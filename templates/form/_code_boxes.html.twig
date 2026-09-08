@@ -1,0 +1,19 @@
+{#
+  The one-box-per-character code input, shared by the CodeType widget
+  (form/form_div_layout.html.twig, block code_widget) and pages that build
+  their form by hand (security/login_2fa.html.twig). Renders the boxes; the
+  caller renders the hidden input that carries the value, INSIDE this
+  wrapper, right after the include. Driven by form-type-code.js
+  (Encore entry form.code).
+
+  Variables: length (6), alphabet ('alnum'|'digits'|'alpha'), uppercase
+  (true), submit (false), autofocus (false), manual_label (a link that swaps
+  the boxes for a plain input - for backup codes of another length).
+#}
+{%- set length = length|default(6) -%}
+{%- set alphabet = alphabet|default('alnum') -%}
+{%- for i in 1..length -%}
+<input type="text" class="code-char" maxlength="{{ length }}" inputmode="{{ alphabet == 'digits' ? 'numeric' : 'text' }}"
+       autocomplete="{{ loop.first ? 'one-time-code' : 'off' }}" autocapitalize="characters" spellcheck="false"
+       aria-label="{{ i }} / {{ length }}"{% if loop.first and autofocus|default(false) %} autofocus{% endif %}>
+{%- endfor -%}

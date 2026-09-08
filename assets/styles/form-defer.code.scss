@@ -1,0 +1,19 @@
+// One box per character (Base\Field\Type\CodeType, form/_code_boxes.html.twig).
+.code-input {
+    display: flex; flex-wrap: wrap; gap: .45em; justify-content: center; align-items: center;
+}
+.code-input .code-char {
+    width: 2.4em; height: 3em; padding: 0; text-align: center;
+    font: inherit; font-size: 1.35em; font-weight: 700; letter-spacing: 0; text-transform: uppercase;
+    border: 1px solid rgba(0, 0, 0, .25); border-radius: .5em; background: #fff; color: #1f2429;
+    caret-color: #2563eb; transition: border-color .12s, box-shadow .12s;
+    -moz-appearance: textfield; appearance: textfield;
+}
+.code-input .code-char:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, .2); }
+.code-input .code-char.is-filled { border-color: rgba(0, 0, 0, .45); }
+.code-input.is-complete .code-char { border-color: #16a34a; }
+.code-input.is-error .code-char { border-color: #dc2626; animation: code-shake .3s; }
+.code-input .code-manual { flex: 1 1 100%; text-align: center; font-size: .85em; opacity: .7; }
+.code-input .code-manual-input { flex: 1 1 100%; }
+@keyframes code-shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+html.theme-mode-dark .code-input .code-char { background: #1e2127; color: #e6e8eb; border-color: rgba(255, 255, 255, .25); }

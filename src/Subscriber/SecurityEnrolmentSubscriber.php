@@ -76,12 +76,26 @@ class SecurityEnrolmentSubscriber implements EventSubscriberInterface
             }
         }
 
-        if ($request->getSession()->isStarted()
-            && $request->getSession()->get(SecurityPolicy::SESSION_ENROLMENT_SKIPPED)) {
+        $session = $request->hasSession() ? $request->getSession() : null;
+        $user = $this->security->getUser();
+
+        // The optional offer after a sign-in from an unknown browser
+        // (NewDeviceSubscriber): shown once, then the flag is gone whatever
+        // the answer. It becomes moot the moment a second factor exists.
+        if ($session && $session->get(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT)) {
+            if ($user && !$this->securityPolicy->hasSecondFactor($user)) {
+                $event->setResponse(new RedirectResponse($this->router->generate('user_settings_enrolment')));
+
+                return;
+            }
+            $session->remove(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
+        }
+
+        if ($session && $session->isStarted() && $session->get(SecurityPolicy::SESSION_ENROLMENT_SKIPPED)) {
             return;
         }
 
-        if (!$this->securityPolicy->needsEnrolment($this->security->getUser())) {
+        if (!$this->securityPolicy->needsEnrolment($user)) {
             return;
         }
 

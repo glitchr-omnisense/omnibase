@@ -2,6 +2,8 @@
 
 namespace Base\Field;
 
+use Base\Entity\Layout\ImageInterface;
+
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -21,6 +23,9 @@ class FieldValueResolver
     protected array $identifierFieldsByEntity;
 
     protected bool $lowercaseIdentifiers;
+
+    /** @var \WeakMap<object, string|null>|null entity => image source, see entityImage() */
+    protected ?\WeakMap $imageCache = null;
 
     /**
      * @param string[]|null                 $identifierFields         null = DEFAULT_IDENTIFIER_FIELDS
@@ -299,6 +304,67 @@ class FieldValueResolver
         }
 
         return null;
+    }
+
+    /**
+     * The raw STORAGE PATH of an entity's image, or null.
+     *
+     * Deliberately the source and not a URL: callers hand it to the media
+     * pipeline (`|thumbnail(w, h)`), which is what resizes, caches and
+     * obfuscates. Handing them a built URL would make the pipeline fetch a
+     * full-size original just to draw a 96px chip - the exact cost this
+     * exists to avoid.
+     *
+     * Only an ImageInterface counts. An entity whose getAvatar() already
+     * returns a rendered URL is a different contract (entityAvatar()), and
+     * treating its return value as a path would silently produce broken
+     * thumbnails.
+     */
+    public function entityImage(mixed $entity): ?string
+    {
+        if (\is_string($entity)) {
+            return '' !== $entity ? $entity : null;
+        }
+
+        if (!\is_object($entity)) {
+            return null;
+        }
+
+        // Memoised per request. Resolving a source goes through
+        // Uploader::getPublic(), which on remote storage (S3) is far from
+        // free, and a single cell asks three times over (the branch test,
+        // the tile, the full link) while a datagrid asks once per chip.
+        $this->imageCache ??= new \WeakMap();
+        if ($this->imageCache->offsetExists($entity)) {
+            return $this->imageCache[$entity];
+        }
+
+        $image = $entity instanceof ImageInterface ? $entity : null;
+        if (null === $image) {
+            foreach (['getImage', 'getThumbnail', 'getCover', 'getPicture', 'getPhoto'] as $method) {
+                if (!method_exists($entity, $method)) {
+                    continue;
+                }
+
+                $candidate = $entity->{$method}();
+                if ($candidate instanceof ImageInterface) {
+                    $image = $candidate;
+                    break;
+                }
+            }
+        }
+
+        if (null === $image) {
+            return $this->imageCache[$entity] = null;
+        }
+
+        // getSource() is documented as mixed (it can hand back a File on some
+        // storages); anything but a plain path is not something the media
+        // pipeline can key a cache on.
+        $source = $image->getSource();
+        $source = \is_string($source) && '' !== $source ? $source : null;
+
+        return $this->imageCache[$entity] = $source;
     }
 
     /**

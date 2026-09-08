@@ -2,6 +2,16 @@
 
 {% block title %}{{ '@forms.2fa.challengeTitle'|trans }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('form.code') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('form.code') }}
+{% endblock %}
+
 {% block content %}
 <article class="wrapper login half">
 <div class="card">
@@ -24,23 +34,15 @@
         {% endif %}
 
         <form class="form" action="{{ checkPathUrl ? checkPathUrl: path(checkPathRoute) }}" method="post">
-            <div class="col d-flex justify-content-center">
-                <div class="input-group form-group mb-2">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa-fw fa-solid fa-key"></i></span>
-                    </div>
-                    <input
-                        id="_auth_code"
-                        class="form-control"
-                        type="text"
-                        name="{{ authCodeParameterName }}"
-                        inputmode="numeric"
-                        pattern="[0-9]*"
-                        autocomplete="one-time-code"
-                        placeholder="{{ 'auth_code'|trans({}, 'SchebTwoFactorBundle') }} ({{ twoFactorProvider }})"
-                        autofocus
-                    />
-                </div>
+            {#- One box per digit (form/_code_boxes.html.twig, entry form.code):
+                the boxes fill the hidden _auth_code and submit once complete.
+                Backup codes may be longer: "type it as one field" swaps the
+                boxes for a plain input on the same name. -#}
+            <p class="text-center text-muted mb-2">{{ 'auth_code'|trans({}, 'SchebTwoFactorBundle') }} ({{ twoFactorProvider }})</p>
+            <div class="code-input mb-3{{ authenticationError ? ' is-error' }}" data-code-field data-code-length="6" data-code-alphabet="digits" data-code-uppercase="0" data-code-submit="1">
+                {{- include('@Base/form/_code_boxes.html.twig', { length: 6, alphabet: 'digits', autofocus: true }) -}}
+                <input type="hidden" id="_auth_code" name="{{ authCodeParameterName }}" value="" autocomplete="one-time-code">
+                <a href="#" class="code-manual" data-code-manual>{{ '@forms.2fa.typeAsOneField'|trans }}</a>
             </div>
 
             {% if displayTrustedOption %}

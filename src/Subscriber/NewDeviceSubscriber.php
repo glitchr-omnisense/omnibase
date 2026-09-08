@@ -11,8 +11,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 /**
- * Tells a user, by email, when their account is signed into from a browser it
- * has not been signed into before.
+ * Reacts to an account being signed into from a browser it has not been
+ * signed into before: tells the user by email (administrator's switch), and
+ * on an account with no second factor, flags the session so the next page
+ * offers - once, optionally - to set up a one-time code
+ * (SecurityEnrolmentSubscriber, UserSettingsController::Enrolment).
  *
  * "Browser" here means what UserTracker already means by it: a Connection,
  * keyed by the long-lived id it keeps in a cookie. A sign-in that has to
@@ -47,7 +50,9 @@ class NewDeviceSubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
-        if (!$this->securityPolicy->isNewDeviceEmailEnabled()) {
+        $email = $this->securityPolicy->isNewDeviceEmailEnabled();
+        $prompt = $this->securityPolicy->isNewDevicePromptEnabled();
+        if (!$email && !$prompt) {
             return;
         }
 
@@ -70,12 +75,25 @@ class NewDeviceSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $notification = new Notification('newDevice.subject', [$user]);
-        $notification->setUser($user);
-        $notification->setHtmlTemplate('@Base/client/email/security_newDevice.html.twig', [
-            'connection' => $connection,
-            'recipient' => $user,
-        ]);
-        $notification->send('email');
+        if ($email) {
+            $notification = new Notification('newDevice.subject', [$user]);
+            $notification->setUser($user);
+            $notification->setHtmlTemplate('@Base/client/email/security_newDevice.html.twig', [
+                'connection' => $connection,
+                'recipient' => $user,
+            ]);
+            $notification->send('email');
+        }
+
+        // The offer is made once per person, not once per browser: a
+        // "no thanks" is kept in a long-lived cookie, and an account that
+        // already holds a second factor has nothing to be offered.
+        $request = $event->getRequest();
+        if ($prompt
+            && !$this->securityPolicy->hasSecondFactor($user)
+            && !$request->cookies->has(SecurityPolicy::COOKIE_NEW_DEVICE_PROMPT_DISMISSED)
+            && $request->hasSession()) {
+            $request->getSession()->set(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT, true);
+        }
     }
 }

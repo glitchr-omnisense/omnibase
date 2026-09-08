@@ -359,6 +359,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['value'] = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
 
         $view->vars['clippable'] = $view->vars['path'] = $view->vars['download'] = json_encode([]);
+        $view->vars['previews'] = json_encode([]);
         if (!is_array($view->vars["value"]) && $options["multiple"]) {
             $view->vars["value"] = [$view->vars["value"]];
         } elseif (is_array($view->vars["value"]) && !$options["multiple"]) {
@@ -390,6 +391,26 @@ class FileType extends AbstractType implements DataMapperInterface
                         : $this->mediaService->linkable($v)];
                 }, array_filter($view->vars['value']))));
 
+                // What the 124px dropzone previews actually DISPLAY. `path`
+                // above stays at 1024px because it is what the lightbox, the
+                // clipboard and "open in a tab" hand out, but drawing a dozen
+                // 1024px images into 124px boxes still fetched megabytes and,
+                // on a cold cache, timed out often enough that half a gallery
+                // never painted. Square-cropped (OUTBOUND) so every preview is
+                // the same rounded tile whatever the photo's aspect ratio.
+                // Non-images keep the plain link, and the list stays aligned
+                // with `path` position for position - the client walks both by
+                // index.
+                $view->vars['previews'] = json_encode(array_values(array_transforms(function ($k, $v): ?array {
+                    if (!$this->fileIsAvailable($v)) {
+                        return null;
+                    }
+
+                    return [$k, $this->fileService->isImage($v)
+                        ? $this->mediaService->thumbnailOutbound($v, 320, 320)
+                        : $this->mediaService->linkable($v)];
+                }, array_filter($view->vars['value']))));
+
                 $view->vars['download'] = json_encode(array_transforms(function ($k, $v): ?array {
                     return $this->fileIsAvailable($v) ? [basename($v), $this->fileService->downloadable($v)] : null;
                 }, array_filter($view->vars['value'])));
@@ -404,6 +425,7 @@ class FileType extends AbstractType implements DataMapperInterface
         } else {
 
             $view->vars['path'] = $view->vars["value"];
+            $view->vars['previews'] = $view->vars["value"];
             $view->vars['download'] = $this->fileService->downloadable($view->vars["value"]);
             $view->vars['clippable'] = $this->fileService->isImage($view->vars["value"]);
         }

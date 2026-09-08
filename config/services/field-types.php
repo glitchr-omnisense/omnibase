@@ -132,6 +132,8 @@ return function (ContainerConfigurator $configurator) {
             new Reference('twig'),
             new Reference('localizer'),
         ]);
+    $services->set('Base\Field\Type\CodeType')->tag('form.type');
+
     $services->set('Base\Field\Type\ColorType')
         ->tag('form.type')
         ->args([

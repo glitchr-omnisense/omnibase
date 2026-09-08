@@ -1,14 +1,19 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}{{'@forms.settings.enrolmentTitle'|trans}}{% endblock %}
+{#- optional = the offer made once after a sign-in from an unknown browser
+    (NewDeviceSubscriber), on an account with no second factor; otherwise
+    the administrator's mandatory enrolment. Same choices, other words. -#}
+{% set _optional = optional|default(false) %}
+{% set _title = (_optional ? '@forms.settings.newDevicePromptTitle' : '@forms.settings.enrolmentTitle')|trans %}
+{% block title %}{{ _title }}{% endblock %}
 {% block content %}
 <article class="wrapper extended">
-<h1>{{'@forms.settings.enrolmentTitle'|trans}}</h1>
+<h1>{{ _title }}</h1>
 
 <div class="card mb-3">
     <div class="card-header"><i class="fa-fw fa-solid fa-shield-halved"></i> {{'@forms.settings.twoFactor'|trans}}</div>
     <div class="card-body">
-        <p>{{'@forms.settings.enrolmentIntro'|trans}}</p>
+        <p>{{ (_optional ? '@forms.settings.newDevicePromptIntro' : '@forms.settings.enrolmentIntro')|trans }}</p>
 
         <ul class="list-group mb-3">
             <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -46,7 +51,7 @@
            session only, and this page comes back on the next sign-in. #}
         <form method="post" action="{{ path('user_settings_enrolment_skip') }}">
             <input type="hidden" name="_token" value="{{ csrf_token('2fa_enrolment_skip') }}">
-            <button class="btn btn-sm btn-link text-muted" type="submit">{{'@forms.settings.enrolmentSkip'|trans}}</button>
+            <button class="btn btn-sm btn-link text-muted" type="submit">{{ (_optional ? '@forms.settings.newDevicePromptSkip' : '@forms.settings.enrolmentSkip')|trans }}</button>
         </form>
     </div>
 </div>

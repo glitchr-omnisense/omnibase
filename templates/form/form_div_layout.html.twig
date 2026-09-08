@@ -615,6 +615,7 @@
 {%- block fileupload_widget -%}
 
 {% set path     = form.vars.path ?? [] %}
+{% set previews = form.vars.previews ?? [] %}
 {% set download = form.vars.download ?? [] %}
 {% set clippable = form.vars.clippable ?? [] %}
 
@@ -626,6 +627,9 @@
 {% set gotoPattern = "<a target='_blank' href='{0}'>"~("fa-solid fa-fw fa-2x fa-external-link-square-alt"|iconify|first|raw)~"</a>" %}
 {% set deletePattern = allow_delete ? "<a class='warning' data-dz-remove='true'>"~("fa-regular fa-fw fa-2x fa-trash-alt"|iconify|first|raw)~"</a>" : null %}
 
+{#- data-file-preview-links: small square thumbnails for the preview tiles;
+    data-file-path-links stays the full-size link the tools (lightbox, copy,
+    open in a tab) hand out. -#}
 {% set attr = attr|merge({
     'data-file-sortable'              : form.vars.sortable,
     'data-file-lightbox-options'      : form.vars.lightbox,
@@ -635,6 +639,7 @@
     'data-file-max-files'             : form.vars.max_files,
 
     'data-file-path-links'            : path,
+    'data-file-preview-links'         : previews,
     'data-file-download-links'        : download,
 
     'data-file-clipboard'             : clipboardPattern,
@@ -1632,3 +1637,16 @@
 
 {{ form_widget(form, {attr: attr}) }}
 {% endblock %}
+
+{# One box per character (Base\Field\Type\CodeType). The boxes are
+   presentation; the hidden input rendered by form_widget_simple is the
+   field. See form/_code_boxes.html.twig and forms/form-type-code.js. #}
+{% block code_widget -%}
+<div class="code-input" data-code-field data-code-length="{{ code_length }}" data-code-alphabet="{{ code_alphabet }}"
+     data-code-uppercase="{{ code_uppercase ? '1' : '0' }}"{% if code_submit %} data-code-submit="1"{% endif %}>
+    {{- include('@Base/form/_code_boxes.html.twig', { length: code_length, alphabet: code_alphabet, autofocus: attr.autofocus|default(false) }) -}}
+    {%- set type = 'hidden' -%}
+    {%- set attr = attr|merge({ 'data-code-value': '' }) -%}
+    {{- block('form_widget_simple') -}}
+</div>
+{%- endblock code_widget %}

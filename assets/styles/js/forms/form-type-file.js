@@ -16,6 +16,9 @@ window.addEventListener("load.form_type", function () {
         var entryIdList = dropzoneEl.data("entry-id") ?? [];
 
         var pathLinks = dropzoneEl.data("file-path-links") ?? {};
+        // Same list, same order, but square 320px thumbnails: what the tiles
+        // display. pathLinks stays the full-size link behind the tools.
+        var previewLinks = dropzoneEl.data("file-preview-links") ?? {};
         var clippable      = dropzoneEl.data("file-clippable"      ) ?? {};
         var downloadLinks  = dropzoneEl.data("file-download-links" ) ?? {};
 
@@ -136,7 +139,7 @@ window.addEventListener("load.form_type", function () {
                         // so there is nothing to resize: point Dropzone straight at
                         // the URL. Also avoids decoding a dozen full-size images in
                         // the browser just to shrink them again.
-                        editor.displayExistingFile(mock, path, null, null, false);
+                        editor.displayExistingFile(mock, previewLinks[key] ?? previewLinks[uuid] ?? path, null, null, false);
 
                         updateMetadata(this.id, editor.files.length);
                     });
@@ -154,7 +157,7 @@ window.addEventListener("load.form_type", function () {
                     // document order and match the value list one-for-one.
                     var previews = document.querySelectorAll('#'+id+'_dropzone .dz-preview');
                     for (var n = 0; n < previews.length; n++) {
-                        var url = (val[n] || {}).path;
+                        var url = previewLinks[n] ?? (val[n] || {}).path;
                         if (!url || String(url).indexOf('[object') > -1) continue;
 
                         var thumbs = previews[n].querySelectorAll('[data-dz-thumbnail], .dz-image img');

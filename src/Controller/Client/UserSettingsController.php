@@ -15,6 +15,7 @@ use App\Form\Extension\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
 use Base\Entity\User\Notification;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -127,13 +128,23 @@ class UserSettingsController extends AbstractController
     public function Enrolment(Request $request)
     {
         $user = $this->getUser();
-        if (!$this->securityPolicy->needsEnrolment($user)) {
+        $mandatory = $this->securityPolicy->needsEnrolment($user);
+        // The same page doubles as the optional offer made after a sign-in
+        // from an unknown browser (NewDeviceSubscriber) - different wording,
+        // and a "no thanks" that is remembered for good.
+        $offered = !$mandatory && $user
+            && $request->getSession()->get(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT)
+            && !$this->securityPolicy->hasSecondFactor($user);
+        if (!$mandatory && !$offered) {
+            $request->getSession()->remove(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
+
             return $this->redirectToRoute('user_settings');
         }
 
         return $this->render('client/user/settings_enrolment.html.twig', [
             'user' => $user,
             'policy' => $this->securityPolicy,
+            'optional' => $offered,
         ]);
     }
 
@@ -144,12 +155,22 @@ class UserSettingsController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $request->getSession()->set(SecurityPolicy::SESSION_ENROLMENT_SKIPPED, true);
+        $session = $request->getSession();
+        $offered = (bool) $session->get(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
+        $session->remove(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
+        $session->set(SecurityPolicy::SESSION_ENROLMENT_SKIPPED, true);
 
         $notification = new Notification("@notifications.settings.enrolmentSkipped");
         $notification->send("info");
 
-        return $this->redirectToRoute('user_settings');
+        $response = $this->redirectToRoute($offered ? 'user_profile' : 'user_settings');
+        if ($offered) {
+            // Declined once = not asked again from this browser for a year;
+            // the cookie is the only memory there is without a per-user column.
+            $response->headers->setCookie(Cookie::create(SecurityPolicy::COOKIE_NEW_DEVICE_PROMPT_DISMISSED, '1', new \DateTimeImmutable('+1 year'), '/', null, null, true, false, Cookie::SAMESITE_LAX));
+        }
+
+        return $response;
     }
 
     #[Route("/settings/passkeys/{id}/rename", name: "user_settings_passkey_rename", methods: ["POST"])]

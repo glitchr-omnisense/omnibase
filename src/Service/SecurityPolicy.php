@@ -29,6 +29,17 @@ class SecurityPolicy
     public const TWO_FACTOR_MANDATORY = 'base.settings.security.two_factor.mandatory';
     public const PASSKEYS = 'base.settings.security.passkeys';
     public const NEW_DEVICE_EMAIL = 'base.settings.security.new_device_email';
+    public const NEW_DEVICE_PROMPT = 'base.settings.security.new_device_prompt';
+
+    /**
+     * Session key set by a sign-in from a browser this account has never
+     * used, on an account with no second factor: the next page shows, once,
+     * the optional offer to set up a one-time code. Cleared when answered.
+     */
+    public const SESSION_NEW_DEVICE_PROMPT = 'security_new_device_prompt';
+
+    /** Cookie remembering that the offer above was declined - it is never repeated. */
+    public const COOKIE_NEW_DEVICE_PROMPT_DISMISSED = 'base_2fa_offer';
 
     /** Session key holding a "not now" answer to the enrolment prompt. */
     public const SESSION_ENROLMENT_SKIPPED = 'security_2fa_enrolment_skipped';
@@ -116,6 +127,16 @@ class SecurityPolicy
     public function canEnableTwoFactor(): bool
     {
         return $this->isTwoFactorAvailable();
+    }
+
+    /**
+     * Should the first sign-in from an unknown browser offer, once, to set up
+     * a one-time code? Only meaningful while two-factor is available and not
+     * already mandatory (then the enrolment prompt does the asking).
+     */
+    public function isNewDevicePromptEnabled(): bool
+    {
+        return $this->isTwoFactorAvailable() && !$this->isTwoFactorMandatory() && $this->flag(self::NEW_DEVICE_PROMPT, true);
     }
 
     /**
