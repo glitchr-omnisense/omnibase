@@ -160,6 +160,17 @@ class Translator implements TranslatorInterface
                 }
             }
 
+            // Plain-text ids (a humanised field label such as "Published at")
+            // take this early path and never reached the default-language
+            // fallback at the end of the method - so a language without the
+            // key kept the English text while dotted keys fell back to French.
+            if ($ret === $id && ($lookupLocale ?? $this->getLocale()) != Localizer::__toLocale(Localizer::getDefaultLocale(), "_")) {
+                $fallback = $this->translator->trans($id, $parameters, $domain, Localizer::__toLocale(Localizer::getDefaultLocale(), "_"));
+                if ($fallback !== $id && !preg_match("/^{[a-zA-Z0-9]*}$/", $fallback)) {
+                    return $fallback;
+                }
+            }
+
             return $ret;
         }
 
