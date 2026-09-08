@@ -270,6 +270,21 @@ class BaseBundle extends AbstractBaseBundle
            throw new EnvNotFoundException('Application requires `igbinary`, but it is not enabled.');
         }
 
+        // FIRST, before any service is constructed: registering the
+        // App\* => Base\* class aliases is what makes an application entity
+        // loadable at all (App\Entity\Article\Tag extends
+        // App\Entity\Thread\Tag, which only exists as an alias). Anything
+        // below that reaches Doctrine metadata - the AttributeReader graph
+        // does - loads those entity files, and with no aliases yet that is a
+        // fatal "Attempted to load class Tag from namespace
+        // App\Entity\Thread". It stayed hidden for as long as the metadata
+        // pool was warm, since a cache hit never loads the classes; deleting
+        // var/cache/<env>/pools left the application unbootable, console
+        // included, with no way to warm it back up.
+        if (!self::$cache) {
+            $this->warmUp();
+        }
+
         // Seed the lazy runtime for BaseTrait/BaseCommonTrait static accessors.
         // boot() runs for HTTP, console AND bare kernel boots, so the statics
         // work everywhere without eagerly constructing BaseService's full
@@ -290,10 +305,6 @@ class BaseBundle extends AbstractBaseBundle
         // constructing it here is cheap.
         if ($this->container->has(AttributeReader::class)) {
             $this->container->get(AttributeReader::class);
-        }
-
-        if (!self::$cache) {
-            $this->warmUp();
         }
 
         if (class_exists(\Symfony\Component\VarDumper\VarDumper::class)) {
