@@ -133,10 +133,14 @@ class SecurityPolicy
      * Should the first sign-in from an unknown browser offer, once, to set up
      * a one-time code? Only meaningful while two-factor is available and not
      * already mandatory (then the enrolment prompt does the asking).
+     *
+     * OFF unless an administrator turns it on. It interrupts a sign-in the
+     * person did not ask to have interrupted, which is friction a public site
+     * should choose deliberately rather than inherit from a default.
      */
     public function isNewDevicePromptEnabled(): bool
     {
-        return $this->isTwoFactorAvailable() && !$this->isTwoFactorMandatory() && $this->flag(self::NEW_DEVICE_PROMPT, true);
+        return $this->isTwoFactorAvailable() && !$this->isTwoFactorMandatory() && $this->flag(self::NEW_DEVICE_PROMPT, false);
     }
 
     /**
