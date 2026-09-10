@@ -179,25 +179,46 @@ class TranslatorTest extends TestCase
         $this->assertSame('{foo.bar}', $this->makeTranslator()->trans('nested'));
     }
 
-    public function testTransReturnsTheRawIdWhenNothingIsFoundInDebugMode(): void
+    /**
+     * Debug mode no longer gets a raw-key carve-out.
+     *
+     * This test used to assert that a missing dot-id came back as
+     * "missing.key" while developing, and it stopped being true at
+     * 6d7edd0d9 ("Translator: fall back to the default language in debug
+     * too"): a back-office switched to a language with partial catalogues
+     * showed raw keys on every button and title, on beta, to the people
+     * reviewing it there. The commit deliberately made debug behave like
+     * production and did not update this file, which is why the suite went
+     * red. Rewritten to state the behaviour that was chosen rather than the
+     * one it replaced.
+     *
+     * A PLAIN id (no dot) is unaffected and still comes back as itself -
+     * those never took the dot-id path in the first place, so "fall back
+     * like production" was never a change for them.
+     */
+    public function testMissingDotIdsAreEmptyInDebugModeToo(): void
     {
         $translator = $this->makeTranslator(isDebug: true);
 
-        $this->assertSame('missing.key', $translator->trans('missing.key'));
+        $this->assertSame('', $translator->trans('missing.key'));
         $this->assertSame('unknown_plain_id', $translator->trans('unknown_plain_id'));
     }
 
     /**
      * Current behavior, found by direct experimentation rather than reading
-     * the code alone: outside debug mode, a totally-missing dot-id comes
-     * back as "" rather than the raw id — even when no locale override was
-     * requested. That's because the "fall back to the default locale"
-     * check compares the (nullable) $locale parameter directly against
+     * the code alone: a totally-missing dot-id comes back as "" rather than
+     * the raw id — even when no locale override was requested. That's
+     * because the "fall back to the default locale" check compares the
+     * (nullable) $locale parameter directly against
      * Localizer::getDefaultLocale(), and null is never == a non-empty
-     * locale string — so the production-fallback branch fires on every
-     * call that doesn't pass an explicit locale, not just genuine
-     * locale mismatches. Documented here, not fixed: changing this would
-     * alter what every already-live page shows for any missing translation.
+     * locale string — so the fallback branch fires on every call that
+     * doesn't pass an explicit locale, not just genuine locale mismatches.
+     * Documented here, not fixed: changing this would alter what every
+     * already-live page shows for any missing translation.
+     *
+     * Kept alongside the debug-mode case above now that the two agree: this
+     * one is the guard on the non-debug path specifically, so a future
+     * change that reintroduces a split gets caught on both sides.
      */
     public function testMissingTranslationsBecomeEmptyStringOutsideDebugMode(): void
     {
@@ -255,9 +276,17 @@ class TranslatorTest extends TestCase
     {
         $translator = $this->makeTranslator(isDebug: true);
 
-        // No "@controllers.foo.title" translation is defined, so the
-        // dot-id/domain-tag fallback format is returned unresolved.
-        $this->assertSame('@controllers.foo.title', $translator->transRoute('foo'));
+        // transRoute() builds "@controllers.foo.title" and hands it to
+        // trans(). No such translation is defined, and a missing dot-id now
+        // resolves to "" in debug as well as in production (see
+        // testMissingDotIdsAreEmptyInDebugModeToo) - this used to assert the
+        // unresolved key, back when debug had its own raw-key carve-out.
+        //
+        // transRouteExists() is what callers should branch on, and it still
+        // says false - which is the half of this test that actually protects
+        // anything, since "" is also what a defined-but-empty translation
+        // would give.
+        $this->assertSame('', $translator->transRoute('foo'));
         $this->assertFalse($translator->transRouteExists('foo'));
     }
 
