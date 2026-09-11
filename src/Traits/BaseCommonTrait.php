@@ -39,15 +39,60 @@ trait BaseCommonTrait
      */
     protected static ?RuntimeLocatorInterface $runtime = null;
 
+    /**
+     * Installing a DIFFERENT locator means a different kernel, and everything
+     * memoised from the previous one (by runtimeGet() or by an eagerly built
+     * BaseService's set*() calls) belongs to a container that is gone. Those
+     * statics are cleared, so every accessor re-resolves lazily from the new
+     * kernel - the process then behaves exactly like a fresh first boot.
+     *
+     * Without this, a second kernel in the same process silently ran on the
+     * FIRST kernel's services. It never shows in production (an FPM request
+     * or a messenger worker boots once), but any process that boots twice
+     * does - a PHPUnit run of several KernelTestCase tests that persist
+     * entities failed three different ways at once: "The kernel service is
+     * synthetic", "Undefined array key preQuery" (a dead event manager), and
+     * "Column uuid cannot be null" (GenerateUuid wired to the old one).
+     *
+     * The first installation (from null) resets nothing: there is nothing
+     * stale yet, and values pre-filled before it must survive. Re-installing
+     * the SAME locator resets nothing either.
+     *
+     * projectDir/environment are reset too; BaseBundle::boot() re-seeds both
+     * right after calling this.
+     */
     public static function setRuntime(?RuntimeLocatorInterface $runtime): void
     {
+        if (self::$runtime !== null && $runtime !== self::$runtime) {
+            self::forgetRuntimeServices();
+        }
+
         self::$runtime = $runtime;
+    }
+
+    /**
+     * Every static this trait declares, back to null - enumerated by
+     * reflection rather than by hand, so an accessor added later is covered
+     * without anyone having to remember this method. Deliberately no "skip
+     * the non-nullable ones" guard: a future non-nullable static would make
+     * this throw in the multi-kernel tests (loud) instead of being skipped
+     * and silently staying stale.
+     */
+    private static function forgetRuntimeServices(): void
+    {
+        foreach ((new \ReflectionClass(BaseCommonTrait::class))->getProperties(\ReflectionProperty::IS_STATIC) as $property) {
+            $name = $property->getName();
+            if ($name !== 'runtime') {
+                self::$$name = null;
+            }
+        }
     }
 
     /**
      * Resolve a static property, lazily pulling the backing service from the
      * runtime locator on first access. Memoizes into the static property, so
-     * each service is resolved at most once per process — and an eagerly
+     * each service is resolved at most once per RUNTIME (per kernel; see
+     * setRuntime(), which clears these when a new kernel boots) — and an eagerly
      * constructed BaseService (which still calls the set*() methods) simply
      * pre-fills the same properties.
      *
@@ -263,7 +308,7 @@ trait BaseCommonTrait
     /**
      * @var Environment
      */
-    protected static Environment $twig;
+    protected static ?Environment $twig = null;
 
     public static function setTwig(Environment $twig)
     {
@@ -273,7 +318,7 @@ trait BaseCommonTrait
     /**
      * @var SettingBag
      */
-    protected static SettingBag $settings;
+    protected static ?SettingBag $settings = null;
 
     public static function setSettingBag(SettingBagInterface $settings)
     {
@@ -283,7 +328,7 @@ trait BaseCommonTrait
     /**
      * @var ParameterBagInterface
      */
-    protected static ParameterBagInterface $parameterBag;
+    protected static ?ParameterBagInterface $parameterBag = null;
 
     public static function setParameterBag(ParameterBagInterface $parameterBag)
     {

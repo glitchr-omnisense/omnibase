@@ -177,9 +177,16 @@ class AttributeReader extends AbstractLocalCache
         string                   $cacheDir
     )
     {
-        if (!self::getInstance(false)) {
-            self::setInstance($this);
-        }
+        // The reader the CURRENT container just built always becomes the
+        // singleton. This used to be "only if there is none yet", so in any
+        // process that boots a second kernel (BaseBundle::boot() builds a
+        // fresh reader every time) getInstance() kept returning the FIRST
+        // kernel's reader, wired to a container that no longer exists -
+        // attributes such as GenerateUuid then silently stopped applying
+        // ("Column uuid cannot be null"). Same bug class as the memoised
+        // statics BaseCommonTrait::setRuntime() now clears. The reader is a
+        // shared service, so within one kernel this still runs exactly once.
+        self::setInstance($this);
 
         // Check if custom reader is enabled
         $this->parameterBag = $parameterBag;
