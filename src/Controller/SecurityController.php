@@ -31,6 +31,7 @@ use Base\Attributes\Attribute\Iconize;
 use Base\Form\FormProxy;
 use Base\Form\FormProcessorInterface;
 use Base\Form\Type\SecurityLoginTokenType;
+use Base\Service\SpeculativeRequest;
 use Base\Service\ReferrerInterface;
 use Base\Form\Type\SecurityResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
@@ -162,13 +163,11 @@ class SecurityController extends AbstractController
     #[Iconize("fa-solid fa-fw fa-right-from-bracket")]
     public function Logout(Request $request, ReferrerInterface $referrer)
     {
-        // A prefetch is not a click. Browsers (Sec-Purpose/Purpose: prefetch,
-        // X-Moz: prefetch) and transparent.js (X-Purpose/Purpose: prefetch)
-        // announce speculative loads; honouring one here would sign the user
+        // A prefetch is not a click. Honouring one here would sign the user
         // out while the page keeps drawing itself signed-in, and whatever they
         // then submit posts as an anonymous visitor (prod 2026-09-11: two
         // comment replies lost). Answer with nothing to cache.
-        if (self::isPrefetch($request)) {
+        if (SpeculativeRequest::is($request)) {
             return new Response("", Response::HTTP_NO_CONTENT, ["Cache-Control" => "no-store"]);
         }
 
@@ -205,18 +204,6 @@ class SecurityController extends AbstractController
 
         // Redirect to previous page
         return $this->redirect($returnUrl);
-    }
-
-    public static function isPrefetch(Request $request): bool
-    {
-        foreach (["Sec-Purpose", "Purpose", "X-Purpose", "X-Moz"] as $header) {
-            $value = strtolower((string) $request->headers->get($header, ""));
-            if ($value !== "" && (str_contains($value, "prefetch") || str_contains($value, "preview") || str_contains($value, "prerender"))) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     #[Route("/logout-request", name: "security_logoutRequest")]

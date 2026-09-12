@@ -3,6 +3,7 @@
 namespace Base\Subscriber;
 
 use Base\Service\Analytics;
+use Base\Service\SpeculativeRequest;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
@@ -53,6 +54,12 @@ class PageViewSubscriber implements EventSubscriberInterface
         $response = $event->getResponse();
 
         if (!$request->isMethod("GET")) {
+            return;
+        }
+        // Fetched ahead by the browser, or by a client script, without the
+        // visitor asking for the page: not a view. Counting these inflated
+        // article views on prod for as long as the site prefetched on hover.
+        if (SpeculativeRequest::is($request)) {
             return;
         }
         if ($response->getStatusCode() < Response::HTTP_OK || $response->getStatusCode() >= Response::HTTP_MULTIPLE_CHOICES) {
