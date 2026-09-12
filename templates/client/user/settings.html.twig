@@ -161,7 +161,7 @@
 
 <div class="mb-3">
     {{'@forms.settings.loggedInAs'|trans({'user': user})}}
-    <a href="{{ path('security_logout') }}">{{'@forms.login.logout'|trans}}</a>
+    <a href="{{ path('security_logout') }}" rel="nofollow" data-no-prefetch>{{'@forms.login.logout'|trans}}</a>
 </div>
 
 {% endif %}
