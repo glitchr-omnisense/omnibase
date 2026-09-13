@@ -4,6 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -42,20 +43,32 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     /**
      * Refreshes the user after being reloaded from the session.
      *
-     * When a user is logged in, at the beginning of each request, the
-     * User object is loaded from the session and then this method is
-     * called. Your job is to make sure the user's data is still fresh by,
-     * for example, re-querying for fresh User data.
+     * The session holds a serialized copy of the User; what comes back from
+     * it is a detached object with the values of the moment it was stored.
+     * Re-reading the row is what makes a change made elsewhere (a level or a
+     * balance updated by a nightly command, a role changed in the admin) show
+     * on the member's next request instead of their next login - and what
+     * makes deleting an account actually end its sessions: no row, no user.
+     *
+     * A transient user (the OAuth stub of loadUserByOAuthUserResponse(), id
+     * 0) has no row to re-read and is returned as it is.
      *
      * If your firewall is "stateless: true" (for a pure API), this
      * method is not called.
-     *
-     * @return UserInterface
      */
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof User) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        }
+
+        if ($user->getId()) {
+            $fresh = $this->userRepository->find($user->getId());
+            if (!$fresh instanceof User) {
+                throw new UserNotFoundException(sprintf('User "%s" no longer exists.', $user->getUserIdentifier()));
+            }
+
+            $user = $fresh;
         }
 
         $this->userTracker->updateConnection($user);
