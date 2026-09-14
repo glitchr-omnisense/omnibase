@@ -98,7 +98,7 @@ class TrasheableSubscriber
 
             $entityManager->persist($entity);
             $unitOfWork->propertyChanged($entity, $field, $oldValue, $deletedAt);
-            $unitOfWork->scheduleExtraUpdate($entity, [$field => [$oldValue, $deletedAt]]);
+            $unitOfWork->scheduleExtraUpdate($entity, $this->withPendingChanges($unitOfWork, $classMetadata, $entity, [$field => [$oldValue, $deletedAt]]));
 
             if ($trasheable->cascade) {
                 $this->rescueCascade($entityManager, $unitOfWork, $entity, [spl_object_id($entity) => true]);
@@ -129,6 +129,64 @@ class TrasheableSubscriber
                 $cache->evictEntity($className, $id);
             }
         }
+    }
+
+    /**
+     * The deletion stamp, plus everything else that changed on $entity since
+     * it was loaded.
+     *
+     * An entity scheduled for deletion never has its own change set computed,
+     * and the stamp above goes out as an extra update carrying only
+     * $changeSet. So `$entity->setX(); $em->remove($entity); $em->flush();`
+     * used to write deletedAt and silently drop setX: an unsubscribed
+     * newsletter address came out trashed but still valid. Folding the
+     * pending changes into the same extra update keeps the rest of this
+     * rewrite exactly as it was - still no preUpdate/postUpdate, so trashing
+     * does not start firing revision or indexing listeners it never fired.
+     *
+     * Fields and owning to-one associations only: those are what an update
+     * statement writes. Collections have their own persisters. The original
+     * data is moved forward as well, so a later flush does not see the same
+     * change again.
+     *
+     * @param array<string, array{0: mixed, 1: mixed}> $changeSet
+     * @return array<string, array{0: mixed, 1: mixed}>
+     */
+    protected function withPendingChanges(UnitOfWork $unitOfWork, ClassMetadata $classMetadata, object $entity, array $changeSet): array
+    {
+        $original = $unitOfWork->getOriginalEntityData($entity);
+        $oid = spl_object_id($entity);
+
+        foreach ($classMetadata->getFieldNames() as $name) {
+            if (isset($changeSet[$name]) || $classMetadata->isIdentifier($name) || !array_key_exists($name, $original)) {
+                continue;
+            }
+
+            $old = $original[$name];
+            $new = $classMetadata->getFieldValue($entity, $name);
+            if ($old === $new || ($old instanceof DateTimeInterface && $new instanceof DateTimeInterface && $old == $new)) {
+                continue;
+            }
+
+            $changeSet[$name] = [$old, $new];
+            $unitOfWork->setOriginalEntityProperty($oid, $name, $new);
+        }
+
+        foreach ($classMetadata->associationMappings as $name => $mapping) {
+            if (isset($changeSet[$name]) || !$mapping->isToOneOwningSide() || !array_key_exists($name, $original)) {
+                continue;
+            }
+
+            $new = $classMetadata->getFieldValue($entity, $name);
+            if ($original[$name] === $new) {
+                continue;
+            }
+
+            $changeSet[$name] = [$original[$name], $new];
+            $unitOfWork->setOriginalEntityProperty($oid, $name, $new);
+        }
+
+        return $changeSet;
     }
 
     /**
