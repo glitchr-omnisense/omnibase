@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Base\Repository\Analytics\PageViewRepository;
 use Base\Repository\Analytics\VisitRepository;
+use Base\Repository\Analytics\PageVisitRepository;
 use Base\Entity\Analytics\PageView;
 use Base\Entity\Analytics\Visit;
 use Base\Service\Analytics\UserAgentClassifier;
@@ -26,6 +27,9 @@ class Analytics
         private readonly PageViewRepository $pageViews,
         private readonly VisitRepository $visits,
         private readonly UserAgentClassifier $userAgentClassifier,
+        // Nullable so a caller wiring the first three by hand keeps working;
+        // without it unique views are simply not recorded.
+        private readonly ?PageVisitRepository $pageVisits = null,
     ) {
     }
 
@@ -66,11 +70,17 @@ class Analytics
             return;
         }
 
+        // Presence per page too: that pair (subject, page) is what a unique
+        // view is. Same subjects, same gating - a consented visitor cookie or
+        // an authenticated account - so unique views never count anybody
+        // uniqueVisitors()/uniqueUsers() would not.
         if ($visitorId !== null && $visitorId !== "") {
             $this->visits->recordPresence(Visit::TYPE_VISITOR, $visitorId, $now);
+            $this->pageVisits?->recordPresence($path, Visit::TYPE_VISITOR, $visitorId, $now);
         }
         if ($userId !== null && $userId !== "") {
             $this->visits->recordPresence(Visit::TYPE_USER, $userId, $now);
+            $this->pageVisits?->recordPresence($path, Visit::TYPE_USER, $userId, $now);
         }
     }
 
@@ -90,6 +100,51 @@ class Analytics
     public function uniqueVisitors(?string $window = null): int
     {
         return $this->visits->countUnique(Visit::TYPE_VISITOR, self::resolveWindow($window));
+    }
+
+    /**
+     * Unique views: distinct (page, identified subject) pairs in the window.
+     *
+     * pageViews() counts hits - a reload is a view. This counts a person on a
+     * page once. Only identified subjects can be told apart, so the two are
+     * not comparable as "x% of views were unique": an anonymous visitor who
+     * declined the cookie produces views and no unique view at all.
+     */
+    public function uniqueViews(?string $window = null, ?string $path = null): int
+    {
+        return $this->pageVisits?->countUnique(self::resolveWindow($window), $path) ?? 0;
+    }
+
+    /**
+     * Retention over two back-to-back windows of $days days, the second
+     * ending today: the share of subjects active in the earlier window who
+     * came back in the later one, per subject type, as a percentage.
+     *
+     * Same day boundaries as dailyBreakdown(), so "7" means the same seven
+     * days the chart shows. Null when nobody was active in the earlier
+     * window (no base to be a share of), or when $days is null - "all time"
+     * has no earlier window.
+     *
+     * @return array{visitors: ?float, users: ?float}
+     */
+    public function retention(?int $days = 7): array
+    {
+        $retention = ["visitors" => null, "users" => null];
+        if (null === $days || $days < 1) {
+            return $retention;
+        }
+
+        $currentSince = new \DateTimeImmutable(($days - 1) . " days ago midnight");
+        $previousSince = $currentSince->modify("-{$days} days");
+
+        foreach (["visitors" => Visit::TYPE_VISITOR, "users" => Visit::TYPE_USER] as $key => $type) {
+            $counts = $this->visits->returning($type, $previousSince, $currentSince);
+            $retention[$key] = $counts["previous"] > 0
+                ? round(($counts["returning"] / $counts["previous"]) * 100, 1)
+                : null;
+        }
+
+        return $retention;
     }
 
     /**
@@ -120,6 +175,7 @@ class Analytics
                 "pageViewsAi" => $this->pageViews(null, $window, PageView::SOURCE_AI),
                 "uniqueVisitors" => $this->uniqueVisitors($window),
                 "uniqueUsers" => $this->uniqueUsers($window),
+                "uniqueViews" => $this->uniqueViews($window),
             ];
         }
 
@@ -170,6 +226,9 @@ class Analytics
         $pageViewsBySource = $this->pageViews->dailyBreakdownBySource($since, $path);
         $visitors = $this->visits->dailyBreakdown(Visit::TYPE_VISITOR, $since);
         $users = $this->visits->dailyBreakdown(Visit::TYPE_USER, $since);
+        // Scoped to $path like the page-view columns: unlike visitors and
+        // users, a unique view belongs to a page.
+        $views = $this->pageVisits?->dailyBreakdown($since, $path) ?? [];
 
         $emptySource = [PageView::SOURCE_HUMAN => 0, PageView::SOURCE_BOT => 0, PageView::SOURCE_AI => 0];
 
@@ -185,6 +244,7 @@ class Analytics
                 "pageViewsAi" => $bySource[PageView::SOURCE_AI],
                 "uniqueVisitors" => $visitors[$date] ?? 0,
                 "uniqueUsers" => $users[$date] ?? 0,
+                "uniqueViews" => $views[$date] ?? 0,
             ];
         }
 
@@ -215,6 +275,7 @@ class Analytics
         $pageViewsBySource = $this->pageViews->hourlyBreakdownBySource($since, $path);
         $visitors = $this->visits->hourlyBreakdown(Visit::TYPE_VISITOR, $since);
         $users = $this->visits->hourlyBreakdown(Visit::TYPE_USER, $since);
+        $views = $this->pageVisits?->hourlyBreakdown($since, $path) ?? [];
 
         $emptySource = [PageView::SOURCE_HUMAN => 0, PageView::SOURCE_BOT => 0, PageView::SOURCE_AI => 0];
 
@@ -230,6 +291,7 @@ class Analytics
                 "pageViewsAi" => $bySource[PageView::SOURCE_AI],
                 "uniqueVisitors" => $visitors[$date] ?? 0,
                 "uniqueUsers" => $users[$date] ?? 0,
+                "uniqueViews" => $views[$date] ?? 0,
             ];
         }
 
@@ -253,7 +315,7 @@ class Analytics
      */
     public function periodOverPeriodChange(?int $days): array
     {
-        $keys = ["pageViews", "pageViewsHuman", "pageViewsBot", "pageViewsAi", "uniqueVisitors", "uniqueUsers"];
+        $keys = ["pageViews", "pageViewsHuman", "pageViewsBot", "pageViewsAi", "uniqueVisitors", "uniqueUsers", "uniqueViews"];
 
         if (null === $days) {
             return \array_fill_keys($keys, null);

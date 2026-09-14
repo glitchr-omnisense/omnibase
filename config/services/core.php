@@ -47,6 +47,7 @@ return static function (ContainerConfigurator $container): void {
             service('Base\Repository\Analytics\PageViewRepository'),
             service('Base\Repository\Analytics\VisitRepository'),
             service('Base\Service\Analytics\UserAgentClassifier'),
+            service('Base\Repository\Analytics\PageVisitRepository'),
         ]);
 
     // CacheClearSessionsCommand

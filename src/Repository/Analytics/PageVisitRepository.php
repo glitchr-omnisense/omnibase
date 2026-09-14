@@ -1,0 +1,138 @@
+<?php
+
+namespace Base\Repository\Analytics;
+
+use Base\Database\Repository\ServiceEntityRepository;
+use Base\Entity\Analytics\PageVisit;
+use Doctrine\DBAL\ArrayParameterType;
+
+/**
+ * @extends ServiceEntityRepository<PageVisit>
+ */
+class PageVisitRepository extends ServiceEntityRepository
+{
+    /**
+     * Insert-if-absent, bucketed to the hour - same contract as
+     * VisitRepository::recordPresence(), with the page added.
+     */
+    public function recordPresence(string $path, string $subjectType, string $subjectId, \DateTimeImmutable $date): void
+    {
+        $table = $this->getClassMetadata()->getTableName();
+        $hour = $date->setTime((int) $date->format("H"), 0, 0);
+
+        $this->getEntityManager()->getConnection()->executeStatement(
+            "INSERT IGNORE INTO {$table} (date, path, subject_type, subject_id) VALUES (:date, :path, :type, :id)",
+            [
+                "date" => $hour->format("Y-m-d H:i:s"),
+                "path" => mb_substr($path, 0, 255),
+                "type" => $subjectType,
+                "id" => mb_substr($subjectId, 0, 64),
+            ],
+        );
+    }
+
+    /**
+     * Unique views over the window: distinct (page, subject) pairs. A reader
+     * reloading one page is one unique view; the same reader on two pages is
+     * two. Rows are hourly, so this is a DISTINCT, never a COUNT(*).
+     *
+     * @param string|string[]|null $path
+     */
+    public function countUnique(?\DateTimeImmutable $since = null, string|array|null $path = null): int
+    {
+        [$where, $params, $types] = $this->filters($since, $path);
+
+        return (int) $this->getEntityManager()->getConnection()->fetchOne(
+            "SELECT COUNT(DISTINCT path, subject_type, subject_id) FROM {$this->getClassMetadata()->getTableName()}{$where}",
+            $params,
+            $types,
+        );
+    }
+
+    /**
+     * One entry per calendar day: distinct (page, subject) pairs seen that
+     * day. A reader coming back to the same page on another day counts again
+     * on that day - the right answer for a trend line, as with
+     * VisitRepository::dailyBreakdown().
+     *
+     * @param string|string[]|null $path
+     *
+     * @return array<string, int> date (Y-m-d) => unique views
+     */
+    public function dailyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array
+    {
+        [$where, $params, $types] = $this->filters($since, $path);
+
+        return $this->pairs(
+            "SELECT DATE(date) AS date, COUNT(DISTINCT path, subject_type, subject_id) AS count
+             FROM {$this->getClassMetadata()->getTableName()}{$where}
+             GROUP BY DATE(date) ORDER BY DATE(date) ASC",
+            $params,
+            $types,
+        );
+    }
+
+    /**
+     * @param string|string[]|null $path
+     *
+     * @return array<string, int> hour ("Y-m-d H:i:s") => unique views
+     */
+    public function hourlyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array
+    {
+        [$where, $params, $types] = $this->filters($since, $path);
+
+        return $this->pairs(
+            "SELECT date, COUNT(DISTINCT path, subject_type, subject_id) AS count
+             FROM {$this->getClassMetadata()->getTableName()}{$where}
+             GROUP BY date ORDER BY date ASC",
+            $params,
+            $types,
+        );
+    }
+
+    /**
+     * @param string|string[]|null $path
+     *
+     * @return array{0: string, 1: array<string, mixed>, 2: array<string, mixed>}
+     */
+    private function filters(?\DateTimeImmutable $since, string|array|null $path): array
+    {
+        $clauses = [];
+        $params = [];
+        $types = [];
+
+        if ($since !== null) {
+            $clauses[] = "date >= :since";
+            $params["since"] = $since->format("Y-m-d H:i:s");
+        }
+
+        if (is_array($path)) {
+            if ($path === []) {
+                // An empty list of pages is "no page", not "every page".
+                $clauses[] = "1 = 0";
+            } else {
+                $clauses[] = "path IN (:paths)";
+                $params["paths"] = array_values($path);
+                $types["paths"] = ArrayParameterType::STRING;
+            }
+        } elseif ($path !== null) {
+            $clauses[] = "path = :path";
+            $params["path"] = $path;
+        }
+
+        return [$clauses ? " WHERE " . implode(" AND ", $clauses) : "", $params, $types];
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function pairs(string $sql, array $params, array $types): array
+    {
+        $breakdown = [];
+        foreach ($this->getEntityManager()->getConnection()->fetchAllAssociative($sql, $params, $types) as $row) {
+            $breakdown[$row["date"]] = (int) $row["count"];
+        }
+
+        return $breakdown;
+    }
+}

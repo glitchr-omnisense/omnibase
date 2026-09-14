@@ -53,6 +53,43 @@ class VisitRepository extends ServiceEntityRepository
     }
 
     /**
+     * Retention: of the subjects seen in [$previousSince, $currentSince), how
+     * many were seen again from $currentSince on.
+     *
+     * Both numbers come from one scan rather than two queries, so they cannot
+     * disagree about who "previous" was. A subject first seen in the current
+     * window is not in either count - retention is about coming BACK, and a
+     * newcomer has nothing to come back to.
+     *
+     * @return array{previous: int, returning: int}
+     */
+    public function returning(string $subjectType, \DateTimeImmutable $previousSince, \DateTimeImmutable $currentSince): array
+    {
+        $table = $this->getClassMetadata()->getTableName();
+        $connection = $this->getEntityManager()->getConnection();
+
+        $row = $connection->fetchAssociative(
+            "SELECT COUNT(DISTINCT p.subject_id) AS previous,
+                    COUNT(DISTINCT CASE WHEN EXISTS (
+                        SELECT 1 FROM {$table} c
+                        WHERE c.subject_type = p.subject_type AND c.subject_id = p.subject_id AND c.date >= :current
+                    ) THEN p.subject_id END) AS returning
+             FROM {$table} p
+             WHERE p.subject_type = :type AND p.date >= :previous AND p.date < :current",
+            [
+                "type" => $subjectType,
+                "previous" => $previousSince->format("Y-m-d H:i:s"),
+                "current" => $currentSince->format("Y-m-d H:i:s"),
+            ],
+        );
+
+        return [
+            "previous" => (int) ($row["previous"] ?? 0),
+            "returning" => (int) ($row["returning"] ?? 0),
+        ];
+    }
+
+    /**
      * One row per calendar day in range - unlike countUnique() (a single
      * total over the whole window), a subject seen on multiple days
      * within range legitimately contributes to EACH of those days here;
