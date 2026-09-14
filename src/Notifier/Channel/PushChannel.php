@@ -21,13 +21,29 @@ class PushChannel implements ChannelInterface
     ) {
     }
 
+    /**
+     * Always true, and that is the whole point of "silent".
+     *
+     * Symfony's Notifier does not skip a channel whose supports() returns false:
+     * it throws LogicException('The "push" channel is not supported.') and
+     * aborts the ENTIRE send. This used to return isConfigured() && a user, so on
+     * a host without VAPID keys every "notify" send threw. In production that
+     * killed thread:publishable on every run - the announcement runs inside the
+     * cron's flush, the exception rolled the whole transaction back, and a
+     * scheduled article stayed unpublished, retried and rolled back every 5
+     * minutes. The "nothing to do" cases are handled in notify() instead.
+     */
     public function supports(SymfonyNotification $notification, RecipientInterface $recipient): bool
     {
-        return $this->webPush->isConfigured() && $this->inApp->userOf($recipient) !== null;
+        return true;
     }
 
     public function notify(SymfonyNotification $notification, RecipientInterface $recipient, ?string $transportName = null): void
     {
+        if (!$this->webPush->isConfigured()) {
+            return;
+        }
+
         $user = $this->inApp->userOf($recipient);
         if (!$user) {
             return;

@@ -31,9 +31,15 @@ class InAppChannel implements ChannelInterface
     ) {
     }
 
+    /**
+     * Always true - see PushChannel::supports(). Symfony's Notifier throws on
+     * false instead of skipping the channel, so a recipient that is not a user
+     * (a plain newsletter e-mail address) would abort the whole send. notify()
+     * already ignores non-user recipients and foreign notification classes.
+     */
     public function supports(SymfonyNotification $notification, RecipientInterface $recipient): bool
     {
-        return $notification instanceof Notification && $this->userOf($recipient) !== null;
+        return true;
     }
 
     public function notify(SymfonyNotification $notification, RecipientInterface $recipient, ?string $transportName = null): void
