@@ -36,6 +36,11 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',
+            // Clicking an entry marks it read AND follows its link in the same
+            // gesture. On a full page load (the back-office, a link opened
+            // outside the SPA) the browser cancels in-flight requests, so the
+            // entry could come back unread; keepalive lets the POST finish.
+            keepalive: true,
             body: JSON.stringify(Object.assign({ token: cfg('csrf') }, body || {}))
         }).then(function (res) { return res.json().catch(function () { return {}; }).then(function (json) { json.__status = res.status; return json; }); });
     }
@@ -285,10 +290,12 @@
         panel.hidden = false;
         panel.classList.add('is-open');
         if (!isFloating(panel)) fitPanel(panel);
-        // Opening the list is reading it: the dot goes away, entries keep
-        // their own unread styling until clicked.
-        if (document.querySelector('[data-notification-item].is-unread')) markAllRead();
-        else setUnread(0);
+        // Opening the list is NOT reading it. It used to mark every
+        // notification read on open, so a glance at the bell cleared the count
+        // and the unread styling at once. Entries now stay unread until the
+        // person clicks one (markRead), or asks for "mark all as read". The
+        // badge is left alone too: it is the server's count, and the panel
+        // only shows the latest few, so an empty-looking panel proved nothing.
     }
 
     document.addEventListener('click', function (e) {
