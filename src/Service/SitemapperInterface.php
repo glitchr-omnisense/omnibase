@@ -17,5 +17,7 @@ interface SitemapperInterface
 
     public function registerAttributes(): self;
 
+    public function registerProviders(): self;
+
     public function serve(string $name, array $context = []): Response;
 }

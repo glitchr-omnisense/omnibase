@@ -2,6 +2,7 @@
 
 namespace Base\DependencyInjection;
 
+use Base\Service\SitemapProviderInterface;
 use Base\Attributes\AttributeInterface;
 use Base\BaseBundle;
 use Doctrine\DBAL\Types\Type;
@@ -56,6 +57,7 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         $container->registerForAutoconfiguration(AttributeInterface::class)->addTag('base.attribute');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
         $container->registerForAutoconfiguration(SharingAdapterInterface::class)->addTag('base.service.sharing');
+        $container->registerForAutoconfiguration(SitemapProviderInterface::class)->addTag('base.sitemap_provider');
         $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');

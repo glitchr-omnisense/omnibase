@@ -2,6 +2,7 @@
 
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use \Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\Reference;
 
 
@@ -177,6 +178,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('base.attribute_reader'),
             new Reference('advanced_router'),
             new Reference('localizer'),
+            new TaggedIteratorArgument('base.sitemap_provider'),
         ]);
 
 

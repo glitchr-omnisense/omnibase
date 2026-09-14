@@ -45,15 +45,19 @@ class Sitemapper implements SitemapperInterface
     protected string $hostname = "";
     protected array $urlset = [];
 
-    public function __construct(Environment $twig, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer)
+    public function __construct(Environment $twig, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer, iterable $providers = [])
     {
         $this->twig = $twig;
         $this->router = $router;
         $this->localizer = $localizer;
+        $this->providers = $providers;
         $this->attributeReader = $attributeReader;
 
         $this->mimeTypes = new MimeTypes();
     }
+
+    /** @var iterable<SitemapProviderInterface> */
+    protected iterable $providers = [];
 
     public function getSitemap(Route $route): ?Sitemap
     {
@@ -62,7 +66,13 @@ class Sitemapper implements SitemapperInterface
             return null;
         }
 
-        list($class, $method) = explode("::", $controller);
+        $parts = explode("::", $controller);
+        if (count($parts) !== 2) {
+            // An invokable service controller, not "Class::method".
+            return null;
+        }
+
+        list($class, $method) = $parts;
         if (!class_exists($class)) {
             return null;
         }
@@ -93,7 +103,14 @@ class Sitemapper implements SitemapperInterface
             $route = $routeOrName;
         }
 
-        $routeMatch = $this->router->getRouteMatch($route->getPath());
+        // A route that takes parameters cannot be matched by its own path:
+        // "/{slug}" is not a URL. Fill in what the caller gave first.
+        $path = $route->getPath();
+        foreach ($routeParameters as $parameter => $value) {
+            $path = str_replace("{" . $parameter . "}", rawurlencode((string) $value), $path);
+        }
+
+        $routeMatch = $this->router->getRouteMatch($path);
         if (!$routeMatch) {
             return $this;
         }
@@ -133,6 +150,16 @@ class Sitemapper implements SitemapperInterface
 
         if (array_key_exists("_locale", $routeDefaults)) {
             $this->urlset[$routeName . "." . md5(serialize($routeParameters))]->addAlternate($sitemapEntry);
+        }
+
+        return $this;
+    }
+
+    /** Every tagged SitemapProviderInterface adds what attributes cannot: the pages behind a route parameter. */
+    public function registerProviders(): self
+    {
+        foreach ($this->providers as $provider) {
+            $provider->provide($this);
         }
 
         return $this;

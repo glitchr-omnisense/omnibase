@@ -21,7 +21,8 @@ class SitemapController extends AbstractController
 
         return $sitemap
             ->setHostname($hostname)
-            ->registerMetadata()
+            ->registerAttributes()
+            ->registerProviders()
             ->serve('sitemap.' . $extension . '.twig');
     }
 }
