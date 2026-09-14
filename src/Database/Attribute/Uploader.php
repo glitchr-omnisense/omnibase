@@ -368,6 +368,63 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     protected static $tmpHashTable = [];
 
     /**
+     * Remote objects are copied into a tmpfile() so callers get a real File. One
+     * handle per (adapter, uuid), kept open for the request because closing a
+     * tmpfile() deletes it.
+     *
+     * Until 2026-09-14 every call fwrite()'d the object into the SAME handle again
+     * without rewinding: a second get() of the same field within one request - an
+     * entity getter and FileType rendering the same upload, say - handed back a
+     * file holding the content twice over, i.e. a corrupt image or document, after
+     * paying for a second full download. An upload never changes under its uuid, so
+     * once materialized the copy is simply reused.
+     *
+     * The table is request-scoped; see forgetTemporaryFiles().
+     */
+    public static function materializeTemporaryFile(string $index, callable $read): ?File
+    {
+        if (!array_key_exists($index, self::$tmpHashTable)) {
+            // Read BEFORE opening the handle, so a failing read leaves nothing behind.
+            $content = (string) $read();
+
+            $handle = tmpfile();
+            if ($handle === false) {
+                return null;
+            }
+
+            fwrite($handle, $content);
+            fflush($handle);
+            self::$tmpHashTable[$index] = $handle;
+        }
+
+        return new File(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
+    }
+
+    /**
+     * Close every materialized copy; closing a tmpfile() deletes it.
+     *
+     * Under FPM, or FrankenPHP classic mode, statics die with the request and this
+     * never mattered. A process that outlives the request - FrankenPHP worker mode,
+     * a messenger consumer - kept every handle open forever (file descriptors and
+     * /tmp space growing without bound), and because spl_object_hash() values are
+     * recycled once an adapter is freed, a later request could even be handed one
+     * object's bytes under another's key.
+     *
+     * Called at the start of every main request and on kernel.reset, by
+     * Base\Subscriber\RequestScopedStateSubscriber.
+     */
+    public static function forgetTemporaryFiles(): void
+    {
+        foreach (self::$tmpHashTable as $handle) {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+        }
+
+        self::$tmpHashTable = [];
+    }
+
+    /**
      * @param $entity
      * @param string $fieldName
      * @return array|mixed|File|null
@@ -426,12 +483,10 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
             // Copy file content in a tmp file
             $index = spl_object_hash($adapter) . ":" . $uuidOrFile;
-            if (!array_key_exists($index, self::$tmpHashTable)) {
-                self::$tmpHashTable[$index] = tmpfile();
-            }
-
-            fwrite(self::$tmpHashTable[$index], $that->getFlysystem()->read($path, $that->getStorage()));
-            $fileList[] = new File(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
+            $fileList[] = self::materializeTemporaryFile(
+                $index,
+                fn () => $that->getFlysystem()->read($path, $that->getStorage())
+            );
         }
 
         if (count($fileList) < 1) {

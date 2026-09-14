@@ -111,6 +111,14 @@ return static function (ContainerConfigurator $container): void {
         }
     }
 
+    // Request-scoped statics for processes that outlive a request (FrankenPHP
+    // worker mode, messenger consumers). Both tags on purpose: kernel.reset never
+    // runs on a cloned kernel, kernel.request never runs between messenger
+    // messages - see the class docblock.
+    $services->set('Base\Subscriber\RequestScopedStateSubscriber')
+        ->tag('kernel.event_subscriber')
+        ->tag('kernel.reset', ['method' => 'reset']);
+
     // AdvancedRouter
     $services->set('Base\Routing\AdvancedRouter')
         ->tag('twig.runtime')

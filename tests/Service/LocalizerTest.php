@@ -304,4 +304,40 @@ class LocalizerTest extends TestCase
         // Different language altogether => never compatible.
         $this->assertFalse($localizer->compatibleLocale('de-DE', 'fr-FR', ['fr-FR']));
     }
+
+    public function testForgetRequestStateClearsTheLateFlag(): void
+    {
+        Localizer::markAsLate();
+        $this->assertTrue(Localizer::isLate());
+
+        Localizer::forgetRequestState();
+
+        $this->assertFalse(Localizer::isLate(), 'a request in a long-running worker must not start "already late"');
+    }
+
+    public function testNormalizeLocaleMemoStaysBoundedAgainstArbitraryInput(): void
+    {
+        $this->seedLocales('en-GB', ['en-GB']);
+
+        // Five-character inputs take the direct normalization path, one memo entry each.
+        for ($i = 0; $i < Localizer::MAX_CACHED_LOCALES * 3; $i++) {
+            Localizer::normalizeLocale(sprintf('%02d_%02d', intdiv($i, 100), $i % 100));
+        }
+
+        $memo = (new ReflectionClass(Localizer::class))->getStaticPropertyValue('cacheLocales');
+        $this->assertLessThanOrEqual(Localizer::MAX_CACHED_LOCALES, count($memo));
+    }
+
+    public function testNormalizeLocaleStaysCorrectAcrossAMemoRollover(): void
+    {
+        $this->seedLocales('en-GB', ['en-GB']);
+
+        $this->assertSame('fr' . Localizer::SEPARATOR . 'FR', Localizer::normalizeLocale('fr_FR'));
+
+        for ($i = 0; $i < Localizer::MAX_CACHED_LOCALES + 5; $i++) {
+            Localizer::normalizeLocale(sprintf('%02d_%02d', intdiv($i, 100), $i % 100));
+        }
+
+        $this->assertSame('fr' . Localizer::SEPARATOR . 'FR', Localizer::normalizeLocale('fr_FR'));
+    }
 }

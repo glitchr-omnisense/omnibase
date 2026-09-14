@@ -35,6 +35,18 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         self::$isLate = $location;
     }
 
+    /**
+     * isLate records that the locale has been resolved for THE CURRENT request
+     * (LocalizerSubscriber::onKernelRequest). As a static it outlives that request
+     * in any long-running process - FrankenPHP worker mode, a messenger consumer -
+     * and would claim "already resolved" for every request after the first. Cleared
+     * at the start of each main request by Base\Subscriber\RequestScopedStateSubscriber.
+     */
+    public static function forgetRequestState(): void
+    {
+        self::$isLate = null;
+    }
+
     protected bool $localeHasChanged = false;
 
     /**
@@ -287,6 +299,11 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     protected static array $cacheLocales = [];
 
+    /**
+     * Upper bound for the normalizeLocale() memo; see the check in that method.
+     */
+    public const MAX_CACHED_LOCALES = 256;
+
     public static function normalizeLocale(string|array $locale, string $separator = self::SEPARATOR): string|array
     {
         //
@@ -302,6 +319,15 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
         if (array_key_exists($locale, self::$cacheLocales)) {
             return self::$cacheLocales[$locale];
+        }
+
+        // The memo is keyed by the raw input, which arrives here from the _locale
+        // route attribute and the language cookie - anything a client cares to send.
+        // Harmless while statics die with the request; in a worker that lives for
+        // hundreds of requests it is an unbounded memory sink. Past the cap the memo
+        // simply starts over: every entry is recomputable.
+        if (count(self::$cacheLocales) >= self::MAX_CACHED_LOCALES) {
+            self::$cacheLocales = [];
         }
 
         //
