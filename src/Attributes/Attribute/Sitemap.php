@@ -30,7 +30,12 @@ class Sitemap extends AbstractAttribute
     {
         $this->group = $group;
 
-        $this->lastMod = $lastmod ?? date("Y-m-d H:m:s");
+        // date("Y-m-d H:m:s") put the MONTH where the minutes belong - "m" is
+        // the month, "i" is the minutes - so every entry claimed to have been
+        // modified at nine minutes past the hour, all year long. And the
+        // sitemap spec wants W3C Datetime, which is ISO 8601: a space between
+        // the date and the time is not it.
+        $this->lastMod = $lastmod ?? date("c");
         $this->changeFreq = $changefreq;
         $this->priority = $priority;
     }

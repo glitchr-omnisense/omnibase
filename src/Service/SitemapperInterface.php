@@ -11,9 +11,9 @@ interface SitemapperInterface
 
     public function setHostname(string $hostname): self;
 
-    public function register(string|Route $routeOrName, array $routeParameters = []): self;
+    public function register(string|Route $routeOrName, array $routeParameters = [], ?string $lastMod = null): self;
 
-    public function registerUrl(string $url): self;
+    public function registerUrl(string $url, ?string $lastMod = null): self;
 
     public function registerAttributes(): self;
 

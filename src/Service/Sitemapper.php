@@ -62,7 +62,14 @@ class Sitemapper implements SitemapperInterface
             return null;
         }
 
-        list($class, $method) = explode("::", $controller);
+        // An invokable controller is registered as the bare class, with no
+        // "::method" - so this destructuring warned "Undefined array key 1",
+        // and in an environment that turns warnings into exceptions that is a
+        // 500 on /sitemap.xml, the one URL robots.txt points a crawler at.
+        $parts = explode("::", $controller, 2);
+        $class = $parts[0];
+        $method = $parts[1] ?? "__invoke";
+
         if (!class_exists($class)) {
             return null;
         }
@@ -85,7 +92,7 @@ class Sitemapper implements SitemapperInterface
         return $this;
     }
 
-    public function register(string|Route $routeOrName, array $routeParameters = []): self
+    public function register(string|Route $routeOrName, array $routeParameters = [], ?string $lastMod = null): self
     {
         if (is_string($routeOrName)) {
             $route = $this->router->getRoute($routeOrName);
@@ -120,7 +127,11 @@ class Sitemapper implements SitemapperInterface
 
         $sitemapEntry = new SitemapEntry($url);
         $sitemapEntry->setPriority($sitemap->getPriority());
-        $sitemapEntry->setLastMod($sitemap->getLastMod());
+        // The attribute is written once per route, so its lastmod is the same
+        // for every page the route serves - which tells a crawler that the
+        // whole site changed today, every day. A caller that knows when this
+        // particular entity was last touched says so here.
+        $sitemapEntry->setLastMod($lastMod ?? $sitemap->getLastMod());
         $sitemapEntry->setChangeFreq($sitemap->getChangeFreq());
 
         $locale = $this->localizer->getLocale($routeParameters["_locale"] ?? null);
@@ -138,14 +149,14 @@ class Sitemapper implements SitemapperInterface
         return $this;
     }
 
-    public function registerUrl(string $url): self
+    public function registerUrl(string $url, ?string $lastMod = null): self
     {
         $routeParameters = $this->router->getRouteMatch($url);
         if (!$routeParameters) {
             throw new RouteNotFoundException("Route \"$url\" not found.");
         }
 
-        return $this->register($routeParameters["_route"], $routeParameters);
+        return $this->register($routeParameters["_route"], $routeParameters, $lastMod);
     }
 
     public function registerAttributes(): self
