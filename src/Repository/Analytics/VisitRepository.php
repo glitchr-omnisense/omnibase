@@ -22,6 +22,13 @@ class VisitRepository extends ServiceEntityRepository
      */
     public function recordPresence(string $subjectType, string $subjectId, \DateTimeImmutable $date): void
     {
+        // UTC before bucketing, whatever the process default is: BaseBundle
+        // sets that from the visitor's timezone cookie on every request, so
+        // formatting the raw value stored each visitor's local hour. Before
+        // the hour is cut, too - a half-hour zone would otherwise land between
+        // two UTC buckets.
+        $date = $date->setTimezone(new \DateTimeZone("UTC"));
+
         $table = $this->getClassMetadata()->getTableName();
         $connection = $this->getEntityManager()->getConnection();
         $hour = $date->setTime((int) $date->format("H"), 0, 0);
@@ -78,8 +85,8 @@ class VisitRepository extends ServiceEntityRepository
              WHERE p.subject_type = :type AND p.date >= :previous AND p.date < :current",
             [
                 "type" => $subjectType,
-                "previous" => $previousSince->format("Y-m-d H:i:s"),
-                "current" => $currentSince->format("Y-m-d H:i:s"),
+                "previous" => $previousSince->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s"),
+                "current" => $currentSince->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s"),
             ],
         );
 
@@ -111,7 +118,7 @@ class VisitRepository extends ServiceEntityRepository
             "SELECT DATE(date) AS date, COUNT(DISTINCT subject_id) AS count FROM {$table}
              WHERE subject_type = :type AND date >= :since
              GROUP BY DATE(date) ORDER BY DATE(date) ASC",
-            ["type" => $subjectType, "since" => $since->format("Y-m-d H:i:s")],
+            ["type" => $subjectType, "since" => $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s")],
         );
 
         $breakdown = [];
@@ -140,7 +147,7 @@ class VisitRepository extends ServiceEntityRepository
             "SELECT date, COUNT(DISTINCT subject_id) AS count FROM {$table}
              WHERE subject_type = :type AND date >= :since
              GROUP BY date ORDER BY date ASC",
-            ["type" => $subjectType, "since" => $since->format("Y-m-d H:i:s")],
+            ["type" => $subjectType, "since" => $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s")],
         );
 
         $breakdown = [];

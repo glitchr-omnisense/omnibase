@@ -61,7 +61,7 @@ class Analytics
         // incrementView()/VisitRepository::recordPresence()), which is
         // what lets dailyBreakdown()'s "today" row now come from up to 24
         // real hourly rows instead of being the storage grain itself.
-        $now = new \DateTimeImmutable("now");
+        $now = new \DateTimeImmutable("now", self::utc());
         $source = $userAgent !== null ? $this->userAgentClassifier->classify($userAgent) : PageView::SOURCE_HUMAN;
 
         $this->pageViews->incrementView($path, $now, $source);
@@ -134,7 +134,7 @@ class Analytics
             return $retention;
         }
 
-        $currentSince = new \DateTimeImmutable(($days - 1) . " days ago midnight");
+        $currentSince = new \DateTimeImmutable(($days - 1) . " days ago midnight", self::utc());
         $previousSince = $currentSince->modify("-{$days} days");
 
         foreach (["visitors" => Visit::TYPE_VISITOR, "users" => Visit::TYPE_USER] as $key => $type) {
@@ -216,10 +216,10 @@ class Analytics
     public function dailyBreakdown(?int $days = 14, string|array|null $path = null): array
     {
         if (null === $days) {
-            $since = $this->pageViews->earliestDate() ?? new \DateTimeImmutable("today");
-            $days = (int) $since->diff(new \DateTimeImmutable("today"))->format("%a") + 1;
+            $since = $this->pageViews->earliestDate() ?? new \DateTimeImmutable("today", self::utc());
+            $days = (int) $since->diff(new \DateTimeImmutable("today", self::utc()))->format("%a") + 1;
         } else {
-            $since = new \DateTimeImmutable(($days - 1) . " days ago midnight");
+            $since = new \DateTimeImmutable(($days - 1) . " days ago midnight", self::utc());
         }
 
         $pageViews = $this->pageViews->dailyBreakdown($since, $path);
@@ -268,8 +268,8 @@ class Analytics
      */
     public function hourlyBreakdown(string|array|null $path = null): array
     {
-        $since = new \DateTimeImmutable("today");
-        $currentHour = (int) (new \DateTimeImmutable("now"))->format("H");
+        $since = new \DateTimeImmutable("today", self::utc());
+        $currentHour = (int) (new \DateTimeImmutable("now", self::utc()))->format("H");
 
         $pageViews = $this->pageViews->hourlyBreakdown($since, $path);
         $pageViewsBySource = $this->pageViews->hourlyBreakdownBySource($since, $path);
@@ -352,13 +352,46 @@ class Analytics
      * than that, which is the standard, deliberate trade-off of a daily-
      * aggregate design over a raw event log), "7d", "30d", null/"all".
      */
+    /**
+     * The one timezone analytics are written and read in.
+     *
+     * BaseBundle sets PHP's default timezone from the VISITOR's timezone
+     * cookie on every request, so a bare `new \DateTimeImmutable()` here
+     * followed whoever was browsing: two hits in the same minute landed in
+     * buckets hours apart, and "today" meant a different day to each admin.
+     * UTC is what every entity datetime column already stores
+     * (DateTimeTypeUTC), and it is the only choice that does not depend on
+     * the request.
+     */
+    private static function utc(): \DateTimeZone
+    {
+        return new \DateTimeZone("UTC");
+    }
+
+    /**
+     * A bucket key from dailyBreakdown()/hourlyBreakdown(), as a date to show.
+     *
+     * Hourly keys ("Y-m-d H:i:s", UTC) are shifted to the viewer's own
+     * timezone, so 11:00 UTC reads 13:00 in Paris. Daily keys ("Y-m-d") are
+     * UTC calendar days and are shown as they are: shifting their midnight
+     * would move the date back a day for anyone west of Greenwich.
+     */
+    public static function displayBucket(string $bucket): \DateTimeImmutable
+    {
+        $date = new \DateTimeImmutable($bucket, self::utc());
+
+        return strlen($bucket) > 10
+            ? $date->setTimezone(new \DateTimeZone(date_default_timezone_get()))
+            : $date;
+    }
+
     private static function resolveWindow(?string $window): ?\DateTimeImmutable
     {
         return match ($window) {
             null, "all" => null,
-            "today", "24h" => new \DateTimeImmutable("today"),
-            "7d" => new \DateTimeImmutable("-6 days"),
-            "30d" => new \DateTimeImmutable("-29 days"),
+            "today", "24h" => new \DateTimeImmutable("today", self::utc()),
+            "7d" => new \DateTimeImmutable("-6 days", self::utc()),
+            "30d" => new \DateTimeImmutable("-29 days", self::utc()),
             default => throw new \InvalidArgumentException("Unknown analytics window: \"{$window}\" (expected one of: today, 24h, 7d, 30d, all)"),
         };
     }

@@ -96,7 +96,11 @@ class MailTrap
     {
         $this->ensureDirectory();
         \file_put_contents($this->path(self::FLAG), \json_encode([
-            'since' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            // UTC, like every timestamp this trap writes: PHP's default
+            // timezone is the current visitor's (BaseBundle sets it from a
+            // cookie per request), so a local time here depended on who
+            // happened to trigger the mail.
+            'since' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
             'reason' => $reason,
         ], \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE));
     }
@@ -118,11 +122,14 @@ class MailTrap
     {
         $this->ensureDirectory();
 
-        $id = \date('Ymd-His') . '-' . \substr(\bin2hex(\random_bytes(4)), 0, 8);
+        // gmdate, not date: ids and capturedAt are what the listing sorts
+        // on, and two captures made under different visitors' timezones
+        // came back out of order.
+        $id = \gmdate('Ymd-His') . '-' . \substr(\bin2hex(\random_bytes(4)), 0, 8);
 
         \file_put_contents($this->path($id . '.json'), \json_encode([
             'id' => $id,
-            'capturedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'capturedAt' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s'),
             'sender' => $envelope->getSender()->getAddress(),
             'to' => \array_map(static fn ($a) => $a->getAddress(), $envelope->getRecipients()),
             // A released-then-recaptured message arrives as a RawMessage, which

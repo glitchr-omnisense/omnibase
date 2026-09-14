@@ -214,8 +214,11 @@ class AnalyticsTest extends KernelTestCase
         $series = $this->analytics->dailyBreakdown(5);
 
         $this->assertCount(5, $series);
-        $this->assertSame((new \DateTimeImmutable("-4 days"))->format("Y-m-d"), $series[0]["date"], "oldest day first");
-        $this->assertSame((new \DateTimeImmutable("today"))->format("Y-m-d"), $series[4]["date"], "today last");
+        // Breakdown days are UTC calendar days (see Analytics::utc()), so the
+        // expectation is built in UTC too - a local "-4 days" near midnight
+        // names a different day.
+        $this->assertSame((new \DateTimeImmutable("-4 days", new \DateTimeZone("UTC")))->format("Y-m-d"), $series[0]["date"], "oldest day first");
+        $this->assertSame((new \DateTimeImmutable("today", new \DateTimeZone("UTC")))->format("Y-m-d"), $series[4]["date"], "today last");
 
         $byDate = array_column($series, null, "date");
         $threeDaysAgo = (new \DateTimeImmutable("-3 days"))->format("Y-m-d");
@@ -486,15 +489,27 @@ class AnalyticsTest extends KernelTestCase
         // earlier hour directly (deterministically NOT the current hour,
         // whatever that happens to be), same convention as this file's
         // other seeded-history tests.
-        $currentHour = (int) (new \DateTimeImmutable("now"))->format("H");
+        //
+        // In UTC: that is what analytics buckets are stored in, whatever
+        // PHP's default timezone happens to be for the request. A local
+        // "today +12h" could land in the same UTC bucket as the tracked hit.
+        $utc = new \DateTimeZone("UTC");
+        $currentHour = (int) (new \DateTimeImmutable("now", $utc))->format("H");
         $seedHour = 12 === $currentHour ? 11 : 12;
+
+        // Measured, not assumed to be zero: uniqueVisitors() is site-wide,
+        // so any real consented visitor today (and there are some, now that
+        // the visitor cookie is actually written) is in the count. What
+        // this test is about is that THIS visitor adds exactly one.
+        $before = $this->analytics->uniqueVisitors("today");
+
         $connection->executeStatement(
             "INSERT IGNORE INTO analytics_visit (date, subject_type, subject_id) VALUES (:date, 'visitor', :id)",
-            ["date" => (new \DateTimeImmutable("today"))->modify("+{$seedHour} hours")->format("Y-m-d H:i:s"), "id" => $visitor],
+            ["date" => (new \DateTimeImmutable("today", $utc))->modify("+{$seedHour} hours")->format("Y-m-d H:i:s"), "id" => $visitor],
         );
         $this->analytics->track($this->path("-two-hours"), $visitor);
 
-        $this->assertSame(1, $this->analytics->uniqueVisitors("today"), "one distinct visitor across the whole day, regardless of how many hourly rows back it");
+        $this->assertSame($before + 1, $this->analytics->uniqueVisitors("today"), "one distinct visitor across the whole day, regardless of how many hourly rows back it");
 
         $rows = (int) $connection->fetchOne(
             "SELECT COUNT(*) FROM analytics_visit WHERE subject_type = 'visitor' AND subject_id = :id",

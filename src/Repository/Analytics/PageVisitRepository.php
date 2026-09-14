@@ -17,6 +17,13 @@ class PageVisitRepository extends ServiceEntityRepository
      */
     public function recordPresence(string $path, string $subjectType, string $subjectId, \DateTimeImmutable $date): void
     {
+        // UTC before bucketing, whatever the process default is: BaseBundle
+        // sets that from the visitor's timezone cookie on every request, so
+        // formatting the raw value stored each visitor's local hour. Before
+        // the hour is cut, too - a half-hour zone would otherwise land between
+        // two UTC buckets.
+        $date = $date->setTimezone(new \DateTimeZone("UTC"));
+
         $table = $this->getClassMetadata()->getTableName();
         $hour = $date->setTime((int) $date->format("H"), 0, 0);
 
@@ -103,7 +110,7 @@ class PageVisitRepository extends ServiceEntityRepository
 
         if ($since !== null) {
             $clauses[] = "date >= :since";
-            $params["since"] = $since->format("Y-m-d H:i:s");
+            $params["since"] = $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s");
         }
 
         if (is_array($path)) {

@@ -28,6 +28,13 @@ class PageViewRepository extends ServiceEntityRepository
      */
     public function incrementView(string $path, \DateTimeImmutable $date, string $source = PageView::SOURCE_HUMAN): void
     {
+        // UTC before bucketing, whatever the process default is: BaseBundle
+        // sets that from the visitor's timezone cookie on every request, so
+        // formatting the raw value stored each visitor's local hour. Before
+        // the hour is cut, too - a half-hour zone would otherwise land between
+        // two UTC buckets.
+        $date = $date->setTimezone(new \DateTimeZone("UTC"));
+
         $table = $this->getClassMetadata()->getTableName();
         $connection = $this->getEntityManager()->getConnection();
         $hour = $date->setTime((int) $date->format("H"), 0, 0);
@@ -82,7 +89,8 @@ class PageViewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
 
-        return $date ? new \DateTimeImmutable((new \DateTimeImmutable($date))->format("Y-m-d")) : null;
+        // Stored in UTC, so read back as UTC.
+        return $date ? new \DateTimeImmutable(substr((string) $date, 0, 10), new \DateTimeZone("UTC")) : null;
     }
 
     /**
@@ -116,7 +124,7 @@ class PageViewRepository extends ServiceEntityRepository
             "SELECT DATE(date) AS date, SUM(views) AS views FROM {$table}
              WHERE date >= :since {$where}
              GROUP BY DATE(date) ORDER BY DATE(date) ASC",
-            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s")], $params),
             \array_merge(["since" => "string"], $types),
         );
 
@@ -155,7 +163,7 @@ class PageViewRepository extends ServiceEntityRepository
             "SELECT DATE(date) AS date, source, SUM(views) AS views FROM {$table}
              WHERE date >= :since {$where}
              GROUP BY DATE(date), source ORDER BY DATE(date) ASC",
-            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s")], $params),
             \array_merge(["since" => "string"], $types),
         );
 
@@ -194,7 +202,7 @@ class PageViewRepository extends ServiceEntityRepository
             "SELECT date, SUM(views) AS views FROM {$table}
              WHERE date >= :since {$where}
              GROUP BY date ORDER BY date ASC",
-            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s")], $params),
             \array_merge(["since" => "string"], $types),
         );
 
@@ -225,7 +233,7 @@ class PageViewRepository extends ServiceEntityRepository
             "SELECT date, source, SUM(views) AS views FROM {$table}
              WHERE date >= :since {$where}
              GROUP BY date, source ORDER BY date ASC",
-            \array_merge(["since" => $since->format("Y-m-d H:i:s")], $params),
+            \array_merge(["since" => $since->setTimezone(new \DateTimeZone("UTC"))->format("Y-m-d H:i:s")], $params),
             \array_merge(["since" => "string"], $types),
         );
 
