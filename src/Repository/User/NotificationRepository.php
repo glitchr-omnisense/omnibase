@@ -33,9 +33,14 @@ class NotificationRepository extends ServiceEntityRepository
      *
      * @return Notification[]
      */
-    public function findVisibleFor(User $user, int $limit = 100, int $offset = 0): array
+    public function findVisibleFor(User $user, int $limit = 100, int $offset = 0, bool $unreadOnly = false): array
     {
-        return $this->visibleFor($user)
+        $qb = $this->visibleFor($user);
+        if ($unreadOnly) {
+            $qb->andWhere('n.isRead = false');
+        }
+
+        return $qb
             ->orderBy('n.sentAt', 'DESC')->addOrderBy('n.id', 'DESC')
             ->setMaxResults($limit)->setFirstResult($offset)
             ->getQuery()->getResult();

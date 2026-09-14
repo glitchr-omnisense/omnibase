@@ -44,11 +44,18 @@ class NotificationController extends AbstractController
             return $this->redirectToRoute("security_login");
         }
 
-        $notifications = $this->notificationRepository->findVisibleFor($user, 100);
+        // ?unread=1 narrows the page to what is still waiting. Filtering in
+        // the query rather than in the template matters: the list is capped
+        // at 100, so hiding read rows client-side would show an empty page to
+        // anyone whose last hundred notifications happen to be read, while
+        // older unread ones exist.
+        $unreadOnly = $request->query->getBoolean("unread");
+        $notifications = $this->notificationRepository->findVisibleFor($user, 100, 0, $unreadOnly);
 
         return $this->render("client/user/notifications.html.twig", [
             "notifications" => $notifications,
             "unread" => $this->countUnread($user),
+            "unreadOnly" => $unreadOnly,
         ]);
     }
 
