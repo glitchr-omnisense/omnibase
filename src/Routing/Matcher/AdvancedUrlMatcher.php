@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
@@ -25,9 +26,20 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
             // NB: Static routes using multiple host, or domains might be screened.. imo
             $reservedChars = ["{", "}", "(", ")", "/", "\\", "@", ":"];
             $replacementChars = array_pad([], count($reservedChars), "_");
-            $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".static_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
-            $staticRoutes = self::$router->getCache()->get($cacheKey, function () use (&$staticRoutes) {
-                
+
+            // The keys carry a signature of the compiled routes. The cache pool
+            // (cache.adapter) outlives cache:clear, and these entries hold the
+            // routes' defaults - so without it a changed route kept being
+            // matched as it used to be (API Platform routes still `_stateless`
+            // after their configuration said otherwise). checkCondition is a
+            // closure and cannot be serialized; the rest is what gets cached.
+            // Entries of superseded routes expire instead of piling up.
+            $signature = hash('xxh128', serialize([$matchHost, $staticRoutes, $regexpList, $dynamicRoutes]));
+
+            $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".static_routes[" . $signature . "][" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
+            $staticRoutes = self::$router->getCache()->get($cacheKey, function (ItemInterface $item) use (&$staticRoutes) {
+                $item->expiresAfter(86400);
+
                 foreach ($staticRoutes as &$staticRoute) {
                 
                     $host = $staticRoute[0][1];
@@ -61,9 +73,10 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
                 return $staticRoutes;
             });
 
-            $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".dynamic_routes[" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
-            [$regexpList, $dynamicRoutes] = self::$router->getCache()->get($cacheKey, function () use (&$regexpList, &$dynamicRoutes) {
-                
+            $cacheKey = str_replace($reservedChars, $replacementChars, self::$router->getCacheName() . ".dynamic_routes[" . $signature . "][" . self::$router->getLocale() . "][" . self::$router->getHost() . "]");
+            [$regexpList, $dynamicRoutes] = self::$router->getCache()->get($cacheKey, function (ItemInterface $item) use (&$regexpList, &$dynamicRoutes) {
+                $item->expiresAfter(86400);
+
                 foreach ($regexpList as &$regexp) {
 
                     $ipFallback = self::$router->getHostFallback() ? array_key_exists("ip", parse_url2(self::$router->getHostFallback())) : false;
