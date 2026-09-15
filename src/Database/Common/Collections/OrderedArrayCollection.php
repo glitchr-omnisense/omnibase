@@ -6,7 +6,6 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\Common\Collections\ReadableCollection;
 use Doctrine\Common\Collections\Selectable;
 use Traversable;
 
@@ -260,7 +259,14 @@ class OrderedArrayCollection extends ArrayCollection
         return parent::slice($offset, $length);
     }
 
-    public function matching(Criteria $criteria): ReadableCollection&Selectable
+    /**
+     * Collection&Selectable satisfies both doctrine/collections majors:
+     * 2.x declares ReadableCollection&Selectable here (Collection extends
+     * ReadableCollection), 3.x narrowed ArrayCollection::matching() to
+     * Collection - and the old ReadableCollection&Selectable is not a
+     * subtype of that, a compile error that took the whole kernel down.
+     */
+    public function matching(Criteria $criteria): Collection&Selectable
     {
         $this->reorder();
         return parent::matching($criteria);
