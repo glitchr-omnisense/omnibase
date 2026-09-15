@@ -17,14 +17,11 @@
         {%- set htmlAttributes = htmlAttributes|merge({'media': media}) -%}
     {% endif %}
 
-    {# Don't preload media-scoped (breakpoint) stylesheets: a preload hint has no
-       media attribute, so it would force-fetch non-matching breakpoint CSS (e.g.
-       desktop CSS on mobile) at high priority, defeating the media-based
-       deprioritization. The plain <link rel="stylesheet" media="…"> below still
-       loads the matching breakpoint; non-matching ones stay low priority. #}
-    {% if (preload or async or defer) and not media %}
-        {{ ('<link rel="preload" href="'~ asset(value, packageName) ~ '" as="' ~ preloadAs ~ '">')|raw }}
-    {% endif %}
-
+    {# No <link rel="preload" as="style"> here. It used to precede the
+       stylesheet for preload/async/defer entries, but the stylesheet link comes
+       right after it, is discovered by the same parse and fetched at the same
+       priority - the hint gained nothing, and Safari reports every such preload
+       as "not used" whenever the page is left before it settles.
+       preload_as is still read above so existing tag options stay valid. #}
     {{ ('<link rel="stylesheet" href="'~ asset(value, packageName) ~ '" ' ~ html_attributes(htmlAttributes) ~ '>')|raw }}
 {% endfor %}
