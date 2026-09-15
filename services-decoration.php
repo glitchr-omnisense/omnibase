@@ -98,6 +98,15 @@ return static function (ContainerConfigurator $container): void {
             new Reference('parameter_bag'),
         ]);
 
+    // API Platform: an App\ override replaces the Base\ resource it extends.
+    // Between the attribute/class-name collectors (priority 0) and the cache
+    // (-10), so the cached collection is the filtered one.
+    $services->set('Base\ApiPlatform\Metadata\Resource\Factory\OverriddenResourceNameCollectionFactory')
+        ->decorate('api_platform.metadata.resource.name_collection_factory', null, -5)
+        ->args([
+            new Reference('.inner'),
+        ]);
+
     // Console commands
     $services->set('Base\Console\Command\CacheClearCommand')
         ->parent('Base\Console\Command')
