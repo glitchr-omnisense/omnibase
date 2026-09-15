@@ -19,8 +19,19 @@ use Base\Entity\User\Attribute\GroupRule;
 use Base\Entity\User\Attribute\GroupScope;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\GroupRepository;
+use Base\Database\Attribute\DiscriminatorEntry;
 
+/**
+ * Open to extension the way User is: JOINED inheritance on a `class`
+ * discriminator, so an application can add its own group (a leader, a motto,
+ * a join mode...) as a subclass in its own table, while roles, permissions,
+ * rules, scopes and actions keep working on the base row. An application
+ * without a subclass sees no change but the discriminator column.
+ */
 #[ORM\Entity(repositoryClass:GroupRepository::class)]
+#[ORM\InheritanceType("JOINED")]
+#[ORM\DiscriminatorColumn(name: "class", type: "string")]
+#[DiscriminatorEntry(value: "common")]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]
 class Group implements IconizeInterface
 {
