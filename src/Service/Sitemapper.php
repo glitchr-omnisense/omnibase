@@ -41,6 +41,9 @@ class Sitemapper implements SitemapperInterface
      */
     protected $mimeTypes;
 
+    /** How many pages one route with enumerated parameters may add. */
+    protected const MAX_ENUMERATED = 200;
+
     private $computeFlag = true;
     protected string $hostname = "";
     protected array $urlset = [];
@@ -181,19 +184,98 @@ class Sitemapper implements SitemapperInterface
                 continue;
             }
 
-            $routeParameters = $this->router->getRouteMatch($route->getPath()) ?? [];
-            $numberOfParameters = count(array_filter($routeParameters, fn($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY));
-            if ($numberOfParameters > 0) {
+            $variables = array_values(array_filter(
+                $route->compile()->getPathVariables(),
+                fn($variable) => !str_starts_with($variable, "_")
+            ));
+
+            if (!$variables) {
+                try {
+                    $this->register($route);
+                } catch (SitemapNotFoundException $e) {
+                }
+
                 continue;
             }
 
-            try {
-                $this->register($route);
-            } catch (SitemapNotFoundException $e) {
+            // A parameter whose requirement spells out the values it accepts
+            // ("xml|txt", "faq|parents|presse") is one this can fill in on its
+            // own: each combination is a page of its own, and they were all
+            // missing from the sitemap because the route takes a parameter at
+            // all. A parameter open to anything - a slug, an identifier - is
+            // still the application's to enumerate (SitemapEvent).
+            $choices = [];
+            foreach ($variables as $variable) {
+                $values = self::enumerateRequirement($route->getRequirement($variable), $route->getDefault($variable));
+                if (!$values) {
+                    $choices = null;
+                    break;
+                }
+
+                $choices[$variable] = $values;
+            }
+
+            if (!$choices) {
+                continue;
+            }
+
+            foreach (self::combine($choices) as $routeParameters) {
+                try {
+                    $this->register($route, $routeParameters);
+                } catch (SitemapNotFoundException $e) {
+                }
             }
         }
 
         return $this;
+    }
+
+    /**
+     * The values a requirement spells out ("xml|txt"), or none when it is a
+     * pattern: only a plain list of literals can be turned into pages.
+     *
+     * @return string[]
+     */
+    protected static function enumerateRequirement(?string $requirement, mixed $default = null): array
+    {
+        if ($requirement === null || $requirement === "") {
+            return $default === null ? [] : [(string) $default];
+        }
+
+        $requirement = trim($requirement, "^$");
+        if (!preg_match('/^[\w\-]+(\|[\w\-]+)*$/u', $requirement)) {
+            return [];
+        }
+
+        return explode("|", $requirement);
+    }
+
+    /**
+     * Every combination of the values each parameter can take, up to a sane
+     * number: a route with several open lists must not fill the sitemap on
+     * its own.
+     *
+     * @return array<int, array<string, string>>
+     */
+    protected static function combine(array $choices, int $limit = self::MAX_ENUMERATED): array
+    {
+        $rows = [[]];
+        foreach ($choices as $name => $values) {
+            $combined = [];
+            foreach ($rows as $row) {
+                foreach ($values as $value) {
+                    if (count($combined) >= $limit) {
+                        return $combined;
+                    }
+
+                    $combined[] = $row + [$name => $value];
+                }
+            }
+
+            $rows = $combined;
+        }
+
+        return $rows;
     }
 
     public function get(SitemapEntry|string|null $sitemapOrRouteName = null): ?SitemapEntry
