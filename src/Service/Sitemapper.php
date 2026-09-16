@@ -100,7 +100,20 @@ class Sitemapper implements SitemapperInterface
             $route = $routeOrName;
         }
 
-        $routeMatch = $this->router->getRouteMatch($route->getPath());
+        // A route that takes parameters cannot be matched by its own path:
+        // "/{slug}" is not a URL, the matcher finds nothing and the entry was
+        // dropped without a word - which is every URL a SitemapEvent listener
+        // registers, the ones the attributes cannot reach on their own. Put
+        // the caller's parameters in first, and match a real address.
+        $path = $route->getPath();
+        foreach ($routeParameters as $parameter => $value) {
+            if (str_starts_with((string) $parameter, "_")) {
+                continue;
+            }
+            $path = str_replace("{" . $parameter . "}", rawurlencode((string) $value), $path);
+        }
+
+        $routeMatch = $this->router->getRouteMatch($path);
         if (!$routeMatch) {
             return $this;
         }
