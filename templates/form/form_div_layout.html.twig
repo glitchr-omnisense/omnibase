@@ -124,7 +124,9 @@
 {%- block form2_help -%}
     {% if help is not empty %}
     <span class="data-help">
-        <i class="fa-regular fa-question-circle" data-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
+        {# The help is a translation key like any label: printed as it is, the
+           tooltip showed the key itself ("form.markdown_help"). #}
+        <i class="fa-regular fa-question-circle" data-toggle="tooltip" data-bs-placement="right" title="{{ help|trans(help_translation_parameters|default({}), translation_domain) }}"></i>
     </span>
     {% endif %}
 {%- endblock -%}
