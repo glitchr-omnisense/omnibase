@@ -6,7 +6,13 @@ function getUser()
 {
     var opts = Intl.DateTimeFormat(getLocale()).resolvedOptions();
     return {
-        time:new Date(),
+        // No `time` here: Cookie.set(..., true) reloads the page whenever the
+        // stored value differs, and a fresh Date() differs on every load - so
+        // every visitor's first page was rendered, thrown away and fetched
+        // again, on every page. Nothing on the server reads it (the timezone
+        // is what tells the server the clock), and the rest of the object
+        // only changes when the browser really does, which is when a reload
+        // is what one wants.
         timezone:opts.timeZone,
         calendar:opts.calendar,
         locale:opts.locale,
