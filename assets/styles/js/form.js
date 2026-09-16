@@ -104,11 +104,38 @@ window.addEventListener('load', function(event) {
             if (el.length) {
 
                 // Flag elements as..
-                const style = getComputedStyle(document.body);
-                $([document.documentElement, document.body]).animate(
-                    {scrollTop: $(el[0]).offset().top - parseInt(style["scroll-padding-top"])},
-                    function () { $(this).addClass('was-validated'); }.bind(this)
-                );
+                $(this).addClass('was-validated');
+
+                // parseFloat and a fallback, and the SCROLLING element rather
+                // than the body: scroll-padding-top is "auto" unless a page
+                // sets it, parseInt("auto") is NaN, and `offset().top - NaN`
+                // is NaN. jQuery animated scrollTop towards NaN, which the
+                // browser reads as 0, so every form the browser refused sent
+                // the page to its very top - taking the field being complained
+                // about off the screen with it. Reported on a site whose
+                // header is a full screen of sky: "the form goes back up to
+                // the sky and says nothing".
+                var scroller = document.scrollingElement || document.documentElement;
+                var padding = parseFloat(getComputedStyle(scroller).scrollPaddingTop) || 0;
+                var top = Math.max(0, $(el[0]).offset().top - padding);
+
+                // The reason, in the browser's own words. Every form here
+                // carries `novalidate` (just above), so the browser will not
+                // say anything by itself, and a refusal no one can see reads
+                // as a button that does nothing - which is exactly how it was
+                // reported. On the control: a form with `novalidate` answers
+                // form.reportValidity() with nothing on WebKit.
+                var say = function () { try { el[0].reportValidity(); } catch (e) {} };
+
+                // Only when the field is not already on screen: the bubble is
+                // dismissed by any scrolling, so a scroll that was not needed
+                // takes the message away with it. And after the scroll, never
+                // before, for the same reason.
+                var box = el[0].getBoundingClientRect();
+                var height = window.innerHeight || document.documentElement.clientHeight;
+
+                if (box.top >= 0 && box.bottom <= height) say();
+                else $([document.documentElement, document.body]).animate({scrollTop: top}).promise().done(say);
             }
         }
     });
