@@ -102,7 +102,10 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         $array = [];
         for ($i = 1, $N = min($pagination->getPageRange(), $pagination->getPage() - 1); $i <= $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . '</a>';
+            // The page number is the label when the caller gives none: trans()
+            // takes a string, so a null label was a TypeError - and the `??` it
+            // was written with never fired, since trans() returns a string.
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
         }
 
         return $array;
@@ -116,7 +119,7 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         $array = [];
         for ($i = max(1, $pagination->getPage() - $pagination->getPageRange()), $N = $pagination->getPage(); $i < $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . '</a>';
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
         }
 
         return $array;
@@ -157,7 +160,7 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         $array = [];
         for ($i = $pagination->getPage() + 1, $N = min($pagination->getTotalPages(), $pagination->getPage() + $pagination->getPageRange()) + 1; $i < $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . '</a>';
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
         }
 
         return $array;
@@ -182,7 +185,7 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         $array = [];
         for ($i = max($pagination->getPage() + 1, $pagination->getTotalPages() - $pagination->getPageRange()), $N = $pagination->getTotalPages(); $i <= $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($this->translator->trans($label, [$i]) ?? $i) . '</a>';
+            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
         }
 
         return $array;
