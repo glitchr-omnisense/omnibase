@@ -31,6 +31,13 @@ abstract class AbstractBaseBundle extends Bundle
         if (!$this->hasInstance()) {
             static::$_instance = $this;
         }
+
+        // Here, not in warmUp(): the kernel instantiates the bundles first, and
+        // a container that is loaded from cache but not yet warmed runs its
+        // cache warmers before any bundle is built or booted - with no alias
+        // declared at all (IconCacheWarmer -> MentionEnhancer ->
+        // App\Repository\Thread\MentionRepository, on every cache:clear).
+        self::registerAliasAutoloader();
     }
 
     /**
@@ -139,6 +146,66 @@ abstract class AbstractBaseBundle extends Bundle
     protected static ?array $aliasList = null;
     protected static ?array $aliasRepositoryList = null;
 
+    /** The namespaces BaseBundle::warmUp() maps Base\X => App\X, for the fallback below. */
+    protected const ALIASED_NAMESPACES = ["Entity", "Repository", "Enum", "Tests", "Notifier", "Form"];
+
+    protected static bool $aliasAutoloader = false;
+
+    /**
+     * A last-resort autoloader for the App\* aliases.
+     *
+     * The aliases are declared once per process, from the pool that
+     * BaseBundle::warmUp() reads (or the scan that rebuilds it). A pool that is
+     * stale or incomplete - a concurrent rebuild, cache:clear moving the cache
+     * dir under a process - used to leave one alias out, and whatever first
+     * needed it died: `Class "App\Repository\Thread\MentionRepository" not
+     * found` from the container, which instantiates the service by that name
+     * (config/services/media.php).
+     *
+     * It also covers the window before warmUp() has run at all: see the
+     * constructor. Composer is asked first; this only runs for a class nobody
+     * else could load. It answers from the known alias lists, then from the convention
+     * itself (App\Entity\X is Base\Entity\X, ...), and declares the alias.
+     */
+    public static function registerAliasAutoloader(): void
+    {
+        if (self::$aliasAutoloader) {
+            return;
+        }
+        self::$aliasAutoloader = true;
+
+        spl_autoload_register(static function (string $class): void {
+            $input = array_search($class, self::$aliasList ?? [], true)
+                ?: array_search($class, self::$aliasRepositoryList ?? [], true);
+
+            if (!$input && str_starts_with($class, "App\\")) {
+                $namespace = explode("\\", $class)[1] ?? "";
+                if (in_array($namespace, self::ALIASED_NAMESPACES, true)) {
+                    $input = "Base\\" . substr($class, 4);
+                }
+            }
+
+            if (!$input) {
+                return;
+            }
+
+            // Silent when there is nothing to alias: the class is then simply not
+            // found, as it was before. Another loader in the chain throws a
+            // ReflectionException for an unknown Base\ name rather than
+            // answering false, and TranslatableTrait probes App\...\XIntl
+            // classes that legitimately do not exist.
+            try {
+                $exists = class_exists($input) || interface_exists($input) || trait_exists($input);
+            } catch (\Throwable $e) {
+                return;
+            }
+
+            if ($exists && !class_exists($class, false) && !interface_exists($class, false) && !trait_exists($class, false)) {
+                class_alias($input, $class);
+            }
+        });
+    }
+
     /**
      * @param $arrayOrObjectOrClass
      * @return array|array[]|false|false[]|mixed|string|string[]
@@ -196,9 +263,23 @@ abstract class AbstractBaseBundle extends Bundle
             try { $outputExists = class_exists($output); }
             catch (ErrorException $e) { }
 
-            if ($inputExists && !$outputExists && !array_key_exists($input, self::$aliasList ?? [])) {
+            // An output that already exists AS AN ALIAS of the input (declared
+            // earlier in this process, or by the fallback autoloader below
+            // answering the class_exists() just above) is still this mapping,
+            // and must still be recorded - skipping it wrote a pool with holes,
+            // and the next process booted without those aliases.
+            $outputIsAlias = false;
+            if ($inputExists && $outputExists) {
+                try { $outputIsAlias = (new \ReflectionClass($output))->getName() === ltrim($input, "\\"); }
+                catch (\ReflectionException $e) { }
+            }
 
-                class_alias($input, $output);
+            $known = array_key_exists($input, self::$aliasList ?? []) || array_key_exists($input, self::$aliasRepositoryList ?? []);
+            if ($inputExists && (!$outputExists || $outputIsAlias) && !$known) {
+
+                if (!$outputExists) {
+                    class_alias($input, $output);
+                }
                 if (str_ends_with($input, "Repository")) {
                     self::$aliasRepositoryList[$input] = $output;
                 } else {
