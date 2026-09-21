@@ -166,6 +166,7 @@ abstract class AbstractBaseBundle extends Bundle
      * constructor. Composer is asked first; this only runs for a class nobody
      * else could load. It answers from the known alias lists, then from the convention
      * itself (App\Entity\X is Base\Entity\X, ...), and declares the alias.
+     * An alias the lists declare whose Base class is missing is a LogicException.
      */
     public static function registerAliasAutoloader(): void
     {
@@ -177,6 +178,7 @@ abstract class AbstractBaseBundle extends Bundle
         spl_autoload_register(static function (string $class): void {
             $input = array_search($class, self::$aliasList ?? [], true)
                 ?: array_search($class, self::$aliasRepositoryList ?? [], true);
+            $declared = (bool) $input;
 
             if (!$input && str_starts_with($class, "App\\")) {
                 $namespace = explode("\\", $class)[1] ?? "";
@@ -189,15 +191,15 @@ abstract class AbstractBaseBundle extends Bundle
                 return;
             }
 
-            // Silent when there is nothing to alias: the class is then simply not
-            // found, as it was before. Another loader in the chain throws a
-            // ReflectionException for an unknown Base\ name rather than
-            // answering false, and TranslatableTrait probes App\...\XIntl
-            // classes that legitimately do not exist.
-            try {
-                $exists = class_exists($input) || interface_exists($input) || trait_exists($input);
-            } catch (\Throwable $e) {
-                return;
+            $exists = class_exists($input) || interface_exists($input) || trait_exists($input);
+
+            // A declared alias whose Base class is gone is a broken bundle, not
+            // a class that does not exist: say which, rather than a bare "not
+            // found" on the App name. By convention alone, a missing Base class
+            // only means there is no such class (TranslatableTrait probes
+            // App\...\XIntl names that legitimately do not exist).
+            if (!$exists && $declared) {
+                throw new \LogicException(sprintf('"%s" is declared as an alias of "%s", which does not exist.', $class, $input));
             }
 
             if ($exists && !class_exists($class, false) && !interface_exists($class, false) && !trait_exists($class, false)) {
