@@ -76,9 +76,7 @@
     "dev-server": "encore dev-server",
     "dev": "encore dev",
     "watch": "encore dev --watch",
-    "prod": "encore production --progress",
-    "postinstall": "node patches/apply.js",
-    "patches": "node patches/apply.js"
+    "prod": "encore production --progress"
   },
   "repository": {
     "type": "git",
