@@ -19,33 +19,42 @@ $.fn.find_in_siblings = function (e = "") {
 
 window.addEventListener('load', function(event) {
 
+    // A form's buttons are not all submitters. A field's own clear/reset
+    // affordance, a toggle, a "show password" eye - anything the author put
+    // there as a control rather than as the way out of the form - must not be
+    // what Enter reaches for, or pressing Enter runs that control INSTEAD of
+    // the search/save the reader asked for. [data-enter-ignore] is how such a
+    // button opts out; everything without it keeps the previous behaviour.
+    var SUBMIT = "[type=submit]:not([data-enter-ignore])";
+    var BUTTON = "[type=button]:not([data-enter-ignore])";
+
     $("form :input").on("keydown", function(event){
-        
+
         if(event.key === 'Enter') {
 
             var form = $(this).closest("form");
             if(form.length) {
 
                 var button = undefined;
-                if ($(this).find_siblings("[type=submit]").length == 1) {
-                    button = $(this).find_siblings("[type=submit]");
-                } else if ($(this).find_siblings("[type=button]").length == 1) {
-                    button = $(this).find_siblings("[type=button]");
-                } else if ($(this).find_in_siblings("[type=submit]").length == 1) {
-                    button = $(this).find_in_siblings("[type=submit]");
-                } else if ($(this).find_in_siblings("[type=button]").length == 1) {
-                    button = $(this).find_in_siblings("[type=button]");
-                } else if ($(this).closest("[type=submit]").length == 1) {
-                    button = $(this).closest("[type=submit]");
-                } else if ($(this).closest("[type=button]").length == 1) {
-                    button = $(this).closest("[type=button]");
-                } else if(form.find("[type=submit]").length == 1) {
-                    button = form.find("[type=submit]");
-                } else if(form.find("[type=button]").length == 1) {
-                    button = form.find("[type=button]");
-                } else if(form.find("[type=submit]").length > 1) {
+                if ($(this).find_siblings(SUBMIT).length == 1) {
+                    button = $(this).find_siblings(SUBMIT);
+                } else if ($(this).find_siblings(BUTTON).length == 1) {
+                    button = $(this).find_siblings(BUTTON);
+                } else if ($(this).find_in_siblings(SUBMIT).length == 1) {
+                    button = $(this).find_in_siblings(SUBMIT);
+                } else if ($(this).find_in_siblings(BUTTON).length == 1) {
+                    button = $(this).find_in_siblings(BUTTON);
+                } else if ($(this).closest(SUBMIT).length == 1) {
+                    button = $(this).closest(SUBMIT);
+                } else if ($(this).closest(BUTTON).length == 1) {
+                    button = $(this).closest(BUTTON);
+                } else if(form.find(SUBMIT).length == 1) {
+                    button = form.find(SUBMIT);
+                } else if(form.find(BUTTON).length == 1) {
+                    button = form.find(BUTTON);
+                } else if(form.find(SUBMIT).length > 1) {
                     return false; // Prevent submission form submission due to ambiguity
-                } else if(form.find("[type=button]").length > 1) {
+                } else if(form.find(BUTTON).length > 1) {
                     return false; // Prevent submission form submission due to ambiguity
                 }
 
