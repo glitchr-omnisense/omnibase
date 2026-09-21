@@ -46,22 +46,17 @@ class ThreadSearchController extends AbstractController
                     $data->title = $data->title ?? $data->generic ?? "";
                     $data->excerpt = $data->excerpt ?? $data->generic ?? "";
 
-                    $formattedData = clone $data;
-                    $formattedData->content = str_strip("%" . $data->content . "%", "%%", "%%");
-                    $formattedData->title = str_strip("%" . $data->title . "%", "%%", "%%");
-                    $formattedData->excerpt = str_strip("%" . $data->excerpt . "%", "%%", "%%");
-                    $formattedData->generic = str_strip("%" . $data->generic . "%", "%%", "%%");
+                    // The "%term%" wrapping that used to happen here now lives
+                    // in searchTranslations, next to the LIKE it belongs to.
+                    // $data keeps the raw terms, which is what the template
+                    // needs to highlight them in the results.
 
                     $states = [ThreadState::PUBLISH];
                     if ($this->isGranted("ROLE_ADMIN")) {
                         $states = [];
                     }
 
-                    $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
-                        "content" => $formattedData->content,
-                        "title" => $formattedData->title,
-                        "excerpt" => $formattedData->excerpt,
-                    ], ["translatable.state" => $states, "translatable.parent" => $formattedData->parent_id])->getResult());
+                    $threads = array_map(fn($t) => $t->getTranslatable(), $this->searchTranslations($data, $states));
 
                     usort($threads, function ($a, $b) {
                         $aRepository = $this->entityManager->getRepository(get_class($a));
@@ -80,5 +75,53 @@ class ThreadSearchController extends AbstractController
             ->handleRequest($request);
 
         return $formProcessor->getResponse();
+    }
+
+    /**
+     * Translations whose title, excerpt OR content matches the term, scoped
+     * by thread state and parent.
+     *
+     * Hand-written instead of a magic finder because the shape is
+     * "(a OR b OR c) AND scope" and the finder DSL has no parentheses: it
+     * applies one separator to every criterion it is handed, so asking for
+     * the three fields with "Or" would OR the state filter in with them and
+     * return every thread on the site. This query used to go through the
+     * DSL's Model clause, which is AND-only by design and since it began
+     * requiring a select object rather than an array made the page a 500 -
+     * and had it been given one, "the word appears in the title AND in the
+     * excerpt AND in the body" would have matched almost nothing.
+     */
+    protected function searchTranslations(object $data, array $states): array
+    {
+        $terms = array_filter(
+            ["title" => $data->title, "excerpt" => $data->excerpt, "content" => $data->content],
+            fn($term) => is_string($term) && trim($term) !== ""
+        );
+
+        // An empty search matches nothing, rather than LIKE '%%' - i.e. the
+        // entire site - which is what wrapping an empty term used to build.
+        if (!$terms) {
+            return [];
+        }
+
+        $queryBuilder = $this->threadIntlRepository->createQueryBuilder("i")->join("i.translatable", "t");
+
+        $expr = [];
+        foreach ($terms as $field => $term) {
+            $expr[] = "LOWER(i." . $field . ") LIKE :term_" . $field;
+            $queryBuilder->setParameter("term_" . $field, "%" . mb_strtolower(trim($term)) . "%");
+        }
+
+        $queryBuilder->andWhere(implode(" OR ", $expr));
+
+        if ($states) {
+            $queryBuilder->andWhere("t.state IN (:states)")->setParameter("states", $states);
+        }
+
+        if ($data->parent_id) {
+            $queryBuilder->andWhere("t.parent = :parent")->setParameter("parent", $data->parent_id);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }
