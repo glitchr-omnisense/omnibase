@@ -16,3 +16,4 @@ var
 stubs
 vendor
 composer.lock
+/PATCHES.txt
