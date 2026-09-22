@@ -128,11 +128,14 @@ class BaseBundle extends AbstractBaseBundle
             $needsWarmup = true;
         }
 
+        // warmUp() runs more than once in a process (the dev kernel reboots after
+        // a cache rebuild), and class_alias() on an alias that already exists
+        // is a warning - turned into a 500 on whatever page was being served.
         foreach (self::$aliasList as $class => $alias) {
-            class_alias($class, $alias);
+            if (!class_exists($alias, false)) class_alias($class, $alias);
         }
         foreach (self::$aliasRepositoryList as $class => $alias) {
-            class_alias($class, $alias);
+            if (!class_exists($alias, false)) class_alias($class, $alias);
         }
 
         // One builder at a time. Without this, every request that finds the
