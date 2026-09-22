@@ -471,8 +471,8 @@ class EditorController extends AbstractController
 
     /**
      * This action creates a short-lived, signed ticket. A browser
-     * presents this ticket to the collab relay. Refer to the collab-relay/
-     * directory at the bundle root for the relay code. This ticket lets a
+     * presents this ticket to the collab relay. Refer to the relay/
+     * directory of the editorjs-yjs repository for the relay code. This ticket lets a
      * client join a room's WebSocket connection, for the `collab_live`
      * option. This action uses the same CSRF check and session check as
      * the other actions in this controller. Refer to the Autosave()

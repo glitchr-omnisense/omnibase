@@ -81,7 +81,7 @@ class EditorType extends AbstractType
             //
             // collab_live: this option activates real-time presence and
             // real-time collaboration, through the collab relay. Refer to
-            // the collab-relay/ directory at the bundle root for the
+            // the relay/ directory of the editorjs-yjs repository for the
             // relay code. This option creates a join ticket, through
             // ux_editorjs_collabTicket. This option does not require the
             // collab_autosave option. The relay's own persistence bridge

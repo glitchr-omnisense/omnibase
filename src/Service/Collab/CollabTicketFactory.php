@@ -4,7 +4,7 @@ namespace Base\Service\Collab;
 
 /**
  * This class creates a short-lived, signed ticket. A browser presents
- * this ticket to the collab relay (collab-relay/src/server.js), to join a
+ * this ticket to the collab relay (relay/src/server.js in editorjs-yjs), to join a
  * room's WebSocket connection. The relay checks the signature by itself.
  * The relay does not send requests to PHP. The relay does not read the
  * session store. Because of this, this class is the only place on this
