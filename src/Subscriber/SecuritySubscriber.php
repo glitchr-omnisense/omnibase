@@ -294,6 +294,15 @@ class SecuritySubscriber implements EventSubscriberInterface
             return;
         }
 
+        // Presence is recorded before the page is drawn, not after it: poked
+        // on the response, the first page after a pause (a restored session,
+        // a tab left open) showed its own reader offline, and online only on
+        // the next click. This runs after the firewall (priority 8), so the
+        // login greeting has already read the previous activeAt.
+        if ($event->isMainRequest()) {
+            $this->poke($user);
+        }
+
         //
         // Check if user is verified
         // (NB:exception in debut mode for user matching test_recipient emails)
@@ -356,7 +365,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (!($user->isActive())) {
+        // Still here for a token that appeared during the request itself.
+        $this->poke($user);
+    }
+
+    private function poke(BaseUser $user): void
+    {
+        if (!$user->isActive()) {
             $user->poke(new DateTime("now"));
             $this->userRepository->flush();
         }
