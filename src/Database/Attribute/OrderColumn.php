@@ -124,7 +124,11 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
             return; // skip if the property is not initialized
         }
 
-        if($isToMany) $orderBy = $reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray();
+        // An element persisted in the same flush has no id yet: it cannot be
+        // positioned by id, and a null in the list broke every later read
+        // (array_flip in OrderedArrayCollection::reorder). Left out, it
+        // simply comes last - where it was added anyway.
+        if($isToMany) $orderBy = array_values(array_filter($reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray(), fn($id) => $id !== null));
         else $orderBy = array_keys($doctrineType->getOrderingKeys($reflProp->getValue($entity)));
 
         $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
@@ -149,7 +153,11 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
             return; // skip if the property is not initialized
         }
 
-        if($isToMany) $orderBy = $reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray();
+        // An element persisted in the same flush has no id yet: it cannot be
+        // positioned by id, and a null in the list broke every later read
+        // (array_flip in OrderedArrayCollection::reorder). Left out, it
+        // simply comes last - where it was added anyway.
+        if($isToMany) $orderBy = array_values(array_filter($reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray(), fn($id) => $id !== null));
         else $orderBy = array_keys($doctrineType->getOrderingKeys($reflProp->getValue($entity)));
 
         if(\is_identity($orderBy)) $orderBy = []; // avoid serializing large arrays of integers

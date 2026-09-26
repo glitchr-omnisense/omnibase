@@ -57,8 +57,12 @@ class OrderedArrayCollection extends ArrayCollection
             return $this;
         }
 
+        // Positions stored before OrderColumn skipped unsaved elements may
+        // hold nulls ("[null]"): only ids can position anything.
+        $positions = array_filter($this->positions, fn($id) => is_int($id) || is_string($id));
+
         $elements = parent::toArray();
-        $positionMap = array_flip($this->positions);
+        $positionMap = array_flip($positions);
 
         // sort by the map (unknown ids go to the end)
         usort($elements, function($a, $b) use ($positionMap) {
