@@ -107,6 +107,7 @@
         </button>
         {% endif %}
 
+        {% if oauth_available('google') or user.getIdentityProvider() == 'google' %}
         <h5>{{'@forms.settings.connectedAccounts'|trans}}</h5>
         <ul class="list-group">
             <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -118,6 +119,7 @@
                 {% endif %}
             </li>
         </ul>
+        {% endif %}
     </div>
 </div>
 

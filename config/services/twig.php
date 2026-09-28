@@ -125,6 +125,9 @@ return static function (ContainerConfigurator $container): void {
         ->bind('$projectDir', '%kernel.project_dir%')
         ->bind('$routeRegistry', new Reference('Base\Admin\Router\AdminRouteRegistry', ContainerInterface::NULL_ON_INVALID_REFERENCE));
 
+    $services->set('Base\Twig\Extension\OAuthTwigExtension')
+        ->tag('twig.extension')
+        ->args([new Reference('hwi_oauth.resource_ownermap_locator', ContainerInterface::NULL_ON_INVALID_REFERENCE)]);
     $services->set('Base\Twig\Extension\MathTwigExtension')->tag('twig.extension');
     $services->set('Base\Twig\Extension\ClassTwigExtension')->tag('twig.extension');
     $services->set('Base\Twig\Extension\ClipboardTwigExtension')->tag('twig.extension');

@@ -37,7 +37,7 @@
             <h3 class="text-center">Sign Up</h3>
             {# Google only, as on the login page: it is the one provider whose
                oauth_* route redirects anywhere (the others are bare paths). #}
-            {% if 'google' in hwi_oauth_resource_owners() %}
+            {% if oauth_available('google') %}
             <div class="d-flex justify-content-center social-icons">
                 <a href="{{path("oauth_google")}}" class="btn btn-lg btn-social-icon-circle btn-outline-google-alt"></a>
             </div>
