@@ -97,8 +97,8 @@ class VersionManager
                     "value" => $value,
                     "preview" => $this->preview($value),
                     "at" => $revision->getCreatedAt(),
-                    "by" => $revision->getInitiator()?->getUsername(),
-                    "impersonator" => $revision->getImpersonator()?->getUsername(),
+                    "by" => \Base\Entity\User::nameOf($revision->getInitiator()),
+                    "impersonator" => \Base\Entity\User::nameOf($revision->getImpersonator()),
                     "hash" => $revision->getHashShort(),
                     "restorable" => $versionable->restorable,
                 ];

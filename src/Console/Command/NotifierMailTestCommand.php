@@ -76,7 +76,8 @@ class NotifierMailTestCommand extends Command
 
         $notification = $this->notifier->testEmail($user);
         $notification->send();
-        $io->success("Sent test email to {$user->getEmail()} (Username: {$user->getUsername()}, ID: {$userId}) using async transport.");
+        $name = \Base\Entity\User::nameOf($user);
+        $io->success("Sent test email to {$user->getEmail()} (Name: {$name}, ID: {$userId}) using async transport.");
 
         return Command::SUCCESS;
     }

@@ -80,6 +80,21 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     public function __autocompleteData(): array { return []; }
 
     public function __toString() { return $this->getEmail() ?? $this->getId(); }
+
+    /**
+     * How a member is named in a record of what they did (revisions, trash):
+     * the application's username when it has one, else the display name.
+     * Not getUsername() on the base class: the admin builds URLs from any
+     * getUsername() it finds, and only a real column resolves back.
+     */
+    public static function nameOf(?self $user): ?string
+    {
+        if (null === $user) {
+            return null;
+        }
+
+        return method_exists($user, 'getUsername') ? $user->getUsername() : (string) $user;
+    }
     public function __iconize(): ?array
     {
         return array_map(fn($r) => UserRole::getIcon($r, 0), array_filter($this->getRoles()));

@@ -29,10 +29,14 @@ class WebauthnUserEntityRepository implements PublicKeyCredentialUserEntityRepos
 
     private function toUserEntity(\App\Entity\User $user): PublicKeyCredentialUserEntity
     {
+        // name: the login key the authenticator lists (unique); displayName:
+        // how the member reads, where the application defines one.
+        $displayName = method_exists($user, 'getFullname') ? $user->getFullname() : null;
+
         return PublicKeyCredentialUserEntity::create(
-            $user->getUsername(),
+            $user->getUserIdentifier(),
             (string) $user->getId(),
-            $user->getFullname() ?: $user->getUsername(),
+            $displayName ?: (string) $user,
         );
     }
 }
