@@ -1,0 +1,12 @@
+{# A member's avatar, as an image: the application's own rendering when its
+   User has one (getFormattedAvatar(), HTML), else a thumbnail of the uploaded
+   avatar, else a neutral icon. Params: user, size (px, default 128). #}
+{%- set _size = size|default(128) -%}
+{%- if user is null -%}
+{%- elseif user.formattedAvatar is defined -%}
+    {{- user.formattedAvatar|raw -}}
+{%- elseif user.avatar -%}
+    <img class="avatar" alt="{{ user }}" src="{{ user.avatar|thumbnail(_size, _size) }}" width="{{ _size }}" height="{{ _size }}">
+{%- else -%}
+    <span class="avatar avatar-placeholder" title="{{ user }}"><i class="fa-solid fa-user"></i></span>
+{%- endif -%}

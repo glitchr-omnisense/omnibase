@@ -80,7 +80,10 @@
             <div class="col d-flex justify-content-center">
                 <div class="form-group form-check form-switch form-switch-md">
                     {{ form_widget(form.agreeTerms) }}
-                    {{ form_label(form.agreeTerms, '@forms.register.agreeTerms'|trans([path("widget_page", {"slug":"gdpr"})])) }}
+                    {#- The terms/privacy page: base.settings.legal_page (a page slug,
+                        set on the site's settings page), else "gdpr". -#}
+                    {% set _legal = app.settingBag.getScalar('base.settings.legal_page') ?: 'gdpr' %}
+                    {{ form_label(form.agreeTerms, '@forms.register.agreeTerms'|trans([path("widget_page", {"slug": _legal})])) }}
                 </div>
             </div>
             <div class="col d-flex justify-content-center">

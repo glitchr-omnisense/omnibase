@@ -52,7 +52,7 @@
 
                     <ul class="field-avatar">
                         {% for owner in thread.owners|reverse %}
-                        <li>{{ owner.getFormattedAvatar()|raw }}</li>
+                        <li>{% include '@Base/client/user/_avatar.html.twig' with {user: owner, size: 64} only %}</li>
                         {% endfor %}
                     </ul>
 

@@ -15,7 +15,7 @@
         <div class="header">
 
             <ul class="field-avatar">
-                <li class="keep-opacity">{{ user.getFormattedAvatar()|raw }}</li>
+                <li class="keep-opacity">{% include '@Base/client/user/_avatar.html.twig' with {user: user} only %}</li>
             </ul>
 
             <div class="text d-flex flex-column">
