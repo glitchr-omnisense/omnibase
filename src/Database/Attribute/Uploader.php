@@ -74,6 +74,16 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         if (array_key_exists(spl_object_id($entity), $this->getUnitOfWork()->getScheduledEntityInsertions())) {
+            // A new entity reached by cascade (a product's images, a review's
+            // pictures) is scheduled after preFlush, where uploads happen: its
+            // files are still File instances here. Store them now, or the row
+            // gets no path and the second-level cache chokes on the File.
+            $value = self::getFieldValue($entity, $property);
+            $pending = array_filter(is_array($value) ? $value : [$value], fn ($file) => $file instanceof File);
+            if ($pending && $this->uploadFiles($entity, null, $property)) {
+                $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+            }
+
             return;
         }
 

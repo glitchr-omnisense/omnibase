@@ -23,8 +23,12 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         $bundlePath = $parameterBag->get('base.twig.default_path');
         parent::__construct([], $bundlePath);
+        // Each namespace with ITS paths: getPaths() without a namespace is the
+        // main one's (the app's templates/), which made @Base/x resolve to an
+        // app override of x first - an override extending its original
+        // extended itself, an endless render.
         foreach($this->inner->getNamespaces() as $namespace) {
-            foreach($this->inner->getPaths() as $path) {
+            foreach($this->inner->getPaths($namespace) as $path) {
                 $this->prependPath(trim($path), $namespace);
             }
         }

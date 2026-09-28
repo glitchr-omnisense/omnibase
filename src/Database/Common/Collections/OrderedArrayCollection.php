@@ -58,7 +58,9 @@ class OrderedArrayCollection extends ArrayCollection
         }
 
         $elements = parent::toArray();
-        $positionMap = array_flip($this->positions);
+        // Only ids can be flipped: positions recorded while the entries had
+        // none yet (created with their parent in one flush) are nulls.
+        $positionMap = array_flip(array_filter($this->positions, fn ($id) => \is_int($id) || \is_string($id)));
 
         // sort by the map (unknown ids go to the end)
         usort($elements, function($a, $b) use ($positionMap) {

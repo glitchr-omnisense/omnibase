@@ -4,6 +4,7 @@ namespace Base\EntityDispatcher;
 
 use Base\Database\Entity\EntityHydratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
@@ -17,6 +18,16 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 abstract class AbstractEventDispatcher implements EventDispatcherInterface
 {
     protected array $events;
+
+    /**
+     * Listeners of the events dispatched after a write may change entities:
+     * they are flushed once the current flush is over (postFlush), never from
+     * inside it - a flush within postPersist/postUpdate is forbidden by
+     * Doctrine, and it wrote the second-level cache of entities whose
+     * uploads were not stored yet (a File cannot be serialized).
+     */
+    protected bool $flushPending = false;
+    protected bool $flushing = false;
 
     /**
      * @var SymfonyEventDispatcherInterface
@@ -112,7 +123,22 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         }
 
         if ($reflush) {
+            $this->flushPending = true;
+        }
+    }
+
+    public function postFlush(PostFlushEventArgs $event): void
+    {
+        if (!$this->flushPending || $this->flushing) {
+            return;
+        }
+
+        $this->flushPending = false;
+        $this->flushing = true;
+        try {
             $event->getObjectManager()->flush();
+        } finally {
+            $this->flushing = false;
         }
     }
 

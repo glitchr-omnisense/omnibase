@@ -299,7 +299,9 @@ abstract class AbstractAttribute implements AttributeInterface
         $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        return object_hydrate(new $classname, array_merge($fields, $associations));
+        // Without the constructor: the snapshot is filled from $data, and an
+        // entity may require constructor arguments (Widget\Slot needs a path).
+        return object_hydrate((new \ReflectionClass($classname))->newInstanceWithoutConstructor(), array_merge($fields, $associations));
     }
 
     /**

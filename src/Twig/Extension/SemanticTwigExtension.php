@@ -30,8 +30,10 @@ final class SemanticTwigExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('semantify', [SemanticEnhancer::class, 'highlight'], ['is_safe' => ['all']]),
-            new TwigFilter('semantify_only', [SemanticEnhancer::class, 'highlightOne'], ['is_safe' => ['all']]),
+            // SemanticEnhancer has no static highlight()/highlightOne() any more:
+            // its enhance() does both (every semantic word, or only $words).
+            new TwigFilter('semantify', fn ($text, array $attributes = []) => $this->semanticEnhancer->enhance($text, null, $attributes), ['is_safe' => ['all']]),
+            new TwigFilter('semantify_only', fn ($text, $words, array $attributes = []) => $this->semanticEnhancer->enhance($text, $words, $attributes), ['is_safe' => ['all']]),
         ];
     }
 }

@@ -164,7 +164,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
             $route = $position !== false ? $attributes[$position] : null;
             $routeName = $route ? $this->getRouteName($path) : null;
-            $routeParameters = $route ? array_filter($this->getRouteParameters($path, $route->path !== null ? rtrim($route->path, "/") : null) ?? []) : [];
+            // A localized route's path is an array (locale => path): the request's.
+            $routePath = $route?->path;
+            if (is_array($routePath)) {
+                $routePath = $routePath[$request->getLocale()] ?? $routePath[substr($request->getLocale(), 0, 2)] ?? reset($routePath);
+            }
+            $routeParameters = $route ? array_filter($this->getRouteParameters($path, $routePath !== null ? rtrim($routePath, "/") : null) ?? []) : [];
             $routeParameterKeys = array_keys($routeParameters);
 
             $transPath = implode(".", array_merge([$routeName], $routeParameterKeys));

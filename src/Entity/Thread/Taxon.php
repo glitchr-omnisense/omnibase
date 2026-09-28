@@ -55,6 +55,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 
         $this->threads = new ArrayCollection();
         $this->children = new ArrayCollection();
+        $this->connexes = new ArrayCollection();
     }
 
     #[ORM\Id]
