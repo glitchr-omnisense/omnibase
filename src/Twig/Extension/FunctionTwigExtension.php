@@ -3,6 +3,7 @@
 namespace Base\Twig\Extension;
 
 use Base\Admin\Controller\AbstractCrudController;
+use Base\Admin\Router\AdminRouteRegistry;
 use Base\Database\Type\EnumType;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
@@ -51,7 +52,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
     protected Environment $twig;
 
-    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGeneratorInterface $adminUrlGenerator, string $projectDir)
+    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGeneratorInterface $adminUrlGenerator, string $projectDir, private readonly ?AdminRouteRegistry $routeRegistry = null)
     {
         $this->translator = $translator;
         $this->assetExtension = $assetExtension;
@@ -189,21 +190,29 @@ final class FunctionTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param $entity
-     * @return string
+     * A link to the entity's edit page in the admin, or nothing when no CRUD
+     * manages it. Options: label, icon. The registered controller first (an
+     * app's CRUD may sit outside the namespace convention), then the
+     * convention.
+     *
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function crudify($entity, array $options = []): string
+    public function crudify(?object $entity, array $options = []): string
     {
-        return $this->twig->render('@Base/easyadmin/crudify.html.twig', [
-            'label' => $options["label"] ?? null,
+        $controller = $entity ? ($this->routeRegistry?->getControllerForEntity($entity) ?? AbstractCrudController::getCrudControllerFqcn($entity)) : null;
+        if (null === $controller) {
+            return '';
+        }
+
+        return $this->twig->render('@Base/admin-legacy/crudify.html.twig', [
+            'label' => $options['label'] ?? null,
+            'icon' => $options['icon'] ?? null,
             'path' => $this->adminUrlGenerator->unsetAll()
-                ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
+                ->setController($controller)
                 ->setEntityId($entity->getId())
                 ->setAction(Crud::PAGE_EDIT)
-                //->includeReferrer()
                 ->generateUrl(),
         ]);
     }
