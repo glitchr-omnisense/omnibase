@@ -120,6 +120,10 @@ return static function (ContainerConfigurator $container): void {
             new Reference('localizer'),
         ]);
 
+    // Low priority: after the subscribers that still change associations in onFlush.
+    $services->set('Base\DatabaseSubscriber\InverseCollectionCacheSubscriber')
+        ->tag('doctrine.event_listener', ['event' => 'onFlush', 'priority' => -1024]);
+
     $services->set('Base\DatabaseSubscriber\TrackingPolicySubscriber')
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata'])
         ->args([new Reference('base.database.metadata_manipulator')]);
