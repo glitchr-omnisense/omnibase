@@ -288,7 +288,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
 
-            $this->userRepository->flush();
+            $this->userRepository->flush(false);
             $event->stopPropagation();
 
             return;
@@ -335,10 +335,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (!$user->isApproved()) {
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
                 $user->approve();
-                $this->userRepository->flush();
+                $this->userRepository->flush(false);
             } elseif ($this->parameterBag->get("base.user.autoapprove")) {
                 $user->approve();
-                $this->userRepository->flush();
+                $this->userRepository->flush(false);
             } elseif ($this->router->isSecured()) {
                 $this->router->redirectEvent($event, "security_pendingForApproval", [], 302, ["exceptions" => $exceptions]);
             }
@@ -369,11 +369,21 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->poke($user);
     }
 
+    /*
+     * Every flush here keeps the entity manager as it is (flush(false)): a
+     * repository's flush() clears it by default, and this runs on every
+     * request - the first one after the member's active delay cleared it
+     * under the controller, the logged-in user was detached from then on,
+     * everything loaded after it was a second copy of the same rows (an
+     * order's customer !== the user: "Ce panier n'est pas le tien"), and a
+     * new row pointing at the user would not flush ("A new entity was found
+     * through the relationship...").
+     */
     private function poke(BaseUser $user): void
     {
         if (!$user->isActive()) {
             $user->poke(new DateTime("now"));
-            $this->userRepository->flush();
+            $this->userRepository->flush(false);
         }
     }
 
