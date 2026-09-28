@@ -174,6 +174,17 @@ class IntlSubscriber
 
         if ($entity instanceof TranslatableInterface) {
             foreach ($entity->getTranslations() as $locale => $translation) {
+                // An empty translation (translate() makes one for a locale a
+                // getter asked about) is never persisted: out of the collection
+                // too, or the collection's second-level cache meets an entity
+                // the unit of work does not know.
+                if ($translation->isEmpty() && !$translation->getId()) {
+                    $entity->removeTranslation($translation);
+                    if ($this->entityManager->contains($translation)) {
+                        $this->entityManager->detach($translation);
+                    }
+                    continue;
+                }
                 if (null === $translation->getLocale()) {
                     $translation->setLocale($locale);
                 }
