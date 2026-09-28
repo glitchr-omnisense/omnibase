@@ -122,7 +122,8 @@ return static function (ContainerConfigurator $container): void {
             new Reference('twig'),
             new Reference('Base\Routing\AdminUrlGeneratorInterface'),
         ])
-        ->bind('$projectDir', '%kernel.project_dir%');
+        ->bind('$projectDir', '%kernel.project_dir%')
+        ->bind('$routeRegistry', new Reference('Base\Admin\Router\AdminRouteRegistry', ContainerInterface::NULL_ON_INVALID_REFERENCE));
 
     $services->set('Base\Twig\Extension\MathTwigExtension')->tag('twig.extension');
     $services->set('Base\Twig\Extension\ClassTwigExtension')->tag('twig.extension');
@@ -363,5 +364,6 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
             new Reference('twig'),
             new Reference('Base\Routing\AdminUrlGeneratorInterface')
         ])
-        ->bind('$projectDir', '%kernel.project_dir%');
+        ->bind('$projectDir', '%kernel.project_dir%')
+        ->bind('$routeRegistry', new Reference('Base\Admin\Router\AdminRouteRegistry', ContainerInterface::NULL_ON_INVALID_REFERENCE));
 };
