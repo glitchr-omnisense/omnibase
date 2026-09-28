@@ -1,0 +1,86 @@
+{% extends 'layout1.html.twig' %}
+
+{# The member's notification center (NotificationController::Index): every
+   notification with something to show, newest first, grouped by day. The
+   "notifications" script (assets/notifications.js) marks entries read or
+   unread, deletes them and toggles push through the root's data attributes;
+   without it the list still reads, and each entry still links its page. #}
+
+{% block title %}{{ '@messages.notifications.title'|trans }}{% endblock %}
+{% block content %}
+
+{% set today = 'today'|date('Y-m-d') %}
+{% set yesterday = '-1 day'|date('Y-m-d') %}
+{% set week = '-7 days'|date('Y-m-d') %}
+
+<article class="wrapper notifications-page"
+         data-notifications
+         data-csrf="{{ notifications_token() }}"
+         data-read-url="{{ path('user_notifications_read') }}"
+         data-latest-url="{{ path('user_notifications_latest') }}"
+         data-delete-url="{{ path('user_notifications_delete') }}"
+         data-push-key="{{ push_available() ? push_vapid_key() : '' }}"
+         data-push-subscribe-url="{{ path('push_subscribe') }}"
+         data-push-unsubscribe-url="{{ path('push_unsubscribe') }}">
+
+    <h2>{{ '@messages.notifications.title'|trans }}
+        <span class="badge bg-primary" data-notifications-badge data-count="{{ unread }}" {{ unread ? '' : 'hidden' }}>{{ unread }}</span>
+    </h2>
+
+    <div class="notifications-toolbar d-flex flex-wrap gap-2">
+        {% if unreadOnly %}
+            <a class="btn btn-sm btn-outline-primary" href="{{ path('user_notifications') }}">{{ '@messages.notifications.all'|trans }}</a>
+        {% endif %}
+        <button type="button" class="btn btn-sm btn-outline-primary" data-notifications-read-all>
+            <i class="fa-solid fa-check-double"></i> {{ '@messages.notifications.readAll'|trans }}
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-notifications-delete-read>
+            <i class="fa-solid fa-trash-can"></i> {{ '@messages.notifications.deleteRead'|trans }}
+        </button>
+        {% if push_available() %}
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-push-toggle hidden
+                    data-label-off="{{ '@messages.notifications.push.enable'|trans }}"
+                    data-label-on="{{ '@messages.notifications.push.disable'|trans }}"
+                    data-label-denied="{{ '@messages.notifications.push.denied'|trans }}">
+                <i class="fa-solid fa-mobile-screen"></i> <span data-push-label>{{ '@messages.notifications.push.enable'|trans }}</span>
+            </button>
+        {% endif %}
+    </div>
+    {% if push_available() %}
+        <p class="notifications-hint text-muted small">{{ '@messages.notifications.push.hint'|trans }}</p>
+    {% endif %}
+
+    {% set group = null %}
+    <ul class="notifications-list list-unstyled">
+    {% for notification in notifications %}
+        {% set day = notification.sentAt ? notification.sentAt|date('Y-m-d') : null %}
+        {% set current = day is null ? 'earlier' : (day == today ? 'today' : (day == yesterday ? 'yesterday' : (day > week ? 'week' : 'earlier'))) %}
+        {% if current != group %}
+            {% set group = current %}
+            <li class="notifications-group"><h3 class="h6 text-muted mt-3">{{ ('@messages.notifications.group.' ~ group)|trans }}</h3></li>
+        {% endif %}
+        <li class="notification d-flex align-items-start {{ notification.isRead ? '' : 'is-unread' }}" data-notification-item data-id="{{ notification.id }}">
+            <a class="notification-link flex-grow-1" href="{{ notification.url ?? '#' }}">
+                <strong>{{ notification.getTitle() ?: notification.getSubject() }}</strong>
+                {% if notification.getContent() %}<span class="d-block">{{ notification.getContent()|striptags|slice(0, 240) }}</span>{% endif %}
+                {% if notification.sentAt %}<time class="notification-time" datetime="{{ notification.sentAt|date('c') }}">{{ notification.sentAt|date('d/m/Y H:i') }}</time>{% endif %}
+            </a>
+            <span class="notification-actions d-flex">
+                <button type="button" class="btn btn-raw {{ notification.isRead ? 'is-read' : '' }}" data-notification-read-toggle
+                        data-label-read="{{ '@messages.notifications.markRead'|trans }}"
+                        data-label-unread="{{ '@messages.notifications.markUnread'|trans }}"
+                        title="{{ (notification.isRead ? '@messages.notifications.markUnread' : '@messages.notifications.markRead')|trans }}"
+                        aria-label="{{ (notification.isRead ? '@messages.notifications.markUnread' : '@messages.notifications.markRead')|trans }}"><i class="fa-solid fa-check"></i></button>
+                <button type="button" class="btn btn-raw" data-notification-delete
+                        title="{{ '@messages.notifications.delete'|trans }}" aria-label="{{ '@messages.notifications.delete'|trans }}"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+        </li>
+    {% else %}
+        <li class="notifications-empty text-muted">{{ '@messages.notifications.empty'|trans }}</li>
+    {% endfor %}
+    </ul>
+</article>
+{# Encore renders an entry once per request: nothing doubles on a site whose
+   layout already loads it for its bell. #}
+{{ encore_entry_script_tags('notifications') }}
+{% endblock %}

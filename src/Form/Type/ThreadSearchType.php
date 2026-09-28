@@ -2,7 +2,6 @@
 
 namespace Base\Form\Type;
 
-use App\Entity\Destination\Destination;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 

@@ -39,7 +39,7 @@
                     <strong>{{'@forms.settings.passkeys'|trans}}</strong>
                     <br><small class="text-muted">{{'@forms.settings.passkeyHelp'|trans}}</small>
                 </span>
-                <button type="button" class="btn btn-sm btn-outline-primary" data-passkey-register="{{ user.getUsername() }}">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-passkey-register="{{ user.getUserIdentifier() }}">
                     <i class="fa-fw fa-solid fa-passport"></i> {{'@forms.settings.addPasskey'|trans}}
                 </button>
             </li>

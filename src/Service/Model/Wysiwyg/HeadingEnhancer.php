@@ -27,7 +27,7 @@ class HeadingEnhancer implements HeadingEnhancerInterface
     public function toc(mixed $html, ?int $maxLevel = null): array
     {
         if (!$html) {
-            return $html;
+            return [];
         }
 
         if (is_array($html)) {

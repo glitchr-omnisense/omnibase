@@ -114,3 +114,23 @@ user_analytics:
                 =1 {# other active user}
                 other {# other active users}
             }"
+
+notifications:
+    title: Notifications
+    all: All notifications
+    empty: Nothing here yet.
+    readAll: Mark all as read
+    group:
+        today: Today
+        yesterday: Yesterday
+        week: This week
+        earlier: Earlier
+    delete: Delete
+    deleteRead: Delete read notifications
+    markRead: Mark as read
+    markUnread: Mark as unread
+    push:
+        enable: Enable notifications on this device
+        disable: Disable notifications on this device
+        denied: Notifications are blocked by the browser
+        hint: "Push notifications reach you even with the site closed. They are enabled per device and per browser."

@@ -35,11 +35,13 @@
     <div class="card">
         <div class="card-header">
             <h3 class="text-center">Sign Up</h3>
+            {# Google only, as on the login page: it is the one provider whose
+               oauth_* route redirects anywhere (the others are bare paths). #}
+            {% if 'google' in hwi_oauth_resource_owners() %}
             <div class="d-flex justify-content-center social-icons">
-                <a href="{{path("oauth_facebook")}}" class="btn btn-lg btn-social-icon-circle btn-outline-facebook-alt"></a>
-                <a href="{{path("oauth_instagram")}}" class="btn btn-lg btn-social-icon-circle btn-outline-instagram-alt"></a>
                 <a href="{{path("oauth_google")}}" class="btn btn-lg btn-social-icon-circle btn-outline-google-alt"></a>
             </div>
+            {% endif %}
         </div>
 
         <div class="card-body">

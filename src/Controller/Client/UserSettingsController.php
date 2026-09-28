@@ -11,7 +11,7 @@ use Base\Entity\User\Connection;
 use Base\Repository\User\ConnectionRepository;
 use Base\Repository\User\PasskeyRepository;
 
-use App\Form\Extension\Login2FAType;
+use Base\Form\Type\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
 use Base\Entity\User\Notification;
 use Doctrine\ORM\EntityManagerInterface;

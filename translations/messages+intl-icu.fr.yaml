@@ -114,3 +114,23 @@ user_analytics:
                 =1 {# utilisateur actif}
                 other {# utilisateurs actifs}
             }"
+
+notifications:
+    title: Notifications
+    all: Toutes les notifications
+    empty: Aucune notification pour le moment.
+    readAll: Tout marquer comme lu
+    group:
+        today: "Aujourd'hui"
+        yesterday: Hier
+        week: Cette semaine
+        earlier: Plus ancien
+    delete: Supprimer
+    deleteRead: Supprimer les notifications lues
+    markRead: Marquer comme lue
+    markUnread: Marquer comme non lue
+    push:
+        enable: Activer les notifications sur cet appareil
+        disable: Désactiver les notifications sur cet appareil
+        denied: Notifications bloquées par le navigateur
+        hint: "Les notifications push préviennent, même le site fermé. Elles s'activent par appareil et par navigateur."

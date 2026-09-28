@@ -102,7 +102,7 @@
                 <li class="list-group-item text-muted">{{'@forms.settings.noPasskeys'|trans}}</li>
             {% endfor %}
         </ul>
-        <button type="button" class="btn btn-sm btn-primary" data-passkey-register="{{ user.getUsername() }}">
+        <button type="button" class="btn btn-sm btn-primary" data-passkey-register="{{ user.getUserIdentifier() }}">
             <i class="fa-fw fa-solid fa-passport"></i> {{'@forms.settings.addPasskey'|trans}}
         </button>
         {% endif %}
