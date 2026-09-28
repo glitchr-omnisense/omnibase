@@ -55,6 +55,13 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Security\Voter\PermissionVoter')
         ->tag('security.voter');
 
+    $services->set('Base\Security\Voter\ComplaintVoter')
+        ->tag('security.voter')
+        ->args([
+            new Reference('security.access.decision_manager'),
+            new Reference('security.role_hierarchy'),
+        ]);
+
     $services->set('Base\Security\Voter\AccessVoter')
         ->tag('security.voter')
         ->args([
