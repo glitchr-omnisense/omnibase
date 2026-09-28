@@ -144,7 +144,6 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     }
 
     /**
-     * @param $thumbnail
      * @return $this
      */
     public function setThumbnail($thumbnail)

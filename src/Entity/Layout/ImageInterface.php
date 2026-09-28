@@ -9,7 +9,6 @@ interface ImageInterface
     public function getSourceFile();
 
     /**
-     * @param $source
      * @return $this
      */
     public function setSource($source): static;

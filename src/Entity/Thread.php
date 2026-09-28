@@ -185,7 +185,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @param $connex
      * @return $this
      */
     public function addConnex($connex): self
@@ -198,7 +197,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @param $connex
      * @return $this
      */
     public function removeConnex($connex): self
@@ -237,7 +235,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @param $state
      * @return $this
      */
     public function setState($state): self
@@ -329,7 +326,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @param $workflow
      * @return $this
      */
     public function setWorkflow($workflow): self
@@ -462,7 +458,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @param $taxon
      * @return $this
      */
     public function addTaxon($taxon): self
@@ -475,7 +470,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
-     * @param $taxon
      * @return $this
      */
     public function removeTaxon($taxon): self

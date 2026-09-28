@@ -39,7 +39,6 @@ abstract class AbstractRule extends AbstractAttribute implements RuleInterface
     }
 
     /**
-     * @param $value
      * @return $this
      */
     public function setValue($value)

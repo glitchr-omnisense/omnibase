@@ -79,7 +79,6 @@ class Tooltip implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @param $icon
      * @return $this
      */
     public function setIcon($icon)

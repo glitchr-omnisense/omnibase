@@ -40,7 +40,6 @@ abstract class AbstractAction extends AbstractAttribute implements ActionInterfa
     }
 
     /**
-     * @param $value
      * @return $this
      */
     public function setValue($value): static

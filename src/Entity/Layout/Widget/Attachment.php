@@ -89,7 +89,6 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
     }
 
     /**
-     * @param $file
      * @return $this
      */
     public function setDownload($file)

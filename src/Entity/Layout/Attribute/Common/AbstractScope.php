@@ -55,7 +55,6 @@ abstract class AbstractScope extends AbstractAttribute implements ScopeInterface
     }
 
     /**
-     * @param $value
      * @return $this
      */
     public function setValue($value)

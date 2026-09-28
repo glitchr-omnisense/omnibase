@@ -96,9 +96,6 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return $this->__toLink() ?? "";
     }
 
-    /**
-     * @param $src
-     */
     public function __construct($src = null)
     {
         $this->crops = new ArrayCollection();
@@ -138,7 +135,6 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
 
     /**
-     * @param $source
      * @return $this
      */
     public function setSource($source): static
@@ -200,7 +196,6 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
     }
 
     /**
-     * @param $source
      * @return $this
      */
     public function set($source): self

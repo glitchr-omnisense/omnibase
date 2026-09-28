@@ -106,7 +106,6 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     }
 
     /**
-     * @param $icon
      * @return $this
      */
     public function setIcon($icon)

@@ -38,8 +38,6 @@ class Setting implements TranslatableInterface, IconizeInterface
 
     /**
      * @param string $path
-     * @param $value
-     * @param $locale
      * @throws \Exception
      */
     public function __construct(string $path, $value = null, $locale = null)

@@ -50,7 +50,6 @@ class AttributeIntl implements TranslationInterface
     }
 
     /**
-     * @param $value
      * @return $this
      */
     public function setValue($value)

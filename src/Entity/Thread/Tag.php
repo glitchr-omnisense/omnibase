@@ -136,7 +136,6 @@ class Tag implements TranslatableInterface, IconizeInterface, AliasInterface
     }
 
     /**
-     * @param $icon
      * @return $this
      */
     public function setIcon($icon)

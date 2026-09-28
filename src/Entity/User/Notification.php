@@ -384,7 +384,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     /**
      * @param string $key
-     * @param $value
      * @return $this
      */
     public function addContextKey(string $key, $value = null): self
@@ -471,7 +470,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     /**
      * @param string $key
-     * @param $value
      * @return $this
      */
     public function addHtmlParameter(string $key, $value)
@@ -528,7 +526,6 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     }
 
     /**
-     * @param $content
      * @param array $parameters
      * @param string $domain
      * @param string|null $locale

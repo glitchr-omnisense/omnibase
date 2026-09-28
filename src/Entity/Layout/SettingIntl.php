@@ -101,7 +101,6 @@ class SettingIntl implements TranslationInterface
     }
 
     /**
-     * @param $value
      * @return $this
      */
     public function setValue($value)

@@ -117,7 +117,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
-     * @param $other
      * @return bool
      */
     public function equals($other): bool
@@ -168,7 +167,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
-     * @param $role
      * @return bool
      * @throws Exception
      */
@@ -198,7 +196,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
-     * @param $id
      * @return $this
      */
     public function setId($id): self
@@ -240,7 +237,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
-     * @param $secret
      * @return $this
      */
     public function setTotpSecret($secret): self
@@ -387,7 +383,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
-     * @param $avatar
      * @return $this
      */
     public function setAvatar($avatar)
@@ -796,7 +791,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
-     * @param $type
      * @return Collection
      */
     public function getTokens($type = Token::ALL): Collection
@@ -833,7 +827,6 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
 
     /**
      * @param string $name
-     * @param $type
      * @return Token|null
      */
     public function getToken(string $name, $type = Token::ALL): ?Token
