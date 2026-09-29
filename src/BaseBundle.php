@@ -344,7 +344,12 @@ class BaseBundle extends AbstractBaseBundle
 
             // Set default time to UTC everywhere
             date_default_timezone_set($timezone);
-            Type::overrideType('date', DateTimeType::class);
+            // Instants are stored in UTC. A date is a calendar day with no time
+            // and no zone: Doctrine's own "date" type (DATE, Y-m-d). It was
+            // overridden with the UTC datetime too, which made a "date" field a
+            // DATETIME holding the visitor's midnight in UTC (15:00 the day
+            // before, for a visitor in Tokyo), and a real DATE column never
+            // compared equal to its mapping.
             Type::overrideType('datetime', DateTimeType::class);
             Type::overrideType('datetimetz', DateTimeType::class);
 
