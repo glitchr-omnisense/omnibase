@@ -16,19 +16,15 @@ class Referrer implements ReferrerInterface
     /** @var AdvancedRouterInterface */
     private AdvancedRouterInterface $router;
 
-    /** @var LocalizerInterface */
-    private LocalizerInterface $localizer;
-
     public function __toString(): string
     {
         return $this->getUrl() ?? "";
     }
 
-    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router, LocalizerInterface $localizer)
+    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router)
     {
         $this->requestStack = $requestStack;
         $this->router = $router;
-        $this->localizer = $localizer;
     }
 
     public function redirect(array $headers = []): RedirectResponse

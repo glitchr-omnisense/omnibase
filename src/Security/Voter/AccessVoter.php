@@ -8,14 +8,11 @@ use Base\Service\MaintenanceProviderInterface;
 use Base\Service\launcherInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Referrer;
-use Base\Service\SettingBagInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
-use Symfony\Component\Security\Http\FirewallMapInterface;
 
 class AccessVoter extends Voter
 {
@@ -28,10 +25,6 @@ class AccessVoter extends Voter
     public const     ADMIN_ACCESS = "ADMIN_ACCESS";
 
     /**
-     * @var RequestStack
-     * */
-    protected RequestStack $requestStack;
-    /**
      * @var RouterInterface
      * */
     protected RouterInterface $router;
@@ -43,14 +36,6 @@ class AccessVoter extends Voter
      * @var LocalizerInterface
      * */
     protected LocalizerInterface $localizer;
-    /**
-     * @var SettingBagInterface
-     * */
-    protected SettingBagInterface $settingBag;
-    /**
-     * @var FirewallMapInterface
-     * */
-    protected FirewallMapInterface $firewallMap;
     /**
      * @var MaintenanceProviderInterface
      * */
@@ -68,13 +53,10 @@ class AccessVoter extends Voter
     private ?bool $publicAccessCache = null;
     private ?FirewallConfig $currentFirewallCache = null;
 
-    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, FirewallMapInterface $firewallMap, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, LauncherInterface $launcher)
+    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, MaintenanceProviderInterface $maintenanceProvider, LauncherInterface $launcher)
     {
-        $this->requestStack = $requestStack;
         $this->router = $router;
-        $this->settingBag = $settingBag;
         $this->parameterBag = $parameterBag;
-        $this->firewallMap = $firewallMap;
         $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->launcher = $launcher;

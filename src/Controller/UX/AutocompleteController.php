@@ -11,7 +11,6 @@ use Base\Service\PaginatorInterface;
 use Base\Service\TradingInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
-use Exchanger\Exception\ChainException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Attribute\Route;
@@ -223,19 +222,22 @@ class AutocompleteController extends AbstractController
             return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
-        try {
-            $rate = $this->tradingMarket->getLatest($source, $target);
-        } catch (ChainException $e) {
-            return new JsonResponse("Invalid request", 500);
+        // The stored rates only: a visitor's request never spends the
+        // provider's quota, whether the application's Trading is live or not.
+        $source = strtoupper($source);
+        $target = strtoupper($target);
+
+        $rate = $this->tradingMarket->getFallback($source, $target);
+        if (!$rate) {
+            return new JsonResponse("No rate stored for " . $source . "/" . $target, 404);
         }
 
-        $array = [
+        return new JsonResponse([
             "source" => $source,
             "target" => $target,
-            "rate" => $rate
-        ];
-
-        return new JsonResponse($array);
+            "rate" => $rate->getValue(),
+            "date" => $rate->getDate()->format(DATE_ATOM),
+        ]);
     }
 
 

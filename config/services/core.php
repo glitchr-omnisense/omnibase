@@ -35,7 +35,6 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service('request_stack'),
             service('advanced_router'),
-            service('localizer'),
         ]);
 
     // Analytics (page views + visitor/user unique counters)
@@ -103,9 +102,9 @@ return static function (ContainerConfigurator $container): void {
 
     // Subscribers
     $subscribers = [
-        'Base\Subscriber\RouterSubscriber' => ['security.authorization_checker', 'advanced_router', 'parameter_bag', 'setting_bag'],
+        'Base\Subscriber\RouterSubscriber' => ['security.authorization_checker', 'advanced_router', 'parameter_bag'],
         'Base\Subscriber\ProfilerSubscriber' => ['advanced_router'],
-        'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router', '$publicDir' => '%kernel.project_dir%/public'],
+        'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router'],
         'Base\Subscriber\HotParameterBagSubscriber' => ['parameter_bag', 'setting_bag'],
         'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', 'ga.service'],
         'Base\Subscriber\PageViewSubscriber' => ['Base\Service\Analytics', 'Symfony\Bundle\SecurityBundle\Security', '$excludedPrefixes' => ['/admin', '/_', '/api']],
@@ -171,7 +170,6 @@ return static function (ContainerConfigurator $container): void {
             service('doctrine.orm.entity_manager'),
             service('Base\Repository\Layout\SettingRepository'),
             service('localizer'),
-            service('assets.packages'),
             service('cache.adapter'),
         ])
         ->bind('$environment', '%kernel.environment%');

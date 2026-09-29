@@ -3,7 +3,6 @@
 namespace Base\Subscriber;
 
 use Base\Service\ParameterBagInterface;
-use Base\Service\SettingBagInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -30,17 +29,11 @@ class RouterSubscriber implements EventSubscriberInterface
      */
     protected ParameterBagInterface $parameterBag;
 
-    /**
-     * @var SettingBagInterface
-     */
-    protected SettingBagInterface $settingBag;
-
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, RouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->router = $router;
         $this->parameterBag = $parameterBag;
-        $this->settingBag = $settingBag;
     }
 
     /**

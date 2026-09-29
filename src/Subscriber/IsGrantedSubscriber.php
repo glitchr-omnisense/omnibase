@@ -10,7 +10,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -31,12 +30,9 @@ class IsGrantedSubscriber implements EventSubscriberInterface
      */
     private AttributeReader $attributeReader;
 
-    private TokenStorageInterface $tokenStorage;
-
-    public function __construct(AttributeReader $attributeReader, TokenStorageInterface $tokenStorage, ?AuthorizationCheckerInterface $authorizationChecker = null)
+    public function __construct(AttributeReader $attributeReader, ?AuthorizationCheckerInterface $authorizationChecker = null)
     {
         $this->authorizationChecker = $authorizationChecker;
-        $this->tokenStorage = $tokenStorage;
         $this->attributeReader = $attributeReader;
     }
 

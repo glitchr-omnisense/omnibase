@@ -7,7 +7,6 @@ use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Repository\Layout\SettingRepository;
 use Psr\Cache\CacheItemInterface;
-use Symfony\Component\Asset\Packages;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
@@ -19,11 +18,6 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class SettingBag implements SettingBagInterface, CacheWarmerInterface
 {
-    /**
-     * @var Packages
-     */
-    protected Packages $packages;
-
     /**
      * @var EntityManagerInterface
      */
@@ -103,7 +97,7 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
         return true;
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, Packages $packages, CacheInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, CacheInterface $cache, string $environment)
     {
         $this->parameterBag = $parameterBag;
         $this->entityManager = $entityManager;
@@ -113,7 +107,6 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
         $this->cacheName = "setting_bag." . hash('md5', self::class);
         // Defer cache item fetch to first use (lazy loading)
 
-        $this->packages = $packages;
         $this->localizer = $localizer;
         $this->environment = $environment;
     }

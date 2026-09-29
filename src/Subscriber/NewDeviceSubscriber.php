@@ -71,7 +71,7 @@ class NewDeviceSubscriber implements EventSubscriberInterface
         }
 
         // Nothing to compare a first-ever sign-in against.
-        if (count($this->connectionRepository->findBy(['user' => $user])) < 2) {
+        if ($this->connectionRepository->countFor($user) < 2) {
             return;
         }
 

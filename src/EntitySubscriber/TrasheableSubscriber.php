@@ -62,7 +62,6 @@ class TrasheableSubscriber
     protected array $evictions = [];
 
     public function __construct(
-        protected EntityManagerInterface $entityManager,
         protected string $emptyTrash = "+7 days",
     ) {
     }

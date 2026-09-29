@@ -252,11 +252,8 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
     $services->set('Base\Security\Voter\AccessVoter')
         ->tag('security.voter')
         ->args([
-            new Reference('request_stack'),
             new Reference('advanced_router'),
-            new Reference('setting_bag'),
             new Reference('parameter_bag'),
-            new Reference('security.firewall.map'),
             new Reference('localizer'),
             new Reference('base.service.maintenance'),
             new Reference('base.service.launcher')

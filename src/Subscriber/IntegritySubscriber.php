@@ -22,7 +22,6 @@ use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use ErrorException;
 use InvalidArgumentException;
@@ -54,11 +53,6 @@ class IntegritySubscriber implements EventSubscriberInterface
     protected RequestStack $requestStack;
 
     /**
-     * @var TranslatorInterface
-     */
-    protected TranslatorInterface $translator;
-
-    /**
      * @var AdvancedRouterInterface
      */
     protected AdvancedRouterInterface $router;
@@ -83,11 +77,10 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     protected Process $clearProcess;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, AdvancedRouterInterface $router, ReferrerInterface $referrer, string $projectDir, ?string $secret = null)
+    public function __construct(TokenStorageInterface $tokenStorage, RequestStack $requestStack, ManagerRegistry $doctrine, AdvancedRouterInterface $router, ReferrerInterface $referrer, string $projectDir, ?string $secret = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
-        $this->translator = $translator;
         $this->doctrine = $doctrine;
         $this->router = $router;
         $this->referrer = $referrer;

@@ -15,6 +15,11 @@ interface TradingInterface
 
     public function getLatest(string $source, string $target, array $options = []): ?ExchangeRate;
 
+    /** Whether get()/getLatest() ask the providers when the options do not say ("use_swap"). */
+    public function isLive(): bool;
+
+    public function setLive(bool $live): static;
+
     //public function refresh(): bool; // not satisfying way to refresh cache from swap found.. imo
 
     public function convert(string|float $cash, string $source, string $target, array $options = [], string $timeAgo = "now"): ?float;

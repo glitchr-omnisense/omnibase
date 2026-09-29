@@ -34,7 +34,17 @@ class Trading implements TradingInterface
      */
     protected $simpleCache;
 
-    public function __construct(HttpClientInterface $httpClient, string $cacheDir, ?string $buildDir = null)
+    /**
+     * @param bool $live whether a call that does not say otherwise ("use_swap")
+     *                   may ask the providers. On by default; an application on
+     *                   a provider's free plan (a hundred requests a month,
+     *                   which a visitor's page views would spend in a day) sets
+     *                   BASE_TRADING_LIVE=0: the stored rates, laid in as
+     *                   fallbacks, then answer, and whoever refreshes them (an
+     *                   administrator's action, a command) passes
+     *                   ['use_swap' => true].
+     */
+    public function __construct(HttpClientInterface $httpClient, string $cacheDir, protected bool $live = true)
     {
         $this->httpClient = new Psr18Client($httpClient);
         $this->simpleCache = new Psr16Cache(new FilesystemAdapter("swap", 0, $cacheDir));
@@ -169,7 +179,8 @@ class Trading implements TradingInterface
             $builder->add($provider->getName(), $provider->getOptions());
         }
 
-        if (!array_key_exists("", $this->options)) {
+        // An hour unless setCacheTTL() already chose another lifetime.
+        if (!array_key_exists("cache_ttl", $this->options)) {
             $this->setCacheTTL(3600);
         }
 
@@ -185,13 +196,37 @@ class Trading implements TradingInterface
         $this->options["cache_ttl"] = $ttl;
     }
 
+    public function isLive(): bool
+    {
+        return $this->live;
+    }
+
+    public function setLive(bool $live): static
+    {
+        $this->live = $live;
+        return $this;
+    }
+
+    /**
+     * The options for Swap, or null when the providers are not to be asked:
+     * offline, or none has a key. build() is only called when going online,
+     * as reading the providers' keys reads the settings.
+     */
+    protected function swapOptions(array $options): ?array
+    {
+        $options["use_swap"] ??= $this->live;
+        if (!$options["use_swap"] || !$this->build()) {
+            return null;
+        }
+
+        // After build(), which sets the default cache lifetime.
+        return array_merge($this->options, $options);
+    }
+
     public function getLatest(string $source, string $target, array $options = []): ?ExchangeRate
     {
-        $options = array_merge($this->options, $options);
-        $options["use_swap"] ??= true;
-        $options["use_swap"] &= $this->build();
-
-        if (!$options["use_swap"]) {
+        $options = $this->swapOptions($options);
+        if ($options === null) {
             return $this->getFallback($source, $target);
         }
 
@@ -208,11 +243,8 @@ class Trading implements TradingInterface
             return $this->getLatest($from, $to, $options);
         }
 
-        $options = array_merge($this->options, $options);
-        $options["use_swap"] ??= true;
-        $options["use_swap"] &= $this->build();
-
-        if (!$options["use_swap"]) {
+        $options = $this->swapOptions($options);
+        if ($options === null) {
             return null;
         }
 

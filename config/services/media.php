@@ -146,7 +146,6 @@ return static function (ContainerConfigurator $container): void {
         ->tag('doctrine.event_listener', ['event' => 'onFlush',   'priority' => 1024])
         ->tag('doctrine.event_listener', ['event' => 'postFlush', 'priority' => 1024])
         ->args([
-            new Reference('doctrine.orm.entity_manager'),
             '%base.extension.empty_trash%',
         ]);
 
@@ -375,9 +374,15 @@ return static function (ContainerConfigurator $container): void {
     * Trading & Currency
     * ------------------------------*/
 
+    // Live unless the application says otherwise: BASE_TRADING_LIVE=0 keeps
+    // every rate to the stored ones but for the calls that ask for the
+    // providers (a free plan's monthly quota is spent otherwise).
+    $container->parameters()->set('env(BASE_TRADING_LIVE)', 'true');
+
     $services->set('Base\Service\Trading')
         ->args([new Reference('http_client')])
-        ->bind('$cacheDir', '%kernel.cache_dir%');
+        ->bind('$cacheDir', '%kernel.cache_dir%')
+        ->bind('$live', '%env(bool:BASE_TRADING_LIVE)%');
 
     $services->set('Base\Service\Model\Currency\AbstractCurrencyApi')
         ->args([new Reference('setting_bag')]);

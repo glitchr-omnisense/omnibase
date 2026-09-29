@@ -4,7 +4,6 @@ namespace Tests\Base\Subscriber;
 
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Service\SettingBagInterface;
 use Base\Subscriber\RouterSubscriber;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
@@ -61,14 +60,12 @@ class RouterSubscriberTest extends TestCase
     private function makeSubscriber(
         AdvancedRouterInterface $router,
         ?AuthorizationCheckerInterface $authorizationChecker = null,
-        ?ParameterBagInterface $parameterBag = null,
-        ?SettingBagInterface $settingBag = null
+        ?ParameterBagInterface $parameterBag = null
     ): RouterSubscriber {
         return new RouterSubscriber(
             $authorizationChecker ?? $this->createMock(AuthorizationCheckerInterface::class),
             $router,
-            $parameterBag ?? $this->createMock(ParameterBagInterface::class),
-            $settingBag ?? $this->createMock(SettingBagInterface::class)
+            $parameterBag ?? $this->createMock(ParameterBagInterface::class)
         );
     }
 

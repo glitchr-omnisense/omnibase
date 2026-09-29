@@ -42,12 +42,10 @@ class TwigSubscriber implements EventSubscriberInterface
      */
     protected $authorizationChecker;
 
-    /** * @var string */
-    protected string $publicDir;
     /** * @var bool */
     protected ?bool $autoAppend;
 
-    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, AdvancedRouterInterface $router, string $publicDir)
+    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, AdvancedRouterInterface $router)
     {
         $this->webpackTagRenderer = $webpackTagRenderer;
 
@@ -57,7 +55,6 @@ class TwigSubscriber implements EventSubscriberInterface
         $this->router = $router;
         $this->authorizationChecker = $authorizationChecker;
 
-        $this->publicDir = $publicDir;
         $this->autoAppend = $this->parameterBag->get("base.twig.autoappend");
     }
 

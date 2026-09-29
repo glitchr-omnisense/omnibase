@@ -196,7 +196,6 @@ return static function (ContainerConfigurator $container): void {
         'Base\Subscriber\IsGrantedSubscriber' => [
             'args' => [
                 new Reference('base.attribute_reader'),
-                new Reference('security.token_storage'),
                 new Reference('security.authorization_checker', ContainerInterface::NULL_ON_INVALID_REFERENCE)
             ]
         ],

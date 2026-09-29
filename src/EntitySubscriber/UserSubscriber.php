@@ -10,7 +10,6 @@ use Base\Entity\User\Token;
 use Base\EntityDispatcher\Event\UserEvent;
 use Base\Notifier\NotifierInterface;
 use Base\Routing\AdvancedRouterInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -28,18 +27,12 @@ class UserSubscriber implements EventSubscriberInterface
     protected $tokenStorage;
 
     /**
-     * @var EntityManager
-     */
-    protected $entityManager;
-
-    /**
      * @var NotifierInterface
      */
     protected $notifier;
 
-    public function __construct(NotifierInterface $notifier, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, AdvancedRouterInterface $router)
+    public function __construct(NotifierInterface $notifier, TokenStorageInterface $tokenStorage, AdvancedRouterInterface $router)
     {
-        $this->entityManager = $entityManager;
         $this->router = $router;
         $this->tokenStorage = $tokenStorage;
         $this->notifier = $notifier;

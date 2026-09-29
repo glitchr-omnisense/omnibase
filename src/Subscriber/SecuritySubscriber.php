@@ -288,7 +288,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
 
-            $this->userRepository->flush(false);
+            // Nothing to write: the kick is lifted by the next sign-in (LoginFormAuthenticator).
             $event->stopPropagation();
 
             return;
