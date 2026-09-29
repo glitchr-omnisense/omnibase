@@ -1200,6 +1200,21 @@ class ServiceEntityParser
      * @return Andx|Comparison|Func|Orx|string
      * @throws EntityNotFoundException
      */
+    /**
+     * The mapped type to bind a date or time criterion with. Untyped, Doctrine
+     * guesses "datetime" for any DateTime and sends the moment (in UTC), which
+     * a DATE or TIME column never equals: findOneBy(['day' => $today]) found
+     * nothing. Other values keep Doctrine's own inference.
+     */
+    protected function dateTypeOf(string $fieldHead, mixed $fieldValue): ?string
+    {
+        if (!$fieldValue instanceof \DateTimeInterface || !$this->classMetadata->hasField($fieldHead)) {
+            return null;
+        }
+
+        return $this->classMetadata->getTypeOfField($fieldHead);
+    }
+
     protected function buildQueryExpr(QueryBuilder $queryBuilder, $field, $fieldValue)
     {
         $fieldID = str_replace(".", "_", implode("_", $field));
@@ -1583,7 +1598,7 @@ class ServiceEntityParser
                         }
 
                         if(!$isEmpty && !$isNotEmpty && !$isBool) {
-                            $queryBuilder->setParameter($fieldID, $fieldValue);
+                            $queryBuilder->setParameter($fieldID, $fieldValue, $this->dateTypeOf($fieldHead, $fieldValue));
                         }
                     } else {
 
@@ -1605,7 +1620,7 @@ class ServiceEntityParser
                 }
 
             } elseif (!$isEmpty && !$isNotEmpty && !$isBool) {
-                $queryBuilder->setParameter($fieldID, $fieldValue);
+                $queryBuilder->setParameter($fieldID, $fieldValue, $this->dateTypeOf($fieldHead, $fieldValue));
             }
             
             if ($isInsensitive) {

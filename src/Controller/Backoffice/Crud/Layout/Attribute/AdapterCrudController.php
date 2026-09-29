@@ -2,6 +2,8 @@
 
 namespace Base\Controller\Backoffice\Crud\Layout\Attribute;
 
+use Base\Admin\Config\Action;
+use Base\Admin\Config\Actions;
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Admin\Filter\Filters;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
@@ -14,8 +16,8 @@ use Base\Field\TranslationField;
  * Every attribute adapter - the definitions behind scopes, rules, actions
  * and plain attributes ("scope-region", "rule-cart-total", a barcode
  * standard...): their code, icon and label. Each kind is created from its
- * own CRUD, which knows its settings (the list's "new" offers those kinds);
- * this list renames and re-icons them, and keeps those attributes still use.
+ * own CRUD, which knows its settings; this list renames and re-icons them,
+ * and keeps those attributes still use.
  */
 class AdapterCrudController extends AbstractCrudController
 {
@@ -27,6 +29,14 @@ class AdapterCrudController extends AbstractCrudController
     public static function getPreferredIcon(): ?string
     {
         return 'fa-solid fa-plug';
+    }
+
+    /** Nothing is created here: each kind has its own CRUD, which knows its settings. */
+    public function configureActions(Actions $actions): Actions
+    {
+        $actions = parent::configureActions($actions);
+
+        return AbstractAdapter::class === static::getEntityFqcn() ? $actions->disable(Action::NEW) : $actions;
     }
 
     public function isDeletable(object $entity): bool
