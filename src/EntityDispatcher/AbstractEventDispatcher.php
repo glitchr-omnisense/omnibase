@@ -14,17 +14,25 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDi
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-abstract class AbstractEventDispatcher implements EventDispatcherInterface
+abstract class AbstractEventDispatcher implements EventDispatcherInterface, ResetInterface
 {
     protected array $events;
 
     /**
-     * Listeners of the events dispatched after a write may change entities:
-     * they are flushed once the current flush is over (postFlush), never from
-     * inside it - a flush within postPersist/postUpdate is forbidden by
-     * Doctrine, and it wrote the second-level cache of entities whose
-     * uploads were not stored yet (a File cannot be serialized).
+     * Listeners of the events dispatched after a write may change entities.
+     * Those changes are flushed once the flush that raised the events is
+     * completely over - by flushPending(), when the response goes out, a
+     * command ends, a message is handled (EntityDispatcherFlushSubscriber) -
+     * and never from inside it:
+     *  - not in postPersist/postUpdate: Doctrine forbids it, and it wrote the
+     *    second-level cache of entities whose uploads were not stored yet;
+     *  - not in postFlush either: Doctrine fires it before it clears the
+     *    flush's schedules, so a flush there ran the outer flush's collection
+     *    deletions a second time, with nothing to insert back - a form that
+     *    rewrote a ManyToMany (a thread's tags) lost its rows.
+     * A flush the application makes later in the request takes them along.
      */
     protected bool $flushPending = false;
     protected bool $flushing = false;
@@ -127,19 +135,43 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         }
     }
 
+    /** Nothing is flushed here any more: see $flushPending. */
     public function postFlush(PostFlushEventArgs $event): void
     {
-        if (!$this->flushPending || $this->flushing) {
-            return;
-        }
+    }
 
-        $this->flushPending = false;
-        $this->flushing = true;
-        try {
-            $event->getObjectManager()->flush();
-        } finally {
-            $this->flushing = false;
+    /**
+     * What the listeners changed, flushed - outside any flush. A flush may
+     * raise events again, whose listeners change more: a few rounds at most.
+     */
+    public function flushPending(): void
+    {
+        for ($round = 0; $this->flushPending && !$this->flushing && $round < 5; ++$round) {
+            if (!$this->entityManager->isOpen()) {
+                $this->flushPending = false;
+
+                return;
+            }
+
+            $this->flushPending = false;
+            $this->flushing = true;
+            try {
+                $this->entityManager->flush();
+            } finally {
+                $this->flushing = false;
+            }
         }
+    }
+
+    /**
+     * Keyed by spl_object_id, which PHP gives again to a new object once the
+     * old one is gone: in a worker, a message's entity inherited the events
+     * (or the "already sent" mark) of an earlier one's.
+     */
+    public function reset(): void
+    {
+        $this->events = [];
+        $this->flushPending = false;
     }
 
     /**

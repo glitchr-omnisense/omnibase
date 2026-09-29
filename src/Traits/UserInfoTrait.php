@@ -16,11 +16,20 @@ trait UserInfoTrait
     public static function getCookie(?string $key = null)
     {
         $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
-        if (array_key_exists("timezone", $cookie)) {
-            $timezone = Timezones::getCountryCode($cookie["timezone"]);
-            if (!array_key_exists("country", $cookie) || $timezone != $cookie["country"]) {
-                $cookie["country"] = Timezones::getCountryCode($cookie["timezone"]);
-                static::setCookie("country", $cookie["country"]);
+        // The browser's zone, as its country: not every zone has one ("UTC",
+        // "Etc/UTC" - what Tor Browser, Firefox resisting fingerprinting and
+        // many containers report), and Timezones::getCountryCode() throws for
+        // those: an exception on every page for these visitors.
+        $timezone = $cookie["timezone"] ?? null;
+        if (is_string($timezone) && Timezones::exists($timezone)) {
+            try {
+                $country = Timezones::getCountryCode($timezone);
+            } catch (\Throwable) {
+                $country = null;
+            }
+            if (null !== $country && (!array_key_exists("country", $cookie) || $country != $cookie["country"])) {
+                $cookie["country"] = $country;
+                static::setCookie("country", $country);
             }
         }
 

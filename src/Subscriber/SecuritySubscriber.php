@@ -446,8 +446,11 @@ class SecuritySubscriber implements EventSubscriberInterface
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
 
-        if ($user instanceof User) { // Just to remember username.. after logout & first redirection
-            $this->requestStack->getSession()?->set("_user", $user);
+        // Who just left, for the logout page's message - by id: the entity
+        // itself in the session came back detached, and what the page changed
+        // on it (the kick cleared, expired tokens removed) was lost.
+        if ($user instanceof User && $user->getId()) {
+            $this->requestStack->getSession()?->set("_user", $user->getId());
         }
 
         $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_ROUTE);

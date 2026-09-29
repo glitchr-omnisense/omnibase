@@ -206,9 +206,14 @@ class IntlSubscriber
                     $translatable->removeTranslation($entity);
                 }
 
-                $this->entityManager->detach($entity);
-                if ($this->entityManager->contains($entity)) {
-                    $this->entityManager->remove($entity);
+                // A saved one is deleted - it was detached first, so the remove()
+                // after it never ran: the emptied value kept its row and came
+                // back on the next load. In onFlush, through the unit of work.
+                // A new one is only forgotten.
+                if ($entity->getId()) {
+                    $uow->scheduleForDelete($entity);
+                } else {
+                    $this->entityManager->detach($entity);
                 }
 
             } else {

@@ -52,7 +52,10 @@ class ConnectionSubscriber implements EventSubscriberInterface
         $user = $passport->getUser();
         if (!$user instanceof User) return;
 
-        $this->userTracker->getCurrentConnection($user);
+        // Looked up, not created: the credentials are not checked yet, and a
+        // row per attempt was made (and flushed) before they were. A failure
+        // is recorded by onLoginFailure, a success by onLoginSuccess.
+        $this->userTracker->getCurrentConnection($user, false);
     }
 
     public function onLoginFailure(LoginFailureEvent $event)

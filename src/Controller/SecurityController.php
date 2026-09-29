@@ -180,8 +180,11 @@ class SecurityController extends AbstractController
         }
 
         // Check if the session is found.. meaning, the user just logged out
-        if ($request->getSession()?->has("_user")) {
-            $user = $request->getSession()?->remove("_user");
+        $left = $request->getSession()?->remove("_user");
+        // An id (SecuritySubscriber::onLogout); an older session may still hold the entity.
+        $user = is_object($left) && method_exists($left, "getId") ? $left->getId() : $left;
+        $user = is_scalar($user) ? $this->userRepository->find($user) : null;
+        if ($user) {
             if ($user->isKicked()) {
 
                 $notification = new Notification("kickout", [$user]);
@@ -197,6 +200,7 @@ class SecurityController extends AbstractController
 
             // Remove expired tokens
             $user->removeExpiredTokens();
+            $this->entityManager->flush();
         }
 
         $returnUrl = $referrer->getUrl() ?? $this->router->getUrlIndex();

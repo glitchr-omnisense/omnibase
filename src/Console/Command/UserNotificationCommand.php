@@ -72,10 +72,12 @@ class UserNotificationCommand extends Command
         if ($actionClear && $nbNotifications_toErase) {
             $output->section()->writeln('<warning>These notifications are now erased..</warning>');
 
-            foreach ($notifications as $notification) {
+            // The expired read ones only - it erased every notification,
+            // unread included - and one flush for all.
+            foreach ($notifications_toErase as $notification) {
                 $this->entityManager->remove($notification);
-                $this->entityManager->flush();
             }
+            $this->entityManager->flush();
         }
 
         return Command::SUCCESS;

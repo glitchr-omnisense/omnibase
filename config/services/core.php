@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service_closure;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -90,6 +91,16 @@ return static function (ContainerConfigurator $container): void {
         }
     }
 
+    // The editor's endpoints (uploads, mentions, autosave, collab ticket):
+    // never registered either - constructor arguments, no service - so every
+    // /ux/editorjs/* answered 500, the editor's uploads and autosave included.
+    // Autowired: its arguments are all typed.
+    $services->set('Base\Controller\UX\EditorController')
+        ->autowire()
+        ->tag('controller.service_arguments')
+        ->tag('container.service_subscriber')
+        ->call('setContainer', [service('Psr\Container\ContainerInterface')]);
+
     // Subscribers
     $subscribers = [
         'Base\Subscriber\RouterSubscriber' => ['security.authorization_checker', 'advanced_router', 'parameter_bag', 'setting_bag'],
@@ -116,6 +127,10 @@ return static function (ContainerConfigurator $container): void {
     // worker mode, messenger consumers). Both tags on purpose: kernel.reset never
     // runs on a cloned kernel, kernel.request never runs between messenger
     // messages - see the class docblock.
+    $services->set('Base\Subscriber\EntityDispatcherFlushSubscriber')
+        ->args([tagged_iterator('base.entity_dispatcher')])
+        ->tag('kernel.event_subscriber');
+
     $services->set('Base\Subscriber\RequestScopedStateSubscriber')
         ->tag('kernel.event_subscriber')
         ->tag('kernel.reset', ['method' => 'reset']);

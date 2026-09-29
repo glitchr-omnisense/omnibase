@@ -484,14 +484,16 @@ class EditorController extends AbstractController
     {
         $vars = json_decode($request->getContent(), true) ?? [];
 
-        $token = $vars["token"] ?? null;
-        if (!$token || !$this->isCsrfTokenValid("editorjs", $token)) {
-            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 403);
+        $room = $vars["room"] ?? null;
+        if (!is_string($room) || '' === $room) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Missing room."], 400);
         }
 
-        $room = $vars["room"] ?? null;
-        if (!$room) {
-            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Missing room."], 400);
+        // The room's own token, handed out with its field's form: a ticket for
+        // this room only (see Autosave()).
+        $token = $vars["token"] ?? null;
+        if (!is_string($token) || !$this->isCsrfTokenValid($this->roomResolver->tokenId($room), $token)) {
+            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 403);
         }
 
         $user = $this->getUser();
@@ -553,17 +555,6 @@ class EditorController extends AbstractController
     {
         $vars = json_decode($request->getContent(), true) ?? [];
 
-        $token = $vars["token"] ?? null;
-        $serviceToken = $vars["serviceToken"] ?? null;
-        $room = $vars["room"] ?? null;
-
-        $authorized = ($token && $this->isCsrfTokenValid("editorjs", $token))
-            || ($serviceToken && $room && $this->ticketFactory->verifyServiceToken($serviceToken, $room));
-
-        if (!$authorized) {
-            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 403);
-        }
-
         $fqcn        = $vars["fqcn"]        ?? null;
         $id          = $vars["id"]          ?? null;
         $field       = $vars["field"]       ?? null;
@@ -571,7 +562,26 @@ class EditorController extends AbstractController
         $value       = $vars["value"]       ?? null;
         $baseVersion = $vars["baseVersion"] ?? null;
 
-        if (!$fqcn || !$id || !$field || !class_exists($fqcn)) {
+        if (!is_string($fqcn) || !is_scalar($id) || !is_string($field) || (null !== $locale && !is_string($locale))) {
+            return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Invalid autosave target."], 400);
+        }
+
+        // The target's own room: its token was handed out with the form of
+        // that one field (EditorType, FormTypeCollabExtension). The
+        // session-wide "editorjs" token wrote any field of any entity.
+        $room = $this->roomResolver->buildRoom($fqcn, $id, $field, $locale);
+        $token = $vars["token"] ?? null;
+        $serviceToken = $vars["serviceToken"] ?? null;
+
+        $authorized = (is_string($token) && $this->isCsrfTokenValid($this->roomResolver->tokenId($room), $token))
+            // The relay's save: for the room it names, and that room must be this target.
+            || (is_string($serviceToken) && ($vars["room"] ?? null) === $room && $this->ticketFactory->verifyServiceToken($serviceToken, $room));
+
+        if (!$authorized) {
+            return new JsonResponse(["success" => self::STATUS_NOTOKEN, "error" => $this->translator->trans("editor.error.invalid_token", [], "fields")], 403);
+        }
+
+        if (!class_exists($fqcn)) {
             return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Invalid autosave target."], 400);
         }
 

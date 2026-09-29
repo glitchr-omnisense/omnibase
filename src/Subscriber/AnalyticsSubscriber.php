@@ -122,6 +122,13 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
     public function onGoogleAnalyticsRequest(RequestEvent $event)
     {
+        // The figures are the back office's: asked of Google (a remote API)
+        // on its main requests only - it was every request, sub-requests and
+        // the profiler's included, whenever Analytics was set up.
+        if (!$event->isMainRequest() || $this->router->isProfiler() || !$this->router->isAdmin()) {
+            return;
+        }
+
         if (isset($this->gaService) && $this->gaService->isEnabled()) {
             $googleAnalytics = $this->gaService->getBasics();
 

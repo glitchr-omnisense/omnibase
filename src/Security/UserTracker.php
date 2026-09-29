@@ -70,11 +70,7 @@ class UserTracker
     public function createNewConnection(User $user): Connection
     {
         $connection = new Connection($this->getUniqid(), $user);
-        $connection->addIp(User::getIp());
-        $connection->setAgent(User::getAgent());
-        $connection->setLocale($user->getLocale());
-        $connection->addHostname($this->router->getHost());
-        $connection->addTimezone($user->getTimezone());
+        $this->describe($connection, $user);
 
         $this->entityManager->persist($connection);
         $this->entityManager->flush();
@@ -82,16 +78,51 @@ class UserTracker
         return $connection;
     }
 
+    /**
+     * On every authenticated request (UserProvider::refreshUser): flushed
+     * only when the connection is new or something about it changed - it
+     * flushed the whole unit of work on every request, before the controller
+     * had even run.
+     */
     public function updateConnection(User $user)
     {
-        $connection = $this->getCurrentConnection($user);
-        
-        $connection->addIp(User::getIp());
-        $connection->setAgent(User::getAgent());
-        $connection->setLocale($user->getLocale());
+        $connection = $this->getCurrentConnection($user, false);
+        if (!$connection) {
+            $this->getCurrentConnection($user);
+
+            return;
+        }
+
+        $before = $this->fingerprint($connection);
+        $this->describe($connection, $user);
+        if ($this->fingerprint($connection) !== $before) {
+            $this->entityManager->flush();
+        }
+    }
+
+    /**
+     * Where from, with what: the request's IP, agent, host, the user's locale
+     * and timezone - each only when there is one. A request without a
+     * User-Agent (a monitor, curl) or without an address (a worker) got a
+     * TypeError, a 500 on every page.
+     */
+    protected function describe(Connection $connection, User $user): void
+    {
+        if (is_string($ip = User::getIp()) && '' !== $ip) {
+            $connection->addIp($ip);
+        }
+        if (is_string($agent = User::getAgent()) && '' !== $agent) {
+            $connection->setAgent($agent);
+        }
+        if (is_string($locale = $user->getLocale()) && '' !== $locale) {
+            $connection->setLocale($locale);
+        }
         $connection->addHostname($this->router->getHost());
         $connection->addTimezone($user->getTimezone());
+    }
 
-        $this->entityManager->flush();
+    protected function fingerprint(Connection $connection): string
+    {
+        return serialize([$connection->getIpList(), $connection->getAgent(), $connection->getLocale(), $connection->getHostnames(), $connection->getTimezones()]);
     }
 }

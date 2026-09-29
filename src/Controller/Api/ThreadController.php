@@ -10,9 +10,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\TranslatorInterface;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -48,9 +50,12 @@ class ThreadController extends AbstractController
         $this->likeRepository = $likeRepository;
     }
 
-    #[Route("/thread/{slug}/publish", name:"thread_publish")]
-    public function Publish(string $slug): Response
+    #[Route("/thread/{slug}/publish", name:"thread_publish", methods: ["POST"])]
+    public function Publish(Request $request, string $slug): Response
     {
+        if ($denied = $this->denied($request)) {
+            return $denied;
+        }
         $thread = $this->threadRepository->cacheOneBySlug($slug);
         if (!$this->isGranted('ROLE_ADMIN')) {
 
@@ -63,7 +68,7 @@ class ThreadController extends AbstractController
         if (!$thread) throw new NotFoundHttpException();
 
         $thread->setState(ThreadState::PUBLISH);
-        $this->threadRepository->flush();
+        $this->entityManager->flush();
 
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
@@ -71,9 +76,12 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    #[Route("/thread/{slug}/hide", name:"thread_hide")]
-    public function Hide(string $slug): Response
+    #[Route("/thread/{slug}/hide", name:"thread_hide", methods: ["POST"])]
+    public function Hide(Request $request, string $slug): Response
     {
+        if ($denied = $this->denied($request)) {
+            return $denied;
+        }
         $thread = $this->threadRepository->cacheOneBySlug($slug);
         if (!$this->isGranted('ROLE_ADMIN')) {
 
@@ -86,7 +94,7 @@ class ThreadController extends AbstractController
         if (!$thread) throw new NotFoundHttpException();
 
         $thread->setState(ThreadState::SECRET);
-        $this->threadRepository->flush();
+        $this->entityManager->flush();
 
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
@@ -94,9 +102,12 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    #[Route("/thread/{slug}/follow", name:"thread_follow")]
-    public function Follow(string $slug): Response
+    #[Route("/thread/{slug}/follow", name:"thread_follow", methods: ["POST"])]
+    public function Follow(Request $request, string $slug): Response
     {
+        if ($denied = $this->denied($request)) {
+            return $denied;
+        }
         $thread = $this->threadRepository->cacheOneBySlug($slug);
         if (!$this->isGranted('ROLE_USER')) {
 
@@ -117,9 +128,12 @@ class ThreadController extends AbstractController
         ]));
     }
 
-    #[Route("/thread/{slug}/unfollow", name:"thread_unfollow")]
-    public function Unfollow(string $slug): Response
+    #[Route("/thread/{slug}/unfollow", name:"thread_unfollow", methods: ["POST"])]
+    public function Unfollow(Request $request, string $slug): Response
     {
+        if ($denied = $this->denied($request)) {
+            return $denied;
+        }
         $thread = $this->threadRepository->cacheOneBySlug($slug);
         if (!$this->isGranted('ROLE_USER')) {
 
@@ -138,10 +152,13 @@ class ThreadController extends AbstractController
     }
 
 
-    #[Route("/thread/{slug}/like", name:"thread_like")]
-    public function Like($slug): Response
+    #[Route("/thread/{slug}/like", name:"thread_like", methods: ["POST"])]
+    public function Like(Request $request, string $slug): Response
     {
-        $thread = $this->threadRepository->findOneBySlug($slug);
+        if ($denied = $this->denied($request)) {
+            return $denied;
+        }
+        $thread = $this->threadRepository->findOneBySlug($slug) ?? throw new NotFoundHttpException();
         if ($this->getUser() === null) {
 
             return JsonResponse::fromJsonString(json_encode([
@@ -150,11 +167,20 @@ class ThreadController extends AbstractController
             ]), 401);
         }
 
-        $like = $this->likeRepository->findOneByThreadAndUser($thread, $this->getUser());
-        if(!$like) {
+        // The thread's row locked while its likes are looked at: a double
+        // click, two tabs, made two Like rows (and Unlike removed one).
+        $this->entityManager->beginTransaction();
+        try {
+            $this->entityManager->lock($thread, LockMode::PESSIMISTIC_WRITE);
+            if (!$this->likeRepository->findOneByThreadAndUser($thread, $this->getUser())) {
+                $thread->addLike(new Like($this->getUser()));
+                $this->entityManager->flush();
+            }
+            $this->entityManager->commit();
+        } catch (\Throwable $e) {
+            $this->entityManager->rollback();
 
-            $thread->addLike(new Like($this->getUser()));
-            $this->threadRepository->flush();
+            throw $e;
         }
 
         $nlikes = count($thread->getLikes());
@@ -167,10 +193,13 @@ class ThreadController extends AbstractController
         ]), 200);
     }
 
-    #[Route("/thread/{slug}/unlike", name:"thread_unlike")]
-    public function Unlike($slug): Response
+    #[Route("/thread/{slug}/unlike", name:"thread_unlike", methods: ["POST"])]
+    public function Unlike(Request $request, string $slug): Response
     {
-        $thread = $this->threadRepository->findOneBySlug($slug);
+        if ($denied = $this->denied($request)) {
+            return $denied;
+        }
+        $thread = $this->threadRepository->findOneBySlug($slug) ?? throw new NotFoundHttpException();
         $nlikes = count($thread->getLikes());
 
         if ($this->getUser() === null) {
@@ -181,10 +210,12 @@ class ThreadController extends AbstractController
         }
 
         $like = $this->likeRepository->findOneByThreadAndUser($thread, $this->getUser());
-        $thread->removeLike($like);
+        if ($like) {
+            $thread->removeLike($like);
+        }
 
         $nlikes = count($thread->getLikes());
-        $this->threadRepository->flush();
+        $this->entityManager->flush();
 
         $this->addFlash("info", $this->translator->trans("@controllers.thread.unlike"));
 
@@ -192,5 +223,21 @@ class ThreadController extends AbstractController
             "response" => "OK",
             "likes" => $nlikes
         ]), 201);
+    }
+
+    /**
+     * These act (publish, hide, follow, like): POST only, and the "api_thread"
+     * token - in the body's _token or an X-CSRF-Token header. As plain GET
+     * routes, a link or an image elsewhere published a thread for a
+     * signed-in admin, and made anyone like it.
+     */
+    private function denied(Request $request): ?JsonResponse
+    {
+        $token = $request->request->get('_token') ?? $request->headers->get('X-CSRF-Token');
+        if (\is_string($token) && $this->isCsrfTokenValid('api_thread', $token)) {
+            return null;
+        }
+
+        return new JsonResponse(['code' => 403, 'response' => 'Invalid token'], 403);
     }
 }

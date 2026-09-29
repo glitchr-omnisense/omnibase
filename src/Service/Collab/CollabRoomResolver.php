@@ -35,6 +35,17 @@ class CollabRoomResolver
     }
 
     /**
+     * The CSRF token id of one room - one entity's one field. The autosave
+     * and the collab ticket accept only the token of the room they act on:
+     * with the session-wide "editorjs" token, which any form with an editor
+     * hands out, anyone could write any field of any entity (a User's roles).
+     */
+    public function tokenId(string $room): string
+    {
+        return "editorjs_collab:" . $room;
+    }
+
+    /**
      * The root form data is not always the mapped entity. An embedded
      * form or a collection form can bind a separate DTO object or wrapper
      * object instead. In this case, this method returns null. This

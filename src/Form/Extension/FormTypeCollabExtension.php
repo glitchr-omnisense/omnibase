@@ -75,7 +75,8 @@ class FormTypeCollabExtension extends AbstractTypeExtension
         $locale = $view->vars["locale"] ?? null;
         $room = $this->roomResolver->buildRoom(get_class($entity), $entity->getId(), $form->getName(), $locale);
 
-        $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
+        // This room's token, not the session-wide "editorjs": it writes this field only.
+        $token = $this->csrfTokenManager->getToken($this->roomResolver->tokenId($room))->getValue();
         $currentUser = $this->tokenStorage->getToken()?->getUser();
 
         $collabAttr = [

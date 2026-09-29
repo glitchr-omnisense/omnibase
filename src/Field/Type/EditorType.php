@@ -184,8 +184,10 @@ class EditorType extends AbstractType
                 // complete. Because of this limit, a multi-locale form
                 // must not activate collab_autosave or collab_live yet.
                 $locale = $view->vars["locale"] ?? null;
+                $room = $this->roomResolver->buildRoom(get_class($entity), $entity->getId(), $form->getName(), $locale);
 
-                $token = $this->csrfTokenManager->getToken("editorjs")->getValue();
+                // This room's token, not the session-wide "editorjs": it writes this field only.
+                $token = $this->csrfTokenManager->getToken($this->roomResolver->tokenId($room))->getValue();
                 $currentUser = $this->tokenStorage->getToken()?->getUser();
 
                 $editorOpts["collab"] = [
@@ -195,7 +197,7 @@ class EditorType extends AbstractType
                     "id"          => $entity->getId(),
                     "field"       => $form->getName(),
                     "locale"      => $locale,
-                    "room"        => $this->roomResolver->buildRoom(get_class($entity), $entity->getId(), $form->getName(), $locale),
+                    "room"        => $room,
                     "autosaveUrl" => $this->router->generate("ux_editorjs_autosave"),
                     "ticketUrl"   => $collabLive ? $this->router->generate("ux_editorjs_collabTicket") : null,
                     "token"       => $token,

@@ -190,7 +190,15 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->__call(__METHOD__, [$criteria]);
     }
 
-    public function flush(bool $autoclear = true)
+    /**
+     * Flushes the unit of work - and clears the EntityManager only when asked:
+     * cleared by default (as it was), a request's signed-in user and every
+     * entity it held were detached for the rest of it, so the next flush
+     * touching them duplicated rows or failed on "a new entity was found
+     * through the relationship" (as SecuritySubscriber's did). A batch that
+     * wants its memory back passes true.
+     */
+    public function flush(bool $autoclear = false)
     {
         $this->getEntityManager()->flush();
         if($autoclear) $this->clear();
