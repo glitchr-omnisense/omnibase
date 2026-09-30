@@ -24,6 +24,13 @@ class FlashBagSubscriber implements EventSubscriberInterface
             return;
         }
 
+        // Never into a response a cache may keep and hand to someone else (/api/avatar/codes is public):
+        // a member's "Bravo, tu passes niveau 4 !" was folded into it, stored, and gone from their own page.
+        // Nor without a session to read, which starting one here would create for every API call.
+        if ($response->headers->hasCacheControlDirective('public') || !$event->getRequest()->hasPreviousSession()) {
+            return;
+        }
+
         /**
          * @var Session $session
          */
