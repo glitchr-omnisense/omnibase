@@ -622,7 +622,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                         ->end()
                     ->scalarNode('default_path')
                         ->info('Default twig path')
-                        ->defaultValue("%kernel.project_dir%/vendor/glitchr/base-bundle/templates")
+                        ->defaultValue("%kernel.project_dir%/vendor/glitchr/omnibase/templates")
                         ->end()
                     ->arrayNode('form_themes')
                         ->addDefaultChildrenIfNoneSet()

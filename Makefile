@@ -22,7 +22,7 @@ export APP_ENV APP_DEBUG
 #
 # Built at the bundle root, where package.json and node_modules live (not in
 # assets/, which only holds the sources). This is the target the application's
-# `make build-vendor glitchr/base-bundle` runs; it used to be missing, so that
+# `make build-vendor glitchr/omnibase` runs; it used to be missing, so that
 # command printed "Nothing to be done for 'assets'", exited 0 and left the old
 # bundle in place.
 #

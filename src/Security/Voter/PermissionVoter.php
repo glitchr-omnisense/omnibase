@@ -25,7 +25,7 @@ class PermissionVoter extends Voter
      * prefixed attributes (Symfony's own RoleHierarchyVoter territory) or
      * EA_ prefixed ones (base-bundle-admin's SecurityVoter territory,
      * checked by prefix rather than a direct class reference to avoid a
-     * reverse dependency on glitchr/base-bundle-admin). A Voter returning
+     * reverse dependency on omnibase/admin). A Voter returning
      * false here is harmless under Symfony's default "affirmative"
      * strategy - existing ROLE_-based authorization is provably unaffected.
      */

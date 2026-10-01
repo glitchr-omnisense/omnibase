@@ -1,7 +1,7 @@
 <?php
 
 // The bundle is either checked out standalone (CI: own vendor/) or installed
-// inside a host application's vendor/glitchr/base-bundle (dev workflow).
+// inside a host application's vendor/glitchr/omnibase (dev workflow).
 foreach ([
     __DIR__ . '/../vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',

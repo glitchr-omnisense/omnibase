@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  *
  * base-bundle is usable on its own - a front-end-only install has no
  * back-office at all - so it must never type-hint the admin's concrete
- * generator. It depends on this interface instead; glitchr/base-bundle-admin
+ * generator. It depends on this interface instead; omnibase/admin
  * supplies the real implementation when it is installed, and
  * NullAdminUrlGenerator stands in when it is not.
  *

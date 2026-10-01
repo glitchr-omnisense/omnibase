@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Standalone, runnable demo of glitchr/base-bundle — a bare Symfony skeleton
+# Standalone, runnable demo of glitchr/omnibase — a bare Symfony skeleton
 # (no theme, no app code) with the bundle installed from this very checkout,
 # a SQLite database, and one flat page touring a few bundle features:
 # the App\ <-> Base\ namespace mirroring, the shipped entity layer, the
@@ -62,7 +62,7 @@ COPY . /srv/base-bundle
 # google/recaptcha contrib recipe even breaks it). The overlay ships every
 # config file the demo needs; the container is compiled at first run instead.
 RUN composer config repositories.base-bundle '{"type": "path", "url": "/srv/base-bundle", "options": {"symlink": false}}' \
-    && composer require "glitchr/base-bundle:*@dev" --no-interaction --no-progress --no-scripts \
+    && composer require "glitchr/omnibase:*@dev" --no-interaction --no-progress --no-scripts \
     # the google/recaptcha contrib recipe references ReCaptcha\RequestMethod\Curl,
     # which google/recaptcha 1.5 no longer ships — and the demo needs no recaptcha
     && rm -f config/packages/google_recaptcha.yaml

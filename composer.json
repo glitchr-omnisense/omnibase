@@ -1,5 +1,5 @@
 {
-    "name": "glitchr/base-bundle",
+    "name": "glitchr/omnibase",
     "type": "symfony-bundle",
     "description": "Base helper integration for Symfony",
     "keywords": ["symfony", "base", "helper"],

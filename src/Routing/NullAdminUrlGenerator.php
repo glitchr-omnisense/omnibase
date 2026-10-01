@@ -5,7 +5,7 @@ namespace Base\Routing;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Stand-in used when glitchr/base-bundle-admin is not installed.
+ * Stand-in used when omnibase/admin is not installed.
  *
  * Every call site in base-bundle builds its URL fluently and only then asks
  * for the string, so the builder methods stay silent no-ops and the failure
@@ -46,6 +46,6 @@ final class NullAdminUrlGenerator implements AdminUrlGeneratorInterface
 
     public function generateUrl(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
     {
-        throw new \LogicException('Cannot generate a back-office URL: no admin is installed. Require glitchr/base-bundle-admin, or guard the call site.');
+        throw new \LogicException('Cannot generate a back-office URL: no admin is installed. Require omnibase/admin, or guard the call site.');
     }
 }

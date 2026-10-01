@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\Reference;
  * Form-type services for the Base\Field\Type layer. Extracted verbatim from
  * the former services/admin.php: the Types are plain Symfony form types used
  * by base-bundle-admin and regular forms alike, so they stay registered here
- * after the EA-era admin layer moved to glitchr/base-bundle-admin.
+ * after the EA-era admin layer moved to omnibase/admin.
  */
 return function (ContainerConfigurator $configurator) {
 

@@ -14,7 +14,7 @@ Requires PHP ≥ 8.1 and Symfony 6, 7 or 8. Licensed LGPL-3.0-or-later
 The package is resolved from GitLab (`gitlab.glitchr.dev/public-repository/symfony/bundle/base/component`):
 
 ```bash
-composer require glitchr/base-bundle:^3.0
+composer require glitchr/omnibase:^3.0
 ```
 
 Enable in `config/bundles.php` (Flex usually does it):
@@ -72,7 +72,7 @@ Service definitions live in `config/`:
 
 ## Development
 
-The bundle is developed inside a host app's `vendor/glitchr/base-bundle`
+The bundle is developed inside a host app's `vendor/glitchr/omnibase`
 checkout (composer VCS install keeps `.git`) and pushed from there.
 
 ```bash

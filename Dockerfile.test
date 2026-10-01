@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Standalone test runner for glitchr/base-bundle — installs the bundle as
+# Standalone test runner for glitchr/omnibase — installs the bundle as
 # its own root package (composer.json already declares the VCS repositories
 # for its glitchr/* dependencies), pulling in require-dev (phpunit, phpstan)
 # along with it. No demo app scaffolding needed, unlike Dockerfile/docker
