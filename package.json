@@ -80,7 +80,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.glitchr.dev/public-repository/symfony/bundles/base-bundle"
+    "url": "git+https://github.com/glitchr-studio/omnibase.git"
   },
   "author": "Marco Meyer <support@glitchr.io>",
   "description": "",
