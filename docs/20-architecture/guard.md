@@ -49,7 +49,9 @@ the guard asks its token; below, nothing of the captcha is printed (neither the 
 script) and no token is asked. The trap, the time and the lists are asked every time.
 
 The form refused at the threshold, printed again, carries the widget: the field is always in the
-form, printed or not. Without `cache.app` - or without an address or a session to count by - the
+form, but below the threshold it is taken out of the form's view, so `form.guard_captcha is defined`
+is false, `form_rest` and `form_end` print nothing of it, and a template that writes
+`{% if form.guard_captcha is defined %}{{ form_row(form.guard_captcha) }}{% endif %}` needs no change. Without `cache.app` - or without an address or a session to count by - the
 captcha is always shown, as it was before the threshold. `captcha_after: 0`, on a form or in
 `base.guard`, does the same.
 

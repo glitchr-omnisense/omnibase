@@ -222,15 +222,15 @@ class FormTypeGuardExtension extends AbstractTypeExtension
         if (!$form->isRoot() || !isset($view[FormGuard::CHALLENGE_FIELD])) {
             return;
         }
-        // Before `captcha_after` refused tries: nothing printed, the widget nor its script (a form_row
-        // or form_rest of a field already rendered prints nothing).
+        // Before `captcha_after` refused tries: the two fields are taken out of the view, so nothing is
+        // printed (neither the widget nor its script) and a template that asks for them finds none:
+        // `form.guard_captcha is defined` is false, and form_rest / form_end have nothing left to print.
+        // (Marking them rendered would not do: a form_row of a rendered field throws.) The form itself
+        // keeps both fields, so a submission is still read, validated and, below the threshold, accepted
+        // without a token.
         if (!$this->captchaAsked($form)) {
             foreach ([FormGuard::CHALLENGE_FIELD, FormGuard::FALLBACK_FIELD] as $name) {
-                if (isset($view[$name])) {
-                    $view[$name]->vars['omnishield_html'] = '';
-                    $view[$name]->vars['guard_hidden'] = true;
-                    $view[$name]->setRendered();
-                }
+                unset($view[$name]);
             }
 
             return;
