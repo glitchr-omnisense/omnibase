@@ -85,7 +85,7 @@ class ReferrerAfterSignInHttpTest extends KernelTestCase
         $page = new Response('<!DOCTYPE html><html><head></head><body>A page</body></html>', 200, ['Content-Type' => 'text/html; charset=UTF-8']);
         $fragment = new Response('<li>An item</li>', 200, ['Content-Type' => 'text/html; charset=UTF-8']);
 
-        $this->assertTrue(ReferrerSubscriber::isPageNavigation(Request::create('/a', 'GET', [], [], [], $xhr), $page), 'transparentjs\'s swap: a whole page');
+        $this->assertTrue(ReferrerSubscriber::isPageNavigation(Request::create('/a', 'GET', [], [], [], $xhr), $page), 'flowjs\'s navigation swap: a whole page');
         $this->assertFalse(ReferrerSubscriber::isPageNavigation(Request::create('/a', 'GET', [], [], [], $xhr), $fragment), 'a widget\'s fragment');
         $this->assertTrue(ReferrerSubscriber::isPageNavigation(Request::create('/a', 'GET', [], [], [], ['HTTP_SEC_FETCH_DEST' => 'document']), $page));
         $this->assertTrue(ReferrerSubscriber::isPageNavigation(Request::create('/a'), $page), 'a client that says nothing of the destination');

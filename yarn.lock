@@ -986,11 +986,6 @@
   resolved "https://registry.npmjs.org/@fortawesome/fontawesome-free/-/fontawesome-free-6.7.2.tgz"
   integrity sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==
 
-"@glitchr/ajaxer@^1.0":
-  version "1.0.56"
-  resolved "https://registry.npmjs.org/@glitchr/ajaxer/-/ajaxer-1.0.56.tgz"
-  integrity sha512-+g9VAyPmBm7XgjZ6ly0WOLDLEAMtYJqltkKhT1q6koJ8x9CgIjrl0ASMfYmjtJGQVQJrLD8phyRh1bX6y4xeWw==
-
 "@glitchr/breakpoints@^1.0":
   version "1.0.29"
   resolved "https://registry.npmjs.org/@glitchr/breakpoints/-/breakpoints-1.0.29.tgz"
@@ -1010,6 +1005,10 @@
   version "1.0.23"
   resolved "https://registry.npmjs.org/@glitchr/dockjs/-/dockjs-1.0.23.tgz"
   integrity sha512-+SZXviQg5akFkutCKq6nxOK0xBQO7nUlj481oxTAohHZjYX3axMPRAlGOvhpzFb+6lQ8olrrT0Hmev7m95Ujiw==
+
+"@glitchr/flowjs@git+https://github.com/glitchr-studio/flowjs.git#07eaaa2e1c5ed49049b29505daca3ea8247d3850":
+  version "1.0.0"
+  resolved "git+https://github.com/glitchr-studio/flowjs.git#07eaaa2e1c5ed49049b29505daca3ea8247d3850"
 
 "@glitchr/imaginejs@^1.0":
   version "1.0.45"

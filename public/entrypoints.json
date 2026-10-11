@@ -10,10 +10,10 @@
     },
     "base-defer": {
       "css": [
-        "/bundles/base/base-defer.5f32239b.css"
+        "/bundles/base/base-defer.5eda710d.css"
       ],
       "js": [
-        "/bundles/base/base-defer.3e26b37a.js"
+        "/bundles/base/base-defer.34bdfa26.js"
       ]
     },
     "admin-charts": {

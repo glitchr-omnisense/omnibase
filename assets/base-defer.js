@@ -1,4 +1,4 @@
-import '@glitchr/ajaxer';
+import '@glitchr/flowjs/ajaxer';
 import '@glitchr/breakpoints';
 import '@glitchr/imaginejs';
 

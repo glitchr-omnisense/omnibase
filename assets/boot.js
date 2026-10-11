@@ -1,12 +1,13 @@
 /*
  * Base.boot(): what every omnibase site's app-defer.js used to repeat before
- * its own effects - @glitchr/stickyjs and @glitchr/transparentjs started in
- * the right order, and the back office opened as a website-in-website.
- * Both libraries stay what they are (two packages, two repositories); this
- * only starts them. Import the two first, then:
+ * its own effects - the scroll effects, the scroll stops and the navigation
+ * of @glitchr/flowjs started in the right order, and the back office opened
+ * as a website-in-website. flowjs stays what it is (one library, one module
+ * per feature); this only starts the modules. Import the ones the site uses
+ * first, then:
  *
- *     import '@glitchr/stickyjs';
- *     import '@glitchr/transparentjs';
+ *     import '@glitchr/flowjs';              // all of them, with the stylesheets
+ *     // or only: '@glitchr/flowjs/sticky', '/stops', '/navigation'
  *     import Base from '../vendor/glitchr/omnibase/assets/boot.js';
  *
  *     Base.boot({
@@ -20,9 +21,10 @@
  *
  * On load: Sticky.ready() (its own snapping off: the stops settle the scroll),
  * StickyStops.attach(window, stops), Transparent.ready({identifier: '#content',
- * nest, ...}); after each navigation (transparent:load) the stops are attached
- * again and the current link marked. Also, once: jQuery's closestScrollable
- * made safe, the <style> blocks scripts inject into <head> kept across swaps
+ * nest, ...}); after each navigation (transparent:load) the current link is
+ * marked - the stops need nothing: flowjs measures them again at each page it
+ * swaps in, their options kept. Also, once: jQuery's closestScrollable made
+ * safe, the <style> blocks scripts inject into <head> kept across swaps
  * (data-headlock), and a site page that lands inside the back office's nest
  * frame goes to the main window instead.
  */
@@ -81,7 +83,6 @@ Base.boot = function (options) {
     }).observe(document.head, { childList: true });
 
     window.addEventListener('transparent:load', function () {
-        attachStops(stops);
         markCurrent(options.current);
     });
 
