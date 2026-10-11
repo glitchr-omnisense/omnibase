@@ -302,10 +302,10 @@ class FormGuardTest extends TestCase
     private function shows(FormInterface $form, string $ip = '203.0.113.7'): bool
     {
         $this->requests->push(Request::create('/contact', 'GET', [], [], [], ['REMOTE_ADDR' => $ip]));
-        $captcha = $form->createView()[FormGuard::CHALLENGE_FIELD];
+        $view = $form->createView();
         $this->requests->pop();
 
-        return !$captcha->isRendered() && '' !== $captcha->vars['omnishield_html'];
+        return isset($view[FormGuard::CHALLENGE_FIELD]) && '' !== $view[FormGuard::CHALLENGE_FIELD]->vars['omnishield_html'];
     }
 
     public function testBelowCaptchaAfterTheCaptchaIsNeitherShownNorAsked(): void
@@ -320,6 +320,59 @@ class FormGuardTest extends TestCase
         $this->assertSame(['' => [FormGuard::TRAPPED]], $this->errors($this->send($this->form($forms), [FormGuard::TRAP_FIELD => 'x'])));
         $this->assertSame(['' => [FormGuard::TOO_FAST]], $this->errors($this->send($this->form($forms), ago: 0)));
         $this->assertFalse($this->shows($this->form($forms)), 'two refusals: still below three');
+    }
+
+    /** A template as the sites write them: the row asked for when the field is there, then the rest. */
+    private function renderPage(FormInterface $form, string $ip = '203.0.113.7'): string
+    {
+        $bridge = \dirname((new \ReflectionClass(\Symfony\Bridge\Twig\Extension\FormExtension::class))->getFileName(), 2).'/Resources/views/Form';
+        $omnishield = \dirname((new \ReflectionClass(ChallengeType::class))->getFileName(), 2).'/templates';
+        $twig = new \Twig\Environment(new \Twig\Loader\ChainLoader([
+            new \Twig\Loader\ArrayLoader(['page.html.twig' => '{{ form_start(form) }}{% if form.guard_captcha is defined %}{{ form_row(form.guard_captcha) }}{% endif %}{% if form.guard_captcha is defined and not form.guard_captcha.rendered %}{{ form_widget(form.guard_captcha) }}{% endif %}{{ form_rest(form) }}{{ form_end(form) }}']),
+            new \Twig\Loader\FilesystemLoader([$bridge, $omnishield]),
+        ]), ['strict_variables' => true]);
+        $twig->addExtension(new \Symfony\Bridge\Twig\Extension\FormExtension());
+        $twig->addExtension(new \Symfony\Bridge\Twig\Extension\TranslationExtension(new \Symfony\Component\Translation\Translator('en')));
+        $renderer = new \Symfony\Component\Form\FormRenderer(new \Symfony\Bridge\Twig\Form\TwigRendererEngine(['form_div_layout.html.twig', 'form.html.twig'], $twig));
+        $twig->addRuntimeLoader(new class($renderer) implements \Twig\RuntimeLoader\RuntimeLoaderInterface {
+            public function __construct(private readonly \Symfony\Component\Form\FormRenderer $renderer)
+            {
+            }
+
+            public function load(string $class): ?object
+            {
+                return \Symfony\Component\Form\FormRenderer::class === $class ? $this->renderer : null;
+            }
+        });
+
+        $this->requests->push(Request::create('/contact', 'GET', [], [], [], ['REMOTE_ADDR' => $ip]));
+        try {
+            return $twig->render('page.html.twig', ['form' => $form->createView()]);
+        } finally {
+            $this->requests->pop();
+        }
+    }
+
+    public function testATemplateThatPrintsTheCaptchaRowRendersBelowTheThreshold(): void
+    {
+        $forms = $this->forms(['captcha_after' => 3], cache: new ArrayAdapter());
+
+        // form_row, form_widget, form_rest and form_end of a captcha that is not asked: no exception, no widget.
+        $html = $this->renderPage($this->form($forms));
+        $this->assertStringContainsString('contact_name', $html);
+        $this->assertStringNotContainsString('omnishield', $html);
+        $this->assertStringNotContainsString('guard_captcha', $html);
+        $this->assertStringNotContainsString('guard_fallback', $html);
+
+        // The form still has both fields: sent without a token, it is accepted.
+        $this->assertTrue($this->send($this->form($forms))->isValid());
+
+        // At the threshold the widget is printed, once.
+        for ($i = 0; $i < 3; ++$i) {
+            $this->send($this->form($forms), ago: 0);
+        }
+        $html = $this->renderPage($this->form($forms));
+        $this->assertSame(1, substr_count($html, FixedGateway::FIELD), $html);
     }
 
     public function testFromCaptchaAfterRefusedTriesTheCaptchaIsShownAndAsked(): void
