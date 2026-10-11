@@ -89,7 +89,7 @@
     // A request that dies with status 0 while the interface reports offline is
     // a real connectivity failure (status 0 alone can also be an abort or a
     // CORS issue, so both conditions are required). Catches SPA navigations
-    // (@glitchr/transparent) and infinite-scroll loads (@glitchr/ajaxer)
+    // (flowjs navigation) and infinite-scroll loads (flowjs ajaxer)
     // failing before the `offline` event has fired.
     if (window.jQuery) {
         jQuery(document).ajaxError(function (event, xhr, settings, error) {

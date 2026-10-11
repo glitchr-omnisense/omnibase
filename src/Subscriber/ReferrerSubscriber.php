@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  *
  * Only a page is remembered - a GET answered 2xx with an HTML document,
  * asked as a document (Sec-Fetch-Dest: document or iframe) or by
- * transparentjs's swap (an XHR whose answer is a whole HTML page, as
+ * flowjs's navigation swap (an XHR whose answer is a whole HTML page, as
  * omnibase's PageViewSubscriber counts it). An image, a stylesheet, a feed,
  * a JSON or an HTML fragment fetched by a script is not: an avatar served by
  * a controller used to be the last thing asked before the sign-in, and the
@@ -88,7 +88,7 @@ class ReferrerSubscriber implements EventSubscriberInterface
         }
 
         // A script's fetch (or a browser that says nothing): a page only when its answer is a whole document,
-        // as transparentjs's swap gets - not a fragment of HTML for a widget.
+        // as flowjs's navigation swap gets - not a fragment of HTML for a widget.
         $scripted = 'empty' === $destination || $request->isXmlHttpRequest();
         if ($scripted || '' === $destination) {
             $accept = strtolower((string) $request->headers->get('Accept', ''));

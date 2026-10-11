@@ -48,13 +48,12 @@ Nothing else is customisable: neither the font nor the colours.
 # `Base.boot()`
 
 What every site's `assets/app-defer.js` repeated: `Sticky.ready()`,
-`StickyStops.attach()` and `Transparent.ready()` in that order, the stops
-attached again after each navigation, the back office as a website-in-website.
-`@glitchr/stickyjs` (^1.4) and `@glitchr/transparentjs` stay two libraries.
+`StickyStops.attach()` and `Transparent.ready()` in that order, the back office
+as a website-in-website. The three come from `@glitchr/flowjs` (one library, one
+module per feature; the stops measure themselves again after each navigation).
 
 ```js
-import '@glitchr/stickyjs';
-import '@glitchr/transparentjs';
+import '@glitchr/flowjs';   // or its modules: '@glitchr/flowjs/sticky', '/stops', '/navigation'
 import Base from '../vendor/glitchr/omnibase/assets/boot.js';
 
 Base.boot({
