@@ -51,9 +51,15 @@ What every site's `assets/app-defer.js` repeated: `Sticky.ready()`,
 `StickyStops.attach()` and `Transparent.ready()` in that order, the back office
 as a website-in-website. The three come from `@glitchr/flowjs` (one library, one
 module per feature; the stops measure themselves again after each navigation).
+Install it from npm (`yarn add @glitchr/flowjs`) and import only the modules the
+site uses: `Base.boot()` starts a module only if its global is there, so a site
+that imports the navigation alone starts the navigation alone. The core's own
+bundle (`base-defer`) imports none of them - in particular not `Ajaxer`, which
+a site that sends named AJAX channels imports itself
+(`import '@glitchr/flowjs/ajaxer'`).
 
 ```js
-import '@glitchr/flowjs';   // or its modules: '@glitchr/flowjs/sticky', '/stops', '/navigation'
+import '@glitchr/flowjs/navigation';   // the modules the site uses: '/sticky', '/stops', '/navigation'
 import Base from '../vendor/glitchr/omnibase/assets/boot.js';
 
 Base.boot({
@@ -62,7 +68,8 @@ Base.boot({
     viewTransitions: false,
     exceptions: ['/agenda.ics'],                        // after /_*, /login*, /logout*, /register*, /locale/*, /connect/*
     current: '.site-nav a',                             // aria-current="page" follows the page
-    transparent: { exit_duration: 380 },                // anything else for Transparent.ready()
+    transparent: { exit_duration: 380 },                // anything else for Transparent.ready(); false: not started
+    sticky: false,                                      // Sticky.ready()'s options; false: not started
 });
 ```
 

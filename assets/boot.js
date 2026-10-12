@@ -4,10 +4,11 @@
  * of @glitchr/flowjs started in the right order, and the back office opened
  * as a website-in-website. flowjs stays what it is (one library, one module
  * per feature); this only starts the modules. Import the ones the site uses
- * first, then:
+ * first, then (yarn add @glitchr/flowjs):
  *
- *     import '@glitchr/flowjs';              // all of them, with the stylesheets
- *     // or only: '@glitchr/flowjs/sticky', '/stops', '/navigation'
+ *     import '@glitchr/flowjs/navigation';   // only the modules the site uses,
+ *     // among '@glitchr/flowjs/sticky', '/stops', '/navigation'; a module that
+ *     // is not imported is not started (its global is not there)
  *     import Base from '../vendor/glitchr/omnibase/assets/boot.js';
  *
  *     Base.boot({
@@ -16,7 +17,8 @@
  *         viewTransitions: true,                    // Transparent's use_view_transitions
  *         exceptions: ['/ressources/*\/telecharger'], // loads whole, after the defaults
  *         current: '.as-nav a',                     // links marked aria-current="page"
- *         transparent: { exit_duration: 420 }       // anything else for Transparent.ready()
+ *         transparent: { exit_duration: 420 }       // anything else for Transparent.ready(); false: not started
+ *         sticky: false                             // Sticky.ready()'s options; false: not started
  *     });
  *
  * On load: Sticky.ready() (its own snapping off: the stops settle the scroll),
@@ -89,9 +91,9 @@ Base.boot = function (options) {
     // Once only: a repeated Transparent.ready() races itself.
     window.addEventListener('load', function () {
         guardScrollable();
-        if (window.Sticky) window.Sticky.ready(Object.assign({ scrollsnap: false, autoscroll: false, swipehint: false }, options.sticky || {}));
+        if (window.Sticky && options.sticky !== false) window.Sticky.ready(Object.assign({ scrollsnap: false, autoscroll: false, swipehint: false }, options.sticky || {}));
         attachStops(stops);
-        if (window.Transparent) window.Transparent.ready(Object.assign({
+        if (window.Transparent && options.transparent !== false) window.Transparent.ready(Object.assign({
             identifier: '#content',
             exceptions: EXCEPTIONS.concat(options.exceptions || []),
             nest: options.nest || ['/admin*'],

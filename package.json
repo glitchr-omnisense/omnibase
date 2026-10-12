@@ -31,7 +31,7 @@
     "@glitchr/clipboardjs": "^1.0",
     "@glitchr/cookie": "^1.0",
     "@glitchr/dockjs": "^1.0",
-    "@glitchr/flowjs": "git+https://github.com/glitchr-studio/flowjs.git#07eaaa2e1c5ed49049b29505daca3ea8247d3850",
+    "@glitchr/flowjs": "^1.0.1",
     "@glitchr/imaginejs": "^1.0",
     "@glitchr/lightbox2": "^1.0",
     "@glitchr/media-query-plugin": "^1.5",
