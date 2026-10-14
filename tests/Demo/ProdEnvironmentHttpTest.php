@@ -64,6 +64,15 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
         $this->assertStringContainsString('404', (string) $response->getContent());
     }
 
+    /** A page of the site's that does not exist (widget_page): its error page, 404, not a 500. */
+    public function testAnUnknownPageAnswers404(): void
+    {
+        $response = $this->browse('/page/no-such-page-anywhere');
+
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertStringContainsString('404', (string) $response->getContent());
+    }
+
     public function testTheBannerPrintsNothing(): void
     {
         $twig = static::getContainer()->get('twig');

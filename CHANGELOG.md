@@ -39,6 +39,7 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
   `example/app/` overlay doubles as a minimal host-app reference config.
 
 ### Fixed
+- **A page, an attachment or a short link that does not exist answers 404**, the site's error page: `WidgetController` (`/page/{slug}`, `widget_page`; `/attachment/{slug}`, `widget_attachment`) and `ShortLinkController` threw php-http's `Http\Discovery\Exception\NotFoundException`, no HTTP exception, and every unknown address under them answered 500 (a site's link to `/page/gdpr`, a page it never made). They throw `createNotFoundException()`. Tests: `tests/Http/WidgetPageHttpTest.php`, `ProdEnvironmentHttpTest::testAnUnknownPageAnswers404()`.
 - `composer.json` now declares dependencies the bundle's DI actually
   hard-references: `hwi/oauth-bundle`, `symfony/webpack-encore-bundle`,
   `symfony/monolog-bundle`, `glitchr/ux-google`, plus `ext-imagick` /

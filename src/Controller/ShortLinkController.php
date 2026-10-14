@@ -7,7 +7,6 @@ use Base\Routing\AdvancedRouterInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Base\Attributes\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Http\Discovery\Exception\NotFoundException;
 
 class ShortLinkController extends AbstractController
 {
@@ -36,7 +35,7 @@ class ShortLinkController extends AbstractController
          */
         $shlink = $this->shlinkRepository->findOneBySlug($slug);
         if ($shlink === null) {
-            throw new NotFoundException("Page requested doesn't exist.");
+            throw $this->createNotFoundException("Page requested doesn't exist.");
         }
 
         return $this->redirect($this->router->format($shlink->getUrl()));
