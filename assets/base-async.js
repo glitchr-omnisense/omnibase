@@ -3,7 +3,7 @@ window.$ = $;
 window.jQuery = $;
 
 import '@glitchr/lightbox2';
-import '@glitchr/cookie';
+import '@glitchr/flowjs/cookie';
 import '@glitchr/clipboardjs';
 
 import './styles/base-async.scss';

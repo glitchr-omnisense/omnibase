@@ -54,9 +54,16 @@ module per feature; the stops measure themselves again after each navigation).
 Install it from npm (`yarn add @glitchr/flowjs`) and import only the modules the
 site uses: `Base.boot()` starts a module only if its global is there, so a site
 that imports the navigation alone starts the navigation alone. The core's own
-bundle (`base-defer`) imports none of them - in particular not `Ajaxer`, which
-a site that sends named AJAX channels imports itself
-(`import '@glitchr/flowjs/ajaxer'`).
+bundle imports none of them - in particular not `Ajaxer`, which a site that
+sends named AJAX channels imports itself (`import '@glitchr/flowjs/ajaxer'`).
+
+The one module the core does import is the library's sixth, the cookies:
+`base-async` brings `@glitchr/flowjs/cookie` (the `Cookie` global, with
+flowjs's core) to every page, see [Cookies](#cookies) below. The core's
+`base-async` runs before a site's entries and the library keeps the first
+`Flow` loaded, so **a site takes the same `@glitchr/flowjs` as the core**
+(`^1.2.0` in its `package.json`, 1.2.0 or later in its `yarn.lock`): an older
+navigation or sticky module would otherwise run on the newer core.
 
 ```js
 import '@glitchr/flowjs/navigation';   // the modules the site uses: '/sticky', '/stops', '/navigation'
@@ -187,3 +194,32 @@ installs those alone (`yarn install --frozen-lockfile`): from a clean copy it
 rebuilds `bundles/base` byte-identical to what is committed. To take newer
 packages: `ALLOW_ASSETS_UPDATE=1 make assets`, then commit the lock with the
 bundles it built. Node 24 or later (select2's engines).
+
+# Cookies
+
+`base-async` imports `@glitchr/flowjs/cookie`: the `Cookie` global on every
+page (`Cookie.set(group, name, value, expires)`, `Cookie.get()`,
+`Cookie.cookies`, `Cookie.local`, `Cookie.session`, `Cookie.use()`, see the
+library's `docs/cookie.md`). It replaces `@glitchr/cookie`, whose methods and
+`localStorage` keys (`cookie/<GROUP>`) it keeps: a site drops
+`@glitchr/cookie` from its `package.json` and, if it imported it itself,
+imports nothing in its place.
+
+What is written goes through it, so that the visitor's answer decides
+(omnibase/consent declares the categories and shows the panel; without that
+bundle a group is written until `Cookie.setConsent(false, group)` refuses it):
+
+| Cookie | Written by | Under |
+| --- | --- | --- |
+| `USER/INFO` | `assets/styles/js/user.js`: the browser's language, calendar, numbering system, light or dark theme | `USER` |
+| `LOCATION/TIMEZONE` | `user.js`: the browser's time zone | `LOCATION`, when the site declares that category for its visitors to answer (omnibase/consent's default); else the zone stays in `USER/INFO` (`timezone`), under `USER` |
+| `USER/THEME/*` | a site's theme switch | `USER` |
+| `ANALYTICS/VISITOR_ID` | a site's own script, if it counts unique visitors (`Cookie.set('ANALYTICS', 'VISITOR_ID', ...)`) - the core only reads it (`PageViewSubscriber`) | `ANALYTICS` |
+
+The server reads them and writes none of these: `User::getCookie('timezone')`
+is `LOCATION/TIMEZONE`, else `USER/INFO`'s; `getCookie('country')` is read
+from that zone. A script of a site writes its own the same way
+(`Cookie.set('USER', 'THEME/MODE', mode, ...)`, or
+`Consent.cookie(group, name, value, expires)`), never with `document.cookie`:
+what is written behind `Cookie` is neither kept from being written after a
+refusal nor known to the detailed section.

@@ -37,7 +37,7 @@ class Analytics
      * Call once per trackable request. $visitorId is the ANALYTICS/
      * VISITOR_ID cookie value if present - deliberately never generated or
      * set here: that cookie is written client-side via Cookie.set("ANALYTICS",
-     * "VISITOR_ID", ...) (see @glitchr/cookie), which silently no-ops
+     * "VISITOR_ID", ...) (see @glitchr/flowjs/cookie), which silently no-ops
      * without consent. A visit with no visitor cookie still counts toward
      * pageViews() (an anonymous hit, no identity involved) but never
      * toward uniqueVisitors() - consent is what turns a hit into a
