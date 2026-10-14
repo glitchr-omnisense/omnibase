@@ -63,13 +63,23 @@ final class DemoAccounts implements DemoAccountProviderInterface
   banner nor on the sign-in page: `DemoAccountRegistry::offered()` is the
   list without them. See [The back office](#the-back-office).
 
-### One account for each role, not for each permission
+### One account for each role of the application, none for the back office
 
-A role gets an account when it has **a space of its own** - the tenant's
-rents, the seller's orders, the kitchen's screen: what a visitor comes to
-see. Two roles that open the same pages with one button more or less share an
-account. The banner names one account, the first offered (`position`); the
-others wait on the sign-in page.
+The roles of the application are the constants of its `user_role` type
+(`App\Enum\UserRole`, else `Base\Enum\UserRole`). **Each one below the back
+office has a demonstration account** holding it - its own roles or its
+group's; `ROLE_USER` is held by any account. Those that open the back office
+(`base.demo.admin_roles`, `ROLE_SUPERADMIN`, `ROLE_EDITOR` above it) have none
+offered. Roles a group gives and the enum does not name (a practice's
+`ROLE_PRACTITIONER`) are the bundle's to declare, as they do.
+
+```php
+$registry->missingRoles();   // [] when every role has its account; demo:reset warns otherwise
+```
+
+A site's suite asserts it (`self::assertSame([], $registry->missingRoles())`).
+The banner names one account, the first offered (`position`); the others wait
+on the sign-in page.
 
 ### In the fixtures
 
@@ -206,7 +216,7 @@ the same checkout.
 | **Indexing** | `X-Robots-Tag: noindex, nofollow` on every response. |
 | **A demonstration account's credentials** | Its identifier, address, password, one-time code, e-mail code and backup codes do not change; it is not disabled nor deleted. |
 | **The staff's second factor** | `base.security.two_factor.required_roles` and the administrator's "mandatory for everyone" are lifted **for the demonstration accounts**; any other account is asked as usual. |
-| **The back office** | Its accounts (`base.demo.admin_roles`) are offered to nobody and sign in with `base.demo.admin_password` (the `DEMO_ADMIN_PASSWORD` secret) or not at all. |
+| **The back office** | Its accounts (`base.demo.admin_roles`) are offered to nobody and sign in with `base.demo.admin_password` (the `DEMO_ADMIN_PASSWORD` secret) or not at all; it answers 403 to every other account. |
 | **The super-administrator** | Signs in with `base.demo.superadmin_password` (the `DEMO_SUPERADMIN_PASSWORD` secret) or not at all. |
 | **Starting** | Refused in debug, and on the production database. |
 | **Payments** | omnibase/marketplace offers its `dev` gateway and none of glitchr/omnitrade's (its `docs/dev-gateway-and-keys.md`). |
@@ -268,6 +278,10 @@ declared as a demonstration account or not:
 
 - is **not offered**: not in the banner, not on the sign-in page, not signed
   in by `/login/demo`;
+- is **the only one the back office opens to**: any other account signed in
+  - a demonstration account or one a visitor created, whatever its roles give
+  it elsewhere (the kitchen's `ROLE_STAFF` reading the orders under `/admin`)
+  - gets a 403 on every page of it (`/admin`, omnibase/admin's routes);
 - **signs in with `base.demo.admin_password`** - by default
   `%env(default::DEMO_ADMIN_PASSWORD)%` - typed in the ordinary sign-in form
   with its identifier ("gestion"). The stored password is not looked at.
@@ -395,7 +409,7 @@ base:
 | | |
 |---|---|
 | `Base\Demo\DemoAccount`, `DemoAccountProviderInterface` | a declaration, and who declares |
-| `Base\Demo\DemoAccountRegistry` | every declaration (`all()`), the ones a visitor is offered (`offered()`); `get()`, `of($user)`, `isAdministrator($user)`, `isSuperAdmin($user)` |
+| `Base\Demo\DemoAccountRegistry` | every declaration (`all()`), the ones a visitor is offered (`offered()`), the roles without one (`missingRoles()`); `get()`, `of($user)`, `isAdministrator($user)`, `isSuperAdmin($user)` |
 | `Base\Demo\DemoAccountFactory` | the rows: `account()`, `load()`, `missing()` |
 | `Base\Demo\DemoMode` | `isActive()`: the `demo` environment, and no other |
 | `Base\Demo\DemoGuard` | what demo refuses to start on |

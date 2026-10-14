@@ -3,8 +3,13 @@
 namespace Base\Subscriber;
 
 use Base\Demo\DemoAccountRegistry;
+use Base\Routing\AdvancedRouterInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -29,6 +34,10 @@ use Symfony\Component\Security\Http\Event\CheckPassportEvent;
  * What is typed is compared with the secret, the password stored in the
  * database is not looked at. While a tier's secret is not set, its accounts
  * cannot sign in at all, by any means.
+ *
+ * And no other account opens the back office, whatever its roles give it
+ * elsewhere (the kitchen's ROLE_STAFF reading the orders under /admin): a
+ * page of it answers 403 to anyone signed in below base.demo.admin_roles.
  */
 class DemoBackOfficeSubscriber implements EventSubscriberInterface
 {
@@ -36,6 +45,8 @@ class DemoBackOfficeSubscriber implements EventSubscriberInterface
         private readonly DemoAccountRegistry $accounts,
         #[Autowire('%base.demo.superadmin_password%')] private readonly ?string $password = null,
         #[Autowire('%base.demo.admin_password%')] private readonly ?string $adminPassword = null,
+        #[Autowire(service: 'advanced_router')] private readonly ?AdvancedRouterInterface $router = null,
+        private readonly ?TokenStorageInterface $tokens = null,
     ) {
     }
 
@@ -43,7 +54,29 @@ class DemoBackOfficeSubscriber implements EventSubscriberInterface
     {
         // After the user is known (UserProviderListener, 1024) and checked
         // (UserCheckerListener, 256), before the stored password is (CheckCredentialsListener, 0).
-        return [CheckPassportEvent::class => ['onCheckPassport', 128]];
+        return [
+            CheckPassportEvent::class => ['onCheckPassport', 128],
+            // After the firewall (8) has signed the visitor in, before the controller.
+            KernelEvents::REQUEST => ['onRequest', 4],
+        ];
+    }
+
+    public function onRequest(RequestEvent $event): void
+    {
+        if (!$event->isMainRequest() || null === $this->router || null === $this->tokens) {
+            return;
+        }
+
+        $user = $this->tokens->getToken()?->getUser();
+        if (null === $user || $this->accounts->isAdministrator($user)) {
+            return;
+        }
+
+        $request = $event->getRequest();
+        $path = $request->getPathInfo();
+        if ('/admin' === $path || str_starts_with($path, '/admin/') || ('security_rescue' !== $request->attributes->get('_route') && $this->router->isAdmin($request))) {
+            throw new AccessDeniedHttpException('The back office is not part of the demonstration.');
+        }
     }
 
     public function onCheckPassport(CheckPassportEvent $event): void

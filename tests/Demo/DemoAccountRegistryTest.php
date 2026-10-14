@@ -112,4 +112,24 @@ class DemoAccountRegistryTest extends TestCase
         $this->assertSame(['client'], array_keys((new DemoAccountRegistry($accounts, [], $hierarchy, ['ROLE_STAFF']))->offered()));
         $this->assertSame(['boutique', 'gerant', 'cuisine', 'client'], array_keys((new DemoAccountRegistry($accounts, [], $hierarchy, []))->offered()));
     }
+
+    public function testEachRoleBelowTheBackOfficeHasAnAccount(): void
+    {
+        $hierarchy = new RoleHierarchy(['ROLE_SUPERADMIN' => ['ROLE_ADMIN'], 'ROLE_ADMIN' => ['ROLE_STAFF'], 'ROLE_MANAGER' => ['ROLE_ADMIN'], 'ROLE_EDITOR' => ['ROLE_SUPERADMIN']]);
+        $roles = ['ROLE_EDITOR', 'ROLE_SUPERADMIN', 'ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_STAFF', 'ROLE_ARTIST', 'ROLE_USER'];
+
+        $registry = new DemoAccountRegistry([$this->provider([
+            new DemoAccount('boutique', 'La boutique', roles: ['ROLE_ADMIN']),
+            new DemoAccount('client', 'Client'),
+        ])], [], $hierarchy);
+        $this->assertSame(['ROLE_STAFF', 'ROLE_ARTIST'], $registry->missingRoles($roles), 'the back office\'s roles need none; ROLE_USER is any account\'s');
+
+        $registry = new DemoAccountRegistry([$this->provider([
+            new DemoAccount('cuisine', 'La cuisine', roles: ['ROLE_STAFF']),
+            new DemoAccount('artiste', 'Artiste', group: 'Artistes', groupRoles: ['ROLE_ARTIST']),
+        ])], [], $hierarchy);
+        $this->assertSame([], $registry->missingRoles($roles), 'a group\'s role counts');
+
+        $this->assertSame(['ROLE_USER'], (new DemoAccountRegistry([], [], $hierarchy))->missingRoles(['ROLE_ADMIN', 'ROLE_USER']), 'no account at all: not even the public\'s');
+    }
 }

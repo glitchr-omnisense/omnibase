@@ -2,6 +2,7 @@
 
 namespace Base\Demo;
 
+use Doctrine\DBAL\Types\Type;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
@@ -19,6 +20,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * A declared account that opens the back office (base.demo.admin_roles) is
  * created like the others and offered to nobody: offered() leaves it out.
+ *
+ * A demonstration has one account for each role of the application's
+ * `user_role` type (App\Enum\UserRole, else Base\Enum\UserRole) below the
+ * back office: missingRoles() names those without one.
  */
 class DemoAccountRegistry
 {
@@ -80,6 +85,37 @@ class DemoAccountRegistry
     public function offered(): array
     {
         return array_filter($this->all(), fn (DemoAccount $account): bool => !$this->reachesAdministration($account->getAllRoles()));
+    }
+
+    /**
+     * The roles of the application's `user_role` type (or of $roles) that no
+     * account offered holds - leaving out those that open the back office.
+     * ROLE_USER is everyone's: any account offered holds it. Empty when the
+     * demonstration has one account for each role it should.
+     *
+     * @param string[]|null $roles null: the constants of the `user_role` type
+     *
+     * @return string[]
+     */
+    public function missingRoles(?array $roles = null): array
+    {
+        if (null === $roles) {
+            if (!class_exists(Type::class) || !Type::hasType('user_role')) {
+                return [];
+            }
+            $roles = Type::getType('user_role')::getPermittedValues();
+        }
+
+        $offered = $this->offered();
+        $held = $offered ? ['ROLE_USER'] : [];
+        foreach ($offered as $account) {
+            $held = [...$held, ...$account->getAllRoles()];
+        }
+
+        return array_values(array_filter(
+            array_unique(array_map('strval', $roles)),
+            fn (string $role): bool => !\in_array($role, $held, true) && !$this->reachesAdministration([$role]) && !$this->reachesSuperAdmin([$role]),
+        ));
     }
 
     public function get(?string $identifier): ?DemoAccount

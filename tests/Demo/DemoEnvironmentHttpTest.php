@@ -224,6 +224,26 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->assertNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());
     }
 
+    public function testTheBackOfficeOpensToItsOwnAccountAlone(): void
+    {
+        // Signed in at a click: the back office answers 403, page and sub-page.
+        $form = $this->demoForm((string) $this->browse('/login')->getContent(), TestDemoAccounts::MEMBER);
+        $this->browse($form['@action'], 'POST', ['_token' => $form['_token'], 'account' => $form['account']]);
+        $this->browse('/settings');
+        $this->assertSame(TestDemoAccounts::MEMBER, static::getContainer()->get('security.token_storage')->getToken()?->getUser()?->getEmail());
+        foreach (['/admin', '/admin/users'] as $path) {
+            $this->assertSame(403, $this->browse($path)->getStatusCode(), $path);
+        }
+        $this->assertSame(200, $this->browse('/settings')->getStatusCode(), 'the rest of the site is open');
+
+        // Its own account, signed in with the secret: not refused here.
+        self::ensureKernelShutdown();
+        $_SERVER['DEMO_ADMIN_PASSWORD'] = $_ENV['DEMO_ADMIN_PASSWORD'] = self::BACK_OFFICE_SECRET;
+        $this->bootIn(DemoMode::ENVIRONMENT);
+        $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => self::BACK_OFFICE_SECRET]]);
+        $this->assertNotSame(403, $this->browse('/admin')->getStatusCode());
+    }
+
     public function testTheBannerIsPrintedAndNamesTheDemonstrationAccountToAVisitor(): void
     {
         $html = static::getContainer()->get('twig')->render('@Base/demo/_banner.html.twig');
