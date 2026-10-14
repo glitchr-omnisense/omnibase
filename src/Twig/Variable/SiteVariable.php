@@ -172,10 +172,18 @@ class SiteVariable
         return $this->launcher->since($locale);
     }
 
+    /**
+     * Whether the visitor has not been seen within the last $within seconds,
+     * remembered in the cookie USER/LAST_VISIT - which a visitor who refused
+     * the site's own cookies (USER) is not given: such a visitor is a
+     * newcomer at each page.
+     */
     public function is_newcomer(int $within = 0): bool
     {
         $lastVisit = $_COOKIE['USER/LAST_VISIT'] ?? 0;
-        setcookie('USER/LAST_VISIT', time(), time() + $within, '/', parse_url2(get_url())['domain'] ?? '');
+        if (!\Base\Security\CookieAnswer::refused('USER')) {
+            setcookie('USER/LAST_VISIT', time(), time() + $within, '/', parse_url2(get_url())['domain'] ?? '');
+        }
 
         return !$lastVisit;
     }

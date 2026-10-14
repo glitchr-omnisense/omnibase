@@ -216,7 +216,9 @@ bundle a group is written until `Cookie.setConsent(false, group)` refuses it):
 | `USER/THEME/*` | a site's theme switch | `USER` |
 | `ANALYTICS/VISITOR_ID` | a site's own script, if it counts unique visitors (`Cookie.set('ANALYTICS', 'VISITOR_ID', ...)`) - the core only reads it (`PageViewSubscriber`) | `ANALYTICS` |
 
-The server reads them and writes none of these: `User::getCookie('timezone')`
+| `USER/LAST_VISIT` | the server, when a template asks `app.site.is_newcomer()` - not for a visitor who refused `USER` (`Base\Security\CookieAnswer::refused('USER')` reads the answer the script keeps in the cookie `cookie-consent`) | `USER` |
+
+The server reads the others and writes none of them: `User::getCookie('timezone')`
 is `LOCATION/TIMEZONE`, else `USER/INFO`'s; `getCookie('country')` is read
 from that zone. A script of a site writes its own the same way
 (`Cookie.set('USER', 'THEME/MODE', mode, ...)`, or
