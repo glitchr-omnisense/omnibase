@@ -992,8 +992,11 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["language"] = $this->localizer->getLocaleLang($this->localizer->getLocale($options["language"]));
             }
 
-            if (!array_key_exists("tokenSeparators", $selectOpts)) {
-                $selectOpts["tokenSeparators"] = $selectOpts["tokenSeparators"] ?? $options["tokenSeparators"];
+            // Separators cut what is typed into new choices: tags only. Without tags, select2's
+            // tokenizer meets a separator - a space in "Cours élémentaire" - and throws
+            // (_removeOldTags is not a function, the Tags decorator's): the search stopped there.
+            if (!array_key_exists("tokenSeparators", $selectOpts) && $options["tags"]) {
+                $selectOpts["tokenSeparators"] = $options["tokenSeparators"];
             }
             if (!array_key_exists("allowClear", $selectOpts)) {
                 $selectOpts["allowClear"] = array_key_exists("required", $options) && !$options["required"];
