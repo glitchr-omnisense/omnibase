@@ -3,6 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Demo\DemoAccountFactory;
+use Base\Demo\DemoAccountRegistry;
 use Base\Demo\DemoGuard;
 use Base\Demo\DemoMode;
 use Base\Exception\DemoRefusedException;
@@ -60,6 +61,7 @@ class DemoResetCommand extends Command
         #[Autowire('%base.demo.reset.purge%')] private readonly array $purge = [],
         #[Autowire('%base.demo.reset.orphans%')] private readonly bool $orphans = true,
         #[Autowire('%base.demo.reset.groups%')] private readonly array $groups = [],
+        private readonly ?DemoAccountRegistry $registry = null,
     ) {
         parent::__construct();
     }
@@ -119,6 +121,10 @@ class DemoResetCommand extends Command
                 $this->accounts->load();
                 $this->doctrine?->getManager()->flush();
                 $this->say($output, sprintf('demonstration account(s) created: %s.', implode(', ', $missing)));
+            }
+
+            if ($roles = $this->registry?->missingRoles()) {
+                $this->say($output, sprintf('no demonstration account for %s: declare one for each role below the back office (DemoAccountProviderInterface).', implode(', ', $roles)), 'warning');
             }
 
             if ($this->orphans && !$input->getOption('keep-files')) {
