@@ -27,7 +27,7 @@ class PermissionCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->onlyOnIndex();
         yield TextField::new('tag')->setColumns(4);
-        yield IconField::new('icon')->setColumns(2);
+        yield IconField::new('icon')->setRequired(false)->setColumns(2);
         yield TextareaField::new('description')->setColumns(6);
         // Roles this permission empowers when granted, independent of the
         // group hierarchy - see Permission::getEmpoweredRoles()/setEmpoweredRoles().

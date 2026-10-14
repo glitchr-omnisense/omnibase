@@ -141,7 +141,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             throw new Exception(sprintf(
                 'findByExample() received a select (%s) with no queryable set fields — refusing to match the whole "%s" table. Use findAll() instead.',
                 get_class($select),
-                $this->getFqcnEntityName()
+                $this->getClassName()
             ));
         }
 
@@ -220,7 +220,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
      */
     public function persist($entity, bool $flush = false): void
     {
-        $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
+        $entityClass = $this->getClassName();
         if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
             throw new Exception("Repository \"" . static::class . "\" is expected \"" . $entityClass . "\" entity, you passed \"" . $class . "\"");
@@ -235,7 +235,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public function remove($entity, bool $flush = false): void
     {
-        $entityClass = \property_exists($this, '_entityName') ? $this->_entityName : $this->getFqcnEntityName(); // Doctrine ORM 2 vs. 3
+        $entityClass = $this->getClassName();
         if (!is_object($entity) || (!$entity instanceof $entityClass && !is_subclass_of($entity, $entityClass))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
             throw new Exception("Repository \"" . static::class . "\" is expected \"" . $entityClass . "\" entity, you passed \"" . $class . "\"");

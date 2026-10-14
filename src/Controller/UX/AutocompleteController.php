@@ -3,6 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Repository\ServiceEntityRepository;
 
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Autocomplete;
@@ -11,6 +12,7 @@ use Base\Service\PaginatorInterface;
 use Base\Service\TradingInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Attribute\Route;
@@ -63,8 +65,14 @@ class AutocompleteController extends AbstractController
      */
     private RequestStack $requestStack;
 
-    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null)
+    /**
+     * @var ManagerRegistry|null
+     */
+    protected ?ManagerRegistry $doctrine;
+
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null, ?ManagerRegistry $doctrine = null)
     {
+        $this->doctrine = $doctrine;
         $this->requestStack = $requestStack;
         $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
@@ -129,7 +137,7 @@ class AutocompleteController extends AbstractController
             $results = [];
             $pagination = false;
             if ($this->classMetadataManipulator->isEntity($class)) {
-                $repository = $this->entityManager->getRepository($class);
+                $repository = $this->repository($class);
 
                 if (!is_associative($fields)) {
                     $fields = array_fill_keys($fields, $term);
@@ -205,6 +213,30 @@ class AutocompleteController extends AbstractController
         return new JsonResponse("Invalid request", 500);
     }
 
+
+    /**
+     * The repository a picker looks into: the entity's own when it is
+     * omnibase's (cacheByInstanceOf() and the other finders are its parser's);
+     * else one of omnibase's built for the class. A bundle's plain Doctrine
+     * repository - DoctrineBundle's ServiceEntityRepository, an
+     * EntityRepository, which an entity inheriting another's mapping gets
+     * when it names none (omnibase/classroom's levels and subjects, Taxon's) -
+     * answers no such method: the search answered 500 ("Undefined method
+     * cacheByInstanceOf"), and the picker stayed on "Searching...".
+     */
+    protected function repository(string $class): ServiceEntityRepository
+    {
+        $repository = $this->entityManager->getRepository($class);
+        if ($repository instanceof ServiceEntityRepository) {
+            return $repository;
+        }
+
+        if (null === $this->doctrine) {
+            throw new \LogicException('The repository of '.$class.' is no omnibase repository, and no ManagerRegistry was given to build one.');
+        }
+
+        return new ServiceEntityRepository($this->doctrine, $class);
+    }
 
     #[Route("/ux/autocomplete/currency/{source}/{target}/{data}", name:"ux_autocomplete_forex")]
     public function Forex(Request $request, string $source, string $target, string $data, ?Profiler $profiler = null): Response
