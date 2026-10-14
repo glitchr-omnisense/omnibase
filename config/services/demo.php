@@ -57,8 +57,8 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
         ->tag('kernel.event_subscriber')
         ->tag('monolog.logger', ['channel' => 'demo']);
 
-    // The super-administrator signs in with the secret, or not at all.
-    $services->set('Base\Subscriber\DemoSuperAdminSubscriber')
+    // The back office is not public: its accounts and the super-administrator sign in with a secret each, or not at all.
+    $services->set('Base\Subscriber\DemoBackOfficeSubscriber')
         ->tag('kernel.event_subscriber');
 
     // A demonstration account keeps its identifier, address, password and second factor.

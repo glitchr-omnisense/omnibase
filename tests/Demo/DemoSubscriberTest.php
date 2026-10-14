@@ -3,8 +3,8 @@
 namespace Tests\Base\Demo;
 
 use Base\Demo\DemoAccountRegistry;
+use Base\Subscriber\DemoBackOfficeSubscriber;
 use Base\Subscriber\DemoSubscriber;
-use Base\Subscriber\DemoSuperAdminSubscriber;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,8 +26,8 @@ use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 
 /**
  * The demonstration's safeguards one by one: no page indexed, no e-mail
- * sent, and a super-administrator who signs in with the secret or not at
- * all.
+ * sent, and a back office - its accounts, the super-administrator - that
+ * signs in with a secret or not at all.
  */
 class DemoSubscriberTest extends TestCase
 {
@@ -49,9 +49,9 @@ class DemoSubscriberTest extends TestCase
         }
     }
 
-    private function check(?string $secret, Passport $passport): void
+    private function check(?string $secret, Passport $passport, ?string $adminSecret = null): void
     {
-        (new DemoSuperAdminSubscriber(new DemoAccountRegistry(), $secret))
+        (new DemoBackOfficeSubscriber(new DemoAccountRegistry(), $secret, $adminSecret))
             ->onCheckPassport(new CheckPassportEvent($this->createMock(AuthenticatorInterface::class), $passport));
     }
 
@@ -88,9 +88,35 @@ class DemoSubscriberTest extends TestCase
         $this->check('not-a-real-secret-example', $this->passport(['ROLE_SUPERADMIN'], 'glitchr'));
     }
 
+    public function testAnAccountOfTheBackOfficeSignsInWithItsOwnSecretOrNotAtAll(): void
+    {
+        // No secret of its own: unusable, and the super-administrator's is not its.
+        foreach ([null, ''] as $adminSecret) {
+            try {
+                $this->check('not-a-real-secret-example', $this->passport(['ROLE_ADMIN'], 'glitchr'), $adminSecret);
+                $this->fail('the back office opened without a secret');
+            } catch (CustomUserMessageAuthenticationException $e) {
+                $this->assertSame('This account is not available in the demonstration.', $e->getMessageKey());
+            }
+        }
+
+        $passport = $this->passport(['ROLE_ADMIN'], 'the-back-office-secret-example');
+        $this->check(null, $passport, 'the-back-office-secret-example');
+        $this->assertTrue($passport->getBadge(PasswordCredentials::class)->isResolved());
+
+        // The password everyone knows opens nothing; nor does the back office's secret open the super-administrator.
+        try {
+            $this->check(null, $this->passport(['ROLE_ADMIN'], 'glitchr'), 'the-back-office-secret-example');
+            $this->fail('signed in with the stored password');
+        } catch (BadCredentialsException) {
+        }
+        $this->expectException(BadCredentialsException::class);
+        $this->check('not-a-real-secret-example', $this->passport(['ROLE_SUPERADMIN'], 'the-back-office-secret-example'), 'the-back-office-secret-example');
+    }
+
     public function testAnyOtherAccountIsLeftToTheUsualCheck(): void
     {
-        $passport = $this->passport(['ROLE_ADMIN'], 'whatever');
+        $passport = $this->passport(['ROLE_STAFF'], 'whatever');
         $this->check(null, $passport);
 
         $this->assertFalse($passport->getBadge(PasswordCredentials::class)->isResolved());

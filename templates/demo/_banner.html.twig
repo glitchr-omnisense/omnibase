@@ -4,16 +4,33 @@
 
         {{ include('@Base/demo/_banner.html.twig') }}
 
+    To a visitor who is not signed in it names the demonstration account - the first one offered
+    (demo_accounts(): never one that opens the back office) - with what it signs in with, and links
+    to the sign-in page, where a click does it and the other roles are. No form here: a form needs
+    a CSRF token, a token a session, and no public page starts one.
+
     Its colours are two custom properties a site may set (--demo-banner-bg, --demo-banner-fg);
     to rewrite it, templates/bundles/BaseBundle/demo/_banner.html.twig.
 #}
 {% if demo_mode() %}
+{% set accounts = app.user ? [] : demo_accounts() %}
 <div class="base-demo-banner" role="note" data-demo-banner>
     <strong>{{ '@demo.banner.title'|trans }}</strong><span aria-hidden="true"> — </span>{{ '@demo.banner.text'|trans }}
+    {%- if accounts is not empty -%}
+    {%- set account = accounts|first -%}
+    <span class="base-demo-banner-sep" aria-hidden="true"> · </span><span class="base-demo-banner-account" data-demo-notice="{{ account.identifier }}">
+        {{- '@demo.notice.account'|trans({label: account.label|trans, identifier: account.identifier, password: account.getPassword()}) -}}
+        {%- if not app.request or app.request.attributes.get('_route') != 'security_login' %} <a href="{{ path('security_login') }}">{{ '@demo.notice.sign_in'|trans({count: accounts|length}) }}</a>{% endif -%}
+    </span>
+    {%- endif %}
+
 </div>
 <style>
     .base-demo-banner { margin: 0; padding: .35rem 1rem; text-align: center; font: 500 12.5px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: .01em; background: var(--demo-banner-bg, #1c1c1c); color: var(--demo-banner-fg, #fff); position: relative; z-index: 1000; }
     .base-demo-banner strong { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: .92em; }
+    /* The account's sentence beside the first one, and under it where the line is short. */
+    @media (max-width: 60rem) { .base-demo-banner-sep { display: none; } .base-demo-banner-account { display: block; } }
+    .base-demo-banner a { color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
     @media print { .base-demo-banner { display: none; } }
 </style>
 {% endif %}

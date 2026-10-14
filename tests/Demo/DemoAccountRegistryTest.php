@@ -89,4 +89,27 @@ class DemoAccountRegistryTest extends TestCase
         $this->expectException(\LogicException::class);
         $registry->all();
     }
+
+    public function testAnAccountThatOpensTheBackOfficeIsDeclaredAndOfferedToNobody(): void
+    {
+        $hierarchy = new RoleHierarchy(['ROLE_SUPERADMIN' => ['ROLE_ADMIN'], 'ROLE_ADMIN' => ['ROLE_STAFF'], 'ROLE_MANAGER' => ['ROLE_ADMIN']]);
+        $accounts = [$this->provider([
+            new DemoAccount('boutique', 'La boutique', roles: ['ROLE_ADMIN'], position: 10),
+            new DemoAccount('gerant', 'Le gérant', group: 'Gérance', groupRoles: ['ROLE_MANAGER'], position: 20),
+            new DemoAccount('cuisine', 'La cuisine', roles: ['ROLE_STAFF'], position: 30),
+            new DemoAccount('client', 'Client', position: 40),
+        ])];
+
+        $registry = new DemoAccountRegistry($accounts, [], $hierarchy);
+        $this->assertSame(['boutique', 'gerant', 'cuisine', 'client'], array_keys($registry->all()), 'the fixtures create them all');
+        $this->assertSame(['cuisine', 'client'], array_keys($registry->offered()), 'a visitor is offered those below the back office');
+        $this->assertTrue($registry->reachesAdministration(['ROLE_MANAGER']), 'through the hierarchy');
+        $this->assertFalse($registry->reachesAdministration(['ROLE_STAFF']));
+        $this->assertTrue($registry->isAdministrator(new InMemoryUser('root', null, ['ROLE_SUPERADMIN'])), 'the super-administrator\'s roles reach it');
+        $this->assertFalse($registry->isAdministrator(null));
+
+        // base.demo.admin_roles: another role opens the back office here - or none, and it is as public as the rest.
+        $this->assertSame(['client'], array_keys((new DemoAccountRegistry($accounts, [], $hierarchy, ['ROLE_STAFF']))->offered()));
+        $this->assertSame(['boutique', 'gerant', 'cuisine', 'client'], array_keys((new DemoAccountRegistry($accounts, [], $hierarchy, []))->offered()));
+    }
 }

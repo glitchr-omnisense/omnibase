@@ -43,7 +43,7 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
 
         $this->assertFalse(static::getContainer()->has('Base\\Controller\\DemoController'));
         $this->assertFalse(static::getContainer()->has('Base\\Subscriber\\DemoSubscriber'));
-        $this->assertFalse(static::getContainer()->has('Base\\Subscriber\\DemoSuperAdminSubscriber'));
+        $this->assertFalse(static::getContainer()->has('Base\\Subscriber\\DemoBackOfficeSubscriber'));
         $this->assertFalse(static::getContainer()->has('Base\\DatabaseSubscriber\\DemoAccountLockSubscriber'));
 
         $this->browse('/settings');

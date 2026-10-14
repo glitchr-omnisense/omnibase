@@ -8,7 +8,9 @@ order: 45
 A fourth environment beside dev, test and prod: `APP_ENV=demo` runs a site as
 a **demonstration** - production's behaviour (no debug), a database of its
 own, and accounts that are always there, one for each role of the trade. A
-visitor opens the sign-in page, clicks "Médecin" or "Patient", and is in.
+visitor reads the account's name in the banner of any page, opens the sign-in
+page, clicks "Patient", and is in. The back office is not part of what is
+public: [its accounts sign in with a secret](#the-back-office).
 
 Everything below lives in glitchr/omnibase and is active when
 `kernel.environment` is `demo`, and only then. In dev, test and prod none of
@@ -54,6 +56,20 @@ final class DemoAccounts implements DemoAccountProviderInterface
   whose roles reach `ROLE_SUPERADMIN` - its own, its group's, or through
   `security.role_hierarchy` (a `ROLE_EDITOR` above it) - is refused with a
   `LogicException` as soon as the registry is read, in every environment.
+- **An account that opens the back office is declared, and offered to
+  nobody.** One whose roles reach `base.demo.admin_roles` (`[ROLE_ADMIN]`,
+  through the hierarchy too) is created by the fixtures as the others are -
+  dev and the tests sign in with it - and in `demo` it is neither in the
+  banner nor on the sign-in page: `DemoAccountRegistry::offered()` is the
+  list without them. See [The back office](#the-back-office).
+
+### One account for each role, not for each permission
+
+A role gets an account when it has **a space of its own** - the tenant's
+rents, the seller's orders, the kitchen's screen: what a visitor comes to
+see. Two roles that open the same pages with one button more or less share an
+account. The banner names one account, the first offered (`position`); the
+others wait on the sign-in page.
 
 ### In the fixtures
 
@@ -84,7 +100,7 @@ otherwise.
 ## On the sign-in page
 
 `@Base/demo/_accounts.html.twig` prints "Comptes de démonstration": one button
-for each declared account that exists. omnibase's own sign-in page includes
+for each account offered that exists. omnibase's own sign-in page includes
 it; an application with its own `templates/security/login.html.twig` adds the
 line under its form:
 
@@ -95,9 +111,9 @@ line under its form:
 Each button is a **POST form with a CSRF token** to `security_loginDemo`
 (`/login/demo`) - never a link: a GET that signs in is followed by a prefetch,
 a crawler, a link preview. The route is declared for the `demo` environment
-only. `Base\Controller\DemoController` signs in a declared account and
-nothing else: an identifier nobody declared, or an account promoted to
-super-administrator since, is sent back to the sign-in page.
+only. `Base\Controller\DemoController` signs in an account that is offered
+and nothing else: an identifier nobody declared, an account of the back
+office, or one promoted to it since, is sent back to the sign-in page.
 
 The partial prints nothing outside `demo`. Its look hangs on
 `.base-demo-accounts` (it inherits the page's colours). A button and its
@@ -123,6 +139,20 @@ office shows it too:
 Two custom properties set its colours (`--demo-banner-bg`,
 `--demo-banner-fg`); `templates/bundles/BaseBundle/demo/_banner.html.twig`
 rewrites it.
+
+### The account, on every page
+
+To a visitor who is not signed in, the banner goes on: "Compte de
+démonstration « Client » : identifiant client, mot de passe client. Se
+connecter" - the first account offered, what it signs in with, and a link to
+the sign-in page ("Se connecter ou choisir un autre rôle" when there are
+several). A site that includes the banner has nothing to add; a site with no
+account to offer keeps the banner's first sentence alone. Signed in, the
+sentence is gone.
+
+It is a sentence and a link, not a button: a button that signs in is a form
+with a CSRF token, a token needs a session, and no public page starts one for
+a visitor who only reads.
 
 ## `demo:reset`
 
@@ -176,6 +206,7 @@ the same checkout.
 | **Indexing** | `X-Robots-Tag: noindex, nofollow` on every response. |
 | **A demonstration account's credentials** | Its identifier, address, password, one-time code, e-mail code and backup codes do not change; it is not disabled nor deleted. |
 | **The staff's second factor** | `base.security.two_factor.required_roles` and the administrator's "mandatory for everyone" are lifted **for the demonstration accounts**; any other account is asked as usual. |
+| **The back office** | Its accounts (`base.demo.admin_roles`) are offered to nobody and sign in with `base.demo.admin_password` (the `DEMO_ADMIN_PASSWORD` secret) or not at all. |
 | **The super-administrator** | Signs in with `base.demo.superadmin_password` (the `DEMO_SUPERADMIN_PASSWORD` secret) or not at all. |
 | **Starting** | Refused in debug, and on the production database. |
 | **Payments** | omnibase/marketplace offers its `dev` gateway and none of glitchr/omnitrade's (its `docs/dev-gateway-and-keys.md`). |
@@ -223,11 +254,49 @@ $policy->canEnableTwoFactor($user);     // false for it
 $policy->needsEnrolment($user);         // false for it, whatever its roles
 ```
 
+### The back office
+
+A demonstration's password is its identifier: whoever reads "client / client"
+in the banner can guess "gestion / gestion". Behind the back office are the
+accounts of the visitors who signed up that day, the settings, the uploads -
+what one visitor writes there, every other one reads until the night's reset.
+So it is not public.
+
+In `demo`, an account whose roles reach `base.demo.admin_roles`
+(`[ROLE_ADMIN]` by default; through `security.role_hierarchy` too) -
+declared as a demonstration account or not:
+
+- is **not offered**: not in the banner, not on the sign-in page, not signed
+  in by `/login/demo`;
+- **signs in with `base.demo.admin_password`** - by default
+  `%env(default::DEMO_ADMIN_PASSWORD)%` - typed in the ordinary sign-in form
+  with its identifier ("gestion"). The stored password is not looked at.
+  Unset or empty, it cannot sign in by any means.
+
+`DEMO_ADMIN_PASSWORD` is the secret given to whoever is shown the back
+office - a prospect, for the time of a presentation; changing it closes the
+door again. It is the deployment's, like the super-administrator's: a real
+environment variable or `.env.demo.local`, never `.env.demo`. Once in, the
+account is a demonstration account like the others: its credentials do not
+change, the staff's second factor is not asked of it.
+
+```yaml
+when@demo:
+    base:
+        demo:
+            admin_roles: [ROLE_ADMIN, ROLE_MANAGER]   # another role opens the back office here
+            # admin_roles: []                         # ...or none: the back office as public as the rest
+```
+
+A role below these - the kitchen's `ROLE_STAFF`, a practitioner's group -
+stays public, with whatever pages of the back office the application opens
+to it: name it in `admin_roles` when those pages are not for everyone.
+
 ### The super-administrator
 
 The fixtures give Glitch Art's account a password everyone knows
 ("glitchr" / "glitchr"); a demonstration is public. In `demo`,
-`Base\Subscriber\DemoSuperAdminSubscriber` compares what is typed with
+`Base\Subscriber\DemoBackOfficeSubscriber` compares what is typed with
 `base.demo.superadmin_password` - by default
 `%env(default::DEMO_SUPERADMIN_PASSWORD)%` - and never looks at the stored
 password. Unset or empty, an account whose roles reach `ROLE_SUPERADMIN`
@@ -314,6 +383,8 @@ base:
     demo:
         production_database: ~            # DSN of production's database; required in demo
         superadmin_password: '%env(default::DEMO_SUPERADMIN_PASSWORD)%'
+        admin_roles: [ROLE_ADMIN]         # the roles that open the back office: not offered, signed in by the secret
+        admin_password: '%env(default::DEMO_ADMIN_PASSWORD)%'
         exclude: []                       # declared identifiers this site leaves out
         reset:
             purge: []                     # directories demo:reset empties before the fixtures
@@ -324,7 +395,7 @@ base:
 | | |
 |---|---|
 | `Base\Demo\DemoAccount`, `DemoAccountProviderInterface` | a declaration, and who declares |
-| `Base\Demo\DemoAccountRegistry` | every declaration; `get()`, `of($user)`, `isSuperAdmin($user)` |
+| `Base\Demo\DemoAccountRegistry` | every declaration (`all()`), the ones a visitor is offered (`offered()`); `get()`, `of($user)`, `isAdministrator($user)`, `isSuperAdmin($user)` |
 | `Base\Demo\DemoAccountFactory` | the rows: `account()`, `load()`, `missing()` |
 | `Base\Demo\DemoMode` | `isActive()`: the `demo` environment, and no other |
 | `Base\Demo\DemoGuard` | what demo refuses to start on |

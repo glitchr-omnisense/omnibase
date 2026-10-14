@@ -16,6 +16,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * It exists in every environment - the fixtures of dev and test create the
  * same accounts as the demonstration's - but only the `demo` environment
  * does anything with it at sign-in (DemoMode).
+ *
+ * A declared account that opens the back office (base.demo.admin_roles) is
+ * created like the others and offered to nobody: offered() leaves it out.
  */
 class DemoAccountRegistry
 {
@@ -26,12 +29,14 @@ class DemoAccountRegistry
 
     /**
      * @param iterable<DemoAccountProviderInterface> $providers
-     * @param string[]                               $exclude   identifiers left out (base.demo.exclude)
+     * @param string[]                               $exclude    identifiers left out (base.demo.exclude)
+     * @param string[]                               $adminRoles the roles that open the back office (base.demo.admin_roles)
      */
     public function __construct(
         #[AutowireIterator('base.demo_account_provider')] private readonly iterable $providers = [],
         #[Autowire('%base.demo.exclude%')] private readonly array $exclude = [],
         private readonly ?RoleHierarchyInterface $roleHierarchy = null,
+        #[Autowire('%base.demo.admin_roles%')] private readonly array $adminRoles = ['ROLE_ADMIN'],
     ) {
     }
 
@@ -64,6 +69,17 @@ class DemoAccountRegistry
         uasort($accounts, static fn (DemoAccount $a, DemoAccount $b): int => [$a->position, $rank[$a->identifier]] <=> [$b->position, $rank[$b->identifier]]);
 
         return $this->accounts = $accounts;
+    }
+
+    /**
+     * The declared accounts a visitor is offered - in the banner, on the
+     * sign-in page, at a click: every one but those that open the back office.
+     *
+     * @return array<string, DemoAccount> by identifier, in the order of the sign-in page
+     */
+    public function offered(): array
+    {
+        return array_filter($this->all(), fn (DemoAccount $account): bool => !$this->reachesAdministration($account->getAllRoles()));
     }
 
     public function get(?string $identifier): ?DemoAccount
@@ -99,16 +115,40 @@ class DemoAccountRegistry
      */
     public function reachesSuperAdmin(array $roles): bool
     {
-        $roles = array_map(static fn ($role): string => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $roles);
-        if ($this->roleHierarchy) {
-            $roles = $this->roleHierarchy->getReachableRoleNames($roles);
-        }
-
-        return \in_array(self::SUPER_ADMIN, $roles, true);
+        return \in_array(self::SUPER_ADMIN, $this->reachable($roles), true);
     }
 
     public function isSuperAdmin(?UserInterface $user): bool
     {
         return null !== $user && $this->reachesSuperAdmin($user->getRoles());
+    }
+
+    /**
+     * Do these roles open the back office - one of base.demo.admin_roles,
+     * directly or through the role hierarchy? A super-administrator's do,
+     * wherever the hierarchy puts ROLE_SUPERADMIN above them.
+     *
+     * @param array<string|\BackedEnum> $roles
+     */
+    public function reachesAdministration(array $roles): bool
+    {
+        return [] !== array_intersect($this->adminRoles, $this->reachable($roles));
+    }
+
+    public function isAdministrator(?UserInterface $user): bool
+    {
+        return null !== $user && $this->reachesAdministration($user->getRoles());
+    }
+
+    /**
+     * @param array<string|\BackedEnum> $roles
+     *
+     * @return string[]
+     */
+    private function reachable(array $roles): array
+    {
+        $roles = array_map(static fn ($role): string => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $roles);
+
+        return $this->roleHierarchy ? $this->roleHierarchy->getReachableRoleNames($roles) : $roles;
     }
 }

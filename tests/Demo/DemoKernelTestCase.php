@@ -61,7 +61,7 @@ abstract class DemoKernelTestCase extends KernelTestCase
             }
         }
         $this->created = [];
-        unset($_SERVER['DEMO_SUPERADMIN_PASSWORD'], $_ENV['DEMO_SUPERADMIN_PASSWORD'], $_SERVER['DEMO_TEST_PRODUCTION_DATABASE'], $_ENV['DEMO_TEST_PRODUCTION_DATABASE']);
+        unset($_SERVER['DEMO_SUPERADMIN_PASSWORD'], $_ENV['DEMO_SUPERADMIN_PASSWORD'], $_SERVER['DEMO_ADMIN_PASSWORD'], $_ENV['DEMO_ADMIN_PASSWORD'], $_SERVER['DEMO_TEST_PRODUCTION_DATABASE'], $_ENV['DEMO_TEST_PRODUCTION_DATABASE']);
 
         parent::tearDown();
     }

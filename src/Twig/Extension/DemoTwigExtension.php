@@ -16,7 +16,8 @@ use Twig\TwigFunction;
  *     {% for account in demo_accounts() %}   the declared accounts a visitor may sign in as
  *
  * @Base/demo/_banner.html.twig and @Base/demo/_accounts.html.twig are what a
- * layout and a sign-in page include; both print nothing outside `demo`.
+ * layout and a sign-in page include; both print nothing outside `demo`. The
+ * banner names the first of these accounts to a visitor who is not signed in.
  */
 class DemoTwigExtension extends AbstractExtension
 {
@@ -37,7 +38,8 @@ class DemoTwigExtension extends AbstractExtension
 
     /**
      * The declared accounts that exist and may be signed in as - none
-     * outside `demo`, and never one whose roles reach ROLE_SUPERADMIN.
+     * outside `demo`, and never one that opens the back office
+     * (base.demo.admin_roles; the super-administrator's roles reach them).
      *
      * @return DemoAccount[]
      */
@@ -48,13 +50,14 @@ class DemoTwigExtension extends AbstractExtension
         }
 
         $accounts = [];
-        foreach ($this->registry->all() as $identifier => $account) {
+        foreach ($this->registry->offered() as $identifier => $account) {
             try {
                 $user = $this->factory->find($identifier);
             } catch (\Throwable) {
                 return []; // no database yet: the page still answers
             }
-            if ($user && !$this->registry->isSuperAdmin($user)) {
+            // Declared as a plain account, promoted since (in the back office): not offered either.
+            if ($user && !$this->registry->isSuperAdmin($user) && !$this->registry->isAdministrator($user)) {
                 $accounts[] = $account;
             }
         }

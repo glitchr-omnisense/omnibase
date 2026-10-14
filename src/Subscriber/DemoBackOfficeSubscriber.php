@@ -13,21 +13,29 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 
 /**
- * The super-administrator in a demonstration (registered in the `demo`
- * environment only): never a demonstration account, and never signed in with
- * the password the fixtures gave it - a public one ("glitchr" / "glitchr").
+ * The back office in a demonstration (registered in the `demo` environment
+ * only): open to nobody with a password everyone knows. Two tiers, a secret
+ * each:
  *
- * Its password is base.demo.superadmin_password, a secret
- * (DEMO_SUPERADMIN_PASSWORD by default): what is typed is compared with it,
- * the password stored in the database is not looked at. While the secret is
- * not set, an account whose roles reach ROLE_SUPERADMIN cannot sign in at
- * all, by any means.
+ *  - the super-administrator, never a demonstration account, and never signed
+ *    in with the password the fixtures gave it ("glitchr" / "glitchr"): its
+ *    password is base.demo.superadmin_password (DEMO_SUPERADMIN_PASSWORD by
+ *    default);
+ *  - an account that opens the back office (base.demo.admin_roles - the
+ *    shop's, the practice's, declared as a demonstration account or not):
+ *    its password is base.demo.admin_password (DEMO_ADMIN_PASSWORD by
+ *    default), the one given to whoever is shown the back office.
+ *
+ * What is typed is compared with the secret, the password stored in the
+ * database is not looked at. While a tier's secret is not set, its accounts
+ * cannot sign in at all, by any means.
  */
-class DemoSuperAdminSubscriber implements EventSubscriberInterface
+class DemoBackOfficeSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private readonly DemoAccountRegistry $accounts,
         #[Autowire('%base.demo.superadmin_password%')] private readonly ?string $password = null,
+        #[Autowire('%base.demo.admin_password%')] private readonly ?string $adminPassword = null,
     ) {
     }
 
@@ -51,16 +59,20 @@ class DemoSuperAdminSubscriber implements EventSubscriberInterface
             return; // nobody of that name: the sign-in fails as usual
         }
 
-        if (!$this->accounts->isSuperAdmin($user)) {
+        if ($this->accounts->isSuperAdmin($user)) {
+            $secret = $this->password;
+        } elseif ($this->accounts->isAdministrator($user)) {
+            $secret = $this->adminPassword;
+        } else {
             return;
         }
 
-        if (null === $this->password || '' === $this->password) {
+        if (null === $secret || '' === $secret) {
             throw new CustomUserMessageAuthenticationException('This account is not available in the demonstration.');
         }
 
         if (!$passport->hasBadge(PasswordCredentials::class)) {
-            return; // a passkey or a "remember me" the super-administrator set up once signed in
+            return; // a passkey or a "remember me" set up once signed in with the secret
         }
 
         /** @var PasswordCredentials $credentials */
@@ -69,7 +81,7 @@ class DemoSuperAdminSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (!hash_equals($this->password, $credentials->getPassword())) {
+        if (!hash_equals($secret, $credentials->getPassword())) {
             throw new BadCredentialsException('The presented password is invalid.');
         }
 
