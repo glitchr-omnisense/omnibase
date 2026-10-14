@@ -32,7 +32,7 @@ class TagCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->onlyOnIndex();
         yield SlugField::new('slug')->setColumns(3);
-        yield IconField::new('icon')->setColumns(3)->hideOnIndex();
+        yield IconField::new('icon')->setRequired(false)->setColumns(3)->hideOnIndex();
         yield NumberField::new('priority')->setColumns(3);
         yield TranslationField::new()->hideOnIndex()->setFields(['label' => []]);
     }

@@ -159,7 +159,9 @@ class ServiceEntityParser
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
-        $this->classMetadata = $entityManager->getClassMetadata($serviceEntity->getFqcnEntityName());
+        // The class the repository was built for (getClassName()): its name read from the repository's own
+        // (getFqcnEntityName()) only when none was given - one built for an entity whose repository is a plain Doctrine one.
+        $this->classMetadata = $entityManager->getClassMetadata($serviceEntity->getClassName());
 
         $this->criteria = [];
         $this->options = [];
@@ -634,7 +636,7 @@ class ServiceEntityParser
             }
             if ($conflictingOption !== null) {
                 throw new Exception(
-                    "\"" . $this->serviceEntity->getFqcnEntityName() . "\" entity has a field called \"$field\". " .
+                    "\"" . $this->serviceEntity->getClassName() . "\" entity has a field called \"$field\". " .
                     "This is unfortunate, because this word (\"$conflictingOption\") is used to customize DQL queries. " .
                     "Please build your own DQL query or change your database field name"
                 );

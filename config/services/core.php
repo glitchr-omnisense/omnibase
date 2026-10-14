@@ -88,6 +88,8 @@ return static function (ContainerConfigurator $container): void {
         }
         if ($id === 'Base\Controller\UX\AutocompleteController') {
             $definition->arg(8, new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+            // An entity whose repository is a plain Doctrine one is searched through omnibase's, built for it.
+            $definition->arg(9, service('doctrine'));
         }
     }
 

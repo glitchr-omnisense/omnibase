@@ -40,7 +40,7 @@ class TaxonCrudController extends AbstractCrudController
             'description' => ['required' => false],
         ])->setColumns(12);
         yield SlugField::new('slug')->setColumns(4);
-        yield IconField::new('icon')->setColumns(4)->hideOnIndex();
+        yield IconField::new('icon')->setRequired(false)->setColumns(4)->hideOnIndex();
         yield SelectField::new('parent')->setClass(static::getEntityFqcn())->setRequired(false)->setColumns(4);
         yield from $this->taxonFields($pageName);
     }
