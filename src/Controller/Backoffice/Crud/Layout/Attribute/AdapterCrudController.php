@@ -53,9 +53,10 @@ class AdapterCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->onlyOnIndex();
         yield TextField::new('code')->setColumns(4);
-        yield IconField::new('icon')->setColumns(4);
+        yield IconField::new('icon')->setRequired(false)->setColumns(4);
         yield TranslationField::new()->showOnIndex('label')->setFields([
-            'label' => ['required' => true],
+            // Asked in the site's language only, as a taxon's.
+            'label' => ['required' => fn (bool $required, string $locale, array $options): bool => $required],
             'help' => ['required' => false],
         ])->setColumns(12);
         yield from $this->adapterFields($pageName);

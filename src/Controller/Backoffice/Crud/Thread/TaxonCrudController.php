@@ -36,10 +36,13 @@ class TaxonCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->onlyOnIndex();
         yield TranslationField::new()->showOnIndex('label')->setFields([
-            'label' => ['required' => true],
+            // The label of the site's language is asked; the others may stay
+            // empty (an empty translation is dropped). `true` asked it in
+            // every language, and no taxon could be made with one label.
+            'label' => ['required' => fn (bool $required, string $locale, array $options): bool => $required],
             'description' => ['required' => false],
         ])->setColumns(12);
-        yield SlugField::new('slug')->setColumns(4);
+        yield SlugField::new('slug')->setTargetFieldName('translations.label')->setColumns(4);
         yield IconField::new('icon')->setRequired(false)->setColumns(4)->hideOnIndex();
         yield SelectField::new('parent')->setClass(static::getEntityFqcn())->setRequired(false)->setColumns(4);
         yield from $this->taxonFields($pageName);
