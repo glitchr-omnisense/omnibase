@@ -25,7 +25,7 @@ longer copied because a package provides it.
 | `bin/`, `public/index.php`, `src/Kernel.php`, `config/bootstrap.php`, `config/preload.php` | nothing |
 | `composer.json` | its name and description; the `require` of its bundles; path `repositories` for the packages not on Packagist yet |
 | `symfony.lock` | nothing - **it is copied with `composer.json`** (see below); `composer.lock` is not, the first `composer install` writes it |
-| `package.json`, `webpack.config.js`, `postcss.config.js` | its name; `@glitchr/flowjs` at the version the core takes (`^1.2.0`, from npm: the core's `base-async` loads its `Flow` first); no `@glitchr/cookie` |
+| `package.json`, `webpack.config.js`, `postcss.config.js` | its name; `@glitchr/flowjs` at the version the core takes (`^1.2.1`, from npm: the core's `base-async` loads its `Flow` first); no `@glitchr/cookie` |
 | `phpunit.xml.dist`, `tests/bootstrap.php`, `tests/Mock/NoNetwork.php` | nothing |
 | `initdb.sql` | the database name |
 
