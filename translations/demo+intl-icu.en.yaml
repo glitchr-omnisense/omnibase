@@ -4,3 +4,6 @@ banner:
 accounts:
     title: "Demonstration accounts"
     intro: "One click opens the site in the chosen role. Nothing is real: no e-mail is sent, no payment is taken."
+notice:
+    account: "Demonstration account “{label}”: identifier {identifier}, password {password}."
+    sign_in: "{count, plural, one {Sign in} other {Sign in or pick another role}}"

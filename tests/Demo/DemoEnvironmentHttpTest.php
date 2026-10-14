@@ -8,16 +8,18 @@ use Base\Service\SecurityPolicy;
 use Tests\Base\Demo\Fixtures\TestDemoAccounts;
 
 /**
- * The `demo` environment as a visitor meets it: the sign-in page lists the
- * declared accounts, a click signs in, the banner and the noindex header are
- * there, the account's password and second factor do not change, the staff's
- * mandatory second factor is lifted for it, and the super-administrator is
- * neither listed nor signed in without the secret.
+ * The `demo` environment as a visitor meets it: the banner names the
+ * demonstration account, the sign-in page lists the declared accounts, a
+ * click signs in, the noindex header is there, the account's password and
+ * second factor do not change, the staff's mandatory second factor is lifted
+ * for it - and the back office is not public: its account and the
+ * super-administrator are neither listed nor signed in without their secret.
  */
 class DemoEnvironmentHttpTest extends DemoKernelTestCase
 {
     private const ROOT = 'demo-root@example.org';
     private const ROOT_STORED_PASSWORD = 'the-password-the-fixtures-gave';
+    private const BACK_OFFICE_SECRET = 'the-back-office-secret-example';
 
     protected function setUp(): void
     {
@@ -27,17 +29,19 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->entityManager()->clear();
     }
 
-    public function testTheSignInPageListsTheDeclaredAccountsAndNotTheSuperAdministrator(): void
+    public function testTheSignInPageListsTheDeclaredAccountsAndNotTheBackOffice(): void
     {
         $response = $this->browse('/login');
         $html = (string) $response->getContent();
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringContainsString('data-demo-accounts', $html);
-        $this->assertStringContainsString('Staff of the practice', $html);
-        $this->assertStringContainsString('The agenda, the patients, the back office.', $html);
         $this->assertStringContainsString('Member of the public', $html);
-        $this->assertLessThan(strpos($html, 'Member of the public'), strpos($html, 'Staff of the practice'), 'in the declared order');
+        $this->assertStringContainsString('Books, pays, reads their own file.', $html);
+        $this->assertStringContainsString('Professional', $html);
+        $this->assertLessThan(strpos($html, 'Professional'), strpos($html, 'Member of the public'), 'in the declared order');
+        $this->assertStringNotContainsString('Staff of the practice', $html, 'the back office is offered to nobody');
+        $this->assertStringNotContainsString('demo-staff', $html);
         // In a narrow sign-in card the sentence goes under its button: the line folds, the sentence asks for 14rem.
         $this->assertMatchesRegularExpression('/\.base-demo-accounts form \{[^}]*flex-wrap: wrap/', $html);
         $this->assertMatchesRegularExpression('/\.base-demo-accounts form span \{[^}]*flex: 1 1 14rem/', $html);
@@ -74,8 +78,8 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->assertSame(302, $response->getStatusCode());
         $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'));
 
-        // The super-administrator and an account nobody declared: not through here, token or not.
-        foreach ([self::ROOT, 'nobody@example.org'] as $identifier) {
+        // The super-administrator, the back office's account and one nobody declared: not through here, token or not.
+        foreach ([self::ROOT, TestDemoAccounts::STAFF, 'nobody@example.org'] as $identifier) {
             $response = $this->browse('/login/demo', 'POST', ['_token' => $form['_token'], 'account' => $identifier]);
             $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'), $identifier);
         }
@@ -145,6 +149,10 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
 
     public function testTheStaffsMandatorySecondFactorIsLiftedForItAndForItAlone(): void
     {
+        self::ensureKernelShutdown();
+        $_SERVER['DEMO_ADMIN_PASSWORD'] = $_ENV['DEMO_ADMIN_PASSWORD'] = self::BACK_OFFICE_SECRET;
+        $this->bootIn(DemoMode::ENVIRONMENT);
+
         $policy = static::getContainer()->get(SecurityPolicy::class);
         $this->assertSame(['ROLE_ADMIN'], $policy->getRequiredRoles());
 
@@ -152,9 +160,8 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $colleague = $this->createUser('demo-colleague@example.org', ['ROLE_ADMIN'], 'colleague-password-example');
         $this->assertTrue($policy->needsEnrolment($colleague));
 
-        // ...the demonstration's member of staff walks in.
-        $form = $this->demoForm((string) $this->browse('/login')->getContent(), TestDemoAccounts::STAFF);
-        $this->browse($form['@action'], 'POST', ['_token' => $form['_token'], 'account' => $form['account']]);
+        // ...the demonstration's member of staff, signed in with the back office's secret, walks in.
+        $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => self::BACK_OFFICE_SECRET]]);
 
         $response = $this->browse('/profile');
         $this->assertStringNotContainsString('/settings/security-required', (string) $response->headers->get('Location'));
@@ -187,13 +194,65 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->assertSame(self::ROOT, static::getContainer()->get('security.token_storage')->getToken()?->getUser()?->getEmail());
     }
 
-    public function testTheBannerIsPrinted(): void
+    public function testTheBackOfficesAccountSignsInWithItsSecretOrNotAtAll(): void
+    {
+        // No secret: the password everyone could guess - its identifier - opens nothing.
+        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => TestDemoAccounts::STAFF]]);
+        $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'));
+        $this->browse('/settings');
+        $this->assertNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());
+
+        // The secret set: it is the password...
+        self::ensureKernelShutdown();
+        $_SERVER['DEMO_ADMIN_PASSWORD'] = $_ENV['DEMO_ADMIN_PASSWORD'] = self::BACK_OFFICE_SECRET;
+        $this->bootIn(DemoMode::ENVIRONMENT);
+
+        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => self::BACK_OFFICE_SECRET]]);
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertStringNotContainsString('/login', (string) $response->headers->get('Location'));
+        $this->browse('/settings');
+        $this->assertSame(TestDemoAccounts::STAFF, static::getContainer()->get('security.token_storage')->getToken()?->getUser()?->getEmail());
+
+        // ...the stored one still opens nothing, and the super-administrator's secret stays its own.
+        self::ensureKernelShutdown();
+        $this->bootIn(DemoMode::ENVIRONMENT);
+        foreach ([[TestDemoAccounts::STAFF, TestDemoAccounts::STAFF], [self::ROOT, self::BACK_OFFICE_SECRET]] as [$identifier, $password]) {
+            $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => $identifier, 'password' => $password]]);
+            $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'), $identifier);
+        }
+        $this->browse('/settings');
+        $this->assertNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());
+    }
+
+    public function testTheBannerIsPrintedAndNamesTheDemonstrationAccountToAVisitor(): void
     {
         $html = static::getContainer()->get('twig')->render('@Base/demo/_banner.html.twig');
 
         $this->assertStringContainsString('data-demo-banner', $html);
         $this->assertMatchesRegularExpression('/Démonstration|Demonstration/', $html);
         $this->assertMatchesRegularExpression('/remises à zéro chaque nuit|reset every night/', $html);
+
+        // The first account offered, with what it signs in with, and the way to the sign-in page - where the other role is.
+        $this->assertStringContainsString('data-demo-notice="'.TestDemoAccounts::MEMBER.'"', $html);
+        $this->assertStringContainsString('Member of the public', $html);
+        $this->assertMatchesRegularExpression('/(identifiant|identifier) '.preg_quote(TestDemoAccounts::MEMBER, '/').', (mot de passe|password) '.preg_quote(TestDemoAccounts::MEMBER, '/').'/', $html);
+        $this->assertMatchesRegularExpression('#<a href="[^"]*/login">(Se connecter ou choisir un autre rôle|Sign in or pick another role)</a>#', $html);
+        $this->assertStringNotContainsString('demo-staff', $html, 'never the back office\'s');
+        $this->assertStringNotContainsString('<form', $html, 'no form: no token, no session on a public page');
+
+        // On the sign-in page itself the accounts are right under the form: no link back to it.
+        $signIn = (string) $this->browse('/login')->getContent();
+        $this->assertStringNotContainsString('pick another role</a>', $signIn);
+        $this->assertStringNotContainsString('choisir un autre rôle</a>', $signIn);
+
+        // Signed in, nobody is told how to.
+        $form = $this->demoForm($signIn, TestDemoAccounts::MEMBER);
+        $this->browse($form['@action'], 'POST', ['_token' => $form['_token'], 'account' => $form['account']]);
+        $this->browse('/settings');
+        $this->assertNotNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());
+        $html = static::getContainer()->get('twig')->render('@Base/demo/_banner.html.twig');
+        $this->assertStringContainsString('data-demo-banner', $html);
+        $this->assertStringNotContainsString('data-demo-notice', $html);
     }
 
     public function testItDoesNotStartOnTheProductionDatabase(): void

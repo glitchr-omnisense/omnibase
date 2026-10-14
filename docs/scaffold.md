@@ -249,8 +249,9 @@ the back office - and without it they are refused, not stored in clear: see
 
 `APP_ENV=demo` runs the site as a demonstration ([The demo
 environment](20-architecture/demo.md)): production's behaviour, a database of
-its own (`<database>_demo`), one button for each role on the sign-in page, a
-reset every night. Everything is in glitchr/omnibase; a site adds these lines.
+its own (`<database>_demo`), the demonstration account named in the banner of
+every page, one button for each role on the sign-in page, a back office that
+opens with a secret, a reset every night. Everything is in glitchr/omnibase; a site adds these lines.
 
 **`.env.demo`** (committed: defaults only, as `.env.prod`; no secret):
 
@@ -264,9 +265,10 @@ HTTP_BASEDIR=/
 HTTP_PORT='[80,8126]'
 HTTPS_PORT='[443,8643]'
 USE_SYS_TMPDIR=false
-# DEMO_SUPERADMIN_PASSWORD is NOT here: the super-administrator's password in
-# the demonstration is a secret of the server (.env.demo.local, git-ignored,
-# or a real variable). Unset, that account cannot sign in.
+# DEMO_SUPERADMIN_PASSWORD and DEMO_ADMIN_PASSWORD are NOT here: the passwords
+# of the super-administrator and of the back office's accounts (ROLE_ADMIN) in
+# the demonstration are secrets of the server (.env.demo.local, git-ignored,
+# or real variables). Unset, those accounts cannot sign in.
 ```
 
 A real variable beats every `.env*` file, and the containers get `.env` as

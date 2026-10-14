@@ -21,7 +21,8 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
  * The route exists in the `demo` environment only. It is a POST carrying a
  * CSRF token - never a link: a GET that signs in is followed by a prefetch,
  * a crawler, a preview. Only a declared account is signed in, and never one
- * whose roles reach ROLE_SUPERADMIN.
+ * that opens the back office (base.demo.admin_roles) or whose roles reach
+ * ROLE_SUPERADMIN: those sign in with their secret (DemoBackOfficeSubscriber).
  */
 class DemoController extends AbstractController
 {
@@ -49,8 +50,8 @@ class DemoController extends AbstractController
             return $this->refuse('@notifications.demo.unknown');
         }
 
-        // Declared as a plain account, promoted since (in the back office): not through here.
-        if ($accounts->isSuperAdmin($user)) {
+        // The back office is not offered at a click - declared with its role, or promoted since.
+        if ($accounts->isSuperAdmin($user) || $accounts->isAdministrator($user) || $accounts->reachesAdministration($account->getAllRoles())) {
             return $this->refuse('@notifications.demo.unknown');
         }
 
