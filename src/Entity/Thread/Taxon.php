@@ -20,6 +20,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TaxonRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: TaxonRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]
@@ -61,6 +63,27 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->threads = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->connexes = new ArrayCollection();
+    }
+
+    /**
+     * A taxon is named in one language at least: the screen asks for the
+     * label of the site's language only (the others may stay empty), and a
+     * taxon without any label has nothing to show in a list, a picker or its
+     * slug.
+     */
+    #[Assert\Callback]
+    public function validateLabel(ExecutionContextInterface $context): void
+    {
+        foreach ($this->getTranslations() as $translation) {
+            if (method_exists($translation, 'getLabel') && '' !== trim((string) $translation->getLabel())) {
+                return;
+            }
+        }
+
+        $context->buildViolation((new Assert\NotBlank())->message)
+            ->atPath('translations')
+            ->setTranslationDomain('validators')
+            ->addViolation();
     }
 
     #[ORM\Id]
