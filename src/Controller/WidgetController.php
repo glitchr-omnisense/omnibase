@@ -7,7 +7,6 @@ use Base\Repository\Layout\Widget\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Http\Discovery\Exception\NotFoundException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -29,7 +28,7 @@ class WidgetController extends AbstractController
     {
         $page = $this->pageRepository->findOneBySlug($slug);
         if ($page === null) {
-            throw new NotFoundException("Page requested doesn't exist.");
+            throw $this->createNotFoundException("Page requested doesn't exist.");
         }
 
         return $this->render("widget/page.html.twig", ["page" => $page]);
@@ -40,7 +39,7 @@ class WidgetController extends AbstractController
     {
         $attachment = $this->attachmentRepository->findOneBySlug($slug);
         if ($attachment === null) {
-            throw new NotFoundException("Attachment requested doesn't exist.");
+            throw $this->createNotFoundException("Attachment requested doesn't exist.");
         }
 
         $mimeTypeGuesser = new FileinfoMimeTypeGuesser();
