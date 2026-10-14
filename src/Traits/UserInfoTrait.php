@@ -8,14 +8,31 @@ use Doctrine\ORM\Mapping as ORM;
 trait UserInfoTrait
 {
     public const __COOKIE_IDENTIFIER__ = "USER/INFO";
+    /** The time zone, where the visitor answers for it apart (the LOCATION category of the page's script, assets/styles/js/user.js). */
+    public const __TIMEZONE_IDENTIFIER__ = "LOCATION/TIMEZONE";
 
     /**
+     * What the page's script wrote of the visitor's browser: its language,
+     * calendar, light or dark theme (USER/INFO), its time zone
+     * (LOCATION/TIMEZONE, else USER/INFO's "timezone") and, read from that
+     * zone, its country. Nothing is written here: the cookies are the
+     * visitor's to accept or refuse, and the script's to write.
+     *
      * @param string|null $key
      * @return array|mixed|string|null
      */
     public static function getCookie(?string $key = null)
     {
-        $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true) ?? [];
+        $cookie = json_decode($_COOKIE[self::__COOKIE_IDENTIFIER__] ?? "", true);
+        if (!is_array($cookie)) {
+            $cookie = [];
+        }
+
+        $timezone = $_COOKIE[self::__TIMEZONE_IDENTIFIER__] ?? null;
+        if (is_string($timezone) && "" !== $timezone) {
+            $cookie["timezone"] = $timezone;
+        }
+
         // The browser's zone, as its country: not every zone has one ("UTC",
         // "Etc/UTC" - what Tor Browser, Firefox resisting fingerprinting and
         // many containers report), and Timezones::getCountryCode() throws for
@@ -23,19 +40,12 @@ trait UserInfoTrait
         $timezone = $cookie["timezone"] ?? null;
         if (is_string($timezone) && Timezones::exists($timezone)) {
             try {
-                $country = Timezones::getCountryCode($timezone);
+                $cookie["country"] = Timezones::getCountryCode($timezone);
             } catch (\Throwable) {
-                $country = null;
-            }
-            if (null !== $country && (!array_key_exists("country", $cookie) || $country != $cookie["country"])) {
-                $cookie["country"] = $country;
-                static::setCookie("country", $country);
+                // No country for this zone: what the cookie says of it, if anything.
             }
         }
 
-        if (!isset($cookie)) {
-            return null;
-        }
         if (empty($key)) {
             return $cookie;
         }

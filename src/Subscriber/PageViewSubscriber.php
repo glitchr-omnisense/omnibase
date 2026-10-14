@@ -76,7 +76,7 @@ class PageViewSubscriber implements EventSubscriberInterface
             }
         }
 
-        // matches @glitchr/cookie's own naming convention
+        // matches the Cookie global's own naming convention (@glitchr/flowjs/cookie)
         // (GROUPNAME/NAME, both uppercased) - see Analytics::track()'s
         // docblock for why this is only ever READ here, never set.
         $visitorId = $request->cookies->get("ANALYTICS/VISITOR_ID");

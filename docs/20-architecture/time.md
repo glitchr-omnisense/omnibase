@@ -6,8 +6,11 @@ order: 30
 # Time and time zones
 
 omnibase sets PHP's time zone **per visitor**: `BaseBundle::boot()` reads the
-visitor's zone in the `USER/INFO` cookie (written by the page's script) and calls
-`date_default_timezone_set()` with it, UTC without one. `new \DateTime()`,
+visitor's zone in the cookie the page's script writes (`LOCATION/TIMEZONE`
+where the visitor answers for the time zone apart, else `USER/INFO`'s
+`timezone`; `User::getCookie('timezone')` reads both) and calls
+`date_default_timezone_set()` with it, UTC without one - a visitor who
+refused that cookie included. `new \DateTime()`,
 `date()` and Twig's `|date` are therefore the visitor's clock: "today" is the
 visitor's day.
 
