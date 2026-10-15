@@ -397,6 +397,24 @@ class BaseBundle extends AbstractBaseBundle
         $this->boot = true;
     }
 
+    /**
+     * A kernel that shuts down handles no request any more. get_url() reads
+     * the main request first, through BaseService's static stack, which
+     * outlives the kernel: a request left on it (a test that pushed one and
+     * never popped it) was the current address of every call made after the
+     * kernel was gone, instead of PHP's globals.
+     */
+    public function shutdown(): void
+    {
+        if ($this->container?->initialized('request_stack')) {
+            $requests = $this->container->get('request_stack');
+            while ($requests->pop()) {
+            }
+        }
+
+        parent::shutdown();
+    }
+
     public function isBuilt() { return $this->container !== null; }
     public function build(ContainerBuilder $container): void
     {

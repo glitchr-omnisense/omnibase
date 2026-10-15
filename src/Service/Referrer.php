@@ -140,6 +140,11 @@ class Referrer implements ReferrerInterface
         $targetHost = $targetUrl["host"] ?? $currentHost ?? null;
         if($currentHost == $targetHost) $targetUrl["host"] = null;
 
+        // Never credentials ("user:password@"), whatever the stored address held
+        if (is_array($targetUrl)) {
+            unset($targetUrl["user"], $targetUrl["pass"], $targetUrl["password"]);
+        }
+
         $targetPath = compose_url($targetUrl);
         return $targetRoute ? $targetPath : null;
     }
