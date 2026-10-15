@@ -3,6 +3,9 @@
 namespace {
 
     use Base\BaseBundle;
+    use Base\Service\BaseService;
+    use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
+    use Symfony\Component\HttpFoundation\Request;
 
     function dumpif(...$variadic)
     {
@@ -419,29 +422,120 @@ namespace {
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 
+    /**
+     * The request the address being served is read from: the kernel's main
+     * request when there is one - what the firewall, the controllers and
+     * Symfony's own URL generation see, framework.trusted_proxies applied -
+     * else one made of PHP's globals (a call before the kernel handles the
+     * request, a command, a test that sets $_SERVER).
+     */
+    function get_url_request(): Request
+    {
+        $request = class_exists(BaseService::class) ? BaseService::getRequestStack()?->getMainRequest() : null;
+
+        return $request ?? new Request([], [], [], [], [], $_SERVER);
+    }
+
+    /**
+     * "https" when the visitor's connection is secure, "http" otherwise.
+     *
+     * Request::isSecure() first: HTTPS set to anything but "" or "off", or a
+     * trusted proxy saying X-Forwarded-Proto: https. FrankenPHP sets HTTPS
+     * to "" behind a proxy that terminates TLS; read with "??" it stopped the
+     * chain and every address came out http (on a port other than 443, every
+     * page then redirected to port 80). HTTPS present but empty or "off",
+     * with no trusted proxy saying otherwise, is http. Without HTTPS at all,
+     * the variables the core always read (USE_HTTPS, REQUEST_SCHEME,
+     * X-Forwarded-Proto) decide, as before.
+     */
+    function get_url_scheme(?Request $request = null): string
+    {
+        $request ??= get_url_request();
+        if ($request->isSecure()) {
+            return 'https';
+        }
+
+        if ($request->server->has('HTTPS')) {
+            return 'http';
+        }
+
+        $scheme = $request->server->get('USE_HTTPS') ?? $request->server->get('REQUEST_SCHEME') ?? $request->server->get('HTTP_X_FORWARDED_PROTO');
+        $scheme = (string) $scheme;
+
+        return strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0 ? 'https' : 'http';
+    }
+
+    /**
+     * The port the visitor asked for.
+     *
+     * Behind a trusted proxy: the port of the host it forwards
+     * (X-Forwarded-Host, when it carries one - the Host the visitor's browser
+     * sent, kept by `proxy_set_header X-Forwarded-Host $http_host`), else
+     * Request::getPort() (X-Forwarded-Port, then the host's port, then the
+     * scheme's). The forwarded host comes first because X-Forwarded-Port is
+     * often the proxy's own port - 443 inside a container published on 8663.
+     * Without one, the Host header's port, else SERVER_PORT, as before.
+     */
+    function get_url_port(?Request $request = null): int|string|null
+    {
+        $request ??= get_url_request();
+        if ($request->isFromTrustedProxy()) {
+            $forwarded = (Request::getTrustedHeaderSet() & Request::HEADER_X_FORWARDED_HOST) ? $request->headers->get('X_FORWARDED_HOST') : null;
+            $forwarded = trim(explode(',', (string) $forwarded)[0]);
+            if (preg_match('/^(?:\[[^\]]*\]|[^:\[\]]+):(\d+)$/', $forwarded, $match)) {
+                return (int) $match[1];
+            }
+
+            return $request->getPort();
+        }
+
+        $host = (string) $request->headers->get('HOST');
+        if (preg_match('/^(?:\[[^\]]*\]|[^:\[\]]+):(\d+)$/', $host, $match)) {
+            return (int) $match[1];
+        }
+
+        return $request->server->get('SERVER_PORT');
+    }
+
+    /**
+     * The address being served (or the one given), without the visitor's
+     * credentials: a basic authentication (PHP_AUTH_USER, PHP_AUTH_PW) never
+     * goes into an address.
+     */
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null): ?string
     {
         $http_host = $http_host ? $http_host : null;
         $scheme = $scheme ? $scheme : null;
         $request_uri = $request_uri ? $request_uri : null;
 
-        // Honor an explicitly-passed $scheme; only derive it from $_SERVER when
-        // the caller didn't give one. The old code unconditionally overwrote
-        // $scheme on the next line, so passing "http"/"https" (as
-        // AdvancedUrlGenerator and RouterSubscriber do) had no effect.
-        if ($scheme === null) {
-            $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"] ?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
-        }
-        $scheme = $scheme && (strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0);
-        $scheme = $scheme ? "https" : "http";
+        $request = get_url_request();
 
-        $domain = explode(":", $http_host ?? $_SERVER["HTTP_HOST"] ?? "")[0] ?? $_SERVER["SERVER_NAME"] ?? null;
-        $port = explode(":", $http_host ?? $_SERVER["HTTP_HOST"] ?? "")[1] ?? $_SERVER["SERVER_PORT"] ?? null;
+        // Honor an explicitly-passed $scheme; only derive it from the request
+        // when the caller didn't give one.
+        if ($scheme !== null) {
+            $scheme = strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0 ? "https" : "http";
+        } else {
+            $scheme = get_url_scheme($request);
+        }
+
+        if ($http_host !== null) {
+            $domain = explode(":", $http_host)[0];
+            $port = explode(":", $http_host)[1] ?? $request->server->get("SERVER_PORT");
+        } else {
+            try {
+                $domain = $request->getHost();
+            } catch (SuspiciousOperationException) {
+                $domain = explode(":", (string) $request->headers->get('HOST'))[0];
+            }
+
+            $port = get_url_port($request);
+        }
+
         $port = $port != 80 && $port != 443 ? $port : null;
 
-        $request_uri ??= $_SERVER["REQUEST_URI"] ?? null; // Fragment is contained in request URI
-	
-        return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
+        $request_uri ??= $request->server->get("REQUEST_URI") ?: null; // Fragment is contained in request URI
+
+        return compose_url($scheme, null, null, null, null, $domain ?: null, $port, $request_uri == "/" ? null : $request_uri);
     }
     
     /**
@@ -548,9 +642,10 @@ namespace {
             );
         }
 
-        // Default scheme according to Symfony semantics
+        // Default scheme: the visitor's (HTTPS "off" read as a boolean was https,
+        // and a trusted proxy's X-Forwarded-Proto was never read)
         if ($domain && !$scheme) {
-            $scheme = boolval($_SERVER["HTTPS"] ?? false) ? 'https' : 'http';
+            $scheme = get_url_scheme();
         }
 
         // Only build scheme if domain is provided
