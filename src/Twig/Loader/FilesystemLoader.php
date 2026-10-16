@@ -35,6 +35,15 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             }
         }
     
+        // @Base, this bundle's templates, declared here at Twig's level rather
+        // than left to Symfony's bundle path (src/Resources/views, a link that a
+        // copy of the package loses: Composer's path repository with
+        // symlink: false, the harness). An application's override
+        // (templates/bundles/BaseBundle/) first, then the templates; @!Base the
+        // templates alone. Where the link is there, nothing is added twice.
+        $this->declare('Base', [$projectDir . '/templates/bundles/BaseBundle', $bundlePath]);
+        $this->declare('!Base', [$bundlePath]);
+
         // Add @Twig, @Assets and @Layout variables
         $this->prependPath($bundlePath . '/notifier');
         $this->prependPath($bundlePath);
@@ -76,6 +85,26 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             }
 
             $this->prependPath($path, $namespace);
+        }
+    }
+
+    /**
+     * Gives a namespace each of these directories it does not have yet (an
+     * existing one found by its real path, a link counting as what it leads
+     * to), after the ones it has.
+     *
+     * @param list<string> $directories
+     */
+    protected function declare(string $namespace, array $directories): void
+    {
+        $known = array_filter(array_map('realpath', $this->getPaths($namespace)));
+        foreach ($directories as $directory) {
+            $real = realpath($directory);
+            if (false === $real || !is_dir($real) || \in_array($real, $known, true)) {
+                continue;
+            }
+            $this->addPath($directory, $namespace);
+            $known[] = $real;
         }
     }
 
