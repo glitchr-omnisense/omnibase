@@ -277,6 +277,28 @@ class FormGuardTest extends TestCase
         $this->assertStringNotContainsString('<template', $plain[FormGuard::CHALLENGE_FIELD]->vars['omnishield_html']);
     }
 
+    public function testAViewBuiltAndThrownAwayLeavesTheScriptsToTheOneShown(): void
+    {
+        $altcha = ['factory' => 'altcha', 'options' => ['hmac_key' => self::SECRET, 'cost' => 10]];
+        $script = '<script src="'.AltchaGatewayFactory::SCRIPT.'"';
+
+        // FormProcessor::handleRequest() makes a view to collect the page's assets, then the page
+        // shows another: the captcha there comes with its script (the sign-in, after a few failures).
+        $this->registry(['forms' => $altcha]);
+        $form = $this->form($this->forms(['captcha_after' => 0]));
+        $form->createView();
+        $this->assertStringContainsString($script, (string) $form->createView()[FormGuard::CHALLENGE_FIELD]->vars['omnishield_html']);
+
+        // The fallback beside a captcha that waits for consent, wrapped by this extension: the same.
+        $this->registry(['third' => ['factory' => 'third'], 'local' => $altcha]);
+        $form = $this->form($this->forms(['challenge' => 'third', 'fallback' => 'local', 'captcha_after' => 0], 'third'));
+        $form->createView();
+        $view = $form->createView();
+        $this->assertStringStartsWith('<div data-guard-fallback=', (string) $view[FormGuard::FALLBACK_FIELD]->vars['omnishield_html']);
+        $this->assertStringContainsString($script, (string) $view[FormGuard::FALLBACK_FIELD]->vars['omnishield_html']);
+        $this->assertStringStartsWith('<template data-guard-consent=', (string) $view[FormGuard::CHALLENGE_FIELD]->vars['omnishield_html']);
+    }
+
     public function testWithoutOmnishieldTheTrapAndTheTimeAlone(): void
     {
         $forms = $this->forms(['reputation' => ['emails']], null, omnishield: false);

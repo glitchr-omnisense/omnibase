@@ -244,7 +244,7 @@ class FormTypeGuardExtension extends AbstractTypeExtension
         $label = $this->translator?->trans('@forms.guard.consent', ['origins' => $origins]) ?? 'Captcha';
         $fallback = isset($view[FormGuard::FALLBACK_FIELD]) ? $view[FormGuard::FALLBACK_FIELD]->vars['id'] : null;
         if ($fallback) {
-            $view[FormGuard::FALLBACK_FIELD]->vars['omnishield_html'] = '<div data-guard-fallback="'.$id.'">'.$view[FormGuard::FALLBACK_FIELD]->vars['omnishield_html'].'</div>';
+            $view[FormGuard::FALLBACK_FIELD]->vars['omnishield_html'] = self::wrap($view[FormGuard::FALLBACK_FIELD]->vars['omnishield_html'], '<div data-guard-fallback="'.$id.'">', '</div>');
         }
 
         $script = <<<'JS'
@@ -262,7 +262,19 @@ class FormTypeGuardExtension extends AbstractTypeExtension
                 if (window.Consent) { start(); } else { document.addEventListener('DOMContentLoaded', start); }
             })(document.currentScript.previousElementSibling);
             JS;
-        $captcha->vars['omnishield_html'] = '<template data-guard-consent="'.htmlspecialchars($id, \ENT_QUOTES).'" data-guard-label="'.htmlspecialchars($label, \ENT_QUOTES).'">'.$captcha->vars['omnishield_html'].'</template><script>'.$script.'</script>';
+        $captcha->vars['omnishield_html'] = self::wrap($captcha->vars['omnishield_html'], '<template data-guard-consent="'.htmlspecialchars($id, \ENT_QUOTES).'" data-guard-label="'.htmlspecialchars($label, \ENT_QUOTES).'">', '</template><script>'.$script.'</script>');
+    }
+
+    /**
+     * A widget's markup between two pieces of markup. glitchr/omnishield's field prints it when the
+     * page shows it (Omnishield\WidgetHtml): wrapped as it is, so that this view - built, then perhaps
+     * thrown away, as FormProcessor::handleRequest() makes one to collect the page's assets - does
+     * not take the provider's script away from the one the page shows. An older omnishield's string
+     * is wrapped as a string.
+     */
+    private static function wrap(mixed $html, string $before, string $after): mixed
+    {
+        return $html instanceof \Omnishield\WidgetHtml ? $html->wrap($before, $after) : $before.$html.$after;
     }
 
     /** An action a captcha accepts: letters, digits, underscores. */
