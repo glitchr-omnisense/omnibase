@@ -19,6 +19,23 @@ crud:
     url:
       placeholder: "{0} or /go/to/route"
 
+# The fields of the back office's screens of users' groups and permissions
+fields:
+  permission:
+    tag: "Key"
+    icon: "Icon"
+    description: "Description"
+    empowered_roles: "Roles granted"
+    groups: "Groups"
+  group:
+    name: "Name"
+    icon: "Icon"
+    color: "Colour"
+    roles: "Roles"
+    permissions: "Permissions"
+    members: "Members"
+    created_at: "Created on"
+
 settings:
   filter:
     mono: "Monochrome"

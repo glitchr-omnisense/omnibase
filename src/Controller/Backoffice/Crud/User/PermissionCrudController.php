@@ -26,15 +26,15 @@ class PermissionCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnIndex();
-        yield TextField::new('tag')->setColumns(4);
-        yield IconField::new('icon')->setRequired(false)->setColumns(2);
-        yield TextareaField::new('description')->setColumns(6);
+        yield TextField::new('tag', '@admin.fields.permission.tag')->setColumns(4);
+        yield IconField::new('icon', '@admin.fields.permission.icon')->setRequired(false)->setColumns(2);
+        yield TextareaField::new('description', '@admin.fields.permission.description')->setColumns(6);
         // Roles this permission empowers when granted, independent of the
         // group hierarchy - see Permission::getEmpoweredRoles()/setEmpoweredRoles().
         // ArrayField, not RoleField: same SelectType choice-guessing issue
         // as Group::$roles (see GroupCrudController) since empower is a
         // plain json column too.
-        yield ArrayField::new('empoweredRoles')->hideOnIndex();
-        yield AssociationField::new('gid')->hideOnIndex();
+        yield ArrayField::new('empoweredRoles', '@admin.fields.permission.empowered_roles')->hideOnIndex();
+        yield AssociationField::new('gid', '@admin.fields.permission.groups')->hideOnIndex();
     }
 }

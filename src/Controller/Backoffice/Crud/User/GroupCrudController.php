@@ -37,11 +37,11 @@ class GroupCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnIndex();
-        yield TextField::new('name')->setColumns(5);
-        yield IconField::new('icon')->setColumns(3);
-        yield ColorField::new('color')->setColumns(4)->hideOnIndex();
-        yield ArrayField::new('roles')->hideOnIndex();
-        yield AssociationField::new('permissions')->hideOnIndex();
+        yield TextField::new('name', '@admin.fields.group.name')->setColumns(5);
+        yield IconField::new('icon', '@admin.fields.group.icon')->setColumns(3);
+        yield ColorField::new('color', '@admin.fields.group.color')->setColumns(4)->hideOnIndex();
+        yield ArrayField::new('roles', '@admin.fields.group.roles')->hideOnIndex();
+        yield AssociationField::new('permissions', '@admin.fields.group.permissions')->hideOnIndex();
         // hideOnForm(), not hideOnIndex(): rendering this as a User-entity
         // picker on the new/edit form crashes with the same "No choices...
         // could be guessed" SelectType error as Group::$roles - building
@@ -49,7 +49,7 @@ class GroupCrudController extends AbstractCrudController
         // (including its RoleField) outside a valid form-data context.
         // Membership is still visible/manageable via the index and detail
         // views; only the new/edit form widget is affected.
-        yield AssociationField::new('members')->hideOnForm();
-        yield DateTimeField::new('createdAt')->onlyOnDetail();
+        yield AssociationField::new('members', '@admin.fields.group.members')->hideOnForm();
+        yield DateTimeField::new('createdAt', '@admin.fields.group.created_at')->onlyOnDetail();
     }
 }

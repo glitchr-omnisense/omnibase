@@ -18,6 +18,23 @@ Cart: Panier
 All users: "Tous les utilisateurs"
 Add user: Ajouter un utilisateur
 
+# The fields of the back office's screens of users' groups and permissions
+fields:
+  permission:
+    tag: "Clé"
+    icon: "Icône"
+    description: "Description"
+    empowered_roles: "Rôles accordés"
+    groups: "Groupes"
+  group:
+    name: "Nom"
+    icon: "Icône"
+    color: "Couleur"
+    roles: "Rôles"
+    permissions: "Permissions"
+    members: "Membres"
+    created_at: "Créé le"
+
 settings:
   filter:
     mono: "Monochrome"
