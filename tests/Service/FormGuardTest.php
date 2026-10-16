@@ -279,7 +279,12 @@ class FormGuardTest extends TestCase
 
     public function testAViewBuiltAndThrownAwayLeavesTheScriptsToTheOneShown(): void
     {
-        $altcha = ['factory' => 'altcha', 'options' => ['hmac_key' => self::SECRET, 'cost' => 10]];
+        if (!class_exists(\Omnishield\WidgetHtml::class)) {
+            // The widget printed when the page shows it is glitchr/omnishield 76dd63a's: an older one prints at buildView.
+            self::markTestSkipped('Requires glitchr/omnishield with Omnishield\WidgetHtml (76dd63a or later).');
+        }
+
+        $altcha =['factory' => 'altcha', 'options' => ['hmac_key' => self::SECRET, 'cost' => 10]];
         $script = '<script src="'.AltchaGatewayFactory::SCRIPT.'"';
 
         // FormProcessor::handleRequest() makes a view to collect the page's assets, then the page
