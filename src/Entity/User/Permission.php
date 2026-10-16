@@ -58,6 +58,14 @@ class Permission implements IconizeInterface
         return $this->id;
     }
 
+    /** Its tag, wherever a permission is shown as one line (a group's permissions picker). */
+    public function __toString(): string
+    {
+        $tag = (string) $this->tag;
+
+        return '' !== $tag ? $tag : '#'.$this->id;
+    }
+
     public function getTag(): ?string
     {
         return $this->tag;

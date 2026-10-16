@@ -67,8 +67,7 @@ class Autocomplete
                 $autocompleteData = $entry->__autocompleteData() ?? [];
             }
 
-            $className = get_class($entry);
-            $className = $this->translator->transEntity($className, null, Translator::NOUN_SINGULAR);
+            $className = $this->entityNoun($entry);
 
             $html = $entryOptions["html"] && is_html($autocomplete) ? $autocomplete : null;
             $text = $entryOptions["html"] && is_html($autocomplete) ? null : $entityStr;
@@ -194,5 +193,23 @@ class Autocomplete
 
             return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $entryOptions["format"])]];
         }, !empty($entry) ? $entry : []);
+    }
+
+    /**
+     * What an entry without a name of its own is called before its id: the
+     * noun of its class, else of the nearest parent class that has one (an
+     * application's OccasionGroup is a "groupe" when it names none), else
+     * its short class name - never the translation key itself
+     * ("occasion_group._singular #1").
+     */
+    private function entityNoun(object $entry): string
+    {
+        for ($class = get_class($entry); $class; $class = get_parent_class($class)) {
+            if ($this->translator->transEntityExists($class, null, Translator::NOUN_SINGULAR)) {
+                return (string) $this->translator->transEntity($class, null, Translator::NOUN_SINGULAR);
+            }
+        }
+
+        return substr((string) strrchr('\\'.get_class($entry), '\\'), 1);
     }
 }
