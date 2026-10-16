@@ -45,6 +45,19 @@ class Group implements IconizeInterface
         return [self::DEFAULT_ICON];
     }
 
+    /**
+     * Its name, wherever a group is shown as one line: the pickers (a
+     * permission's groups, a user's), the back office's titles and lists.
+     * Without it a picker fell back to the translation key of the class and
+     * the id ("occasion_group._singular #1" for an application's subclass).
+     */
+    public function __toString(): string
+    {
+        $name = (string) $this->name;
+
+        return '' !== $name ? $name : '#'.$this->id;
+    }
+
     public function __construct()
     {
         $this->members = new ArrayCollection();
