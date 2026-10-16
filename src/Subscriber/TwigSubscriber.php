@@ -45,6 +45,9 @@ class TwigSubscriber implements EventSubscriberInterface
     /** * @var bool */
     protected ?bool $autoAppend;
 
+    /** The request attribute (a route default) that keeps a response as it was rendered. */
+    public const INJECT = '_omnibase_inject';
+
     public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, AdvancedRouterInterface $router)
     {
         $this->webpackTagRenderer = $webpackTagRenderer;
@@ -74,6 +77,14 @@ class TwigSubscriber implements EventSubscriberInterface
     private function allowRender(ResponseEvent $event)
     {
         if (!$this->autoAppend) {
+            return false;
+        }
+
+        // A route that renders a page whole, its own markup and nothing else
+        // (a screen also rendered by another framework, plan 0 rule 13), says
+        // so with the default `_omnibase_inject: false`: nothing is added to
+        // its response (the breakpoints, the queued HTML, the webpack entries).
+        if (false === $event->getRequest()->attributes->get(self::INJECT, true)) {
             return false;
         }
 
