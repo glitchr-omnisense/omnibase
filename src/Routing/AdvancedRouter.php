@@ -608,16 +608,26 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function getPort(?string $locale = null, ?string $environment = null): ?int
     {
         $parsedUrl = parse_url2(get_url());
-        $port = $parsedUrl["port"] ?? null;
-        $scheme = $this->getScheme($locale, $environment);
-        
-        $fallbackPorts = $this->getPortFallbacks($locale, $environment);
-        if (count($fallbackPorts) && !in_array($port, $fallbackPorts, true)) {
-            $port = $this->getPortFallback($locale, $environment);
-        }
+        $port = isset($parsedUrl["port"]) ? (int) $parsedUrl["port"] : null;
+
+        // The port is judged by the scheme of the address it comes from:
+        // getScheme() says https whatever the request (REQUEST_SCHEME "http"
+        // is a truthy string), so the port of an http address was checked
+        // against HTTPS_PORT and a site on http:8081 (HTTP_PORT='[8081]') was
+        // reduced to port 80.
+        $scheme = $parsedUrl["scheme"] ?? $this->getScheme($locale, $environment);
 
         $httpsPorts = isset($_SERVER['HTTPS_PORT']) ? (array) json_decode($_SERVER['HTTPS_PORT'], true) : [443];
         $httpPorts  = isset($_SERVER['HTTP_PORT'])  ? (array) json_decode($_SERVER['HTTP_PORT'],  true) : [80];
+
+        // A port the site declares for that scheme is its own; the fallbacks
+        // (filtered by getScheme()) and the first declared port replace any other.
+        $declared = $port !== null && in_array($port, array_map('intval', $scheme === 'https' ? $httpsPorts : $httpPorts), true);
+
+        $fallbackPorts = $this->getPortFallbacks($locale, $environment);
+        if (!$declared && count($fallbackPorts) && !in_array($port, array_map('intval', $fallbackPorts), true)) {
+            $port = $this->getPortFallback($locale, $environment);
+        }
 
         if ($port === null) {
             if ($scheme === 'https') $port = first($httpsPorts) ?? 443;
