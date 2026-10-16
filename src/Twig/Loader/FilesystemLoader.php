@@ -68,7 +68,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
                 $fullPath = $bundlesPath . '/' . $directory;
                 if (is_dir($fullPath)) {
                     $namespace = str_replace('Bundle', '', $directory);
-                    $this->overridePath($fullPath, $namespace);
+                    $this->prependPath($fullPath, $namespace);
                 }
             }
         }
@@ -106,31 +106,6 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             $this->addPath($directory, $namespace);
             $known[] = $real;
         }
-    }
-
-    /**
-     * This bundle's override of another bundle's templates, first in its
-     * namespace - except the web debug toolbar's where
-     * glitchr/symfony-profiler-pack is installed: the toolbar is the pack's
-     * (this bundle's copy is the older one, mouse only), so this bundle's
-     * override comes right after it and only serves what the pack does not
-     * have (the collectors' templates).
-     */
-    protected function overridePath(string $path, string $namespace): void
-    {
-        if ('WebProfiler' === $namespace) {
-            $paths = $this->getPaths($namespace);
-            foreach ($paths as $index => $existing) {
-                if (str_contains(str_replace('\\', '/', $existing), '/symfony-profiler-pack/')) {
-                    array_splice($paths, $index + 1, 0, [$path]);
-                    $this->setPaths($paths, $namespace);
-
-                    return;
-                }
-            }
-        }
-
-        $this->prependPath($path, $namespace);
     }
 
     /**
