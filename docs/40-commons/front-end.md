@@ -62,7 +62,7 @@ The one module the core does import is the library's sixth, the cookies:
 flowjs's core) to every page, see [Cookies](#cookies) below. The core's
 `base-async` runs before a site's entries and the library keeps the first
 `Flow` loaded, so **a site takes the same `@glitchr/flowjs` as the core**
-(`^1.2.1` in its `package.json`, 1.2.1 or later in its `yarn.lock`): an older
+(`^1.3.1` in its `package.json`, 1.3.1 or later in its `yarn.lock`): an older
 navigation or sticky module would otherwise run on the newer core.
 
 ```js

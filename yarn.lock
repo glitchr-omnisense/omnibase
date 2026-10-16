@@ -1001,10 +1001,10 @@
   resolved "https://registry.npmjs.org/@glitchr/dockjs/-/dockjs-1.0.23.tgz"
   integrity sha512-+SZXviQg5akFkutCKq6nxOK0xBQO7nUlj481oxTAohHZjYX3axMPRAlGOvhpzFb+6lQ8olrrT0Hmev7m95Ujiw==
 
-"@glitchr/flowjs@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/@glitchr/flowjs/-/flowjs-1.2.1.tgz#35a168f0cc47d83c2da09dae31ddd73756d071a4"
-  integrity sha512-Plaqnqq+FwFZjaA35AjdkbfRIjj8mZ7szwWBidTTqyJH6TN+Sq7C1bOT2DVLnK8lhv/OJZRKWJ/3O1YO6Q1riQ==
+"@glitchr/flowjs@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.npmjs.org/@glitchr/flowjs/-/flowjs-1.3.1.tgz#2484b31790708d9f21baf5b738d84b740a91dee7"
+  integrity sha512-Z6PdhDfWXxP5FVIjvwwe/LpckbhvP5SWyv00H3OXrYPpogZOOpLZtpaN7BCVg0Ew2IxHWpOCvdtVaiUV2pe61w==
 
 "@glitchr/imaginejs@^1.0":
   version "1.0.45"
