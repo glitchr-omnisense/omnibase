@@ -5,7 +5,6 @@ namespace Base\Database\Type;
 use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\SelectInterface;
-use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -73,7 +72,7 @@ abstract class EnumType extends Type implements SelectInterface
 
     public static function getText(string $id, ?TranslatorInterface $translator = null): ?string
     {
-        return $translator ? $translator->transEnum($id, get_called_class(), Translator::NOUN_SINGULAR) : $id;
+        return $translator ? $translator->transEnum($id, get_called_class(), TranslatorInterface::NOUN_SINGULAR) : $id;
     }
 
     public static function getHtml(string $id): ?string
