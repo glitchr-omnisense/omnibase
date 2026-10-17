@@ -19,6 +19,7 @@
  *
  * Sorted. 599 classes on 2026-10-17 (step C1), every class of src/ that passed.
  * 678 on 2026-10-18 after step C3b (+79: the repositories, built on doctrine/orm's EntityRepository).
+ * 679 after step C3c (+1: Base\Service\ParameterBagInterface, the core's contract).
  */
 
 return [
@@ -576,6 +577,7 @@ return [
     Base\Service\OpeningHours::class,
     Base\Service\Paginator::class,
     Base\Service\PaginatorInterface::class,
+    Base\Service\ParameterBagInterface::class,
     Base\Service\Push\WebPushService::class,
     Base\Service\Qr\QrCode::class,
     Base\Service\Qr\QrSheet::class,
