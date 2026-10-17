@@ -17,6 +17,8 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 | `Base\Contract\Access` | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
 | `Base\Contract\Locales` | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
 | `Base\Contract\Files` | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
+| `Base\Contract\Pictures` (step C5) | an image's address at a size, what `\|picture` answers | `Base\Bridge\Symfony\MediaPictures`: `CommonsTwigExtension::picture()` (MediaService's thumbnails) |
+| `Base\Contract\Texts` (step C5) | a stored text rendered (Editor.js or HTML), its table of contents, whether it is Editor.js | `Base\Bridge\Symfony\WysiwygTexts`: the pipeline of `\|wysiwyg` and `\|wysiwyg_toc` |
 | `Psr\Clock\ClockInterface` (PSR-20) | `now()` | the framework's `clock` (symfony/clock); the machine's (`Base\Contract\SystemClock`) when there is none |
 | `Psr\EventDispatcher\EventDispatcherInterface` (PSR-14) | `dispatch()` | `event_dispatcher` |
 | `Symfony\Component\Mailer\MailerInterface` | `send()` | `mailer.mailer` |
@@ -98,3 +100,19 @@ compares each with the service it used) and answers where there is no framework
 statics, so the strings are the same by construction; the entities ask it
 with the Locales contract's (`here()`). The test keeps a copy of the rule as
 it was and compares both paths with it.
+
+## The screens (step C5)
+
+A controller hands a template and a view model (`Base\Screen\View`: template,
+`Base\Screen\Screen`, the React component's name, the status) to
+`Base\Bridge\Symfony\ScreenResponder`, which renders it with the request's frame
+(`Base\Screen\ContextProvider`, under Symfony `SymfonyScreenContext`: locale, site,
+links, viewer, theme, a site's own fields; the flashes) - Twig with `frame` and
+`screen`, or omnibridge/react's page in JSON (`X-Omnibridge`; without omnibridge/react,
+a request asking `application/json` alone gets the props). A JSON answer carrying a
+viewer is private and varies on `Cookie`. The view models (`Base\Screen\*`: Frame, Site,
+Viewer, Author, Tag, Link, StoryText, Card, Story, Comment, Reply, Discussion) keep
+lesringostars' prop names (`App\Screen\*`, the pilot's); `Base\Screen\Builder\Stories`
+makes them from a `Thread` and its comments with the Texts and Pictures contracts and
+the clock (`recent`, so that no template compares a moment). All of them are in the
+Fondation (`tests/Screen/screens-without-framework.php`).

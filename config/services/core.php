@@ -406,6 +406,34 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\FlysystemFiles')
         ->args([service('flysystem'), service('base.service.image')->nullOnInvalid()]);
     $services->alias('Base\Contract\Files', 'Base\Bridge\Symfony\FlysystemFiles');
+    $services->set('Base\Bridge\Symfony\MediaPictures')
+        ->args([service('Base\Twig\Extension\CommonsTwigExtension')]);
+    $services->alias('Base\Contract\Pictures', 'Base\Bridge\Symfony\MediaPictures');
+    $services->set('Base\Bridge\Symfony\WysiwygTexts')
+        ->args([service('Base\Twig\Extension\HtmlTwigExtension'), service('editor_enhancer')]);
+    $services->alias('Base\Contract\Texts', 'Base\Bridge\Symfony\WysiwygTexts');
+
+    // The screens (plan "omnibase agnostique", C5): a controller hands a
+    // template and a view model (Base\Screen\View) to the ScreenResponder,
+    // which renders it with the frame of the request (the ContextProvider:
+    // a site decorates it to add its own fields) or gives it to a front end
+    // in JSON. Stories builds the threads' view models.
+    $services->set('Base\Bridge\Symfony\SymfonyScreenContext')
+        ->args([
+            service('request_stack'),
+            service('Base\Contract\Urls')->nullOnInvalid(),
+            service('Base\Contract\Access')->nullOnInvalid(),
+            service('Base\Contract\Locales')->nullOnInvalid(),
+            service('Base\Service\SettingBagInterface')->nullOnInvalid(),
+            service('Base\Service\Themizer')->nullOnInvalid(),
+            service('twig')->nullOnInvalid(),
+            service('twig.app_variable')->nullOnInvalid(),
+        ]);
+    $services->alias('Base\Screen\ContextProvider', 'Base\Bridge\Symfony\SymfonyScreenContext')->public();
+    $services->set('Base\Bridge\Symfony\ScreenResponder')->public()
+        ->args([service('twig'), service('Base\Screen\ContextProvider'), '%base.screens.version%']);
+    $services->set('Base\Screen\Builder\Stories')->public()
+        ->args([service('Base\Contract\Texts'), service('Base\Contract\Pictures')]); // "now": Runtime::clock(), the framework's unless one is set by hand
 
     // BaseService
     $services->set('Base\Service\BaseService')

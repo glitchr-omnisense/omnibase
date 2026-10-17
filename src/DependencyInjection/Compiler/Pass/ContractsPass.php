@@ -5,6 +5,8 @@ namespace Base\DependencyInjection\Compiler\Pass;
 use Base\Contract\Access;
 use Base\Contract\Files;
 use Base\Contract\Locales;
+use Base\Contract\Pictures;
+use Base\Contract\Texts;
 use Base\Contract\Urls;
 use Omnibridge\Twig\Contract\Translations;
 use Psr\Clock\ClockInterface;
@@ -39,6 +41,8 @@ final class ContractsPass implements CompilerPassInterface
         Access::class,
         Locales::class,
         Files::class,
+        Pictures::class,
+        Texts::class,
         ClockInterface::class,
         EventDispatcherInterface::class,
         MailerInterface::class,

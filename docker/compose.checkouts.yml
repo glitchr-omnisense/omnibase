@@ -18,6 +18,9 @@ services:
       # checked out as well.
       - ${OMNIBASE_PLUGINS:-../..}/blog:/srv/demo/vendor/omnibase/blog
       - ${OMNIBASE_PLUGINS:-../..}/classroom:/srv/demo/vendor/omnibase/classroom
+      # omnibridge/react, which the image does not install: the core's ScreenResponderTest
+      # speaks its protocol when it finds the checkout here (OMNIBRIDGE: ../../../omnibridge).
+      - ${OMNIBRIDGE:-../../../omnibridge}/react:/srv/omnibridge/react:ro
       - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
       - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
       - ./demo.sh:/usr/local/bin/demo:ro

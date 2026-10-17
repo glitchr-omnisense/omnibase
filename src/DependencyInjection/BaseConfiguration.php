@@ -842,6 +842,16 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->info('Default logging expiry')
                     ->defaultValue(3*60)
                     ->end()
+                ->end()
+            ->end()
+
+            // The screens (plan "omnibase agnostique", C5): pages handed as a template and a view model.
+            ->arrayNode('screens')->addDefaultsIfNotSet()
+                ->children()
+                ->scalarNode('version')
+                    ->info('The version of the front end that renders the screens (omnibridge/react\'s X-Omnibridge-Version): a front end of another version reloads the page whole. Null: none checked.')
+                    ->defaultValue(null)
+                    ->end()
         ->end();
 
         return $treeBuilder;

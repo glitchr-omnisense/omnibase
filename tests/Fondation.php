@@ -41,6 +41,11 @@
  * the resolveDiscriminator event, the column types, the filters and the DQL functions, for Symfony and by hand).
  * 718 after step C6 (+3: Base\Bridge\Doctrine\Mapping, Registry, RepositoryFactory - the mapping on an entity
  * manager built by hand, without DoctrineBundle).
+ * 741 after step C5's screens (+23: the view models Base\Screen\* - Frame, Site, Viewer, Author, Tag, Link,
+ * StoryText, Card, Story, Comment, Reply, Discussion, the Screen interface, Shape, View, ContextProvider -, their
+ * builder Base\Screen\Builder\Stories, the contracts Base\Contract\Pictures and Texts, and their Symfony side,
+ * Base\Bridge\Symfony\MediaPictures, WysiwygTexts, SymfonyScreenContext, ScreenResponder, which name the
+ * framework and load none of it).
  */
 
 return [
@@ -60,10 +65,14 @@ return [
     Base\Bridge\Doctrine\Types::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
+    Base\Bridge\Symfony\MediaPictures::class,
     Base\Bridge\Symfony\NotificationMessages::class,
     Base\Bridge\Symfony\RouterUrls::class,
+    Base\Bridge\Symfony\ScreenResponder::class,
     Base\Bridge\Symfony\SecurityAccess::class,
+    Base\Bridge\Symfony\SymfonyScreenContext::class,
     Base\Bridge\Symfony\TranslatorTranslations::class,
+    Base\Bridge\Symfony\WysiwygTexts::class,
     Base\Cache\Abstract\AbstractLocalCache::class,
     Base\Cache\Abstract\AbstractLocalCacheInterface::class,
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
@@ -75,8 +84,10 @@ return [
     Base\Contract\Files::class,
     Base\Contract\Link::class,
     Base\Contract\Locales::class,
+    Base\Contract\Pictures::class,
     Base\Contract\Runtime::class,
     Base\Contract\SystemClock::class,
+    Base\Contract\Texts::class,
     Base\Contract\Urls::class,
     Base\Controller\SignatureController::class,
     Base\DatabaseSubscriber\AttributeSubscriber::class,
@@ -528,6 +539,23 @@ return [
     Base\Repository\User\TokenRepository::class,
     Base\Routing\AdminUrlGeneratorInterface::class,
     Base\Routing\NullAdminUrlGenerator::class,
+    Base\Screen\Author::class,
+    Base\Screen\Builder\Stories::class,
+    Base\Screen\Card::class,
+    Base\Screen\Comment::class,
+    Base\Screen\ContextProvider::class,
+    Base\Screen\Discussion::class,
+    Base\Screen\Frame::class,
+    Base\Screen\Link::class,
+    Base\Screen\Reply::class,
+    Base\Screen\Screen::class,
+    Base\Screen\Shape::class,
+    Base\Screen\Site::class,
+    Base\Screen\Story::class,
+    Base\Screen\StoryText::class,
+    Base\Screen\Tag::class,
+    Base\Screen\View::class,
+    Base\Screen\Viewer::class,
     Base\Security\CookieAnswer::class,
     Base\Security\LoginRestrictionInterface::class,
     Base\Security\SignInGuard::class,
