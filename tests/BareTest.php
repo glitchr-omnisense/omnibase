@@ -59,7 +59,12 @@ final class BareTest extends TestCase
         }
     }
 
-    /** The check is not blind: the same report, for the bundle and a repository, names the framework and who asked for it. */
+    /**
+     * The check is not blind: the same report, for the bundle and the users' repository, names the
+     * framework and who asked for it. The users' repository is the framework's by its interfaces
+     * (Security's user provider); since step C3b its parent, omnibase's ServiceEntityRepository, is
+     * doctrine/orm's EntityRepository and no longer brings DoctrineBundle.
+     */
     public function testAClassOfTheFrameworkIsNamed(): void
     {
         [$status, $report] = self::bare([BaseBundle::class, UserRepository::class]);
@@ -71,8 +76,23 @@ final class BareTest extends TestCase
         self::assertNotEmpty(preg_grep('~/symfony/http-kernel/~', $bundle['framework_files']));
 
         $repository = $report['classes'][UserRepository::class];
-        self::assertSame('Base\\Database\\Repository\\ServiceEntityRepository', $repository['boundary']['Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository'] ?? null);
-        self::assertNotEmpty(preg_grep('~/doctrine/doctrine-bundle/~', $repository['framework_files']));
+        self::assertSame(UserRepository::class, $repository['framework']['Symfony\\Component\\Security\\Core\\User\\UserProviderInterface'] ?? null);
+        self::assertNotEmpty(preg_grep('~/symfony/security-core/~', $repository['framework_files']));
+        self::assertArrayNotHasKey('Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository', $repository['framework']);
+        self::assertSame([], preg_grep('~/doctrine/doctrine-bundle/~', $repository['framework_files']));
+    }
+
+    /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
+    public function testARepositoryLoadsWithoutTheFramework(): void
+    {
+        [$status, $report] = self::bare([\Base\Repository\ThreadRepository::class]);
+
+        self::assertSame(0, $status);
+        $repository = $report['classes'][\Base\Repository\ThreadRepository::class];
+        self::assertNull($repository['error']);
+        self::assertSame([], $repository['framework']);
+        self::assertSame([], $repository['framework_files']);
+        self::assertTrue(is_subclass_of(\Base\Repository\ThreadRepository::class, \Doctrine\ORM\EntityRepository::class));
     }
 
     /**

@@ -64,8 +64,10 @@ Twig (the view) are allowed. A failure names the framework's class or file, the
 class of the list that loaded it and the class that asked for it. A second case
 loads `Base\BaseBundle` and `Base\Repository\UserRepository` the same way and
 checks the report names the framework (`HttpKernel\Bundle\Bundle`, asked by
-`AbstractBaseBundle`; DoctrineBundle's `ServiceEntityRepository`, asked by
-`Base\Database\Repository\ServiceEntityRepository`): the check is not blind.
+`AbstractBaseBundle`; Security's `UserProviderInterface`, implemented by the
+users' repository): the check is not blind. A third loads a repository
+(`ThreadRepository`): doctrine/orm's `EntityRepository`, nothing of the
+framework (plan "omnibase agnostique", C3b).
 
 ```sh
 docker compose run --rm omnibase bare                      # the Fondation; exits 1 when the framework was loaded
