@@ -2,15 +2,25 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
-use Base\Database\Filter\TrashFilter;
-use Base\Database\Filter\VaultFilter;
-use Base\Database\Function\JsonArrayPosition;
-use Base\Database\Function\Rand;
-use DoctrineExtensions\Query\Mysql\Field;
-use Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql as DqlFunctions;
+use Base\Bridge\Doctrine\Configuration;
+use Base\Bridge\Doctrine\MappingDriver;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
+/**
+ * omnibase's Doctrine mapping on DoctrineBundle's entity managers, from the
+ * same lists and the same driver an entity manager built by hand gets from
+ * Base\Bridge\Doctrine\Mapping (plan "omnibase agnostique", C6):
+ *
+ * - the filters, the DQL functions and the default hint of
+ *   Base\Bridge\Doctrine\Configuration, on `doctrine.orm.configuration`;
+ * - every entity manager's mapping driver wrapped in
+ *   Base\Bridge\Doctrine\MappingDriver (the discriminator maps generated, the
+ *   `resolveDiscriminator` event), given its entity manager lazily.
+ */
 class DoctrineConfigurationPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
@@ -21,50 +31,37 @@ class DoctrineConfigurationPass implements CompilerPassInterface
 
         $definition = $container->getDefinition('doctrine.orm.configuration');
 
-        // Add filters
-        $definition->addMethodCall('addFilter', ['trash_filter', TrashFilter::class]);
-        $definition->addMethodCall('addFilter', ['vault_filter', VaultFilter::class]);
-
-        // Add DQL numeric functions
-        $definition->addMethodCall('addCustomNumericFunction', ['RAND', Rand::class]);
-
-        if (class_exists(Field::class)) {
-            $definition->addMethodCall('addCustomNumericFunction', ['FIELD', Field::class]);
+        foreach (Configuration::filters() as $name => $className) {
+            $definition->addMethodCall('addFilter', [$name, $className]);
+        }
+        foreach (Configuration::numericFunctions() as $name => $className) {
+            $definition->addMethodCall('addCustomNumericFunction', [$name, $className]);
+        }
+        foreach (Configuration::stringFunctions() as $name => $className) {
+            $definition->addMethodCall('addCustomStringFunction', [$name, $className]);
+        }
+        foreach (Configuration::defaultQueryHints() as $name => $value) {
+            $definition->addMethodCall('setDefaultQueryHint', [$name, $value]);
         }
 
-        // Add DQL string functions
-        if (class_exists(DqlFunctions\JsonExtract::class)) {
-            $definition->addMethodCall('addCustomStringFunction', [
-                DqlFunctions\JsonExtract::FUNCTION_NAME,
-                DqlFunctions\JsonExtract::class
-            ]);
-        }
+        $entityManagers = $container->hasParameter('doctrine.entity_managers') ? $container->getParameter('doctrine.entity_managers') : [];
+        foreach ($entityManagers as $name => $entityManager) {
+            $id = sprintf('doctrine.orm.%s_configuration', $name);
+            if (!$container->hasDefinition($id)) {
+                continue;
+            }
 
-        if (class_exists(DqlFunctions\JsonSearch::class)) {
-            $definition->addMethodCall('addCustomStringFunction', [
-                DqlFunctions\JsonSearch::FUNCTION_NAME,
-                DqlFunctions\JsonSearch::class
-            ]);
-        }
+            $configuration = $container->getDefinition($id);
+            $calls = $configuration->getMethodCalls();
+            foreach ($calls as $i => [$method, $arguments]) {
+                if ($method !== 'setMetadataDriverImpl' || !($arguments[0] ?? null) instanceof Reference) {
+                    continue;
+                }
 
-        if (class_exists(DqlFunctions\JsonContains::class)) {
-            $definition->addMethodCall('addCustomStringFunction', [
-                DqlFunctions\JsonContains::FUNCTION_NAME,
-                DqlFunctions\JsonContains::class
-            ]);
+                $driver = new Definition(MappingDriver::class, [$arguments[0], new ServiceClosureArgument(new Reference($entityManager))]);
+                $calls[$i] = [$method, [$driver]];
+            }
+            $configuration->setMethodCalls($calls);
         }
-
-        if (class_exists(JsonArrayPosition::class)) {
-            $definition->addMethodCall('addCustomStringFunction', [
-                JsonArrayPosition::FUNCTION_NAME,
-                JsonArrayPosition::class
-            ]);
-        }
-
-        // Optional: set default query hint (if needed)
-        $definition->addMethodCall('setDefaultQueryHint', [
-            \Doctrine\ORM\Query::HINT_CUSTOM_TREE_WALKERS,
-            []
-        ]);
     }
 }

@@ -7,9 +7,8 @@ if(!isset($_SERVER["APP_TIMER"])) {
 }
 
 use App\Entity\User;
-use Base\Database\Type\DateTimeTypeUTC as DateTimeType;
-use Base\Database\Type\ArrayType;
-use Doctrine\DBAL\Types\Type;
+use Base\Bridge\Doctrine\Configuration;
+use Base\Bridge\Doctrine\Types;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -379,36 +378,13 @@ class BaseBundle extends AbstractBaseBundle
             // type asked of Doctrine would no longer be the Base\Database\Type
             // class applications and bundles name, and it ignores use_custom
             // (tests/Database/Type/OmnibridgeTypesTest says both convert alike).
-            Type::overrideType('datetime', DateTimeType::class);
-            Type::overrideType('datetimetz', DateTimeType::class);
-
-            // Backward compatibility (see doctrine:array:upgrade)
-            if(Type::hasType('array')) Type::overrideType('array', ArrayType::class);
-            else Type::addType('array', ArrayType::class);
-
-            $classList = array_merge(
-                self::getAllClasses(self::getBundleDir() . "/src/Enum"),
-                self::getAllClasses($this->getProjectDir() . "/src/Enum")
-            );
-
-            foreach ($classList as $className) {
-
-                // A plain PHP enum (Base\Enum\Allergen, CommentState) is no Doctrine type.
-                if (!method_exists($className, "getStaticName")) continue;
-
-                if(!Type::hasType($className::getStaticName())) {
-                    Type::addType($className::getStaticName(), $className);
-                }
-
-                $type = Type::getType($className::getStaticName());
-                if($type == $className) {
-                    throw new EnvNotFoundException('Doctrine type `'.$className::getStaticName().'` already exists, conflict detected between '. $className." and ". get_class($type));
-                }
-            }
-
-            $entityManager = $this->container->get('doctrine.orm.entity_manager'); 
-            $entityManager->getFilters()->enable("trash_filter");
-            $entityManager->getFilters()->enable("vault_filter")->setEnvironment($this->getEnvironment());
+            //
+            // The column types and the filters are Base\Bridge\Doctrine's (plan "omnibase agnostique", C6),
+            // what an entity manager built by hand is given as well: datetime and datetimetz the core's
+            // DateTimeTypeUTC, array its ArrayType (backward compatibility, see doctrine:array:upgrade),
+            // the UTC types, every enumeration of the core's src/Enum and of the application's.
+            Types::register([], [Types::coreEnumerationDirectory(), $this->getProjectDir() . "/src/Enum"]);
+            Configuration::enableFilters($this->container->get('doctrine.orm.entity_manager'), $this->getEnvironment());
         }
 
         CacheClearCommand::$testFile ??= $this->getCacheDir().".txt";

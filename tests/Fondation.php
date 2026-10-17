@@ -37,6 +37,8 @@
  * WarmableInterface: AttributeReader, ClassMetadataManipulator, AbstractLocalCache and its interface,
  * SimpleCache and its interface, IconProvider, Localizer, AbstractIconAdapter, BootstrapTwitterAdapter,
  * FontAwesomeAdapter, Obfuscator, Themizer, WebpackTagRenderer).
+ * 715 after step C6's move (+3: Base\Bridge\Doctrine\MappingDriver, Types, Configuration - the discriminator maps,
+ * the resolveDiscriminator event, the column types, the filters and the DQL functions, for Symfony and by hand).
  */
 
 return [
@@ -47,7 +49,10 @@ return [
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
     Base\Attributes\Traits\HierarchifyTrait::class,
+    Base\Bridge\Doctrine\Configuration::class,
+    Base\Bridge\Doctrine\MappingDriver::class,
     Base\Bridge\Doctrine\MetadataSnapshot::class,
+    Base\Bridge\Doctrine\Types::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\NotificationMessages::class,
