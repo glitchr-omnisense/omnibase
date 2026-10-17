@@ -63,13 +63,15 @@ class MentionEnhancer implements MentionEnhancerInterface
 
             if(!$entry) continue;
 
-            $encoding = mb_detect_encoding($entry);
-            $dom = new DOMDocument('1.0', $encoding);
+            // mb_utf8(), not mb_detect_encoding($entry): unsure, the latter says ASCII for a text
+            // that opens on enough of it (an older article's photos kept inline in base64, 2.6MB),
+            // and the conversion from ASCII turned every other character into "?" on the page.
+            $dom = new DOMDocument('1.0', 'UTF-8');
             // Charset hint is load-bearing: without it libxml decodes this UTF-8
             // fragment as ISO-8859-1 and saveHTML() re-encodes it, doubling every
             // accent ("e-acute" -> "A-tilde + copyright"). The DOMDocument encoding
             // argument only labels the output; it does not affect loadHTML() input.
-            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
+            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_utf8($entry), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("mention");
             if(count($tags) < 1) continue;
@@ -115,7 +117,7 @@ class MentionEnhancer implements MentionEnhancerInterface
             // fragment as ISO-8859-1 and saveHTML() re-encodes it, doubling every
             // accent ("e-acute" -> "A-tilde + copyright"). The DOMDocument encoding
             // argument only labels the output; it does not affect loadHTML() input.
-            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
+            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_utf8($entry), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("mention");
             if(count($tags) < 1) continue;
