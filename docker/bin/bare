@@ -45,7 +45,9 @@
 // A notice or a deprecation goes to the error output, not into the report.
 ini_set('display_errors', 'stderr');
 
-const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
+// A namespace segment ending in Bundle is a bundle's - except symfony/intl's resource readers
+// (Symfony\Component\Intl\Data\Bundle\...), a standalone component's (plan, C3e).
+const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
 const FRAMEWORK_FILES = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
 
 $options = ['json' => false, 'all' => false, 'each' => false, 'names' => false];

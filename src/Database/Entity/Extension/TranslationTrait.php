@@ -4,7 +4,7 @@ namespace Base\Database\Entity\Extension;
 
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\Entity\Extension\TranslatableInterface;
-use Base\Service\Localizer;
+use Base\Service\Model\LocaleNormalizer;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -63,7 +63,7 @@ trait TranslationTrait
     public function getLocale(): ?string
     {
         if ($this->locale) {
-            return Localizer::normalizeLocale($this->locale);
+            return LocaleNormalizer::here($this->locale);
         }
 
         return $this->getTranslatable()?->getTranslations()->indexOf($this);
@@ -76,7 +76,7 @@ trait TranslationTrait
      */
     public function setLocale(string $locale)
     {
-        $this->locale = Localizer::normalizeLocale($locale);
+        $this->locale = LocaleNormalizer::here($locale);
         return $this;
     }
 

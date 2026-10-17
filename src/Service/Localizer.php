@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Cache\Abstract\AbstractLocalCache;
+use Base\Service\Model\LocaleNormalizer;
 use DateTimeZone;
 use Exception;
 use Locale;
@@ -12,7 +13,6 @@ use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Intl\Languages;
-use Symfony\Component\Intl\Locales;
 use Symfony\Component\Intl\Timezones;
 
 class Localizer extends AbstractLocalCache implements LocalizerInterface
@@ -103,12 +103,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 
     public static function __toLocaleLang(string $locale): string
     {
-        $lang = $locale ? substr($locale, 0, 2) : null;
-        if ($lang === null || !array_key_exists($lang, self::getLocales())) {
-            $lang = substr(self::getDefaultLocale(), 0, 2);
-        }
-
-        return $lang;
+        return LocaleNormalizer::lang($locale, self::getDefaultLocale(), self::getLocales());
     }
 
     public static function __toLocaleCountry(string $locale): string
@@ -141,22 +136,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     public static function getLocales()
     {
         if (self::$locales === null) {
-
-            self::$locales = [];
-            foreach (Locales::getLocales() as $locale) {
-                // NB: Only keep xx-YY locale format
-                if (!preg_match('/[a-z]{2}.[A-Z]{2}/', $locale)) {
-                    continue;
-                }
-
-                $lang = substr($locale, 0, 2);
-                $country = substr($locale, 3, 2);
-
-                if (!array_key_exists($lang, self::$locales)) {
-                    self::$locales[$lang] = [];
-                }
-                self::$locales[$lang][] = $country;
-            }
+            self::$locales = LocaleNormalizer::getLocales();
         }
 
         return self::$locales;
@@ -331,28 +311,10 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         }
 
         //
-        // Correct length, perhaps wrong separator.. just normalize
-        if (strlen($locale) == 5) {
-            self::$cacheLocales[$locale] = substr($locale, 0, 2) . self::SEPARATOR . substr($locale, 3, 2);
-            return self::$cacheLocales[$locale];
-        }
-
-        //
-        // Missing information.. try to guess..
-        $lang = $locale ? substr($locale, 0, 2) : null;
-        if ($lang === null || !array_key_exists($lang, self::getLocales())) {
-            $lang = substr(self::getDefaultLocale(), 0, 2);
-        }
-
-        $defaultCountry = self::getDefaultLocale() ? substr(self::getDefaultLocale(), 3, 2) : ($lang == "en" ? "GB" : first(self::$locales[$lang]) ?? null);
-        $availableCountries = array_transforms(fn($k, $l): array => $l !== null ? [substr($l, 0, 2), [substr($l, 3, 2)]] : null, self::getAvailableLocales());
-        $langCountries = $availableCountries[$lang] ?? [];
-
-        $country = substr($locale, 3, 2);
-        $country = $country ?: null;
-        $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
-
-        self::$cacheLocales[$locale] = $lang . self::SEPARATOR . $country;
+        // The rule is Base\Service\Model\LocaleNormalizer's (plan "omnibase agnostique",
+        // C3e: the entities apply it without the framework), with this Localizer's
+        // default and fallback locales.
+        self::$cacheLocales[$locale] = LocaleNormalizer::normalize($locale, self::getDefaultLocale(), self::getAvailableLocales(), self::getLocales());
         return self::$cacheLocales[$locale];
     }
 

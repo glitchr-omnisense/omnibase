@@ -89,3 +89,12 @@ compares each with the service it used) and answers where there is no framework
 | `ShortLink::__toLink()` | `getRouter()->generate()` (by `__call`, on the current translation's `BaseTrait`: the Localizer first) | `Link::to()` |
 | `Thread::isVisible()` | `getService()->isGranted('ROLE_ADMIN')`, and the owners compared with the token storage's token (never one of them: never true) | `Runtime::access()->isGranted('ROLE_ADMIN')`; the token line dropped, the answers unchanged |
 | `User::isGranted($role)` | `getService()->isGranted($role, $this)` | `Runtime::access()->isGranted($role, $this)` (User itself still loads the framework: Security's `UserInterface`, Scheb's) |
+| `TranslatableTrait::translate()` (every translatable entity's titles, its `__call` getters and setters), its `__get` and `__isset` fallbacks, `addTranslation()` | `BaseService::getLocalizer()`: `getDefaultLocale()`, `getAvailableLocales()`, `getLocale($locale)`, `getLocaleLang()` | `Runtime::find(Locales::class)` (none: null, as when no Localizer was found) and `LocaleNormalizer` |
+| `TranslationTrait::getLocale()`, `setLocale()` | `Localizer::normalizeLocale()` (its statics, filled when the Symfony service is built) | `LocaleNormalizer::here()`: the rule with the Locales contract's default and available locales |
+
+`Base\Service\Model\LocaleNormalizer` is the Localizer's rule for omnibase's
+`xx-XX` form, taken out of it: `Localizer::normalizeLocale()`,
+`__toLocaleLang()` and `getLocales()` now ask it with the Localizer's own
+statics, so the strings are the same by construction; the entities ask it
+with the Locales contract's (`here()`). The test keeps a copy of the rule as
+it was and compares both paths with it.

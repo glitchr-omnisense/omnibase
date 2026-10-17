@@ -26,6 +26,8 @@
  * load nothing of the framework - they name it, see bare --names).
  * 692 after step C3e's links (+1: Base\Contract\Link, a route's address by a router's reference type
  * through the Urls contract).
+ * 693 after step C3e's locales (+1: Base\Service\Model\LocaleNormalizer, the Localizer's rule for
+ * omnibase's xx-XX form, which the translatable entities apply with the Locales contract).
  */
 
 return [
@@ -559,6 +561,7 @@ return [
     Base\Service\Model\IconizeInterface::class,
     Base\Service\Model\IntlDateTime::class,
     Base\Service\Model\LinkableInterface::class,
+    Base\Service\Model\LocaleNormalizer::class,
     Base\Service\Model\Obfuscator\AbstractCompression::class,
     Base\Service\Model\Obfuscator\CompressionInterface::class,
     Base\Service\Model\Obfuscator\Compression\DeflateCompression::class,
