@@ -21,6 +21,9 @@ services:
       # omnibridge/react, which the image does not install: the core's ScreenResponderTest
       # speaks its protocol when it finds the checkout here (OMNIBRIDGE: ../../../omnibridge).
       - ${OMNIBRIDGE:-../../../omnibridge}/react:/srv/omnibridge/react:ro
+      # omnibridge/doctrine as checked out over the image's (cf6b3b9): the hand-built entity manager's
+      # test passes it Mapping::configure() (its configure:, from 4d2436d).
+      - ${OMNIBRIDGE:-../../../omnibridge}/doctrine:/srv/demo/vendor/omnibridge/doctrine:ro
       - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
       - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
       - ./demo.sh:/usr/local/bin/demo:ro
