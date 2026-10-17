@@ -6,7 +6,11 @@ use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\ShortLink;
+use Base\Contract\Locales;
 use Base\Entity\Thread;
+use Base\Entity\ThreadIntl;
+use Base\Service\Localizer;
+use Base\Service\Model\LocaleNormalizer;
 use Base\Enum\ThreadState;
 use Base\Enum\WorkflowState;
 use Base\Exception\MissingContractException;
@@ -154,5 +158,93 @@ final class EntityGettersTest extends KernelTestCase
         self::assertSame([ThreadState::PUBLISH => true, ThreadState::DRAFT => false, ThreadState::SECRET => false], $seen['nobody'], 'nobody sees the published thread only');
         self::assertSame([true, true, true], array_values($seen['an administrator']), 'an administrator sees them all');
         self::assertTrue($member->isGranted('ROLE_ADMIN'), 'the administrator is granted ROLE_ADMIN on a member');
+    }
+
+    /**
+     * The rule the Localizer applied before C3e, copied as it was (normalizeLocale() with the
+     * Localizer's statics): LocaleNormalizer must give the same strings, through the Localizer and
+     * through the Locales contract.
+     */
+    private static function normalizedBefore(string $locale): string
+    {
+        if (5 == strlen($locale)) {
+            return substr($locale, 0, 2).'-'.substr($locale, 3, 2);
+        }
+        $locales = Localizer::getLocales();
+        $lang = $locale ? substr($locale, 0, 2) : null;
+        if (null === $lang || !array_key_exists($lang, $locales)) {
+            $lang = substr(Localizer::getDefaultLocale(), 0, 2);
+        }
+        $defaultCountry = Localizer::getDefaultLocale() ? substr(Localizer::getDefaultLocale(), 3, 2) : ('en' == $lang ? 'GB' : first($locales[$lang]) ?? null);
+        $availableCountries = array_transforms(fn ($k, $l): array => null !== $l ? [substr($l, 0, 2), [substr($l, 3, 2)]] : null, Localizer::getAvailableLocales());
+        $langCountries = $availableCountries[$lang] ?? [];
+        $country = substr($locale, 3, 2) ?: null;
+        $country = null !== $country && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
+
+        return $lang.'-'.$country;
+    }
+
+    /**
+     * The translatable entities' locales (TranslatableTrait::translate(), its proxies, addTranslation(),
+     * TranslationTrait's getLocale() and setLocale()) come from the Locales contract and
+     * LocaleNormalizer, where they came from BaseTrait's Localizer: every quantity translate() read
+     * of the Localizer - the default and available locales, a locale normalized, its language - is
+     * the same, for the page's locale and a dozen given; and the translation picked, the title read
+     * by __call, follow the page's language as before.
+     */
+    public function testTranslationsFollowTheLocalesAsTheLocalizerGaveThem(): void
+    {
+        $localizer = static::getContainer()->get('localizer');
+        $locales = Runtime::locales();
+        $default = $locales->getDefaultLocale();
+        $available = $locales->getAvailableLocales();
+
+        self::assertSame($localizer::getDefaultLocale(), $default);
+        self::assertSame(array_values($localizer::getAvailableLocales()), $available);
+
+        foreach (['fr', 'en', 'ja', 'de', 'pt', 'xx', '', 'fr_FR', 'fr-FR', 'en-US', 'en-GB', 'en_gb', 'fr-CA', 'es-MX', 'zz-ZZ', 'de-DE-1996'] as $given) {
+            $before = self::normalizedBefore($given);
+            self::assertSame($before, LocaleNormalizer::here($given), '"'.$given.'" through the contract');
+            self::assertSame($before, Localizer::normalizeLocale($given), '"'.$given.'" through the Localizer');
+            self::assertSame($before, LocaleNormalizer::normalize($given, $default, $available), '"'.$given.'"');
+            self::assertSame($localizer->getLocaleLang($before), LocaleNormalizer::lang($before, $default), '"'.$given.'", its language');
+            self::assertSame(Localizer::__toLocaleLang($given), LocaleNormalizer::lang($given, $default), '"'.$given.'", its language as given');
+        }
+
+        self::assertGreaterThan(1, count($available), 'two languages at least to choose between');
+        $thread = new Thread();
+        foreach ($available as $locale) {
+            $thread->translate($locale)->setTitle('Title '.$locale);
+        }
+        self::assertSame($available, array_keys($thread->getTranslations()->toArray()), 'each written in its language');
+
+        foreach (array_merge($available, ['ja-JP', 'de-DE']) as $page) {
+            $localizer->setLocale($page);
+            self::assertSame($localizer->getLocale(), $locales->getLocale());
+            self::assertSame(self::normalizedBefore($localizer->getLocale()), LocaleNormalizer::here($locales->getLocale()), 'the page\'s locale');
+            $expected = $thread->getTranslations()[$localizer->getLocale()] ?? null;
+            foreach ($thread->getTranslations() as $key => $candidate) {
+                $expected ??= substr($key, 0, 2) === substr($localizer->getLocale(), 0, 2) ? $candidate : null;
+            }
+            $expected ??= $thread->getTranslations()[$default];
+            self::assertSame($expected, $thread->translate(), 'the page\'s, the same language\'s, else the default\'s: '.$page);
+            self::assertSame($expected->getTitle(), $thread->getTitle(), 'getTitle() by __call: '.$page);
+        }
+
+        // A write on the page goes where a read goes: the page's language when written in, else the fallback.
+        $localizer->setLocale($available[1]);
+        $thread->setTitle('Retitled');
+        self::assertSame('Retitled', $thread->translate($available[1])->getTitle());
+        self::assertSame('Title '.$default, $thread->translate($default)->getTitle());
+
+        $localizer->setLocale($default);
+        self::assertSame($thread->translate($default), $thread->translate(-1), 'a negative locale is the default');
+        self::assertSame($thread->translate(), $thread->translate(null));
+
+        $intl = new ThreadIntl();
+        foreach (['fr_FR', 'en', 'fr', 'ja'] as $given) {
+            $intl->setLocale($given);
+            self::assertSame(self::normalizedBefore($given), $intl->getLocale(), 'TranslationTrait::setLocale("'.$given.'")');
+        }
     }
 }

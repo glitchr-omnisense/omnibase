@@ -5,8 +5,9 @@ namespace Base\Database\Entity\Extension;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\Entity\Extension\TranslationInterface;
 
-use Base\Service\BaseService;
-use Base\Service\Localizer;
+use Base\Contract\Locales;
+use Base\Contract\Runtime;
+use Base\Service\Model\LocaleNormalizer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
@@ -152,7 +153,7 @@ trait TranslatableTrait
      */
     public function addTranslation(TranslationInterface $translation)
     {
-        $this->getTranslations()->set(Localizer::normalizeLocale($translation->getLocale()), $translation);
+        $this->getTranslations()->set(LocaleNormalizer::here($translation->getLocale()), $translation);
         $translation->setTranslatable($this);
 
         return $this;
@@ -184,16 +185,21 @@ trait TranslatableTrait
      */
     public function translate(?string $locale = null)
     {
-        $localizer = BaseService::getLocalizer();
-        if (!$localizer) {
+        // The page's language, the default and the available ones: the Locales
+        // contract (plan "omnibase agnostique", C3e), the Localizer's own under
+        // Symfony (LocalizerLocales); none in the registry, none here, as when
+        // BaseTrait found no Localizer.
+        $locales = Runtime::find(Locales::class);
+        if (!$locales) {
             return null;
         }
 
-        $defaultLocale = $localizer->getDefaultLocale();
-        $availableLocales = $localizer->getAvailableLocales();
+        $defaultLocale = $locales->getDefaultLocale();
+        $availableLocales = $locales->getAvailableLocales();
+        $normalize = fn (string $locale): string => LocaleNormalizer::normalize($locale, $defaultLocale, $availableLocales);
 
         $locale = intval($locale) < 0 ? $defaultLocale : $locale;
-        $normLocale = $localizer->getLocale($locale); // Locale normalizer
+        $normLocale = $normalize($locale ?? $locales->getLocale()); // Locale normalizer
         $translations = $this->getTranslations(); // pending ones written in since are committed here
 
         $translation = $translations[$normLocale] ?? null;
@@ -205,7 +211,7 @@ trait TranslatableTrait
             $written = array_filter($translations->toArray(), fn($t) => $t && !$t->isEmpty());
 
             // The same language in another region (fr-CA's page, fr-FR's text)
-            $lang = $localizer->getLocaleLang($normLocale);
+            $lang = LocaleNormalizer::lang($normLocale, $defaultLocale);
             foreach ($written as $key => $candidate) {
                 if (substr((string) $key, 0, 2) === $lang) {
                     return $candidate;
@@ -214,7 +220,7 @@ trait TranslatableTrait
 
             // The default locale, then the available ones in their order
             foreach (array_unique(array_filter(array_merge([$defaultLocale], $availableLocales))) as $fallbackLocale) {
-                $fallbackLocale = $localizer->getLocale($fallbackLocale);
+                $fallbackLocale = $normalize($fallbackLocale);
                 if (isset($written[$fallbackLocale])) {
                     return $written[$fallbackLocale];
                 }
@@ -402,7 +408,7 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for current locale
-        $defaultLocale = BaseService::getLocalizer()?->getDefaultLocale();
+        $defaultLocale = Runtime::find(Locales::class)?->getDefaultLocale();
         $entityIntl = $entity->translate();
         if(!$entityIntl) {
             return null;
@@ -475,7 +481,7 @@ trait TranslatableTrait
         }
 
         // If still not found and current locale isn't default, try fallback to default locale
-        $defaultLocale = BaseService::getLocalizer()->getDefaultLocale();
+        $defaultLocale = Runtime::locales()->getDefaultLocale();
         if ($entityIntl->getLocale() !== $defaultLocale) {
             $entityIntl = $entity->translate($defaultLocale);
 

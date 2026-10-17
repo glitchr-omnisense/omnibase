@@ -56,7 +56,9 @@ class, interface, trait and file PHP loaded on the way is checked. None may be
 the framework's: the Symfony bundles (FrameworkBundle, DoctrineBundle,
 TwigBundle, SecurityBundle, every `*-bundle`) and bridges, `dependency-injection`,
 `config`, `http-kernel`, `http-foundation`, `routing`, `security-*`, `form`,
-`console`, `ux-*`, API Platform, HWI, Scheb, Webauthn's bundle, Nelmio. The
+`console`, `ux-*`, API Platform, HWI, Scheb, Webauthn's bundle, Nelmio (a
+namespace segment ending in `Bundle` is a bundle's, except symfony/intl's
+resource readers, `Symfony\Component\Intl\Data\Bundle\`). The
 standalone Symfony components (`string`, `uid`, `intl`, `translation`,
 `validator`, `serializer`, `mime`, `mailer`, `notifier`, `cache`, `workflow`,
 `event-dispatcher`, `http-client`, the contracts...), Doctrine (storage) and

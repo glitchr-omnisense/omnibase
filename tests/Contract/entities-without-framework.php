@@ -17,14 +17,17 @@
 
 use Base\Contract\Access;
 use Base\Contract\Link;
+use Base\Contract\Locales;
 use Base\Contract\Runtime;
 use Base\Contract\Urls;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\ShortLink;
 use Base\Entity\Thread;
+use Base\Entity\ThreadIntl;
 use Base\Enum\ThreadState;
 use Base\Enum\WorkflowState;
 use Base\Exception\MissingContractException;
+use Base\Service\Model\LocaleNormalizer;
 
 $answers = [];
 
@@ -109,6 +112,48 @@ $access->roles = ['ROLE_ADMIN'];
 foreach ($threads as $label => $thread) {
     $answers['thread '.$label.', an administrator'] = $thread->isVisible();
 }
+
+// Locales: a translatable entity's translations (TranslatableTrait::translate(), its __call
+// getters and setters, TranslationTrait's locale), the page's language from the contract.
+$answers['thread, no Locales'] = (new ReflectionClass(Thread::class))->newInstanceWithoutConstructor()->translate();
+$locales = new class implements Locales {
+    public string $current = 'fr-FR';
+
+    public function getLocale(): string
+    {
+        return $this->current;
+    }
+
+    public function getDefaultLocale(): string
+    {
+        return 'fr-FR';
+    }
+
+    public function getAvailableLocales(): array
+    {
+        return ['fr-FR', 'en-GB'];
+    }
+};
+Runtime::set(Locales::class, $locales);
+$answers['normalized'] = array_map(LocaleNormalizer::here(...), ['fr' => 'fr', 'en' => 'en', 'en_US' => 'en_US', 'ja' => 'ja', 'xx' => 'xx']);
+
+$article = new Thread(null, null, 'Abbey Road (fr)');
+$article->translate('en')->setTitle('Abbey Road (en)');
+$locales->current = 'en-GB';
+$answers['title en'] = $article->getTitle();
+$locales->current = 'fr-FR';
+$answers['title fr'] = $article->getTitle();
+$locales->current = 'en-US';
+$answers['title en-US, the same language elsewhere'] = $article->getTitle();
+$locales->current = 'ja-JP';
+$answers['title ja, the default'] = $article->getTitle();
+$answers['translation en'] = $article->translate('en')->getTitle();
+$answers['translations'] = array_keys($article->getTranslations()->toArray());
+$answers['default'] = $article->translate(-1)->getLocale();
+$intl = new ThreadIntl();
+$answers['intl locale'] = $intl->setLocale('en')->getLocale();
+$short = new ShortLink('https://lesringostars.test/articles/abbey-road', 'Abbey Road');
+$answers['short link, label'] = (string) $short;
 
 Runtime::reset();
 

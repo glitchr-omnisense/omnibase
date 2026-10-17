@@ -175,6 +175,17 @@ final class BareTest extends TestCase
             'thread published, an administrator' => true,
             'thread draft, an administrator' => true,
             'thread secret, an administrator' => true,
+            'thread, no Locales' => null,
+            'normalized' => ['fr' => 'fr-FR', 'en' => 'en-GB', 'en_US' => 'en-US', 'ja' => 'ja-FR', 'xx' => 'fr-FR'],
+            'title en' => 'Abbey Road (en)',
+            'title fr' => 'Abbey Road (fr)',
+            'title en-US, the same language elsewhere' => 'Abbey Road (en)',
+            'title ja, the default' => 'Abbey Road (fr)',
+            'translation en' => 'Abbey Road (en)',
+            'translations' => ['fr-FR', 'en-GB'],
+            'default' => 'fr-FR',
+            'intl locale' => 'en-GB',
+            'short link, label' => 'Abbey Road',
         ], $run['result']);
     }
 
