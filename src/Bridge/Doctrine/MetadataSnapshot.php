@@ -16,10 +16,12 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  * query of it, and the completor omnibase's attributes filled for it (aliases,
  * hierarchy); then the DBAL types registered, by name.
  *
- * A mapping object's properties left null are left out; the discriminator map
- * is sorted by its values' names and the subclasses by name - in a map Doctrine
- * generates, they come in the order PHP declared the classes, which two
- * processes need not share. Two entity managers over the same entities and database - DoctrineBundle's,
+ * A mapping object's properties left null or false are left out (read back
+ * from the metadata cache, a field's nullable, unique and index are null where
+ * a mapping just built says false); the discriminator map is sorted by its
+ * keys, the subclasses by name and the property accessors by property - in a
+ * map Doctrine generates, the classes come in the order PHP declared them,
+ * which two processes need not share. Two entity managers over the same entities and database - DoctrineBundle's,
  * and one built by hand with Base\Bridge\Doctrine\Mapping - give the same
  * snapshot (tests/Bridge/Doctrine/HandBuiltEntityManagerTest).
  */
@@ -64,9 +66,13 @@ final class MetadataSnapshot
         $data['idGenerator'] = isset($classMetadata->idGenerator) ? $classMetadata->idGenerator::class : null;
         $data = self::normalize($data);
 
-        // In the order PHP declared the classes (the mapping driver lists them so), which two processes need not share.
+        // In the order PHP declared the classes (the mapping driver lists them so), which two processes need not share;
+        // the property accessors in the order the metadata was built or read back from the cache.
         ksort($data['discriminatorMap']);
         sort($data['subClasses']);
+        if (is_array($data['propertyAccessors'] ?? null)) {
+            ksort($data['propertyAccessors']);
+        }
 
         $data['@filters'] = [];
         foreach ($entityManager->getFilters()->getEnabledFilters() as $name => $filter) {
@@ -137,9 +143,11 @@ final class MetadataSnapshot
             return '@closure';
         }
 
-        // A mapping object's unset properties (null) are left out: they say nothing.
+        // A mapping object's unset properties (null) and its flags off (false) are left out: they say nothing, and a
+        // mapping read back from the metadata cache has null where one just built says false (FieldMapping's nullable,
+        // unique, index).
         $properties = method_exists($value, 'toArray') ? $value->toArray() : get_object_vars($value);
 
-        return ['@class' => $value::class] + self::normalize(array_filter($properties, fn ($property) => $property !== null));
+        return ['@class' => $value::class] + self::normalize(array_filter($properties, fn ($property) => $property !== null && $property !== false));
     }
 }

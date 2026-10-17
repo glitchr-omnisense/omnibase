@@ -31,7 +31,9 @@ $configuration = new Doctrine\DBAL\Configuration();
 $configuration->setMiddlewares([new Base\Database\Middleware\PlatformMiddleware()]);
 $connection = Doctrine\DBAL\DriverManager::getConnection($options['connection'], $configuration);
 
-$entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $options['paths']);
+// The metadata cached in memory: EntityManagers::create() without a cache takes ORMSetup's default, which
+// is APCu, else a Memcached or a Redis server on 127.0.0.1 - none in an application's web container.
+$entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $options['paths'], false, new Symfony\Component\Cache\Adapter\ArrayAdapter());
 $mapping = Base\Bridge\Doctrine\Mapping::register($entityManager, [
     'project_dir' => $options['project_dir'],
     'environment' => $options['environment'] ?? 'prod',

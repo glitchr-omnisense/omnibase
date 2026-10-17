@@ -74,9 +74,20 @@ final class MappingDriver implements PersistenceMappingDriver
         }
     }
 
+    /**
+     * The driver's classes, without the aliases: an attribute driver lists the classes PHP declared from its
+     * folders, and PHP lists a class_alias() among them, lower-cased (app\entity\thread\tag for App\Entity\
+     * Thread\Tag, Base\Entity\Thread\Tag's alias). DoctrineBundle's chain dropped them by its namespaces' case;
+     * one attribute driver over every folder (an entity manager built by hand) did not.
+     *
+     * @return list<class-string>
+     */
     public function getAllClassNames(): array
     {
-        return $this->driver->getAllClassNames();
+        return array_values(array_filter(
+            $this->driver->getAllClassNames(),
+            static fn (string $className): bool => !class_exists($className, false) || (new \ReflectionClass($className))->getName() === $className,
+        ));
     }
 
     public function isTransient(string $className): bool
@@ -166,7 +177,7 @@ final class MappingDriver implements PersistenceMappingDriver
         }
 
         $map = [$class->name => $class->name];
-        foreach ($this->driver->getAllClassNames() as $subClassCandidate) {
+        foreach ($this->getAllClassNames() as $subClassCandidate) {
             if (is_subclass_of($subClassCandidate, $class->name)) {
                 $map[$subClassCandidate] = $subClassCandidate;
             }
