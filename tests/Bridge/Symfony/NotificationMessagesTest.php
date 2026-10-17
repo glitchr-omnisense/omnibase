@@ -55,7 +55,44 @@ final class NotificationMessagesTest extends KernelTestCase
         if (($recorded['application'] ?? null) !== $answers['application']) {
             self::markTestSkipped('Recorded in the omnibase harness ('.($recorded['application'] ?? '?').'); this application\'s e-mails print its own site.');
         }
+        // An e-mail without an HTML template failed before (Twig given ""): it is now written in the e-mail
+        // frame, as the same notification with the frame as its template was - recorded beside it.
+        foreach ($recorded as $name => $answer) {
+            if (is_array($answer) && $answer['email'] === 'UnexpectedValueException: Failed to render template "". See below') {
+                $recorded[$name]['email'] = $recorded[$name.', templated']['email'];
+            }
+        }
         self::assertSame($recorded, json_decode((string) json_encode($answers), true));
+    }
+
+    /** removeAttachment(), removeRecipient() and removeHtmlParameter() take out what was added, and only that. */
+    public function testWhatIsRemovedIsTakenOut(): void
+    {
+        $notification = new Notification('Une notification');
+
+        $file = tempnam(sys_get_temp_dir(), 'c6');
+        file_put_contents($file, 'facture');
+        try {
+            $kept = new UploadedFile($file, 'facture.pdf', 'application/pdf', null, true);
+            $removed = new \SplFileInfo(__DIR__);
+            $notification->addAttachment($kept)->addAttachment($removed);
+            $notification->removeAttachment($removed);
+            self::assertSame([$kept], $notification->getAttachments());
+            $notification->removeAttachment($kept);
+            self::assertSame([], $notification->getAttachments());
+        } finally {
+            @unlink($file);
+        }
+
+        $ada = new Recipient('ada@example.org');
+        $grace = new Recipient('grace@example.org');
+        $notification->addRecipient($ada)->addRecipient($grace);
+        $notification->removeRecipient($ada);
+        self::assertSame([$grace], $notification->getRecipients());
+
+        $notification->addHtmlParameter('footer_text', 'Le pied')->addHtmlParameter('signature', 'footer_text');
+        $notification->removeHtmlParameter('footer_text');
+        self::assertSame(['signature' => 'footer_text'], array_intersect_key($notification->getHtmlParameters(), ['footer_text' => 1, 'signature' => 1]));
     }
 
     /**
@@ -99,8 +136,8 @@ final class NotificationMessagesTest extends KernelTestCase
     }
 
     /**
-     * Each case twice: as built, and with the e-mail's HTML template (an e-mail without one fails to
-     * render, before the cut as after: recorded too).
+     * Each case twice: as built, and with the e-mail's HTML template (an e-mail without one failed to
+     * render, before the cut as after: recorded so; it is written in the frame since).
      *
      * @return array<string, Notification>
      */

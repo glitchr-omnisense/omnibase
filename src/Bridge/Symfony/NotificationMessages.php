@@ -39,6 +39,9 @@ use UnexpectedValueException;
  */
 final class NotificationMessages
 {
+    /** The e-mail frame: the HTML of a notification whose template is missing or not found. */
+    public const FRAME = "@Base/notifier/email.html.twig";
+
     /**
      * The error to describe, when the notification's content is one: an ExceptionEvent's throwable,
      * a FlattenException, a Throwable; null for anything else.
@@ -164,11 +167,13 @@ final class NotificationMessages
             $email->embed(fopen($projectDir . "/" . $path, 'rb'), $path /* replace by alias */);
         }
 
-        $htmlTemplate = $notification->getHtmlTemplate();
+        // A notification without an HTML template of its own is written in the e-mail frame, as one whose
+        // template is not found: "" was given to Twig, which refused it ("Failed to render template """).
+        $htmlTemplate = $notification->getHtmlTemplate() ?: self::FRAME;
         try {
             $context["html"] = $twig->render($htmlTemplate, $htmlParameters);
         } catch (LoaderError $e) {
-            $context["html"] = $twig->render("@Base/notifier/email.html.twig", $htmlParameters);
+            $context["html"] = $twig->render(self::FRAME, $htmlParameters);
         } catch (RuntimeException $e) {
             throw new UnexpectedValueException("Failed to render template \"$htmlTemplate\". See below", 500, $e);
         }
