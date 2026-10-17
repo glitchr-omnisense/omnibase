@@ -52,4 +52,29 @@ final class FirstAddressTest extends KernelTestCase
             }
         }
     }
+
+    /** A route the router does not know is said so (RouteNotFoundException), without a deprecation on the way (null given to str_ends_with() and substr()). */
+    public function testAnUnknownRouteIsSaidWithoutADeprecation(): void
+    {
+        $router = static::getContainer()->get(AdvancedRouterInterface::class);
+        $deprecations = [];
+        set_error_handler(static function (int $level, string $message) use (&$deprecations): bool {
+            $deprecations[] = $message;
+
+            return true;
+        }, \E_DEPRECATED | \E_USER_DEPRECATED);
+        try {
+            foreach (['app_c5_nowhere', 'c5_nowhere'] as $name) {
+                try {
+                    $router->generate($name);
+                    self::fail($name.' generated');
+                } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException) {
+                    self::addToAssertionCount(1);
+                }
+            }
+        } finally {
+            restore_error_handler();
+        }
+        self::assertSame([], array_values(array_filter($deprecations, static fn ($message) => str_contains($message, 'null to parameter'))));
+    }
 }
