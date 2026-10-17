@@ -1,0 +1,222 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * The core in bare PHP: no kernel, no container, no bundle booted. Only the
+ * Composer autoloader is required, then each class asked is loaded in turn,
+ * and every class, interface, trait and file PHP loaded on the way is checked
+ * against the framework (see FRAMEWORK below). tests/BareTest.php runs it in
+ * a PHP process of its own over tests/Fondation.php.
+ *
+ *   docker compose run --rm omnibase bare                       # the Fondation (tests/Fondation.php); exits 1 when a class of the framework was loaded
+ *   docker compose run --rm omnibase bare 'Base\BaseBundle'     # the classes named
+ *   docker compose run --rm omnibase bare --all --each          # every class of src/, each in a PHP process of its own
+ *   docker compose run --rm omnibase bare --json                # the same, whole, as JSON
+ *
+ * --each loads every class in a fresh process (exact for each class, slower);
+ * without it the classes are loaded one after the other in this process, and
+ * a framework class is reported under the first class that brought it.
+ *
+ * The framework (plan "omnibase agnostique", §0 and D1-D4): symfony/framework-
+ * bundle and every *-bundle (DoctrineBundle, TwigBundle, SecurityBundle,
+ * WebpackEncoreBundle, the third-party ones), symfony/*-bridge,
+ * dependency-injection, config, http-kernel, http-foundation, routing,
+ * security-*, form, console, symfony/ux-*, API Platform, HWI, Scheb,
+ * Webauthn's bundle, Nelmio. Not the framework: PHP, the standalone Symfony
+ * components (string, uid, intl, translation, validator, serializer, mime,
+ * mailer, notifier, cache, workflow, event-dispatcher, options-resolver,
+ * property-access, http-client, the contracts...), Doctrine (storage: ORM,
+ * DBAL, collections, persistence) and Twig (the view).
+ */
+
+// A notice or a deprecation goes to the error output, not into the report.
+ini_set('display_errors', 'stderr');
+
+const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
+const FRAMEWORK_FILES = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
+
+$options = ['json' => false, 'all' => false, 'each' => false];
+$classes = [];
+foreach (array_slice($argv, 1) as $argument) {
+    if (in_array($argument, ['-h', '--help'], true)) {
+        echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Fondation (tests/Fondation.php), loaded with Composer's autoloader alone.\n";
+        exit(0);
+    }
+    if (str_starts_with($argument, '--') && isset($options[substr($argument, 2)])) {
+        $options[substr($argument, 2)] = true;
+    } else {
+        $classes[] = ltrim($argument, '\\');
+    }
+}
+
+$core = dirname(__DIR__, 2);
+$autoload = getenv('OMNIBASE_AUTOLOAD') ?: null;
+foreach ([$core.'/vendor/autoload.php', $core.'/../../autoload.php'] as $candidate) {
+    $autoload ??= is_file($candidate) ? realpath($candidate) : null;
+}
+if (null === $autoload) {
+    fwrite(STDERR, "No Composer autoloader found (vendor/autoload.php, or the host application's): run \"composer install\", or set OMNIBASE_AUTOLOAD.\n");
+    exit(2);
+}
+
+if ($options['all']) {
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($core.'/src', FilesystemIterator::SKIP_DOTS));
+    foreach ($files as $file) {
+        $path = substr($file->getPathname(), strlen($core.'/src/'));
+        if (str_ends_with($path, '.php') && !str_starts_with($path, 'Resources/')) {
+            $classes[] = 'Base\\'.str_replace('/', '\\', substr($path, 0, -4));
+        }
+    }
+} elseif (!$classes) {
+    $classes = require $core.'/tests/Fondation.php';
+}
+$classes = array_values(array_unique($classes));
+sort($classes);
+
+$report = $options['each'] ? each_apart($classes, $autoload) : load_here($classes, $autoload);
+$report['autoload'] = $autoload;
+
+$failed = array_filter($report['classes'], static fn (array $class) => $class['framework'] || $class['framework_files'] || null !== $class['error']);
+if ($options['json']) {
+    echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), "\n";
+    exit($failed || $report['baseline']['symbols'] ? 1 : 0);
+}
+
+printf("The core in bare PHP: %d classes loaded with %s alone, no kernel, no container.\n\n", count($classes), $autoload);
+foreach ([...$report['baseline']['symbols'], ...$report['baseline']['files']] as $loaded) {
+    printf("  the autoloader itself, before any class: %s\n", $loaded);
+}
+foreach ($failed as $class => $result) {
+    printf("✗ %s\n", $class);
+    if (null !== $result['error']) {
+        printf("    does not load: %s\n", $result['error']);
+    }
+    foreach ($result['framework'] as $symbol => $askedBy) {
+        printf("    %s%s\n", $symbol, null === $askedBy || $askedBy === $class ? '' : ', asked by '.$askedBy);
+    }
+    foreach ($result['framework_files'] as $file) {
+        printf("    %s\n", $file);
+    }
+}
+printf("\n%d without the framework, %d with it or not loaded.\n", count($classes) - count($failed), count($failed));
+exit($failed || $report['baseline']['symbols'] ? 1 : 0);
+
+/**
+ * Loads the classes one after the other in this process.
+ *
+ * @param list<string> $classes
+ *
+ * @return array{baseline: array{symbols: list<string>, files: list<string>}, classes: array<string, array{error: ?string, framework: array<string, ?string>, framework_files: list<string>, boundary: array<string, string>}>}
+ */
+function load_here(array $classes, string $autoload): array
+{
+    $loader = require $autoload;
+    // What the autoloader loads by itself, before any class is asked: Composer's
+    // "files" entries (api-platform/jsonld's HydraContext.php, a constant, while
+    // the core requires API Platform). Reported, not held against a class.
+    $baseline = ['symbols' => array_values(preg_grep(FRAMEWORK, symbols_since([0, 0, 0]))), 'files' => array_values(preg_grep(FRAMEWORK_FILES, get_included_files()))];
+
+    // Who asked for each class: the class being loaded when PHP asked for it
+    // (its parent, an interface, a trait, a class its file uses at once).
+    $asked = [];
+    $stack = [];
+    spl_autoload_register(static function (string $class) use ($loader, &$asked, &$stack): void {
+        $asked[$class] ??= $stack ? end($stack) : null;
+        $stack[] = $class;
+        try {
+            $loader->loadClass($class);
+        } finally {
+            array_pop($stack);
+        }
+    }, true, true);
+
+    $report = [];
+    foreach ($classes as $class) {
+        [$symbols, $files] = [counts(), count(get_included_files())];
+        $error = null;
+        try {
+            if (!class_exists($class) && !interface_exists($class) && !trait_exists($class)) {
+                $error = 'no class, interface, trait nor enum of that name';
+            }
+        } catch (Throwable $e) {
+            $error = $e::class.': '.$e->getMessage();
+        }
+        $framework = [];
+        $boundary = [];
+        foreach (preg_grep(FRAMEWORK, symbols_since($symbols)) as $symbol) {
+            $framework[$symbol] = $asked[$symbol] ?? null;
+            // The edge where the framework begins: the first class outside it on the way up.
+            for ($by = $asked[$symbol] ?? null, $from = $symbol; null !== $by && preg_match(FRAMEWORK, $by); $from = $by, $by = $asked[$by] ?? null);
+            if (null !== $by) {
+                $boundary[$from] = $by;
+            }
+        }
+        ksort($framework);
+        ksort($boundary);
+        $report[$class] = ['error' => $error, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary];
+    }
+
+    return ['baseline' => $baseline, 'classes' => $report];
+}
+
+/**
+ * Loads each class in a PHP process of its own, a few at a time.
+ *
+ * @param list<string> $classes
+ *
+ * @return array{baseline: array{symbols: list<string>, files: list<string>}, classes: array<string, array<string, mixed>>}
+ */
+function each_apart(array $classes, string $autoload): array
+{
+    $report = ['baseline' => ['symbols' => [], 'files' => []], 'classes' => []];
+    $running = [];
+    $queue = $classes;
+    $parallel = max(1, (int) (getenv('BARE_PARALLEL') ?: trim((string) @shell_exec('nproc 2>/dev/null')) ?: 4));
+    while ($queue || $running) {
+        while ($queue && count($running) < $parallel) {
+            $class = array_shift($queue);
+            // Files, not pipes: a report bigger than a pipe's buffer would block the process.
+            $outputs = [tempnam(sys_get_temp_dir(), 'bare'), tempnam(sys_get_temp_dir(), 'bare')];
+            $process = proc_open([PHP_BINARY, __FILE__, '--json', $class], [1 => ['file', $outputs[0], 'w'], 2 => ['file', $outputs[1], 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
+            $running[$class] = [$process, $outputs];
+        }
+        foreach ($running as $class => [$process, $outputs]) {
+            $status = proc_get_status($process);
+            if ($status['running']) {
+                continue;
+            }
+            proc_close($process);
+            $status = $status['exitcode'];
+            [$out, $err] = [(string) file_get_contents($outputs[0]), (string) file_get_contents($outputs[1])];
+            array_map('unlink', $outputs);
+            unset($running[$class]);
+            $result = json_decode($out, true);
+            if (!is_array($result) || !isset($result['classes'][$class])) {
+                $report['classes'][$class] = ['error' => 'PHP exited '.$status.': '.trim(strtok($err.$out, "\n") ?: ''), 'framework' => [], 'framework_files' => [], 'boundary' => []];
+                continue;
+            }
+            $report['baseline'] = $result['baseline'];
+            $report['classes'][$class] = $result['classes'][$class];
+        }
+        usleep(5000);
+    }
+    ksort($report['classes']);
+
+    return $report;
+}
+
+/** @return array{int, int, int} how many classes (enums among them), interfaces and traits are declared */
+function counts(): array
+{
+    return [count(get_declared_classes()), count(get_declared_interfaces()), count(get_declared_traits())];
+}
+
+/**
+ * @param array{int, int, int} $counts
+ *
+ * @return list<string> the classes, interfaces and traits declared since those counts
+ */
+function symbols_since(array $counts): array
+{
+    return [...array_slice(get_declared_classes(), $counts[0]), ...array_slice(get_declared_interfaces(), $counts[1]), ...array_slice(get_declared_traits(), $counts[2])];
+}

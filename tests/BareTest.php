@@ -1,0 +1,100 @@
+<?php
+
+namespace Tests\Base;
+
+use Base\BaseBundle;
+use Base\Repository\UserRepository;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * The core outside the framework: docker/bin/bare, run in a PHP process of
+ * its own - this one has loaded PHPUnit and the suite - requires Composer's
+ * autoloader alone (no kernel, no container, no bundle booted), loads every
+ * class of the Fondation (tests/Fondation.php) and reports every class,
+ * interface, trait and file PHP loaded on the way. None may be the
+ * framework's: the Symfony bundles and bridges, dependency-injection, config,
+ * http-kernel, http-foundation, routing, security-*, form, console, API
+ * Platform, the third-party bundles. The standalone Symfony components,
+ * Doctrine and Twig are allowed (plan "omnibase agnostique", §0, D1, D2, D4).
+ *
+ * The Fondation only grows: a class leaves it only by a decision written
+ * down in the plan and in CHANGELOG.md.
+ */
+final class BareTest extends TestCase
+{
+    public function testTheFondationLoadsWithNoClassNorFileOfTheFramework(): void
+    {
+        [$status, $report] = self::bare([]);
+
+        $fondation = require __DIR__.'/Fondation.php';
+        self::assertSame($fondation, array_keys($report['classes']), 'every class of the Fondation was loaded');
+        self::assertSame([], $report['baseline']['symbols'], 'the autoloader alone loads no class of the framework');
+
+        $failures = [];
+        foreach ($report['classes'] as $class => $result) {
+            if (null !== $result['error']) {
+                $failures[] = $class.' does not load: '.$result['error'];
+            }
+            foreach ($result['framework'] as $symbol => $askedBy) {
+                $failures[] = $class.' loads '.$symbol.(null === $askedBy || $askedBy === $class ? '' : ', asked by '.$askedBy);
+            }
+            foreach ($result['framework_files'] as $file) {
+                $failures[] = $class.' loads the file '.$file;
+            }
+        }
+        self::assertSame([], $failures, "a class of the Fondation loads the framework:\n".implode("\n", $failures));
+        self::assertSame(0, $status);
+    }
+
+    public function testTheFondationIsSortedAndNamesClassesOfTheCore(): void
+    {
+        $fondation = require __DIR__.'/Fondation.php';
+        $sorted = $fondation;
+        sort($sorted);
+
+        self::assertSame($sorted, $fondation, 'sorted');
+        self::assertSame(array_values(array_unique($fondation)), $fondation, 'each class once');
+        foreach ($fondation as $class) {
+            self::assertFileExists(__DIR__.'/../src/'.str_replace('\\', '/', substr($class, \strlen('Base\\'))).'.php', $class);
+        }
+    }
+
+    /** The check is not blind: the same report, for the bundle and a repository, names the framework and who asked for it. */
+    public function testAClassOfTheFrameworkIsNamed(): void
+    {
+        [$status, $report] = self::bare([BaseBundle::class, UserRepository::class]);
+
+        self::assertSame(1, $status);
+        $bundle = $report['classes'][BaseBundle::class];
+        self::assertNull($bundle['error']);
+        self::assertSame('Base\\Bundle\\AbstractBaseBundle', $bundle['framework']['Symfony\\Component\\HttpKernel\\Bundle\\Bundle'] ?? null);
+        self::assertNotEmpty(preg_grep('~/symfony/http-kernel/~', $bundle['framework_files']));
+
+        $repository = $report['classes'][UserRepository::class];
+        self::assertSame('Base\\Database\\Repository\\ServiceEntityRepository', $repository['boundary']['Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository'] ?? null);
+        self::assertNotEmpty(preg_grep('~/doctrine/doctrine-bundle/~', $repository['framework_files']));
+    }
+
+    /**
+     * Runs docker/bin/bare apart, on the autoloader of this run.
+     *
+     * @param list<string> $classes none: the Fondation
+     *
+     * @return array{int, array<string, mixed>} the exit status, the report
+     */
+    private static function bare(array $classes): array
+    {
+        $autoload = \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2).'/autoload.php';
+        $output = (string) tempnam(sys_get_temp_dir(), 'bare');
+        $process = proc_open([\PHP_BINARY, __DIR__.'/../docker/bin/bare', '--json', ...$classes], [1 => ['file', $output, 'w'], 2 => ['pipe', 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
+        self::assertIsResource($process);
+        $err = (string) stream_get_contents($pipes[2]);
+        $status = proc_close($process);
+        $out = (string) file_get_contents($output);
+        unlink($output);
+        $report = json_decode($out, true);
+        self::assertIsArray($report, 'PHP exited '.$status.': '.$err.$out);
+
+        return [$status, $report];
+    }
+}
