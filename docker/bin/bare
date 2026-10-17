@@ -13,6 +13,7 @@
  *   docker compose run --rm omnibase bare --all --each          # every class of src/, each in a PHP process of its own
  *   docker compose run --rm omnibase bare --json                # the same, whole, as JSON
  *   docker compose run --rm omnibase bare --names               # informative: the classes of the Fondation that name the framework
+ *   docker compose run --rm omnibase bare path/to/script.php    # a script run with the autoloader alone (what it returns is in --json)
  *
  * --each loads every class in a fresh process (exact for each class, slower);
  * without it the classes are loaded one after the other in this process, and
@@ -151,8 +152,12 @@ function load_here(array $classes, string $autoload): array
     foreach ($classes as $class) {
         [$symbols, $files] = [counts(), count(get_included_files())];
         $error = null;
+        $result = null;
         try {
-            if (!class_exists($class) && !interface_exists($class) && !trait_exists($class)) {
+            if (str_ends_with($class, '.php') && is_file($class)) {
+                // A script, not a class: run with the autoloader alone, what it returns reported.
+                $result = (static fn (string $script) => require $script)($class);
+            } elseif (!class_exists($class) && !interface_exists($class) && !trait_exists($class)) {
                 $error = 'no class, interface, trait nor enum of that name';
             }
         } catch (Throwable $e) {
@@ -170,7 +175,7 @@ function load_here(array $classes, string $autoload): array
         }
         ksort($framework);
         ksort($boundary);
-        $report[$class] = ['error' => $error, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary];
+        $report[$class] = ['error' => $error, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary] + (null === $result ? [] : ['result' => $result]);
     }
 
     return ['baseline' => $baseline, 'classes' => $report];

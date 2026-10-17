@@ -20,6 +20,8 @@
  * Sorted. 599 classes on 2026-10-17 (step C1), every class of src/ that passed.
  * 678 on 2026-10-18 after step C3b (+79: the repositories, built on doctrine/orm's EntityRepository).
  * 679 after step C3c (+1: Base\Service\ParameterBagInterface, the core's contract).
+ * 686 after step C4 (+7: the contracts Base\Contract\*, their registry Runtime, SystemClock and
+ * Base\Exception\MissingContractException).
  */
 
 return [
@@ -32,6 +34,12 @@ return [
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
     Base\Console\Console::class,
     Base\Console\ConsoleInterface::class,
+    Base\Contract\Access::class,
+    Base\Contract\Files::class,
+    Base\Contract\Locales::class,
+    Base\Contract\Runtime::class,
+    Base\Contract\SystemClock::class,
+    Base\Contract\Urls::class,
     Base\Controller\SignatureController::class,
     Base\DatabaseSubscriber\AttributeSubscriber::class,
     Base\DatabaseSubscriber\DemoAccountLockSubscriber::class,
@@ -267,6 +275,7 @@ return [
     Base\Exception\InvalidPageException::class,
     Base\Exception\InvalidSizeException::class,
     Base\Exception\InvalidUuidException::class,
+    Base\Exception\MissingContractException::class,
     Base\Exception\MissingDiscriminatorMapException::class,
     Base\Exception\MissingDiscriminatorValueException::class,
     Base\Exception\MissingLocaleException::class,

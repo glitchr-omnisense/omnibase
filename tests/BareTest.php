@@ -96,6 +96,50 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The contracts of the Fondation work where there is no framework (plan "omnibase agnostique",
+     * C4): tests/Contract/runtime-without-framework.php, run by bare with the autoloader alone, binds
+     * plain PHP implementations by the contracts' names in a PSR-11 container, as another framework
+     * does at boot, hands it to Base\Contract\Runtime, and a user of the contracts written as C3e
+     * writes the entities' getters answers through them: its link, its address, what the visitor may
+     * do, an ICU label in two languages, its age by the clock, its thumbnail, an event. Nothing of
+     * the framework is loaded on the way.
+     */
+    public function testTheContractsWorkWithoutTheFramework(): void
+    {
+        $script = __DIR__.'/Contract/runtime-without-framework.php';
+        [$status, $report] = self::bare([$script, \Base\Contract\Runtime::class]);
+
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame([
+            'empty' => 'MissingContractException',
+            'link' => '/articles/abbey-road',
+            'url' => 'https://lesringostars.test/articles/abbey-road',
+            'view' => true,
+            'edit, nobody' => false,
+            'label fr' => '« Abbey Road », sans commentaire',
+            'label fr, 2' => '« Abbey Road », 2 commentaires',
+            'days' => 16,
+            'thumbnail' => '/uploads/covers/abbey-road.jpg',
+            'asset' => '/images/logo.svg',
+            'edit, alice' => true,
+            'user' => 'alice',
+            'label en, 1' => '"Abbey Road", 1 comment',
+            'available' => ['fr-FR', 'en-GB'],
+            'events' => ['abbey-road'],
+            'mailer' => false,
+        ], $run['result']);
+
+        $fondation = require __DIR__.'/Fondation.php';
+        foreach ([\Base\Contract\Runtime::class, \Base\Contract\Urls::class, \Base\Contract\Access::class, \Base\Contract\Locales::class, \Base\Contract\Files::class, \Base\Contract\SystemClock::class, \Base\Exception\MissingContractException::class] as $contract) {
+            self::assertContains($contract, $fondation, $contract.' is in the Fondation');
+        }
+    }
+
+    /**
      * Runs docker/bin/bare apart, on the autoloader of this run.
      *
      * @param list<string> $classes none: the Fondation
