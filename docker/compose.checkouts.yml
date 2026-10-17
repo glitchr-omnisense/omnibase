@@ -11,3 +11,13 @@ services:
       - ${OMNIBASE_PLUGINS:-../..}/forum:/srv/demo/vendor/omnibase/forum
       - ${OMNIBASE_PLUGINS:-../..}/mailbox:/srv/demo/vendor/omnibase/mailbox
       - ${OMNIBASE_PLUGINS:-../..}/docs:/srv/demo/vendor/omnibase/docs
+      # Not installed by the image: their tests' bootstraps register their own
+      # classes (and the omnibase/* bundles they require, read beside them),
+      # and the demo's bundles.php and routes/plugins.php, mounted as checked
+      # out, register their bundles and pages once they are loaded; demo.sh as
+      # checked out as well.
+      - ${OMNIBASE_PLUGINS:-../..}/blog:/srv/demo/vendor/omnibase/blog
+      - ${OMNIBASE_PLUGINS:-../..}/classroom:/srv/demo/vendor/omnibase/classroom
+      - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
+      - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
+      - ./demo.sh:/usr/local/bin/demo:ro
