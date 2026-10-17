@@ -6,9 +6,15 @@ use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\ShortLink;
+use Base\Entity\Thread;
+use Base\Enum\ThreadState;
+use Base\Enum\WorkflowState;
 use Base\Exception\MissingContractException;
+use Base\Service\BaseService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 
 /**
  * The entities' getters C3e moved off BaseTrait's services onto the contracts
@@ -28,6 +34,12 @@ final class EntityGettersTest extends KernelTestCase
         }
 
         self::bootKernel();
+    }
+
+    protected function tearDown(): void
+    {
+        static::getContainer()->get('security.token_storage')->setToken(null);
+        parent::tearDown();
     }
 
     public function testLinksReferenceTypesAreTheRoutersConstants(): void
@@ -98,5 +110,49 @@ final class EntityGettersTest extends KernelTestCase
         } finally {
             Runtime::setContainer($container);
         }
+    }
+
+    /**
+     * Thread::isVisible() and User::isGranted() ask the Access contract what they asked BaseService:
+     * the same authorization checker, nobody signed in then an administrator, a published, a draft
+     * and a secret thread. The old isVisible() also asked whether the owners held the token
+     * storage's token, never true: its answers were BaseService::isGranted('ROLE_ADMIN') or
+     * approved, published and not secret, compared here.
+     */
+    public function testVisibilityAndGrantsAreTheAuthorizationCheckers(): void
+    {
+        $container = static::getContainer();
+        $checker = $container->get('security.authorization_checker');
+        $userClass = 'App\\Entity\\User';
+        $member = (new \ReflectionClass($userClass))->newInstanceWithoutConstructor();
+
+        $threads = [];
+        foreach ([ThreadState::PUBLISH, ThreadState::DRAFT, ThreadState::SECRET] as $state) {
+            $thread = new Thread();
+            $thread->setState($state);
+            $thread->setWorkflow(WorkflowState::APPROVED);
+            $threads[$state] = $thread;
+        }
+
+        $seen = [];
+        foreach ([null, new InMemoryUser('c3e-admin', null, ['ROLE_ADMIN'])] as $user) {
+            $container->get('security.token_storage')->setToken($user ? new UsernamePasswordToken($user, 'main', $user->getRoles()) : null);
+            $label = $user ? 'an administrator' : 'nobody';
+
+            foreach ($threads as $state => $thread) {
+                $before = BaseService::getService()->isGranted('ROLE_ADMIN') || ($thread->isApproved() && $thread->isPublished() && !$thread->isSecret());
+                self::assertSame($before, $thread->isVisible(), $state.', '.$label);
+                $seen[$label][$state] = $thread->isVisible();
+            }
+
+            foreach (['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPERADMIN', 'IS_AUTHENTICATED'] as $role) {
+                self::assertSame($checker->isGranted($role, $member), $member->isGranted($role), $role.', '.$label);
+                self::assertSame(BaseService::getService()->isGranted($role, $member), $member->isGranted($role), $role.', '.$label.', BaseService');
+            }
+        }
+
+        self::assertSame([ThreadState::PUBLISH => true, ThreadState::DRAFT => false, ThreadState::SECRET => false], $seen['nobody'], 'nobody sees the published thread only');
+        self::assertSame([true, true, true], array_values($seen['an administrator']), 'an administrator sees them all');
+        self::assertTrue($member->isGranted('ROLE_ADMIN'), 'the administrator is granted ROLE_ADMIN on a member');
     }
 }

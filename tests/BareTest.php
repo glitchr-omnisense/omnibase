@@ -169,6 +169,12 @@ final class BareTest extends TestCase
             'short link, url' => 'https://lesringostars.test/short_redirect?utm=mail&slug=x7Kq2',
             'short link, network path' => 'InvalidArgumentException',
             'link' => '/blog_post?slug=help',
+            'thread published, nobody' => true,
+            'thread draft, nobody' => false,
+            'thread secret, nobody' => false,
+            'thread published, an administrator' => true,
+            'thread draft, an administrator' => true,
+            'thread secret, an administrator' => true,
         ], $run['result']);
     }
 

@@ -26,6 +26,7 @@ use Base\Database\Attribute\Versionable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
+use Base\Contract\Runtime;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TrasheableTrait;
 use Base\Entity\Thread\Taxon;
@@ -283,13 +284,21 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return str_starts_with($this->state, ThreadState::PUBLISH);
     }
 
+    /**
+     * An administrator sees every thread; anyone else an approved, published,
+     * not secret one. Asked of the Access contract (plan "omnibase
+     * agnostique", C3e), not of BaseService: under Symfony the same
+     * authorization checker (Base\Bridge\Symfony\SecurityAccess).
+     *
+     * It also asked whether the owners contained the token storage's token -
+     * a token compared with users, never one of them: never true, so dropped
+     * with the token storage, the answers unchanged. Whether an owner should
+     * see their own unpublished thread is a decision left for later (plan,
+     * C3e).
+     */
     public function isVisible(): bool
     {
-        if ($this->getService()->isGranted("ROLE_ADMIN")) {
-            return true;
-        }
-
-        if ($this->getOwners()->contains($this->getTokenStorage()->getToken())) {
+        if (Runtime::access()->isGranted("ROLE_ADMIN")) {
             return true;
         }
 
