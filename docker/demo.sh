@@ -41,16 +41,20 @@ case "${1:-serve}" in
         # every entity the bundles map.
         export APP_ENV=test
         export HARNESS_SUITE_BOOTSTRAP="$suite/tests/bootstrap.php"
-        # The bundles' public files, linked, before the cache is made: a page
-        # asked of the kernel links its scripts and stylesheets only when the
-        # webpack warmer found them (bundles/base/entrypoints.json).
-        php bin/console assets:install public --symlink --env=test --no-interaction --quiet
         # The demonstration's tests compile theirs without debug
         # (var/cache/<env>_demo_test): nothing refreshes it, and var/ is a
         # volume that outlives the run.
         # The pools of var/share (the router's compiled routes) last as long:
         # a route added since was never generated.
+        # Removed first: the previous suite's container may list bundles this
+        # one has not (the blog's, the classroom's: config/bundles.php).
         rm -rf var/cache/test var/cache/*_demo_test var/share/test var/share/demo var/test.db
+        # The bundles' public files, linked, before the cache is made: a page
+        # asked of the kernel links its scripts and stylesheets only when the
+        # webpack warmer found them (bundles/base/entrypoints.json). The
+        # container this compiles is removed again, warmed after the files.
+        php bin/console assets:install public --symlink --env=test --no-interaction --quiet
+        rm -rf var/cache/test
         php bin/console doctrine:schema:create --env=test --no-interaction --quiet
         exec vendor/bin/phpunit -c "$suite/phpunit.xml.dist" --bootstrap tests/harness.php "$@" ;;
     *) exec "$@" ;;

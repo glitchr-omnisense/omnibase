@@ -25,6 +25,14 @@ docker compose -f compose.yml -f compose.checkouts.yml up                       
 `../marketplace`...) over the installed packages: what is edited is what runs,
 no rebuild needed. Without it, the plugins are the Packagist ones.
 
+`omnibase/blog` and `omnibase/classroom` are not installed by the image; the
+overlay mounts their checkouts too (`test blog`, `test classroom`). Their tests'
+bootstrap registers their classes (and the `omnibase/*` bundles they require,
+read beside them), and the demo's `config/bundles.php` and
+`config/routes/plugins.php` - mounted as checked out, with `demo.sh` - register
+their bundles and their pages for their own suites only: the other suites' map
+the same entities as before.
+
 ## What `test` sets up
 
 - **The test environment.** `APP_ENV=test`; PHPUnit starts from
@@ -39,7 +47,8 @@ no rebuild needed. Without it, the plugins are the Packagist ones.
   wants a line there.
 - **A fresh database.** `var/test.db` (SQLite) is deleted, and its schema
   created from every mapped entity, at each run; the test container cache
-  (`var/cache/test`) too.
+  (`var/cache/test`) too - first, before the bundles' public files are linked:
+  the previous suite's container may list bundles this one has not.
 
 The suites that need a host application (`KernelTestCase`: core's analytics,
 admin's widgets, the forge's entities) run here as they do inside an
