@@ -75,6 +75,7 @@ docker compose run --rm omnibase bare 'Base\Entity\User'    # the classes named
 docker compose run --rm omnibase bare --all --each         # every class of src/, each in a process of its own: those that can join
 docker compose run --rm omnibase bare --json               # the whole report
 docker compose run --rm omnibase bare --names              # informative: the classes of the Fondation that name the framework
+docker compose run --rm omnibase bare vendor/omniscient/omnibase/tests/Contract/runtime-without-framework.php   # a script, with the autoloader alone
 ```
 
 What is checked is what loading a class loads - its parents, interfaces,
@@ -83,6 +84,11 @@ attribute's class, a type in a signature and a `new` in a method body load
 nothing until they run. Composer's autoloader itself includes
 `api-platform/jsonld`'s `HydraContext.php` (a constant, a `files` entry) before
 any class: it is reported, not held against one.
+
+A script given in place of a class (a path ending in `.php`) is run the same
+way, with the autoloader alone, and what it returns is in the `--json` report:
+`BareTest` runs `tests/Contract/runtime-without-framework.php` so, the
+contracts of the Fondation used without the framework.
 
 **The list only grows.** A class enters it when it loads without the framework
 (`bare --all --each`); a class leaves it only by a decision written down in the
