@@ -204,8 +204,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             $scheme = self::$router->getScheme() ?? $this->getContext()->getScheme();
             $port = self::$router->getPort() ?? $this->getContext()->getHttpPort();
-            if ($route->getHost() || ($isHttpsEnv && $scheme === 'http')) {
-                $referenceType = self::ABSOLUTE_URL; // Force absolute URL if unconsistent HTTP scheme
+            // A route with a host of its own is written whole. A visitor on http
+            // where the site sets HTTPS no longer forces it: getScheme() is the
+            // request's now, and the address would carry the request's own
+            // scheme and host, nothing a path does not say.
+            if ($route->getHost()) {
+                $referenceType = self::ABSOLUTE_URL;
             }
 
             $validHttpPort = json_decode($_ENV["HTTP_PORT"] ?? "[]", true);

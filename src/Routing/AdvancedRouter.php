@@ -472,17 +472,37 @@ class AdvancedRouter implements AdvancedRouterInterface
     }
 
     /**
-     * https whatever the request (REQUEST_SCHEME "http" is a true string),
-     * left so for now: see docs/decisions/router-scheme.md before changing it.
-     * It is not the scheme of the site's routes' addresses (the request's,
-     * through get_url()) but that of Symfony's own routes, the one the host
-     * fallbacks' ports are filtered by, and app.site.scheme. The scheme the
-     * visitor used is get_url_scheme()'s.
+     * The scheme of the request being handled: get_url_scheme() of the main
+     * request (Request::isSecure(), so a trusted proxy's X-Forwarded-Proto,
+     * then HTTPS, USE_HTTPS, REQUEST_SCHEME), the scheme get_url() gives the
+     * visited address and the site's routes. A web request not yet on the
+     * stack: the same function on PHP's globals. A command, a worker or a
+     * test with no request: https, unless the site sets HTTPS (or USE_HTTPS)
+     * to a false value - PHP's globals say nothing of the scheme there.
+     *
+     * It is the scheme of Symfony's own routes (_profiler, _wdt...), the one
+     * the host fallbacks' ports are filtered by (HTTPS_PORT or HTTP_PORT),
+     * the IP restriction's redirection and app.site.scheme.
+     * docs/decisions/router-scheme.md says why it read REQUEST_SCHEME as a
+     * boolean (always https) until 3.x and what following the request moved.
      */
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
-        $use_https ??= $_SERVER["REQUEST_SCHEME"] ?? true;
-        return $use_https ? "https" : "http";
+        $request = $this->requestStack->getMainRequest();
+        if ($request !== null) {
+            return get_url_scheme($request);
+        }
+
+        if (!$this->isCli()) {
+            return get_url_scheme(new Request([], [], [], [], [], $_SERVER));
+        }
+
+        $https = $_ENV["HTTPS"] ?? $_SERVER["HTTPS"] ?? $_ENV["USE_HTTPS"] ?? $_SERVER["USE_HTTPS"] ?? null;
+        if ($https === null || $https === "") {
+            return "https";
+        }
+
+        return strtobool(is_bool($https) ? $https : (string) $https) || strcasecmp("https", (string) $https) == 0 ? "https" : "http";
     }
 
     public function getBaseDir(?string $locale = null, ?string $environment = null): string
@@ -618,18 +638,18 @@ class AdvancedRouter implements AdvancedRouterInterface
         $parsedUrl = parse_url2(get_url());
         $port = isset($parsedUrl["port"]) ? (int) $parsedUrl["port"] : null;
 
-        // The port is judged by the scheme of the address it comes from:
-        // getScheme() says https whatever the request (REQUEST_SCHEME "http"
-        // is a truthy string), so the port of an http address was checked
-        // against HTTPS_PORT and a site on http:8081 (HTTP_PORT='[8081]') was
-        // reduced to port 80.
+        // The port is judged by the scheme of the address it comes from (the
+        // request's, as getScheme() now is too): getScheme() said https
+        // whatever the request until 3.x, so the port of an http address was
+        // checked against HTTPS_PORT and a site on http:8081
+        // (HTTP_PORT='[8081]') was reduced to port 80.
         $scheme = $parsedUrl["scheme"] ?? $this->getScheme($locale, $environment);
 
         $httpsPorts = isset($_SERVER['HTTPS_PORT']) ? (array) json_decode($_SERVER['HTTPS_PORT'], true) : [443];
         $httpPorts  = isset($_SERVER['HTTP_PORT'])  ? (array) json_decode($_SERVER['HTTP_PORT'],  true) : [80];
 
         // A port the site declares for that scheme is its own; the fallbacks
-        // (filtered by getScheme()) and the first declared port replace any other.
+        // (filtered by the same scheme) and the first declared port replace any other.
         $declared = $port !== null && in_array($port, array_map('intval', $scheme === 'https' ? $httpsPorts : $httpPorts), true);
 
         $fallbackPorts = $this->getPortFallbacks($locale, $environment);
