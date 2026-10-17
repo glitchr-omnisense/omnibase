@@ -24,6 +24,8 @@
  * Base\Exception\MissingContractException).
  * 691 with C4's Symfony adapters (+5: Base\Bridge\Symfony\*, which implement only the contracts and
  * load nothing of the framework - they name it, see bare --names).
+ * 692 after step C3e's links (+1: Base\Contract\Link, a route's address by a router's reference type
+ * through the Urls contract).
  */
 
 return [
@@ -43,6 +45,7 @@ return [
     Base\Console\ConsoleInterface::class,
     Base\Contract\Access::class,
     Base\Contract\Files::class,
+    Base\Contract\Link::class,
     Base\Contract\Locales::class,
     Base\Contract\Runtime::class,
     Base\Contract\SystemClock::class,

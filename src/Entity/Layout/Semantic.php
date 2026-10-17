@@ -12,7 +12,8 @@ use Base\Traits\BaseTrait;
 use DomDocument;
 use DOMXPath;
 use Exception;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Base\Contract\Link;
+use Base\Exception\MissingContractException;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: SemanticRepository::class)]
@@ -32,7 +33,7 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return ["fa-solid fa-award"];
     }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         return $this->generate($referenceType);
     }
@@ -114,10 +115,19 @@ class Semantic implements TranslatableInterface, IconizeInterface
         return in_array(strtolower($keyword), array_map(fn($k) => strtolower($k), $this->keywords));
     }
 
-    protected function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    /**
+     * The route's address through the Urls contract (Base\Contract\Link), not
+     * BaseTrait's router: the same string under Symfony (RouterUrls is the
+     * same router), and one where there is no framework. A route the router
+     * cannot make is null, as before; a registry with no Urls is said aloud,
+     * never taken for a missing route.
+     */
+    protected function generate(int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         try {
-            return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
+            return Link::to($this->routeName, $this->routeParameters ?? [], $referenceType);
+        } catch (MissingContractException $e) {
+            throw $e;
         } catch (Exception $e) {
         }
 

@@ -12,7 +12,7 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 
 | Contract | What it answers | Under Symfony |
 |---|---|---|
-| `Base\Contract\Urls` (extends omnibridge/twig's `Urls`) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
+| `Base\Contract\Urls` (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
 | `Omnibridge\Twig\Contract\Translations` | `trans()`, ICU messages | `Base\Bridge\Symfony\TranslatorTranslations`: the `translator` chain (texts rewritten in the back office, `Base\Service\Translator`, Symfony's) - Twig's `\|trans` |
 | `Base\Contract\Access` | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
 | `Base\Contract\Locales` | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
@@ -62,3 +62,28 @@ PHP implementations bound as another framework binds them, and a user of the
 contracts that answers through them. `tests/Bridge/Symfony/ContractAdaptersTest`
 compares every adapter's answers with the services and the Twig functions they
 stand for.
+
+## A link by a router's reference type: `Base\Contract\Link`
+
+The entities' `__toLink(array $routeParameters = [], int $referenceType = ...)`
+take Symfony's reference types. `Link::to($name, $parameters, $referenceType)`
+makes the address through `Runtime::urls()`: `Link::ABSOLUTE_PATH` (1) is
+`path()`, `Link::ABSOLUTE_URL` (0) is `url()` - the values of
+`UrlGeneratorInterface`'s constants, named here so that a link is made without
+the routing component (`LinkableInterface`'s default is `Link::ABSOLUTE_PATH`).
+A relative or a network path has no equivalent in the contract: it is asked of
+the implementation's own `generate($name, $parameters, $referenceType)` when it
+has one (`RouterUrls`, the router as before) and refused otherwise. It is a
+helper, not a contract.
+
+## The entities' getters on the contracts (step C3e)
+
+What an entity of the core asked of `BaseTrait`'s services and now asks of the
+registry, with the same answers under Symfony (`tests/Contract/EntityGettersTest`
+compares each with the service it used) and answers where there is no framework
+(`tests/Contract/entities-without-framework.php`, run by `BareTest`):
+
+| Getter | Before | Now |
+|---|---|---|
+| `Semantic::__toLink()`, `getUrl()` | `getRouter()->generate()` | `Link::to()` (a route the router cannot make: null, as before; no Urls: `MissingContractException`) |
+| `ShortLink::__toLink()` | `getRouter()->generate()` (by `__call`, on the current translation's `BaseTrait`: the Localizer first) | `Link::to()` |
