@@ -29,7 +29,7 @@ $entityManager = EntityManagers::create($connection, [
     $vendor.'/omniscient/omnibase/src/Entity',
     $projectDir.'/src/Entity',
     // a bundle's src/Entity...
-]);
+], configure: Mapping::configure(...));   // the repository factory, before the entity manager exists
 $mapping = Mapping::register($entityManager, [
     'project_dir' => $projectDir,          // its src/Enum, its src/Attribute
     'environment' => 'prod',               // the vault filter's
@@ -37,7 +37,7 @@ $mapping = Mapping::register($entityManager, [
     'resolve_target_entities' => [/* interface => class */],
 ]);
 
-$articles = $mapping->getRepository(App\Entity\Blog\Article::class)->findBy([], ['id' => 'DESC'], 10);
+$articles = $entityManager->getRepository(App\Entity\Blog\Article::class)->findBy([], ['id' => 'DESC'], 10);
 $article = $entityManager->createQuery('SELECT a FROM App\Entity\Blog\Article a WHERE a.slug = :slug')->setParameter('slug', 'le-fuji')->getOneOrNullResult();
 ```
 
@@ -52,7 +52,7 @@ own `ClassMetadataFactory` is used; the class names are the core's (D6).
 | Naming | `naming_strategy: Base\Database\Mapping\NamingStrategy` | set on the configuration |
 | The factory | `class_metadata_factory_name: Base\Database\Mapping\ClassMetadataFactory` (kept: the naming strategy of a cached ClassMetadata, `isEntity()`, `getAllClassNames()`) | Doctrine's own |
 | Listeners: `AttributeSubscriber`, `IntlSubscriber`, the targets resolved, the entity listeners attached, `TrackingPolicySubscriber`, `ExtensionSubscriber`; on flush `TrasheableSubscriber`, `VersionableSubscriber`, `InverseCollectionCacheSubscriber` | tags `doctrine.event_listener` (config/services/media.php), in their priorities' order | added in that order |
-| Repositories | DoctrineBundle's `ContainerRepositoryFactory` (the services) | `$mapping->getRepository()`, `Base\Bridge\Doctrine\RepositoryFactory`: a repository built from a `ManagerRegistry` gets `Base\Bridge\Doctrine\Registry`. The entity manager's own `getRepository()` keeps the factory it was built with (Doctrine's default under `EntityManagers::create()`, which builds a repository from the entity manager and the metadata) |
+| Repositories | DoctrineBundle's `ContainerRepositoryFactory` (the services) | `Base\Bridge\Doctrine\RepositoryFactory`, set by `Mapping::configure()` as omnibridge/doctrine's `configure:` (from 4d2436d), before the entity manager exists: its own `getRepository()` builds a repository taking a `ManagerRegistry` from `Base\Bridge\Doctrine\Registry`. `$mapping->getRepository()` (deprecated) hands the same one, and is the way for an entity manager built without `configure:` (Doctrine's default factory) |
 | `App\Entity\X` = `Base\Entity\X` | `BaseBundle::warmUp()`'s aliases, `AbstractBaseBundle`'s fallback autoloader | `Base\Service\Model\ClassAliases::register()` (the same convention) |
 
 What the hand-built side does not have: the framework's services. The

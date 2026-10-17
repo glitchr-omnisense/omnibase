@@ -33,7 +33,9 @@ $connection = Doctrine\DBAL\DriverManager::getConnection($options['connection'],
 
 // The metadata cached in memory: EntityManagers::create() without a cache takes ORMSetup's default, which
 // is APCu, else a Memcached or a Redis server on 127.0.0.1 - none in an application's web container.
-$entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $options['paths'], false, new Symfony\Component\Cache\Adapter\ArrayAdapter());
+// The repository factory set before the entity manager exists: its own getRepository() builds the repositories
+// from the registry (omnibridge/doctrine's configure:, 4d2436d).
+$entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $options['paths'], false, new Symfony\Component\Cache\Adapter\ArrayAdapter(), Base\Bridge\Doctrine\Mapping::configure(...));
 $mapping = Base\Bridge\Doctrine\Mapping::register($entityManager, [
     'project_dir' => $options['project_dir'],
     'environment' => $options['environment'] ?? 'prod',
@@ -44,14 +46,15 @@ $mapping = Base\Bridge\Doctrine\Mapping::register($entityManager, [
     'entity_listeners' => $options['entity_listeners'] ?? [],
 ]);
 
-$answer = ['factory' => $entityManager->getMetadataFactory()::class];
+$answer = ['factory' => $entityManager->getMetadataFactory()::class, 'repository factory' => $entityManager->getConfiguration()->getRepositoryFactory()::class];
 $answer += Base\Bridge\Doctrine\MetadataSnapshot::of($entityManager, $options['classes'] ?? null);
 
 $answer['reads'] = [];
 foreach ($options['reads'] ?? [] as $name => $read) {
     if (isset($read['repository'])) {
-        // A repository's findBy(), built by Base\Bridge\Doctrine\RepositoryFactory.
-        $repository = $mapping->getRepository($read['repository']);
+        // A repository's findBy(), built by Base\Bridge\Doctrine\RepositoryFactory through the entity manager's own getRepository().
+        $repository = $entityManager->getRepository($read['repository']);
+        $answer['same repository'][$name] = $repository === $mapping->getRepository($read['repository']);
         $answer['repositories'][$name] = $repository::class;
         $result = $repository->findBy($read['criteria'] ?? [], $read['order'] ?? null, $read['max'] ?? null);
     } else {

@@ -28,7 +28,7 @@ use Doctrine\ORM\Tools\ResolveTargetEntityListener;
  * omnibase's Doctrine mapping on an entity manager built by hand - no kernel,
  * no container, no DoctrineBundle (plan "omnibase agnostique", C6):
  *
- *     $entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $paths);
+ *     $entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $paths, configure: Base\Bridge\Doctrine\Mapping::configure(...));
  *     Base\Bridge\Doctrine\Mapping::register($entityManager, ['project_dir' => ..., 'environment' => 'prod']);
  *
  * before the first metadata is read. It does what DoctrineBundle and the
@@ -43,8 +43,9 @@ use Doctrine\ORM\Tools\ResolveTargetEntityListener;
  *   (Base\Bridge\Doctrine\MappingDriver: the discriminator maps, the
  *   `resolveDiscriminator` event);
  * - the repositories built from a registry (Base\Bridge\Doctrine\Registry,
- *   RepositoryFactory), through getRepository(): the entity manager keeps the
- *   repository factory it was built with;
+ *   RepositoryFactory): configure() sets the factory on the configuration
+ *   before the entity manager exists (omnibridge/doctrine's `configure:`), and
+ *   the entity manager's own getRepository() hands them out;
  * - the services the mapping reads through: the ClassMetadataManipulator
  *   (the completors: aliases, hierarchies), the AttributeReader (#[Alias],
  *   #[DiscriminatorEntry], #[Hierarchify], #[Cache], #[OrderColumn]...) with
@@ -107,7 +108,12 @@ final class Mapping
         Configuration::apply($configuration);
         $configuration->setMetadataDriverImpl(new MappingDriver($configuration->getMetadataDriverImpl(), $entityManager));
 
-        $registry = new Registry($entityManager);
+        // The repository factory configure() set, and its registry; else a factory of our own, which only
+        // getRepository() (deprecated) reaches: the entity manager keeps the one it was built with.
+        $factory = $configuration->getRepositoryFactory();
+        $repositories = $factory instanceof RepositoryFactory ? $factory : null;
+        $registry = $repositories?->registryFor($entityManager) ?? new Registry($entityManager);
+        $repositories ??= new RepositoryFactory($registry);
 
         $manipulator = new ClassMetadataManipulator($registry, $entityManager, $cacheDir);
         $hydrator = new EntityHydrator($entityManager, $manipulator);
@@ -160,15 +166,29 @@ final class Mapping
             Configuration::enableFilters($entityManager, $environment);
         }
 
-        return new self($entityManager, $registry, $manipulator, $reader, $parameters, new RepositoryFactory($registry));
+        return new self($entityManager, $registry, $manipulator, $reader, $parameters, $repositories);
+    }
+
+    /**
+     * What an entity manager built by hand needs set before it exists: the
+     * repository factory (Doctrine keeps the one its configuration had at
+     * `new EntityManager`). Given to omnibridge/doctrine's EntityManagers::create()
+     * as its `configure:` closure; then the entity manager's getRepository()
+     * builds omnibase's ServiceEntityRepository and the applications' over it
+     * from the registry, as the bundle would.
+     */
+    public static function configure(\Doctrine\ORM\Configuration $configuration): void
+    {
+        $configuration->setRepositoryFactory(new RepositoryFactory());
     }
 
     /**
      * The repository of an entity as the bundle would hand it out: omnibase's ServiceEntityRepository and the
-     * applications' over it are built from the ManagerRegistry (Base\Bridge\Doctrine\Registry). The entity
-     * manager's own getRepository() asks the factory its configuration had when it was built - Doctrine's
-     * default one under EntityManagers::create(), which builds a repository from the entity manager and the
-     * metadata, as a plain EntityRepository is built.
+     * applications' over it are built from the ManagerRegistry (Base\Bridge\Doctrine\Registry).
+     *
+     * @deprecated since step C6's follow-up: build the entity manager with configure() (omnibridge/doctrine's
+     *             `configure:`) and ask its own getRepository() - the same repository. Kept for an entity manager
+     *             built without it, whose own factory is Doctrine's default.
      */
     public function getRepository(string $className): EntityRepository
     {

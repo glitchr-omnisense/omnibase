@@ -23,8 +23,22 @@ final class RepositoryFactory implements RepositoryFactoryInterface
     /** @var array<string, EntityRepository> */
     private array $repositories = [];
 
-    public function __construct(private readonly ManagerRegistry $registry)
+    /** @var array<int, ManagerRegistry> a registry over each entity manager, when none was given */
+    private array $registries = [];
+
+    /**
+     * The registry the repositories are built from; none: one over the entity
+     * manager asking (Base\Bridge\Doctrine\Registry) - the factory is then set
+     * on a configuration before its entity manager exists (Mapping::configure()).
+     */
+    public function __construct(private readonly ?ManagerRegistry $registry = null)
     {
+    }
+
+    /** The registry a repository of this entity manager is built from. */
+    public function registryFor(EntityManagerInterface $entityManager): ManagerRegistry
+    {
+        return $this->registry ?? $this->registries[spl_object_id($entityManager)] ??= new Registry($entityManager);
     }
 
     public function getRepository(EntityManagerInterface $entityManager, string $entityName): EntityRepository
@@ -44,7 +58,9 @@ final class RepositoryFactory implements RepositoryFactoryInterface
         $first = $constructor?->getParameters()[0] ?? null;
         $type = $first?->getType();
         if ($type instanceof \ReflectionNamedType && !$type->isBuiltin() && is_a($type->getName(), ManagerRegistry::class, true)) {
-            return $constructor->getNumberOfParameters() > 1 ? new $className($this->registry, $entityName) : new $className($this->registry);
+            $registry = $this->registryFor($entityManager);
+
+            return $constructor->getNumberOfParameters() > 1 ? new $className($registry, $entityName) : new $className($registry);
         }
 
         return new $className($entityManager, $metadata);

@@ -138,6 +138,8 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
         ]], $answer['reads']['thread'], 'the thread Symfony wrote, read by hand');
         self::assertSame($answer['reads']['thread'], $answer['reads']['repository'], 'and through its repository');
         self::assertSame(get_class($entityManager->getRepository(Thread::class)), $answer['repositories']['repository'], 'the same repository class');
+        self::assertSame(\Base\Bridge\Doctrine\RepositoryFactory::class, $answer['repository factory'], 'set before the entity manager existed (Mapping::configure())');
+        self::assertTrue($answer['same repository']['repository'], 'Mapping::getRepository(), deprecated, hands the same one');
     }
 
     /**
