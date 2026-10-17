@@ -15,11 +15,15 @@
  * Returns what they answered.
  */
 
+use Base\Contract\Access;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Contract\Urls;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\ShortLink;
+use Base\Entity\Thread;
+use Base\Enum\ThreadState;
+use Base\Enum\WorkflowState;
 use Base\Exception\MissingContractException;
 
 $answers = [];
@@ -75,6 +79,36 @@ try {
     $answers['short link, network path'] = 'InvalidArgumentException';
 }
 $answers['link'] = Link::to('blog_post', ['slug' => 'help']);
+
+// Access: Thread::isVisible() (User::isGranted() too, but User loads the framework: Security's
+// UserInterface, Scheb's - EntityGettersTest compares it under Symfony).
+$access = new class implements Access {
+    public array $roles = [];
+
+    public function isGranted(mixed $attribute, mixed $subject = null): bool
+    {
+        return in_array($attribute, $this->roles, true);
+    }
+
+    public function getUser(): ?object
+    {
+        return null;
+    }
+};
+Runtime::set(Access::class, $access);
+$threads = [];
+foreach (['published' => ThreadState::PUBLISH, 'draft' => ThreadState::DRAFT, 'secret' => ThreadState::SECRET] as $label => $state) {
+    $threads[$label] = (new ReflectionClass(Thread::class))->newInstanceWithoutConstructor();
+    $threads[$label]->setState($state);
+    $threads[$label]->setWorkflow(WorkflowState::APPROVED);
+}
+foreach ($threads as $label => $thread) {
+    $answers['thread '.$label.', nobody'] = $thread->isVisible();
+}
+$access->roles = ['ROLE_ADMIN'];
+foreach ($threads as $label => $thread) {
+    $answers['thread '.$label.', an administrator'] = $thread->isVisible();
+}
 
 Runtime::reset();
 

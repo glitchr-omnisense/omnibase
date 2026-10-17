@@ -48,6 +48,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Base\Service\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
+use Base\Contract\Runtime;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Exception;
 use Base\Database\Attribute\Cache;
@@ -183,10 +184,14 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     }
 
     /**
+     * Whether the visitor is granted $role on this user, asked of the Access
+     * contract (plan "omnibase agnostique", C3e) where it was BaseService's:
+     * under Symfony the same authorization checker, with this user as the
+     * subject.
+     *
      * @return bool
-     * @throws Exception
      */
-    public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
+    public function isGranted($role): bool { return Runtime::access()->isGranted($role, $this); }
 
     public function killSession() { $this->logout(); }
     public function logout()

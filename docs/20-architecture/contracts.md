@@ -87,3 +87,5 @@ compares each with the service it used) and answers where there is no framework
 |---|---|---|
 | `Semantic::__toLink()`, `getUrl()` | `getRouter()->generate()` | `Link::to()` (a route the router cannot make: null, as before; no Urls: `MissingContractException`) |
 | `ShortLink::__toLink()` | `getRouter()->generate()` (by `__call`, on the current translation's `BaseTrait`: the Localizer first) | `Link::to()` |
+| `Thread::isVisible()` | `getService()->isGranted('ROLE_ADMIN')`, and the owners compared with the token storage's token (never one of them: never true) | `Runtime::access()->isGranted('ROLE_ADMIN')`; the token line dropped, the answers unchanged |
+| `User::isGranted($role)` | `getService()->isGranted($role, $this)` | `Runtime::access()->isGranted($role, $this)` (User itself still loads the framework: Security's `UserInterface`, Scheb's) |
