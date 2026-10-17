@@ -48,8 +48,10 @@ class LinkEnhancer implements LinkEnhancerInterface
                 continue;
             }
 
-            $encoding = mb_detect_encoding($entry);
-            $dom = new DOMDocument('1.0', $encoding);
+            // mb_utf8(), not mb_detect_encoding($entry): unsure, the latter says ASCII for a text
+            // that opens on enough of it (an older article's photos kept inline in base64, 2.6MB),
+            // and the conversion from ASCII turned every other character into "?" on the page.
+            $dom = new DOMDocument('1.0', 'UTF-8');
 
             // The "<?xml encoding" prefix is load-bearing, NOT decoration: given an
             // HTML fragment with no charset declaration, libxml assumes ISO-8859-1
@@ -60,7 +62,7 @@ class LinkEnhancer implements LinkEnhancerInterface
             // on how loadHTML() decodes its input. Found live: every article whose
             // stored content contains a link (this enhancer's own entry condition)
             // rendered as mojibake on the public site.
-            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_convert_encoding($entry, 'UTF-8', $encoding), LIBXML_NOERROR);
+            $dom->loadHTML('<?xml encoding="UTF-8" ?>' . mb_utf8($entry), LIBXML_NOERROR);
 
             $tags = $dom->getElementsByTagName("a");
             if (count($tags) < 1) {
