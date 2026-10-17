@@ -51,3 +51,19 @@ subject.
 A subject set in PHP wins - `->subject('Rappel')` - and is handed to the
 template as the `subject` variable, which the frame prints as its title and
 lead instead of the block.
+
+## A notification and its e-mail
+
+`Base\Entity\User\Notification` is what a notification is - subject,
+content, importance, channels, recipients, context, templates - and its
+sending through omnibase's notifier (`send()`, `sendBy()`, `sendAdmins()`).
+What needs Symfony is `Base\Bridge\Symfony\NotificationMessages`' (plan
+"omnibase agnostique", step C3f): the e-mail of `asEmailMessage()` (Twig's
+`NotificationEmail`, the uploaded attachments embedded, the HTML rendered),
+`render()`'s `Response` (`renderHtml()` is the HTML alone), and the error an
+`ExceptionEvent` or a `FlattenException` carries made the content. The
+entity's methods are those of before and answer the same; it names nothing of
+the framework (Symfony's Notifier is a standalone component).
+`addAttachment()` takes a `\SplFileInfo`; the e-mail embeds the uploaded
+files (`UploadedFile`), as it did.
+

@@ -28,6 +28,8 @@
  * through the Urls contract).
  * 693 after step C3e's locales (+1: Base\Service\Model\LocaleNormalizer, the Localizer's rule for
  * omnibase's xx-XX form, which the translatable entities apply with the Locales contract).
+ * 694 after step C3f (+1: Base\Bridge\Symfony\NotificationMessages, Notification's Symfony half, which
+ * names the framework and loads none of it).
  */
 
 return [
@@ -39,6 +41,7 @@ return [
     Base\Attributes\Traits\HierarchifyTrait::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
+    Base\Bridge\Symfony\NotificationMessages::class,
     Base\Bridge\Symfony\RouterUrls::class,
     Base\Bridge\Symfony\SecurityAccess::class,
     Base\Bridge\Symfony\TranslatorTranslations::class,
