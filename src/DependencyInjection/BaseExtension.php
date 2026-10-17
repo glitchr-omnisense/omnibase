@@ -66,6 +66,11 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
         // The demonstration accounts a bundle or the application declares (docs/20-architecture/demo.md).
         $container->registerForAutoconfiguration(DemoAccountProviderInterface::class)->addTag('base.demo_account_provider');
+        // omnibase's repositories are doctrine/orm's EntityRepository built from the ManagerRegistry
+        // (plan "omnibase agnostique", C3b), no longer DoctrineBundle's ServiceEntityRepository, whose
+        // interface DoctrineBundle tags: an application's repository extending them (App\Repository\*)
+        // is tagged here, and DoctrineBundle's repository factory finds it in the container as before.
+        $container->registerForAutoconfiguration(\Base\Database\Repository\ServiceEntityRepository::class)->addTag('doctrine.repository_service');
 
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preUpdate"]);
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postUpdate"]);

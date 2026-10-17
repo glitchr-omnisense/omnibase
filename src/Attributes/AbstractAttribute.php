@@ -9,7 +9,6 @@ use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\EntityRepository;
@@ -267,10 +266,11 @@ abstract class AbstractAttribute implements AttributeInterface
     /**
      * @param $entity
      * @param string $property
-     * @return ServiceEntityRepositoryInterface
+     * @return EntityRepository the repository of the class declaring $property (an omnibase
+     *                          repository, Base\Database\Repository\ServiceEntityRepository, or any other)
      * @throws NotSupported
      */
-    public function getPropertyOwnerRepository($entity, string $property): ServiceEntityRepositoryInterface
+    public function getPropertyOwnerRepository($entity, string $property): EntityRepository
     {
         $className = get_class($entity);
         $repository = $this->getEntityManager()->getRepository($className);

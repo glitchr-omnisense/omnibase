@@ -325,8 +325,9 @@ abstract class AbstractBaseBundle extends Bundle
      * Whether $class is registered as a Doctrine repository service (tagged
      * doctrine.repository_service, built with `doctrine`): a class whose name
      * ends with "Repository", that can be instantiated and that is a service
-     * repository (Doctrine's ServiceEntityRepositoryInterface, which
-     * omnibase's ServiceEntityRepository is).
+     * repository: omnibase's Base\Database\Repository\ServiceEntityRepository
+     * (built on doctrine/orm's EntityRepository since step C3b of the plan
+     * "omnibase agnostique") or DoctrineBundle's ServiceEntityRepositoryInterface.
      *
      * Every class of a bundle's src/Repository named so used to be
      * registered, an abstract base repository included - and the container
@@ -349,8 +350,14 @@ abstract class AbstractBaseBundle extends Bundle
             return false;
         }
 
-        return $reflection->isInstantiable()
-            && $reflection->implementsInterface(\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface::class);
+        if (!$reflection->isInstantiable()) {
+            return false;
+        }
+
+        return $reflection->getName() === \Base\Database\Repository\ServiceEntityRepository::class
+            || $reflection->isSubclassOf(\Base\Database\Repository\ServiceEntityRepository::class)
+            || (interface_exists(\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface::class)
+                && $reflection->implementsInterface(\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface::class));
     }
 
     public function setAlias(array $classes)

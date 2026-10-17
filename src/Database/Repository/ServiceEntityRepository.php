@@ -5,15 +5,33 @@ namespace Base\Database\Repository;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use LogicException;
 
 /**
+ * A repository of omnibase: Doctrine's EntityRepository, built from the
+ * ManagerRegistry contract (doctrine/persistence) as DoctrineBundle's
+ * ServiceEntityRepository is - `__construct(ManagerRegistry $registry,
+ * ?string $entityName = null)`, the entity's class guessed from the
+ * repository's name when not given - plus the finder language
+ * (findByStateAndLocale(), cacheOneBySlug(), countByDomain()...).
+ *
+ * It no longer extends DoctrineBundle's class (plan "omnibase agnostique",
+ * step C3b): loading a repository loads doctrine/orm and doctrine/persistence,
+ * not the bundle. Under Symfony it is still a repository service: the bundle
+ * tags every service extending this class `doctrine.repository_service`
+ * (BaseExtension, registerForAutoconfiguration(); AbstractBaseBundle::
+ * isRepositoryService() for the bundles' mapped repositories), and
+ * DoctrineBundle's ContainerRepositoryFactory hands it out as before.
+ *
  * @method Entity[]    findBy*(...array $customs,
  *      array $criteria, array ??array $orderBy = null, $limit = null, $offset = null)
  */
-class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
+class ServiceEntityRepository extends EntityRepository
 {
     /**
      * @var ClassMetadata
@@ -44,9 +62,20 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public function __construct(ManagerRegistry $doctrine, ?string $entityName = null)
     {
-        parent::__construct($doctrine, $entityName ?? $this->getFqcnEntityName());
+        $entityName ??= $this->getFqcnEntityName();
 
-        $entityManager = $this->getEntityManager();
+        // The entity manager of the class, as DoctrineBundle's repository resolves it (that one
+        // waited for the first call; this constructor always asked for it at once below).
+        $entityManager = $doctrine->getManagerForClass($entityName);
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new LogicException(sprintf(
+                'Could not find the entity manager for class "%s". Check your Doctrine configuration to make sure it is configured to load this entity’s metadata.',
+                $entityName,
+            ));
+        }
+
+        parent::__construct($entityManager, $entityManager->getClassMetadata($entityName));
+
         $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
         
         $this->classMetadata = $entityManager->getClassMetadata($entityName ?? $this->getFqcnEntityName());

@@ -7,9 +7,16 @@ order: 25
 
 ## Repositories
 
-`Base\Database\Repository\ServiceEntityRepository` is Doctrine's service
-repository plus the finder language (`findByStateAndLocale()`,
-`cacheOneBySlug()`, `countByDomain()`...).
+`Base\Database\Repository\ServiceEntityRepository` is doctrine/orm's
+`EntityRepository` built from the `ManagerRegistry` (doctrine/persistence), as
+DoctrineBundle's service repository is - `__construct(ManagerRegistry $registry,
+?string $entityName = null)`, the entity guessed from the repository's name -
+plus the finder language (`findByStateAndLocale()`, `cacheOneBySlug()`,
+`countByDomain()`...). It does not extend DoctrineBundle's class: a repository
+loads without the framework (it is in `tests/Fondation.php`). Under Symfony
+every service extending it is tagged `doctrine.repository_service`
+(`BaseExtension`, `registerForAutoconfiguration()`), so an application's
+`App\Repository\*` is still handed out by `getRepository()` and autowired.
 
 **Counting gives an integer.** `count([])`, `count(['state' => 'draft'])`,
 `countByState('draft')` and `distinctCountForLocaleByDomain('messages')` each
@@ -22,8 +29,8 @@ rows, each with its `count` (`ThreadRepository::countForChildrenIn()`).
 application's namespace, and the ones that are repository services are
 registered (`doctrine.repository_service`, built with `doctrine`). A repository
 service is a class whose name ends with `Repository`, that can be instantiated
-and implements Doctrine's `ServiceEntityRepositoryInterface`
-(`AbstractBaseBundle::isRepositoryService()`). An abstract base repository, an
+and extends omnibase's `ServiceEntityRepository` or implements DoctrineBundle's
+`ServiceEntityRepositoryInterface` (`AbstractBaseBundle::isRepositoryService()`). An abstract base repository, an
 interface or a trait in that directory is aliased, never registered: a bundle
 may keep `AbstractCatalogueRepository` beside the repositories that extend it.
 
