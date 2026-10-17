@@ -471,6 +471,14 @@ class AdvancedRouter implements AdvancedRouterInterface
         return null;
     }
 
+    /**
+     * https whatever the request (REQUEST_SCHEME "http" is a true string),
+     * left so for now: see docs/decisions/router-scheme.md before changing it.
+     * It is not the scheme of the site's routes' addresses (the request's,
+     * through get_url()) but that of Symfony's own routes, the one the host
+     * fallbacks' ports are filtered by, and app.site.scheme. The scheme the
+     * visitor used is get_url_scheme()'s.
+     */
     public function getScheme(?string $locale = null, ?string $environment = null): string
     {
         $use_https ??= $_SERVER["REQUEST_SCHEME"] ?? true;
