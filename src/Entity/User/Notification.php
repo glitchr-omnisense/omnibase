@@ -142,7 +142,8 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     public function removeAttachment(\SplFileInfo $attachment): self
     {
-        array_remove($this->attachments, $attachment);
+        // The very file given: two \SplFileInfo compare equal (==) whatever their paths, they carry no property.
+        $this->attachments = array_values(array_filter($this->attachments, fn ($kept) => $kept !== $attachment));
         return $this;
     }
 
@@ -164,7 +165,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     public function removeRecipient(RecipientInterface $recipient): self
     {
-        array_remove($this->recipients, $recipient);
+        $this->recipients = array_values(array_remove($this->recipients, $recipient));
         return $this;
     }
 
@@ -489,7 +490,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      */
     public function removeHtmlParameter(string $key)
     {
-        array_remove($this->htmlParameters, $key);
+        unset($this->htmlParameters[$key]);
         return $this;
     }
 
