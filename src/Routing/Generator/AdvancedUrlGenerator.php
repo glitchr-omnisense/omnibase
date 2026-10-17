@@ -68,7 +68,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeCandidates[] = $routeName;
         $routeGroups = self::$router->getRouteGroups($routeName);
 
-        $routeDefaultName = first($routeGroups);
+        // No group for a route the router does not know: its own name (str_ends_with() and substr() were given null, deprecated since PHP 8.1, before RouteNotFoundException).
+        $routeDefaultName = first($routeGroups) ?? $routeName;
         if (!str_ends_with($routeDefaultName, "." . $locale)) {
             $routeCandidates[] = $routeDefaultName . "." . $locale;
         }
