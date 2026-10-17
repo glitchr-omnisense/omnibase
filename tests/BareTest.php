@@ -190,6 +190,40 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The screens' view models and their builder where there is no framework (plan "omnibase
+     * agnostique", C5): tests/Screen/screens-without-framework.php, run by bare with the autoloader
+     * alone, gives plain contracts (Locales, Texts, Pictures, a clock) and turns omnibase's own Thread,
+     * Tag and Comment into a card, a story, a link and comments in a frame. Nothing of the framework
+     * is loaded; the props are lesringostars' names, with the additions the pilot agreed.
+     */
+    public function testTheScreensAreBuiltWithoutTheFramework(): void
+    {
+        $script = __DIR__.'/Screen/screens-without-framework.php';
+        [$status, $report] = self::bare([$script]);
+
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        $result = $run['result'];
+        self::assertSame(['slug', 'title', 'excerpt', 'hasContent', 'publishedAt', 'readingMinutes', 'authors', 'tags', 'likes', 'likeUrl', 'comments', 'url', 'headline', 'cover', 'taxa', 'recent'], array_keys($result['card']));
+        self::assertSame(['slug' => 'sorties', 'label' => 'Sorties', 'color' => null, 'icon' => null, 'url' => '/chroniques?sujet=sorties'], $result['card']['tags'][0]);
+        self::assertSame([null, null, null], [$result['card']['likes'], $result['card']['likeUrl'], $result['card']['comments']], 'none counted: null, never 0');
+        self::assertSame('/uploads/couverture.jpg?w=800', $result['card']['cover']);
+        self::assertSame('2026-05-11T08:00:00+00:00', $result['card']['publishedAt']);
+        self::assertTrue($result['card']['recent'], 'published four hours before the clock\'s now');
+        self::assertSame([['tag' => 'h2', 'slug' => 'depart', 'title' => 'Départ']], $result['story']['toc']);
+        self::assertTrue($result['story']['commentable']);
+        self::assertSame(['title' => 'La rentrée', 'url' => '/chroniques/la-rentree', 'state' => 'STATE_DRAFT'], $result['link']);
+        self::assertSame(['locale', 'site', 'destination', 'links', 'viewer', 'theme', 'comments', 'hasMore', 'open', 'canReply', 'signIn', 'flashes'], $result['props']);
+        self::assertSame(7, $result['comment']['id']);
+        self::assertSame([['name' => 'Inès', 'profile' => 'https://ines.example.org', 'avatar' => null, 'staff' => false]], $result['comment']['authors']);
+        self::assertFalse($result['comment']['recent']);
+        self::assertSame('refused', $result['reserved'], 'a site\'s extra may not override the frame\'s own fields');
+    }
+
+    /**
      * Runs docker/bin/bare apart, on the autoloader of this run.
      *
      * @param list<string> $classes none: the Fondation
