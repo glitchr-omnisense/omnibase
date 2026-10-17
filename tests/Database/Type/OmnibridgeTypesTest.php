@@ -14,8 +14,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * omnibase's moment types are omnibridge/doctrine's: datetime (DateTimeTypeUTC
- * extends its DateTimeType), utc_datetime and utc_datetime_immutable (its
- * classes are final: delegated to), the same zone. Each pair writes the same
+ * extends its DateTimeType), utc_datetime and utc_datetime_immutable (they
+ * extend its UtcDateTimeType and UtcDateTimeImmutableType), the same zone. Each pair writes the same
  * text and reads back the same moment, from Tokyo, Paris and UTC, so a site
  * mapped by omnibase and an application mapped by omnibridge/doctrine
  * (Omnibridge\Doctrine\Types::register()) read each other's rows.
@@ -90,5 +90,7 @@ final class OmnibridgeTypesTest extends TestCase
         self::assertSame('utc_datetime', UtcDateTimeType::NAME);
         self::assertSame('utc_datetime_immutable', UtcDateTimeImmutableType::NAME);
         self::assertInstanceOf(Bridge\DateTimeType::class, new DateTimeTypeUTC());
+        self::assertInstanceOf(Bridge\UtcDateTimeType::class, new UtcDateTimeType());
+        self::assertInstanceOf(Bridge\UtcDateTimeImmutableType::class, new UtcDateTimeImmutableType());
     }
 }

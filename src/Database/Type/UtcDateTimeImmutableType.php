@@ -2,9 +2,6 @@
 
 namespace Base\Database\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\DateTimeImmutableType;
-
 /**
  * A moment, written in UTC and read back as UTC (`utc_datetime_immutable`).
  *
@@ -26,38 +23,12 @@ use Doctrine\DBAL\Types\DateTimeImmutableType;
  * What comes back is in UTC; show it with Twig's |date (PHP's zone: the
  * visitor's) or ->setTimezone(). A wall clock that is no moment (a
  * restaurant's reservation at 20:00, an opening hour) is not for this type.
+ *
+ * omnibridge/doctrine's UtcDateTimeImmutableType, under omnibase's name:
+ * written and read as it writes and reads (in UTC; unreadable, the DBAL's
+ * own exception).
  */
-final class UtcDateTimeImmutableType extends DateTimeImmutableType
+final class UtcDateTimeImmutableType extends \Omnibridge\Doctrine\Type\UtcDateTimeImmutableType
 {
     public const NAME = 'utc_datetime_immutable';
-
-    /** DBAL 3 asks a type its name, and marks the column with it (DBAL 4 does neither). */
-    public function getName(): string
-    {
-        return self::NAME;
-    }
-
-    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-    {
-        return true;
-    }
-
-    /** Written as omnibridge/doctrine's UtcDateTimeImmutableType writes it (that class is final: delegated, not inherited). */
-    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
-    {
-        return self::bridge()->convertToDatabaseValue($value, $platform);
-    }
-
-    /** Read as omnibridge/doctrine's UtcDateTimeImmutableType reads it: in UTC; unreadable, the DBAL's own exception. */
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?\DateTimeImmutable
-    {
-        return self::bridge()->convertToPHPValue($value, $platform);
-    }
-
-    private static ?\Omnibridge\Doctrine\Type\UtcDateTimeImmutableType $bridge = null;
-
-    private static function bridge(): \Omnibridge\Doctrine\Type\UtcDateTimeImmutableType
-    {
-        return self::$bridge ??= new \Omnibridge\Doctrine\Type\UtcDateTimeImmutableType();
-    }
 }
