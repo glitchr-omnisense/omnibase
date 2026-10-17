@@ -9,6 +9,9 @@ The bundle is organised around a few long-lived pieces:
 
 - **Entities** — `Thread` and its subtypes carry the shared title/slug/content
   model that articles, comments and pages all reuse.
+- **The contracts of the Fondation** — what framework-free code asks of the
+  application (URLs, translations, access, locales, files, the clock, events,
+  mail), through `Base\Contract\Runtime`: [The contracts](contracts.md).
 - **Settings** — a compiled snapshot of configuration, read through
   `SettingBag`.
 - **Admin** — a from-scratch administration bundle (`base-bundle-admin`).

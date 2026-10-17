@@ -19,9 +19,11 @@ use Symfony\Component\DependencyInjection\Reference;
 
 use Base\Attributes\AttributeReader;
 use Base\Bundle\AbstractBaseBundle;
+use Base\Contract\Runtime;
 use Base\Console\Command\CacheClearCommand;
 use Base\Demo\DemoGuard;
 use Base\Demo\DemoMode;
+use Base\DependencyInjection\Compiler\Pass\ContractsPass;
 use Base\DependencyInjection\Dumper\CliDumper;
 use Base\DependencyInjection\Dumper\HtmlDumper;
 use Base\Service\BaseService;
@@ -299,6 +301,13 @@ class BaseBundle extends AbstractBaseBundle
         // instantiated on its first actual accessor call.
         if ($this->container->has('base.runtime')) {
             BaseService::setRuntime($this->container->get('base.runtime'));
+        }
+        // The contracts of the Fondation (Base\Contract\Runtime), from the
+        // locator ContractsPass builds: closures as well, nothing constructed
+        // before a contract is asked; a new kernel's locator replaces the
+        // previous one's, and what was resolved from it is forgotten.
+        if ($this->container->has(ContractsPass::SERVICE)) {
+            Runtime::setContainer($this->container->get(ContractsPass::SERVICE));
         }
         BaseService::setProjectDir($this->container->getParameter('kernel.project_dir'));
         BaseService::setEnvironment($this->container->getParameter('kernel.environment'));

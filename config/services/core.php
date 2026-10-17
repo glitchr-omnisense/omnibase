@@ -385,6 +385,28 @@ return static function (ContainerConfigurator $container): void {
             'parameter_bag' => new Reference('parameter_bag'),
         ]]);
 
+    // The contracts of the Fondation and their Symfony adapters (plan
+    // "omnibase agnostique", C4): what omnibase's framework-free code asks
+    // through Base\Contract\Runtime, each bound to its interface's name (an
+    // application rebinds one by aliasing that name). The registry gets them
+    // from the `base.contracts` locator (ContractsPass), with the framework's
+    // clock, event dispatcher and mailer, seeded in BaseBundle::boot().
+    $services->set('Base\Bridge\Symfony\RouterUrls')
+        ->args([service('advanced_router'), service('assets.packages')->nullOnInvalid()]);
+    $services->alias('Base\Contract\Urls', 'Base\Bridge\Symfony\RouterUrls');
+    $services->set('Base\Bridge\Symfony\TranslatorTranslations')
+        ->args([service('translator')]);
+    $services->alias('Omnibridge\Twig\Contract\Translations', 'Base\Bridge\Symfony\TranslatorTranslations');
+    $services->set('Base\Bridge\Symfony\SecurityAccess')
+        ->args([service('security.authorization_checker'), service('security.token_storage')]);
+    $services->alias('Base\Contract\Access', 'Base\Bridge\Symfony\SecurityAccess');
+    $services->set('Base\Bridge\Symfony\LocalizerLocales')
+        ->args([service('localizer')]);
+    $services->alias('Base\Contract\Locales', 'Base\Bridge\Symfony\LocalizerLocales');
+    $services->set('Base\Bridge\Symfony\FlysystemFiles')
+        ->args([service('flysystem'), service('base.service.image')->nullOnInvalid()]);
+    $services->alias('Base\Contract\Files', 'Base\Bridge\Symfony\FlysystemFiles');
+
     // BaseService
     $services->set('Base\Service\BaseService')
         ->public(true)
