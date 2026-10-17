@@ -96,7 +96,7 @@ contracts of the Fondation used without the framework (see
 **The list only grows.** A class enters it when it loads without the framework
 (`bare --all --each`); a class leaves it only by a decision written down in the
 plan "omnibase agnostique" and in CHANGELOG.md. On 2026-10-17 it held 599 of
-the 895 classes of `src/`; 691 of 908 after step C4. The `bare` command is `demo.sh`'s: an image built
+the 895 classes of `src/`; 691 of 908 after step C4; 694 of 911 after steps C3e and C3f. The `bare` command is `demo.sh`'s: an image built
 before it has the script only, `docker compose run --rm omnibase php
 vendor/omniscient/omnibase/docker/bin/bare`.
 
@@ -113,7 +113,9 @@ followed to the end (○, with the chain). It is the dashboard of the seams
 class of `src/`, a list of classes reads those; `--json` gives the whole
 report. On 2026-10-18 (after C4): of the 691 classes of the Fondation, 133
 name the framework themselves (131 of the 679 before it, the two more are
-Symfony adapters), 420 themselves or through a `Base\` name.
+Symfony adapters), 420 themselves or through a `Base\` name. After C3e and C3f:
+of 694, 129 name it themselves (128 of the classes of before, and Notification's
+Symfony half), 410 themselves or through a `Base\` name.
 
 ## SQLite
 

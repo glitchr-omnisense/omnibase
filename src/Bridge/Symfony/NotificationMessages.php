@@ -1,0 +1,215 @@
+<?php
+
+namespace Base\Bridge\Symfony;
+
+use App\Entity\User;
+use Base\Entity\User\Notification;
+use Base\Notifier\Abstract\BaseNotifierInterface;
+use RuntimeException;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
+use Symfony\Component\ErrorHandler\Exception\FlattenException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\Notifier\Message\EmailMessage;
+use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
+use Symfony\Component\Notifier\Recipient\NoRecipient;
+use Throwable;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use UnexpectedValueException;
+
+/**
+ * The Symfony half of Base\Entity\User\Notification (plan "omnibase
+ * agnostique", step C3f): what the entity made with the framework, moved
+ * here as it was. The entity keeps what a notification is - its subject,
+ * content, importance, channels, recipients, context, templates - and its
+ * sending through the notifier; it hands this class what needs Symfony:
+ *
+ * - throwable(): the error an ExceptionEvent (HttpKernel) carries, or a
+ *   FlattenException (ErrorHandler), made the notification's content;
+ * - response(): render()'s HttpFoundation Response;
+ * - email(): asEmailMessage(), the NotificationEmail of Symfony's Twig bridge
+ *   (TemplatedEmail, WrappedTemplatedEmail), its attachments
+ *   (HttpFoundation's UploadedFile), its HTML through Twig.
+ *
+ * Same names for what the sites use: they keep calling the entity's
+ * methods, which answer what they answered.
+ */
+final class NotificationMessages
+{
+    /**
+     * The error to describe, when the notification's content is one: an ExceptionEvent's throwable,
+     * a FlattenException, a Throwable; null for anything else.
+     */
+    public static function throwable(mixed $content): Throwable|FlattenException|null
+    {
+        if ($content instanceof ExceptionEvent) {
+            return $content->getThrowable();
+        }
+
+        return $content instanceof FlattenException || $content instanceof Throwable ? $content : null;
+    }
+
+    public static function response(string $html): Response
+    {
+        return new Response($html);
+    }
+
+    public static function email(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Environment $twig, string $projectDir): EmailMessage
+    {
+        $message = EmailMessage::fromNotification($notification, $recipient);
+
+        /**
+         * @var EmailRecipientInterface $technicalRecipient
+         */
+        $technicalRecipient = $notifier->getTechnicalRecipient();
+        if ($technicalRecipient instanceof NoRecipient) {
+            throw new UnexpectedValueException("No support address found.");
+        }
+
+        $title = $notification->getTitle();
+        $content = $notification->getContent();
+        $footer = $notification->getFooter();
+
+        $fwd = "";
+        $subject = $notification->getSubject();
+        $from = $technicalRecipient->getEmail();
+        $to = $recipient->getEmail();
+
+        if ($notification->isMarkAsAdmin()) {
+            $user = $notification->getUser() ?? "User \"" . User::getIp() . "\"";
+            $fwd .= "Fwd: ";
+            $title = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $notification->getTitle()]);
+            $content = $notification->getContent();
+        }
+
+        if ($notifier->isTest($recipient)) {
+
+            $fwd .= "Test: ";
+            $email = mailparse($recipient->getEmail());
+            $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
+            $to = "[" . $notifier->getTranslator()->trans("@emails.fake_test.author") . "] " . $email;
+
+            $footer = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+            $footer = implode(" - ", array_filter($footer));
+
+            $htmlFooter = $notification->getHtmlParameters()["footer_text"] ?? null;
+            if ($htmlFooter) {
+
+                $htmlFooter = [$htmlFooter, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+                $htmlFooter = implode(" - ", array_filter($htmlFooter));
+                $notification->addHtmlParameter("footer_text", $htmlFooter);
+            }
+        }
+
+        /**
+         * @var TemplatedEmail $email
+         */
+        $email = $message->getMessage(); // Embed image inside email (cid:/)
+        $context = array_merge([
+
+            // render html
+            "raw" => true,
+            // Make sure notification context for html template got images pre-rendered
+            "warmup" => true, // e.g. when sending emails..
+
+        ], $notification->getContext([
+            "title" => $title,
+            "content" => $content,
+            "footer_text" => $footer,
+            "recipient" => $recipient
+        ]));
+
+        if (array_key_exists("email", $notification->getHtmlParameters())) {
+            throw new UnexpectedValueException("`email` is a reserved key. Cannot pass it through html parameters.");
+        }
+
+        $htmlParameters = array_merge(
+            $context,
+            $notification->getHtmlParameters(),
+            ["email" => new WrappedTemplatedEmail($twig, $email)]
+        );
+
+        // Append notification attachments
+        $importance = $context["importance"] ?? $notification->getImportance();
+        $attachments = array_unique(array_merge($notification->getAttachments(), $context["attachments"] ?? []));
+
+        $context["attachments"] = [];
+        foreach ($attachments as $key => $attachment) {
+
+            if (!$attachment instanceof UploadedFile) {
+                continue;
+            }
+
+            $email->embed($attachment->getContent(), $attachment->getClientOriginalName());
+            $context["attachments"][] = $attachment->getClientOriginalName();
+        }
+
+        // Fallback: Append cid:/ like attachments
+        foreach ($context as $value) {
+
+            if (!$value) {
+                continue;
+            }
+            if (!is_string($value)) {
+                continue;
+            }
+            if (!str_starts_with($value, "cid:")) {
+                continue;
+            }
+
+            list($cid, $path) = explode(":", $value);
+            $email->embed(fopen($projectDir . "/" . $path, 'rb'), $path /* replace by alias */);
+        }
+
+        $htmlTemplate = $notification->getHtmlTemplate();
+        try {
+            $context["html"] = $twig->render($htmlTemplate, $htmlParameters);
+        } catch (LoaderError $e) {
+            $context["html"] = $twig->render("@Base/notifier/email.html.twig", $htmlParameters);
+        } catch (RuntimeException $e) {
+            throw new UnexpectedValueException("Failed to render template \"$htmlTemplate\". See below", 500, $e);
+        }
+
+        if (preg_match('/<title>(.*)<\/title>/ims', $context["html"], $matches)) {
+            $subject = html_entity_decode(trim($matches[1]));
+        }
+
+        $subject ??= $notification->getSubject();
+        $subject = $fwd . $subject;
+
+        // Alias cid://
+        $search = [];
+        $replacement = [];
+        foreach ($email->getAttachments() as $key => $attachment) {
+
+            $ext = pathinfo($attachment->GetName(), PATHINFO_EXTENSION);
+            $newFilename = rand_str(6) . ($ext ? ".".$ext : "");
+
+            $filename = $attachment->getFilename();
+            object_hydrate($attachment, ["name" => $newFilename, "filename" => $newFilename]);
+            $search[] = "cid:".$filename;
+            $replacement[] = "cid:".$newFilename;
+        }
+
+        $context["html"] = str_replace($search, $replacement, $context["html"]);
+
+        // Priority
+        $priority = [Notification::IMPORTANCE_HIGH, Notification::IMPORTANCE_MEDIUM, Notification::IMPORTANCE_LOW];
+        $email
+            ->importance(in_array($importance, $priority) ? $importance : "")
+            ->subject($subject)
+            ->from($from)
+            ->to($to)
+            ->htmlTemplate("@Base/notifier/raw.html.twig")
+            ->context($context);
+
+        if ($context["replyTo"] ?? null) {
+            $email->replyTo($context["replyTo"]);
+        }
+
+        return $message;
+    }
+}
