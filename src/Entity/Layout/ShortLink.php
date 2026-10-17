@@ -13,7 +13,7 @@ use Base\Database\Attribute\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortLinkRepository;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Base\Contract\Link;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: ShortLinkRepository::class)]
@@ -32,7 +32,11 @@ class ShortLink implements TranslatableInterface, IconizeInterface, LinkableInte
         return ["fa-solid fa-compress-alt fa-rotate-45"];
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    /**
+     * The short address, through the Urls contract (Base\Contract\Link): the
+     * router's own string under Symfony, made where there is no framework too.
+     */
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         $slug = $this->getSlug();
         if (!$slug) {
@@ -41,7 +45,7 @@ class ShortLink implements TranslatableInterface, IconizeInterface, LinkableInte
 
         $routeParameters = array_merge($routeParameters, ["slug" => $slug]);
 
-        return $this->getRouter()->generate("short_redirect", $routeParameters, $referenceType);
+        return Link::to("short_redirect", $routeParameters, $referenceType);
     }
 
     /**

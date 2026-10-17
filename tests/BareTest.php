@@ -140,6 +140,39 @@ final class BareTest extends TestCase
     }
 
     /**
+     * omnibase's own entities answer through the contracts where there is no framework (plan
+     * "omnibase agnostique", C3e): tests/Contract/entities-without-framework.php, run by bare with
+     * the autoloader alone, sets plain PHP implementations of the contracts by hand and calls the
+     * getters C3e moved off BaseTrait's services on the core's real classes. Nothing of the
+     * framework is loaded on the way; tests/Contract/EntityGettersTest compares the same getters
+     * with the services they used under Symfony.
+     */
+    public function testTheEntitiesAnswerThroughTheContractsWithoutTheFramework(): void
+    {
+        $script = __DIR__.'/Contract/entities-without-framework.php';
+        [$status, $report] = self::bare([$script]);
+
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame([
+            'semantic, no Urls' => 'MissingContractException',
+            'semantic, link' => '/article?slug=abbey-road',
+            'semantic, url' => 'https://lesringostars.test/article?slug=abbey-road',
+            'semantic, getUrl' => '/article?slug=abbey-road',
+            'semantic, relative path' => null,
+            'semantic, missing route' => null,
+            'short link, no slug' => null,
+            'short link, link' => '/short_redirect?slug=x7Kq2',
+            'short link, url' => 'https://lesringostars.test/short_redirect?utm=mail&slug=x7Kq2',
+            'short link, network path' => 'InvalidArgumentException',
+            'link' => '/blog_post?slug=help',
+        ], $run['result']);
+    }
+
+    /**
      * Runs docker/bin/bare apart, on the autoloader of this run.
      *
      * @param list<string> $classes none: the Fondation

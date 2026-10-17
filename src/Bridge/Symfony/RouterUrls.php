@@ -33,4 +33,14 @@ final class RouterUrls implements Urls
     {
         return $this->packages?->getUrl($path) ?? $path;
     }
+
+    /**
+     * Any of the router's reference types, beyond the contract (which has an
+     * absolute path and URL only): Base\Contract\Link::to() asks it for a
+     * relative or a network path, which the router made before C3e.
+     */
+    public function generate(string $name, array $parameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
+    {
+        return $this->router->generate($name, $parameters, $referenceType);
+    }
 }
