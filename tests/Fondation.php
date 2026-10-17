@@ -30,6 +30,7 @@
  * omnibase's xx-XX form, which the translatable entities apply with the Locales contract).
  * 694 after step C3f (+1: Base\Bridge\Symfony\NotificationMessages, Notification's Symfony half, which
  * names the framework and loads none of it).
+ * 695 with step C6's measure (+1: Base\Bridge\Doctrine\MetadataSnapshot, an entity manager's mapping as data).
  */
 
 return [
@@ -39,6 +40,7 @@ return [
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
     Base\Attributes\Traits\HierarchifyTrait::class,
+    Base\Bridge\Doctrine\MetadataSnapshot::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\NotificationMessages::class,
