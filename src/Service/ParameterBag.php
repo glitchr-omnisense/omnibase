@@ -5,6 +5,12 @@ namespace Base\Service;
 use Base\Traits\BagTrait;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 
+/**
+ * The Symfony adapter of omnibase's Base\Service\ParameterBagInterface: the
+ * container's parameters (it decorates `parameter_bag`), read by a dotted path,
+ * and DependencyInjection's ParameterBagInterface as well (through ContainerBag)
+ * for the code that types that one.
+ */
 class ParameterBag extends ContainerBag implements ParameterBagInterface
 {
     use BagTrait;

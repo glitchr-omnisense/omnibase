@@ -17,10 +17,10 @@ use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FlysystemInterface;
+use Base\Service\ParameterBagInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -113,6 +113,9 @@ class AttributeReader extends AbstractLocalCache
     }
 
     /**
+     * omnibase's contract (Base\Service\ParameterBagInterface), the container's
+     * `parameter_bag` under Symfony, which Base\Service\ParameterBag decorates.
+     *
      * @var ParameterBagInterface
      */
     protected ParameterBagInterface $parameterBag;
