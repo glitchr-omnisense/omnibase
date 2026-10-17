@@ -82,7 +82,7 @@ class UploaderEntitiesCommand extends Command
                 }
                 $nTotalFields++;
 
-                $attribute = last($attribute);
+                $attribute = array_end($attribute);
                 if ($attribute->getDeclaringEntity($class, $field) != $class) {
                     continue;
                 }

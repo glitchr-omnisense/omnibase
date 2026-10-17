@@ -148,7 +148,7 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
     {
         $this->email = $email;
 
-        $role = strtoupper(class_basename(get_called_class()));
+        $role = strtoupper(class_name(get_called_class()));
         $this->roles = [UserRole::hasKey($role) ? UserRole::getValue($role) : UserRole::USER];
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 

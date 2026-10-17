@@ -69,7 +69,7 @@ $em->persist(new SpecialDay($from, $until, 'Travaux', 'store:12'));
 - The injected service and `opening_hours()` without an argument stay the
   whole site's: `for()` returns a new instance.
 
-An update of `glitchr/omnibase` adds the table `hoursScopedWeek` and a
+An update of `omniscient/omnibase` adds the table `hoursScopedWeek` and a
 nullable `scope` column (indexed) to `hoursSpecialDay`; `hoursWeekDay` is
 untouched.
 

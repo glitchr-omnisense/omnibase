@@ -8,6 +8,6 @@ git:
     repositories:
         omnibase:
             path: /srv/omnibase
-            label: 'glitchr/omnibase'
+            label: 'omniscient/omnibase'
             description: 'The checkout this demo was built from'
             default_branch: HEAD

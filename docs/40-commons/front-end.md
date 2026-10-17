@@ -67,7 +67,7 @@ navigation or sticky module would otherwise run on the newer core.
 
 ```js
 import '@glitchr/flowjs/navigation';   // the modules the site uses: '/sticky', '/stops', '/navigation'
-import Base from '../vendor/glitchr/omnibase/assets/boot.js';
+import Base from '../vendor/omniscient/omnibase/assets/boot.js';
 
 Base.boot({
     nest: ['/admin*'],                                  // default
@@ -106,7 +106,7 @@ own. `media.js` (no dependency) is those two lines written once:
 ```
 
 ```js
-import '../vendor/glitchr/omnibase/assets/media/media.js';     // bundled: the same script, window.MediaPlay
+import '../vendor/omniscient/omnibase/assets/media/media.js';     // bundled: the same script, window.MediaPlay
 
 const leave = MediaPlay.join(player, () => player.pause());      // 2. paused when another starts
 MediaPlay.announce(player, { kind: 'audio', id: track.id });     // 1. when this one starts
@@ -140,7 +140,7 @@ kitchen board, a queue.
 
 ```js
 // assets/bootstrap.js
-import Poll from '../vendor/glitchr/omnibase/assets/controllers/poll_controller.js';
+import Poll from '../vendor/omniscient/omnibase/assets/controllers/poll_controller.js';
 app.register('poll', Poll);
 ```
 

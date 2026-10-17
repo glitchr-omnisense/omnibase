@@ -464,12 +464,12 @@ class Translator implements TranslatorInterface
 
                 $parent = class_exists($class) ? get_parent_class($class) : null;
 
-                $class = class_basename($class);
+                $class = class_name($class);
                 if ($parent) {
-                    $class .= "." . class_basename($parent);
+                    $class .= "." . class_name($parent);
                 }
                 while (class_exists($parent) && ($parent = get_parent_class($parent))) {
-                    $class .= "." . class_basename($parent);
+                    $class .= "." . class_name($parent);
                 }
 
                 return camel2snake($class);

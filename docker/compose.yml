@@ -1,4 +1,4 @@
-# glitchr/omnibase with every omnibase/* plugin, runnable:
+# omniscient/omnibase with every omnibase/* plugin, runnable:
 #
 #   docker compose up                 # → http://localhost:8000/ (OMNIBASE_PORT to change)
 #   docker compose run --rm omnibase check          # container and templates linted, routes counted
@@ -18,7 +18,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: glitchr/omnibase-harness
+    image: omniscient/omnibase-harness
     ports:
       - "${OMNIBASE_PORT:-8000}:8000"
     env_file:

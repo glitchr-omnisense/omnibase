@@ -1,0 +1,1303 @@
+{
+    "App\\Entity\\Article\\Article": {
+        "table": "article",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Article\\ArticleIntl": {
+        "table": "articleIntl",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Article\\Comment": {
+        "table": "articleComment",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Article\\CommentReply": {
+        "table": "articleCommentReply",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Article\\Tag": {
+        "table": "articleTag",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Calendar\\Calendar": {
+        "table": "calendar",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Calendar\\Event": {
+        "table": "calendarEvent",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Destination\\Destination": {
+        "table": "destination",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "locations": [
+                "destination_locations",
+                "destination_id",
+                "destinationLocation_id",
+                "App\\Entity\\Destination\\Location",
+                "App\\Entity\\Destination\\Destination",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Destination\\Location": {
+        "table": "destinationLocation",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Gallery\\Gallery": {
+        "table": "gallery",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Gallery\\GalleryIntl": {
+        "table": "galleryIntl",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Gallery\\Photo": {
+        "table": "galleryPhoto",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Gallery\\PhotoIntl": {
+        "table": "galleryPhotoIntl",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Guestbook\\Guestbook": {
+        "table": "guestbook",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Guestbook\\Message": {
+        "table": "guestbookMessage",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Newsletter\\Engagement": {
+        "table": "newsletterEngagement",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Newsletter\\Group": {
+        "table": "newsletterGroup",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Newsletter\\Newsletter": {
+        "table": "newsletter",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "subscribers": [
+                "newsletter_subscribers",
+                "newsletter_id",
+                "newsletterSubscriber_id",
+                "App\\Entity\\Newsletter\\Subscriber",
+                "App\\Entity\\Newsletter\\Newsletter",
+                false
+            ]
+        }
+    },
+    "App\\Entity\\Newsletter\\Subscriber": {
+        "table": "newsletterSubscriber",
+        "declared": false,
+        "joins": []
+    },
+    "App\\Entity\\Newsletter\\Subscription": {
+        "table": "newsletterSubscription",
+        "declared": true,
+        "joins": []
+    },
+    "App\\Entity\\User": {
+        "table": "userProfile",
+        "declared": true,
+        "joins": {
+            "groups": [
+                "user_groups",
+                "user_id",
+                "userGroup_id",
+                "Base\\Entity\\User\\Group",
+                "Base\\Entity\\User",
+                false
+            ],
+            "permissions": [
+                "user_permissions",
+                "user_id",
+                "userPermission_id",
+                "Base\\Entity\\User\\Permission",
+                "Base\\Entity\\User",
+                false
+            ],
+            "hyperlinks": [
+                "userProfile_hyperlinks",
+                "userProfile_id",
+                "layoutAttributeHyperlink_id",
+                "Base\\Entity\\Layout\\Attribute\\Hyperlink",
+                "App\\Entity\\User",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Analytics\\PageView": {
+        "table": "analytics_page_view",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Analytics\\PageVisit": {
+        "table": "analytics_page_visit",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Analytics\\Visit": {
+        "table": "analytics_visit",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Extension\\Abstract\\AbstractExtension": {
+        "table": "extensionAbstract",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Extension\\Revision": {
+        "table": "extensionRevision",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Extension\\TrashBall": {
+        "table": "extensionTrashBall",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Hours\\ScopedWeek": {
+        "table": "hoursScopedWeek",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Hours\\SpecialDay": {
+        "table": "hoursSpecialDay",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Hours\\WeekDayHours": {
+        "table": "hoursWeekDay",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute": {
+        "table": "layoutAttribute",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\AttributeIntl": {
+        "table": "layoutAttributeIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\ArrayAdapter": {
+        "table": "layoutAttributeAdapterArray",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\ColorAdapter": {
+        "table": "layoutAttributeAdapterColor",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\Common\\AbstractActionAdapter": {
+        "table": "layoutAttributeAdapterCommonAbstractAction",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\Common\\AbstractAdapter": {
+        "table": "layoutAttributeAdapterCommonAbstract",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\Common\\AbstractAdapterIntl": {
+        "table": "layoutAttributeAdapterCommonAbstractIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\Common\\AbstractRuleAdapter": {
+        "table": "layoutAttributeAdapterCommonAbstractRule",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\Common\\AbstractScopeAdapter": {
+        "table": "layoutAttributeAdapterCommonAbstractScope",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\CountryAdapter": {
+        "table": "layoutAttributeAdapterCountry",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\DateRangeAdapter": {
+        "table": "layoutAttributeAdapterDateRange",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\DateTimeAdapter": {
+        "table": "layoutAttributeAdapterDateTime",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\HyperpatternAdapter": {
+        "table": "layoutAttributeAdapterHyperpattern",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\HyperpatternAdapterIntl": {
+        "table": "layoutAttributeAdapterHyperpatternIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\ImageAdapter": {
+        "table": "layoutAttributeAdapterImage",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\MoneyAdapter": {
+        "table": "layoutAttributeAdapterMoney",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\NumberAdapter": {
+        "table": "layoutAttributeAdapterNumber",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\PercentAdapter": {
+        "table": "layoutAttributeAdapterPercent",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\ScalarAdapter": {
+        "table": "layoutAttributeAdapterScalar",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\ScoreAdapter": {
+        "table": "layoutAttributeAdapterScore",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\TextAdapter": {
+        "table": "layoutAttributeAdapterText",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Adapter\\TextareaAdapter": {
+        "table": "layoutAttributeAdapterTextarea",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Common\\AbstractAction": {
+        "table": "layoutAttributeCommonAbstractAction",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Common\\AbstractAttribute": {
+        "table": "layoutAttributeCommonAbstract",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Common\\AbstractRule": {
+        "table": "layoutAttributeCommonAbstractRule",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Common\\AbstractScope": {
+        "table": "layoutAttributeCommonAbstractScope",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\Hyperlink": {
+        "table": "layoutAttributeHyperlink",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Attribute\\HyperlinkIntl": {
+        "table": "layoutAttributeHyperlinkIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Image": {
+        "table": "layoutImage",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\ImageCrop": {
+        "table": "layoutImageCrop",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Redirection": {
+        "table": "layoutRedirection",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Semantic": {
+        "table": "layoutSemantic",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\SemanticIntl": {
+        "table": "layoutSemanticIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Setting": {
+        "table": "layoutSetting",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\SettingIntl": {
+        "table": "layoutSettingIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\ShortLink": {
+        "table": "layoutShortLink",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\ShortLinkIntl": {
+        "table": "layoutShortLinkIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\TextOverride": {
+        "table": "layoutTextOverride",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Tooltip": {
+        "table": "layoutTooltip",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\TooltipIntl": {
+        "table": "layoutTooltipIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Widget": {
+        "table": "layoutWidget",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\WidgetIntl": {
+        "table": "layoutWidgetIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Widget\\Attachment": {
+        "table": "layoutWidgetAttachment",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Link": {
+        "table": "layoutWidgetLink",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\LinkIntl": {
+        "table": "layoutWidgetLinkIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Layout\\Widget\\Page": {
+        "table": "layoutWidgetPage",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Route": {
+        "table": "layoutWidgetRoute",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Set\\Book": {
+        "table": "layoutWidgetSetBook",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Set\\Linkset": {
+        "table": "layoutWidgetSetLinkset",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ],
+            "hyperlinks": [
+                "layoutWidgetSetLinkset_hyperlinks",
+                "layoutWidgetSetLinkset_id",
+                "layoutAttributeHyperlink_id",
+                "Base\\Entity\\Layout\\Attribute\\Hyperlink",
+                "Base\\Entity\\Layout\\Widget\\Set\\Linkset",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Set\\Menu": {
+        "table": "layoutWidgetSetMenu",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ],
+            "items": [
+                "layoutWidgetSetMenu_items",
+                "layoutWidgetSetMenu_id",
+                "layoutWidget_id",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget\\Set\\Menu",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Set\\Network": {
+        "table": "layoutWidgetSetNetwork",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ],
+            "routes": [
+                "layoutWidgetSetNetwork_routes",
+                "layoutWidgetSetNetwork_id",
+                "layoutWidgetRoute_id",
+                "Base\\Entity\\Layout\\Widget\\Route",
+                "Base\\Entity\\Layout\\Widget\\Set\\Network",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Set\\Paperclip": {
+        "table": "layoutWidgetSetPaperclip",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ],
+            "attachments": [
+                "layoutWidgetSetPaperclip_attachments",
+                "layoutWidgetSetPaperclip_id",
+                "layoutWidgetAttachment_id",
+                "Base\\Entity\\Layout\\Widget\\Attachment",
+                "Base\\Entity\\Layout\\Widget\\Set\\Paperclip",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\Slot": {
+        "table": "layoutWidgetSlot",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "layoutWidget_connexes",
+                "layoutWidget_source",
+                "layoutWidget_target",
+                "Base\\Entity\\Layout\\Widget",
+                "Base\\Entity\\Layout\\Widget",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Layout\\Widget\\SlotIntl": {
+        "table": "layoutWidgetSlotIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Signature\\AbstractEnvelope": {
+        "table": "signatureAbstractEnvelope",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Thread": {
+        "table": "thread",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "thread_connexes",
+                "thread_source",
+                "thread_target",
+                "Base\\Entity\\Thread",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "owners": [
+                "thread_owners",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "followers": [
+                "thread_followers",
+                "thread_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "tags": [
+                "thread_tags",
+                "thread_id",
+                "threadTag_id",
+                "App\\Entity\\Thread\\Tag",
+                "Base\\Entity\\Thread",
+                false
+            ],
+            "taxa": [
+                "thread_taxa",
+                "thread_id",
+                "threadTaxon_id",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\ThreadIntl": {
+        "table": "threadIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Thread\\Comment": {
+        "table": "threadComment",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\Thread\\Like": {
+        "table": "threadLike",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Thread\\Mention": {
+        "table": "threadMention",
+        "declared": false,
+        "joins": {
+            "mentioners": [
+                "threadMention_mentioners",
+                "threadMention_id",
+                "userProfile_id",
+                "App\\Entity\\User",
+                "Base\\Entity\\Thread\\Mention",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Thread\\Tag": {
+        "table": "threadTag",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Thread\\TagIntl": {
+        "table": "threadTagIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\Thread\\Taxon": {
+        "table": "threadTaxon",
+        "declared": false,
+        "joins": {
+            "connexes": [
+                "threadTaxon_connexes",
+                "threadTaxon_source",
+                "threadTaxon_target",
+                "Base\\Entity\\Thread\\Taxon",
+                "Base\\Entity\\Thread\\Taxon",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\Thread\\TaxonIntl": {
+        "table": "threadTaxonIntl",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User": {
+        "table": "user",
+        "declared": false,
+        "joins": {
+            "groups": [
+                "user_groups",
+                "user_id",
+                "userGroup_id",
+                "Base\\Entity\\User\\Group",
+                "Base\\Entity\\User",
+                false
+            ],
+            "permissions": [
+                "user_permissions",
+                "user_id",
+                "userPermission_id",
+                "Base\\Entity\\User\\Permission",
+                "Base\\Entity\\User",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\User\\Address": {
+        "table": "userAddress",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\Action\\GrantPermissionAdapter": {
+        "table": "userAttributeActionGrantPermissionAdapter",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\Action\\GrantRoleAdapter": {
+        "table": "userAttributeActionGrantRoleAdapter",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\GroupAction": {
+        "table": "userAttributeGroupAction",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\GroupRule": {
+        "table": "userAttributeGroupRule",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\GroupScope": {
+        "table": "userAttributeGroupScope",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\Scope\\GroupAdapter": {
+        "table": "userAttributeScopeGroupAdapter",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Attribute\\Scope\\UserAdapter": {
+        "table": "userAttributeScopeAdapter",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Complaint": {
+        "table": "userComplaint",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Connection": {
+        "table": "userConnection",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Group": {
+        "table": "userGroup",
+        "declared": false,
+        "joins": {
+            "permissions": [
+                "userGroup_permissions",
+                "userGroup_id",
+                "userPermission_id",
+                "Base\\Entity\\User\\Permission",
+                "Base\\Entity\\User\\Group",
+                false
+            ],
+            "penalties": [
+                "userGroup_penalties",
+                "userGroup_id",
+                "userPenalty_id",
+                "Base\\Entity\\User\\Penalty",
+                "Base\\Entity\\User\\Group",
+                false
+            ]
+        }
+    },
+    "Base\\Entity\\User\\Invitation": {
+        "table": "userInvitation",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Notification": {
+        "table": "userNotification",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Passkey": {
+        "table": "userPasskey",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Penalty": {
+        "table": "userPenalty",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Permission": {
+        "table": "userPermission",
+        "declared": false,
+        "joins": []
+    },
+    "Base\\Entity\\User\\PushSubscription": {
+        "table": "userPushSubscription",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Sanction": {
+        "table": "userSanction",
+        "declared": true,
+        "joins": []
+    },
+    "Base\\Entity\\User\\Token": {
+        "table": "userToken",
+        "declared": false,
+        "joins": []
+    },
+    "Webauthn\\CredentialRecord": {
+        "table": "webauthnCredentialRecord",
+        "declared": false,
+        "joins": []
+    },
+    "Webauthn\\PublicKeyCredentialEntity": {
+        "table": "webauthnPublicKeyCredentialEntity",
+        "declared": false,
+        "joins": []
+    },
+    "Webauthn\\PublicKeyCredentialUserEntity": {
+        "table": "webauthnPublicKeyCredentialUserEntity",
+        "declared": false,
+        "joins": []
+    }
+}

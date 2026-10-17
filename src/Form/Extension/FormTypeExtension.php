@@ -77,7 +77,7 @@ class FormTypeExtension extends AbstractTypeExtension
         $resolver->setNormalizer('form_flow_id', function (Options $options, $value) {
             $formType = null;
             if (class_implements_interface($options['data_class'], FormModelInterface::class)) {
-                $formType = camel2snake(str_rstrip(class_basename($options['data_class']::getTypeClass()), 'Type'));
+                $formType = camel2snake(str_rstrip(class_name($options['data_class']::getTypeClass()), 'Type'));
             }
 
             return '_flow_token' == $value ? $formType : $value;

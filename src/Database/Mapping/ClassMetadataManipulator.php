@@ -904,7 +904,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
     public function fetchEntityMapping(string $entityName, array|string $fieldPath): null|FieldMapping|AssociationMapping
     {
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
-        $fieldName = head($fieldPath);
+        $fieldName = begin($fieldPath);
         $classMetadata = $this->doctrine->getManagerForClass($entityName)->getClassMetadata($entityName);
 
         if ($classMetadata->hasAssociation($this->getFieldName($classMetadata, $fieldName))) {
@@ -915,7 +915,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
             return null;
         }
 
-        $fieldName = $fieldPath ? head($fieldPath) : $fieldName;
+        $fieldName = $fieldPath ? begin($fieldPath) : $fieldName;
         $fieldPath = tail($fieldPath, $this->isToManySide($entityName, $fieldName) ? -2 : -1);
         if (!$fieldPath) {
             return $entityMapping;
@@ -1014,7 +1014,7 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
         $entityName = $classMetadata->getName();
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
-        $fieldName = head($fieldPath);
+        $fieldName = begin($fieldPath);
 
         $classMetadata = $this->getClassMetadata($entityName);
         $columnNames = $this->getFieldNames($classMetadata);

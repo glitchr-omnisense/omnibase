@@ -22,6 +22,12 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->useCustomLoader = $parameterBag->get('base.twig.use_custom');
 
         $bundlePath = $parameterBag->get('base.twig.default_path');
+        // A path that is not there is the package's own templates: an
+        // application that still names vendor/glitchr/omnibase/templates (the
+        // package's old name, before omniscient/omnibase) keeps its pages.
+        if (!\is_string($bundlePath) || !is_dir($bundlePath)) {
+            $bundlePath = \dirname(__DIR__, 3).'/templates';
+        }
         parent::__construct([], $bundlePath);
         // Each namespace with ITS paths: getPaths() without a namespace is the
         // main one's (the app's templates/), which made @Base/x resolve to an

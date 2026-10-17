@@ -96,7 +96,7 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
                 $validationGroups = $form->getConfig()->getOption("validation_groups");
                 if (!$validationGroups) {
                     $validationGroups[] = "Default";
-                    $validationGroups[] = class_basename($dataClass);
+                    $validationGroups[] = class_name($dataClass);
                 }
 
                 //
@@ -124,7 +124,7 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
             $validationGroups = $form->getConfig()->getOption("validation_groups");
             if (!$validationGroups) {
                 $validationGroups[] = "Default";
-                $validationGroups[] = class_basename($validationEntity);
+                $validationGroups[] = class_name($validationEntity);
             }
 
             if ($this->classMetadataManipulator->isEntity($validationEntity)) {

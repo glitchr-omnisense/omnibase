@@ -40,7 +40,7 @@ $signatures->of($quote);                               // the envelopes about th
 - `POST /signatures/{gateway}/webhook` answers 404.
 
 With it: `composer require glitchr/omnisign omnisign/docuseal` (or `omnisign/yousign`,
-`omnisign/docusign`; not on Packagist yet: the `vcs` repositories of `glitchr/omnibase`'s
+`omnisign/docusign`; not on Packagist yet: the `vcs` repositories of `omniscient/omnibase`'s
 `composer.json`), register `Omnisign\Bridge\Symfony\OmnisignBundle`, configure a gateway, then
 `make:migration` and `doctrine:migrations:migrate` for the table:
 

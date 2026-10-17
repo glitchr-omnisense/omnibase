@@ -19,7 +19,7 @@ root, so an application can replace any base page by creating a file at the
 same path:
 
 ```
-vendor/glitchr/omnibase/docs/operations/deployment.md   <- base
+vendor/omniscient/omnibase/docs/operations/deployment.md   <- base
 docs/operations/deployment.md                              <- wins
 ```
 
