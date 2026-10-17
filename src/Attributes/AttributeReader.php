@@ -201,17 +201,9 @@ class AttributeReader extends AbstractLocalCache
         $this->parameterBag = $parameterBag;
         $this->enabled = $parameterBag->get("base.attributes.use_custom") ?? false;
 
-        $paths = [];
-        $paths[] = __DIR__ . "/Attribute";
-        $paths[] = __DIR__ . "/../Database/Attribute";
-        if (($matches = preg_grep('/^base.attributes.paths\.[0-9]*\.[.*]*$/', array_keys($parameterBag->all())))) {
-            foreach ($matches as $match) {
-                $paths[] = $parameterBag->get($match);
-            }
-        }
-
-        // Paths to look for attributes
-        foreach ($paths as $path) {
+        // Paths to look for attributes: the core's own, then base.attributes.paths (an application's
+        // src/Attribute, a bundle's: MarketplaceExtension prepends its own).
+        foreach ([__DIR__ . "/Attribute", __DIR__ . "/../Database/Attribute", ...self::configuredPaths($parameterBag)] as $path) {
             $this->addPath($path);
         }
 
@@ -277,11 +269,36 @@ class AttributeReader extends AbstractLocalCache
         if (!file_exists($path)) {
             return $this;
         }
+        // Kept: getPaths() answered [] whatever was added.
+        $this->paths[] = $path;
         foreach (ClassFinder::classes($path) as $attribute) {
             $this->addAttributeName($attribute);
         }
 
         return $this;
+    }
+
+    /**
+     * The folders base.attributes.paths names. The configuration's list is in
+     * the bag whole (base.attributes.paths) and item by item
+     * (base.attributes.paths.0, .1...: omnibase's flattened parameters, and
+     * what Base\Bridge\Doctrine\Mapping gives an entity manager built by
+     * hand); the pattern that read them wanted a dot after the number
+     * (paths.0.), which no key has, so none was ever read.
+     *
+     * @return list<string>
+     */
+    public static function configuredPaths(ParameterBagInterface $parameterBag): array
+    {
+        $all = $parameterBag->all();
+        $paths = \is_array($all['base.attributes.paths'] ?? null) ? array_values($all['base.attributes.paths']) : [];
+        foreach (array_keys($all) as $key) {
+            if (preg_match('/^base\.attributes\.paths\.\d+$/', (string) $key)) {
+                $paths[] = $all[$key];
+            }
+        }
+
+        return array_values(array_unique(array_filter($paths, static fn ($path) => \is_string($path) && '' !== $path)));
     }
 
     public function getAsset(string $url): string
