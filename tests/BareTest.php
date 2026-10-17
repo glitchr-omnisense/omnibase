@@ -84,7 +84,15 @@ final class BareTest extends TestCase
      */
     private static function bare(array $classes): array
     {
+        // The autoloader that knows this package: under symfony/phpunit-bridge's simple-phpunit (an
+        // application's suite) the first ClassLoader is PHPUnit's own, which knows no Base\ class.
         $autoload = \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2).'/autoload.php';
+        foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
+            if (false !== $loader->findFile(BaseBundle::class)) {
+                $autoload = $vendorDir.'/autoload.php';
+                break;
+            }
+        }
         $output = (string) tempnam(sys_get_temp_dir(), 'bare');
         $process = proc_open([\PHP_BINARY, __DIR__.'/../docker/bin/bare', '--json', ...$classes], [1 => ['file', $output, 'w'], 2 => ['pipe', 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
         self::assertIsResource($process);
