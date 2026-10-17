@@ -12,6 +12,11 @@ The bundle is organised around a few long-lived pieces:
 - **The contracts of the Fondation** — what framework-free code asks of the
   application (URLs, translations, access, locales, files, the clock, events,
   mail), through `Base\Contract\Runtime`: [The contracts](contracts.md).
+- **The Doctrine mapping** — what omnibase assembles at runtime (the
+  attributes, the translations, the discriminator maps, the filters, the
+  types), wired by `Base\Bridge\Doctrine` under Symfony and on an entity
+  manager built by hand, on doctrine/orm as published:
+  [The Doctrine mapping](doctrine.md).
 - **Settings** — a compiled snapshot of configuration, read through
   `SettingBag`.
 - **Admin** — a from-scratch administration bundle (`base-bundle-admin`).
