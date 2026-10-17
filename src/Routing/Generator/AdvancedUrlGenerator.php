@@ -304,7 +304,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 $cache->save(self::$router->getCacheRoutes()->set($this->cachedRoutes));
             }
 
-            return sanitize_url($routeUrl);
+            // As the router wrote it, as a route found in the cache above is given: sanitize_url() here made
+            // the first address of a route in the cache's life differ from every later one - a slash before
+            // the query (/chroniques/?page=2, then /chroniques?page=2), the root's slash dropped
+            // (http://localhost, then http://localhost/) -, so a page's links depended on the order they
+            // were made in.
+            return $routeUrl;
         }
 
         throw new RouteNotFoundException("No valid route found for `$routeName`. Candidate routes are ". implode(", ", array_keys($routes)). "(please check mandatory variables?)");
