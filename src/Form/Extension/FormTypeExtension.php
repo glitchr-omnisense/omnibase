@@ -114,8 +114,18 @@ class FormTypeExtension extends AbstractTypeExtension
             return;
         }
 
+        // A field that names no label shows its name humanised ("excerpt" ->
+        // "Excerpt"), translated in its domain by the theme: that text is
+        // looked up as well, so a field of the back office (FieldFormBuilder's
+        // "forms") reads "Titre", "Adresse", not "Title", "Slug" - the fields
+        // of a translation (TranslationType) included, two forms below.
+        $label = $view->vars['label'] ?? null;
+        if (null === $label && empty($view->vars['label_format'] ?? null) && \is_string($view->vars['name'] ?? null)) {
+            $label = self::humanize($view->vars['name']);
+        }
+
         $keys = [];
-        foreach ([$view->vars['label'] ?? null, $view->vars['help'] ?? null, $view->vars['attr']['placeholder'] ?? null, $view->vars['placeholder'] ?? null] as $text) {
+        foreach ([$label, $view->vars['help'] ?? null, $view->vars['attr']['placeholder'] ?? null, $view->vars['placeholder'] ?? null] as $text) {
             if (\is_string($text) && '' !== $text && !str_starts_with($text, '@')) {
                 $keys[] = $text;
             }
@@ -143,6 +153,12 @@ class FormTypeExtension extends AbstractTypeExtension
                 }
             }
         }
+    }
+
+    /** The text Symfony's theme shows for a field without a label (FormRenderer::humanize()). */
+    private static function humanize(string $name): string
+    {
+        return ucfirst(strtolower(trim(preg_replace(['/([A-Z])/', '/[_\s]+/'], ['_$1', ' '], $name))));
     }
 
     private function translates(string $key, ?string $domain): bool
