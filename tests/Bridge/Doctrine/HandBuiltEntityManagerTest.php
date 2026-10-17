@@ -29,6 +29,9 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
 {
     private const FIXTURE = __DIR__.'/fixtures/doctrine-metadata.json';
 
+    /** @var list<string> the classes Symfony's attribute drivers map */
+    private array $attributeClasses = [];
+
     protected function setUp(): void
     {
         if (!class_exists('App\\Kernel')) {
@@ -94,7 +97,24 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
         if (getenv('C6_FRAMEWORK')) {
             fwrite(STDERR, "\nframework loaded by hand-built.php: ".implode(', ', $answer['framework'])."\n");
         }
-        self::assertSame(array_keys($symfony['classes']), array_keys($answer['classes']), 'the same classes');
+        // The same classes, but those a bundle maps with a driver of its own (XML: WebauthnBundle's credentials),
+        // which a site without the framework does not have.
+        self::assertSame([], array_values(array_diff(array_keys($answer['classes']), array_keys($symfony['classes']))), 'no class Symfony does not map');
+        $own = array_values(array_diff(array_keys($symfony['classes']), array_keys($answer['classes'])));
+        foreach ($own as $className) {
+            self::assertNotContains($className, $this->attributeClasses, $className.' is mapped by attributes');
+            unset($symfony['classes'][$className]);
+        }
+        // And the fields an entity inherits from one of them (Base\Entity\User\Passkey from Webauthn's
+        // CredentialRecord), declared there.
+        foreach ($symfony['classes'] as $className => $metadata) {
+            foreach ($metadata['fieldMappings'] as $field => $mapping) {
+                if (in_array($mapping['declared'] ?? null, $own, true)) {
+                    unset($symfony['classes'][$className]['fieldMappings'][$field], $symfony['classes'][$className]['columnNames'][$field], $symfony['classes'][$className]['propertyAccessors'][$field]);
+                    $symfony['classes'][$className]['fieldNames'] = array_diff($symfony['classes'][$className]['fieldNames'], [$field]);
+                }
+            }
+        }
         $differences = [];
         foreach ($symfony['classes'] as $className => $metadata) {
             $differences = array_merge($differences, self::differences($metadata, $answer['classes'][$className] ?? null, $className));
@@ -134,9 +154,11 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
         $driver = $entityManager->getConfiguration()->getMetadataDriverImpl();
         $driver = $driver instanceof MappingDriver ? $driver->getDriver() : $driver;
         $paths = [];
+        $this->attributeClasses = [];
         foreach ($driver instanceof MappingDriverChain ? $driver->getDrivers() : [$driver] as $inner) {
             if ($inner instanceof AttributeDriver) {
                 $paths = array_merge($paths, $inner->getPaths());
+                $this->attributeClasses = array_merge($this->attributeClasses, $inner->getAllClassNames());
             }
         }
 
