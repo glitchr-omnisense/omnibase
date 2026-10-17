@@ -834,8 +834,9 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->defaultValue(5)
                     ->end()
                 ->scalarNode('empty_trash')
-                    ->info('Time before hard deletion')
-                    ->defaultValue(5)
+                    ->info('Time a trashed entity is kept before the purge may delete it for good: a relative date PHP reads ("+7 days", "+1 month"); a bare number is a number of days')
+                    // "+7 days", what TrasheableSubscriber and TrashPurgeCommand say; 5 was given to new DateTime() and failed to parse, so a host without its own value could not remove a Thread.
+                    ->defaultValue('+7 days')
                     ->end()
                 ->scalarNode('logging_default_expiry')
                     ->info('Default logging expiry')
