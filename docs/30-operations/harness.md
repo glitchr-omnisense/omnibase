@@ -74,6 +74,7 @@ docker compose run --rm omnibase bare                      # the Fondation; exit
 docker compose run --rm omnibase bare 'Base\Entity\User'    # the classes named
 docker compose run --rm omnibase bare --all --each         # every class of src/, each in a process of its own: those that can join
 docker compose run --rm omnibase bare --json               # the whole report
+docker compose run --rm omnibase bare --names              # informative: the classes of the Fondation that name the framework
 ```
 
 What is checked is what loading a class loads - its parents, interfaces,
@@ -89,6 +90,20 @@ plan "omnibase agnostique" and in CHANGELOG.md. On 2026-10-17 it held 599 of
 the 895 classes of `src/`. The `bare` command is `demo.sh`'s: an image built
 before it has the script only, `docker compose run --rm omnibase php
 vendor/omniscient/omnibase/docker/bin/bare`.
+
+### The names report: `bare --names`
+
+A second report, **informative, not a guard**: which classes still *name* the
+framework, where loading them loads none of it (a type in a signature, a `new`
+in a method, an attribute). Nothing is loaded; each file of `src/` is read, its
+`use` lines (grouped ones expanded, `use function` and `use const` too) and
+its fully qualified names. Two counts: the classes that name the framework
+themselves (●), and those that name it through the `Base\` classes they name,
+followed to the end (○, with the chain). It is the dashboard of the seams
+(C3-C5): the Fondation only grows, this report only falls. `--all` reads every
+class of `src/`, a list of classes reads those; `--json` gives the whole
+report. On 2026-10-18: of the 679 classes of the Fondation, 131 name the
+framework themselves, 417 themselves or through a `Base\` name.
 
 ## SQLite
 
@@ -109,6 +124,13 @@ layer until this checkout changes; to fetch the families' latest commits:
 ```sh
 docker compose -f compose.yml -f compose.checkouts.yml build --build-arg OMNI_REFRESH=$(date +%s) omnibase
 ```
+
+The same goes for the core's own dependencies on their development branches
+(`omnibridge/doctrine`, `omnibridge/twig`, `1.x-dev`): an image built before a
+commit of theirs that the core needs keeps the older one. Rebuild with
+`OMNI_REFRESH` rather than mounting a checkout over `vendor/`; the image of
+2026-10-18 has omnibridge/doctrine cf6b3b9 (the UTC types the core extends),
+and the suite runs on it without a mount.
 
 `docker/app/` (configuration, `.env.test`, `tests/harness.php`) is copied into
 the image: a change there needs a build too.
