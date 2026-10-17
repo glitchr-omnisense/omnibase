@@ -114,6 +114,16 @@ return static function (ContainerConfigurator $container): void {
             new Reference('editor_enhancer'),
         ]);
 
+    // omnibridge/twig's helpers (html_attributes, mb_ucfirst, second,
+    // join_if_exists, less_than, html_decode...), the ones another framework
+    // rendering these templates registers: added first (the highest
+    // priority), so a filter of the same name registered by omnibase's own
+    // extensions - str_shorten, highlight, datetime, lang, country,
+    // lang_name, which do more - is the one a template gets.
+    $services->set('Omnibridge\Twig\HelperExtension')
+        ->tag('twig.extension', ['priority' => 255])
+        ->args(['%kernel.default_locale%']);
+
     $services->set('Base\Twig\Extension\FunctionTwigExtension')->public()
         ->tag('twig.extension')
         ->args([

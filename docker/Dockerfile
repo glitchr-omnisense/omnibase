@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# glitchr/omnibase with every omnibase/* plugin, as one runnable Symfony
+# omniscient/omnibase with every omnibase/* plugin, as one runnable Symfony
 # application: this checkout installed as the bundle, the plugins from
 # Packagist (their development branches), a SQLite database, a demo page
 # that seeds members, a shop and signs you in - then the shop (/boutiques),
@@ -65,8 +65,8 @@ ARG PLUGINS="omnibase/admin omnibase/marketplace omnibase/forge omnibase/forum o
 # build --build-arg OMNI_REFRESH=$(date +%s)` refetches it.
 ARG OMNI_REFRESH=0
 RUN echo "omni families as of ${OMNI_REFRESH}" \
-    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"glitchr/omnibase": "3.x-dev"}}}' \
-    && composer require "glitchr/omnibase:3.x-dev as 3.0.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
+    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omniscient/omnibase": "3.x-dev"}}}' \
+    && composer require "omniscient/omnibase:3.x-dev as 3.0.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
         omnipay/stripe symfony/translation symfony/messenger symfony/lock \
         dompdf/dompdf horstoeko/zugferd --no-interaction --no-progress --no-scripts \

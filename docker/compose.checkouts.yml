@@ -4,7 +4,7 @@
 services:
   omnibase:
     volumes:
-      - ..:/srv/demo/vendor/glitchr/omnibase
+      - ..:/srv/demo/vendor/omniscient/omnibase
       - ${OMNIBASE_PLUGINS:-../..}/admin:/srv/demo/vendor/omnibase/admin
       - ${OMNIBASE_PLUGINS:-../..}/marketplace:/srv/demo/vendor/omnibase/marketplace
       - ${OMNIBASE_PLUGINS:-../..}/forge:/srv/demo/vendor/omnibase/forge

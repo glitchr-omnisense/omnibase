@@ -1,5 +1,5 @@
 {
-    "name": "glitchr/omnibase",
+    "name": "omniscient/omnibase",
     "type": "symfony-bundle",
     "description": "Base helper integration for Symfony",
     "keywords": [
@@ -61,7 +61,7 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-exif": "*",
         "ext-igbinary": "*",
         "ext-imagick": "*",
@@ -89,6 +89,8 @@
         "league/flysystem-ftp": "^3.0",
         "nelmio/cors-bundle": "^2.2",
         "nelmio/security-bundle": "^3.0",
+        "omnibridge/doctrine": "1.x-dev",
+        "omnibridge/twig": "1.x-dev",
         "phpoffice/phpspreadsheet": "^1.23|^2.0",
         "picqer/php-barcode-generator": "^2.0",
         "scheb/2fa": "^7.0|^8.0",
@@ -122,6 +124,9 @@
         "twig/inky-extra": "^3.0",
         "twig/intl-extra": "^3.0",
         "twig/twig": "^3.0"
+    },
+    "replace": {
+        "glitchr/omnibase": "self.version"
     },
     "suggest": {
         "doctrine/doctrine-fixtures-bundle": "demo:reset reloads the fixtures (the demo environment)",

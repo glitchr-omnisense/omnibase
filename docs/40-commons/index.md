@@ -5,7 +5,7 @@ order: 40
 
 # Shared bricks
 
-What several sites need and used to copy, written once in `glitchr/omnibase`.
+What several sites need and used to copy, written once in `omniscient/omnibase`.
 An application or an `omnibase/*` bundle uses these; it does not keep a copy.
 
 | Brick | Where | Page |
@@ -34,7 +34,7 @@ An application or an `omnibase/*` bundle uses these; it does not keep a copy.
 
 Nothing to enable: the services are registered by the bundle
 (`config/services/commons.php`), the entities mapped with the others. A site
-that updates `glitchr/omnibase` gets these tables on its next migration
+that updates `omniscient/omnibase` gets these tables on its next migration
 (`hoursWeekDay`, `hoursSpecialDay`, `hoursScopedWeek`, `threadComment`,
 `layoutTextOverride`, `layoutRedirection`):
 

@@ -361,6 +361,15 @@ class BaseBundle extends AbstractBaseBundle
             // DATETIME holding the visitor's midnight in UTC (15:00 the day
             // before, for a visitor in Tokyo), and a real DATE column never
             // compared equal to its mapping.
+            //
+            // What Omnibridge\Doctrine\Types::register() does, with omnibase's
+            // names: DateTimeTypeUTC is omnibridge/doctrine's DateTimeType, and
+            // utc_datetime(_immutable) are registered with the connection
+            // (BaseExtension::prependDoctrineTypes()). register() itself is not
+            // called: it would put omnibridge's classes under these names, so a
+            // type asked of Doctrine would no longer be the Base\Database\Type
+            // class applications and bundles name, and it ignores use_custom
+            // (tests/Database/Type/OmnibridgeTypesTest says both convert alike).
             Type::overrideType('datetime', DateTimeType::class);
             Type::overrideType('datetimetz', DateTimeType::class);
 

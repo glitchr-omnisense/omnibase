@@ -13,7 +13,7 @@ It is where the bundles' suites run: there is no PHP on the host.
 
 ```sh
 cd docker
-docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test              # glitchr/omnibase's suite
+docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test              # omniscient/omnibase's suite
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test admin        # a plugin's: admin, marketplace, forge...
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test forge --filter License
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase check             # container and templates linted
@@ -86,7 +86,7 @@ any class: it is reported, not held against one.
 plan "omnibase agnostique" and in CHANGELOG.md. On 2026-10-17 it held 599 of
 the 895 classes of `src/`. The `bare` command is `demo.sh`'s: an image built
 before it has the script only, `docker compose run --rm omnibase php
-vendor/glitchr/omnibase/docker/bin/bare`.
+vendor/omniscient/omnibase/docker/bin/bare`.
 
 ## SQLite
 

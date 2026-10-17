@@ -99,7 +99,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             $nTotalCrops = count($imageCrops);
 
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(' You are about to normalize ' . $nNormalizable . ' element(s) using ' . class_basename(get_class($this->maxDefinition)) . ', do you want to continue? [y/n] ', false);
+            $question = new ConfirmationQuestion(' You are about to normalize ' . $nNormalizable . ' element(s) using ' . class_name(get_class($this->maxDefinition)) . ', do you want to continue? [y/n] ', false);
             if (!$helper->ask($input, $output, $question)) {
                 return Command::FAILURE;
             }

@@ -157,7 +157,7 @@ class EntityHydrator implements EntityHydratorInterface
                 function ($k, $e) use ($aggregateModel, $data): ?array {
 
                     $varName = explode("\x00", $k);
-                    $varName = last($varName);
+                    $varName = array_end($varName);
                     if ($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isReadable($data, $varName)) {
                         return [$varName, $this->propertyAccessor->getValue($data, $varName)];
                     }

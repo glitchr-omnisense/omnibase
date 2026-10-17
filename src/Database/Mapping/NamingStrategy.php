@@ -2,149 +2,46 @@
 
 namespace Base\Database\Mapping;
 
-use Doctrine\ORM\Mapping\Table;
 use Exception;
 use ReflectionClass;
 
-class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
+/**
+ * omnibase's names for tables and columns: App\Entity\Thread\Tag is
+ * threadTag, App\Entity\User\Profile userProfile, Thread::$tags the join
+ * table thread_tags (thread_id, threadTag_id), a property its own name.
+ *
+ * The rules are omnibridge/doctrine's NamingStrategy (framework-free, the one
+ * another framework reading the same database maps with), which this class
+ * extends: one place says how a class becomes a table. What omnibase adds on
+ * top is kept here, unchanged: a class may be given as an object, and every
+ * attribute of an entity is instantiated and must serialize (the metadata
+ * cache stores them) - a mistake said at once, with the attribute's name.
+ */
+class NamingStrategy extends \Omnibridge\Doctrine\NamingStrategy
 {
-    public const TABLE_NAME_SIZE = 64;
-    public const TABLE_I18N_SUFFIX = "Intl";
-
     protected array $uniqueTableName = [];
 
     /**
-     * @param $className
-     * @return string
+     * @param string|object|null $className
      * @throws Exception
      */
     public function classToTableName($className): string
     {
-        if(!$className) return "";
+        if (!$className) {
+            return "";
+        }
 
-        $tableName = null;
         $className = is_object($className) ? get_class($className) : $className;
-        $className = $className && class_exists($className) ? (new ReflectionClass($className))->getName() : $className;
-
-        //
-        // Search for a table name in class metadata
-        if ($className && class_exists($className)) {
-
-            $reflClass = new ReflectionClass($className);
-            
-            // Attributes
-            $attributes = [];
-            foreach($reflClass->getAttributes() as $attribute) {
-
+        if (class_exists($className)) {
+            foreach ((new ReflectionClass($className))->getAttributes() as $attribute) {
                 $attribute = $attribute->newInstance();
                 if (!is_serializable($attribute)) {
                     throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
                 }
-
-                $attributes[] = $attribute;
-            }
-
-            while ($attribute = array_pop($attributes)) {
-                if ($attribute instanceof Table && !empty($attribute->name)) {
-                    $tableName = $attribute->name;
-                    break;
-                }
             }
         }
 
-        //
-        // Determination of table name based on class information
-        if(!$tableName) {
-
-            // Strip App\ or Base\ namespace..
-            $tableName = str_lstrip($className, ["App\\", "Base\\"]);
-
-            // Strip first occurence of \Entity\
-            $entityNamespace = "Entity\\";
-            $pos = $tableName ? strpos($tableName, $entityNamespace) : false;
-            if ($pos !== false) $tableName = substr_replace($tableName, "", $pos, strlen($entityNamespace));
-
-            // Defaulting case
-            if (empty($tableName)) {
-
-                $tableName = $className;
-                if ($tableName && strrpos($tableName, '\\') !== false) {
-
-                    $tableName = lcfirst(substr($className, strrpos($className, '\\') + 1));
-                }
-            }
-
-            // Turn from namespace into camel string..
-            if($tableName) {
-
-                $tableName = str_replace("\\", "", $tableName);
-                $tableName = explode("_", camel2snake($tableName));
-                $tableName = array_unique($tableName);
-
-                $tableName = snake2camel(implode("_", $tableName));
-                $tableName = lcfirst($tableName);
-
-                // Handle I18n case
-                $tableName = preg_replace('/' . self::TABLE_I18N_SUFFIX . '$/', self::TABLE_I18N_SUFFIX, $tableName);
-            }
-        }
-
-        //
-        // Make sure there is no ambiguity or issue related to SQL server
-        if ($tableName && strlen($tableName) > self::TABLE_NAME_SIZE) {
-            throw new Exception("Table name will be truncated for \"" . $className . "\"");
-        }
-
-        return $tableName ?? $className;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function propertyToColumnName($propertyName, $className = null): string
-    {
-        return lcfirst($propertyName);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $className = null, $embeddedClassName = null): string
-    {
-        return lcfirst($propertyName) . '_' . lcfirst($embeddedColumnName);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function referenceColumnName(): string
-    {
-        return 'id';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function joinColumnName($propertyName, $className = null): string
-    {
-        return lcfirst($propertyName) . '_' . lcfirst($this->referenceColumnName());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function joinTableName($sourceEntity, $targetEntity, $propertyName = null): string
-    {
-        return lcfirst($this->classToTableName($sourceEntity)) . '_' .
-            lcfirst($this->classToTableName($propertyName ?? $targetEntity));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function joinKeyColumnName($entityName, $referencedColumnName = null): string
-    {
-        return lcfirst($this->classToTableName($entityName)) . '_' .
-            lcfirst(($referencedColumnName ?: $this->referenceColumnName()));
+        // A name over 64 characters: omnibridge's \LengthException, an \Exception as before, the same message.
+        return parent::classToTableName($className);
     }
 }

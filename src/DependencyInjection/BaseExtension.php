@@ -82,6 +82,13 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
     public function prepend(ContainerBuilder $builder): void
     {
+        // Where this package is, wherever Composer put it (vendor/omniscient/omnibase
+        // since its rename from glitchr/omnibase, a path repository, a checkout):
+        // what an application's configuration names instead of a vendor path -
+        // wikidoc's roots ('%base.package_dir%/docs'), git's repositories.
+        // Set before any extension loads, so every configuration can use it.
+        $builder->setParameter('base.package_dir', \dirname(__DIR__, 2));
+
         $this->prependDoctrineTypes($builder);
 
         $builder->prependExtensionConfig('twig_component', [

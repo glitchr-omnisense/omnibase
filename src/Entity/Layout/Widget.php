@@ -84,7 +84,7 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
             return $this->template;
         }
 
-        $defaultTemplate = camel2snake(class_basename(get_called_class()));
+        $defaultTemplate = camel2snake(class_name(get_called_class()));
         return "widget/" . $defaultTemplate . ".html.twig";
     }
 

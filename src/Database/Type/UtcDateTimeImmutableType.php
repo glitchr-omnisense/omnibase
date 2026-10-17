@@ -42,26 +42,22 @@ final class UtcDateTimeImmutableType extends DateTimeImmutableType
         return true;
     }
 
+    /** Written as omnibridge/doctrine's UtcDateTimeImmutableType writes it (that class is final: delegated, not inherited). */
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
-        if ($value instanceof \DateTimeInterface) {
-            $value = \DateTimeImmutable::createFromInterface($value)->setTimezone(Utc::zone());
-        }
-
-        return parent::convertToDatabaseValue($value, $platform);
+        return self::bridge()->convertToDatabaseValue($value, $platform);
     }
 
+    /** Read as omnibridge/doctrine's UtcDateTimeImmutableType reads it: in UTC; unreadable, the DBAL's own exception. */
     public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?\DateTimeImmutable
     {
-        if (null === $value) {
-            return null;
-        }
-        if ($value instanceof \DateTimeInterface) {
-            return \DateTimeImmutable::createFromInterface($value)->setTimezone(Utc::zone());
-        }
+        return self::bridge()->convertToPHPValue($value, $platform);
+    }
 
-        // Unreadable in UTC, it is unreadable: the parent says so with the DBAL's own exception.
-        return \DateTimeImmutable::createFromFormat($platform->getDateTimeFormatString(), (string) $value, Utc::zone())
-            ?: (date_create_immutable((string) $value, Utc::zone()) ?: parent::convertToPHPValue($value, $platform));
+    private static ?\Omnibridge\Doctrine\Type\UtcDateTimeImmutableType $bridge = null;
+
+    private static function bridge(): \Omnibridge\Doctrine\Type\UtcDateTimeImmutableType
+    {
+        return self::$bridge ??= new \Omnibridge\Doctrine\Type\UtcDateTimeImmutableType();
     }
 }

@@ -12,11 +12,10 @@ namespace Base\Database\Type;
  */
 final class Utc
 {
-    private static ?\DateTimeZone $zone = null;
-
+    /** The zone moments are kept in: omnibridge/doctrine's, the one its types (and these) write with. */
     public static function zone(): \DateTimeZone
     {
-        return self::$zone ??= new \DateTimeZone('UTC');
+        return \Omnibridge\Doctrine\Type\Utc::zone();
     }
 
     public static function now(): \DateTimeImmutable

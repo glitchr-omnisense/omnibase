@@ -48,7 +48,7 @@ abstract class AbstractLocalCacheWarmer extends AbstractPhpFileCacheWarmer imple
         }
 
         if ($this->shellVerbosity > 0 && 'cli' == php_sapi_name()) {
-            echo ' // Warming up cache... ' . ucwords(camel2snake(str_replace('CacheWarmer', '', class_basename(static::class)), ' ')) . PHP_EOL . PHP_EOL;
+            echo ' // Warming up cache... ' . ucwords(camel2snake(str_replace('CacheWarmer', '', class_name(static::class)), ' ')) . PHP_EOL . PHP_EOL;
         }
 
         $this->simpleCache?->setCache($arrayAdapter);

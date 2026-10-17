@@ -12,7 +12,7 @@ visitor reads the account's name in the banner of any page, opens the sign-in
 page, clicks "Patient", and is in. The back office is not part of what is
 public: [its accounts sign in with a secret](#the-back-office).
 
-Everything below lives in glitchr/omnibase and is active when
+Everything below lives in omniscient/omnibase and is active when
 `kernel.environment` is `demo`, and only then. In dev, test and prod none of
 it is in the container: no route, no listener, no header. What an application
 adds to run it is listed in [Scaffolding a site](../scaffold.md#demo).

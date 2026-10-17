@@ -29,11 +29,11 @@ case "${1:-serve}" in
         php bin/console lint:twig templates
         for p in marketplace_ forum_ mailbox_ forge_ git_ admin; do printf '%-12s %s routes\n' "$p" "$(php bin/console debug:router --format=json | grep -c "\"$p")"; done ;;
     console) shift; exec php bin/console "$@" ;;
-    bare) shift; exec php vendor/glitchr/omnibase/docker/bin/bare "$@" ;;
+    bare) shift; exec php vendor/omniscient/omnibase/docker/bin/bare "$@" ;;
     test)
         shift
         case "${1:-}" in
-            ""|-*) suite=vendor/glitchr/omnibase ;;
+            ""|-*) suite=vendor/omniscient/omnibase ;;
             *) suite="vendor/omnibase/$1"; shift ;;
         esac
         # The test environment (.env then .env.test, see tests/harness.php),

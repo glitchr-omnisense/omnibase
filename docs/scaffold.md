@@ -6,7 +6,7 @@ order: 15
 # Scaffolding a site
 
 A new omnibase site starts as a copy of **Apfelschule** (`~/Sites/apfelschule`),
-the reference application: Symfony 8, PHP 8.4, Docker, glitchr/omnibase 3.x with
+the reference application: Symfony 8, PHP 8.4, Docker, omniscient/omnibase 3.x with
 omnibase/admin, omnibase/marketplace and the `omnibase/*` bundles of its trade.
 This page is the exact list: what is copied and then adapted, and what is no
 longer copied because a package provides it.
@@ -251,7 +251,7 @@ the back office - and without it they are refused, not stored in clear: see
 environment](20-architecture/demo.md)): production's behaviour, a database of
 its own (`<database>_demo`), the demonstration account named in the banner of
 every page, one button for each role on the sign-in page, a back office that
-opens with a secret, a reset every night. Everything is in glitchr/omnibase; a site adds these lines.
+opens with a secret, a reset every night. Everything is in omniscient/omnibase; a site adds these lines.
 
 **`.env.demo`** (committed: defaults only, as `.env.prod`; no secret):
 
@@ -429,12 +429,12 @@ follow whichever environment cleared its cache last.
 | `src/Controller/Admin/SystemController.php` | omnibase/admin's `SystemController` (`admin_settings`, `admin_apikey`, `admin_settings_quick`); the site's own fields in a class implementing `Base\Admin\Settings\SettingsSectionInterface` |
 | `src/Form/ContactType.php`, `src/Model/ContactMessage.php` | `Base\Form\Type\ContactType` with `['phone' => true, 'subject' => false, 'attachments' => false, 'buttons' => false, 'trap' => true]`, `Base\Form\Model\ContactModel` (`isRobot()`) - created with `createNamed('contact', …)` to keep the field names |
 | A consent checkbox and a data-protection sentence under a form | `ContactType`'s `privacy`, `privacy_consent`, `privacy_parameters` options, or `Base\Form\Type\PrivacyType` in any form ([Pages and texts](40-commons/pages-and-texts.md)) |
-| `src/Twig/ImageExtension.php` | glitchr/omnibase's `\|picture` filter |
+| `src/Twig/ImageExtension.php` | omniscient/omnibase's `\|picture` filter |
 | `src/Entity/TextOverride.php`, `src/Repository/TextOverrideRepository.php`, `src/Translation/OverridingTranslator.php`, `src/Translation/TextOverrideCacheListener.php`, `src/Controller/Admin/Crud/TextOverrideCrudController.php` | `Base\Entity\Layout\TextOverride` (table `layoutTextOverride`), `Base\Translation\*`, omnibase/admin's `TextOverrideCrudController` |
 | `src/Market/DevGateway.php` | omnibase/marketplace's `DevGateway`, registered in debug only |
 | `templates/partials/_credits.html.twig` and its SCSS (`.as-credits`, `.nk-credits`, `.mh-credits`, `.gl-credits`…) | `@Base/partials/_credits.html.twig` (`color: black\|white`, `outline`, `mirror`, `rule`, a `credits_detail` block) |
-| The boot code of `assets/app-defer.js` (closestScrollable guard, `<style>` headlock, nest-frame escape, `Sticky.ready`, `StickyStops.attach`, `Transparent.ready`, the current link) | `Base.boot()` from `vendor/glitchr/omnibase/assets/boot.js` |
-| A copy of opening hours, ICS / Google Calendar, invitations, signed downloads, QR sheets, allergens, comments, URL embeds, a polling script | glitchr/omnibase's shared bricks: [docs/40-commons](40-commons/index.md) |
+| The boot code of `assets/app-defer.js` (closestScrollable guard, `<style>` headlock, nest-frame escape, `Sticky.ready`, `StickyStops.attach`, `Transparent.ready`, the current link) | `Base.boot()` from `vendor/omniscient/omnibase/assets/boot.js` |
+| A copy of opening hours, ICS / Google Calendar, invitations, signed downloads, QR sheets, allergens, comments, URL embeds, a polling script | omniscient/omnibase's shared bricks: [docs/40-commons](40-commons/index.md) |
 | A hand-written `LocalBusiness` JSON-LD around `opening_hours().schema()` | `{{ local_business_jsonld() }}` ([LocalBusiness JSON-LD](40-commons/local-business.md)) |
 | A screen for the hours and the days off; a table of old addresses and its listener | omnibase/admin's `/admin/hours`; `Base\Entity\Layout\Redirection` and omnibase/admin's "Redirections" ([Redirections](40-commons/redirections.md)) |
 | A column type, or a helper, keeping moments in UTC | the Doctrine type `utc_datetime_immutable` ([Time and time zones](20-architecture/time.md)) |

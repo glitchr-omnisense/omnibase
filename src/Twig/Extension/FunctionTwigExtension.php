@@ -32,6 +32,14 @@ use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+/**
+ * omnibase's Twig functions and filters. html_attributes, mb_ucfirst, second,
+ * join_if_exists and less_than are omnibridge/twig's HelperExtension's
+ * (registered beside this one, the same results); str_shorten, highlight and
+ * datetime stay here, they do more than its copies (str_shorten's
+ * SHORTEN_BACK_SHRINK/EXTEND, highlight's excerpt, datetime's patterns lists,
+ * intervals and formats), and win over them.
+ */
 final class FunctionTwigExtension extends AbstractExtension
 {
     protected TranslatorInterface $translator;
@@ -89,7 +97,6 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('mailparse_email', [$this, 'mailparseEmail'], ['is_safe' => ['all']]),
             new TwigFunction('mailparse_name', [$this, 'mailparseName'], ['is_safe' => ['all']]),
 
-            new TwigFunction('html_attributes', 'html_attributes', ['is_safe' => ['all']]),
             new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'], ['is_safe' => ['all']]),
             new TwigFunction('render_javascript', [$this, 'render_javascript'], ['is_safe' => ['all']]),
 
@@ -145,23 +152,19 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('preg_split', [$this, 'preg_split']),
                 new TwigFilter('nargs', [$this, 'nargs']),
                 new TwigFilter('instanceof', [$this, 'instanceof']),
-                new TwigFilter('join_if_exists', [$this, 'joinIfExists']),
                 new TwigFilter('stringify', [$this, 'stringify']),
                 new TwigFilter('highlight', [$this, 'highlight']),
                 new TwigFilter('array_flatten', [$this, 'array_flatten']),
-                new TwigFilter('less_than', [$this, 'less_than']),
                 new TwigFilter('greater_than', [$this, 'greater_than']),
                 new TwigFilter('transforms', [$this, 'transforms'], ['needs_environment' => true]),
                 new TwigFilter('pad', [$this, 'pad']),
-                new TwigFilter('mb_ucfirst', 'mb_ucfirst'),
                 new TwigFilter('mb_ucwords', 'mb_ucwords'),
-                new TwigFilter('second', 'second'),
                 new TwigFilter('third', 'third'),
                 new TwigFilter('fourth', 'fourth'),
                 new TwigFilter('fifth', 'fifth'),
                 new TwigFilter('empty', 'empty'),
 
-                new TwigFilter('head', 'head'),
+                new TwigFilter('head', 'begin'), // omnibase's head(): null for an empty list, whatever head() Laravel defines
                 new TwigFilter('tail', 'tail'),
 
                 new TwigFilter('colorify', [$this, 'colorify']),
@@ -492,11 +495,7 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function joinIfExists(?array $array, string $separator)
     {
-        if (null === $array) {
-            return null;
-        }
-
-        return implode($separator, array_filter($array));
+        return \Omnibridge\Twig\HelperExtension::joinIfExists($array, $separator);
     }
 
     /**
@@ -659,22 +658,7 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function less_than($date, $diff): bool
     {
-        if (\is_string($date)) {
-            $date = new \DateTime($date);
-        }
-        if ($date instanceof \DateTime) {
-            $date = $date->getTimestamp();
-        }
-        if (\is_string($diff)) {
-            $diff = new \DateTime($diff);
-        }
-        if ($diff instanceof \DateTime) {
-            $diff = $diff->getTimestamp() - time();
-        }
-
-        $deltaTime = time() - $date;
-
-        return $deltaTime < $diff;
+        return \Omnibridge\Twig\HelperExtension::lessThan($date, $diff);
     }
 
     /**

@@ -6,7 +6,13 @@ domain code. The `Base\` namespace deliberately mirrors the host apps' `App\`
 structure — a host class can usually extend or decorate its `Base\` counterpart
 one-to-one.
 
-Requires PHP ≥ 8.1 and Symfony 6, 7 or 8. Licensed MIT (`LICENSE`) since 2026-10-09;
+Published as `omniscient/omnibase` (formerly `glitchr/omnibase`, which this package replaces: a
+`composer.json` that still requires the old name keeps resolving to it, and never installs both).
+Composer now installs it in `vendor/omniscient/omnibase`; nothing in the package depends on that
+path (its templates, documentation and scripts are found from its own directory), but an
+application that names the old path in its configuration has to follow - see CHANGELOG.
+
+Requires PHP ≥ 8.2 (omnibridge/doctrine) and Symfony 6, 7 or 8. Licensed MIT (`LICENSE`) since 2026-10-09;
 earlier versions remain published under LGPL-3.0-or-later.
 
 ## Docker: every plugin, running
@@ -29,10 +35,10 @@ The suites run there in the test environment on a fresh SQLite database: see
 
 ## Installation
 
-The package is resolved from GitLab (`gitlab.glitchr.dev/public-repository/symfony/bundle/base/component`):
+The package is resolved from Packagist (repository: https://github.com/glitchr-studio/omnibase):
 
 ```bash
-composer require glitchr/omnibase:^3.0
+composer require omniscient/omnibase:^3.0
 ```
 
 Enable in `config/bundles.php` (Flex usually does it):
@@ -90,7 +96,7 @@ Service definitions live in `config/`:
 
 ## Development
 
-The bundle is developed inside a host app's `vendor/glitchr/omnibase`
+The bundle is developed inside a host app's `vendor/omniscient/omnibase`
 checkout (composer VCS install keeps `.git`) and pushed from there.
 
 ```bash

@@ -21,7 +21,7 @@ abstract class AbstractCurrencyApi implements CurrencyApiInterface
 
     public static function getName(): string
     {
-        return camel2snake(class_basename(static::class));
+        return camel2snake(class_name(static::class));
     }
 
     public function supports(string $key): bool

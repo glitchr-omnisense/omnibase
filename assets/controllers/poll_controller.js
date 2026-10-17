@@ -23,7 +23,7 @@ import { Controller } from '@hotwired/stimulus';
  * is that touch (and remembers it on this device, under poll/<url>).
  * Register it in assets/bootstrap.js:
  *
- *     import Poll from '../vendor/glitchr/omnibase/assets/controllers/poll_controller.js';
+ *     import Poll from '../vendor/omniscient/omnibase/assets/controllers/poll_controller.js';
  *     app.register('poll', Poll);
  */
 export default class extends Controller {
