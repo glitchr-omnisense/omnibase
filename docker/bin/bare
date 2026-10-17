@@ -12,10 +12,22 @@
  *   docker compose run --rm omnibase bare 'Base\BaseBundle'     # the classes named
  *   docker compose run --rm omnibase bare --all --each          # every class of src/, each in a PHP process of its own
  *   docker compose run --rm omnibase bare --json                # the same, whole, as JSON
+ *   docker compose run --rm omnibase bare --names               # informative: the classes of the Fondation that name the framework
  *
  * --each loads every class in a fresh process (exact for each class, slower);
  * without it the classes are loaded one after the other in this process, and
  * a framework class is reported under the first class that brought it.
+ *
+ * --names is a second report, informative, not a guard (plan "omnibase
+ * agnostique", §6, the decision on C1): nothing is loaded, each file is read.
+ * A class "names" the framework when its file imports a class, function or
+ * constant of the framework (its `use` lines) or writes one fully qualified
+ * in its code (`\Symfony\Component\...\Request::class`), even where loading
+ * the class loads none of it (a type in a signature, a `new` in a method).
+ * Two counts: the classes that name it themselves, and those that name it
+ * themselves or through the Base\ classes they name, followed to the end.
+ * It is the dashboard of the seams (C3-C5): the Fondation only grows, this
+ * report only falls.
  *
  * The framework (plan "omnibase agnostique", §0 and D1-D4): symfony/framework-
  * bundle and every *-bundle (DoctrineBundle, TwigBundle, SecurityBundle,
@@ -35,11 +47,12 @@ ini_set('display_errors', 'stderr');
 const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
 const FRAMEWORK_FILES = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
 
-$options = ['json' => false, 'all' => false, 'each' => false];
+$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false];
 $classes = [];
 foreach (array_slice($argv, 1) as $argument) {
     if (in_array($argument, ['-h', '--help'], true)) {
         echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Fondation (tests/Fondation.php), loaded with Composer's autoloader alone.\n";
+        echo "bare --names [--all] [--json] [class...]: informative, not a guard: which of those classes name the framework in their use lines or code, themselves or through the Base\\ classes they name.\n";
         exit(0);
     }
     if (str_starts_with($argument, '--') && isset($options[substr($argument, 2)])) {
@@ -72,6 +85,10 @@ if ($options['all']) {
 }
 $classes = array_values(array_unique($classes));
 sort($classes);
+
+if ($options['names']) {
+    exit(names_report($classes, $core, $options['json']));
+}
 
 $report = $options['each'] ? each_apart($classes, $autoload) : load_here($classes, $autoload);
 $report['autoload'] = $autoload;
@@ -203,6 +220,143 @@ function each_apart(array $classes, string $autoload): array
     ksort($report['classes']);
 
     return $report;
+}
+
+/**
+ * The informative report: which classes name the framework, themselves or
+ * through the Base\ classes they name. Exits 0: it informs, it does not guard.
+ *
+ * @param list<string> $classes
+ */
+function names_report(array $classes, string $core, bool $json): int
+{
+    // Every class of src/, read once: a chain of Base\ names may leave the classes asked.
+    $named = [];
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($core.'/src', FilesystemIterator::SKIP_DOTS));
+    foreach ($files as $file) {
+        $path = substr($file->getPathname(), strlen($core.'/src/'));
+        if (str_ends_with($path, '.php') && !str_starts_with($path, 'Resources/')) {
+            $named['Base\\'.str_replace('/', '\\', substr($path, 0, -4))] = names_in((string) file_get_contents($file->getPathname()));
+        }
+    }
+
+    // Who names the framework itself, then who reaches it through a Base\ name, until nothing changes.
+    $direct = [];
+    foreach ($named as $class => $names) {
+        $framework = array_values(preg_grep(FRAMEWORK, $names));
+        if ($framework) {
+            $direct[$class] = $framework;
+        }
+    }
+    $through = [];
+    do {
+        $changed = false;
+        foreach ($named as $class => $names) {
+            if (isset($direct[$class]) || isset($through[$class])) {
+                continue;
+            }
+            foreach ($names as $name) {
+                if (isset($named[$name]) && (isset($direct[$name]) || isset($through[$name]))) {
+                    $through[$class] = $name;
+                    $changed = true;
+                    break;
+                }
+            }
+        }
+    } while ($changed);
+
+    $report = ['classes' => count($classes), 'direct' => [], 'through' => [], 'missing' => []];
+    foreach ($classes as $class) {
+        if (!isset($named[$class])) {
+            $report['missing'][] = $class;
+        } elseif (isset($direct[$class])) {
+            $report['direct'][$class] = $direct[$class];
+        } elseif (isset($through[$class])) {
+            // The chain down to a class that names the framework itself.
+            for ($chain = [$through[$class]]; isset($through[end($chain)]) && count($chain) < 50; $chain[] = $through[end($chain)]);
+            $report['through'][$class] = ['chain' => $chain, 'framework' => $direct[end($chain)] ?? []];
+        }
+    }
+
+    if ($json) {
+        echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), "\n";
+
+        return 0;
+    }
+    printf("The names of the framework in %d classes (informative, not a guard): their use lines and fully qualified names, nothing loaded.\n\n", count($classes));
+    foreach ($report['direct'] as $class => $names) {
+        printf("● %s\n    %s\n", $class, implode("\n    ", $names));
+    }
+    foreach ($report['through'] as $class => ['chain' => $chain, 'framework' => $names]) {
+        printf("○ %s\n    through %s: %s\n", $class, implode(' > ', $chain), implode(', ', $names));
+    }
+    foreach ($report['missing'] as $class) {
+        printf("? %s: no file under src/\n", $class);
+    }
+    $direct = count($report['direct']);
+    printf("\n%d name the framework themselves (●), %d more through the Base\\ classes they name (○): %d of %d; %d name none of it.\n", $direct, count($report['through']), $direct + count($report['through']), count($classes), count($classes) - $direct - count($report['through']) - count($report['missing']));
+
+    return 0;
+}
+
+/**
+ * The names a PHP file writes: its imports (`use` at the top, grouped ones
+ * expanded, `use function` and `use const` too) and every fully qualified
+ * name in its code. A trait's `use` inside a class and a closure's `use` are
+ * not imports.
+ *
+ * @return list<string>
+ */
+function names_in(string $code): array
+{
+    $names = [];
+    $tokens = token_get_all($code);
+    $depth = 0;
+    for ($i = 0, $n = count($tokens); $i < $n; ++$i) {
+        $token = $tokens[$i];
+        if (!is_array($token)) {
+            $depth += '{' === $token ? 1 : ('}' === $token ? -1 : 0);
+            continue;
+        }
+        if (in_array($token[0], [T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES], true)) {
+            ++$depth;
+        } elseif (T_NAME_FULLY_QUALIFIED === $token[0]) {
+            $names[] = ltrim($token[1], '\\');
+        } elseif (T_USE === $token[0] && 0 === $depth) {
+            // One import statement, up to its semicolon, as words: "A\B as C , D\ { E , F\G }".
+            $words = [];
+            for (++$i; $i < $n && ';' !== $tokens[$i]; ++$i) {
+                $part = $tokens[$i];
+                if (!is_array($part)) {
+                    $words[] = $part;
+                } elseif (!in_array($part[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                    $words[] = T_AS === $part[0] ? 'as' : $part[1];
+                }
+            }
+            if (in_array(strtolower($words[0] ?? ''), ['function', 'const'], true)) {
+                array_shift($words);
+            }
+            $prefix = '';
+            $open = array_search('{', $words, true);
+            if (false !== $open) {
+                $prefix = rtrim(implode('', array_slice($words, 0, $open)), '\\').'\\';
+                $words = array_slice($words, $open + 1);
+            }
+            $alias = false;
+            foreach ($words as $word) {
+                if ('as' === strtolower($word)) {
+                    $alias = true;
+                } elseif (',' === $word || '}' === $word) {
+                    $alias = false;
+                } elseif (!$alias && !in_array(strtolower($word), ['function', 'const'], true)) {
+                    // A name inside a group may itself be qualified: "Prefix\{Sub\Name}".
+                    $names[] = $prefix.ltrim($word, '\\');
+                }
+            }
+        }
+    }
+
+    return array_values(array_unique(array_filter($names, static fn (string $name) => '' !== $name && !str_ends_with($name, '\\') && !in_array(strtolower($name), ['function', 'const'], true))));
 }
 
 /** @return array{int, int, int} how many classes (enums among them), interfaces and traits are declared */
