@@ -151,7 +151,7 @@ final class Mapping
         $extensions = new ExtensionSubscriber($entityManager, new EntityExtension());
         $events->addEventListener([Events::loadClassMetadata], $extensions);
 
-        $events->addEventListener([Events::onFlush, Events::postFlush], new TrasheableSubscriber((string) ($parameters->get('base.extension.empty_trash') ?? '+7 days')));
+        $events->addEventListener([Events::onFlush, Events::postFlush], new TrasheableSubscriber($parameters->get('base.extension.empty_trash') ?? '+7 days'));
         $events->addEventListener([Events::onFlush, Events::postFlush], new VersionableSubscriber($entityManager, (int) ($parameters->get('base.extension.max_revisions') ?? 5)));
         $events->addEventListener([Events::onFlush, Events::postPersist], $extensions);
         $events->addEventListener([Events::onFlush], new InverseCollectionCacheSubscriber());

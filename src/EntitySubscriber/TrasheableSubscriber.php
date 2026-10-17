@@ -61,9 +61,27 @@ class TrasheableSubscriber
     /** @var array<int, array{0: string, 1: mixed}> class + id of what this flush trashed */
     protected array $evictions = [];
 
-    public function __construct(
-        protected string $emptyTrash = "+7 days",
-    ) {
+    protected string $emptyTrash;
+
+    /** @param string|int $emptyTrash base.extension.empty_trash: a relative date ("+7 days"), or a number of days */
+    public function __construct(string|int $emptyTrash = "+7 days")
+    {
+        $this->emptyTrash = self::expiry($emptyTrash);
+    }
+
+    /**
+     * An expiry as new DateTime() reads it: a bare number of days ("5", 5)
+     * becomes "+5 days", anything else is kept (a relative date, "+1 month").
+     * The configuration's default was 5 once, and new DateTime("5") throws.
+     */
+    public static function expiry(string|int|null $value, string $default = "+7 days"): string
+    {
+        $value = trim((string) $value);
+        if ('' === $value) {
+            return $default;
+        }
+
+        return ctype_digit($value) ? '+'.$value.' days' : $value;
     }
 
     public function onFlush(OnFlushEventArgs $event): void
@@ -250,7 +268,7 @@ class TrasheableSubscriber
         $trashBall->setEntityClass($classMetadata->getName());
         $trashBall->setEntityId($entity);
         $trashBall->setAction(EntityAction::DELETE);
-        $trashBall->setPermanentAfter(new DateTime($trasheable->expiry ?? $this->emptyTrash));
+        $trashBall->setPermanentAfter(new DateTime(null !== $trasheable->expiry ? self::expiry($trasheable->expiry) : $this->emptyTrash));
 
         // The label is snapshotted rather than resolved at display time: the
         // trash has to stay readable even for an entity whose __toString()
