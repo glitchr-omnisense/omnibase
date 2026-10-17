@@ -2,6 +2,7 @@
 
 namespace Base\Bundle;
 
+use Base\Service\Model\ClassAliases;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use ReflectionClass;
 use ErrorException;
@@ -147,7 +148,7 @@ abstract class AbstractBaseBundle extends Bundle
     protected static ?array $aliasRepositoryList = null;
 
     /** The namespaces BaseBundle::warmUp() maps Base\X => App\X, for the fallback below. */
-    protected const ALIASED_NAMESPACES = ["Entity", "Repository", "Enum", "Tests", "Notifier", "Form"];
+    protected const ALIASED_NAMESPACES = ClassAliases::NAMESPACES;
 
     protected static bool $aliasAutoloader = false;
 
@@ -180,11 +181,8 @@ abstract class AbstractBaseBundle extends Bundle
                 ?: array_search($class, self::$aliasRepositoryList ?? [], true);
             $declared = (bool) $input;
 
-            if (!$input && str_starts_with($class, "App\\")) {
-                $namespace = explode("\\", $class)[1] ?? "";
-                if (in_array($namespace, self::ALIASED_NAMESPACES, true)) {
-                    $input = "Base\\" . substr($class, 4);
-                }
+            if (!$input) {
+                $input = ClassAliases::base($class);
             }
 
             if (!$input) {

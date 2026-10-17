@@ -11,7 +11,7 @@ use Doctrine\Persistence\ObjectRepository;
 use Exception;
 
 use App\Entity\User;
-use Base\BaseBundle;
+use Base\Service\Model\ClassFinder;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
@@ -107,7 +107,7 @@ class AttributeReader extends AbstractLocalCache
      */
     protected ?FlysystemInterface $flysystem = null;
 
-    public function getFlysystem(): FlysystemInterface
+    public function getFlysystem(): ?FlysystemInterface
     {
         return $this->flysystem;
     }
@@ -148,31 +148,37 @@ class AttributeReader extends AbstractLocalCache
     /**
      * @var RequestStack
      */
-    protected RequestStack $requestStack;
+    protected ?RequestStack $requestStack = null;
 
     /**
      * @var TokenStorageInterface
      */
-    protected TokenStorageInterface $tokenStorage;
+    protected ?TokenStorageInterface $tokenStorage = null;
 
     /**
      * @var EventDispatcherInterface
      */
-    protected EventDispatcherInterface $eventDispatcher;
+    protected ?EventDispatcherInterface $eventDispatcher = null;
 
     /**
      * @var AdvancedRouterInterface
      */
-    protected AdvancedRouterInterface $router;
+    protected ?AdvancedRouterInterface $router = null;
 
+    /**
+     * The event dispatcher, the router, the filesystem, the request stack and the token storage are the
+     * framework's, and may be null: an entity manager built by hand (Base\Bridge\Doctrine\Mapping) reads the
+     * attributes of its entities with none of them - what needs one (an asset's base path, the user signed in,
+     * the routes' attributes) answers without it.
+     */
     public function __construct(
-        EventDispatcherInterface $eventDispatcher,
-        AdvancedRouterInterface          $router,
+        ?EventDispatcherInterface $eventDispatcher,
+        ?AdvancedRouterInterface          $router,
         EntityManager            $entityManager,
         ParameterBagInterface    $parameterBag,
-        FlysystemInterface       $flysystem,
-        RequestStack             $requestStack,
-        TokenStorageInterface    $tokenStorage,
+        ?FlysystemInterface       $flysystem,
+        ?RequestStack             $requestStack,
+        ?TokenStorageInterface    $tokenStorage,
         EntityHydrator           $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator,
         string                   $projectDir,
@@ -271,7 +277,7 @@ class AttributeReader extends AbstractLocalCache
         if (!file_exists($path)) {
             return $this;
         }
-        foreach (BaseBundle::getInstance()->getAllClasses($path) as $attribute) {
+        foreach (ClassFinder::classes($path) as $attribute) {
             $this->addAttributeName($attribute);
         }
 
@@ -286,7 +292,7 @@ class AttributeReader extends AbstractLocalCache
             return $url;
         }
 
-        $request = $this->requestStack->getCurrentRequest();
+        $request = $this->requestStack?->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
 
         $path = trim($parseUrl["path"]);
@@ -301,12 +307,12 @@ class AttributeReader extends AbstractLocalCache
 
     public function getUser(): ?UserInterface
     {
-        return $this->tokenStorage->getToken()?->getUser();
+        return $this->tokenStorage?->getToken()?->getUser();
     }
 
     public function getImpersonator(): ?User
     {
-        $token = $this->tokenStorage->getToken();
+        $token = $this->tokenStorage?->getToken();
         return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
     }
 
@@ -773,7 +779,7 @@ class AttributeReader extends AbstractLocalCache
             }
 
             // Warmup controllers
-            foreach ($this->router->getRouteCollection()->all() as $route) {
+            foreach ($this->router?->getRouteCollection()->all() ?? [] as $route) {
                 $controller = $route->getDefaults()["_controller"] ?? "";
                 // routes may declare [Class::class, 'method'] instead of "Class::method"
                 if (is_array($controller)) {
