@@ -1284,12 +1284,14 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     public function getAllClassNames()
     {
+        // The mapping driver's classes: what omnibase's ClassMetadataFactory::getAllClassNames() answers, and
+        // what Doctrine's own factory (an entity manager built by hand) knows as well.
         $classMetadataFactory = $this->entityManager->getMetadataFactory();
         if ($classMetadataFactory instanceof ClassMetadataFactory) {
             return $classMetadataFactory->getAllClassNames();
         }
 
-        return [];
+        return $this->entityManager->getConfiguration()->getMetadataDriverImpl()?->getAllClassNames() ?? [];
     }
 
     public function getClassMetadataCompletor(null|string|object $entityOrClassOrMetadata): ?ClassMetadataCompletor

@@ -3,10 +3,26 @@
 namespace Base\Cache\Abstract;
 
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 
-interface AbstractLocalCacheInterface extends WarmableInterface
+/**
+ * A service's own cache, warmed by omnibase's cache warmers (Base\Cache\Warmer\*,
+ * which call warmUp()). warmUp() is declared here, with the signature of
+ * HttpKernel's WarmableInterface, which this interface no longer extends
+ * (plan "omnibase agnostique", C6): the AttributeReader and the
+ * ClassMetadataManipulator - what an entity manager built by hand reads its
+ * mapping through - load nothing of the framework. Symfony asks
+ * WarmableInterface of the kernel, its router and its translator only, none of
+ * which is one of these.
+ */
+interface AbstractLocalCacheInterface
 {
+    /**
+     * Warms up the cache.
+     *
+     * @return string[] A list of classes or files to preload
+     */
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array;
+
     public function hasCache(string $key): bool;
 
     public function deleteCache(?string $key = null): bool;

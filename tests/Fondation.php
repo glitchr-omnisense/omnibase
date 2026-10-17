@@ -31,11 +31,18 @@
  * 694 after step C3f (+1: Base\Bridge\Symfony\NotificationMessages, Notification's Symfony half, which
  * names the framework and loads none of it).
  * 695 with step C6's measure (+1: Base\Bridge\Doctrine\MetadataSnapshot, an entity manager's mapping as data).
+ * 712 after step C6's seams (+17: what an entity manager built by hand reads its mapping through -
+ * Base\Service\ArrayParameterBag, Base\Service\Model\ClassFinder, ClassAliases -, and the fourteen services
+ * of omnibase's own caches, Base\Cache\Abstract\AbstractLocalCacheInterface no longer extending HttpKernel's
+ * WarmableInterface: AttributeReader, ClassMetadataManipulator, AbstractLocalCache and its interface,
+ * SimpleCache and its interface, IconProvider, Localizer, AbstractIconAdapter, BootstrapTwitterAdapter,
+ * FontAwesomeAdapter, Obfuscator, Themizer, WebpackTagRenderer).
  */
 
 return [
     Base\Attributes\AbstractAttribute::class,
     Base\Attributes\AttributeInterface::class,
+    Base\Attributes\AttributeReader::class,
     Base\Attributes\Attribute\Iconize::class,
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
@@ -47,7 +54,11 @@ return [
     Base\Bridge\Symfony\RouterUrls::class,
     Base\Bridge\Symfony\SecurityAccess::class,
     Base\Bridge\Symfony\TranslatorTranslations::class,
+    Base\Cache\Abstract\AbstractLocalCache::class,
+    Base\Cache\Abstract\AbstractLocalCacheInterface::class,
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
+    Base\Cache\SimpleCache::class,
+    Base\Cache\SimpleCacheInterface::class,
     Base\Console\Console::class,
     Base\Console\ConsoleInterface::class,
     Base\Contract\Access::class,
@@ -120,6 +131,7 @@ return [
     Base\Database\Function\Rand::class,
     Base\Database\Mapping\ClassMetadataCompletor::class,
     Base\Database\Mapping\ClassMetadataFactory::class,
+    Base\Database\Mapping\ClassMetadataManipulator::class,
     Base\Database\Mapping\NamingStrategy::class,
     Base\Database\Middleware\PlatformMiddleware::class,
     Base\Database\Repository\ServiceEntityParser::class,
@@ -516,6 +528,7 @@ return [
     Base\Serializer\Excel::class,
     Base\Service\Analytics::class,
     Base\Service\Analytics\UserAgentClassifier::class,
+    Base\Service\ArrayParameterBag::class,
     Base\Service\BaseService::class,
     Base\Service\Breadgrinder::class,
     Base\Service\BreadgrinderInterface::class,
@@ -535,10 +548,12 @@ return [
     Base\Service\FlysystemInterface::class,
     Base\Service\FormGuard::class,
     Base\Service\GroupManager::class,
+    Base\Service\IconProvider::class,
     Base\Service\Invitations::class,
     Base\Service\Launcher::class,
     Base\Service\LauncherInterface::class,
     Base\Service\LocalBusiness::class,
+    Base\Service\Localizer::class,
     Base\Service\LocalizerInterface::class,
     Base\Service\MaintenanceProvider::class,
     Base\Service\MaintenanceProviderInterface::class,
@@ -551,6 +566,8 @@ return [
     Base\Service\Model\Breadcrumb::class,
     Base\Service\Model\BreadcrumbInterface::class,
     Base\Service\Model\CacheableInterface::class,
+    Base\Service\Model\ClassAliases::class,
+    Base\Service\Model\ClassFinder::class,
     Base\Service\Model\Color\Intl\Colors::class,
     Base\Service\Model\Color\Palette::class,
     Base\Service\Model\ColorizeInterface::class,
@@ -562,6 +579,9 @@ return [
     Base\Service\Model\Currency\CurrencyApiInterface::class,
     Base\Service\Model\GraphInterface::class,
     Base\Service\Model\HtmlizeInterface::class,
+    Base\Service\Model\IconProvider\AbstractIconAdapter::class,
+    Base\Service\Model\IconProvider\Adapter\BootstrapTwitterAdapter::class,
+    Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter::class,
     Base\Service\Model\IconProvider\IconAdapterInterface::class,
     Base\Service\Model\IconizeInterface::class,
     Base\Service\Model\IntlDateTime::class,
@@ -600,6 +620,7 @@ return [
     Base\Service\Model\Wysiwyg\MentionEnhancerInterface::class,
     Base\Service\Model\Wysiwyg\SemanticEnhancer::class,
     Base\Service\Model\Wysiwyg\SemanticEnhancerInterface::class,
+    Base\Service\Obfuscator::class,
     Base\Service\ObfuscatorInterface::class,
     Base\Service\OpeningHours::class,
     Base\Service\Paginator::class,
@@ -623,6 +644,7 @@ return [
     Base\Service\SpamCheckerInterface::class,
     Base\Service\SpeculativeRequest::class,
     Base\Service\SystemOfUnits::class,
+    Base\Service\Themizer::class,
     Base\Service\ThemizerInterface::class,
     Base\Service\TimeMachine::class,
     Base\Service\TimeMachineInterface::class,
@@ -705,6 +727,7 @@ return [
     Base\Twig\Loader\FilesystemLoader::class,
     Base\Twig\Renderer\AbstractTagRenderer::class,
     Base\Twig\Renderer\Adapter\HtmlTagRenderer::class,
+    Base\Twig\Renderer\Adapter\WebpackTagRenderer::class,
     Base\Twig\Renderer\TagRendererInterface::class,
     Base\Twig\Variable\AdminVariable::class,
     Base\Twig\Variable\EmailVariable::class,

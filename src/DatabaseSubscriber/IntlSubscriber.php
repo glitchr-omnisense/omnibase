@@ -27,17 +27,18 @@ class IntlSubscriber
 {
     protected EntityManagerInterface $entityManager;
 
-    protected LocalizerInterface $localizer;
+    protected ?LocalizerInterface $localizer;
 
     /**
-     * @return LocalizerInterface
+     * @return LocalizerInterface|null
      */
     public function getLocalizer()
     {
         return $this->localizer;
     }
 
-    public function __construct(EntityManagerInterface $entityManager, LocalizerInterface $localizer)
+    /** The localizer is the framework's service; an entity manager built by hand maps the translations without it. */
+    public function __construct(EntityManagerInterface $entityManager, ?LocalizerInterface $localizer = null)
     {
         $this->entityManager = $entityManager;
         $this->localizer = $localizer;

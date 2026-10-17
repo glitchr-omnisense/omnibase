@@ -6,7 +6,7 @@ use Base\Database\Mapping\NamingStrategy;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
-use Base\Service\Localizer;
+use Base\Service\LocalizerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Query\OutputWalker;
 use Doctrine\ORM\Query\AST;
@@ -17,7 +17,7 @@ use Doctrine\ORM\Query\SqlOutputWalker;
 class TranslatableWalker extends SqlOutputWalker implements OutputWalker
 {
     /**
-     * @var Localizer
+     * @var LocalizerInterface|null
      */
     protected $localizer;
 
@@ -108,7 +108,11 @@ class TranslatableWalker extends SqlOutputWalker implements OutputWalker
         return $sql;
     }
 
-    protected function getLocalizer(): Localizer
+    /**
+     * The localizer IntlSubscriber was given; none where the subscriber has none (an entity manager built by hand,
+     * Base\Bridge\Doctrine\Mapping) - the walker joins the translations the same way without it.
+     */
+    protected function getLocalizer(): ?LocalizerInterface
     {
         foreach ($this->getEntityManager()->getEventManager()->getListeners(Events::loadClassMetadata) as $listener) {
             if ($listener instanceof IntlSubscriber) {
