@@ -19,6 +19,7 @@ page that seeds members and a shop and signs you in:
 cd docker
 docker compose up                                        # → http://localhost:8000/
 docker compose run --rm omnibase check                   # container and templates linted, routes counted
+docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase bare   # the Fondation loaded without the framework
 docker compose -f compose.yml -f compose.checkouts.yml up   # the checkouts beside this one instead of Packagist
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test [admin|marketplace|forge|...]   # a suite, on the checkouts
 ```

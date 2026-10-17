@@ -17,6 +17,7 @@ docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test   
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test admin        # a plugin's: admin, marketplace, forge...
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test forge --filter License
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase check             # container and templates linted
+docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase bare              # the Fondation loaded without the framework
 docker compose -f compose.yml -f compose.checkouts.yml up                                  # the demo, http://localhost:8000/
 ```
 
@@ -44,6 +45,48 @@ The suites that need a host application (`KernelTestCase`: core's analytics,
 admin's widgets, the forge's entities) run here as they do inside an
 application. Those that need rows to look at skip when the fresh database has
 none.
+
+## The Fondation: `bare`
+
+`tests/Fondation.php` lists the classes of the core that load without the
+framework, sorted. `tests/BareTest.php`, part of the suite, runs
+`docker/bin/bare` in a PHP process of its own: Composer's autoloader alone - no
+kernel, no container, no bundle booted - then each class of the list, and every
+class, interface, trait and file PHP loaded on the way is checked. None may be
+the framework's: the Symfony bundles (FrameworkBundle, DoctrineBundle,
+TwigBundle, SecurityBundle, every `*-bundle`) and bridges, `dependency-injection`,
+`config`, `http-kernel`, `http-foundation`, `routing`, `security-*`, `form`,
+`console`, `ux-*`, API Platform, HWI, Scheb, Webauthn's bundle, Nelmio. The
+standalone Symfony components (`string`, `uid`, `intl`, `translation`,
+`validator`, `serializer`, `mime`, `mailer`, `notifier`, `cache`, `workflow`,
+`event-dispatcher`, `http-client`, the contracts...), Doctrine (storage) and
+Twig (the view) are allowed. A failure names the framework's class or file, the
+class of the list that loaded it and the class that asked for it. A second case
+loads `Base\BaseBundle` and `Base\Repository\UserRepository` the same way and
+checks the report names the framework (`HttpKernel\Bundle\Bundle`, asked by
+`AbstractBaseBundle`; DoctrineBundle's `ServiceEntityRepository`, asked by
+`Base\Database\Repository\ServiceEntityRepository`): the check is not blind.
+
+```sh
+docker compose run --rm omnibase bare                      # the Fondation; exits 1 when the framework was loaded
+docker compose run --rm omnibase bare 'Base\Entity\User'    # the classes named
+docker compose run --rm omnibase bare --all --each         # every class of src/, each in a process of its own: those that can join
+docker compose run --rm omnibase bare --json               # the whole report
+```
+
+What is checked is what loading a class loads - its parents, interfaces,
+traits, what its file runs - not what its methods do when called: an
+attribute's class, a type in a signature and a `new` in a method body load
+nothing until they run. Composer's autoloader itself includes
+`api-platform/jsonld`'s `HydraContext.php` (a constant, a `files` entry) before
+any class: it is reported, not held against one.
+
+**The list only grows.** A class enters it when it loads without the framework
+(`bare --all --each`); a class leaves it only by a decision written down in the
+plan "omnibase agnostique" and in CHANGELOG.md. On 2026-10-17 it held 599 of
+the 895 classes of `src/`. The `bare` command is `demo.sh`'s: an image built
+before it has the script only, `docker compose run --rm omnibase php
+vendor/glitchr/omnibase/docker/bin/bare`.
 
 ## SQLite
 
