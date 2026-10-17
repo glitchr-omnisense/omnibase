@@ -18,8 +18,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Uid\Uuid;
 
 use Doctrine\ORM\Event\PreFlushEventArgs;
@@ -62,7 +61,80 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         $this->mimeTypes = $mime_types;
         $this->formats = $formats;
 
-        $this->maxSize = str2dec($max_size ?? (8 * UploadedFile::getMaxFilesize()) ) / 8;
+        $this->maxSize = str2dec($max_size ?? (8 * self::getUploadMaxFilesize()) ) / 8;
+    }
+
+    /**
+     * The file an upload is handed as (plan "omnibase agnostique", step C3d): what the
+     * uploader takes is any \SplFileInfo - Symfony's File and UploadedFile are ones -
+     * and what it gives back is Symfony's HttpFoundation File where that component is
+     * installed (every Symfony application: an entity's getter typed ?File, a form's
+     * FileType get the class they always had), a plain \SplFileInfo elsewhere. The
+     * class is named by its string, so the uploader loads nothing of the framework.
+     */
+    public const SYMFONY_FILE = 'Symfony\\Component\\HttpFoundation\\File\\File';
+
+    public static function file(string $path): \SplFileInfo
+    {
+        $class = self::SYMFONY_FILE;
+
+        return class_exists($class) ? new $class($path) : new \SplFileInfo($path);
+    }
+
+    /** The MIME type of a file: its own getMimeType() when it has one (Symfony's File), symfony/mime's guess otherwise. */
+    public static function getFileMimeType(\SplFileInfo $file): ?string
+    {
+        if (method_exists($file, 'getMimeType')) {
+            return $file->getMimeType();
+        }
+        if (class_exists(MimeTypes::class)) {
+            return MimeTypes::getDefault()->guessMimeType($file->getPathname());
+        }
+
+        return (is_file($file->getPathname()) ? mime_content_type($file->getPathname()) : false) ?: null;
+    }
+
+    /**
+     * The largest upload PHP accepts, in bytes: the smaller of post_max_size and
+     * upload_max_filesize, as Symfony's UploadedFile::getMaxFilesize() reads them
+     * (the same parsing: k, m, g, t suffixes; octal and hexadecimal; 0 for no limit).
+     */
+    public static function getUploadMaxFilesize(): int|float
+    {
+        $sizePostMax = self::parseFilesize((string) ini_get('post_max_size'));
+        $sizeUploadMax = self::parseFilesize((string) ini_get('upload_max_filesize'));
+
+        return min($sizePostMax ?: \PHP_INT_MAX, $sizeUploadMax ?: \PHP_INT_MAX);
+    }
+
+    private static function parseFilesize(string $size): int|float
+    {
+        if ('' === $size) {
+            return 0;
+        }
+
+        $size = strtolower($size);
+
+        $max = ltrim($size, '+');
+        if (str_starts_with($max, '0x')) {
+            $max = intval($max, 16);
+        } elseif (str_starts_with($max, '0')) {
+            $max = intval($max, 8);
+        } else {
+            $max = (int) $max;
+        }
+
+        switch (substr($size, -1)) {
+            case 't': $max *= 1024;
+                // no break
+            case 'g': $max *= 1024;
+                // no break
+            case 'm': $max *= 1024;
+                // no break
+            case 'k': $max *= 1024;
+        }
+
+        return $max;
     }
 
     protected array $ancestorEntity = [];
@@ -79,7 +151,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             // files are still File instances here. Store them now, or the row
             // gets no path and the second-level cache chokes on the File.
             $value = self::getFieldValue($entity, $property);
-            $pending = array_filter(is_array($value) ? $value : [$value], fn ($file) => $file instanceof File);
+            $pending = array_filter(is_array($value) ? $value : [$value], fn ($file) => $file instanceof \SplFileInfo);
             if ($pending && $this->uploadFiles($entity, null, $property)) {
                 $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
             }
@@ -206,7 +278,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     /**
      * @param $entity
      * @param $fieldName
-     * @return array|mixed|File|null
+     * @return array|mixed|\SplFileInfo|null
      * @throws Exception
      */
     public static function getPublic($entity, $fieldName)
@@ -261,15 +333,15 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             // supply the untouched raw value, exactly like the scalar
             // branch below already does for a single non-file value.
             foreach ($field as $uuidOrFile) {
-                if (!is_string($uuidOrFile) && !($uuidOrFile instanceof File)) {
+                if (!is_string($uuidOrFile) && !($uuidOrFile instanceof \SplFileInfo)) {
                     return null;
                 }
             }
 
             $pathList = [];
             foreach ($field as $uuidOrFile) {
-                $uuidOrFile = is_string($uuidOrFile) && !str_contains($uuidOrFile, "://") && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
-                if ($uuidOrFile instanceof File) {
+                $uuidOrFile = is_string($uuidOrFile) && !str_contains($uuidOrFile, "://") && is_file($uuidOrFile) ? self::file($uuidOrFile) : $uuidOrFile;
+                if ($uuidOrFile instanceof \SplFileInfo) {
                     $pathList[] = $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
                     continue;
                 }
@@ -287,8 +359,8 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
         } else {
 
-            $uuidOrFile = is_string($field) && !str_contains($field, "://") && is_file($field) ? new File($field) : $field;
-            if ($uuidOrFile instanceof File) {
+            $uuidOrFile = is_string($field) && !str_contains($field, "://") && is_file($field) ? self::file($field) : $field;
+            if ($uuidOrFile instanceof \SplFileInfo) {
                 return $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
             }
 
@@ -361,7 +433,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      */
     public static function getMaxFilesize($entity, $fieldName): int
     {
-        $maxSize = UploadedFile::getMaxFilesize();
+        $maxSize = self::getUploadMaxFilesize();
         if (self::hasAttribute($entity, $fieldName, self::class)) {
             $that = self::getAttribute($entity, $fieldName, self::class);
             $maxSize = min($that->maxSize ?: $maxSize, $maxSize);
@@ -378,7 +450,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     protected static $tmpHashTable = [];
 
     /**
-     * Remote objects are copied into a tmpfile() so callers get a real File. One
+     * Remote objects are copied into a tmpfile() so callers get a real file (see file()). One
      * handle per (adapter, uuid), kept open for the request because closing a
      * tmpfile() deletes it.
      *
@@ -391,7 +463,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      *
      * The table is request-scoped; see forgetTemporaryFiles().
      */
-    public static function materializeTemporaryFile(string $index, callable $read): ?File
+    public static function materializeTemporaryFile(string $index, callable $read): ?\SplFileInfo
     {
         if (!array_key_exists($index, self::$tmpHashTable)) {
             // Read BEFORE opening the handle, so a failing read leaves nothing behind.
@@ -407,7 +479,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             self::$tmpHashTable[$index] = $handle;
         }
 
-        return new File(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
+        return self::file(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
     }
 
     /**
@@ -437,7 +509,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     /**
      * @param $entity
      * @param string $fieldName
-     * @return array|mixed|File|null
+     * @return array|mixed|\SplFileInfo|null
      * @throws FilesystemException
      */
     public static function get($entity, string $fieldName)
@@ -471,7 +543,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
         $fileList = [];
         foreach ($fieldValue as $uuidOrFile) {
-            if ($uuidOrFile instanceof File) {
+            if ($uuidOrFile instanceof \SplFileInfo) {
                 $fileList[] = $uuidOrFile;
                 continue;
             }
@@ -485,7 +557,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
             if ($adapter instanceof LocalFilesystemAdapter) {
                 if ($operator->fileExists($path)) {
-                    $fileList[] = new File($that->getFlysystem()->prefixPath($path, $that->getStorage()));
+                    $fileList[] = self::file($that->getFlysystem()->prefixPath($path, $that->getStorage()));
                 }
 
                 continue;
@@ -535,14 +607,14 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         //$oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 
         // No change in the list.. (NB: Not good approach in case of UOW manipulation)
-        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
+        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof \SplFileInfo);
         if ($potentialMemoryLeak && $newList !== $oldList) {
-            throw new Exception(File::class . " instance found the old list of " . get_class($entity) . "::" . $fieldName . "\n Did you called unit of work change set ? Please process file manually");
+            throw new Exception(get_class(reset($potentialMemoryLeak)) . " instance found the old list of " . get_class($entity) . "::" . $fieldName . "\n Did you called unit of work change set ? Please process file manually");
         } elseif (!$potentialMemoryLeak && $newList === $oldList) {
             return true;
         }
 
-        $oldList = array_filter($oldList, fn($f) => !$f instanceof File);
+        $oldList = array_filter($oldList, fn($f) => !$f instanceof \SplFileInfo);
 
         // Nothing to upload, empty field..
         if ($newList === null) {
@@ -557,7 +629,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
                 if (!$this->fetch) {
                     return true;
                 }
-                $newList[$index] = new File(fetch_url($entry));
+                $newList[$index] = self::file(fetch_url($entry));
             }
         }
 
@@ -570,8 +642,8 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..
-            $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? new File($entry) : $entry;
-            if (!$file instanceof File) {
+            $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? self::file($entry) : $entry;
+            if (!$file instanceof \SplFileInfo) {
                 if ($this->getMissable()) {
                     $fileList[] = $entry;
                 } elseif (is_uuidv4($entry)) {
@@ -594,11 +666,11 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             // Check mime restriction
             $compatibleMimeType = empty($this->mimeTypes);
             foreach ($this->mimeTypes as $mimeType) {
-                $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $file->getMimeType());
+                $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", self::getFileMimeType($file));
             }
 
             if (!$compatibleMimeType) {
-                throw new InvalidMimeTypeException("Invalid MIME type \"" . $file->getMimeType() . "\" received for field \"$fieldName\" in " . get_class($entity) . " " . $entityId . " (expected: \"" . implode(", ", $this->mimeTypes) . "\").");
+                throw new InvalidMimeTypeException("Invalid MIME type \"" . self::getFileMimeType($file) . "\" received for field \"$fieldName\" in " . get_class($entity) . " " . $entityId . " (expected: \"" . implode(", ", $this->mimeTypes) . "\").");
             }
 
             //
@@ -655,7 +727,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
                 continue;
             }
 
-            if ($file instanceof File) {
+            if ($file instanceof \SplFileInfo) {
                 $path = $file->getRealPath();
             } else {
                 $path = $this->getPath($entity ?? $oldEntity ?? null, $fieldName, $file);
