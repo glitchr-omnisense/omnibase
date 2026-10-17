@@ -4,7 +4,6 @@ namespace Base\Service\Model;
 
 use Base\Form\Common\NativeEnum;
 use Base\Service\MediaServiceInterface;
-use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -205,8 +204,8 @@ class Autocomplete
     private function entityNoun(object $entry): string
     {
         for ($class = get_class($entry); $class; $class = get_parent_class($class)) {
-            if ($this->translator->transEntityExists($class, null, Translator::NOUN_SINGULAR)) {
-                return (string) $this->translator->transEntity($class, null, Translator::NOUN_SINGULAR);
+            if ($this->translator->transEntityExists($class, null, TranslatorInterface::NOUN_SINGULAR)) {
+                return (string) $this->translator->transEntity($class, null, TranslatorInterface::NOUN_SINGULAR);
             }
         }
 

@@ -28,9 +28,10 @@ class Translator implements TranslatorInterface
 
     public const TRANSLATION_PROPERTIES = "_properties";
 
-    public const TRANSLATION_NOUN = "noun";
-    public const NOUN_SINGULAR = "_singular";
-    public const NOUN_PLURAL = "_plural";
+    // TRANSLATION_NOUN, NOUN_SINGULAR and NOUN_PLURAL are TranslatorInterface's
+    // (Translator::NOUN_SINGULAR still names them): an enumeration's type asks
+    // for a singular noun without loading this class, the framework's kernel
+    // among its imports.
 
     public const TRANSLATION_GENDERNESS = "genderness";
     public const GENDERNESS_INCLUSIVE = "_inclusive";

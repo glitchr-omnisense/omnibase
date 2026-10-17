@@ -8,6 +8,17 @@ use Symfony\Component\Translation\TranslatorBagInterface as SymfonyTranslatorBag
 
 interface TranslatorInterface extends SymfonyTranslatorInterface, SymfonyTranslatorBagInterface
 {
+    /**
+     * The noun of an entity or an enumeration's value, singular or plural
+     * (transEntity(), transEnum()). Declared here, not on Translator, so that
+     * the code asking for a noun - an enumeration's type, Base\Database\Type\
+     * EnumType::getText() - loads no class of the framework (Translator
+     * imports the kernel). Translator::NOUN_SINGULAR still names them.
+     */
+    public const TRANSLATION_NOUN = "noun";
+    public const NOUN_SINGULAR = "_singular";
+    public const NOUN_PLURAL = "_plural";
+
     public function getFallbackLocales(): array;
 
     /**
@@ -24,13 +35,13 @@ interface TranslatorInterface extends SymfonyTranslatorInterface, SymfonyTransla
 
     public function transTime(int $time): string;
 
-    public function transEnum(?string $value, string $class, string|array $options = Translator::NOUN_SINGULAR): ?string;
+    public function transEnum(?string $value, string $class, string|array $options = self::NOUN_SINGULAR): ?string;
 
-    public function transEnumExists(string $value, string $class, string|array $options = Translator::NOUN_SINGULAR): bool;
+    public function transEnumExists(string $value, string $class, string|array $options = self::NOUN_SINGULAR): bool;
 
-    public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
+    public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string;
 
-    public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): bool;
+    public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): bool;
 
     public function transRoute(string $routeName, ?string $domain = null): ?string;
 
