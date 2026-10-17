@@ -5,6 +5,7 @@ namespace Base\Field\Type;
 use Base\Entity\User;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Collab\CollabRoomResolver;
+use Base\Service\Collab\CollabTicketFactory;
 use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
@@ -39,8 +40,9 @@ class EditorType extends AbstractType
 
     protected CollabRoomResolver $roomResolver;
     protected TokenStorageInterface $tokenStorage;
+    protected ?CollabTicketFactory $ticketFactory;
 
-    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig, AdvancedRouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator, MediaEnhancerInterface $mediaEnhancer, CollabRoomResolver $roomResolver, TokenStorageInterface $tokenStorage)
+    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig, AdvancedRouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, ObfuscatorInterface $obfuscator, MediaEnhancerInterface $mediaEnhancer, CollabRoomResolver $roomResolver, TokenStorageInterface $tokenStorage, ?CollabTicketFactory $ticketFactory = null)
     {
         $this->parameterBag = $parameterBag;
         $this->twig = $twig;
@@ -51,6 +53,7 @@ class EditorType extends AbstractType
         $this->mediaEnhancer = $mediaEnhancer;
         $this->roomResolver = $roomResolver;
         $this->tokenStorage = $tokenStorage;
+        $this->ticketFactory = $ticketFactory;
     }
 
     public function getParent(): ?string
@@ -175,6 +178,15 @@ class EditorType extends AbstractType
         // shows plain, non-collaborative behavior.
         $collabAutosave = $options["collab_autosave"] ?? false;
         $collabLive     = $options["collab_live"] ?? false;
+
+        // collab_live needs a relay (COLLAB_TICKET_SECRET and COLLAB_RELAY_WS_URL):
+        // without one the browser would ask ux_editorjs_collabTicket for a ticket
+        // the site cannot give (503, a console error on every edit screen), so the
+        // field is offered as if the form had not asked for it, autosave aside.
+        if ($collabLive && !$this->ticketFactory?->isConfigured()) {
+            $collabLive = false;
+        }
+
         if ($collabAutosave || $collabLive) {
             $entity = $this->roomResolver->resolveEntity($form->getRoot()->getData());
             if ($entity && method_exists($entity, "getId") && $entity->getId()) {

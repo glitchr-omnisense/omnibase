@@ -54,6 +54,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('security.token_storage'),
             new Reference('security.csrf.token_manager'),
             new Reference('advanced_router'),
+            new Reference('Base\Service\Collab\CollabTicketFactory'),
         ]);
 
     // ------------------------------

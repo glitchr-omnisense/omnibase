@@ -176,10 +176,10 @@ function collabAutosave(editor, holder, collab) {
 // creates the presence Tune, and the presence Tune must exist before
 // this code creates the EditorJs instance. This function returns a
 // Promise. This Promise resolves to an object with this format:
-// {wsUrl, ticket}. This Promise resolves to null in one case: the
-// server has no collaboration configuration. In that case, the
-// ux_editorjs_collabTicket action returns a 503 response, because no
-// relay is deployed.
+// {wsUrl, ticket}. This Promise resolves to null when the action refuses
+// the ticket. A site without a relay never gets here: EditorType offers
+// collab_live only where COLLAB_TICKET_SECRET and COLLAB_RELAY_WS_URL are
+// both set, since the action answers 503 without them.
 function fetchCollabTicket(collab) {
     return fetch(collab.ticketUrl, {
         method: "POST",
