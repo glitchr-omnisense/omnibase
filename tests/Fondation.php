@@ -22,6 +22,8 @@
  * 679 after step C3c (+1: Base\Service\ParameterBagInterface, the core's contract).
  * 686 after step C4 (+7: the contracts Base\Contract\*, their registry Runtime, SystemClock and
  * Base\Exception\MissingContractException).
+ * 691 with C4's Symfony adapters (+5: Base\Bridge\Symfony\*, which implement only the contracts and
+ * load nothing of the framework - they name it, see bare --names).
  */
 
 return [
@@ -31,6 +33,11 @@ return [
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
     Base\Attributes\Traits\HierarchifyTrait::class,
+    Base\Bridge\Symfony\FlysystemFiles::class,
+    Base\Bridge\Symfony\LocalizerLocales::class,
+    Base\Bridge\Symfony\RouterUrls::class,
+    Base\Bridge\Symfony\SecurityAccess::class,
+    Base\Bridge\Symfony\TranslatorTranslations::class,
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
     Base\Console\Console::class,
     Base\Console\ConsoleInterface::class,
