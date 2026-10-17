@@ -5,6 +5,7 @@ namespace Base\Form\Extension;
 use Base\Entity\User;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Collab\CollabRoomResolver;
+use Base\Service\Collab\CollabTicketFactory;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
@@ -40,13 +41,15 @@ class FormTypeCollabExtension extends AbstractTypeExtension
     protected TokenStorageInterface $tokenStorage;
     protected CsrfTokenManagerInterface $csrfTokenManager;
     protected AdvancedRouterInterface $router;
+    protected ?CollabTicketFactory $ticketFactory;
 
-    public function __construct(CollabRoomResolver $roomResolver, TokenStorageInterface $tokenStorage, CsrfTokenManagerInterface $csrfTokenManager, AdvancedRouterInterface $router)
+    public function __construct(CollabRoomResolver $roomResolver, TokenStorageInterface $tokenStorage, CsrfTokenManagerInterface $csrfTokenManager, AdvancedRouterInterface $router, ?CollabTicketFactory $ticketFactory = null)
     {
         $this->roomResolver = $roomResolver;
         $this->tokenStorage = $tokenStorage;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->router = $router;
+        $this->ticketFactory = $ticketFactory;
     }
 
     public static function getExtendedTypes(): iterable
@@ -64,6 +67,13 @@ class FormTypeCollabExtension extends AbstractTypeExtension
     {
         $collab = $options["collab"] ?? false;
         if (!$collab) {
+            return;
+        }
+
+        // "live" needs a relay: without one the field would ask
+        // ux_editorjs_collabTicket for a ticket the site cannot give (503), so
+        // it stays a plain field, as EditorType's collab_live does.
+        if ($collab === "live" && !$this->ticketFactory?->isConfigured()) {
             return;
         }
 

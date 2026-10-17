@@ -116,6 +116,7 @@ return function (ContainerConfigurator $configurator) {
             new Reference('media_enhancer'),
             new Reference('Base\Service\Collab\CollabRoomResolver'),
             new Reference('security.token_storage'),
+            new Reference('Base\Service\Collab\CollabTicketFactory'),
         ]);
     $services->set('Base\Field\Type\MoneyType')
         ->tag('form.type')
