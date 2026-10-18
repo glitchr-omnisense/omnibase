@@ -9,12 +9,20 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use App\Repository\UserRepository;
 
-class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
+/**
+ * The users of the firewalls, by their identifier, refreshed from their row.
+ *
+ * hwi/oauth-bundle is a suggestion of the core since 4.0: this class no longer
+ * names its interface, so it loads without it. With it, the service
+ * Base\Security\UserProvider is an OAuthUserProvider (the same class, declared
+ * OAuth-aware), see config/services/form.php; loadUserByOAuthUserResponse()
+ * stays here (a type in a signature loads nothing).
+ */
+class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
 {
     /**
      * @var UserTracker

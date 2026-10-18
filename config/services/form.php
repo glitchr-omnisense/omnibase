@@ -169,7 +169,8 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Security\UserChecker')
         ->args([new Reference('doctrine.orm.entity_manager')]);
 
-    $services->set('Base\Security\UserProvider')
+    // hwi/oauth-bundle is a suggestion since 4.0: the provider is OAuth-aware when it is there.
+    $services->set('Base\Security\UserProvider', interface_exists('HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface') ? 'Base\Security\OAuthUserProvider' : 'Base\Security\UserProvider')
         ->args([
             new Reference('Base\Security\UserTracker'),
             new Reference('App\Repository\UserRepository'),

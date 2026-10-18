@@ -102,9 +102,11 @@ return static function (ContainerConfigurator $container): void {
 
     // API Platform: an App\ override replaces the Base\ resource it extends.
     // Between the attribute/class-name collectors (priority 0) and the cache
-    // (-10), so the cached collection is the filtered one.
+    // (-10), so the cached collection is the filtered one. API Platform is a
+    // suggestion of the core since 4.0: without its bundle, nothing to decorate,
+    // the decorator is dropped (and its class, on API Platform's interface, never loaded).
     $services->set('Base\ApiPlatform\Metadata\Resource\Factory\OverriddenResourceNameCollectionFactory')
-        ->decorate('api_platform.metadata.resource.name_collection_factory', null, -5)
+        ->decorate('api_platform.metadata.resource.name_collection_factory', null, -5, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
         ->args([
             new Reference('.inner'),
         ]);
