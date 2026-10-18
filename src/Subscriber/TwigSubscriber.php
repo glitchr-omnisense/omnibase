@@ -4,7 +4,7 @@ namespace Base\Subscriber;
 
 use App\Enum\UserRole;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\ParameterBag;
+use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -28,7 +28,7 @@ class TwigSubscriber implements EventSubscriberInterface
     protected $webpackTagRenderer;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
     protected $parameterBag;
 
@@ -48,7 +48,7 @@ class TwigSubscriber implements EventSubscriberInterface
     /** The request attribute (a route default) that keeps a response as it was rendered. */
     public const INJECT = '_omnibase_inject';
 
-    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBag $parameterBag, AdvancedRouterInterface $router)
+    public function __construct(HtmlTagRenderer $htmlTagRenderer, WebpackTagRenderer $webpackTagRenderer, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, AdvancedRouterInterface $router)
     {
         $this->webpackTagRenderer = $webpackTagRenderer;
 

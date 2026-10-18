@@ -81,6 +81,10 @@
  * Symfony's @final FileLinkFormatter and its HtmlErrorRenderer, which base-plugin patched the ErrorHandler to use).
  * 778 after step C9's injections (+1: Base\Service\Model\DevelopmentEnvironment, BaseService::isDevelopment()'s
  * rule over the Environment contract, which the error controller asks instead of BaseService).
+ * 781 after step C9's parameters (+3: Base\Service\DottedParameterBag, the parameters by a dotted path that
+ * ArrayParameterBag and the Symfony ParameterBag read through; Base\Service\HotParameters, the settings stored
+ * in the database laid over any parameters, HotParameterBag's logic; Base\Service\SettingBag, on psr/cache since
+ * its cache warmer moved to Base\Bridge\Symfony\SettingBagWarmer).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -644,6 +648,7 @@ return [
     Base\Service\Collab\CollabTicketFactory::class,
     Base\Service\ColorExtractor::class,
     Base\Service\CommentGuard::class,
+    Base\Service\DottedParameterBag::class,
     Base\Service\DownloadLinks::class,
     Base\Service\EditorEnhancer::class,
     Base\Service\EditorEnhancerInterface::class,
@@ -654,6 +659,7 @@ return [
     Base\Service\FlysystemInterface::class,
     Base\Service\FormGuard::class,
     Base\Service\GroupManager::class,
+    Base\Service\HotParameters::class,
     Base\Service\IconProvider::class,
     Base\Service\Invitations::class,
     Base\Service\Launcher::class,
@@ -743,6 +749,7 @@ return [
     Base\Service\Referrer::class,
     Base\Service\ReferrerInterface::class,
     Base\Service\SecurityPolicy::class,
+    Base\Service\SettingBag::class,
     Base\Service\SettingBagInterface::class,
     Base\Service\SettingSnapshotValue::class,
     Base\Service\Sharing::class,

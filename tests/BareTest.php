@@ -366,6 +366,7 @@ final class BareTest extends TestCase
             'basetrait, a parameter' => 300,
             'basetrait, the parameters' => true,
             'basetrait, the environment' => 'prod',
+            'hot parameters, a false setting, a null one, off' => [false, 300, 300],
             'baseservice, debug, development, salt' => [true, true, 'not-so-secret'],
             'baseservice, granted' => [true, false],
             // Sessions and Locales: the visitor signed out (not kicked), someone else kicked, the locales.

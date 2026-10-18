@@ -254,6 +254,33 @@ compared under Symfony with the service it replaces, and run where there is no f
   nothing. The rule, in docs/20-architecture/contracts.md: BaseTrait to go fast in an
   application, the contracts in the core and the bundles (which add no new use of it).
 
+### Changed: the parameters on the Fondation, the hot bag's defects fixed (step C9)
+- **`Base\Service\DottedParameterBag`** (new, Fondation): parameters by their full names read
+  by a dotted path; `ArrayParameterBag` and `ParameterBag` extend it. `has()` is the presence
+  of a value (`false`, `0`, `""` are there; `null` is not) - it was the value's truth, for
+  `ParameterBag`, `ArrayParameterBag` and `HotParameterBag` alike.
+- **`Base\Service\HotParameters`** (new, Fondation): the settings stored in the database
+  laid over any `ParameterBagInterface`, `HotParameterBag`'s logic with its defects fixed:
+  the order is the `$bag` given, the settings, the configuration, by presence and not by
+  truth (a setting stored as `false`, `0` or `""` no longer gives way to the configuration's
+  value; a `null` one does); with `use_hot_bag` not `true`, the configuration is read (every
+  parameter was `null`); `add()` no longer goes through the exception of the frozen bag's
+  `add()`; `has()` reads the sources in `get()`'s order; the misspelt `#[SentitiveParameter]`
+  gone. A path naming values under it is merged key by key from the three sources, without
+  laying the whole configuration over the settings at each call.
+- **`HotParameterBag`** extends `HotParameters` (no longer `ParameterBag`): the same service,
+  decorating `parameter_bag` over `Base\Service\ParameterBag`, DependencyInjection's two
+  interfaces, `clear()` and `remove()` refused; its constructor takes the `ParameterBag` (or a
+  `Container`, as before). `HotParameterBagInterface::get()` may answer a `UnitEnum`, as
+  DependencyInjection's does. `TwigSubscriber` types omnibase's interface, not the class.
+- **`Base\Service\ParameterBagInterface` autowires `parameter_bag`**, the settings included -
+  it gave the plain `ParameterBag`. `parameter_bag`, that autowiring, DependencyInjection's
+  interfaces, `Runtime::parameters()` and `BaseTrait::getParameterBag()` are one object.
+- **`SettingBag` on psr/cache** (`CacheItemPoolInterface`, `deleteItem()`), no longer
+  `CacheWarmerInterface`: `Base\Bridge\Symfony\SettingBagWarmer` warms it (the same
+  optional warmer). Fondation 778 -> 781 (`DottedParameterBag`, `HotParameters`, `SettingBag`).
+  `HotParametersTest`, `ParameterBagTest`, `ParameterBagServicesTest`, `BareTest`.
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming

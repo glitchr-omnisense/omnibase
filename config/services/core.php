@@ -177,10 +177,6 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\SettingBag')
         ->public(true)
         ->tag('twig.runtime')
-        // Compiles+persists the settings snapshot at warmup (SettingBag
-        // implements WarmableInterface) so the first request after a
-        // deploy/cache:clear hits a warm cache instead of compiling on-demand.
-        ->tag('kernel.cache_warmer')
         ->args([
             service('parameter_bag'),
             service('doctrine.orm.entity_manager'),
@@ -189,6 +185,12 @@ return static function (ContainerConfigurator $container): void {
             service('cache.adapter'),
         ])
         ->bind('$environment', '%kernel.environment%');
+    // Compiles+persists the settings snapshot at warmup so the first request after a
+    // deploy/cache:clear hits a warm cache instead of compiling on-demand (C9: the
+    // warmer is the bridge's, SettingBag stands on psr/cache).
+    $services->set('Base\Bridge\Symfony\SettingBagWarmer')
+        ->args([service('Base\Service\SettingBag')])
+        ->tag('kernel.cache_warmer');
 
     // Reads the administrator's account-security settings and answers "may
     // this user change that themselves". Autowired on SettingBagInterface,
