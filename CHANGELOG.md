@@ -157,6 +157,12 @@ compared under Symfony with the service it replaces, and run where there is no f
   username, never by e-mail address (which the page would show to anyone); the template lists
   them with their avatar and a link to their profile, says when none is found, in the
   `content` block as the account's pages. `UserSearchTest`.
+- **A member's profile listing a core `Thread`** failed: `Base\Entity\Thread` had no
+  `__toLink()`. It answers null (no core route shows a bare thread; it is not a
+  `LinkableInterface` for that), and `Accounts::recent()` lists the threads that have a page.
+  The bundles' threads override it with the same signature (19 `__toLink()` in 11 bundles go
+  through `getRouter()->generate($name, $parameters, $referenceType)` and can use
+  `Link::to()` as they are, at C8). `RecentThreadsTest`.
 
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its

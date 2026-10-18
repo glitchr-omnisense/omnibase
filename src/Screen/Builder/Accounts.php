@@ -97,10 +97,10 @@ final class Accounts
         );
     }
 
-    /** @return list<Link> a member's latest published threads with a title, newest first (by publication, else creation) */
+    /** @return list<Link> a member's latest published threads with a title and a page, newest first (by publication, else creation) */
     public function recent(User $user): array
     {
-        $threads = array_filter(iterator_to_array($user->getThreads(), false), static fn (Thread $thread) => $thread->isPublished() && $thread->getTitle());
+        $threads = array_filter(iterator_to_array($user->getThreads(), false), static fn (Thread $thread) => $thread->isPublished() && $thread->getTitle() && null !== $thread->__toLink());
         uasort($threads, static fn (Thread $a, Thread $b) => ($b->getPublishedAt() ?? $b->getCreatedAt()) <=> ($a->getPublishedAt() ?? $a->getCreatedAt()));
 
         return array_map(static fn (Thread $thread) => new Link(
