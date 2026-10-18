@@ -517,12 +517,40 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $baseDir;
     }
 
+    /** The fallback parameters already worked out, by main request (a WeakMap: gone with the request). */
+    private ?\WeakMap $fallbackParameters = null;
+
+    /**
+     * The host fallbacks for a locale and an environment. Worked out once per main request for each
+     * locale, environment and declared ports: a page asks for them through getHost(), getPort(),
+     * getMachine()... at each address it makes - 179 times on the home of lesringostars, each reading
+     * base.router.host_fallbacks five times from the parameter bag. Without a main request (a
+     * command, a worker), worked out at each call as before.
+     */
     protected function getFallbackParameters(?string $locale = null, ?string $environment = null): ?array
     {
         if (!$this->useFallbacks()) {
             return null;
         }
 
+        $request = $this->requestStack->getMainRequest();
+        if ($request === null) {
+            return $this->resolveFallbackParameters($locale, $environment);
+        }
+
+        $key = $this->localizer->getLocale($locale) . "|" . $this->localizer->getLocaleLang($locale) . "|" . $environment . "|" . ($_SERVER['HTTP_PORT'] ?? "") . "|" . ($_SERVER['HTTPS_PORT'] ?? "");
+        $this->fallbackParameters ??= new \WeakMap();
+        $known = $this->fallbackParameters[$request] ?? [];
+        if (!array_key_exists($key, $known)) {
+            $known[$key] = $this->resolveFallbackParameters($locale, $environment);
+            $this->fallbackParameters[$request] = $known;
+        }
+
+        return $known[$key];
+    }
+
+    private function resolveFallbackParameters(?string $locale, ?string $environment): ?array
+    {
         $fallbacks   = array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocale($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getLocaleLang($locale));
         $fallbacks ??= array_search_by($this->parameterBag->get("base.router.host_fallbacks"), "locale", $this->localizer->getDefaultLocale());
