@@ -4,7 +4,6 @@ namespace Base\Controller\Client;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Base\Enum\UserState;
 use Base\Form\FormProxyInterface;
 use Base\Form\Model\UserSearchModel;
 use Base\Form\Type\UserSearchType;
@@ -38,15 +37,18 @@ class UserSearchController extends AbstractController
             $formattedData = clone $formSearch->getData();
         }
 
+        // Members are looked for by their username, when the application's user has one: never by
+        // their e-mail address, which this page would show to anyone (base User's identifier).
         $users = [];
-        if ($formattedData) {
-            $users = array_map(
-                fn($t) => $t->getTranslatable(),
-                $this->userRepository->findByInsensitivePartialModel(
-                    ["username" => "%" . ($formattedData->username) . "%",],
-                    ["translatable.state" => UserState::VERIFIED]
-                )->getResult()
-            );
+        $term = trim((string) ($formattedData?->username ?? ""));
+        if ($term !== "" && $this->entityManager->getClassMetadata(User::class)->hasField("username")) {
+            $users = $this->userRepository->createQueryBuilder("u")
+                ->where("LOWER(u.username) LIKE :term")
+                ->setParameter("term", "%" . addcslashes(mb_strtolower($term), "%_") . "%")
+                ->orderBy("u.username", "ASC")
+                ->setMaxResults(50)
+                ->getQuery()->getResult();
+            $users = array_values(array_filter($users, fn($u) => !$u->isBanned() && !$u->isGhost()));
         }
 
         return $this->render('client/user/search.html.twig', [
