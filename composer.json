@@ -79,7 +79,6 @@
         "florianv/swap": "^4.0",
         "glitchr/backup-manager": "4.0.*-dev",
         "glitchr/base-plugin": "2.0.*-dev",
-        "glitchr/doctrine-dc2type": "1.0.*-dev",
         "hashids/hashids": "^5.0",
         "imagine/imagine": "^1.2",
         "jaybizzle/crawler-detect": "^1.2",
@@ -192,7 +191,6 @@
         "allow-plugins": {
             "php-http/discovery": true,
             "glitchr/base-plugin": true,
-            "glitchr/doctrine-dc2type": true,
             "endroid/installer": true
         }
     },

@@ -8,7 +8,7 @@ use Base\Service\Model\SelectInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Exception;
 use Generator;
 use InvalidArgumentException;
@@ -224,13 +224,25 @@ abstract class EnumType extends Type implements SelectInterface
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        if ($platform instanceof SqlitePlatform) {
-            return "TEXT";
+        // SQLite has neither: a CLOB, which is what SQLite's TEXT is read back as (a TEXT column was
+        // found changed by every comparison).
+        if ($platform instanceof SQLitePlatform) {
+            return $platform->getClobTypeDeclarationSQL($column);
         }
 
-        $values = array_map(fn($val) => "'" . $val . "'", $this->getPermittedValues());
+        return static::declaration($this->getPermittedValues(), $platform, 'ENUM');
+    }
 
-        return "ENUM(" . implode(", ", $values) . ")";
+    /**
+     * ENUM('A', 'B') or SET('A', 'B'): written as DBAL writes an ENUM column's declaration, so that
+     * the column read back from the database (DBAL's EnumType, or MySQLSetType for a SET) compares
+     * equal while its values are the enumeration's.
+     *
+     * @param list<string> $values
+     */
+    public static function declaration(array $values, AbstractPlatform $platform, string $keyword = 'SET'): string
+    {
+        return $keyword . "(" . implode(", ", array_map($platform->quoteStringLiteral(...), array_values($values))) . ")";
     }
 
     /**

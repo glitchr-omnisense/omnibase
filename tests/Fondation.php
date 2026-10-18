@@ -71,6 +71,10 @@
  * its Symfony side Base\Bridge\Symfony\KernelEnvironment, the kernel's).
  * 776 after step C4b's sessions (+2: Base\Contract\Sessions, a user signed out, and its Symfony side
  * Base\Bridge\Symfony\SecuritySessions, the token storage and the remember-me cookie).
+ * 778 after step C6b (doctrine/dbal as published, without glitchr/doctrine-dc2type): +3, Base\Bridge\Doctrine\
+ * SchemaManagerFactory and MySQLSchemaManager (a SET column read with its values, the "(DC2Type:...)" comments of
+ * before left out) and Base\Database\Type\MySQLSetType (a SET column as the database has it); -1, Base\
+ * DatabaseSubscriber\EnumSubscriber, removed from the core (it wrote those comments; CHANGELOG [4.0], plan C6b).
  */
 
 return [
@@ -85,8 +89,10 @@ return [
     Base\Bridge\Doctrine\Mapping::class,
     Base\Bridge\Doctrine\MappingDriver::class,
     Base\Bridge\Doctrine\MetadataSnapshot::class,
+    Base\Bridge\Doctrine\MySQLSchemaManager::class,
     Base\Bridge\Doctrine\Registry::class,
     Base\Bridge\Doctrine\RepositoryFactory::class,
+    Base\Bridge\Doctrine\SchemaManagerFactory::class,
     Base\Bridge\Doctrine\Types::class,
     Base\Bridge\Symfony\AccountScreens::class,
     Base\Bridge\Symfony\CsrfTokens::class,
@@ -133,7 +139,6 @@ return [
     Base\Controller\SignatureController::class,
     Base\DatabaseSubscriber\AttributeSubscriber::class,
     Base\DatabaseSubscriber\DemoAccountLockSubscriber::class,
-    Base\DatabaseSubscriber\EnumSubscriber::class,
     Base\DatabaseSubscriber\IntlSubscriber::class,
     Base\DatabaseSubscriber\InverseCollectionCacheSubscriber::class,
     Base\DatabaseSubscriber\TrackingPolicySubscriber::class,
@@ -201,6 +206,7 @@ return [
     Base\Database\Type\ArrayType::class,
     Base\Database\Type\DateTimeTypeUTC::class,
     Base\Database\Type\EnumType::class,
+    Base\Database\Type\MySQLSetType::class,
     Base\Database\Type\SetType::class,
     Base\Database\Type\Utc::class,
     Base\Database\Type\UtcDateTimeImmutableType::class,

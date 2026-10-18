@@ -16,13 +16,11 @@ class PlatformMiddleware implements Middleware
 
             public function getDatabasePlatform(ServerVersionProvider $connection): AbstractPlatform
             {
-                $platform = parent::getDatabasePlatform($connection);
-
-                // Register custom type mappings
-                $platform->registerDoctrineTypeMapping('enum', 'string');
-                $platform->registerDoctrineTypeMapping('set', 'json');
-
-                return $platform;
+                // The platform as DBAL makes it. ENUM and SET were mapped to string and json here, which
+                // only glitchr/doctrine-dc2type's "(DC2Type:...)" comments overrode: DBAL reads an ENUM as
+                // its EnumType with the column's values since 4.2, and Base\Bridge\Doctrine\MySQLSchemaManager
+                // a SET as Base\Database\Type\MySQLSetType (plan "omnibase agnostique", C6b).
+                return parent::getDatabasePlatform($connection);
             }
 
             public function connect(array $params): Driver\Connection

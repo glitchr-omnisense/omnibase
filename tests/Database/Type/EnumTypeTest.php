@@ -113,10 +113,11 @@ class EnumTypeTest extends TestCase
         $this->assertSame(ThreadState::PUBLISH, $enum->convertToPHPValue(ThreadState::PUBLISH, new SQLitePlatform()));
     }
 
+    /** SQLite's text column, CLOB: what a TEXT column is read back as, so a schema compares unchanged (C6b). */
     public function testSqlDeclarationIsPlainTextOnSqlite(): void
     {
         $enum = new ThreadState();
 
-        $this->assertSame('TEXT', $enum->getSQLDeclaration([], new SQLitePlatform()));
+        $this->assertSame('CLOB', $enum->getSQLDeclaration([], new SQLitePlatform()));
     }
 }
