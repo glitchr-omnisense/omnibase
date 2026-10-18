@@ -4,6 +4,11 @@ widget_page:
   slug:
     title: "{slug}"
 
+user_search:
+  title: "Find a member"
+  searchbar: "Username.."
+  no_users: "No member found."
+
 thread_search:
   title: "Search for content from here.. "
   searchbar: "Search here.."

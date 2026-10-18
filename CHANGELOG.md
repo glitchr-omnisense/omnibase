@@ -148,6 +148,16 @@ compared under Symfony with the service it replaces, and run where there is no f
   translator's locale - the same for every language the site speaks. `User` reads nothing
   through `BaseTrait` any more. `SessionsTest`. Fondation 774 -> 776.
 
+### Fixed
+- **The members' search** (`user_search`, `/search/user`) rendered nothing: its template was a
+  copy of the threads' search (it read `threads` and `form_data.title`, and a `generic` field)
+  while its controller gave `users`, and its form had no field. `UserSearchType` has a
+  `username` field; the controller finds the members whose username holds the term (case
+  aside, at most 50, banned and ghost accounts left out) when the application's user has a
+  username, never by e-mail address (which the page would show to anyone); the template lists
+  them with their avatar and a link to their profile, says when none is found, in the
+  `content` block as the account's pages. `UserSearchTest`.
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming

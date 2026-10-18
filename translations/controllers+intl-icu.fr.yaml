@@ -16,6 +16,11 @@ thread:
   follow: "Vous suivez désormais ce fil"
   unfollow: "Vous ne suivez plus ce fil"
 
+user_search:
+  title: "Rechercher un membre"
+  searchbar: "Nom d'utilisateur.."
+  no_users: "Aucun membre trouvé."
+
 thread_search:
   title: "Rechercher un contenu précis, c'est par ici.. "
   searchbar: "Rechercher.."

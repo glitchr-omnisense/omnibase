@@ -1,16 +1,18 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Search for a user{% endblock %}
-{% block main %}
+{# The members' search (user_search): the controller gives `users`, the members whose username
+   holds the term, and `form_data`, the search (its `username`). #}
+{% block title %}{{ '@controllers.user_search.title'|trans }}{% endblock %}
+{% block content %}
     <article class="wrapper">
 
         {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
 
             <div class="d-flex justify-content-center flex-row flex-wrap">
-                <h1 class="me-3">{{ '@messages.search.title'|trans }}</h1>
+                <h1 class="me-3">{{ '@controllers.user_search.title'|trans }}</h1>
                 <div class="input-group w-auto me-3">
                     <div class="form-outline">
-                        {{ form_widget(form.generic, {'attr': {'placeholder': '@messages.search.placeholder'|trans}, value: form.vars.value.generic }) }}
+                        {{ form_widget(form.username, {'attr': {'placeholder': '@controllers.user_search.searchbar'|trans}}) }}
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fa-solid fa-search"></i>
@@ -22,92 +24,25 @@
 
     </article>
 
-    {% if threads|length < 1 %}
-
-    <article class="wrapper">
-        <div class="header">
-            Aucune ressource trouvée.
-        </div>
-    </article>
-    {% else %}
-
-        {% set lastSection = null %}
-        {% for thread in threads %}
-
-            {% set depth = thread.getRepository().getHierarchyDepth() %}
-
-            {% if lastSection != thread.getRepository().getHierarchy() %}
-                <article class="wrapper hierarchy">
-                <h1 class="title">
-                    {% for section in thread.getRepository().getHierarchyTree() %}
-                    > {{ section|capitalize }}
-                    {% endfor %}
-                </h1>
-                </article>
-                {% set lastSection = thread.getRepository().getHierarchy() %}
-            {% endif %}
-
-            <article class="wrapper">
-                <div class="header">
-
-                    <ul class="field-avatar">
-                        {% for owner in thread.owners|reverse %}
-                        <li>{% include '@Base/client/user/_avatar.html.twig' with {user: owner, size: 64} only %}</li>
-                        {% endfor %}
-                    </ul>
-
-                    <div class="text">
-
-                        <h1 class="title">
-                            {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
-                            {% if depth > 1 and thread.parent() != null %}
-                                {{ '@messages.thread.found'|trans([thread|trans_entity, thread|urlify]) | raw }}
-                            {% else %}
-                                {{ threadTitle |raw }}
-                            {% endif %}
-                        </h1>
-
-                        <div class="info">
-
-                            {{ '@messages.base.datetime'|trans([
-                                thread.updatedAt()|datetime("dd MMMM YYYY"),
-                                thread.updatedAt()|datetime("HH:mm")
-                            ])|raw }}&nbsp
-
-                            {% if thread.owners|length > 2 %}
-                            <br/>
-                            {% endif %}
-
-                            {{ '@messages.words.by'|trans }}
-                            {% for owner in thread.owners %}
-                                    {% if not loop.first %}
-                                    {% if loop.last %} {{ '@messages.words.and'|trans }} {% else %}, {% endif %}
-                                    {% endif %}
-                                    <a href="/profile/{{ owner.username|lower }}">{{ owner.username }}</a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                {% if thread.excerpt %}
-                <hr>
-                <p>{{ thread.excerpt | highlight(form_data.excerpt, -1) |default(thread.excerpt) | raw }}</p>
-                {% endif %}
-
-                {% if thread.content %}
-                <hr>
-                <p>{{ thread.content | highlight(form_data.content, 5) | raw }}</p>
-                {% endif %}
-
-                {# <p>
-                <div class="d-flex justify-content-end">
-                    <a href="{{ thread.getPath() }}" class="btn btn-primary">
-                        {{ ('@entities.'~get_short_class(thread)~'.see') | trans }}
+    {% if form_data.username is not empty %}
+        {% if users|length < 1 %}
+        <article class="wrapper">
+            <div class="header">{{ '@controllers.user_search.no_users'|trans }}</div>
+        </article>
+        {% else %}
+        <article class="wrapper">
+            <ul class="user-search-results">
+                {% for user in users %}
+                <li>
+                    <a href="{{ path('user_profile', {id: user.id}) }}">
+                        {% include '@Base/client/user/_avatar.html.twig' with {user: user, size: 64} only %}
+                        <span class="username">{{ user.username }}</span>
                     </a>
-                </div>
-                </p> #}
-            </article>
-        {% endfor %}
+                </li>
+                {% endfor %}
+            </ul>
+        </article>
+        {% endif %}
     {% endif %}
 
 {% endblock %}
