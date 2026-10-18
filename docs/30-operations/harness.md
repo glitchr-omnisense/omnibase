@@ -132,10 +132,10 @@ Localizer, the Themizer, `WebpackTagRenderer`), 422 themselves or through a
 
 ## doctrine/orm as released
 
-The image's doctrine/orm is patched by glitchr/base-plugin while the plugin of
-its layer is one of before step C6 (bc3ef78 leaves it as published for this
-core: `extra.base-plugin.doctrine/orm: false`). To run the suites on doctrine/orm
-exactly as released, mount its release's `src/` over the installed one:
+Since 4.0 the image's doctrine/orm is as released: glitchr/base-plugin, which
+patched it for the cores before step C6, is gone (omnibridge/composer applies only
+what the core declares, `extra.omnibridge`: symfony/process). To run the suites on
+another release of doctrine/orm, mount its `src/` over the installed one:
 
 ```sh
 git clone --depth 1 --branch 3.7.5 https://github.com/doctrine/orm.git /tmp/orm

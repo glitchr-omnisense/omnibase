@@ -37,13 +37,14 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /srv/demo
 RUN composer create-project symfony/skeleton . --no-interaction --no-progress
 
-# The glitchr packages are branch releases (N.x-dev); base-plugin, a Composer
-# plugin, hooks third-party packages at install time (doctrine/dbal is used as
-# published since 4.0: no glitchr/doctrine-dc2type).
+# The glitchr packages are branch releases (N.x-dev); omnibridge/composer, the
+# one Composer plugin the core requires, applies the patches and writes the stubs
+# the core declares in its composer.json (extra.omnibridge) - doctrine/orm and
+# doctrine/dbal are used as published since 4.0.
 RUN composer config minimum-stability dev \
     && composer config prefer-stable true \
     && composer config extra.symfony.allow-contrib true \
-    && composer config allow-plugins.glitchr/base-plugin true \
+    && composer config allow-plugins.omnibridge/composer true \
     && composer config allow-plugins.endroid/installer true \
     && composer config allow-plugins.php-http/discovery true
 

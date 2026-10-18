@@ -277,9 +277,11 @@ abstract class AbstractBaseBundle extends Bundle
      * Declares $alias as $class unless something already answers to $alias:
      * a class loaded, or one an autoloader finds a file for - the
      * application's own App\Enum\X, not loaded yet, is never replaced by
-     * Base\Enum\X. The stubs glitchr/base-plugin writes for the classes an
-     * application does not define are no definition of its own. True when
-     * the alias is declared (or already was, to that class).
+     * Base\Enum\X. The stubs written for the classes an application does
+     * not define (vendor/composer/omnibridge/stubs/ by omnibridge/composer,
+     * glitchr/base-plugin's stubs/ before 4.0) are no definition of its own,
+     * should an autoloader ever find one. True when the alias is declared (or
+     * already was, to that class).
      */
     public static function declareAlias(string $class, string $alias): bool
     {
@@ -289,7 +291,7 @@ abstract class AbstractBaseBundle extends Bundle
 
         foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $loader) {
             $file = $loader->findFile($alias);
-            if (false !== $file && !str_contains(str_replace("\\", "/", (string) realpath($file) ?: $file), "/base-plugin/stubs/")) {
+            if (false !== $file && !self::isStub($file)) {
                 return false;
             }
         }
@@ -301,6 +303,14 @@ abstract class AbstractBaseBundle extends Bundle
         class_alias($class, $alias);
 
         return true;
+    }
+
+    /** Whether $file is a stub (omnibridge/composer's, or glitchr/base-plugin's before 4.0), not a class of the application. */
+    public static function isStub(string $file): bool
+    {
+        $path = str_replace("\\", "/", (string) (realpath($file) ?: $file));
+
+        return str_contains($path, "/composer/omnibridge/stubs/") || str_contains($path, "/base-plugin/stubs/");
     }
 
     public static function classLoads(string $class): bool
