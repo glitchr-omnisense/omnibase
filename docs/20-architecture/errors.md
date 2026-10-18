@@ -50,7 +50,9 @@ profiler receive it), and `SYMFONY_IDE` is set to it when `Base\BaseBundle` is
 constructed, for the page Symfony's `ErrorHandler` renders by itself before a
 request is handled (a container that does not compile). A site's own
 `framework.ide` or `SYMFONY_IDE` is kept; one that already maps (`&...>`) too; with
-none, VS Code's format.
+none, VS Code's format. omnibase's former syntax, which the sites' `framework.ide`
+writes - `"vscode://file/%%f[%%b:%env(APP_PATH)%]:%%l"`, `%b` read as the path in
+brackets - is read as Symfony's mapping.
 
 Until 4.0, `Base\Inspector\HtmlErrorRenderer` and `FileLinkFormatter` did this by
 extending Symfony's classes - the formatter is `@final` - and glitchr/base-plugin
