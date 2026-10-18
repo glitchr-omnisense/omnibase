@@ -4,6 +4,81 @@ All notable changes to this bundle are documented here, per release tag.
 Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 `3.1.0`, … (the next major continues on `4.x`).
 
+## [4.0] — branch `4.x`, unreleased
+
+The core requires its Fondation alone (plan "omnibase agnostique", step C7; decisions D7 and
+D11): what `tests/Fondation.php` loads and what it stands on. 3.x stays as it was, for the
+applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
+
+### Changed
+- **`require` is the Fondation**: PHP and its extensions, Doctrine (orm, dbal, collections,
+  persistence, event-manager, common), Twig and its extras, the standalone Symfony components
+  (decision D1), the PSRs, league/flysystem, omnibridge/doctrine and omnibridge/twig, the
+  libraries. Added, because the Fondation loads them and they only came through what left:
+  `web-auth/webauthn-lib` (`Base\Entity\User\Passkey`), `symfony/error-handler`,
+  `symfony/var-dumper` (from `require-dev`), `doctrine/common`, `symfony/options-resolver`,
+  `property-access`, `finder`, `filesystem`, `yaml`, `password-hasher`; and, named for what
+  the code imports, doctrine/{dbal, collections, persistence, event-manager}, psr/{log, cache,
+  simple-cache}, symfony/{cache, mime, string, event-dispatcher} and the contracts,
+  `composer-runtime-api`.
+- **The framework left `require`** for **omnibridge/symfony**: doctrine/doctrine-bundle,
+  symfony/{config, dependency-injection, dotenv, form, framework-bundle, messenger,
+  monolog-bundle, security-bundle, twig-bundle}, twig/extra-bundle (and, through them,
+  http-kernel, http-foundation, routing, security-*, console, twig-bridge, doctrine-bridge).
+  The core does not require omnibridge/symfony (a Laravel application would receive Symfony):
+  it is suggested, and in `require-dev`.
+- **The bundles the core works with are suggested**, no longer required: scheb/2fa,
+  league/flysystem-bundle, hwi/oauth-bundle, web-auth/webauthn-symfony-bundle,
+  api-platform/symfony, api-platform/doctrine-orm, symfony/webpack-encore-bundle,
+  symfony/ux-twig-component, glitchr/ux-google, glitchr/well-known, nelmio/cors-bundle,
+  nelmio/security-bundle. The ones the core's code names are in `require-dev` with
+  omnibridge/symfony, so that the core's own suite resolves (`Dockerfile.test`).
+- **A Symfony application without one of them still compiles** where a fallback costs
+  nothing: API Platform's decoration (`OverriddenResourceNameCollectionFactory`) is ignored
+  without the service it decorates; `ga.service` (glitchr/ux-google) and Encore's
+  `webpack_encore.entrypoint_lookup[_default]` are given as null (a `?` before a service id
+  in `config/services/core.php`); `Base\Security\UserProvider` no longer implements HWI's
+  `OAuthAwareUserProviderInterface` - the service of that id is a
+  `Base\Security\OAuthUserProvider` (new: the same class, declared OAuth-aware) when
+  hwi/oauth-bundle is installed; the `twig_component` defaults are prepended only when its
+  extension is registered. Passkeys' repositories were already passed by without
+  webauthn-symfony-bundle, Encore's Twig functions are the core's own.
+- **Two bundles stay required de facto** under Symfony: **scheb/2fa** (`Base\Entity\User`
+  implements its `Scheb\TwoFactorBundle\Model\*` interfaces) and
+  **league/flysystem-bundle** (`Base\Service\Flysystem`, the `flysystem` service, extends
+  its `LazyFactory` and is built from its storages).
+- `extra.branch-alias`: `dev-4.x` is `4.0.x-dev`.
+- Tests: `SuggestedBundlesTest` - `require` holds neither the framework nor a bundle, the
+  Fondation's additions are there, the suggested bundles the code names are suggested and in
+  `require-dev`; `UserProvider` names no interface of HWI; and the host application booted
+  without the nine bundles the core can do without (`Fixtures\WithoutSuggestedBundlesKernel`:
+  their configuration and route files left out with them) compiles, drops API Platform's
+  decoration, gives `ga.service` as null and answers `/login` (200, Encore's functions the
+  core's own) and `/`. `bare` on a `composer install --no-dev` of the core alone: the
+  Fondation (758 classes) loads nothing of the framework, and none of it is installed but
+  `symfony/console` (doctrine/orm's).
+- The harness: `docker/Dockerfile` requires `omniscient/omnibase:4.x-dev as 4.0.x-dev`,
+  omnibridge/symfony and every bundle `docker/app/config/bundles.php` registers (`BUNDLES`);
+  the root `Dockerfile` (the small demo) omnibridge/symfony and its bundles.
+- The `omnibase/*` bundles accept the core 4.0 (`3.0.*-dev || 4.0.*-dev`) and require
+  omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
+  the core's requirements.
+
+### What a Symfony application adds
+`omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
+`config/bundles.php` registers that it did not require itself - for an application coming
+from 3.x, typically `api-platform/symfony`, `api-platform/doctrine-orm`,
+`league/flysystem-bundle`, `nelmio/security-bundle`, `scheb/2fa` (all 25 sites already
+required hwi, webauthn-symfony-bundle, nelmio/cors, Encore, ux-google, well-known and
+ux-twig-component). `composer update` of those alone: every other locked package stays, and
+no Flex recipe runs again.
+
+### What a Laravel application needs
+The core alone, Doctrine through `laravel-doctrine/orm` and Twig through omnibridge/twig;
+omnibridge/laravel, when it exists, fills the contracts (`Base\Contract\Runtime`) with
+Laravel's services. No Symfony framework package is installed, except `symfony/console`,
+which doctrine/orm 3 requires and nothing of the Fondation loads.
+
 ## [Unreleased]
 
 ### Added

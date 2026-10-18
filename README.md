@@ -12,7 +12,9 @@ Composer now installs it in `vendor/omniscient/omnibase`; nothing in the package
 path (its templates, documentation and scripts are found from its own directory), but an
 application that names the old path in its configuration has to follow - see CHANGELOG.
 
-Requires PHP ≥ 8.2 (omnibridge/doctrine) and Symfony 6, 7 or 8. Licensed MIT (`LICENSE`) since 2026-10-09;
+Requires PHP ≥ 8.2 (omnibridge/doctrine). Since 4.0 the package requires its Fondation alone
+(Doctrine, Twig, Symfony's standalone components): under Symfony 6, 7 or 8 the framework comes with
+`omnibridge/symfony`, see Installation. Licensed MIT (`LICENSE`) since 2026-10-09;
 earlier versions remain published under LGPL-3.0-or-later.
 
 ## Docker: every plugin, running
@@ -35,11 +37,29 @@ The suites run there in the test environment on a fresh SQLite database: see
 
 ## Installation
 
-The package is resolved from Packagist (repository: https://github.com/glitchr-studio/omnibase):
+The package is resolved from Packagist (repository: https://github.com/glitchr-studio/omnibase).
+
+**Symfony** (4.0, branch `4.x`): the core and the framework packages, which `omnibridge/symfony`
+carries (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, MonologBundle, Form...),
+then the bundles your `config/bundles.php` registers - the core suggests them, and works with
+all of them:
 
 ```bash
-composer require omniscient/omnibase:^3.0
+composer require omniscient/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
+composer require scheb/2fa league/flysystem-bundle hwi/oauth-bundle web-auth/webauthn-symfony-bundle \
+    api-platform/symfony api-platform/doctrine-orm symfony/webpack-encore-bundle symfony/ux-twig-component \
+    glitchr/ux-google glitchr/well-known nelmio/cors-bundle nelmio/security-bundle
 ```
+
+`scheb/2fa` and `league/flysystem-bundle` are required de facto (`Base\Entity\User` implements
+scheb's interfaces, `Base\Service\Flysystem` extends the bundle's factory); without one of the
+others the container still compiles. An application coming from 3.x adds `omnibridge/symfony` and
+the bundles it did not require itself, and updates those alone. The 3.x branch
+(`omniscient/omnibase:3.0.*-dev`) still requires the framework itself. See
+[docs/20-architecture/packages.md](docs/20-architecture/packages.md).
+
+**Laravel**: later, with `omnibridge/laravel`, which fills the core's contracts with Laravel's
+services; no Symfony framework package is installed then.
 
 Enable in `config/bundles.php` (Flex usually does it):
 
