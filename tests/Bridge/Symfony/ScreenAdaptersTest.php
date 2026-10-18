@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Bridge\Symfony;
 
+use Base\Bridge\Symfony\CsrfTokens;
 use Base\Bridge\Symfony\MediaPictures;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Bridge\Symfony\SymfonyScreenContext;
@@ -9,6 +10,7 @@ use Base\Bridge\Symfony\WysiwygTexts;
 use Base\Contract\Pictures;
 use Base\Contract\Runtime;
 use Base\Contract\Texts;
+use Base\Contract\Tokens;
 use Base\Screen\Builder\Stories;
 use Base\Screen\ContextProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -51,6 +53,7 @@ final class ScreenAdaptersTest extends KernelTestCase
         self::assertInstanceOf(Stories::class, $container->get(Stories::class));
         self::assertInstanceOf(MediaPictures::class, Runtime::pictures());
         self::assertInstanceOf(WysiwygTexts::class, Runtime::texts());
+        self::assertInstanceOf(CsrfTokens::class, Runtime::tokens());
         self::assertNull($container->getParameter('base.screens.version'));
     }
 
@@ -113,5 +116,22 @@ final class ScreenAdaptersTest extends KernelTestCase
         self::assertSame('', $texts->render(null));
         self::assertSame($twig->createTemplate('{{ text|wysiwyg|raw }}')->render(['text' => '']), $texts->render(''), 'an empty text: the editor\'s empty frame, as the filter');
         self::assertSame([], $texts->toc(''));
+    }
+
+    /** A token of the Tokens contract is one the CSRF token manager accepts for that intent, and only for it - as Twig's csrf_token() is. */
+    public function testTokensAreTheFormsTokens(): void
+    {
+        $container = static::getContainer();
+        $request = Request::create('https://localhost/');
+        $request->setSession(new Session(new MockArraySessionStorage()));
+        $container->get('request_stack')->push($request);
+        $manager = $container->get('security.csrf.token_manager');
+        $tokens = $container->get(Tokens::class);
+
+        $token = $tokens->csrf('2fa_disable');
+        self::assertTrue($manager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken('2fa_disable', $token)));
+        self::assertFalse($manager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken('2fa_email', $token)), 'one intent\'s token is not another\'s');
+        $printed = $container->get('twig')->createTemplate("{{ csrf_token('2fa_disable') }}")->render([]);
+        self::assertTrue($manager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken('2fa_disable', $printed)), 'the template\'s token, for the same intent');
     }
 }

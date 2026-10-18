@@ -412,6 +412,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\WysiwygTexts')
         ->args([service('Base\Twig\Extension\HtmlTwigExtension'), service('editor_enhancer')]);
     $services->alias('Base\Contract\Texts', 'Base\Bridge\Symfony\WysiwygTexts');
+    $services->set('Base\Bridge\Symfony\CsrfTokens')
+        ->args([service('security.csrf.token_manager')]);
+    $services->alias('Base\Contract\Tokens', 'Base\Bridge\Symfony\CsrfTokens');
 
     // The screens (plan "omnibase agnostique", C5): a controller hands a
     // template and a view model (Base\Screen\View) to the ScreenResponder,
