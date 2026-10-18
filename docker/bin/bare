@@ -45,6 +45,14 @@
 // A notice or a deprecation goes to the error output, not into the report.
 ini_set('display_errors', 'stderr');
 
+// A host without the framework, as a Laravel application is: it says so (Base\Contract\Framework,
+// plan "omnibase agnostique", C7b), and Base\Entity\User then declares none of the framework's
+// interfaces, even where they are installed (this harness, an application's vendor).
+// OMNIBASE_FRAMEWORK=symfony measures a class as it loads under Symfony instead.
+if (false === getenv('OMNIBASE_FRAMEWORK')) {
+    putenv('OMNIBASE_FRAMEWORK=none');
+}
+
 // A namespace segment ending in Bundle is a bundle's - except symfony/intl's resource readers
 // (Symfony\Component\Intl\Data\Bundle\...), a standalone component's (plan, C3e).
 const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';

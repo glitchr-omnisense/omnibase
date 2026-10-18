@@ -136,8 +136,8 @@
     },
     "suggest": {
         "omnibridge/symfony": "The core under Symfony (since 4.0): the framework packages it no longer requires - FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, MonologBundle, twig/extra-bundle, Form, Routing, HttpKernel... A Symfony site requires it beside omniscient/omnibase, with the bundles below that its config/bundles.php registers; a Laravel site does not (omnibridge/laravel, to come)",
-        "scheb/2fa": "Two-factor sign-in (TOTP, e-mail codes, backup codes, trusted devices); under Symfony required de facto: Base\\Entity\\User implements its Scheb\\TwoFactorBundle\\Model interfaces (^7.0|^8.0)",
-        "league/flysystem-bundle": "The storages (local.cache, local.public...); under Symfony required de facto: Base\\Service\\Flysystem, the `flysystem` service every file, image and backup service reads, extends its LazyFactory (^3.1)",
+        "scheb/2fa": "Two-factor sign-in (TOTP, e-mail codes, backup codes, trusted devices): installed, Base\\Entity\\User implements its Scheb\\TwoFactorBundle\\Model interfaces (Base\\Contract\\TwoFactorUser); register SchebTwoFactorBundle for the sign-in itself (^7.0|^8.0)",
+        "league/flysystem-bundle": "The storages of the application's configuration (local, S3, SFTP...) behind the `flysystem` service every file, image and backup service reads; without it, omnibase's local storages (local.cache, local.uploads, local.wysiwyg and their .public) (^3.1)",
         "hwi/oauth-bundle": "Signing in through an identity provider (Google...): Base\\Security\\UserProvider is then the OAuth-aware provider (Base\\Security\\OAuthUserProvider) (^2.1)",
         "web-auth/webauthn-symfony-bundle": "Passkeys: Base\\Repository\\User\\PasskeyRepository and Base\\Security\\WebauthnUserEntityRepository are its credential and user repositories (^5.3)",
         "api-platform/symfony": "The API of the #[ApiResource] entities (User, Thread); an App\\ override replaces the Base\\ resource it extends (^4.0)",

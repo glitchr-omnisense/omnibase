@@ -82,6 +82,37 @@ final class BareTest extends TestCase
         self::assertSame([], preg_grep('~/doctrine/doctrine-bundle/~', $repository['framework_files']));
     }
 
+    /**
+     * Base\Entity\User loads without the framework and without scheb/2fa (plan "omnibase agnostique",
+     * C7b): bare is a host without the framework (OMNIBASE_FRAMEWORK=none, as a Laravel application
+     * says), and the user's Base\Contract\SecurityUser and TwoFactorUser are then empty interfaces,
+     * although Security and scheb/2fa are installed here. The same class measured as Symfony loads it
+     * (OMNIBASE_FRAMEWORK=symfony) names Security's two interfaces and scheb/2fa's four: the check
+     * is not blind, and the interfaces are still declared where the framework runs.
+     */
+    public function testTheUserLoadsWithoutTheFrameworkAndDeclaresItsInterfacesUnderIt(): void
+    {
+        [$status, $report] = self::bare([\Base\Entity\User::class]);
+        self::assertSame(0, $status);
+        $user = $report['classes'][\Base\Entity\User::class];
+        self::assertNull($user['error']);
+        self::assertSame([], $user['framework']);
+        self::assertSame([], $user['framework_files']);
+
+        [$status, $report] = self::bare([\Base\Entity\User::class], ['OMNIBASE_FRAMEWORK' => 'symfony']);
+        self::assertSame(1, $status);
+        $user = $report['classes'][\Base\Entity\User::class];
+        self::assertNull($user['error']);
+        self::assertSame([
+            'Scheb\\TwoFactorBundle\\Model\\BackupCodeInterface' => 'Base\\Contract\\TwoFactorUser',
+            'Scheb\\TwoFactorBundle\\Model\\Email\\TwoFactorInterface' => 'Base\\Contract\\TwoFactorUser',
+            'Scheb\\TwoFactorBundle\\Model\\Totp\\TwoFactorInterface' => 'Base\\Contract\\TwoFactorUser',
+            'Scheb\\TwoFactorBundle\\Model\\TrustedDeviceInterface' => 'Base\\Contract\\TwoFactorUser',
+            'Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInterface' => 'Base\\Contract\\SecurityUser',
+            'Symfony\\Component\\Security\\Core\\User\\UserInterface' => 'Base\\Contract\\SecurityUser',
+        ], $user['framework']);
+    }
+
     /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
     public function testARepositoryLoadsWithoutTheFramework(): void
     {
@@ -270,7 +301,7 @@ final class BareTest extends TestCase
      *
      * @return array{int, array<string, mixed>} the exit status, the report
      */
-    private static function bare(array $classes): array
+    private static function bare(array $classes, array $env = []): array
     {
         // The autoloader that knows this package: under symfony/phpunit-bridge's simple-phpunit (an
         // application's suite) the first ClassLoader is PHPUnit's own, which knows no Base\ class.
@@ -282,7 +313,7 @@ final class BareTest extends TestCase
             }
         }
         $output = (string) tempnam(sys_get_temp_dir(), 'bare');
-        $process = proc_open([\PHP_BINARY, __DIR__.'/../docker/bin/bare', '--json', ...$classes], [1 => ['file', $output, 'w'], 2 => ['pipe', 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
+        $process = proc_open([\PHP_BINARY, __DIR__.'/../docker/bin/bare', '--json', ...$classes], [1 => ['file', $output, 'w'], 2 => ['pipe', 'w']], $pipes, null, $env + ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
         self::assertIsResource($process);
         $err = (string) stream_get_contents($pipes[2]);
         $status = proc_close($process);
