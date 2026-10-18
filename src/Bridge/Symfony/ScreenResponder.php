@@ -2,8 +2,10 @@
 
 namespace Base\Bridge\Symfony;
 
+use Base\Screen\Confidential;
 use Base\Screen\ContextProvider;
 use Base\Screen\Frame;
+use Base\Screen\Screen;
 use Base\Screen\View;
 use Omnibridge\React\Page;
 use Omnibridge\React\Protocol;
@@ -31,7 +33,13 @@ use Twig\Environment;
  * Every answer varies on what chooses between them (X-Omnibridge, Accept); a
  * JSON answer carrying a visitor (the frame's viewer) is private to them and
  * varies on the session's cookie: no cache serves one person's name to
- * another.
+ * another. A screen carrying its viewer's secrets (Base\Screen\Confidential:
+ * its forms' tokens) is stored by no cache at all: `private, no-store` and
+ * `Vary: Cookie`, the HTML as the JSON.
+ *
+ * A screen's props never take a key of the frame's (Frame::RESERVED: locale,
+ * site, links, viewer, theme): the frame's would win and the screen's be lost
+ * without a word, so such a screen is refused, in every answer.
  */
 class ScreenResponder
 {
@@ -47,6 +55,7 @@ class ScreenResponder
     /** @param array<string, mixed> $legacy the variables of before, for a site's own template */
     public function respond(Request $request, View $view, array $legacy = [], ?Frame $frame = null): Response
     {
+        self::guard($view->screen);
         $frame ??= $this->context->frame();
 
         if ($this->omnibridge() && Protocol::wantsJson($request->headers->get(Protocol::HEADER))) {
@@ -54,7 +63,7 @@ class ScreenResponder
             $answer = Protocol::answer($page, $request->headers->get(Protocol::HEADER), $request->headers->get(Protocol::VERSION), static fn (string $root): string => $root);
             $response = new Response($answer['body'], 200 === $answer['status'] ? $view->status : $answer['status'], $answer['headers']);
 
-            return $this->private($response, $frame);
+            return $this->private($response, $frame, $view->screen);
         }
 
         if (!$this->omnibridge() && self::asksJsonAlone($request)) {
@@ -63,19 +72,29 @@ class ScreenResponder
             $response = new Response(json_encode($this->props($frame, $view), \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR), $view->status, ['Content-Type' => 'application/json']);
             $response->setVary(['Accept'], false);
 
-            return $this->private($response, $frame);
+            return $this->private($response, $frame, $view->screen);
         }
 
         $response = new Response($this->twig->render($view->template, ['frame' => $frame, 'screen' => $view->screen] + $legacy), $view->status);
         $response->setVary([$this->omnibridge() ? Protocol::HEADER : 'Accept'], false);
 
-        return $response;
+        return $view->screen instanceof Confidential ? $this->private($response, $frame, $view->screen) : $response;
     }
 
     /** @return array<string, mixed> the frame's props and the screen's, as a front end reads them */
     public function props(Frame $frame, View $view): array
     {
+        self::guard($view->screen);
+
         return $frame->toArray() + $view->screen->toArray();
+    }
+
+    /** A screen whose props would take a key of the frame's is refused: its own would be lost in the JSON. */
+    public static function guard(Screen $screen): void
+    {
+        if ($taken = array_intersect(array_keys($screen->toArray()), Frame::RESERVED)) {
+            throw new \InvalidArgumentException(sprintf('A screen\'s props may not take the frame\'s keys: "%s" (%s).', implode('", "', $taken), $screen::class));
+        }
     }
 
     private function omnibridge(): bool
@@ -83,11 +102,14 @@ class ScreenResponder
         return $this->omnibridge ?? class_exists(Protocol::class);
     }
 
-    private function private(Response $response, Frame $frame): Response
+    private function private(Response $response, Frame $frame, Screen $screen): Response
     {
-        if (null !== $frame->viewer) {
+        if (null !== $frame->viewer || $screen instanceof Confidential) {
             $response->setPrivate();
             $response->setVary(['Cookie'], false);
+        }
+        if ($screen instanceof Confidential) {
+            $response->headers->addCacheControlDirective('no-store');
         }
 
         return $response;
