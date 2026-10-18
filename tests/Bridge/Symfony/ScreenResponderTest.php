@@ -150,4 +150,62 @@ final class ScreenResponderTest extends TestCase
         self::assertStringStartsWith('<html', (string) $html->getContent(), 'with omnibridge/react, JSON is its protocol\'s only');
         self::assertContains('X-Omnibridge', $html->getVary());
     }
+
+    /** A screen whose props would take a key of the frame's is refused, in the HTML as in the JSON: its own would be lost. */
+    public function testAScreenMayNotTakeTheFramesKeys(): void
+    {
+        $screen = new class implements \Base\Screen\Screen {
+            public string $title = 'Le blog';
+            public string $url = '/chroniques';
+
+            public function toArray(): array
+            {
+                return ['title' => $this->title, 'links' => ['index' => $this->url]];
+            }
+
+            public function jsonSerialize(): array
+            {
+                return $this->toArray();
+            }
+        };
+        foreach ([[], ['HTTP_ACCEPT' => 'application/json']] as $server) {
+            try {
+                $this->responder(omnibridge: false)->respond(Request::create('/chroniques', server: $server), new View('card.html.twig', $screen));
+                self::fail('A screen taking "links" is refused.');
+            } catch (\InvalidArgumentException $e) {
+                self::assertStringContainsString('"links"', $e->getMessage());
+            }
+        }
+    }
+
+    /** A screen carrying its viewer's secrets (its forms' tokens) is kept out of every cache: private, no-store, varying on Cookie - the HTML as the JSON, a visitor or not. */
+    public function testAConfidentialScreenIsStoredByNoCache(): void
+    {
+        $screen = new class implements \Base\Screen\Confidential {
+            public string $title = 'Réglages';
+            public string $url = '/settings';
+
+            public function toArray(): array
+            {
+                return ['title' => $this->title, 'token' => 'abc'];
+            }
+
+            public function jsonSerialize(): array
+            {
+                return $this->toArray();
+            }
+        };
+        foreach ([null, new Viewer(3, 'louis')] as $viewer) {
+            foreach ([[], ['HTTP_ACCEPT' => 'application/json']] as $server) {
+                $response = $this->responder($viewer, omnibridge: false)->respond(Request::create('/settings', server: $server), new View('card.html.twig', $screen));
+                self::assertTrue($response->headers->hasCacheControlDirective('private'));
+                self::assertTrue($response->headers->hasCacheControlDirective('no-store'));
+                self::assertFalse($response->headers->hasCacheControlDirective('public'));
+                self::assertContains('Cookie', $response->getVary());
+            }
+        }
+        // An ordinary screen's HTML is left to the framework, as before.
+        $html = $this->responder(new Viewer(3, 'louis'), omnibridge: false)->respond(Request::create('/chroniques/le-fuji'), self::view());
+        self::assertFalse($html->headers->hasCacheControlDirective('no-store'));
+    }
 }

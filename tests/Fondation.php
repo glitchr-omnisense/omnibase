@@ -48,6 +48,7 @@
  * framework and load none of it).
  * 743 with the Tokens contract (+2: Base\Contract\Tokens, a form's token for an intent, and its Symfony side,
  * Base\Bridge\Symfony\CsrfTokens, which names the CSRF token manager and loads none of it).
+ * 744 with Base\Screen\Confidential (+1: the marker of a screen carrying its viewer's secrets).
  */
 
 return [
@@ -547,6 +548,7 @@ return [
     Base\Screen\Builder\Stories::class,
     Base\Screen\Card::class,
     Base\Screen\Comment::class,
+    Base\Screen\Confidential::class,
     Base\Screen\ContextProvider::class,
     Base\Screen\Discussion::class,
     Base\Screen\Frame::class,
