@@ -65,6 +65,8 @@
  * Translations contract, which Translator::transTime() answers by).
  * 770 after step C4b's media (+2: Base\Contract\Media, the image route's addresses, and its Symfony side
  * Base\Bridge\Symfony\ServiceMedia, MediaService's answers, which names the framework and loads none of it).
+ * 772 after step C4b's routes (+2: Base\Contract\Routes, a route's declared path, an address's route, a route's
+ * icons, and its Symfony side Base\Bridge\Symfony\RouterRoutes, the router's and the IconProvider's answers).
  */
 
 return [
@@ -88,6 +90,7 @@ return [
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\MediaPictures::class,
     Base\Bridge\Symfony\NotificationMessages::class,
+    Base\Bridge\Symfony\RouterRoutes::class,
     Base\Bridge\Symfony\RouterUrls::class,
     Base\Bridge\Symfony\ScreenResponder::class,
     Base\Bridge\Symfony\SecurityAccess::class,
@@ -110,6 +113,7 @@ return [
     Base\Contract\Media::class,
     Base\Contract\Nouns::class,
     Base\Contract\Pictures::class,
+    Base\Contract\Routes::class,
     Base\Contract\Runtime::class,
     Base\Contract\SecurityUser::class,
     Base\Contract\SystemClock::class,

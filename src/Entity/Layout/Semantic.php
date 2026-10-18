@@ -13,6 +13,7 @@ use DomDocument;
 use DOMXPath;
 use Exception;
 use Base\Contract\Link;
+use Base\Contract\Runtime;
 use Base\Exception\MissingContractException;
 use Base\Database\Attribute\Cache;
 
@@ -84,25 +85,37 @@ class Semantic implements TranslatableInterface, IconizeInterface
     }
 
     /**
+     * The path its route is declared with ("/articles/{slug}"): the Routes
+     * contract (C4b), the router's route collection under Symfony.
+     *
      * @return string|null
      */
     public function getPath()
     {
-        $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
-        return $route?->getPath();
-    }
-
-    public function getRoute(): ?string
-    {
-        return $this->getRouter()->getRoute($this->getUrl());
+        return $this->routeName === null ? null : Runtime::routes()->pattern($this->routeName);
     }
 
     /**
+     * The name of the route its address leads to (the Routes contract, C4b).
+     * It handed the router's Route object to a string return type before,
+     * which threw for every route found.
+     */
+    public function getRoute(): ?string
+    {
+        $url = $this->getUrl();
+
+        return $url === null ? null : Runtime::routes()->match($url);
+    }
+
+    /**
+     * Its route's icons (the Routes contract, C4b: the IconProvider's under
+     * Symfony); null without a route.
+     *
      * @return array|mixed|null
      */
     public function getRouteIcons()
     {
-        return $this->getIconProvider()->getRouteIcons($this->routeName);
+        return $this->routeName === null ? null : Runtime::routes()->icons($this->routeName);
     }
 
     public function getUrl(): ?string

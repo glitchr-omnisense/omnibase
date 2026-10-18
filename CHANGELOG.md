@@ -117,6 +117,15 @@ compared under Symfony with the service it replaces, and run where there is no f
   (Routing's `UrlGeneratorInterface::ABSOLUTE_PATH`, the same 1, without loading Routing).
   `MediaTest`: eleven requests on three images and on crops against their old code copied.
   Fondation 768 -> 770.
+- **What the routes are beyond their addresses**: `Base\Contract\Routes` (`pattern()`, a
+  route's declared path; `match()`, the route an address leads to; `icons()`, a route's
+  `#[Iconize]`), under Symfony `Base\Bridge\Symfony\RouterRoutes` over `advanced_router` and
+  the `IconProvider`; `Runtime::routes()`. `Semantic` and `Widget\Route` ask it for
+  `getPath()`, `getRoute()` and `getRouteIcons()`; `Widget\Route`'s links go through
+  `Link::to()`, as `Semantic`'s since C3e. Fixed on the way: `getRoute()` handed the router's
+  `Route` object to its `?string` return type (a `TypeError` for any route found) and now
+  names the route; `getRouteIcons()` without a route is null (it gave every route's icons).
+  `RoutesTest`. Fondation 770 -> 772.
 
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its

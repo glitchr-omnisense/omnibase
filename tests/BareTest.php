@@ -298,7 +298,7 @@ final class BareTest extends TestCase
      * What omnibase's classes read through BaseTrait's services, answered through the contracts where
      * there is no framework (plan "omnibase agnostique", C4b): tests/Contract/basetrait-seams-without-
      * framework.php, run by bare with the autoloader alone, gives plain contracts and asks the real
-     * classes of the core. NounsTest, DurationTest, MediaTest and the tests named in the script compare each
+     * classes of the core. NounsTest, DurationTest, MediaTest, RoutesTest and the tests named in the script compare each
      * answer with the service it came from, under Symfony.
      */
     public function testTheBaseTraitSeamsAnswerWithoutTheFramework(): void
@@ -344,6 +344,15 @@ final class BareTest extends TestCase
             'image, url' => 'https://lesringostars.test/ux_imageExtension?extension=png&data=%2Fuploads%2Fabbey-road.JPG%7Csquare%7Cwebp%7C0+filter%28s%29',
             'crop, link' => '/ux_imageExtension//uploads/abbey-road.JPG|square|webp|0 filter(s).webp',
             'crop, its own extension' => '/ux_imageExtension//uploads/abbey-road.JPG|square|webp|0 filter(s).jpg',
+            // Routes and Urls: declared paths, routes of addresses, icons; a route widget's links.
+            'semantic, path' => '/articles/{slug}',
+            'semantic, route' => 'article',
+            'semantic, icons' => null,
+            'route widget, path' => '/blog',
+            'route widget, route' => 'blog',
+            'route widget, icons' => ['fa-solid fa-newspaper'],
+            'route widget, link' => '/blog?page=2',
+            'route widget, url' => 'https://lesringostars.test/blog',
         ], $run['result']);
     }
 
