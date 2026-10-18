@@ -3,6 +3,7 @@
 namespace Tests\Base\Database\Common;
 
 use Base\Database\Common\Collections\OrderedArrayCollection;
+use Doctrine\Common\Collections\AbstractLazyCollection;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -55,5 +56,67 @@ class OrderedArrayCollectionTest extends TestCase
         $collection = new OrderedArrayCollection([$a, $b], [null]);
 
         self::assertCount(2, $collection->toArray());
+    }
+
+    /**
+     * Filled by a lazy collection (an association not loaded yet, as
+     * OrderColumn::postLoad() leaves it): the positions wait for that load,
+     * however this collection is read while it is under way - Doctrine
+     * reads it for the entries added before, then for its snapshot.
+     */
+    public function testThePositionsWaitForTheLazyCollectionToBeLoaded(): void
+    {
+        [$a, $b, $c] = [$this->element(1), $this->element(2), $this->element(3)];
+        $ordered = new OrderedArrayCollection([], [3, 1, 2]);
+        $lazy = new class($ordered, [$a, $b, $c]) extends AbstractLazyCollection {
+            public array $seen = [];
+            public function __construct(private OrderedArrayCollection $inner, private array $rows)
+            {
+            }
+            protected function doInitialize(): void
+            {
+                $this->collection = $this->inner;
+                $this->inner->clear();
+                foreach ($this->rows as $row) {
+                    $this->inner->add($row);
+                    $this->seen[] = $this->inner->toArray(); // a read while it loads
+                }
+            }
+        };
+        $ordered->loadedBy($lazy);
+
+        self::assertFalse($ordered->isLoaded());
+        self::assertSame([], $ordered->toArray(), 'nothing there before the load');
+
+        self::assertSame([$c, $a, $b], $lazy->toArray());
+        self::assertSame([$a, $b, $c], end($lazy->seen), 'read during the load: as loaded, the positions kept');
+        self::assertTrue($ordered->isLoaded());
+        self::assertSame([], $ordered->getPositions(), 'spent once, on the entries loaded');
+    }
+
+    public function testWithoutALazyCollectionItSortsAtOnce(): void
+    {
+        [$a, $b] = [$this->element(1), $this->element(2)];
+        $collection = new OrderedArrayCollection([$a, $b], [2, 1]);
+
+        self::assertTrue($collection->isLoaded());
+        self::assertSame([$b, $a], $collection->getValues());
+    }
+
+    public function testItIsSerializedAsBefore(): void
+    {
+        [$a, $b] = [$this->element(1), $this->element(2)];
+        $ordered = new OrderedArrayCollection([], [2, 1]);
+        $lazy = new class extends AbstractLazyCollection {
+            protected function doInitialize(): void
+            {
+            }
+        };
+        $ordered->loadedBy($lazy);
+
+        $copy = unserialize(serialize($ordered));
+        self::assertInstanceOf(OrderedArrayCollection::class, $copy);
+        self::assertSame([2, 1], $copy->getPositions());
+        self::assertTrue($copy->isLoaded(), 'the copy is filled by nothing');
     }
 }

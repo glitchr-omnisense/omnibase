@@ -26,6 +26,8 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
 
     public ?string $orderBy;
     public string $type;
+
+    private static ?ReflectionProperty $collection = null;
     public function __construct(?string $orderBy = null, string $type = self::ASC)
     {  
         $this->orderBy = $orderBy;
@@ -203,11 +205,22 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
         }
         
         $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
-        if ($entityValue instanceof PersistentCollection && $entityValue->getOwner() == $entity) {
+        if ($entityValue instanceof PersistentCollection && $entityValue->getOwner() === $entity) {
 
-            $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
-            $reflProp->setAccessible(true);
-            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue ?? [], $orderBy));
+            // The collection is not loaded here: what it wraps is swapped for
+            // an OrderedArrayCollection holding the stored positions, which
+            // Doctrine fills when the collection is first read (one query,
+            // as for any lazy association) and which sorts itself on the
+            // first read after that load (OrderedArrayCollection::loadedBy()).
+            // It was loaded here, for every ordered association of every
+            // entity loaded, read or not (28 on the home of lesringostars).
+            // An association already loaded (fetch-joined, or refreshed)
+            // keeps its entries, sorted by the positions read now.
+            $ordered = new OrderedArrayCollection($entityValue->unwrap()->toArray(), $orderBy);
+            $ordered->loadedBy($entityValue);
+
+            self::$collection ??= new ReflectionProperty(PersistentCollection::class, "collection");
+            self::$collection->setValue($entityValue, $ordered);
 
         } else {
 

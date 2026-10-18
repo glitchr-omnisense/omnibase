@@ -3,6 +3,7 @@
 namespace Base\Database\Common\Collections;
 
 use Closure;
+use Doctrine\Common\Collections\AbstractLazyCollection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
@@ -19,25 +20,63 @@ class OrderedArrayCollection extends ArrayCollection
     public function __construct(Collection|array $array = [], array $positions = [])
     {
         // Was object_hydrate($this, $array) for the Collection branch: a
-        // raw reflection property copy keyed by NAME between $array and
-        // $this. That works for two instances of compatible classes, but
-        // the one real caller here (OrderColumn::postLoad(), reordering a
-        // freshly loaded association) passes a Doctrine PersistentCollection
-        // - which stores its entries behind its OWN "collection" property,
-        // never one named "elements" (ArrayCollection's own storage) - so
-        // the copy silently matched nothing and this ended up empty right
-        // after construction. toArray() is the real, class-agnostic way to
-        // read any Collection's entries regardless of its internal storage
-        // name; it also forces the PersistentCollection's own lazy
-        // initialize() to run now, before the reflection swap in postLoad()
-        // replaces its wrapped collection - so a later access no longer
-        // re-triggers Doctrine's OWN (unordered) lazy load over top of the
-        // reordered one, which is what silently discarded every drag-to-
-        // reorder on the next page load despite the correct order being
-        // saved (reported live: Tags, Authors, ... reverted to their
-        // original order on reload even though the DB held the new one).
+        // raw reflection property copy keyed by NAME, which matched nothing
+        // in a Doctrine PersistentCollection (its entries sit behind its own
+        // "collection" property, not ArrayCollection's "elements"), so this
+        // ended up empty. toArray() reads any Collection's entries.
+        //
+        // OrderColumn::postLoad() no longer hands it the PersistentCollection
+        // (whose toArray() loaded the association there and then, for every
+        // entity loaded): it passes the entries the association holds, none
+        // until it is loaded, and loadedBy() the PersistentCollection, so the
+        // positions wait for Doctrine's own load to have filled this one -
+        // the order lost after a drag-and-drop (Tags, Authors... back in
+        // their original order on the next page while the database held the
+        // new one) was a reorder spent before that load.
         parent::__construct($array instanceof Collection ? $array->toArray() : $array);
         $this->positions = $positions;
+    }
+
+    /**
+     * The lazy collection that fills this one (OrderColumn::postLoad(): the
+     * PersistentCollection of the association, not loaded yet). Until it is
+     * loaded the positions are kept: Doctrine reads this collection while it
+     * loads it (the entries added before, then the snapshot), and sorting
+     * then would spend the positions on what is not all there yet. Kept in a
+     * WeakMap, not a property: this collection is serialized with its
+     * entity (a session's user) as before, and nothing holds the lazy one.
+     *
+     * @return $this
+     */
+    public function loadedBy(AbstractLazyCollection $collection): static
+    {
+        self::$loadedBy ??= new \WeakMap();
+        self::$loadedBy[$this] = \WeakReference::create($collection);
+
+        return $this;
+    }
+
+    /** @var \WeakMap<self, \WeakReference<AbstractLazyCollection>>|null */
+    private static ?\WeakMap $loadedBy = null;
+
+    /**
+     * Whether the entries are all there: no lazy collection fills this one,
+     * or it has been loaded.
+     */
+    public function isLoaded(): bool
+    {
+        if (null === self::$loadedBy || !isset(self::$loadedBy[$this])) {
+            return true;
+        }
+
+        $collection = self::$loadedBy[$this]->get();
+        if (null !== $collection && !$collection->isInitialized()) {
+            return false;
+        }
+
+        unset(self::$loadedBy[$this]);
+
+        return true;
     }
 
     /**
@@ -53,7 +92,7 @@ class OrderedArrayCollection extends ArrayCollection
      */
     public function reorder()
     {
-        if (empty($this->positions)) {
+        if (empty($this->positions) || !$this->isLoaded()) {
             return $this;
         }
 
