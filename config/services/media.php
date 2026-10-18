@@ -79,10 +79,15 @@ return static function (ContainerConfigurator $container): void {
         ->tag('kernel.event_subscriber');
 
     // Database Subscribers
-    $services->set('Base\DatabaseSubscriber\EnumSubscriber'); // compiler pass
-
     $services->set('Base\Database\Middleware\PlatformMiddleware')
         ->tag('doctrine.middleware');
+
+    // The schema managers of every connection that takes DoctrineBundle's default factory: on MySQL,
+    // a SET column read with its values and the "(DC2Type:...)" comments of before left out (doctrine/dbal
+    // as published, plan "omnibase agnostique" C6b). Nothing to decorate without DoctrineBundle.
+    $services->set('Base\Bridge\Doctrine\SchemaManagerFactory')
+        ->decorate('doctrine.dbal.default_schema_manager_factory', null, 0, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
+        ->args([new Reference('.inner')]);
 
     $services->set('Base\DatabaseSubscriber\AttributeSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata', 'priority' => 4096])

@@ -2,19 +2,10 @@
 
 namespace Tests\Base\Database\Type;
 
-use Base\Database\Type\SetType;
-use Base\DatabaseSubscriber\EnumSubscriber;
 use Base\Service\Model\IconizeInterface;
-use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Schema\Column;
-use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use PHPUnit\Framework\TestCase;
 
-class EnumColumnTestRoles extends SetType implements IconizeInterface
+class EnumColumnTestRoles extends \Base\Database\Type\SetType implements IconizeInterface
 {
     public const USER = 'ROLE_USER';
     public const ADMIN = 'ROLE_ADMIN';
@@ -49,52 +40,14 @@ class EnumColumnTestTypo extends EnumColumnTestRoles implements IconizeInterface
 }
 
 /**
- * A SET or ENUM column says its values in its comment, so a migration sees
- * them change: the type was found again from "(DC2Type:user_role)" and its
- * declaration rebuilt from the code, and a role added to an application's
- * App\Enum\UserRole never reached the column (make:migration: "no change";
- * genealogist's ROLE_PRO refused). And an enumeration that extends another
- * may name the icons of the values it inherits.
+ * An enumeration that extends another may name the icons of the values it
+ * inherits. (A SET or ENUM column's values compared with the database, which
+ * this test also checked through the "(DC2Type:...)" comment EnumSubscriber
+ * wrote: tests/Bridge/Doctrine/SchemaManagerTest, since doctrine/dbal is
+ * used as published - plan "omnibase agnostique", C6b.)
  */
-final class EnumColumnTest extends KernelTestCase
+final class EnumColumnTest extends TestCase
 {
-    /** @param class-string<SetType> $class the type, registered as Doctrine registers an enumeration */
-    private static function type(string $class): Type
-    {
-        $name = strtolower(substr($class, strrpos($class, '\\') + 1));
-        if (!Type::hasType($name)) {
-            Type::addType($name, $class);
-        }
-
-        return Type::getType($name);
-    }
-
-    private function comment(Type $type): string
-    {
-        self::bootKernel();
-        $schema = new Schema([new Table('roles_test', [new Column('roles', $type)])]);
-        (new EnumSubscriber())->postGenerateSchema(new GenerateSchemaEventArgs(static::getContainer()->get(EntityManagerInterface::class), $schema));
-
-        return (string) $schema->getTable('roles_test')->getColumn('roles')->getComment();
-    }
-
-    public function testTheColumnsCommentSaysItsValues(): void
-    {
-        $core = $this->comment(self::type(EnumColumnTestRoles::class));
-        $app = $this->comment(self::type(EnumColumnTestAppRoles::class));
-
-        self::assertStringContainsString('ROLE_ADMIN', $core);
-        self::assertStringContainsString('ROLE_PRO', $app);
-        self::assertNotSame($core, $app, 'a value added changes the column');
-
-        // as the schema tool compares them: the column read back from the database has the old comment
-        $platform = new MySQLPlatform();
-        $old = new Column('roles', self::type(EnumColumnTestAppRoles::class), ['comment' => $core]);
-        $new = new Column('roles', self::type(EnumColumnTestAppRoles::class), ['comment' => $app]);
-        self::assertFalse($platform->columnsEqual($old, $new), 'a migration is made');
-        self::assertMatchesRegularExpression('/\(DC2Type:[^)]+\)/', $app, 'the type is still found from the comment');
-    }
-
     public function testAnEnumerationMayNameTheIconsOfTheValuesItInherits(): void
     {
         $icons = EnumColumnTestAppRoles::getIcons();

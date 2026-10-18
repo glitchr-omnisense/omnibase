@@ -6,9 +6,6 @@ use Base\Console\Command;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
-use Doctrine\DBAL\Schema\Column;
-use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,10 +31,15 @@ class DoctrineArrayUpgradeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $schemaManager = $this->getEntityManager()->GetConnection()->createSchemaManager();
-        $tables = $schemaManager->listTables();
-        foreach ($tables as $table) {
-            $this->convertArrayFieldsToJson($table, $output);
+        // The columns as MySQL has them, comments included: the schema manager leaves the "(DC2Type:...)"
+        // comments of before out of a column (Base\Bridge\Doctrine\MySQLSchemaManager, doctrine/dbal as
+        // published since 4.0), and those are what says a LONGTEXT column held DBAL 3's serialized arrays.
+        $columns = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME, ORDINAL_POSITION'
+        );
+
+        foreach ($columns as $column) {
+            $this->convertArrayFieldToJson($column, $output);
         }
 
         $output->writeln('All array fields converted to JSON successfully.');
@@ -45,28 +47,27 @@ class DoctrineArrayUpgradeCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function convertArrayFieldsToJson(Table $table, OutputInterface $output)
+    /** @param array{TABLE_NAME: string, COLUMN_NAME: string, DATA_TYPE: string, COLUMN_COMMENT: ?string} $column */
+    private function convertArrayFieldToJson(array $column, OutputInterface $output): void
     {
-        $tableName = $table->getName();
-        $columns = $table->getColumns();
-        foreach ($columns as $column) {
+        $tableName = $column['TABLE_NAME'];
+        $columnName = $column['COLUMN_NAME'];
+        $comment = (string) $column['COLUMN_COMMENT'];
 
-            /** @var Column $column */
-            $isArray = Type::getTypeRegistry()->lookupName($column->getType()) === 'array';
-            $isArrayType = $column->getComment() == "(DC2Type:array)";
-            $isJson = Type::getTypeRegistry()->lookupName($column->getType()) === 'json';
-            $isJsonType = $column->getComment() == "(DC2Type:json)";
-            if ($isJson || $isJsonType || $isArray || $isArrayType) {
-                
-                $columnName = $column->getName();
-                try {
-                    $this->convertArrayColumnToJson($tableName, $columnName, $output);
-                    if($isArray) $this->alterColumnToJson($tableName, $columnName, $output);
-                } catch (\Exception $e) {
-                    // Handle the exception gracefully
-                    $output->writeln("Error converting `$columnName` in `$tableName`: " . $e->getMessage());
-                }
+        $isArray = str_contains($comment, '(DC2Type:array)');
+        $isJson = strtolower($column['DATA_TYPE']) === 'json' || str_contains($comment, '(DC2Type:json)');
+        if (!$isArray && !$isJson) {
+            return;
+        }
+
+        try {
+            $this->convertArrayColumnToJson($tableName, $columnName, $output);
+            if ($isArray) {
+                $this->alterColumnToJson($tableName, $columnName, $output);
             }
+        } catch (\Exception $e) {
+            // Handle the exception gracefully
+            $output->writeln("Error converting `$columnName` in `$tableName`: " . $e->getMessage());
         }
     }
 

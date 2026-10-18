@@ -12,7 +12,7 @@
 #   docker run --rm -p 8000:8000 base-bundle-demo
 #   → http://localhost:8000/
 #
-# The glitchr companion packages (base-plugin, doctrine-dc2type, well-known,
+# The glitchr companion packages (base-plugin, well-known,
 # backup-manager, ux-google) are fetched from gitlab.glitchr.dev (public).
 #
 # For running the test suite / coverage instead of touring the bundle, see
@@ -38,19 +38,17 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /srv/demo
 RUN composer create-project symfony/skeleton . --no-interaction --no-progress
 
-# The glitchr packages are branch releases (N.x-dev); plugins patch vendor
-# code at install time (doctrine-dc2type restores DC2Type column comments on
-# DBAL 4, base-plugin hooks third-party packages).
+# The glitchr packages are branch releases (N.x-dev); base-plugin, a Composer
+# plugin, hooks third-party packages at install time (doctrine/dbal is used as
+# published since 4.0: no glitchr/doctrine-dc2type).
 RUN composer config minimum-stability dev \
     && composer config prefer-stable true \
     && composer config extra.symfony.allow-contrib true \
     && composer config allow-plugins.glitchr/base-plugin true \
-    && composer config allow-plugins.glitchr/doctrine-dc2type true \
     && composer config allow-plugins.endroid/installer true \
     && composer config allow-plugins.php-http/discovery true \
     && composer config repositories.backup-manager vcs https://gitlab.glitchr.dev/public-repository/agnostic/backup-manager \
     && composer config repositories.base-plugin vcs https://gitlab.glitchr.dev/public-repository/symfony/bundle/base/plugin \
-    && composer config repositories.doctrine-dc2type vcs https://gitlab.glitchr.dev/public-repository/symfony/bundle/doctrine-dc2type \
     && composer config repositories.well-known vcs https://gitlab.glitchr.dev/public-repository/symfony/bundle/well-known \
     && composer config repositories.ux-google vcs https://gitlab.glitchr.dev/public-repository/symfony/bundle/ux/google-api
 

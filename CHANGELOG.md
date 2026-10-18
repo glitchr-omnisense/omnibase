@@ -79,6 +79,28 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   `doctrine/event-manager` `^2.0`, `doctrine/persistence` `^4.0`, `doctrine/common` `^3.0`:
   the current major of each, open upwards, no older branch, no upper bound, no pinned
   version, Doctrine as published (no patch, no fork).
+- **doctrine/dbal as published; DC2Type comments no longer written** (step C6b).
+  `glitchr/doctrine-dc2type` left `require` and `allow-plugins`: that Composer plugin rewrote
+  DBAL's schema managers so that a column's type was read from its `(DC2Type:...)` comment,
+  which `Base\DatabaseSubscriber\EnumSubscriber` wrote on every ENUM and SET column with its
+  values. Both are gone (EnumSubscriber and `DoctrineEnumSubscriberPass` removed). In their
+  place, DBAL's own means: an ENUM column is read as DBAL's `enum` type with its values (DBAL
+  4.2), `PlatformMiddleware` no longer maps `enum` to `string` and `set` to `json`; on MySQL
+  and MariaDB **`Base\Bridge\Doctrine\SchemaManagerFactory`** gives
+  **`Base\Bridge\Doctrine\MySQLSchemaManager`**, which reads a SET column as
+  **`Base\Database\Type\MySQLSetType`** with its values (DBAL reads SET as a LONGTEXT
+  `simple_array`) and leaves the `(DC2Type:...)` of a comment out (with the values
+  EnumSubscriber wrote after it). Symfony: it decorates DoctrineBundle's
+  `doctrine.dbal.default_schema_manager_factory`; by hand:
+  `$configuration->setSchemaManagerFactory(new SchemaManagerFactory())`. A value added to an
+  enumeration is still a column altered: the values compared are the database's. `EnumType`
+  and `SetType` write `ENUM(...)`/`SET(...)` as DBAL quotes them, and `CLOB` on SQLite (what
+  SQLite's `TEXT` is read back as). **A database that still has the old comments needs no
+  migration**: they are left out on reading, so `doctrine:schema:validate` and
+  `doctrine:migrations:diff` find nothing (an ALTER made later for another reason drops them).
+  `doctrine:array:upgrade` reads the comments from `information_schema` itself.
+  Tests: `tests/Bridge/Doctrine/SchemaManagerTest` (MySQL rows read and compared, a SQLite
+  table created, read back, unchanged); `EnumColumnTest` keeps its icon cases.
 - Tests: `SuggestedBundlesTest` - `require` holds neither the framework nor a bundle, the
   Fondation's additions are there, the suggested bundles the code names are suggested and in
   `require-dev`; `UserProvider` names no interface of HWI; and the host application booted

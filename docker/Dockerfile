@@ -37,14 +37,13 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /srv/demo
 RUN composer create-project symfony/skeleton . --no-interaction --no-progress
 
-# The glitchr packages are branch releases (N.x-dev); plugins patch vendor
-# code at install time (doctrine-dc2type restores DC2Type column comments on
-# DBAL 4, base-plugin hooks third-party packages).
+# The glitchr packages are branch releases (N.x-dev); base-plugin, a Composer
+# plugin, hooks third-party packages at install time (doctrine/dbal is used as
+# published since 4.0: no glitchr/doctrine-dc2type).
 RUN composer config minimum-stability dev \
     && composer config prefer-stable true \
     && composer config extra.symfony.allow-contrib true \
     && composer config allow-plugins.glitchr/base-plugin true \
-    && composer config allow-plugins.glitchr/doctrine-dc2type true \
     && composer config allow-plugins.endroid/installer true \
     && composer config allow-plugins.php-http/discovery true
 

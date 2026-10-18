@@ -29,6 +29,7 @@ require $options['autoload'];
 
 $configuration = new Doctrine\DBAL\Configuration();
 $configuration->setMiddlewares([new Base\Database\Middleware\PlatformMiddleware()]);
+$configuration->setSchemaManagerFactory(new Base\Bridge\Doctrine\SchemaManagerFactory());
 $connection = Doctrine\DBAL\DriverManager::getConnection($options['connection'], $configuration);
 
 // The metadata cached in memory: EntityManagers::create() without a cache takes ORMSetup's default, which
