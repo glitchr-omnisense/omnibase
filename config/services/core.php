@@ -109,16 +109,20 @@ return static function (ContainerConfigurator $container): void {
         'Base\Subscriber\ProfilerSubscriber' => ['advanced_router'],
         'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router'],
         'Base\Subscriber\HotParameterBagSubscriber' => ['parameter_bag', 'setting_bag'],
-        'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', 'ga.service'],
+        'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', '?ga.service'],
         'Base\Subscriber\PageViewSubscriber' => ['Base\Service\Analytics', 'Symfony\Bundle\SecurityBundle\Security', '$excludedPrefixes' => ['/admin', '/_', '/api']],
     ];
+
+    // A service named with a leading "?" is a suggested bundle's (glitchr/ux-google's
+    // ga.service, symfony/webpack-encore-bundle's entry point lookup): null without it.
+    $optional = static fn (string $id) => str_starts_with($id, '?') ? service(substr($id, 1))->nullOnInvalid() : service($id);
 
     foreach ($subscribers as $id => $args) {
         $definition = $services->set($id)
             ->tag('kernel.event_subscriber');
         foreach ($args as $k => $v) {
             if (is_int($k)) {
-                $definition->arg($k, service($v));
+                $definition->arg($k, $optional($v));
             } else {
                 $definition->bind($k, $v);
             }
@@ -331,7 +335,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Cache\Warmer\IconCacheWarmer' => ['base.service.icon', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\LocalizerCacheWarmer' => ['localizer', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\ThemizerCacheWarmer' => ['themizer', '$cacheDir' => '%kernel.cache_dir%'],
-        'Base\Cache\Warmer\WebpackCacheWarmer' => ['parameter_bag', 'twig.webpack_renderer', 'webpack_encore.entrypoint_lookup[_default]', '$cacheDir' => '%kernel.cache_dir%', '$publicDir' => '%kernel.project_dir%/public'],
+        'Base\Cache\Warmer\WebpackCacheWarmer' => ['parameter_bag', 'twig.webpack_renderer', '?webpack_encore.entrypoint_lookup[_default]', '$cacheDir' => '%kernel.cache_dir%', '$publicDir' => '%kernel.project_dir%/public'],
         'Base\Cache\Warmer\AttributeCacheWarmer' => ['base.attribute_reader', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\MetadataCacheWarmer' => ['base.database.metadata_manipulator', 'base.attribute_reader', '$cacheDir' => '%kernel.cache_dir%'],
     ];
@@ -343,7 +347,7 @@ return static function (ContainerConfigurator $container): void {
         }
         foreach ($args as $k => $v) {
             if (is_int($k)) {
-                $definition->arg($k, service($v));
+                $definition->arg($k, $optional($v));
             } else {
                 $definition->bind($k, $v);
             }

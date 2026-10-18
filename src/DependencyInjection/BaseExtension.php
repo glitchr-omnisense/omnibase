@@ -96,18 +96,21 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
         $this->prependDoctrineTypes($builder);
 
-        $builder->prependExtensionConfig('twig_component', [
-            'defaults' => [
-                'Base\\Twig\\Component\\' => [
-                    'template_directory' => '@Base/components/',
-                    'name_prefix' => 'base',
+        // symfony/ux-twig-component is a suggestion since 4.0.
+        if ($builder->hasExtension('twig_component')) {
+            $builder->prependExtensionConfig('twig_component', [
+                'defaults' => [
+                    'Base\\Twig\\Component\\' => [
+                        'template_directory' => '@Base/components/',
+                        'name_prefix' => 'base',
+                    ],
+                    'App\\Twig\\Component\\' => [
+                        'template_directory' => '@App/components/',
+                        'name_prefix' => 'app',
+                    ],
                 ],
-                'App\\Twig\\Component\\' => [
-                    'template_directory' => '@App/components/',
-                    'name_prefix' => 'app',
-                ],
-            ],
-        ]);
+            ]);
+        }
     }
 
     /**
