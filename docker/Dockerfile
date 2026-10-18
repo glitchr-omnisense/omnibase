@@ -52,6 +52,10 @@ RUN composer config minimum-stability dev \
 # (.dockerignore keeps .git, node_modules, var and vendor out of the context)
 COPY . /srv/omnibase
 ARG PLUGINS="omnibase/admin omnibase/marketplace omnibase/forge omnibase/forum omnibase/mailbox omnibase/docs"
+# The bundles the core suggests, all registered by the demo (app/config/bundles.php); scheb/2fa
+# and league/flysystem-bundle are required de facto under Symfony (Base\Entity\User implements
+# scheb's interfaces, Base\Service\Flysystem extends the bundle's LazyFactory).
+ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelmio/security-bundle nelmio/cors-bundle hwi/oauth-bundle symfony/webpack-encore-bundle glitchr/ux-google:1.0.*-dev api-platform/symfony api-platform/doctrine-orm symfony/ux-twig-component web-auth/webauthn-symfony-bundle"
 # --no-scripts: Flex recipes and cache:clear would compile the container
 # against recipe defaults BEFORE the demo config overlay below exists. The
 # overlay ships every config file the demo needs; the container is compiled
@@ -65,8 +69,12 @@ ARG PLUGINS="omnibase/admin omnibase/marketplace omnibase/forge omnibase/forum o
 # build --build-arg OMNI_REFRESH=$(date +%s)` refetches it.
 ARG OMNI_REFRESH=0
 RUN echo "omni families as of ${OMNI_REFRESH}" \
-    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omniscient/omnibase": "3.x-dev"}}}' \
-    && composer require "omniscient/omnibase:3.x-dev as 3.0.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
+    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omniscient/omnibase": "4.x-dev"}}}' \
+    # Since 4.0 the core requires its Fondation alone (Doctrine, Twig, standalone components):
+    # a Symfony application adds omnibridge/symfony (the framework) and the bundles its
+    # config/bundles.php registers - here every one the core suggests (app/config/bundles.php).
+    && composer require "omniscient/omnibase:4.x-dev as 4.0.x-dev" "omnibridge/symfony:1.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
+        $BUNDLES \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
         omnipay/stripe symfony/translation symfony/messenger symfony/lock \
         dompdf/dompdf horstoeko/zugferd --no-interaction --no-progress --no-scripts \

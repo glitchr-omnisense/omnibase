@@ -62,7 +62,12 @@ COPY . /srv/base-bundle
 # google/recaptcha contrib recipe even breaks it). The overlay ships every
 # config file the demo needs; the container is compiled at first run instead.
 RUN composer config repositories.base-bundle '{"type": "path", "url": "/srv/base-bundle", "options": {"symlink": false}}' \
-    && composer require "omniscient/omnibase:*@dev" --no-interaction --no-progress --no-scripts \
+    # Since 4.0 the core requires its Fondation alone: the framework comes with omnibridge/symfony,
+    # and the bundles example/app/config/bundles.php registers are the application's to require.
+    && composer require "omniscient/omnibase:*@dev" "omnibridge/symfony:1.x-dev" \
+        scheb/2fa league/flysystem-bundle "glitchr/well-known:1.0.*-dev" nelmio/security-bundle nelmio/cors-bundle \
+        hwi/oauth-bundle symfony/webpack-encore-bundle "glitchr/ux-google:1.0.*-dev" api-platform/symfony \
+        api-platform/doctrine-orm symfony/ux-twig-component --no-interaction --no-progress --no-scripts \
     # the google/recaptcha contrib recipe references ReCaptcha\RequestMethod\Curl,
     # which google/recaptcha 1.5 no longer ships — and the demo needs no recaptcha
     && rm -f config/packages/google_recaptcha.yaml
