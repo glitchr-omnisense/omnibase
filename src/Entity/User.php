@@ -26,16 +26,11 @@ use Doctrine\Common\Collections\Collection;
 
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Base\Validator\Constraints as AssertBase;
 
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
-use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
-use Scheb\TwoFactorBundle\Model\BackupCodeInterface;
-use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface as EmailTwoFactorInterface;
-use Scheb\TwoFactorBundle\Model\TrustedDeviceInterface;
 
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Database\Attribute\Timestamp;
@@ -44,11 +39,12 @@ use Base\Database\Attribute\Hashify;
 
 use Base\Service\Localizer;
 use Base\Notifier\Recipient\Recipient;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Base\Service\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
 use Base\Contract\Runtime;
+use Base\Contract\SecurityUser;
+use Base\Contract\TwoFactorUser;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Exception;
 use Base\Database\Attribute\Cache;
@@ -73,7 +69,13 @@ use ApiPlatform\Metadata\ApiResource;
 #[AssertBase\UniqueEntity(fields:["email"], message: "@validators.user.email.unique", groups:["new", "edit"])]
 
 #[ApiResource]
-class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface, BackupCodeInterface, TrustedDeviceInterface, PasswordAuthenticatedUserInterface, IconizeInterface, AutocompleteInterface
+/*
+ * SecurityUser and TwoFactorUser are Security's UserInterface and PasswordAuthenticatedUserInterface
+ * and scheb/2fa's TOTP, e-mail, backup-code and trusted-device interfaces when those packages are
+ * installed (Base\Bridge\Symfony\SecurityUser, TwoFactorUser), empty interfaces elsewhere: the user
+ * loads without the framework and without scheb/2fa (plan "omnibase agnostique", C7b).
+ */
+class User implements SecurityUser, TwoFactorUser, IconizeInterface, AutocompleteInterface
 {
     use BaseTrait;
     use UserInfoTrait;
@@ -251,7 +253,8 @@ class User implements UserInterface, TwoFactorInterface, EmailTwoFactorInterface
 
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
-        if ($this->secret == null) {
+        // Without scheb/2fa, no configuration to give (nothing asks for one).
+        if ($this->secret == null || !class_exists(TotpConfiguration::class)) {
             return null;
         }
         return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);

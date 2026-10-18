@@ -47,6 +47,29 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   implements its `Scheb\TwoFactorBundle\Model\*` interfaces) and
   **league/flysystem-bundle** (`Base\Service\Flysystem`, the `flysystem` service, extends
   its `LazyFactory` and is built from its storages).
+- **No bundle is required de facto any more** (step C7b). `Base\Entity\User` implements
+  `Base\Contract\SecurityUser` and `Base\Contract\TwoFactorUser` instead of Security's
+  `UserInterface`, `PasswordAuthenticatedUserInterface` and scheb/2fa's four model interfaces:
+  where those packages are installed, the contracts are aliases of
+  `Base\Bridge\Symfony\SecurityUser` and `TwoFactorUser`, which extend exactly those
+  interfaces (a site's `App\Entity\User` is unchanged: same class, table, mapping, methods,
+  and `instanceof` answers as before); elsewhere, empty interfaces. `Base\Contract\Framework`:
+  a host holding those packages but running without the framework says so
+  (`OMNIBASE_FRAMEWORK=none`, or `Framework::without()` before the user is loaded);
+  `docker/bin/bare` does. `getTotpAuthenticationConfiguration()` answers null without
+  scheb/2fa. `Base\Service\Flysystem` no longer extends league/flysystem-bundle's
+  `LazyFactory`: its constructor takes a PSR-11 container of storages, the service `flysystem`
+  (and `FlysystemInterface`) is built from `tagged_locator('flysystem.storage', 'storage')` -
+  what the bundle tags each configured storage with, the same storages its own lazy factory
+  reads - and, without the bundle, `FlysystemStoragesPass` registers omnibase's local storages
+  (`local.cache`, `local.uploads`, `local.wysiwyg` and their `.public`). scheb/2fa and
+  league/flysystem-bundle stay suggested and in `require-dev`, their texts no longer saying
+  "required de facto". Tests: `SuggestedBundlesTest` leaves out `SchebTwoFactorBundle` and
+  `FlysystemBundle` too (the `flysystem` service on the local storages), the user implements
+  the six interfaces under Symfony, `Flysystem` built from a plain locator; `BareTest`: the
+  user loads nothing of the framework, and measured as under Symfony
+  (`OMNIBASE_FRAMEWORK=symfony`) names the six. Fondation 758 -> 763 (`Base\Entity\User`,
+  `Base\Service\Flysystem`, `Base\Contract\{Framework, SecurityUser, TwoFactorUser}`).
 - `extra.branch-alias`: `dev-4.x` is `4.0.x-dev`.
 - Tests: `SuggestedBundlesTest` - `require` holds neither the framework nor a bundle, the
   Fondation's additions are there, the suggested bundles the code names are suggested and in

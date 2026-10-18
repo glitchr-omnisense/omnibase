@@ -16,17 +16,29 @@ use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToWriteFile;
-use League\FlysystemBundle\Lazy\LazyFactory;
 use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionProperty;
 use Symfony\Component\Finder\Finder;
 use InvalidArgumentException;
 use League\Flysystem\UnableToCreateDirectory;
 use ReflectionException;
+use Symfony\Contracts\Service\ServiceProviderInterface;
 
-class Flysystem extends LazyFactory implements FlysystemInterface
+/**
+ * omnibase's storages, by name ("local.cache", "local.uploads", "s3.private"...), over a
+ * PSR-11 container of Flysystem operators. Its own class since 4.0 (plan "omnibase agnostique",
+ * C7b): it no longer extends league/flysystem-bundle's LazyFactory. Under Symfony the service
+ * `flysystem` is built from the services tagged flysystem.storage by their `storage` name - the
+ * storages of the bundle's configuration, as the bundle's own lazy factory reads them -, or,
+ * without the bundle, omnibase's local storages (FlysystemStoragesPass); elsewhere from any
+ * container of operators.
+ */
+class Flysystem implements FlysystemInterface
 {
+    protected ContainerInterface $storages;
+
     /**
      * @var FilesystemOperator
      */
@@ -52,9 +64,9 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return self::$publicDir;
     }
 
-    public function __construct(...$args)
+    public function __construct(ContainerInterface $storages)
     {
-        parent::__construct(...$args);
+        $this->storages = $storages;
 
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir = self::$projectDir . "/public";
@@ -93,13 +105,18 @@ class Flysystem extends LazyFactory implements FlysystemInterface
 
     public function hasStorage(string $storageName): bool
     {
-        return array_key_exists($storageName, $this->storages->getProvidedServices());
+        return $this->storages instanceof ServiceProviderInterface
+            ? array_key_exists($storageName, $this->storages->getProvidedServices())
+            : $this->storages->has($storageName);
     }
 
     public function getStorageNames(bool $public = true): array
     {
+        // A plain PSR-11 container cannot list its ids: only a service provider's are known.
+        $names = $this->storages instanceof ServiceProviderInterface ? array_keys($this->storages->getProvidedServices()) : [];
+
         return array_filter(
-            array_keys($this->storages->getProvidedServices()),
+            $names,
             fn($s) => $public || !str_ends_with($s, ".public"),
         );
     }

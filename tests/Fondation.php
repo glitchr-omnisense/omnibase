@@ -54,6 +54,10 @@
  * their builder Base\Screen\Builder\Accounts, their Symfony side Base\Bridge\Symfony\AccountScreens and the
  * Twig function account_profile(), Base\Twig\Extension\AccountTwigExtension, which name the framework and load
  * none of it).
+ * 763 after step C7b (+5: Base\Entity\User, which declares Security's and scheb/2fa's interfaces through
+ * Base\Contract\SecurityUser and TwoFactorUser - those interfaces when they are installed and the host runs
+ * the framework, empty ones otherwise, which bare measures as a host without it, see Base\Contract\Framework -,
+ * Base\Contract\Framework itself, and Base\Service\Flysystem, no longer league/flysystem-bundle's LazyFactory).
  */
 
 return [
@@ -92,13 +96,16 @@ return [
     Base\Console\ConsoleInterface::class,
     Base\Contract\Access::class,
     Base\Contract\Files::class,
+    Base\Contract\Framework::class,
     Base\Contract\Link::class,
     Base\Contract\Locales::class,
     Base\Contract\Pictures::class,
     Base\Contract\Runtime::class,
+    Base\Contract\SecurityUser::class,
     Base\Contract\SystemClock::class,
     Base\Contract\Texts::class,
     Base\Contract\Tokens::class,
+    Base\Contract\TwoFactorUser::class,
     Base\Contract\Urls::class,
     Base\Controller\SignatureController::class,
     Base\DatabaseSubscriber\AttributeSubscriber::class,
@@ -288,6 +295,7 @@ return [
     Base\Entity\Thread\TagIntl::class,
     Base\Entity\Thread\Taxon::class,
     Base\Entity\Thread\TaxonIntl::class,
+    Base\Entity\User::class,
     Base\Entity\User\Address::class,
     Base\Entity\User\Attribute\Action\GrantPermissionAdapter::class,
     Base\Entity\User\Attribute\Action\GrantRoleAdapter::class,
@@ -607,6 +615,7 @@ return [
     Base\Service\Embeds::class,
     Base\Service\FileService::class,
     Base\Service\FileServiceInterface::class,
+    Base\Service\Flysystem::class,
     Base\Service\FlysystemInterface::class,
     Base\Service\FormGuard::class,
     Base\Service\GroupManager::class,

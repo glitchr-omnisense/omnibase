@@ -13,9 +13,10 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * The host application (the harness, or the application whose suite this runs in) without
  * the bundles omniscient/omnibase only suggests since 4.0 (plan "omnibase agnostique", C7) -
- * except the two it still needs de facto, scheb/2fa (Base\Entity\User implements its
- * interfaces) and league/flysystem-bundle (Base\Service\Flysystem extends its LazyFactory).
- * The packages stay installed: what is proven is the core's wiring, a container that
+ * all of them since C7b: scheb/2fa (Base\Entity\User declares its interfaces through
+ * Base\Contract\TwoFactorUser, by the package, not the bundle) and league/flysystem-bundle
+ * (Base\Service\Flysystem no longer extends its LazyFactory; omnibase's local storages
+ * without it) were needed de facto before. The packages stay installed: what is proven is the core's wiring, a container that
  * compiles and pages that render without those bundles registered. Their configuration
  * files (config/packages/<alias>.yaml) are left out with them, as an application without
  * the bundle would not have them.
@@ -29,8 +30,10 @@ final class WithoutSuggestedBundlesKernel extends Kernel
         'ApiPlatform\\Symfony\\Bundle\\ApiPlatformBundle',
         'Google\\GoogleBundle',
         'HWI\\Bundle\\OAuthBundle\\HWIOAuthBundle',
+        'League\\FlysystemBundle\\FlysystemBundle',
         'Nelmio\\CorsBundle\\NelmioCorsBundle',
         'Nelmio\\SecurityBundle\\NelmioSecurityBundle',
+        'Scheb\\TwoFactorBundle\\SchebTwoFactorBundle',
         'Symfony\\UX\\TwigComponent\\TwigComponentBundle',
         'Symfony\\WebpackEncoreBundle\\WebpackEncoreBundle',
         'Webauthn\\Bundle\\WebauthnBundle',

@@ -39,22 +39,36 @@ An application coming from 3.x already had every one of them, through the core: 
 them itself keeps them (Composer would otherwise remove what nothing requires any more). No
 Flex recipe runs again for a package already locked: nothing changes in `config/`.
 
-### Two bundles required de facto
+### None required de facto
 
-Two of the suggested bundles cannot be left out of a Symfony application, as long as no seam
-separates them from the core:
+Up to step C7b two of them could not be left out; each has its fallback now, and the user
+class and the storages load without either:
 
-- **scheb/2fa** - `Base\Entity\User` implements its `Scheb\TwoFactorBundle\Model\*`
-  interfaces (TOTP, e-mail code, backup codes, trusted devices). They live in the bundle's
-  package; without it the user class does not load.
-- **league/flysystem-bundle** - `Base\Service\Flysystem` (the `flysystem` service, which
-  the file, image, upload, backup and cache-clear services read) extends its `LazyFactory`
-  and is built from its storages (`local.cache` at least).
+- **scheb/2fa** - `Base\Entity\User` implements `Base\Contract\SecurityUser` and
+  `Base\Contract\TwoFactorUser`. Where symfony/security-core and scheb/2fa are installed,
+  they are aliases of `Base\Bridge\Symfony\SecurityUser` (Security's `UserInterface` and
+  `PasswordAuthenticatedUserInterface`) and `Base\Bridge\Symfony\TwoFactorUser` (scheb's
+  TOTP, e-mail, backup-code and trusted-device interfaces): under Symfony the user implements
+  exactly what it did. Elsewhere they are empty interfaces, and the user loads without them.
+  A host that holds those packages but runs without the framework (a Laravel application
+  reading a Symfony application's `vendor/`) says so with `OMNIBASE_FRAMEWORK=none` or
+  `Base\Contract\Framework::without()` before the user is loaded. Without the bundle
+  registered (the package installed) the interfaces are still declared: only the two-factor
+  sign-in itself is the bundle's.
+- **league/flysystem-bundle** - `Base\Service\Flysystem` (the `flysystem` service, which the
+  file, image, upload, backup and cache-clear services read) is the core's own class, built from
+  a PSR-11 container of storages by name: the services tagged `flysystem.storage`, which the
+  bundle tags from the application's `config/packages/flysystem.yaml`. Without the bundle,
+  `FlysystemStoragesPass` gives omnibase's local storages: `local.cache`
+  (`var/cache/<env>/images`), `local.uploads` and `local.wysiwyg` (`var/storage/...`), each
+  with its `.public` under `public/`.
 
 The others have a fallback:
 
 | Bundle | Without it |
 |---|---|
+| scheb/2fa | the user still declares its interfaces when the package is installed; no two-factor sign-in |
+| league/flysystem-bundle | the `flysystem` service on omnibase's local storages (above) |
 | hwi/oauth-bundle | the service `Base\Security\UserProvider` is a `UserProvider` (with it, an `OAuthUserProvider`: the same, declared OAuth-aware); `oauth_available()` false |
 | web-auth/webauthn-symfony-bundle | `PasskeyRepository` and `WebauthnUserEntityRepository` are not registered (their interfaces are the bundle's); no passkeys |
 | api-platform/symfony | the decoration of its resource name collection is dropped; `#[ApiResource]` is an attribute nothing reads |

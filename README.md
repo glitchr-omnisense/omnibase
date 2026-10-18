@@ -51,9 +51,10 @@ composer require scheb/2fa league/flysystem-bundle hwi/oauth-bundle web-auth/web
     glitchr/ux-google glitchr/well-known nelmio/cors-bundle nelmio/security-bundle
 ```
 
-`scheb/2fa` and `league/flysystem-bundle` are required de facto (`Base\Entity\User` implements
-scheb's interfaces, `Base\Service\Flysystem` extends the bundle's factory); without one of the
-others the container still compiles. An application coming from 3.x adds `omnibridge/symfony` and
+Without any one of them the container still compiles: since step C7b `Base\Entity\User`
+declares Security's and scheb/2fa's interfaces where they are installed (`Base\Contract\SecurityUser`,
+`TwoFactorUser`), and `Base\Service\Flysystem` is the core's own class, on omnibase's local storages
+without league/flysystem-bundle. An application coming from 3.x adds `omnibridge/symfony` and
 the bundles it did not require itself, and updates those alone. The 3.x branch
 (`omniscient/omnibase:3.0.*-dev`) still requires the framework itself. See
 [docs/20-architecture/packages.md](docs/20-architecture/packages.md).

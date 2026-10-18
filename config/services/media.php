@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -303,8 +304,10 @@ return static function (ContainerConfigurator $container): void {
                 new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),
             ]);
 
+    // The storages by name: those league/flysystem-bundle tags from the application's configuration
+    // (what its own lazy factory reads), or omnibase's local ones without it (FlysystemStoragesPass).
     $services->set('Base\Service\Flysystem')
-        ->parent('flysystem.adapter.lazy.factory')
+        ->args([tagged_locator('flysystem.storage', 'storage')])
         ->public();
 
 

@@ -2,10 +2,15 @@
 
 namespace Tests\Base\DependencyInjection;
 
+use Base\Contract\Framework;
+use Base\Entity\User;
 use Base\Security\OAuthUserProvider;
+use Base\Service\Flysystem;
+use Base\Service\FlysystemInterface;
 use Base\Security\UserProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Tests\Base\DependencyInjection\Fixtures\WithoutSuggestedBundlesKernel;
@@ -48,6 +53,9 @@ class SuggestedBundlesTest extends KernelTestCase
         foreach (['symfony/var-dumper', 'symfony/error-handler', 'web-auth/webauthn-lib', 'doctrine/common', 'omnibridge/doctrine', 'omnibridge/twig', 'doctrine/orm', 'twig/twig'] as $fondation) {
             $this->assertArrayHasKey($fondation, $composer['require'], $fondation.' is loaded by the Fondation');
         }
+        foreach (['scheb/2fa', 'league/flysystem-bundle'] as $package) {
+            $this->assertStringNotContainsString('de facto', $composer['suggest'][$package], $package.' is no longer required de facto (C7b)');
+        }
         foreach (['omnibridge/symfony', 'scheb/2fa', 'league/flysystem-bundle', 'hwi/oauth-bundle', 'web-auth/webauthn-symfony-bundle', 'api-platform/symfony', 'symfony/webpack-encore-bundle', 'glitchr/ux-google'] as $package) {
             $this->assertArrayHasKey($package, $composer['suggest'], $package.' is suggested');
             $this->assertArrayHasKey($package, $composer['require-dev'], $package.' is there for the core\'s own suite');
@@ -62,6 +70,54 @@ class SuggestedBundlesTest extends KernelTestCase
         if (interface_exists('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface')) {
             $this->assertContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(OAuthUserProvider::class))->getInterfaceNames());
         }
+    }
+
+    /**
+     * Base\Entity\User under Symfony implements every interface it did up to 4.0 (plan "omnibase
+     * agnostique", C7b): Security's and scheb/2fa's, through Base\Contract\SecurityUser and
+     * TwoFactorUser, the packages being installed here and the host not saying it runs without them.
+     */
+    public function testTheUserImplementsSecurityAndTwoFactorInterfacesUnderSymfony(): void
+    {
+        $this->assertFalse(Framework::isWithout());
+        foreach ([
+            'Symfony\\Component\\Security\\Core\\User\\UserInterface',
+            'Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInterface',
+            'Scheb\\TwoFactorBundle\\Model\\Totp\\TwoFactorInterface',
+            'Scheb\\TwoFactorBundle\\Model\\Email\\TwoFactorInterface',
+            'Scheb\\TwoFactorBundle\\Model\\BackupCodeInterface',
+            'Scheb\\TwoFactorBundle\\Model\\TrustedDeviceInterface',
+        ] as $interface) {
+            $this->assertTrue(is_subclass_of(User::class, $interface), $interface);
+        }
+
+        // Without its constructor: it reads the application's App\Enum\UserRole, not needed here.
+        $user = (new \ReflectionClass(User::class))->newInstanceWithoutConstructor();
+        $this->assertNull($user->getTotpAuthenticationConfiguration());
+        $user->setTotpSecret('JBSWY3DPEHPK3PXP');
+        $this->assertSame('JBSWY3DPEHPK3PXP', $user->getTotpAuthenticationConfiguration()?->getSecret());
+    }
+
+    /**
+     * Base\Service\Flysystem is the core's own class (C7b): no parent, built from any PSR-11
+     * container of operators by name - here a locator, as the `flysystem.storage` tags give it.
+     */
+    public function testFlysystemIsBuiltFromAContainerOfStorages(): void
+    {
+        $this->assertFalse(get_parent_class(Flysystem::class));
+        $root = sys_get_temp_dir().'/omnibase-flysystem-'.bin2hex(random_bytes(4));
+        $flysystem = new Flysystem(new ServiceLocator([
+            'local.cache' => fn () => new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($root.'/cache')),
+            'local.cache.public' => fn () => new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($root.'/public')),
+        ]));
+
+        $this->assertTrue($flysystem->hasStorage('local.cache'));
+        $this->assertFalse($flysystem->hasStorage('local.uploads'));
+        $this->assertSame(['local.cache'], array_values($flysystem->getStorageNames(false)));
+        $this->assertTrue($flysystem->write('a/b.txt', 'abbey road'));
+        $this->assertSame('abbey road', $flysystem->read('a/b.txt'));
+        $this->assertSame($root.'/cache/a/b.txt', $flysystem->get('a/b.txt'));
+        (new Filesystem())->remove($root);
     }
 
     public function testAnApplicationWithoutTheSuggestedBundlesCompilesAndAnswers(): void
@@ -97,6 +153,14 @@ class SuggestedBundlesTest extends KernelTestCase
         $this->assertFalse($container->has('Base\\ApiPlatform\\Metadata\\Resource\\Factory\\OverriddenResourceNameCollectionFactory'));
         // ga.service (glitchr/ux-google) and Encore's lookup given as null.
         $this->assertNull((fn () => $this->gaService)->call($container->get('Base\\Subscriber\\AnalyticsSubscriber')));
+
+        // league/flysystem-bundle left out: the `flysystem` service on omnibase's local storages.
+        $flysystem = $container->get('flysystem');
+        $this->assertInstanceOf(FlysystemInterface::class, $flysystem);
+        $this->assertSame(['local.cache', 'local.uploads', 'local.wysiwyg'], array_values($flysystem->getStorageNames(false)));
+        $this->assertSame($kernel->getProjectDir().'/var/cache/test/images/', $flysystem->getPublicRoot());
+        // scheb/2fa's bundle left out: the user still declares its interfaces (the package is installed).
+        $this->assertTrue(is_subclass_of(User::class, 'Scheb\\TwoFactorBundle\\Model\\Totp\\TwoFactorInterface'));
 
         // Pages: the sign-in page prints the core's encore_entry_script_tags() without Encore's bundle.
         foreach (['/login', '/'] as $uri) {
