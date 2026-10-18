@@ -788,11 +788,12 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
      */
     public function isTester()
     {
-        if (!$this->getService()->isDebug()) {
+        // The Environment contract and the parameters (C4b), BaseService's isDebug() and parameter bag under Symfony.
+        if (!Runtime::environment()->isDebug()) {
             return false;
         }
 
-        foreach ($this->getService()->getParameterBag("base.notifier.test_recipients") as $testRecipient) {
+        foreach (Runtime::parameters()->get("base.notifier.test_recipients") as $testRecipient) {
             if (preg_match("/" . $testRecipient . "/", $this->getEmail())) {
                 return true;
             }
@@ -1264,7 +1265,7 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
 
     public static function getActiveDelay(): int
     {
-        return self::getParameterBag()->get("base.user.active_delay");
+        return Runtime::parameters()->get("base.user.active_delay");
     }
 
     public function isActive(): bool
@@ -1274,7 +1275,7 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
 
     public static function getOnlineDelay(): int
     {
-        return self::getParameterBag()->get("base.user.online_delay");
+        return Runtime::parameters()->get("base.user.online_delay");
     }
 
     public function isOnline(): bool

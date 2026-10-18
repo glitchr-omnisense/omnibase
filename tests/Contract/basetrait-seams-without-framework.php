@@ -19,9 +19,13 @@
  *   route.
  * - the Routes contract (and Urls): Semantic's and Widget\Route's declared
  *   path, route and icons, Widget\Route's links.
+ * - the Environment contract and the parameters (an ArrayParameterBag): User's
+ *   delays and tester's check, a Token built (its throttling, its salt), a
+ *   secured entity's vault.
  * Returns what they answered.
  */
 
+use Base\Contract\Environment;
 use Base\Contract\Link;
 use Base\Contract\Locales;
 use Base\Contract\Media;
@@ -33,13 +37,17 @@ use Base\Contract\Urls;
 use Base\Entity\Layout\Image;
 use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Layout\Semantic;
+use Base\Entity\Layout\SettingIntl;
 use Base\Entity\Layout\Widget\Route as RouteWidget;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
+use Base\Entity\User;
 use Base\Entity\User\Token;
 use Base\Exception\MissingContractException;
+use Base\Service\ArrayParameterBag;
 use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
+use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
 use Omnibridge\Twig\Contract\Translations as OmnibridgeTranslations;
 
@@ -236,6 +244,41 @@ $answers['route widget, route'] = $menu->getRoute();
 $answers['route widget, icons'] = $menu->__iconize();
 $answers['route widget, link'] = $menu->__toLink(['page' => 2]);
 $answers['route widget, url'] = (new RouteWidget('Le blog', 'blog'))->generate(Link::ABSOLUTE_URL);
+
+// Environment and parameters: what the application runs as, and its parameters by a dotted path.
+Runtime::set(Environment::class, new class implements Environment {
+    public function name(): string
+    {
+        return 'prod';
+    }
+
+    public function isDebug(): bool
+    {
+        return true;
+    }
+
+    public function secret(): string
+    {
+        return 'not-so-secret';
+    }
+});
+Runtime::set(ParameterBagInterface::class, new ArrayParameterBag([
+    'base.user.active_delay' => 300,
+    'base.user.online_delay' => 120,
+    'base.user.token_default_throttling' => 60,
+    'base.notifier.test_recipients' => ['@lesringostars\\.test$'],
+]));
+$answers['user, active delay'] = User::getActiveDelay();
+$answers['user, online delay'] = User::getOnlineDelay();
+$member = (new ReflectionClass(User::class))->newInstanceWithoutConstructor();
+$answers['user, a tester'] = $member->setEmail('paul@lesringostars.test')->isTester();
+$answers['user, not a tester'] = $member->setEmail('paul@example.org')->isTester();
+$token = new Token('verify-email', 3600);
+$answers['token, throttling'] = (new ReflectionProperty(Token::class, 'throttle'))->getValue($token);
+$answers['token, salted with the secret'] = (new ReflectionProperty(Token::class, 'hashIds'))->getValue($token)->encodeHex('c4b0') === (new Hashids\Hashids('not-so-secret'))->encodeHex('c4b0');
+$setting = new SettingIntl();
+$answers['vault, secured'] = $setting->setSecure(true)->getVault();
+$answers['vault, not secured'] = $setting->setSecure(false)->getVault();
 
 Runtime::reset();
 

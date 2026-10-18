@@ -2,6 +2,7 @@
 
 namespace Base\Database\Entity\Extension;
 
+use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -58,6 +59,7 @@ trait VaultTrait
      */
     public function setSecure(bool $secure)
     {
-        return $this->setVault($secure === true ? $this->getEnvironment() : null);
+        // Sealed for the environment it runs as (the Environment contract, C4b).
+        return $this->setVault($secure === true ? Runtime::environment()->name() : null);
     }
 }

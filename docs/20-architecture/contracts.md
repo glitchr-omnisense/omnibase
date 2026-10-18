@@ -13,6 +13,8 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 | Contract | What it answers | Under Symfony |
 |---|---|---|
 | `Base\Contract\Urls` (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
+| `Base\Contract\Environment` (step C4b) | the environment's name (`prod`, `dev`, `test`), debug, the application's secret | `Base\Bridge\Symfony\KernelEnvironment`: `kernel.environment`, `kernel.debug`, `kernel.secret` - `BaseService::getEnvironment()`, `isDebug()`, `getSalt()` |
+| `Base\Service\ParameterBagInterface` (step C3c; in the registry since C4b) | the application's parameters by a dotted path | `parameter_bag`: `HotParameterBag`, the settings stored in the database over the container's - `BaseTrait::getParameterBag()`; where there is no container, `Base\Service\ArrayParameterBag` |
 | `Base\Contract\Routes` (step C4b) | what the routes are beyond their addresses: a route's declared path (`pattern()`), the route an address leads to (`match()`), a route's icons | `Base\Bridge\Symfony\RouterRoutes`: `advanced_router` (its route collection, `getRouteName()`) and the `IconProvider` |
 | `Omnibridge\Twig\Contract\Translations` | `trans()`, ICU messages | `Base\Bridge\Symfony\TranslatorTranslations`: the `translator` chain (texts rewritten in the back office, `Base\Service\Translator`, Symfony's) - Twig's `\|trans` |
 | `Base\Contract\Translations` (step C4b; omnibridge/twig's `Translations` and `exists()`) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
@@ -164,6 +166,10 @@ sites that call them.
 | `Semantic::getRoute()`, `Widget\Route::getRoute()` | `getRouter()->getRoute($this->getUrl())`: a `Route` object handed to a `?string` return type, a `TypeError` for any route found | `Runtime::routes()->match($url)`: the name of the route the address leads to |
 | `Semantic::getRouteIcons()`, `Widget\Route::getRouteIcons()` and its `__iconize()` | `getIconProvider()->getRouteIcons($name)` (every route's icons for no route) | `Runtime::routes()->icons($name)` (null for no route) |
 | `Widget\Route::__toLink()`, `getUrl()`, `generate()` | `getRouter()->generate()` | `Link::to()`, as `Semantic` since C3e (a route the router cannot make: null; no Urls: `MissingContractException`) |
+| `User::getActiveDelay()`, `getOnlineDelay()` | `self::getParameterBag()->get()` | `Runtime::parameters()->get()` (`EnvironmentTest`) |
+| `User::isTester()` | `getService()->isDebug()`, `getService()->getParameterBag('base.notifier.test_recipients')` | `Runtime::environment()->isDebug()`, `Runtime::parameters()->get()` |
+| `Token::__construct()` | `getService()->getParameterBag('base.user.token_default_throttling')`, `getService()->getSalt()` | `Runtime::parameters()->get()`, `Runtime::environment()->secret()` (a token is now built where there is no framework) |
+| `VaultTrait::setSecure()` | `getEnvironment()` | `Runtime::environment()->name()` |
 
 **What an entity is called: `Base\Service\Model\EntityNouns`.** The rule of
 `Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:
