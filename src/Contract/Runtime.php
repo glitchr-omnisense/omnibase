@@ -34,7 +34,7 @@ use Symfony\Component\Mailer\MailerInterface;
  * address, a route's icons, C4b), omnibridge/twig's Translations (trans, ICU)
  * and omnibase's, which asks exists() too (C4b), Nouns (what an entity is
  * called, the rule of Base\Service\Model\EntityNouns), Access (isGranted, the
- * user), Locales (current, default, available), Files (public URL, local path
+ * user), Sessions (a user signed out, C4b), Locales (current, default, available), Files (public URL, local path
  * of a stored file), Media (the image route's addresses, C4b), Pictures (an
  * image's address at a size), Texts (a stored text rendered, its table of
  * contents) and Tokens (a form's token for an intent) for the screens (C5),
@@ -183,6 +183,12 @@ final class Runtime
     public static function access(): Access
     {
         return self::get(Access::class);
+    }
+
+    /** The visitor's session (C4b): a user signed out when it is the one signed in. */
+    public static function sessions(): Sessions
+    {
+        return self::get(Sessions::class);
     }
 
     public static function locales(): Locales

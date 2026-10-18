@@ -415,6 +415,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\SecurityAccess')
         ->args([service('security.authorization_checker'), service('security.token_storage')]);
     $services->alias('Base\Contract\Access', 'Base\Bridge\Symfony\SecurityAccess');
+    $services->set('Base\Bridge\Symfony\SecuritySessions')
+        ->args([service('security.token_storage'), service('advanced_router')->nullOnInvalid()]);
+    $services->alias('Base\Contract\Sessions', 'Base\Bridge\Symfony\SecuritySessions');
     $services->set('Base\Bridge\Symfony\LocalizerLocales')
         ->args([service('localizer')]);
     $services->alias('Base\Contract\Locales', 'Base\Bridge\Symfony\LocalizerLocales');

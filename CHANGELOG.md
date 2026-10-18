@@ -134,6 +134,13 @@ compared under Symfony with the service it replaces, and run where there is no f
   `BaseTrait::getParameterBag()` gives; `ContractsPass::SERVICES`). `User::getActiveDelay()`,
   `getOnlineDelay()`, `isTester()`, `Token::__construct()` (default throttling, the hash salt)
   and `VaultTrait::setSecure()` ask them. `EnvironmentTest`. Fondation 772 -> 774.
+- **A user signed out, and its locale**: `Base\Contract\Sessions` (`signOut()`), under
+  Symfony `Base\Bridge\Symfony\SecuritySessions` (the token storage, the `REMEMBERME`
+  cookie); `Runtime::sessions()`. `User::logout()` asks it (else kicks, as before);
+  `User::getLocale()` and `setLocale()` without a locale of the user's take
+  `Runtime::locales()->getLocale()` where they took `Localizer::__toLocale()` of the
+  translator's locale - the same for every language the site speaks. `User` reads nothing
+  through `BaseTrait` any more. `SessionsTest`. Fondation 774 -> 776.
 
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its

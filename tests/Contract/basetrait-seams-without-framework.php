@@ -22,6 +22,7 @@
  * - the Environment contract and the parameters (an ArrayParameterBag): User's
  *   delays and tester's check, a Token built (its throttling, its salt), a
  *   secured entity's vault.
+ * - the Sessions and Locales contracts: User's logout() and its locale.
  * Returns what they answered.
  */
 
@@ -32,6 +33,7 @@ use Base\Contract\Media;
 use Base\Contract\Nouns;
 use Base\Contract\Routes;
 use Base\Contract\Runtime;
+use Base\Contract\Sessions;
 use Base\Contract\Translations;
 use Base\Contract\Urls;
 use Base\Entity\Layout\Image;
@@ -45,11 +47,15 @@ use Base\Entity\User;
 use Base\Entity\User\Token;
 use Base\Exception\MissingContractException;
 use Base\Service\ArrayParameterBag;
+use Base\Service\Model\ClassAliases;
 use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
 use Omnibridge\Twig\Contract\Translations as OmnibridgeTranslations;
+
+// The Base\ / App\ convention as the core resolves it without a kernel (User's states are App\Enum\UserState).
+ClassAliases::register();
 
 $answers = [];
 
@@ -279,6 +285,32 @@ $answers['token, salted with the secret'] = (new ReflectionProperty(Token::class
 $setting = new SettingIntl();
 $answers['vault, secured'] = $setting->setSecure(true)->getVault();
 $answers['vault, not secured'] = $setting->setSecure(false)->getVault();
+
+// Sessions and Locales: a user signed out or kicked, a user's locale.
+Runtime::set(Sessions::class, new class implements Sessions {
+    public ?object $visitor = null;
+
+    public function signOut(object $user): bool
+    {
+        if ($user !== $this->visitor) {
+            return false;
+        }
+        $this->visitor = null;
+
+        return true;
+    }
+});
+$visitor = (new ReflectionClass(User::class))->newInstanceWithoutConstructor();
+$visitor->setIsKicked(false);
+Runtime::sessions()->visitor = $visitor;
+$visitor->logout();
+$answers['user, the visitor signed out'] = [null === Runtime::sessions()->visitor, $visitor->isKicked()];
+$absent = (new ReflectionClass(User::class))->newInstanceWithoutConstructor();
+$absent->setIsKicked(false);
+$absent->logout();
+$answers['user, someone else kicked'] = $absent->isKicked();
+$answers['user, the page\'s locale'] = $absent->getLocale();
+$answers['user, its own locale'] = $absent->setLocale('en-GB')->getLocale();
 
 Runtime::reset();
 
