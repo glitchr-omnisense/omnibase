@@ -398,6 +398,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\RouterUrls')
         ->args([service('advanced_router'), service('assets.packages')->nullOnInvalid()]);
     $services->alias('Base\Contract\Urls', 'Base\Bridge\Symfony\RouterUrls');
+    $services->set('Base\Bridge\Symfony\KernelEnvironment')
+        ->args(['%kernel.environment%', '%kernel.debug%', '%kernel.secret%']);
+    $services->alias('Base\Contract\Environment', 'Base\Bridge\Symfony\KernelEnvironment');
     $services->set('Base\Bridge\Symfony\RouterRoutes')
         ->args([service('advanced_router'), service('base.service.icon')->nullOnInvalid()]);
     $services->alias('Base\Contract\Routes', 'Base\Bridge\Symfony\RouterRoutes');

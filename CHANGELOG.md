@@ -126,6 +126,14 @@ compared under Symfony with the service it replaces, and run where there is no f
   `Route` object to its `?string` return type (a `TypeError` for any route found) and now
   names the route; `getRouteIcons()` without a route is null (it gave every route's icons).
   `RoutesTest`. Fondation 770 -> 772.
+- **What the application runs as, and its parameters**: `Base\Contract\Environment`
+  (`name()`, `isDebug()`, `secret()`), under Symfony `Base\Bridge\Symfony\KernelEnvironment`
+  (`kernel.environment`, `kernel.debug`, `kernel.secret`); `Runtime::environment()`, and
+  `Runtime::parameters()`: `Base\Service\ParameterBagInterface`, bound under Symfony to
+  `parameter_bag` (the settings stored in the database over the container's, what
+  `BaseTrait::getParameterBag()` gives; `ContractsPass::SERVICES`). `User::getActiveDelay()`,
+  `getOnlineDelay()`, `isTester()`, `Token::__construct()` (default throttling, the hash salt)
+  and `VaultTrait::setSecure()` ask them. `EnvironmentTest`. Fondation 772 -> 774.
 
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its

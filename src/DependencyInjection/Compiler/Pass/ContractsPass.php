@@ -3,6 +3,7 @@
 namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\Contract\Access;
+use Base\Contract\Environment;
 use Base\Contract\Files;
 use Base\Contract\Locales;
 use Base\Contract\Media;
@@ -13,6 +14,7 @@ use Base\Contract\Texts;
 use Base\Contract\Tokens;
 use Base\Contract\Translations as BaseTranslations;
 use Base\Contract\Urls;
+use Base\Service\ParameterBagInterface;
 use Omnibridge\Twig\Contract\Translations;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -43,6 +45,8 @@ final class ContractsPass implements CompilerPassInterface
     public const CONTRACTS = [
         Urls::class,
         Routes::class,
+        Environment::class,
+        ParameterBagInterface::class,
         Translations::class,
         BaseTranslations::class,
         Nouns::class,
@@ -58,12 +62,25 @@ final class ContractsPass implements CompilerPassInterface
         MailerInterface::class,
     ];
 
+    /**
+     * The contracts bound to another service than their interface's name:
+     * the parameters are `parameter_bag` (HotParameterBag, the settings stored
+     * in the database over the container's), what BaseTrait's getParameterBag()
+     * gives - the interface's name is the plain Base\Service\ParameterBag.
+     *
+     * @var array<class-string, string>
+     */
+    public const SERVICES = [
+        ParameterBagInterface::class => 'parameter_bag',
+    ];
+
     public function process(ContainerBuilder $container): void
     {
         $contracts = [];
         foreach (self::CONTRACTS as $contract) {
-            if ($container->has($contract)) {
-                $contracts[$contract] = new Reference($contract);
+            $id = self::SERVICES[$contract] ?? $contract;
+            if ($container->has($id)) {
+                $contracts[$contract] = new Reference($id);
             }
         }
 

@@ -3,6 +3,7 @@
 namespace Base\Contract;
 
 use Base\Exception\MissingContractException;
+use Base\Service\ParameterBagInterface;
 use Omnibridge\Twig\Contract\Translations;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
@@ -27,14 +28,17 @@ use Symfony\Component\Mailer\MailerInterface;
  *   same interfaces;
  * - or one service at a time (set()), which wins over the container's.
  *
- * The contracts: Urls (path, url, asset), Routes (a route's declared path,
- * the route of an address, a route's icons, C4b), omnibridge/twig's Translations
- * (trans, ICU) and omnibase's, which asks exists() too (C4b), Nouns (what
- * an entity is called, the rule of Base\Service\Model\EntityNouns), Access
- * (isGranted, the user), Locales (current, default, available), Files
- * (public URL, local path of a stored file), Media (the image route's
- * addresses, C4b), Pictures (an image's address at a size), Texts (a stored text rendered, its table of contents) and Tokens
- * (a form's token for an intent) for the screens (C5), PSR-20's clock,
+ * The contracts: Environment (its name, debug, the secret, C4b), the
+ * application's parameters (Base\Service\ParameterBagInterface, C4b), Urls
+ * (path, url, asset), Routes (a route's declared path, the route of an
+ * address, a route's icons, C4b), omnibridge/twig's Translations (trans, ICU)
+ * and omnibase's, which asks exists() too (C4b), Nouns (what an entity is
+ * called, the rule of Base\Service\Model\EntityNouns), Access (isGranted, the
+ * user), Locales (current, default, available), Files (public URL, local path
+ * of a stored file), Media (the image route's addresses, C4b), Pictures (an
+ * image's address at a size), Texts (a stored text rendered, its table of
+ * contents) and Tokens (a form's token for an intent) for the screens (C5),
+ * PSR-20's clock,
  * PSR-14's event dispatcher, symfony/mailer's MailerInterface (a standalone
  * component, allowed in the Fondation by D1; Laravel's own mail is built on
  * it). A contract asked and not filled throws MissingContractException,
@@ -142,6 +146,21 @@ final class Runtime
     public static function urls(): Urls
     {
         return self::get(Urls::class);
+    }
+
+    /** What the application runs as (C4b): its environment's name, debug, its secret. */
+    public static function environment(): Environment
+    {
+        return self::get(Environment::class);
+    }
+
+    /**
+     * The application's parameters (C4b), read by a dotted path; under Symfony
+     * the container's with the settings stored in the database (parameter_bag).
+     */
+    public static function parameters(): ParameterBagInterface
+    {
+        return self::get(ParameterBagInterface::class);
     }
 
     /** What the routes are beyond their addresses (C4b): a route's path, an address's route, a route's icons. */

@@ -67,6 +67,8 @@
  * Base\Bridge\Symfony\ServiceMedia, MediaService's answers, which names the framework and loads none of it).
  * 772 after step C4b's routes (+2: Base\Contract\Routes, a route's declared path, an address's route, a route's
  * icons, and its Symfony side Base\Bridge\Symfony\RouterRoutes, the router's and the IconProvider's answers).
+ * 774 after step C4b's environment (+2: Base\Contract\Environment, the environment's name, debug, the secret, and
+ * its Symfony side Base\Bridge\Symfony\KernelEnvironment, the kernel's).
  */
 
 return [
@@ -87,6 +89,7 @@ return [
     Base\Bridge\Symfony\AccountScreens::class,
     Base\Bridge\Symfony\CsrfTokens::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
+    Base\Bridge\Symfony\KernelEnvironment::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\MediaPictures::class,
     Base\Bridge\Symfony\NotificationMessages::class,
@@ -106,6 +109,7 @@ return [
     Base\Console\Console::class,
     Base\Console\ConsoleInterface::class,
     Base\Contract\Access::class,
+    Base\Contract\Environment::class,
     Base\Contract\Files::class,
     Base\Contract\Framework::class,
     Base\Contract\Link::class,

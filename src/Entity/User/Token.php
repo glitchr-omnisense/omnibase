@@ -47,8 +47,9 @@ class Token implements IconizeInterface
         $this->expireAt = null;
         $this->allowAt = null;
 
-        $this->throttle = $throttle ?? $this->getService()->getParameterBag("base.user.token_default_throttling");
-        $this->hashIds = new Hashids($this->getService()->getSalt());
+        // The parameters and the Environment contract's secret (C4b), BaseService's parameter bag and salt under Symfony.
+        $this->throttle = $throttle ?? Runtime::parameters()->get("base.user.token_default_throttling");
+        $this->hashIds = new Hashids(Runtime::environment()->secret());
         $this->generate($expiry, $this->throttle);
     }
 
