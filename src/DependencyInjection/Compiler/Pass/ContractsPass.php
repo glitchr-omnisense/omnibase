@@ -10,6 +10,7 @@ use Base\Contract\Media;
 use Base\Contract\Nouns;
 use Base\Contract\Pictures;
 use Base\Contract\Routes;
+use Base\Contract\Sessions;
 use Base\Contract\Texts;
 use Base\Contract\Tokens;
 use Base\Contract\Translations as BaseTranslations;
@@ -51,6 +52,7 @@ final class ContractsPass implements CompilerPassInterface
         BaseTranslations::class,
         Nouns::class,
         Access::class,
+        Sessions::class,
         Locales::class,
         Files::class,
         Pictures::class,

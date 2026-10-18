@@ -298,7 +298,7 @@ final class BareTest extends TestCase
      * What omnibase's classes read through BaseTrait's services, answered through the contracts where
      * there is no framework (plan "omnibase agnostique", C4b): tests/Contract/basetrait-seams-without-
      * framework.php, run by bare with the autoloader alone, gives plain contracts and asks the real
-     * classes of the core. NounsTest, DurationTest, MediaTest, RoutesTest, EnvironmentTest and the tests named in the script compare each
+     * classes of the core. NounsTest, DurationTest, MediaTest, RoutesTest, EnvironmentTest and SessionsTest in the script compare each
      * answer with the service it came from, under Symfony.
      */
     public function testTheBaseTraitSeamsAnswerWithoutTheFramework(): void
@@ -362,6 +362,11 @@ final class BareTest extends TestCase
             'token, salted with the secret' => true,
             'vault, secured' => 'prod',
             'vault, not secured' => null,
+            // Sessions and Locales: the visitor signed out (not kicked), someone else kicked, the locales.
+            'user, the visitor signed out' => [true, false],
+            'user, someone else kicked' => true,
+            'user, the page\'s locale' => 'fr-FR',
+            'user, its own locale' => 'en-GB',
         ], $run['result']);
     }
 

@@ -20,6 +20,7 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 | `Base\Contract\Translations` (step C4b; omnibridge/twig's `Translations` and `exists()`) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
 | `Base\Contract\Nouns` (step C4b) | what an entity is called: its noun (`entity()`), singular or plural, a gender, a level of politeness, a property's label; `entityExists()` | `Base\Service\Model\EntityNouns` from `Base\Service\Translator::getEntityNouns()`: the rule `transEntity()` answers by |
 | `Base\Contract\Access` | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
+| `Base\Contract\Sessions` (step C4b) | a user signed out when it is the visitor signed in (`signOut()`), false otherwise | `Base\Bridge\Symfony\SecuritySessions`: the token storage, the `REMEMBERME` cookie on the path and the site's domain |
 | `Base\Contract\Locales` | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
 | `Base\Contract\Files` | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
 | `Base\Contract\Media` (step C4b) | the image route for a stored image: the extension it is served with, its obfuscated `data`, the route's address | `Base\Bridge\Symfony\ServiceMedia`: `MediaService` (`getExtension()`, `obfuscate()`, `generate()`) |
@@ -170,6 +171,19 @@ sites that call them.
 | `User::isTester()` | `getService()->isDebug()`, `getService()->getParameterBag('base.notifier.test_recipients')` | `Runtime::environment()->isDebug()`, `Runtime::parameters()->get()` |
 | `Token::__construct()` | `getService()->getParameterBag('base.user.token_default_throttling')`, `getService()->getSalt()` | `Runtime::parameters()->get()`, `Runtime::environment()->secret()` (a token is now built where there is no framework) |
 | `VaultTrait::setSecure()` | `getEnvironment()` | `Runtime::environment()->name()` |
+| `User::getLocale()`, `setLocale()` without a locale of the user's | `Localizer::__toLocale(getTranslator()->getLocale())` | `Runtime::locales()->getLocale()` (`SessionsTest`: the same for every language the site speaks; for a bare language it does not speak, the Localizer's form, `ja-FR`, as the rest of the page, where intl's country came before, `ja-JP`) |
+| `User::logout()` | `getTokenStorage()`: the token forgotten, the cookies cleared, through `getRouter()->getDomain()`; else `kick()` | `Runtime::sessions()->signOut($this)`, else `kick()` |
+
+`Base\Entity\User` reads nothing through `BaseTrait` any more (it still uses it: the sites
+call its accessors on a user).
+
+**Where C4b stops.** Left on `BaseTrait`, each for a reason: `Notification` (the notifier,
+Twig and the project's directory - its message half is already `Bridge\Symfony`, step C3f;
+the notifier is a Symfony service by nature), `AbstractExtension::isEntity()` (Doctrine's
+metadata, a question for `Bridge/Doctrine`), `Uploader`'s `AttributeReader` (omnibase's own
+service, already in the Fondation), `MediaEnhancer` (the media service inside the Wysiwyg
+pipeline, which `Texts` already covers from outside), the forms, fields, controllers and
+validators (Symfony by nature, decision D3), and the bundles' entities (step C8).
 
 **What an entity is called: `Base\Service\Model\EntityNouns`.** The rule of
 `Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:

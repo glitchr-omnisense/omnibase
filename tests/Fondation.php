@@ -69,6 +69,8 @@
  * icons, and its Symfony side Base\Bridge\Symfony\RouterRoutes, the router's and the IconProvider's answers).
  * 774 after step C4b's environment (+2: Base\Contract\Environment, the environment's name, debug, the secret, and
  * its Symfony side Base\Bridge\Symfony\KernelEnvironment, the kernel's).
+ * 776 after step C4b's sessions (+2: Base\Contract\Sessions, a user signed out, and its Symfony side
+ * Base\Bridge\Symfony\SecuritySessions, the token storage and the remember-me cookie).
  */
 
 return [
@@ -97,6 +99,7 @@ return [
     Base\Bridge\Symfony\RouterUrls::class,
     Base\Bridge\Symfony\ScreenResponder::class,
     Base\Bridge\Symfony\SecurityAccess::class,
+    Base\Bridge\Symfony\SecuritySessions::class,
     Base\Bridge\Symfony\ServiceMedia::class,
     Base\Bridge\Symfony\SymfonyScreenContext::class,
     Base\Bridge\Symfony\TranslatorTranslations::class,
@@ -120,6 +123,7 @@ return [
     Base\Contract\Routes::class,
     Base\Contract\Runtime::class,
     Base\Contract\SecurityUser::class,
+    Base\Contract\Sessions::class,
     Base\Contract\SystemClock::class,
     Base\Contract\Texts::class,
     Base\Contract\Tokens::class,

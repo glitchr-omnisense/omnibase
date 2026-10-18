@@ -37,7 +37,6 @@ use Base\Database\Attribute\Timestamp;
 use Base\Database\Attribute\Uploader;
 use Base\Database\Attribute\Hashify;
 
-use Base\Service\Localizer;
 use Base\Notifier\Recipient\Recipient;
 use Base\Service\Model\IconizeInterface;
 
@@ -196,15 +195,15 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
     public function isGranted($role): bool { return Runtime::access()->isGranted($role, $this); }
 
     public function killSession() { $this->logout(); }
+    /**
+     * Signs this user out when it is the one signed in here (the Sessions
+     * contract, C4b: Security's token storage and the remember-me cookie under
+     * Symfony), else kicks it out of its sessions elsewhere.
+     */
     public function logout()
     {
-        $token = $this->getTokenStorage()->getToken();
-        if ($token === null || $token->getUser() !== $this) {
+        if (!Runtime::sessions()->signOut($this)) {
             $this->kick();
-        } else {
-            $this->getTokenStorage()->setToken(null);
-            setcookie("REMEMBERME", '', time() - 1);
-            setcookie("REMEMBERME", '', time() - 1, "/", $this->getRouter()->getDomain());
         }
     }
 
@@ -435,7 +434,8 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
 
     public function getLocale(): ?string
     {
-        return $this->locale ?? Localizer::__toLocale($this->getTranslator()->getLocale());
+        // The page's locale (the Locales contract, C4b) when the user has none of its own.
+        return $this->locale ?? Runtime::locales()->getLocale();
     }
 
     public function setLocale(?string $locale = null): self
@@ -443,7 +443,7 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
         if (empty($locale)) {
             $locale = $this->locale ?? null;
         }
-        $this->locale = $locale ?? Localizer::__toLocale($this->getTranslator()->getLocale());
+        $this->locale = $locale ?? Runtime::locales()->getLocale();
 
         if (!$this->locale) {
             throw new MissingLocaleException("Missing locale.");
