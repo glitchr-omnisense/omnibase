@@ -264,7 +264,8 @@ final class Stories
         return method_exists($thread, 'getReadingMinutes') ? (int) $thread->getReadingMinutes() : 0;
     }
 
-    private static function state(mixed $state): string
+    /** @internal a thread's state as the screens carry it: an enumeration's value, else the string */
+    public static function state(mixed $state): string
     {
         return $state instanceof \BackedEnum ? (string) $state->value : (string) $state;
     }
