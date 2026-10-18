@@ -71,6 +71,12 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   (`OMNIBASE_FRAMEWORK=symfony`) names the six. Fondation 758 -> 763 (`Base\Entity\User`,
   `Base\Service\Flysystem`, `Base\Contract\{Framework, SecurityUser, TwoFactorUser}`).
 - `extra.branch-alias`: `dev-4.x` is `4.0.x-dev`.
+- **Doctrine: on suit la dernière majeure, pas de maintenance parallèle.** `doctrine/orm`
+  `^3.4` and `doctrine/dbal` `^4.2` (omnibridge/doctrine's floors, which the core requires:
+  `^2.15|^3.0` and `^3.6|^4.0` said what could never install), `doctrine/collections` `^2.0`,
+  `doctrine/event-manager` `^2.0`, `doctrine/persistence` `^4.0`, `doctrine/common` `^3.0`:
+  the current major of each, open upwards, no older branch, no upper bound, no pinned
+  version, Doctrine as published (no patch, no fork).
 - Tests: `SuggestedBundlesTest` - `require` holds neither the framework nor a bundle, the
   Fondation's additions are there, the suggested bundles the code names are suggested and in
   `require-dev`; `UserProvider` names no interface of HWI; and the host application booted
