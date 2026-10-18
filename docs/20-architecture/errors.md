@@ -38,6 +38,26 @@ tests every refusal and every validation failure of a signed-in user read as
 "not found". Production was right. Tests that expected 404 for a refusal
 expect 403 now.)
 
+## File links
+
+The debug page's and the profiler's links open the file on the developer's machine
+when the site runs in a container: `APP_PATH` (the project's path on the host, which
+a site's Makefile writes in `.env.local`) is mapped from `kernel.project_dir` with
+Symfony's own format, `vscode://file/%f:%l&/srv/app/>/Users/me/site/`
+(`Base\Bridge\Symfony\FileLinks`). `debug.file_link_formatter` is decorated with
+Symfony's `FileLinkFormatter` on that format (the HTML error renderer and the
+profiler receive it), and `SYMFONY_IDE` is set to it when `Base\BaseBundle` is
+constructed, for the page Symfony's `ErrorHandler` renders by itself before a
+request is handled (a container that does not compile). A site's own
+`framework.ide` or `SYMFONY_IDE` is kept; one that already maps (`&...>`) too; with
+none, VS Code's format.
+
+Until 4.0, `Base\Inspector\HtmlErrorRenderer` and `FileLinkFormatter` did this by
+extending Symfony's classes - the formatter is `@final` - and glitchr/base-plugin
+patched symfony/error-handler for it (`@final` removed, `private` made `protected`,
+the `ErrorHandler`'s `new HtmlErrorRenderer` replaced). Gone: symfony/error-handler
+is installed as published.
+
 ## The 404 that are meant
 
 Two refusals are answered 404 on purpose, so as not to tell that the place

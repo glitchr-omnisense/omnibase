@@ -50,6 +50,36 @@ An application coming from 3.x already had every one of them, through the core: 
 them itself keeps them (Composer would otherwise remove what nothing requires any more). No
 Flex recipe runs again for a package already locked: nothing changes in `config/`.
 
+### Composer: omnibridge/composer
+
+The core requires one Composer plugin, **omnibridge/composer** (in place of
+glitchr/base-plugin until 4.0), and declares what it asks of it in its own
+`composer.json`, `extra.omnibridge`:
+
+- **the stubs** of `App\Entity`, `App\Enum`, `App\Form`, `App\Notifier` and
+  `App\Repository` - one per plain class `Base\<Name>\X` the application does not
+  define in `src/<Name>/`, the alias `AbstractBaseBundle` declares at run time - by
+  the providers `Base\Bridge\Composer\Stub\*`, written after every
+  `dump-autoload` into `vendor/composer/omnibridge/stubs/`, which no autoloader
+  reads (for an IDE; never a definition at run time; `StubsTest`). The providers
+  are loaded by the engine alone, outside the Fondation;
+- **one patch**, `process-timeout-from-env` on symfony/process: a `Process` built
+  without a timeout waits `SYMFONY_PROCESS_TIMEOUT` seconds, 60 when unset.
+
+An application allows the plugin:
+
+```json
+"config": { "allow-plugins": { "omnibridge/composer": true } }
+```
+
+and checks vendor/ in its CI with `composer omnibridge:patches --check` (and
+`composer omnibridge:stubs --check`). `composer omnibridge:patches --diff` shows
+the patch.
+
+Nothing else is changed in an application: its `bin/console` keeps its own line,
+`use Base\Console\Application;` in place of FrameworkBundle's (glitchr/base-plugin
+used to rewrite it at each install; a site made from the skeleton writes it once).
+
 ### None required de facto
 
 Up to step C7b two of them could not be left out; each has its fallback now, and the user
