@@ -109,6 +109,14 @@ compared under Symfony with the service it replaces, and run where there is no f
   and `getThrottleTimeStr()` ask it with `Runtime::translations()`. `DurationTest`: 24 lengths
   in French and English against the old `transTime()` copied, a rewritten unit, the getters.
   Fondation 767 -> 768.
+- **The image route's addresses**: `Base\Contract\Media` (`extension()`, `obfuscate()`,
+  `link()`), under Symfony `Base\Bridge\Symfony\ServiceMedia` over `MediaService`;
+  `Runtime::media()`. `Image::__toLink()` asks it and `Link::to()` where it asked
+  `getMediaService()` and `getRouter()`; `ImageCrop::__toLink()` asks it (its dead
+  `getExtensions()` call dropped). Their `$referenceType` defaults to `Link::ABSOLUTE_PATH`
+  (Routing's `UrlGeneratorInterface::ABSOLUTE_PATH`, the same 1, without loading Routing).
+  `MediaTest`: eleven requests on three images and on crops against their old code copied.
+  Fondation 768 -> 770.
 
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its

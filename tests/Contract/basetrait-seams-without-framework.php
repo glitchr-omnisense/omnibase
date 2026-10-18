@@ -15,13 +15,20 @@
  *   namespace; Thread's and Widget's __toString() without a title.
  * - Duration over the Translations contract: a number of seconds in words,
  *   Token's time left and throttle, Thread's time before it is published.
+ * - the Media contract (and Urls): Image's and ImageCrop's links to the image
+ *   route.
  * Returns what they answered.
  */
 
+use Base\Contract\Link;
 use Base\Contract\Locales;
+use Base\Contract\Media;
 use Base\Contract\Nouns;
 use Base\Contract\Runtime;
 use Base\Contract\Translations;
+use Base\Contract\Urls;
+use Base\Entity\Layout\Image;
+use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
 use Base\Entity\User\Token;
@@ -130,6 +137,68 @@ $thread = new Thread();
 $answers['thread, not to be published'] = $thread->getPublishTimeStr();
 $thread->setPublishedAt(new DateTime('+3 days 2 hours 30 seconds'));
 $answers['thread, to be published'] = preg_replace(['/ +/', '/ \\d+ secondes?$/'], [' ', ''], $thread->getPublishTimeStr());
+
+// Media and Urls: an image's link to the image route, a crop's.
+Runtime::set(Urls::class, new class implements Urls {
+    public function path(string $name, array $parameters = []): string
+    {
+        return '/'.$name.($parameters ? '?'.http_build_query($parameters) : '');
+    }
+
+    public function url(string $name, array $parameters = []): string
+    {
+        return 'https://lesringostars.test'.$this->path($name, $parameters);
+    }
+
+    public function asset(string $path): string
+    {
+        return $path;
+    }
+});
+Runtime::set(Media::class, new class implements Media {
+    public function extension(?string $path): ?string
+    {
+        return $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) ?: null : null;
+    }
+
+    public function obfuscate(?string $path, array $config = [], array $filters = []): ?string
+    {
+        return null === $path ? null : $path.'|'.($config['identifier'] ?? '-').'|'.(($config['webp'] ?? true) ? 'webp' : 'as-is').'|'.count($filters).' filter(s)';
+    }
+
+    public function link(string $route, array $parameters, ?string $path, array $config = []): ?string
+    {
+        return null === $path ? null : '/'.$route.'/'.$this->obfuscate($path, $config).(isset($parameters['extension']) ? '.'.$parameters['extension'] : '');
+    }
+});
+$image = new class extends Image {
+    public function __construct()
+    {
+    }
+
+    public function getSource()
+    {
+        return '/uploads/abbey-road.JPG';
+    }
+
+    public function getNaturalWidth(): ?int
+    {
+        return 640;
+    }
+
+    public function getNaturalHeight(): ?int
+    {
+        return 480;
+    }
+};
+$answers['image, link'] = $image->__toLink();
+$answers['image, thumbnail'] = $image->__toLink(['thumbnail' => [120, 80]]);
+$answers['image, its own extension'] = $image->__toLink(['webp' => false]);
+$answers['image, url'] = $image->__toLink(['crop' => 'square', 'extension' => 'png'], Link::ABSOLUTE_URL);
+$crop = new ImageCrop($image);
+$crop->setSlug('square');
+$answers['crop, link'] = $crop->__toLink();
+$answers['crop, its own extension'] = $crop->__toLink(['extension' => true, 'webp' => false]);
 
 Runtime::reset();
 

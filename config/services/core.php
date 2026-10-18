@@ -418,6 +418,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\MediaPictures')
         ->args([service('Base\Twig\Extension\CommonsTwigExtension')]);
     $services->alias('Base\Contract\Pictures', 'Base\Bridge\Symfony\MediaPictures');
+    $services->set('Base\Bridge\Symfony\ServiceMedia')
+        ->args([service('base.service.image')]);
+    $services->alias('Base\Contract\Media', 'Base\Bridge\Symfony\ServiceMedia');
     $services->set('Base\Bridge\Symfony\WysiwygTexts')
         ->args([service('Base\Twig\Extension\HtmlTwigExtension'), service('editor_enhancer')]);
     $services->alias('Base\Contract\Texts', 'Base\Bridge\Symfony\WysiwygTexts');

@@ -31,8 +31,8 @@ use Symfony\Component\Mailer\MailerInterface;
  * (trans, ICU) and omnibase's, which asks exists() too (C4b), Nouns (what
  * an entity is called, the rule of Base\Service\Model\EntityNouns), Access
  * (isGranted, the user), Locales (current, default, available), Files
- * (public URL, local path of a stored file), Pictures (an image's address at
- * a size), Texts (a stored text rendered, its table of contents) and Tokens
+ * (public URL, local path of a stored file), Media (the image route's
+ * addresses, C4b), Pictures (an image's address at a size), Texts (a stored text rendered, its table of contents) and Tokens
  * (a form's token for an intent) for the screens (C5), PSR-20's clock,
  * PSR-14's event dispatcher, symfony/mailer's MailerInterface (a standalone
  * component, allowed in the Fondation by D1; Laravel's own mail is built on
@@ -167,6 +167,12 @@ final class Runtime
     public static function files(): Files
     {
         return self::get(Files::class);
+    }
+
+    /** The image route's addresses for a stored image (C4b): its extension, its data, its link. */
+    public static function media(): Media
+    {
+        return self::get(Media::class);
     }
 
     public static function pictures(): Pictures

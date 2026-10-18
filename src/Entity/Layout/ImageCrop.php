@@ -4,8 +4,9 @@ namespace Base\Entity\Layout;
 
 use Base\Database\Attribute\Slugify;
 use Base\Service\Model\LinkableInterface;
+use Base\Contract\Link;
+use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ImageCropRepository;
@@ -23,7 +24,11 @@ class ImageCrop implements LinkableInterface, SaltInterface
         return $this->getImage()->getSalt() . "_" . md5(serialize($this->getData()));
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    /**
+     * The image route's address for this crop of its image: the Media contract
+     * (C4b), MediaService's strings under Symfony.
+     */
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         // Handling parameter extension
         $allowWebp = array_pop_key("webp", $routeParameters) ?? true;
@@ -37,8 +42,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
 
                 if($allowWebp) $routeParameters["extension"] = "webp";
                 else {
-                    $routeParameters["extension"] = first($this->getMediaService()->getExtensions($this->getImage()->getSource()));
-                    $routeParameters["extension"] = $this->getMediaService()->getExtension($this->getImage()->getSource());
+                    $routeParameters["extension"] = Runtime::media()->extension($this->getImage()->getSource());
                 }
 
             } else if ($routeParameters["extension"] === false) {
@@ -58,7 +62,7 @@ class ImageCrop implements LinkableInterface, SaltInterface
             "salt" => $this->getSalt()
         ];
 
-        return $this->getMediaService()->generate($routeName, $routeParameters, $this->getImage()->getSource(), $config);
+        return Runtime::media()->link($routeName, $routeParameters, $this->getImage()->getSource(), $config);
     }
 
     /**
