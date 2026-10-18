@@ -76,4 +76,41 @@ final class ParameterBagTest extends TestCase
         self::assertSame(42, $bag->all()['base.hot.value']);
         self::assertSame('Les Ringo Stars', $bag->get('base.site.title'));
     }
+
+    /** HotParameterBag is HotParameters (the Fondation's overlay) as DependencyInjection's two interfaces (C9). */
+    public function testTheHotBagIsTheOverlayAsTheFrameworksBag(): void
+    {
+        $bag = new HotParameterBag(self::container());
+
+        self::assertInstanceOf(\Base\Service\HotParameters::class, $bag);
+        self::assertInstanceOf(\Base\Service\HotParameterBagInterface::class, $bag);
+        self::assertInstanceOf(ParameterBagInterface::class, $bag);
+        self::assertInstanceOf(ContainerBagInterface::class, $bag);
+        self::assertSame('/srv/app/var', $bag->resolveValue('%kernel.project_dir%/var'));
+        self::assertSame('%%x', $bag->escapeValue('%x'));
+        foreach (['clear' => [], 'remove' => ['a']] as $method => $arguments) {
+            try {
+                $bag->{$method}(...$arguments);
+                self::fail($method.'() should throw');
+            } catch (LogicException $e) {
+                self::assertSame(sprintf('Impossible to call %s() on a frozen ParameterBag.', $method), $e->getMessage());
+            }
+        }
+
+        $bag->add(['base.site.locale' => false]);
+        self::assertFalse($bag->get('base.site.locale'), 'a false setting over the configuration');
+        self::assertTrue($bag->has('base.site.locale'));
+    }
+
+    /** has() is whether get() finds a value: a parameter set to false is there (C9; it was its truth). */
+    public function testHasIsThePresenceOfAValue(): void
+    {
+        $container = new Container(new FrozenParameterBag(['base.flag' => false, 'base.zero' => 0, 'base.none' => null]));
+        $bag = new ParameterBag($container);
+
+        self::assertTrue($bag->has('base.flag'));
+        self::assertTrue($bag->has('base.zero'));
+        self::assertFalse($bag->has('base.none'));
+        self::assertFalse($bag->has('base.nothing'));
+    }
 }

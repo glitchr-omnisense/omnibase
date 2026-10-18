@@ -13,8 +13,9 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface as 
  * The attributes read the parameters through omnibase's contract,
  * Base\Service\ParameterBagInterface, no longer DependencyInjection's (plan
  * "omnibase agnostique", step C3c). The contract extends nothing of the
- * framework; Base\Service\ParameterBag is its Symfony adapter, the container's
- * `parameter_bag`, and still DependencyInjection's bag for the code typing it.
+ * framework; Base\Service\ParameterBag is its Symfony adapter, and still
+ * DependencyInjection's bag for the code typing it; the reader is given
+ * `parameter_bag` (HotParameterBag over it, C9).
  */
 final class AttributeParameterBagTest extends KernelTestCase
 {
@@ -45,7 +46,8 @@ final class AttributeParameterBagTest extends KernelTestCase
         $container->get(AttributeReader::class);
 
         $bag = AbstractAttribute::getParameterBag();
-        self::assertInstanceOf(ParameterBag::class, $bag);
+        // `parameter_bag` itself since C9 (it was the plain ParameterBag, without the settings stored in the database)
+        self::assertSame($container->get('parameter_bag'), $bag);
         self::assertSame($container->getParameter('base.uploader.storage'), $bag->get('base.uploader.storage'));
         self::assertSame($container->getParameter('kernel.environment'), $bag->all()['kernel.environment'] ?? null);
     }

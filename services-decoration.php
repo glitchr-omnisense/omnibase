@@ -4,14 +4,20 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
     $services->defaults()
         ->public(false);
 
-    // ParameterBag services
-    $services->alias('Base\Service\ParameterBagInterface', 'Base\Service\ParameterBag');
+    // ParameterBag services (plan "omnibase agnostique", C9): Base\Service\ParameterBag, the container's
+    // parameters by a dotted path, decorates Symfony's parameter_bag; HotParameterBag, the settings stored
+    // in the database laid over it, decorates it in turn and is `parameter_bag`. omnibase's
+    // ParameterBagInterface is that same object, as DependencyInjection's interfaces and
+    // Runtime::parameters() (ContractsPass) are - it was the plain ParameterBag, without the settings.
+    $services->alias('Base\Service\ParameterBagInterface', 'parameter_bag');
 
     $services->set('Base\Service\ParameterBag')
         ->parent('parameter_bag')
@@ -19,7 +25,7 @@ return static function (ContainerConfigurator $container): void {
         ->public(true);
 
     $services->set('Base\Service\HotParameterBag')
-        ->parent('parameter_bag')
+        ->args([service('Base\Service\ParameterBag')])
         ->decorate('parameter_bag')
         ->public(true);
 

@@ -2,21 +2,25 @@
 
 namespace Base\Service;
 
-use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Repository\Layout\SettingRepository;
 use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 use Exception;
 use InvalidArgumentException;
-use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 
-class SettingBag implements SettingBagInterface, CacheWarmerInterface
+/**
+ * The settings stored in the database (the back office's), compiled into one
+ * snapshot kept in a PSR-6 cache pool (plan "omnibase agnostique", C9: on
+ * psr/cache, no longer on Symfony's CacheInterface; its cache warmer is
+ * Base\Bridge\Symfony\SettingBagWarmer, which calls warmUp()).
+ */
+class SettingBag implements SettingBagInterface
 {
     /**
      * @var EntityManagerInterface
@@ -51,9 +55,9 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
     protected ?string $environment;
 
     /**
-     * @var CacheInterface
+     * @var CacheItemPoolInterface
      */
-    protected CacheInterface $cache;
+    protected CacheItemPoolInterface $cache;
 
     /**
      * @var string
@@ -68,7 +72,8 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
     /**
      * Compile the snapshot fresh (bypassing any cached copy) and persist it,
      * so the very first request after a deploy/cache:clear hits a warm cache
-     * instead of compiling on-demand.
+     * instead of compiling on-demand. Under Symfony, SettingBagWarmer calls it
+     * at cache:warmup.
      */
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
@@ -90,14 +95,14 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
 
     /**
      * The snapshot compiles on-demand on a cache miss regardless (see
-     * loadSnapshot()), so this warmer is safe to skip under --no-optional-warmers.
+     * loadSnapshot()), so the warmer is safe to skip under --no-optional-warmers.
      */
     public function isOptional(): bool
     {
         return true;
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, CacheInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
     {
         $this->parameterBag = $parameterBag;
         $this->entityManager = $entityManager;
@@ -131,7 +136,7 @@ class SettingBag implements SettingBagInterface, CacheWarmerInterface
     public function invalidate(): void
     {
         $this->snapshot = null;
-        $this->cache->delete($this->cacheName);
+        $this->cache->deleteItem($this->cacheName);
         $this->cacheSettingBag = null;
     }
 

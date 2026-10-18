@@ -23,7 +23,8 @@
  *   delays and tester's check, a Token built (its throttling, its salt), a
  *   secured entity's vault; BaseTrait's getParameterBag() and getEnvironment(),
  *   BaseService's isDebug(), isDevelopment(), getSalt() and, with Access,
- *   isGranted() (C9) - on a BaseService never constructed.
+ *   isGranted() (C9) - on a BaseService never constructed; HotParameters, the
+ *   settings laid over the parameters (C9).
  * - the Sessions and Locales contracts: User's logout() and its locale.
  * Returns what they answered.
  */
@@ -51,6 +52,7 @@ use Base\Entity\User\Token;
 use Base\Exception\MissingContractException;
 use Base\Service\ArrayParameterBag;
 use Base\Service\BaseService;
+use Base\Service\HotParameters;
 use Base\Service\Model\ClassAliases;
 use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
@@ -305,6 +307,12 @@ Runtime::set(Access::class, new class implements Access {
 $answers['basetrait, a parameter'] = BaseService::getParameterBag('base.user.active_delay');
 $answers['basetrait, the parameters'] = BaseService::getParameterBag() instanceof ArrayParameterBag;
 $answers['basetrait, the environment'] = BaseService::getEnvironment();
+// The settings laid over the parameters (C9): HotParameters over the ArrayParameterBag, a false setting winning.
+$hot = new HotParameters(new ArrayParameterBag(['base.parameter_bag.use_hot_bag' => true, 'base.user.login_with_token' => true, 'base.user.active_delay' => 300]));
+$hot->add(['base.user.login_with_token' => false, 'base.user.active_delay' => null]);
+$off = new HotParameters(new ArrayParameterBag(['base.user.active_delay' => 300]));
+$off->add(['base.user.active_delay' => 60]);
+$answers['hot parameters, a false setting, a null one, off'] = [$hot->get('base.user.login_with_token'), $hot->get('base.user.active_delay'), $off->get('base.user.active_delay')];
 $facade = (new ReflectionClass(BaseService::class))->newInstanceWithoutConstructor();
 $answers['baseservice, debug, development, salt'] = [$facade->isDebug(), $facade->isDevelopment(), $facade->getSalt()];
 $answers['baseservice, granted'] = [$facade->isGranted('ROLE_ADMIN'), $facade->isGranted('ROLE_SUPERADMIN')];

@@ -14,7 +14,7 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 |---|---|---|
 | `Base\Contract\Urls` (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
 | `Base\Contract\Environment` (step C4b) | the environment's name (`prod`, `dev`, `test`), debug, the application's secret | `Base\Bridge\Symfony\KernelEnvironment`: `kernel.environment`, `kernel.debug`, `kernel.secret` - `BaseService::getEnvironment()`, `isDebug()`, `getSalt()` |
-| `Base\Service\ParameterBagInterface` (step C3c; in the registry since C4b) | the application's parameters by a dotted path | `parameter_bag`: `HotParameterBag`, the settings stored in the database over the container's - `BaseTrait::getParameterBag()`; where there is no container, `Base\Service\ArrayParameterBag` |
+| `Base\Service\ParameterBagInterface` (step C3c; in the registry since C4b) | the application's parameters by a dotted path | `parameter_bag`: `HotParameterBag`, the settings stored in the database over the container's - `BaseTrait::getParameterBag()`, and the autowiring of this interface since C9; where there is no container, `Base\Service\ArrayParameterBag`, and `Base\Service\HotParameters` over it for the settings (below) |
 | `Base\Contract\Routes` (step C4b) | what the routes are beyond their addresses: a route's declared path (`pattern()`), the route an address leads to (`match()`), a route's icons | `Base\Bridge\Symfony\RouterRoutes`: `advanced_router` (its route collection, `getRouteName()`) and the `IconProvider` |
 | `Omnibridge\Twig\Contract\Translations` | `trans()`, ICU messages | `Base\Bridge\Symfony\TranslatorTranslations`: the `translator` chain (texts rewritten in the back office, `Base\Service\Translator`, Symfony's) - Twig's `\|trans` |
 | `Base\Contract\Translations` (step C4b; omnibridge/twig's `Translations` and `exists()`) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
@@ -97,6 +97,43 @@ BaseTrait - marketplace's `Order` (`getTrading()` x8, `getTranslator()` x3, `get
 (`getRouter()`); and, calling none of its accessors, marketplace's `Sales\Discount`, `Fee`,
 `Sales\Attribute\Action\FixedAmountAdapter`, forum's `Post`, mailbox's `Conversation`,
 classroom's `Entitlement` and `Resource`.
+
+## The parameters and the settings over them (step C9)
+
+`Base\Service\DottedParameterBag` (Fondation) reads parameters given by their full names
+(`base.user.active_delay` => 300) by a dotted path - a path naming the values under it
+(`base.user`) gives them all. `ArrayParameterBag` (an array) and `ParameterBag` (the Symfony
+container's parameters, and DependencyInjection's two interfaces) read through it.
+`has()` is whether `get()` finds a value: a parameter set to `false`, `0` or `""` is there,
+one set to `null` is not (it was the value's truth).
+
+`Base\Service\HotParameters` (Fondation) lays the settings stored in the database - a back
+office's setting linked to a parameter - over any `ParameterBagInterface`. `get()` reads, in
+this order, by the presence of a value:
+
+1. the `$bag` given to the call,
+2. the settings (`add()`; when the overlay is on and `$useHotBag` is true),
+3. the configuration.
+
+A setting stored as `false` wins over the configuration's `true`; a setting whose value is
+`null` (none was typed) is no value, the configuration's is read. The overlay is on when
+`base.parameter_bag.use_hot_bag` is `true`; off, the configuration is read (it read nothing
+at all before: every parameter was `null` unless a `$bag` was given). `has()` reads the same
+sources in the same order.
+
+Under Symfony `parameter_bag` is `HotParameterBag`, that overlay over `ParameterBag` as
+DependencyInjection's `ParameterBagInterface` and `ContainerBagInterface`; it refuses
+`clear()` and `remove()` as the frozen bag does, and `HotParameterBagSubscriber` gives it the
+settings on the first request or command. `parameter_bag`, the autowiring of
+`Base\Service\ParameterBagInterface` (which gave the plain `ParameterBag`, without the
+settings: an autowired `EditorController`, `AttributeReader` read the configuration alone),
+DependencyInjection's interfaces, `Runtime::parameters()` and `BaseTrait::getParameterBag()`
+are one object (`ParameterBagServicesTest`). Elsewhere:
+`new HotParameters(new ArrayParameterBag([...]), true)` and `add()` the settings.
+
+`Base\Service\SettingBag` (the settings themselves) keeps its snapshot in a PSR-6 pool
+(`Psr\Cache\CacheItemPoolInterface`, no longer Symfony's `CacheInterface`); its cache warmer
+is `Base\Bridge\Symfony\SettingBagWarmer`. It is in the Fondation: Doctrine and psr/cache.
 
 ## The registry
 

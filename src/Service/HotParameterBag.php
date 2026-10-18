@@ -2,76 +2,57 @@
 
 namespace Base\Service;
 
-use Exception;
-use RuntimeException;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
-class HotParameterBag extends ParameterBag implements HotParameterBagInterface
+/**
+ * `parameter_bag` under Symfony: the container's parameters (Base\Service\ParameterBag)
+ * with the settings stored in the database laid over them - Base\Service\HotParameters,
+ * the Fondation's overlay, as DependencyInjection's ParameterBagInterface and
+ * ContainerBagInterface (plan "omnibase agnostique", C9). It decorates `parameter_bag`
+ * over Base\Service\ParameterBag; `parameter_bag`, the autowiring of
+ * Base\Service\ParameterBagInterface (and of DependencyInjection's two interfaces) and
+ * Runtime::parameters() are this one object.
+ *
+ * Like the frozen bag the container's parameters are, it refuses clear() and remove();
+ * add() takes the settings in (HotParameterBagSubscriber), set() writes into the $bag given.
+ */
+class HotParameterBag extends HotParameters implements HotParameterBagInterface, ContainerBagInterface
 {
-    public const HOT_N_READY = false; // Debugging
-    private bool $isReady = false;
-
-    #[SentitiveParameter]
-    protected array $hotBag = [];
-
-    /**
-     * @param array $parameters
-     * @return void
-     */
-    public function add(array $parameters): void
+    /** @param ParameterBag|Container $config the container's parameters, or the container to read them from */
+    public function __construct(ParameterBag|Container $config, ?bool $enabled = null)
     {
-        try {
-            parent::add($parameters);
-        } catch (Exception $e) {
-            $this->hotBag = array_merge($this->hotBag, $parameters);
-        }
+        parent::__construct($config instanceof Container ? new ParameterBag($config) : $config, $enabled);
     }
 
-    public function all(): array
+    public function clear(): void
     {
-        return array_merge(parent::all(), $this->hotBag);
+        throw new LogicException('Impossible to call clear() on a frozen ParameterBag.');
     }
 
-    public function has(string $path, ?array $bag = null, bool $useHotBag = true): bool
+    public function remove(string $name): void
     {
-        if($bag && parent::has($path, $bag))
-            return true;
-        if($useHotBag && parent::has($path, $this->hotBag))
-            return true;
-
-        return parent::has($path);
+        throw new LogicException('Impossible to call remove() on a frozen ParameterBag.');
     }
 
-    public function get(string $path = "", ?array $bag = null, bool $useHotBag = true): array|bool|string|int|float|null
+    /** The container's parameters are resolved already. */
+    public function resolve(): void
     {
-        if (!parent::get("base.parameter_bag.use_hot_bag") ?? false) {
-            $useHotBag = false;
-        } elseif (self::HOT_N_READY && !$this->isReady) {
-            throw new RuntimeException("Parameter bag is not Hot'N'Ready. (Did you call it before its related subscriber ?)");
-        }
-
-        $parameterBag = null;
-        if(!$parameterBag && $bag) 
-            $parameterBag = parent::get($path, $bag);
-        if(!$parameterBag && $useHotBag)
-            $parameterBag = parent::get($path, $this->hotBag);
-        if(!$parameterBag && $useHotBag)
-            $parameterBag = parent::get($path);
-
-        return $parameterBag;
     }
 
-    public function isReady(): bool
+    public function resolveValue(mixed $value): mixed
     {
-        return $this->isReady;
+        return $this->config->resolveValue($value);
     }
 
-    /**
-     * @param bool $ready
-     * @return $this
-     */
-    public function markAsReady(bool $ready = true)
+    public function escapeValue(mixed $value): mixed
     {
-        $this->isReady = $ready;
-        return $this;
+        return $this->config->escapeValue($value);
+    }
+
+    public function unescapeValue(mixed $value): mixed
+    {
+        return $this->config->unescapeValue($value);
     }
 }
