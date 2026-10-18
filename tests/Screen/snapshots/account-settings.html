@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Account settings — omniscient/omnibase</title>
+    <style>body:before {
+    display: none;
+    visibility: hidden;
+}</style><style>
+        body { margin: 0; background: #eef2f5; font: 14px/1.5 system-ui, sans-serif; color: #284555; }
+        .demo-bar { background: #006699; color: #fff; padding: .5rem 1rem; font-size: 13px; }
+        .demo-bar a { color: #fff; }
+        .demo-cols { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 1.5rem; max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+        @media (max-width: 860px) { .demo-cols { grid-template-columns: 1fr; } }
+    </style>
+    
+        <link rel="stylesheet" href="/bundles/base/base-async.25c495ee.css" >
+
+        <link rel="stylesheet" href="/bundles/base/base-defer.41e967b6.css" >
+
+    
+        <link rel="stylesheet" href="/bundles/base/form-defer.beb808be.css" >
+
+        <link rel="stylesheet" href="/bundles/base/form-defer.editor.f43c0d96.css" >
+
+    </head>
+<body>
+    <div class="demo-bar">
+        omniscient/omnibase demo — signed in as <b>anne.membre</b> ·
+        <a href="/">tour</a> ·
+        <a href="/boutiques">shop</a> · <a href="/bbs">forum</a> · <a href="/messagerie">mailbox</a> ·
+        <a href="/support">support</a> · <a href="/compte/licences">licences</a> · <a href="/git">git</a> · <a href="/admin">admin</a>
+    </div>
+    <div class="demo-cols">
+        <main><article class="wrapper extended">
+<h1>Account settings</h1>
+
+
+
+<div class="card mb-3">
+    <div class="card-header"><i class="fa-fw fa-solid fa-shield-halved"></i> Security</div>
+    <div class="card-body">
+
+                        <h5>
+            Two-factor authentication
+                    </h5>
+                <ul class="list-group mb-3">
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                Authenticator app (TOTP)
+                                    <a class="btn btn-sm btn-primary" href="/settings/2fa">Enable</a>
+                            </li>
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                Email code
+                                                    <form class="mb-0" method="post" action="/settings/2fa/email">
+                        <input type="hidden" name="_token" value="*">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">
+                            Disable
+                        </button>
+                    </form>
+                            </li>
+                    </ul>
+        
+                <h5>Passkeys</h5>
+        <ul class="list-group mb-2">
+                            <li class="list-group-item text-muted">No passkey registered</li>
+                    </ul>
+        <button type="button" class="btn btn-sm btn-primary" data-passkey-register="anne.membre@example.org">
+            <i class="fa-fw fa-solid fa-passport"></i> Add a passkey
+        </button>
+        
+            </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header"><i class="fa-fw fa-solid fa-laptop"></i> Devices and sessions</div>
+    <div class="card-body">
+        <ul class="list-group">
+                            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span>
+                                                <span title="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15">Safari - macOS</span>
+                        <br><small class="text-muted">192.0.2.10 &middot; 10 april 2026 08:15</small>
+                    </span>
+                                            <form method="post" action="/settings/sessions/{session:open}/logout">
+                            <input type="hidden" name="_token" value="*">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Sign out</button>
+                        </form>
+                                    </li>
+                            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span>
+                                                <span title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36">Chrome - Linux</span>
+                        <br><small class="text-muted">198.51.100.7 &middot; 02 april 2026 21:40</small>
+                    </span>
+                                            <span class="badge bg-secondary">Signed out</span>
+                                    </li>
+                    </ul>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header"><i class="fa-fw fa-solid fa-sliders"></i> Preferences</div>
+    <div class="card-body">
+        <p><strong>Language:</strong> en-GB</p>
+        <p><strong>Time zone:</strong> UTC</p>
+    </div>
+</div>
+
+<div class="mb-3">
+    Signed in as anne.membre.
+    <a href="/logout" rel="nofollow">Sign out</a>
+</div>
+
+</article>
+</main>
+        <aside></aside>
+    </div>
+            
+            <script src="/bundles/base/base-async.417ee669.js" defer=""></script>
+            
+            <script src="/bundles/base/base-defer.4faa176f.js" defer=""></script>
+    
+            
+            <script src="/bundles/base/form-defer.045eae8d.js" defer=""></script>
+            
+            <script src="/bundles/base/form-defer.editor.f98640e8.js" defer=""></script>
+    
+        
+    <script type="application/json" id="passkey-messages">
+{
+    "cancelledLogin":     "No passkey was used. Either you cancelled, or no passkey for this site is available on this device. Sign in another way, then add a passkey from your account settings.",
+    "cancelledRegister":  "Adding the passkey was cancelled, or the device did not respond in time. You can try again.",
+    "alreadyRegistered":  "This device is already registered as a passkey for this account.",
+    "notSupported":       "No compatible authenticator was found on this device.",
+    "misconfigured":      "Passkeys are not correctly configured for this domain (invalid relying party id or origin). Please contact an administrator.",
+    "unsupportedBrowser": "This browser does not support passkeys.",
+    "serverError":        "The server refused the operation: __REASON__",
+    "generic":            "The passkey could not be used (__REASON__)."
+}
+</script>
+    
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notifications — omniscient/omnibase</title>
+    <style>body:before {
+    display: none;
+    visibility: hidden;
+}</style><style>
+        body { margin: 0; background: #eef2f5; font: 14px/1.5 system-ui, sans-serif; color: #284555; }
+        .demo-bar { background: #006699; color: #fff; padding: .5rem 1rem; font-size: 13px; }
+        .demo-bar a { color: #fff; }
+        .demo-cols { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 1.5rem; max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+        @media (max-width: 860px) { .demo-cols { grid-template-columns: 1fr; } }
+    </style>
+    
+        <link rel="stylesheet" href="/bundles/base/base-async.25c495ee.css" >
+
+        <link rel="stylesheet" href="/bundles/base/base-defer.41e967b6.css" >
+
+    
+        <link rel="stylesheet" href="/bundles/base/form-defer.beb808be.css" >
+
+        <link rel="stylesheet" href="/bundles/base/form-defer.editor.f43c0d96.css" >
+
+    </head>
+<body>
+    <div class="demo-bar">
+        omniscient/omnibase demo — signed in as <b>anne.membre</b> ·
+        <a href="/">tour</a> ·
+        <a href="/boutiques">shop</a> · <a href="/bbs">forum</a> · <a href="/messagerie">mailbox</a> ·
+        <a href="/support">support</a> · <a href="/compte/licences">licences</a> · <a href="/git">git</a> · <a href="/admin">admin</a>
+    </div>
+    <div class="demo-cols">
+        <main>
+
+<article class="wrapper notifications-page"
+         data-notifications
+         data-csrf="*"
+         data-read-url="/notifications/read"
+         data-latest-url="/notifications/latest"
+         data-delete-url="/notifications/delete"
+         data-push-key=""
+         data-push-subscribe-url="/push/subscribe"
+         data-push-unsubscribe-url="/push/unsubscribe">
+
+    <h2>Notifications
+        <span class="badge bg-primary" data-notifications-badge data-count="2" >2</span>
+    </h2>
+
+    <div class="notifications-toolbar d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-notifications-read-all>
+            <i class="fa-solid fa-check-double"></i> Mark all as read
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-notifications-delete-read>
+            <i class="fa-solid fa-trash-can"></i> Delete read notifications
+        </button>
+            </div>
+    
+        <ul class="notifications-list list-unstyled">
+                                                    <li class="notifications-group"><h3 class="h6 text-muted mt-3">Earlier</h3></li>
+                <li class="notification d-flex align-items-start is-unread" data-notification-item data-id="{notification:unread}">
+            <a class="notification-link flex-grow-1" href="/bbs/la-sortie-du-samedi">
+                <strong>Nouvelle réponse</strong>
+                <span class="d-block">Paul a répondu à La sortie du samedi.</span>                <time class="notification-time" datetime="2026-04-10T18:05:00+00:00">10/04/2026 18:05</time>            </a>
+            <span class="notification-actions d-flex">
+                <button type="button" class="btn btn-raw " data-notification-read-toggle
+                        data-label-read="Mark as read"
+                        data-label-unread="Mark as unread"
+                        title="Mark as read"
+                        aria-label="Mark as read"><i class="fa-solid fa-check"></i></button>
+                <button type="button" class="btn btn-raw" data-notification-delete
+                        title="Delete" aria-label="Delete"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+        </li>
+                                    <li class="notification d-flex align-items-start " data-notification-item data-id="{notification:read}">
+            <a class="notification-link flex-grow-1" href="#">
+                <strong>Bienvenue</strong>
+                <span class="d-block">Votre compte est prêt.</span>                <time class="notification-time" datetime="2026-04-09T07:00:00+00:00">09/04/2026 07:00</time>            </a>
+            <span class="notification-actions d-flex">
+                <button type="button" class="btn btn-raw is-read" data-notification-read-toggle
+                        data-label-read="Mark as read"
+                        data-label-unread="Mark as unread"
+                        title="Mark as unread"
+                        aria-label="Mark as unread"><i class="fa-solid fa-check"></i></button>
+                <button type="button" class="btn btn-raw" data-notification-delete
+                        title="Delete" aria-label="Delete"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+        </li>
+                                    <li class="notification d-flex align-items-start is-unread" data-notification-item data-id="{notification:html}">
+            <a class="notification-link flex-grow-1" href="#">
+                <strong>Un message</strong>
+                <span class="d-block"></span>                <time class="notification-time" datetime="2026-03-30T12:00:00+00:00">30/03/2026 12:00</time>            </a>
+            <span class="notification-actions d-flex">
+                <button type="button" class="btn btn-raw " data-notification-read-toggle
+                        data-label-read="Mark as read"
+                        data-label-unread="Mark as unread"
+                        title="Mark as read"
+                        aria-label="Mark as read"><i class="fa-solid fa-check"></i></button>
+                <button type="button" class="btn btn-raw" data-notification-delete
+                        title="Delete" aria-label="Delete"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+        </li>
+        </ul>
+</article>
+        
+            <script src="/bundles/base/notifications-defer.cc779640.js" defer=""></script>
+    
+</main>
+        <aside></aside>
+    </div>
+            
+            <script src="/bundles/base/base-async.417ee669.js" defer=""></script>
+            
+            <script src="/bundles/base/base-defer.4faa176f.js" defer=""></script>
+    
+            
+            <script src="/bundles/base/form-defer.045eae8d.js" defer=""></script>
+            
+            <script src="/bundles/base/form-defer.editor.f98640e8.js" defer=""></script>
+    
+    </body>
+</html>
