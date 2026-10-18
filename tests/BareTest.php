@@ -298,7 +298,7 @@ final class BareTest extends TestCase
      * What omnibase's classes read through BaseTrait's services, answered through the contracts where
      * there is no framework (plan "omnibase agnostique", C4b): tests/Contract/basetrait-seams-without-
      * framework.php, run by bare with the autoloader alone, gives plain contracts and asks the real
-     * classes of the core. NounsTest, DurationTest and the tests named in the script compare each
+     * classes of the core. NounsTest, DurationTest, MediaTest and the tests named in the script compare each
      * answer with the service it came from, under Symfony.
      */
     public function testTheBaseTraitSeamsAnswerWithoutTheFramework(): void
@@ -337,6 +337,13 @@ final class BareTest extends TestCase
             'token, throttle' => '10 minutes',
             'thread, not to be published' => null,
             'thread, to be published' => '3 jours 2 heures',
+            // Media and Urls: the image route's links, the data as the plain Media makes it.
+            'image, link' => '/ux_imageExtension?extension=webp&data=%2Fuploads%2Fabbey-road.JPG%7C-%7Cwebp%7C0+filter%28s%29',
+            'image, thumbnail' => '/ux_imageExtension?extension=webp&data=%2Fuploads%2Fabbey-road.JPG%7C120x80%7Cwebp%7C1+filter%28s%29',
+            'image, its own extension' => '/ux_imageExtension?extension=jpg&data=%2Fuploads%2Fabbey-road.JPG%7C-%7Cas-is%7C0+filter%28s%29',
+            'image, url' => 'https://lesringostars.test/ux_imageExtension?extension=png&data=%2Fuploads%2Fabbey-road.JPG%7Csquare%7Cwebp%7C0+filter%28s%29',
+            'crop, link' => '/ux_imageExtension//uploads/abbey-road.JPG|square|webp|0 filter(s).webp',
+            'crop, its own extension' => '/ux_imageExtension//uploads/abbey-road.JPG|square|webp|0 filter(s).jpg',
         ], $run['result']);
     }
 

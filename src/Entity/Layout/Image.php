@@ -10,11 +10,12 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Service\Model\IconizeInterface;
+use Base\Contract\Link;
+use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
 
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Base\Database\Attribute\Cache;
 
@@ -37,7 +38,12 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         return md5(serialize($this->getQuadrant()));
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    /**
+     * The image route's address for this image (its source obfuscated with the
+     * crop, thumbnail and filters asked): the Media contract and the Urls
+     * contract (C4b), MediaService's and the router's strings under Symfony.
+     */
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         // Check if filters have to be applied
         $filters = array_pop_key("filters", $routeParameters) ?? [];
@@ -61,21 +67,21 @@ class Image implements IconizeInterface, ImageInterface, SaltInterface
         if($extension === true) {
 
             if($allowWebp) $extension = "webp";
-            else $extension = $this->getMediaService()->getExtension($this->getSource());
+            else $extension = Runtime::media()->extension($this->getSource());
         }
 
         if($extension) $routeParameters["extension"] = $extension;
 
         $routeName = array_key_exists("extension", $routeParameters) ? "ux_imageExtension" : "ux_image";
         $routeParameters = array_merge($routeParameters, [
-            "data" => $this->getMediaService()->obfuscate($this->getSource(), [
+            "data" => Runtime::media()->obfuscate($this->getSource(), [
                 "webp" => $allowWebp, // This line might be removed, extension is fixed by `$routeParameters["extension"]`   
                 "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
                 "salt" => $this->getSalt()
             ], $filters),
         ]);
 
-        return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        return Link::to($routeName, $routeParameters, $referenceType);
     }
 
     public function __iconize(): ?array

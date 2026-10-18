@@ -19,6 +19,7 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 | `Base\Contract\Access` | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
 | `Base\Contract\Locales` | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
 | `Base\Contract\Files` | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
+| `Base\Contract\Media` (step C4b) | the image route for a stored image: the extension it is served with, its obfuscated `data`, the route's address | `Base\Bridge\Symfony\ServiceMedia`: `MediaService` (`getExtension()`, `obfuscate()`, `generate()`) |
 | `Base\Contract\Pictures` (step C5) | an image's address at a size, what `\|picture` answers | `Base\Bridge\Symfony\MediaPictures`: `CommonsTwigExtension::picture()` (MediaService's thumbnails) |
 | `Base\Contract\Texts` (step C5) | a stored text rendered (Editor.js or HTML), its table of contents, whether it is Editor.js | `Base\Bridge\Symfony\WysiwygTexts`: the pipeline of `\|wysiwyg` and `\|wysiwyg_toc` |
 | `Base\Contract\Tokens` (step C5) | the token a form carries for an intent (`csrf()`), what a screen's actions send back | `Base\Bridge\Symfony\CsrfTokens`: the CSRF token manager - Twig's `csrf_token()` |
@@ -156,6 +157,8 @@ sites that call them.
 |---|---|---|
 | `Thread::__toString()`, `Widget::__toString()` without a title | `getTranslator()->transEntity(static::class)` | `Runtime::nouns()->entity(static::class)` (`NounsTest`) |
 | `Thread::getPublishTimeStr()`, `Token::getRemainingTimeStr()`, `getThrottleTimeStr()` | `getTranslator()->transTime($seconds)` | `Duration::spell($seconds, Runtime::translations())` (`DurationTest`: the texts rewritten in the back office printed as before) |
+| `Image::__toLink()` | `getMediaService()->getExtension()`, `obfuscate()`, then `getRouter()->generate()` | `Runtime::media()->extension()`, `obfuscate()`, then `Link::to()` (`MediaTest`) |
+| `ImageCrop::__toLink()` | `getMediaService()->getExtension()` (after a `getExtensions()` whose answer it overwrote), `generate()` | `Runtime::media()->extension()`, `link()` |
 
 **What an entity is called: `Base\Service\Model\EntityNouns`.** The rule of
 `Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:

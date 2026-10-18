@@ -5,6 +5,7 @@ namespace Base\DependencyInjection\Compiler\Pass;
 use Base\Contract\Access;
 use Base\Contract\Files;
 use Base\Contract\Locales;
+use Base\Contract\Media;
 use Base\Contract\Nouns;
 use Base\Contract\Pictures;
 use Base\Contract\Texts;
@@ -47,6 +48,7 @@ final class ContractsPass implements CompilerPassInterface
         Locales::class,
         Files::class,
         Pictures::class,
+        Media::class,
         Texts::class,
         Tokens::class,
         ClockInterface::class,
