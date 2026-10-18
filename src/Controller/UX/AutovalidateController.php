@@ -2,7 +2,7 @@
 
 namespace Base\Controller\UX;
 
-use Base\Traits\BaseTrait;
+use Base\Contract\Runtime;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,15 +16,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route(priority: -1)]
 class AutovalidateController extends AbstractController
 {
-    use BaseTrait;
-
     private TranslatorInterface $translator;
     private EntityManagerInterface $entityManager;
     private Hashids $hashIds;
 
     public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager)
     {
-        $this->hashIds = new Hashids($this->getService()->getSalt());
+        $this->hashIds = new Hashids(Runtime::environment()->secret());
         $this->entityManager = $entityManager;
         $this->translator = $translator;
     }
@@ -49,7 +47,7 @@ class AutovalidateController extends AbstractController
         $value = $dict["value"] ?? null;
         $formType = $dict["form_type"] ?? null;
 
-        $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
+        $expectedMethod = Runtime::environment()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("validation", $token) && $request->getMethod() == $expectedMethod) {
             $array = ["status" => "Fine"];
             return new JsonResponse($array);

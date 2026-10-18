@@ -18,7 +18,7 @@ return static function (ContainerConfigurator $container): void {
     // ------------------------------
     $services->set('Base\Form\Extension\FormTypeBootstrapExtension')
         ->tag('form.type_extension')
-        ->args([new Reference('base.service')]);
+        ->args([new Reference('parameter_bag')]);
 
     $services->set('Base\Form\Extension\FormTypeCsrfExtension')
         ->tag('form.type_extension');

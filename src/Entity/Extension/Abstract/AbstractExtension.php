@@ -69,7 +69,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     public function setEntityId(mixed $entityOrId)
     {
-        if ($this->getService()->isEntity($entityOrId)) {
+        if (self::isEntity($entityOrId)) {
             $this->entityId = $entityOrId->getId();
         } else {
             $this->entityId = $entityOrId;

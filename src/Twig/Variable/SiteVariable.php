@@ -4,12 +4,13 @@ namespace Base\Twig\Variable;
 
 use Symfony\Component\Routing\Router;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
+use Base\Service\SettingBagInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class SiteVariable
 {
@@ -38,23 +39,31 @@ class SiteVariable
      */
     protected $launcher;
     /**
-     * @var BaseService
+     * The settings stored in the back office (title, slogan, logo, meta), read
+     * where they were read through BaseService (plan "omnibase agnostique", C9:
+     * BaseService is no longer built for every page that prints the site's name).
      */
-    protected $baseService;
+    protected SettingBagInterface $settingBag;
+
+    /** When the page started: the kernel's start (debug), else when this was built - BaseService's measure. */
+    protected float $startTime;
 
     public function __construct(
         AdvancedRouterInterface      $router,
         SitemapperInterface          $sitemapper,
         TranslatorInterface          $translator,
         LocalizerInterface           $localizer,
-        BaseService                  $baseService,
+        SettingBagInterface          $settingBag,
         MaintenanceProviderInterface $maintenanceProvider,
-        LauncherInterface            $launcher
+        LauncherInterface            $launcher,
+        ?KernelInterface             $kernel = null
     )
     {
         $this->router = $router;
         $this->translator = $translator;
-        $this->baseService = $baseService;
+        $this->settingBag = $settingBag;
+        $startTime = $kernel?->getStartTime();
+        $this->startTime = $startTime && is_finite($startTime) ? $startTime : microtime(true);
         $this->localizer = $localizer;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->launcher = $launcher;
@@ -66,14 +75,14 @@ class SiteVariable
      */
     public function index()
     {
-        return $this->baseService->getRouteIndex();
+        return $this->router->getRouteIndex();
     }
 
     public function meta(array $meta = [], ?string $locale = null): array
     {
         $locale ??= $this->localizer->getLocale();
 
-        return array_merge($this->baseService->getMeta($locale), $meta);
+        return array_merge($this->settingBag->get("base.settings.meta", $locale) ?? [], $meta);
     }
 
     /**
@@ -98,7 +107,7 @@ class SiteVariable
      */
     public function title()
     {
-        return $this->baseService->getSite()['title'] ?? null;
+        return $this->settingBag->getScalar("base.settings.title");
     }
 
     /**
@@ -106,7 +115,7 @@ class SiteVariable
      */
     public function slogan()
     {
-        return $this->baseService->getSite()['slogan'] ?? null;
+        return $this->settingBag->getScalar("base.settings.slogan");
     }
 
     /**
@@ -114,7 +123,7 @@ class SiteVariable
      */
     public function logo()
     {
-        return $this->baseService->getSite()['logo'] ?? null;
+        return $this->settingBag->getScalar("base.settings.logo");
     }
 
     public function scheme(?string $locale = null): ?string
@@ -193,6 +202,6 @@ class SiteVariable
      */
     public function execution_time()
     {
-        return $this->baseService->getExecutionTime();
+        return round(microtime(true) - $this->startTime, 2);
     }
 }

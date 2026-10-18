@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Database\Attribute\Uploader;
+use Base\Contract\Runtime;
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
@@ -10,7 +11,6 @@ use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Service\FileService;
 use Base\Service\MediaService;
-use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
@@ -35,8 +35,6 @@ use Traversable;
 
 class AssociationFileType extends AbstractType implements DataMapperInterface
 {
-    use BaseTrait;
-
     /**
      * @var ClassMetadataManipulator|null
      */
@@ -161,7 +159,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
 
         $href = null;
-        if ($options["href"] === null && $crudController && $this->getService()->isGranted(UserRole::ADMIN)) {
+        if ($options["href"] === null && $crudController && Runtime::access()->isGranted(UserRole::ADMIN)) {
             $href = $this->adminUrlGenerator
                 ->unsetAll()
                 ->setController($crudController)

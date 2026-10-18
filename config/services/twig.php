@@ -25,15 +25,17 @@ return static function (ContainerConfigurator $container): void {
             new Reference('sitemap'),
             new Reference('translator'),
             new Reference('localizer'),
-            new Reference('base.service'),
+            new Reference('setting_bag'),
             new Reference('base.service.maintenance'),
             new Reference('base.service.launcher'),
+            new Reference('kernel'),
         ]);
 
     $services->set('Base\Twig\Variable\EmailVariable')->public()
         ->tag('twig.runtime')
         ->args([
-            new Reference('base.service'),
+            new Reference('advanced_router'),
+            new Reference('setting_bag'),
             new Reference('base.service.launcher'),
         ]);
 
@@ -286,16 +288,18 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
             new Reference('sitemap'),
             new Reference('translator'),
             new Reference('localizer'),
-            new Reference('base.service'),
+            new Reference('setting_bag'),
             new Reference('base.service.maintenance'),
-            new Reference('base.service.launcher')
+            new Reference('base.service.launcher'),
+            new Reference('kernel'),
         ]);
 
     $services->set('Base\Twig\Variable\EmailVariable')->public()
         ->tag('twig.runtime')
         ->args([
-            new Reference('base.service'),
-            new Reference('base.service.launcher')
+            new Reference('advanced_router'),
+            new Reference('setting_bag'),
+            new Reference('base.service.launcher'),
         ]);
 
     $services->set('Base\Twig\Variable\RandomVariable')->public()

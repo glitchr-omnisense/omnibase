@@ -79,6 +79,8 @@
  * file links of the error pages mapped to the host with Symfony's own FileLinkFormatter, which it builds and does not
  * extend); -2, Base\Inspector\FileLinkFormatter and HtmlErrorRenderer, removed from the core (they extended
  * Symfony's @final FileLinkFormatter and its HtmlErrorRenderer, which base-plugin patched the ErrorHandler to use).
+ * 778 after step C9's injections (+1: Base\Service\Model\DevelopmentEnvironment, BaseService::isDevelopment()'s
+ * rule over the Environment contract, which the error controller asks instead of BaseService).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -681,6 +683,7 @@ return [
     Base\Service\Model\Currency\Api\ExchangeRatesApi::class,
     Base\Service\Model\Currency\Api\Fixer::class,
     Base\Service\Model\Currency\CurrencyApiInterface::class,
+    Base\Service\Model\DevelopmentEnvironment::class,
     Base\Service\Model\Duration::class,
     Base\Service\Model\EntityNouns::class,
     Base\Service\Model\GraphInterface::class,

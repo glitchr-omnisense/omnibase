@@ -2,7 +2,6 @@
 
 namespace Base\Controller\Client;
 
-use Base\Service\BaseService;
 use Base\Service\SecurityPolicy;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -42,14 +41,12 @@ class UserSettingsController extends AbstractController
     /** How many of the account's sessions the settings page lists. */
     private const SESSIONS_SHOWN = 20;
 
-    private $baseService;
     private UserRepository $userRepository;
     private SecurityPolicy $securityPolicy;
     private TranslatorInterface $translator;
 
-    public function __construct(BaseService $baseService, UserRepository $userRepository, SecurityPolicy $securityPolicy, TranslatorInterface $translator)
+    public function __construct(UserRepository $userRepository, SecurityPolicy $securityPolicy, TranslatorInterface $translator)
     {
-        $this->baseService = $baseService;
         $this->userRepository = $userRepository;
         $this->securityPolicy = $securityPolicy;
         $this->translator = $translator;

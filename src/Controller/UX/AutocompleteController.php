@@ -3,6 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Contract\Runtime;
 use Base\Database\Repository\ServiceEntityRepository;
 
 use Base\Service\MediaServiceInterface;
@@ -118,10 +119,10 @@ class AutocompleteController extends AbstractController
             return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
         }
 
-        $expectedMethods = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        $expectedMethods = Runtime::environment()->isDebug() ? ["GET", "POST"] : ["POST"];
         if (in_array($request->getMethod(), $expectedMethods)) {
 
-            if ($this->getService()->isDebug()) {
+            if (Runtime::environment()->isDebug()) {
                 $term = $request->query->get('term', $request->request->get('term', ''));
                 $pageParam = $request->query->get('page', $request->request->get('page', ''));
             } else {
@@ -294,7 +295,7 @@ class AutocompleteController extends AbstractController
 
         $results = [];
         $pagination = false;
-        $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
+        $expectedMethod = Runtime::environment()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
             $term = mb_strtolower($request->query->get("term", $request->request->get("term", "")));
             $meta = explode(".", $request->query->get("page", $request->request->get("page", "")));
