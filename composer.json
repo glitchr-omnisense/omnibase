@@ -67,7 +67,7 @@
         "ext-imagick": "*",
         "beberlei/doctrineextensions": "^1.0",
         "composer-runtime-api": "^2.0",
-        "doctrine/collections": "^2.0",
+        "doctrine/collections": "^3.1",
         "doctrine/common": "^3.0",
         "doctrine/dbal": "^4.2",
         "doctrine/event-manager": "^2.0",
