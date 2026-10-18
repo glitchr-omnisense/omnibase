@@ -7,7 +7,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Profiler\Profile;
 use Symfony\Component\Routing\Route;
 use App\Entity\User;
+use Base\Contract\Access;
+use Base\Contract\Environment as EnvironmentContract;
+use Base\Contract\Runtime;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Service\Model\DevelopmentEnvironment;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Traits\BaseTrait;
@@ -56,6 +60,19 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use function is_object;
 
+/**
+ * The facade of omnibase's services for an application's code (plan "omnibase
+ * agnostique", C9): kept, not deprecated, with BaseTrait. It is a lazy service -
+ * a ghost of this class until one of its methods reads a property - and the
+ * core injects it nowhere on a page's path any more: the core and the bundles
+ * ask the contracts (Base\Contract\Runtime) or the services they need.
+ *
+ * What a contract answers, it asks the contract when the registry has it:
+ * isDebug(), isDevelopment(), getSecret()/getSalt() (Environment), isGranted()
+ * (Access), and BaseTrait's getParameterBag() and getEnvironment(). Those
+ * methods read no property of the object: called on the ghost, they build
+ * nothing.
+ */
 class BaseService implements RuntimeExtensionInterface
 {
     use BaseTrait;
@@ -354,7 +371,7 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function getSecret()
     {
-        return $this->getParameterBag("kernel.secret");
+        return Runtime::find(EnvironmentContract::class)?->secret() ?? $this->getParameterBag("kernel.secret");
     }
 
     public function getProfiler(): ?Profiler
@@ -505,9 +522,11 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function isDevelopment()
     {
-        return $this->isDebug() ||
-            $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_") ||
-            $this->kernel->getEnvironment() == "local" || str_starts_with($this->kernel->getEnvironment(), "local_");
+        if ($environment = Runtime::find(EnvironmentContract::class)) {
+            return DevelopmentEnvironment::is($environment);
+        }
+
+        return DevelopmentEnvironment::named($this->kernel->getEnvironment(), $this->kernel->isDebug());
     }
 
     /**
@@ -531,7 +550,7 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function isDebug()
     {
-        return $this->kernel->isDebug();
+        return Runtime::find(EnvironmentContract::class)?->isDebug() ?? $this->kernel->isDebug();
     }
 
     /**
@@ -653,6 +672,10 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function isGranted($attribute, $subject = null): bool
     {
+        if ($access = Runtime::find(Access::class)) {
+            return $access->isGranted($attribute, $subject);
+        }
+
         if (!isset($this->authorizationChecker)) {
             throw new Exception("No authorization checker found in BaseService. Did you overloaded self::__construct ?");
         }

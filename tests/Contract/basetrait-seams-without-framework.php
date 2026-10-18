@@ -21,11 +21,14 @@
  *   path, route and icons, Widget\Route's links.
  * - the Environment contract and the parameters (an ArrayParameterBag): User's
  *   delays and tester's check, a Token built (its throttling, its salt), a
- *   secured entity's vault.
+ *   secured entity's vault; BaseTrait's getParameterBag() and getEnvironment(),
+ *   BaseService's isDebug(), isDevelopment(), getSalt() and, with Access,
+ *   isGranted() (C9) - on a BaseService never constructed.
  * - the Sessions and Locales contracts: User's logout() and its locale.
  * Returns what they answered.
  */
 
+use Base\Contract\Access;
 use Base\Contract\Environment;
 use Base\Contract\Link;
 use Base\Contract\Locales;
@@ -47,6 +50,7 @@ use Base\Entity\User;
 use Base\Entity\User\Token;
 use Base\Exception\MissingContractException;
 use Base\Service\ArrayParameterBag;
+use Base\Service\BaseService;
 use Base\Service\Model\ClassAliases;
 use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
@@ -285,6 +289,25 @@ $answers['token, salted with the secret'] = (new ReflectionProperty(Token::class
 $setting = new SettingIntl();
 $answers['vault, secured'] = $setting->setSecure(true)->getVault();
 $answers['vault, not secured'] = $setting->setSecure(false)->getVault();
+// BaseTrait's accessors and BaseService's methods that a contract answers (C9), with no container:
+// the parameters, the environment's name, debug, the secret, and Access - on a BaseService never constructed.
+Runtime::set(Access::class, new class implements Access {
+    public function isGranted(mixed $attribute, mixed $subject = null): bool
+    {
+        return $attribute === 'ROLE_ADMIN';
+    }
+
+    public function getUser(): ?object
+    {
+        return null;
+    }
+});
+$answers['basetrait, a parameter'] = BaseService::getParameterBag('base.user.active_delay');
+$answers['basetrait, the parameters'] = BaseService::getParameterBag() instanceof ArrayParameterBag;
+$answers['basetrait, the environment'] = BaseService::getEnvironment();
+$facade = (new ReflectionClass(BaseService::class))->newInstanceWithoutConstructor();
+$answers['baseservice, debug, development, salt'] = [$facade->isDebug(), $facade->isDevelopment(), $facade->getSalt()];
+$answers['baseservice, granted'] = [$facade->isGranted('ROLE_ADMIN'), $facade->isGranted('ROLE_SUPERADMIN')];
 
 // Sessions and Locales: a user signed out or kicked, a user's locale.
 Runtime::set(Sessions::class, new class implements Sessions {
