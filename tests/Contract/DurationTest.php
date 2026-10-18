@@ -55,7 +55,12 @@ final class DurationTest extends KernelTestCase
     {
         $translator = static::getContainer()->get('Base\Service\Translator');
         $translator->setLocale('fr');
+        // Between omnibase's translator and Symfony's; under an application's test environment the
+        // profiler's DataCollectorTranslator may stand around it: followed down to it.
         $inner = (new \ReflectionProperty(Translator::class, 'translator'))->getValue($translator);
+        for ($depth = 0; !$inner instanceof OverridingTranslator && $depth < 5 && property_exists($inner, 'translator'); ++$depth) {
+            $inner = (new \ReflectionProperty($inner, 'translator'))->getValue($inner);
+        }
         self::assertInstanceOf(OverridingTranslator::class, $inner, 'the back office\'s texts are between omnibase\'s translator and Symfony\'s');
 
         $map = new \ReflectionProperty(OverridingTranslator::class, 'map');
