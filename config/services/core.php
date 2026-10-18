@@ -60,7 +60,7 @@ return static function (ContainerConfigurator $container): void {
 
     // Controllers
     $controllers = [
-        'Base\Controller\MainController' => ['base.service', 'setting_bag'],
+        'Base\Controller\MainController' => ['setting_bag'],
         'Base\Controller\ProfilerController' => ['base.notifier', 'App\Repository\UserRepository'],
         'Base\Controller\Client\ContactController' => ['form.proxy', 'base.notifier'],
         'Base\Controller\LocalizerController' => ['localizer', 'doctrine.orm.entity_manager', 'advanced_router', 'referrer', 'translator'],

@@ -8,7 +8,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -43,9 +42,6 @@ final class ColorPickerType extends AbstractType
     public const COLOR_PURPLE = '#b10dc9';
     public const COLOR_BLACK = '#111111';
     public const COLOR_GRAY = '#AAAAAA';
-
-    /** @var BaseService */
-    protected BaseService $baseService;
 
     /** @var TranslatorInterface */
     protected TranslatorInterface $translator;

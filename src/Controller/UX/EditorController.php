@@ -3,6 +3,7 @@
 namespace Base\Controller\UX;
 
 use App\Entity\User;
+use Base\Contract\Runtime;
 use Base\Service\PaginatorInterface;
 use App\Repository\UserRepository;
 use Base\Enum\UserRole;
@@ -164,7 +165,7 @@ class EditorController extends AbstractController
         
         $query = $vars["query"] ?? NULL;
 
-        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        $expectedMethod = Runtime::environment()->isDebug() ? ["GET", "POST"] : ["POST"];
         if (!in_array($request->getMethod(), $expectedMethod) || !$query) {
             return new Response($this->translator->trans("editor.error.invalid_query", [], "fields"), 500);
         }
@@ -223,7 +224,7 @@ class EditorController extends AbstractController
         
         $query = $this->slugger->slug($vars["query"] ?? NULL);
 
-        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        $expectedMethod = Runtime::environment()->isDebug() ? ["GET", "POST"] : ["POST"];
         if (!in_array($request->getMethod(), $expectedMethod) || !$query) {
             return new Response($this->translator->trans("editor.error.invalid_query", [], "fields"), 500);
         }
@@ -281,7 +282,7 @@ class EditorController extends AbstractController
         
         $query = $this->slugger->slug($vars["query"] ?? NULL);
 
-        $expectedMethod = $this->getService()->isDebug() ? ["GET", "POST"] : ["POST"];
+        $expectedMethod = Runtime::environment()->isDebug() ? ["GET", "POST"] : ["POST"];
         if (!in_array($request->getMethod(), $expectedMethod) || !$query) {
             return new Response($this->translator->trans("editor.error.invalid_query", [], "fields"), 500);
         }

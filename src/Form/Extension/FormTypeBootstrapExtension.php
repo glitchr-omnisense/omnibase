@@ -2,7 +2,7 @@
 
 namespace Base\Form\Extension;
 
-use Base\Service\BaseService;
+use Base\Service\ParameterBagInterface;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -13,14 +13,12 @@ use Symfony\Component\Form\FormView;
 
 class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
-    /**
-     * @var BaseService
-     */
-    protected BaseService $baseService;
+    /** The parameters (base.twig.use_bootstrap), where it asked BaseService for them (plan "omnibase agnostique", C9). */
+    protected ParameterBagInterface $parameterBag;
 
-    public function __construct(BaseService $baseService)
+    public function __construct(ParameterBagInterface $parameterBag)
     {
-        $this->baseService = $baseService;
+        $this->parameterBag = $parameterBag;
     }
 
     public static function getExtendedTypes(): iterable
@@ -31,7 +29,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'bootstrap' => $this->baseService->getParameterBag("base.twig.use_bootstrap"),
+            'bootstrap' => $this->parameterBag->get("base.twig.use_bootstrap"),
             'bootstrap_label' => true
         ]);
     }

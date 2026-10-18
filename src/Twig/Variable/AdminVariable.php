@@ -6,13 +6,14 @@ use Base\Admin\Controller\AbstractCrudController;
 use Base\Admin\Controller\AbstractDashboardController;
 use Base\Routing\AdminUrlGeneratorInterface;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\BaseService;
 use Base\Service\LauncherInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;
+use Base\Service\SettingBagInterface;
 use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use Base\Admin\Config\Crud;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class AdminVariable extends SiteVariable
 {
@@ -23,13 +24,14 @@ class AdminVariable extends SiteVariable
         SitemapperInterface          $sitemapper,
         TranslatorInterface          $translator,
         LocalizerInterface           $localizer,
-        BaseService                  $baseService,
+        SettingBagInterface          $settingBag,
         MaintenanceProviderInterface $maintenanceProvider,
         LauncherInterface            $launcher,
-        AdminUrlGeneratorInterface            $adminUrlGenerator
+        ?KernelInterface             $kernel,
+        AdminUrlGeneratorInterface   $adminUrlGenerator
     )
     {
-        parent::__construct($router, $sitemapper, $translator, $localizer, $baseService, $maintenanceProvider, $launcher);
+        parent::__construct($router, $sitemapper, $translator, $localizer, $settingBag, $maintenanceProvider, $launcher, $kernel);
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
@@ -38,7 +40,7 @@ class AdminVariable extends SiteVariable
      */
     public function title()
     {
-        return $this->baseService->getAdmin()['title']
+        return $this->settingBag->getScalar("base.settings.title.admin")
             ?? $this->translator->trans('admin.title', [], AbstractDashboardController::TRANSLATION_DASHBOARD)
             ?? parent::title();
     }
@@ -48,7 +50,7 @@ class AdminVariable extends SiteVariable
      */
     public function slogan()
     {
-        return $this->baseService->getAdmin()['slogan']
+        return $this->settingBag->getScalar("base.settings.slogan.admin")
             ?? $this->translator->trans('admin.slogan', [], AbstractDashboardController::TRANSLATION_DASHBOARD)
             ?? parent::title();
     }
@@ -58,7 +60,7 @@ class AdminVariable extends SiteVariable
      */
     public function logo()
     {
-        return $this->baseService->getAdmin()['logo']
+        return $this->settingBag->getScalar("base.settings.logo.admin")
             ?? parent::logo();
     }
 

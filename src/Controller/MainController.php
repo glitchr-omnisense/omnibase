@@ -9,19 +9,16 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 
-use  Base\Service\BaseService;
 use  Base\Service\SettingBag;
 use function dirname;
 
 #[Route(priority: -1)]
 class MainController extends AbstractController
 {
-    protected BaseService $service;
     protected SettingBag $settingBag;
 
-    public function __construct(BaseService $service, SettingBag $settingBag)
+    public function __construct(SettingBag $settingBag)
     {
-        $this->service = $service;
         $this->settingBag = $settingBag;
     }
 

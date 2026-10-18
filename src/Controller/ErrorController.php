@@ -2,7 +2,8 @@
 
 namespace Base\Controller;
 
-use Base\Service\BaseService;
+use Base\Contract\Environment;
+use Base\Service\Model\DevelopmentEnvironment;
 
 use Base\Routing\AdvancedRouterInterface;
 use Error;
@@ -20,15 +21,16 @@ use Throwable;
 
 class ErrorController extends AbstractController
 {
-    private BaseService $baseService;
+    private Environment $environment;
     private AdvancedRouterInterface $router;
     private HtmlErrorRenderer $htmlErrorRenderer;
     private RequestStack $requestStack;
     private ?Profiler $profiler;
 
-    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, BaseService $baseService, RequestStack $requestStack, ?Profiler $profiler = null)
+    /** The Environment contract, where it asked BaseService whether it runs for its developers (plan "omnibase agnostique", C9). */
+    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, Environment $environment, RequestStack $requestStack, ?Profiler $profiler = null)
     {
-        $this->baseService = $baseService;
+        $this->environment = $environment;
         $this->router = $router;
         $this->htmlErrorRenderer = $htmlErrorRenderer;
         $this->requestStack = $requestStack;
@@ -45,7 +47,7 @@ class ErrorController extends AbstractController
         try {
             $isPreview = $this->router->getRouteName() === "_preview_error";
 
-            if ($this->baseService->isDevelopment() && !$isPreview) {
+            if (DevelopmentEnvironment::is($this->environment) && !$isPreview) {
                 $response = $this->Rescue($exception);
             } else {
                 $response = $this->renderException(FlattenException::createFromThrowable($exception));
@@ -57,8 +59,8 @@ class ErrorController extends AbstractController
 
         // NB: Remember this might be annoying sometimes..
         // $notification = new Notification($exception);
-        // if ($this->baseService->isDevelopment()) $notification->send("danger");
-        // if ($this->baseService->isDevelopment()) dump($exception);
+        // if (DevelopmentEnvironment::is($this->environment)) $notification->send("danger");
+        // if (DevelopmentEnvironment::is($this->environment)) dump($exception);
 
         return $response;
     }
