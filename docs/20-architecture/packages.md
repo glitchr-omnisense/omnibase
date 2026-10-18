@@ -22,7 +22,7 @@ the framework loaded*, not *absent from vendor*.
 
 **Doctrine: the latest major, one line.** The core follows each Doctrine package's current
 major, open upwards - `doctrine/orm` `^3.4`, `doctrine/dbal` `^4.2` (omnibridge/doctrine's
-floors), `doctrine/collections` `^2.0`, `doctrine/event-manager` `^2.0`,
+floors), `doctrine/collections` `^3.1` (which requires PHP 8.4), `doctrine/event-manager` `^2.0`,
 `doctrine/persistence` `^4.0`, `doctrine/common` `^3.0` - with no older branch kept alive, no
 upper bound and no pinned version; Doctrine is used as published (no patch, no fork). A new
 major is taken up when it comes, not maintained beside the old one.
