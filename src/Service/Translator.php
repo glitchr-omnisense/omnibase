@@ -2,14 +2,23 @@
 
 namespace Base\Service;
 
+use Base\Contract\Translations;
 use Base\Database\Type\SetType;
+use Base\Service\Model\EntityNouns;
+use Base\Service\Model\NounVariants;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
-class Translator implements TranslatorInterface
+/**
+ * omnibase's translator, and the Translations contract of the Fondation
+ * (trans(), exists()) where it runs: an entity's noun is asked of an
+ * EntityNouns over it (getEntityNouns(), plan "omnibase agnostique", C4b),
+ * the rule a host without the framework runs over its own Translations.
+ */
+class Translator implements TranslatorInterface, Translations
 {
     public const PARSE_EXTENDS = "extends";
     public const PARSE_NAMESPACE = "namespace";
@@ -478,19 +487,8 @@ class Translator implements TranslatorInterface
             default:
             case self::PARSE_NAMESPACE:
 
-                $bundleEntityNamespaces = array_map(fn($b) => dirname_namespace($b)."\\Entity\\", \Base\BaseBundle::getInstance()->getBundles());
-                $entityNamespaces = array_merge(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], $bundleEntityNamespaces);
-
-                $entityPrefix = array_fill(0, 3, "");
-                foreach($bundleEntityNamespaces as $namespace)
-                {
-                    $baseNamespace = explode("\\", $namespace)[1] ?? null;
-                    if($baseNamespace) $entityPrefix[] = lcfirst($baseNamespace)."\\";
-                }
-
-                $class = str_replace($entityNamespaces, $entityPrefix, $class);
-
-                return camel2snake(implode(".", array_unique(explode("\\", $class))));
+                // The key of an entity in the "entities" catalogues: EntityNouns's rule (C4b).
+                return $this->getEntityNouns()->key($class);
         }
 
         return "";
@@ -537,48 +535,7 @@ class Translator implements TranslatorInterface
      */
     protected function permutations(array $options): array
     {
-        $politeness = null;
-        if (in_array(self::POLITENESS_PLAIN, $options)) {
-            $politeness = self::POLITENESS_PLAIN;
-        } elseif (in_array(self::POLITENESS_POLITE, $options)) {
-            $politeness = self::POLITENESS_POLITE;
-        } elseif (in_array(self::POLITENESS_FORMAL, $options)) {
-            $politeness = self::POLITENESS_FORMAL;
-        }
-
-        $genderness = null;
-        if (in_array(self::GENDERNESS_INCLUSIVE, $options)) {
-            $genderness = self::GENDERNESS_INCLUSIVE;
-        } elseif (in_array(self::GENDERNESS_MASCULINE, $options)) {
-            $genderness = self::GENDERNESS_MASCULINE;
-        } elseif (in_array(self::GENDERNESS_FEMININE, $options)) {
-            $genderness = self::GENDERNESS_FEMININE;
-        } elseif (in_array(self::GENDERNESS_NEUTRAL, $options)) {
-            $genderness = self::GENDERNESS_NEUTRAL;
-        }
-        $genderness = $genderness ? "." . $genderness : "";
-
-        $noun = null;
-        if (in_array(self::NOUN_PLURAL, $options)) {
-            $noun = self::NOUN_PLURAL;
-        } elseif (in_array(self::NOUN_SINGULAR, $options)) {
-            $noun = self::NOUN_SINGULAR;
-        }
-        $noun = $noun ? "." . $noun : "";
-
-        $others = array_filter([$genderness, $noun]);
-        $permutations = [];
-        foreach (self::politenessChain($politeness) as $level) {
-            foreach (get_permutations(array_merge(["." . $level], $others)) as $permutation) {
-                $permutations[] = implode("", $permutation);
-            }
-        }
-        foreach (get_permutations($others) as $permutation) {
-            $permutations[] = implode("", $permutation);
-        }
-        $permutations[] = "";
-
-        return [array_values(array_unique($permutations)), array_filter([$politeness ? "." . $politeness : "", $genderness, $noun]), $politeness !== null];
+        return NounVariants::of($options);
     }
 
     /**
@@ -701,31 +658,33 @@ class Translator implements TranslatorInterface
 
     public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
     {
-        if (!is_array($options)) {
-            $options = array_filter([$options]);
-        }
-        if (is_object($entityOrClassName)) {
-            $entityOrClassName = get_class($entityOrClassName);
-        }
-
-        $entityOrClassName = $this->parseClass($entityOrClassName);
-        $property = $property ? ".".self::TRANSLATION_PROPERTIES."." . camel2snake($property) : "";
-        return $entityOrClassName ? $this->transPerms($entityOrClassName . $property, $options, [], self::DOMAIN_ENTITY) : null;
+        return $this->getEntityNouns()->entity(is_object($entityOrClassName) ? $entityOrClassName : (string) $entityOrClassName, $property, $options);
     }
 
     public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): bool
     {
-        if (!is_array($options)) {
-            $options = [$options];
-        }
-        if (is_object($entityOrClassName)) {
-            $entityOrClassName = get_class($entityOrClassName);
-        }
+        return $this->getEntityNouns()->entityExists(is_object($entityOrClassName) ? $entityOrClassName : (string) $entityOrClassName, $property, $options);
+    }
 
-        $entityOrClassName = $this->parseClass($entityOrClassName);
-        $property = $property ? ".".self::TRANSLATION_PROPERTIES."." . camel2snake($property) : "";
- 
-       return $this->transPermExists($entityOrClassName . $property, $options, self::DOMAIN_ENTITY);
+    /**
+     * The Translations contract's question (Base\Contract\Translations):
+     * whether the catalogue holds the key, as transExists() answers.
+     */
+    public function exists(string $id, ?string $domain = null, ?string $locale = null): bool
+    {
+        return $this->transExists($id, $domain, $locale);
+    }
+
+    private ?EntityNouns $entityNouns = null;
+
+    /**
+     * The entities' nouns over this translator (the Nouns contract under
+     * Symfony): the entity namespaces of the bundles omnibase's BaseBundle
+     * knows, App\Entity\ and Base\Entity\.
+     */
+    public function getEntityNouns(): EntityNouns
+    {
+        return $this->entityNouns ??= new EntityNouns($this, EntityNouns::namespacesOf(\Base\BaseBundle::getInstance()->getBundles()));
     }
 
     public function transTime(int $time): string

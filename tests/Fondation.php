@@ -58,6 +58,9 @@
  * Base\Contract\SecurityUser and TwoFactorUser - those interfaces when they are installed and the host runs
  * the framework, empty ones otherwise, which bare measures as a host without it, see Base\Contract\Framework -,
  * Base\Contract\Framework itself, and Base\Service\Flysystem, no longer league/flysystem-bundle's LazyFactory).
+ * 767 after step C4b's nouns (+4: the contracts Base\Contract\Translations - omnibridge/twig's and exists() - and
+ * Nouns, what an entity is called, and its rule Base\Service\Model\EntityNouns with the keys it tries,
+ * Base\Service\Model\NounVariants, which Base\Service\Translator now answers by).
  */
 
 return [
@@ -99,12 +102,14 @@ return [
     Base\Contract\Framework::class,
     Base\Contract\Link::class,
     Base\Contract\Locales::class,
+    Base\Contract\Nouns::class,
     Base\Contract\Pictures::class,
     Base\Contract\Runtime::class,
     Base\Contract\SecurityUser::class,
     Base\Contract\SystemClock::class,
     Base\Contract\Texts::class,
     Base\Contract\Tokens::class,
+    Base\Contract\Translations::class,
     Base\Contract\TwoFactorUser::class,
     Base\Contract\Urls::class,
     Base\Controller\SignatureController::class,
@@ -648,6 +653,7 @@ return [
     Base\Service\Model\Currency\Api\ExchangeRatesApi::class,
     Base\Service\Model\Currency\Api\Fixer::class,
     Base\Service\Model\Currency\CurrencyApiInterface::class,
+    Base\Service\Model\EntityNouns::class,
     Base\Service\Model\GraphInterface::class,
     Base\Service\Model\HtmlizeInterface::class,
     Base\Service\Model\IconProvider\AbstractIconAdapter::class,
@@ -658,6 +664,7 @@ return [
     Base\Service\Model\IntlDateTime::class,
     Base\Service\Model\LinkableInterface::class,
     Base\Service\Model\LocaleNormalizer::class,
+    Base\Service\Model\NounVariants::class,
     Base\Service\Model\Obfuscator\AbstractCompression::class,
     Base\Service\Model\Obfuscator\CompressionInterface::class,
     Base\Service\Model\Obfuscator\Compression\DeflateCompression::class,

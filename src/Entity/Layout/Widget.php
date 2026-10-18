@@ -17,6 +17,7 @@ use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Repository\Layout\WidgetRepository;
+use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -57,11 +58,14 @@ class Widget implements TranslatableInterface, IconizeInterface, CacheableInterf
     }
 
     /**
+     * Its title, else what a widget is called (the Nouns contract, C4b) and
+     * its number.
+     *
      * @return string
      */
     public function __toString()
     {
-        return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class) . " #" . $this->getId();
+        return $this->getTitle() ?? Runtime::nouns()->entity(self::class) . " #" . $this->getId();
     }
 
     public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)

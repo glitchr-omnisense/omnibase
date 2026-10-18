@@ -87,6 +87,22 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: what the classes read through BaseTrait, on contracts (step C4b)
+Names constant (`BaseTrait` and its accessors stay for the bundles and the sites); each move
+compared under Symfony with the service it replaces, and run where there is no framework
+(`tests/Contract/basetrait-seams-without-framework.php`, `BareTest`). See
+[docs/20-architecture/contracts.md](docs/20-architecture/contracts.md).
+- **What an entity is called**: `Base\Contract\Nouns` (`entity()`, `entityExists()`) and its
+  rule `Base\Service\Model\EntityNouns` (with `NounVariants`, the keys tried for a noun's
+  options), over `Base\Contract\Translations` - omnibridge/twig's `Translations` and
+  `exists()` - and the entity namespaces of the application's bundles. It is the rule of
+  `Translator::transEntity()`, `transEntityExists()` and `parseClass()`, which now answer by
+  an instance over the translator (`getEntityNouns()`), the contract's service under Symfony;
+  `Translator` implements `Base\Contract\Translations`, `TranslatorTranslations` too.
+  `Thread::__toString()` and `Widget::__toString()` ask `Runtime::nouns()`. `NounsTest`: every
+  entity of the application, five sets of options, three properties, two languages, the old
+  rule copied as it was. Fondation 763 -> 767.
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming

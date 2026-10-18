@@ -401,6 +401,11 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\TranslatorTranslations')
         ->args([service('translator')]);
     $services->alias('Omnibridge\Twig\Contract\Translations', 'Base\Bridge\Symfony\TranslatorTranslations');
+    $services->alias('Base\Contract\Translations', 'Base\Bridge\Symfony\TranslatorTranslations');
+    // What an entity is called (C4b): the translator's own EntityNouns, over the bundles BaseBundle knows.
+    $services->set('Base\Service\Model\EntityNouns')
+        ->factory([service('Base\Service\Translator'), 'getEntityNouns']);
+    $services->alias('Base\Contract\Nouns', 'Base\Service\Model\EntityNouns');
     $services->set('Base\Bridge\Symfony\SecurityAccess')
         ->args([service('security.authorization_checker'), service('security.token_storage')]);
     $services->alias('Base\Contract\Access', 'Base\Bridge\Symfony\SecurityAccess');
