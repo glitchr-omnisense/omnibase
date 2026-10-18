@@ -27,7 +27,8 @@ use Symfony\Component\Mailer\MailerInterface;
  *   same interfaces;
  * - or one service at a time (set()), which wins over the container's.
  *
- * The contracts: Urls (path, url, asset), omnibridge/twig's Translations
+ * The contracts: Urls (path, url, asset), Routes (a route's declared path,
+ * the route of an address, a route's icons, C4b), omnibridge/twig's Translations
  * (trans, ICU) and omnibase's, which asks exists() too (C4b), Nouns (what
  * an entity is called, the rule of Base\Service\Model\EntityNouns), Access
  * (isGranted, the user), Locales (current, default, available), Files
@@ -141,6 +142,12 @@ final class Runtime
     public static function urls(): Urls
     {
         return self::get(Urls::class);
+    }
+
+    /** What the routes are beyond their addresses (C4b): a route's path, an address's route, a route's icons. */
+    public static function routes(): Routes
+    {
+        return self::get(Routes::class);
     }
 
     public static function translations(): Translations

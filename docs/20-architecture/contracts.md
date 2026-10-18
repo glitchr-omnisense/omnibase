@@ -13,6 +13,7 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 | Contract | What it answers | Under Symfony |
 |---|---|---|
 | `Base\Contract\Urls` (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
+| `Base\Contract\Routes` (step C4b) | what the routes are beyond their addresses: a route's declared path (`pattern()`), the route an address leads to (`match()`), a route's icons | `Base\Bridge\Symfony\RouterRoutes`: `advanced_router` (its route collection, `getRouteName()`) and the `IconProvider` |
 | `Omnibridge\Twig\Contract\Translations` | `trans()`, ICU messages | `Base\Bridge\Symfony\TranslatorTranslations`: the `translator` chain (texts rewritten in the back office, `Base\Service\Translator`, Symfony's) - Twig's `\|trans` |
 | `Base\Contract\Translations` (step C4b; omnibridge/twig's `Translations` and `exists()`) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
 | `Base\Contract\Nouns` (step C4b) | what an entity is called: its noun (`entity()`), singular or plural, a gender, a level of politeness, a property's label; `entityExists()` | `Base\Service\Model\EntityNouns` from `Base\Service\Translator::getEntityNouns()`: the rule `transEntity()` answers by |
@@ -159,6 +160,10 @@ sites that call them.
 | `Thread::getPublishTimeStr()`, `Token::getRemainingTimeStr()`, `getThrottleTimeStr()` | `getTranslator()->transTime($seconds)` | `Duration::spell($seconds, Runtime::translations())` (`DurationTest`: the texts rewritten in the back office printed as before) |
 | `Image::__toLink()` | `getMediaService()->getExtension()`, `obfuscate()`, then `getRouter()->generate()` | `Runtime::media()->extension()`, `obfuscate()`, then `Link::to()` (`MediaTest`) |
 | `ImageCrop::__toLink()` | `getMediaService()->getExtension()` (after a `getExtensions()` whose answer it overwrote), `generate()` | `Runtime::media()->extension()`, `link()` |
+| `Semantic::getPath()`, `Widget\Route::getPath()` | `getRouter()->getRouteCollection()->get($name)?->getPath()` | `Runtime::routes()->pattern($name)` (`RoutesTest`) |
+| `Semantic::getRoute()`, `Widget\Route::getRoute()` | `getRouter()->getRoute($this->getUrl())`: a `Route` object handed to a `?string` return type, a `TypeError` for any route found | `Runtime::routes()->match($url)`: the name of the route the address leads to |
+| `Semantic::getRouteIcons()`, `Widget\Route::getRouteIcons()` and its `__iconize()` | `getIconProvider()->getRouteIcons($name)` (every route's icons for no route) | `Runtime::routes()->icons($name)` (null for no route) |
+| `Widget\Route::__toLink()`, `getUrl()`, `generate()` | `getRouter()->generate()` | `Link::to()`, as `Semantic` since C3e (a route the router cannot make: null; no Urls: `MissingContractException`) |
 
 **What an entity is called: `Base\Service\Model\EntityNouns`.** The rule of
 `Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:

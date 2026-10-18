@@ -398,6 +398,9 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\RouterUrls')
         ->args([service('advanced_router'), service('assets.packages')->nullOnInvalid()]);
     $services->alias('Base\Contract\Urls', 'Base\Bridge\Symfony\RouterUrls');
+    $services->set('Base\Bridge\Symfony\RouterRoutes')
+        ->args([service('advanced_router'), service('base.service.icon')->nullOnInvalid()]);
+    $services->alias('Base\Contract\Routes', 'Base\Bridge\Symfony\RouterRoutes');
     $services->set('Base\Bridge\Symfony\TranslatorTranslations')
         ->args([service('translator')]);
     $services->alias('Omnibridge\Twig\Contract\Translations', 'Base\Bridge\Symfony\TranslatorTranslations');

@@ -2,14 +2,16 @@
 
 namespace Base\Entity\Layout\Widget;
 
+use Base\Contract\Link;
+use Base\Contract\Runtime;
 use Base\Database\Attribute\DiscriminatorEntry;
+use Base\Exception\MissingContractException;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\RouteRepository;
 use Exception;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: RouteRepository::class)]
@@ -27,7 +29,7 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return ["fa-solid fa-road"];
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         $this->setRouteParameters(array_merge($this->getRouteParameters(), $routeParameters));
         return $this->generate($referenceType);
@@ -78,25 +80,37 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
     }
 
     /**
+     * The path its route is declared with ("/articles/{slug}"): the Routes
+     * contract (C4b), the router's route collection under Symfony.
+     *
      * @return string|null
      */
     public function getPath()
     {
-        $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
-        return $route?->getPath();
-    }
-
-    public function getRoute(): ?string
-    {
-        return $this->getRouter()->getRoute($this->getUrl());
+        return $this->routeName === null ? null : Runtime::routes()->pattern($this->routeName);
     }
 
     /**
+     * The name of the route its address leads to (the Routes contract, C4b).
+     * It handed the router's Route object to a string return type before,
+     * which threw for every route found.
+     */
+    public function getRoute(): ?string
+    {
+        $url = $this->getUrl();
+
+        return $url === null ? null : Runtime::routes()->match($url);
+    }
+
+    /**
+     * Its route's icons (the Routes contract, C4b: the IconProvider's under
+     * Symfony); null without a route.
+     *
      * @return array|mixed|null
      */
     public function getRouteIcons()
     {
-        return $this->getIconProvider()->getRouteIcons($this->routeName);
+        return $this->routeName === null ? null : Runtime::routes()->icons($this->routeName);
     }
 
     public function getUrl(): ?string
@@ -104,10 +118,18 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this->generate();
     }
 
-    public function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    /**
+     * Its route's address through the Urls contract (Base\Contract\Link, C4b),
+     * not BaseTrait's router: the same string under Symfony. A route the
+     * router cannot make is null, as before; a registry with no Urls is said
+     * aloud, never taken for a missing route.
+     */
+    public function generate(int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         try {
-            return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType);
+            return Link::to($this->routeName, $this->routeParameters ?? [], $referenceType);
+        } catch (MissingContractException $e) {
+            throw $e;
         } catch (Exception $e) {
         }
 

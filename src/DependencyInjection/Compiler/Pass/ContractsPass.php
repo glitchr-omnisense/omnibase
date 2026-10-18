@@ -8,6 +8,7 @@ use Base\Contract\Locales;
 use Base\Contract\Media;
 use Base\Contract\Nouns;
 use Base\Contract\Pictures;
+use Base\Contract\Routes;
 use Base\Contract\Texts;
 use Base\Contract\Tokens;
 use Base\Contract\Translations as BaseTranslations;
@@ -41,6 +42,7 @@ final class ContractsPass implements CompilerPassInterface
     /** @var list<class-string> */
     public const CONTRACTS = [
         Urls::class,
+        Routes::class,
         Translations::class,
         BaseTranslations::class,
         Nouns::class,

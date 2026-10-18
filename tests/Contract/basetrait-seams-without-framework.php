@@ -17,6 +17,8 @@
  *   Token's time left and throttle, Thread's time before it is published.
  * - the Media contract (and Urls): Image's and ImageCrop's links to the image
  *   route.
+ * - the Routes contract (and Urls): Semantic's and Widget\Route's declared
+ *   path, route and icons, Widget\Route's links.
  * Returns what they answered.
  */
 
@@ -24,11 +26,14 @@ use Base\Contract\Link;
 use Base\Contract\Locales;
 use Base\Contract\Media;
 use Base\Contract\Nouns;
+use Base\Contract\Routes;
 use Base\Contract\Runtime;
 use Base\Contract\Translations;
 use Base\Contract\Urls;
 use Base\Entity\Layout\Image;
 use Base\Entity\Layout\ImageCrop;
+use Base\Entity\Layout\Semantic;
+use Base\Entity\Layout\Widget\Route as RouteWidget;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
 use Base\Entity\User\Token;
@@ -199,6 +204,38 @@ $crop = new ImageCrop($image);
 $crop->setSlug('square');
 $answers['crop, link'] = $crop->__toLink();
 $answers['crop, its own extension'] = $crop->__toLink(['extension' => true, 'webp' => false]);
+
+// Routes: a route's declared path, the route of an address, a route's icons.
+Runtime::set(Routes::class, new class implements Routes {
+    private array $routes = ['article' => '/articles/{slug}', 'blog' => '/blog'];
+
+    public function pattern(string $name): ?string
+    {
+        return $this->routes[$name] ?? null;
+    }
+
+    public function match(string $url): ?string
+    {
+        return '/blog' === $url ? 'blog' : (str_starts_with($url, '/article') ? 'article' : null);
+    }
+
+    public function icons(string $name): ?array
+    {
+        return 'blog' === $name ? ['fa-solid fa-newspaper'] : null;
+    }
+});
+$semantic = (new ReflectionClass(Semantic::class))->newInstanceWithoutConstructor();
+$semantic->setRouteName('article');
+$semantic->setRouteParameters(['slug' => 'abbey-road']);
+$answers['semantic, path'] = $semantic->getPath();
+$answers['semantic, route'] = $semantic->getRoute();
+$answers['semantic, icons'] = $semantic->getRouteIcons();
+$menu = new RouteWidget('Le blog', 'blog');
+$answers['route widget, path'] = $menu->getPath();
+$answers['route widget, route'] = $menu->getRoute();
+$answers['route widget, icons'] = $menu->__iconize();
+$answers['route widget, link'] = $menu->__toLink(['page' => 2]);
+$answers['route widget, url'] = (new RouteWidget('Le blog', 'blog'))->generate(Link::ABSOLUTE_URL);
 
 Runtime::reset();
 
