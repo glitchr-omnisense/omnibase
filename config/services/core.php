@@ -467,9 +467,12 @@ return static function (ContainerConfigurator $container): void {
         ->args([service('Base\Screen\Builder\Accounts'), service('twig'), service('Base\Contract\Access')->nullOnInvalid()])
         ->tag('twig.runtime');
 
-    // BaseService
+    // BaseService: a lazy facade (plan "omnibase agnostique", C9). Lazy, it is a ghost
+    // of the class until one of its methods reads a property: injecting it builds
+    // none of its 23 services.
     $services->set('Base\Service\BaseService')
         ->public(true)
+        ->lazy()
         ->args([
             service('kernel'),
             service('request_stack'),
