@@ -60,4 +60,28 @@ final class AppClassOverAliasTest extends TestCase
         self::assertTrue(BaseBundle::declareAlias('Base\\Enum\\UserRole', $alias));
         self::assertSame('Base\\Enum\\UserRole', (new \ReflectionClass($alias))->getName());
     }
+
+    /**
+     * A kernel without debug declares the pool's aliases without the search
+     * (BaseBundle::declareAliases()): the pool lists only names no class
+     * answered to when it was written, and is written again by every
+     * cache:clear. Without the search the alias is declared as it is asked,
+     * which is why it is never asked so with debug.
+     */
+    public function testWithoutTheLookupThePoolsAliasIsDeclaredAsAsked(): void
+    {
+        $alias = 'App\\Enum\\PoolsEnum'.bin2hex(random_bytes(3));
+
+        self::assertTrue(BaseBundle::declareAlias('Base\\Enum\\UserRole', $alias, false));
+        self::assertSame('Base\\Enum\\UserRole', (new \ReflectionClass($alias))->getName());
+        self::assertTrue(BaseBundle::declareAlias('Base\\Enum\\UserRole', $alias, false), 'declared already, to that class');
+    }
+
+    public function testTheLookupStaysTheDefault(): void
+    {
+        $class = $this->appClass('HarnessDefaultRole'.bin2hex(random_bytes(3)), 'Base\\Enum\\UserRole');
+
+        self::assertFalse(BaseBundle::declareAlias('Base\\Enum\\UserRole', $class));
+        self::assertArrayHasKey('OWN', (new \ReflectionClass($class))->getConstants());
+    }
 }

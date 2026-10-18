@@ -282,17 +282,26 @@ abstract class AbstractBaseBundle extends Bundle
      * glitchr/base-plugin's stubs/ before 4.0) are no definition of its own,
      * should an autoloader ever find one. True when the alias is declared (or
      * already was, to that class).
+     *
+     * $lookup false skips the autoloaders' search for a file of the
+     * application: for an alias of the pool, which BaseBundle::warmUp() wrote
+     * only for names no class answered to when it scanned (setAlias()), in a
+     * kernel without debug, whose pool is rebuilt with every cache:clear. That
+     * search is a file_exists() missed per alias - 346 of them on each
+     * request of lesringostars, 8.7 of its 11 ms of aliases.
      */
-    public static function declareAlias(string $class, string $alias): bool
+    public static function declareAlias(string $class, string $alias, bool $lookup = true): bool
     {
         if (class_exists($alias, false) || interface_exists($alias, false) || trait_exists($alias, false)) {
             return (new \ReflectionClass($alias))->getName() === ltrim($class, "\\");
         }
 
-        foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $loader) {
-            $file = $loader->findFile($alias);
-            if (false !== $file && !self::isStub($file)) {
-                return false;
+        if ($lookup) {
+            foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $loader) {
+                $file = $loader->findFile($alias);
+                if (false !== $file && !self::isStub($file)) {
+                    return false;
+                }
             }
         }
 

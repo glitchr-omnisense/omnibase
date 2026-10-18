@@ -139,12 +139,7 @@ class BaseBundle extends AbstractBaseBundle
         // a cache rebuild), and class_alias() on an alias that already exists
         // is a warning - turned into a 500 on whatever page was being served.
         // an application's own class, not loaded yet, is never replaced (declareAlias)
-        foreach (self::$aliasList as $class => $alias) {
-            self::declareAlias($class, $alias);
-        }
-        foreach (self::$aliasRepositoryList as $class => $alias) {
-            self::declareAlias($class, $alias);
-        }
+        $this->declareAliases();
 
         // One builder at a time. Without this, every request that finds the
         // pool missing (a cache:clear just swapped the cache dir, a fresh
@@ -216,6 +211,25 @@ class BaseBundle extends AbstractBaseBundle
     }
 
     /**
+     * The pool's aliases. With debug, each one only once no autoloader finds
+     * a file of the application for it (a class added since the pool was
+     * written wins at once). Without debug the pool is the code's - written by
+     * the scan of the cache:clear that came with it, for names no class
+     * answered to - and that search, a file_exists() missed per alias, is
+     * left out of the request: 8.7 ms of a page of lesringostars.
+     */
+    private function declareAliases(): void
+    {
+        $lookup = !$this->container->hasParameter('kernel.debug') || (bool) $this->container->getParameter('kernel.debug');
+        foreach (self::$aliasList ?? [] as $class => $alias) {
+            self::declareAlias($class, $alias, $lookup);
+        }
+        foreach (self::$aliasRepositoryList ?? [] as $class => $alias) {
+            self::declareAlias($class, $alias, $lookup);
+        }
+    }
+
+    /**
      * Blocks until this process holds the pool lock, or returns null when the
      * lock cannot be taken (read-only cache dir): the caller then scans on its
      * own, which is the pre-lock behaviour, never a failure.
@@ -263,12 +277,7 @@ class BaseBundle extends AbstractBaseBundle
         self::$aliasList = $aliasList;
         self::$aliasRepositoryList = $aliasRepositoryList;
         // an application's own class, not loaded yet, is never replaced (declareAlias)
-        foreach (self::$aliasList as $class => $alias) {
-            self::declareAlias($class, $alias);
-        }
-        foreach (self::$aliasRepositoryList as $class => $alias) {
-            self::declareAlias($class, $alias);
-        }
+        $this->declareAliases();
         return true;
     }
 
