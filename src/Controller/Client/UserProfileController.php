@@ -6,9 +6,12 @@ use App\Entity\User;
 use App\Form\Type\UserProfileType;
 use App\Repository\UserRepository;
 use Base\Attributes\Attribute\Iconize;
+use Base\Bridge\Symfony\AccountScreens;
+use Base\Bridge\Symfony\ScreenResponder;
 use Base\Enum\UserRole;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
+use Base\Screen\View;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -75,9 +78,16 @@ class UserProfileController extends AbstractController
             ->getResponse();
     }
 
+    /**
+     * A member's profile: its template and its view model
+     * (Base\Screen\Account\ProfilePage, plan "omnibase agnostique", C5) to
+     * omnibase's ScreenResponder - the core's template reads the screen alone,
+     * a front end gets it in JSON; a template the site overrides gets `user`
+     * as well (deprecated, gone in 4.0).
+     */
     #[Route("/profile/{id}", name: "user_profile")]
     #[Iconize("fa-solid fa-fw fa-id-card")]
-    public function Show(int $id = -1)
+    public function Show(Request $request, ScreenResponder $responder, AccountScreens $screens, int $id = -1)
     {
         if ($id > 0) {
             if (!($user = $this->userRepository->cacheOneById($id))) {
@@ -89,6 +99,8 @@ class UserProfileController extends AbstractController
             }
         }
 
-        return $this->render('client/user/profile_show.html.twig', ['user' => $user]);
+        $template = 'client/user/profile_show.html.twig';
+
+        return $responder->respond($request, new View($template, $screens->profile($user), 'Account/Profile'), $responder->legacy($template, fn () => ['user' => $user]));
     }
 }

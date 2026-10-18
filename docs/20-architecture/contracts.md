@@ -125,3 +125,18 @@ lesringostars' prop names (`App\Screen\*`, the pilot's); `Base\Screen\Builder\St
 makes them from a `Thread` and its comments with the Texts and Pictures contracts and
 the clock (`recent`, so that no template compares a moment). All of them are in the
 Fondation (`tests/Screen/screens-without-framework.php`).
+
+The account's pages are screens too (C5, its second part): a member's profile, the
+settings, the notifications (`Base\Screen\Account\{ProfilePage, SettingsPage,
+NotificationsPage}` and their parts), built by `Base\Screen\Builder\Accounts` from the
+entities and the security policy, with the Urls and Tokens contracts and the clock (a
+notification's `group`, in Twig's time zone), and handed by the controllers with
+`Base\Bridge\Symfony\AccountScreens` (what only Symfony knows: the viewer, an avatar's
+thumbnail, the providers, web push). A visitor's profile carries what its page shows them,
+nothing of the account. The settings' small forms are `Action`s (an address and the token
+of its intent); a screen carrying tokens is `Base\Screen\Confidential`, whose answers are
+`private, no-store` and vary on `Cookie`. A screen's props never take one of the frame's
+keys (`Frame::RESERVED`): the responder refuses it. A template a site overrides gets the
+variables of before as well (`ScreenResponder::legacy()`); a host page renders the core's
+profile template with the user alone, `account_profile(user)` giving it the model. The
+forms (profile edit, sign-in, sign-up, passwords, two-factor setup) stay Symfony's (D3).

@@ -3,9 +3,12 @@
 namespace Base\Controller\Client;
 
 use App\Entity\User;
+use Base\Bridge\Symfony\AccountScreens;
+use Base\Bridge\Symfony\ScreenResponder;
 use Base\Entity\User\Notification;
 use Base\Notifier\NotificationLinkerInterface;
 use Base\Repository\User\NotificationRepository;
+use Base\Screen\View;
 use Base\Service\Push\WebPushService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,8 +39,16 @@ class NotificationController extends AbstractController
     ) {
     }
 
+    /**
+     * The list: its template and its view model
+     * (Base\Screen\Account\NotificationsPage, plan "omnibase agnostique", C5)
+     * to omnibase's ScreenResponder - the days' groups by the screen's clock,
+     * the token in it, the answers stored by no cache; a template the site
+     * overrides gets `notifications`, `unread` and `unreadOnly` as well
+     * (deprecated, gone in 4.0).
+     */
     #[Route("/notifications", name: "user_notifications")]
-    public function Index(Request $request): Response
+    public function Index(Request $request, ScreenResponder $responder, AccountScreens $screens): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -52,11 +63,14 @@ class NotificationController extends AbstractController
         $unreadOnly = $request->query->getBoolean("unread");
         $notifications = $this->notificationRepository->findVisibleFor($user, 100, 0, $unreadOnly);
 
-        return $this->render("client/user/notifications.html.twig", [
+        $unread = $this->countUnread($user);
+        $template = "client/user/notifications.html.twig";
+
+        return $responder->respond($request, new View($template, $screens->notifications($notifications, $unread, $unreadOnly), "Account/Notifications"), $responder->legacy($template, fn () => [
             "notifications" => $notifications,
-            "unread" => $this->countUnread($user),
+            "unread" => $unread,
             "unreadOnly" => $unreadOnly,
-        ]);
+        ]));
     }
 
     /**
