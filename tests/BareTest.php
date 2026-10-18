@@ -298,8 +298,8 @@ final class BareTest extends TestCase
      * What omnibase's classes read through BaseTrait's services, answered through the contracts where
      * there is no framework (plan "omnibase agnostique", C4b): tests/Contract/basetrait-seams-without-
      * framework.php, run by bare with the autoloader alone, gives plain contracts and asks the real
-     * classes of the core. NounsTest and the tests named in the script compare each answer with the
-     * service it came from, under Symfony.
+     * classes of the core. NounsTest, DurationTest and the tests named in the script compare each
+     * answer with the service it came from, under Symfony.
      */
     public function testTheBaseTraitSeamsAnswerWithoutTheFramework(): void
     {
@@ -329,6 +329,14 @@ final class BareTest extends TestCase
             'thread, toString' => 'Article',
             'thread with a slug, toString' => 'abbey-road',
             'widget, toString' => 'Bloc #',
+            // Duration over Translations (the units plainly, the spaces between them folded, the seconds left out).
+            'duration, none' => '',
+            'duration, a day and a second' => '1 jour 1 seconde',
+            'duration, two hours two minutes two seconds' => '2 heures 2 minutes 2 secondes',
+            'token, time left' => '2 jours 1 minute',
+            'token, throttle' => '10 minutes',
+            'thread, not to be published' => null,
+            'thread, to be published' => '3 jours 2 heures',
         ], $run['result']);
     }
 

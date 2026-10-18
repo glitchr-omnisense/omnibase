@@ -27,6 +27,7 @@ use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
 use Base\Contract\Runtime;
+use Base\Service\Model\Duration;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TrasheableTrait;
 use Base\Entity\Thread\Taxon;
@@ -616,7 +617,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     public function getPublishTimeStr(): ?string
     {
         $publishTime = $this->getPublishTime();
-        return $publishTime ? $this->getTranslator()->transTime($publishTime) : null;
+        return $publishTime ? Duration::spell($publishTime, Runtime::translations()) : null;
     }
 
     public function setPublishedAt(?DateTimeInterface $publishedAt): self

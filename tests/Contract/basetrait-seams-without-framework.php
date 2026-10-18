@@ -13,6 +13,8 @@
  * - the Nouns contract (Base\Service\Model\EntityNouns over a Translations
  *   with exists()): what an entity is called, a bundle's entity by its
  *   namespace; Thread's and Widget's __toString() without a title.
+ * - Duration over the Translations contract: a number of seconds in words,
+ *   Token's time left and throttle, Thread's time before it is published.
  * Returns what they answered.
  */
 
@@ -22,9 +24,12 @@ use Base\Contract\Runtime;
 use Base\Contract\Translations;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
+use Base\Entity\User\Token;
 use Base\Exception\MissingContractException;
+use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
 use Base\Service\Translator;
+use Omnibridge\Twig\Contract\Translations as OmnibridgeTranslations;
 
 $answers = [];
 
@@ -43,8 +48,17 @@ $translations = new class implements Translations {
         'messages' => [],
     ];
 
+    /** base.days and its kin: nothing for none, the singular for one, the plural otherwise (ICU's plural, plainly). */
+    public array $units = ['years' => ['an', 'ans'], 'months' => ['mois', 'mois'], 'days' => ['jour', 'jours'], 'hours' => ['heure', 'heures'], 'minutes' => ['minute', 'minutes'], 'seconds' => ['seconde', 'secondes']];
+
     public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
+        if (str_starts_with($id, 'base.') && isset($this->units[substr($id, 5)])) {
+            $count = (int) ($parameters[0] ?? 0);
+
+            return 0 === $count ? '' : $this->units[substr($id, 5)][1 === $count ? 0 : 1];
+        }
+
         $text = $this->catalogue[$domain ?? 'messages'][$id] ?? $id;
         foreach ($parameters as $key => $value) {
             $text = str_replace('{'.$key.'}', (string) $value, $text);
@@ -101,6 +115,21 @@ $answers['exists, ghost'] = $nouns->entityExists('App\\Entity\\Ghost');
 $answers['thread, toString'] = (string) new Thread();
 $answers['thread with a slug, toString'] = (string) new Thread(null, null, null, 'abbey-road');
 $answers['widget, toString'] = (string) new Widget();
+
+// Duration: through Translations (omnibridge/twig's, which Runtime::translations() gives).
+Runtime::set(OmnibridgeTranslations::class, $translations);
+$answers['duration, none'] = Duration::spell(0, Runtime::translations());
+$answers['duration, a day and a second'] = preg_replace('/ +/', ' ', Duration::spell(86401, Runtime::translations()));
+$answers['duration, two hours two minutes two seconds'] = preg_replace('/ +/', ' ', Duration::spell(7322, Runtime::translations()));
+$token = (new ReflectionClass(Token::class))->newInstanceWithoutConstructor();
+$token->setExpireAt(new DateTime('+2 days 1 minute 30 seconds'));
+$token->setAllowAt(new DateTime('+10 minutes 30 seconds'));
+$answers['token, time left'] = preg_replace(['/ +/', '/ \\d+ secondes?$/'], [' ', ''], $token->getRemainingTimeStr());
+$answers['token, throttle'] = preg_replace(['/ +/', '/ \\d+ secondes?$/'], [' ', ''], $token->getThrottleTimeStr());
+$thread = new Thread();
+$answers['thread, not to be published'] = $thread->getPublishTimeStr();
+$thread->setPublishedAt(new DateTime('+3 days 2 hours 30 seconds'));
+$answers['thread, to be published'] = preg_replace(['/ +/', '/ \\d+ secondes?$/'], [' ', ''], $thread->getPublishTimeStr());
 
 Runtime::reset();
 
