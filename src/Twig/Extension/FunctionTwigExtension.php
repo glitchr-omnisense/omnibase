@@ -548,6 +548,11 @@ final class FunctionTwigExtension extends AbstractExtension
     }
 
     /**
+     * A moment as a pattern says it, lowered. A string in ISO 8601 (a screen's
+     * moment, Base\Screen\Shape::moment(): 2026-04-10T18:05:00+00:00) is that
+     * moment, printed as the DateTime it came from was; any other string is
+     * given back lowered (a word: "présent"); nothing gives the pattern.
+     *
      * @param Environment $env
      * @param \DateTime|\DateInterval|int|string|null $datetime
      * @param array|string $pattern
@@ -582,11 +587,20 @@ final class FunctionTwigExtension extends AbstractExtension
         if ($datetime instanceof \DateInterval) {
             $datetime = time() + (int)$datetime->format('s');
         }
+        if (\is_string($datetime) && self::isMoment($datetime)) {
+            $datetime = (new \DateTimeImmutable($datetime))->getTimestamp();
+        }
         if (\is_string($datetime)) {
             return mb_strtolower($datetime);
         }
 
         return mb_strtolower($this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale));
+    }
+
+    /** Whether a string is a moment in ISO 8601: a date, a time, and a zone or not. */
+    public static function isMoment(string $value): bool
+    {
+        return 1 === preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/', $value);
     }
 
     /**

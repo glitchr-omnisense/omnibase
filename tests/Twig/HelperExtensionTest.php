@@ -122,4 +122,26 @@ final class HelperExtensionTest extends KernelTestCase
         self::assertSame('MMMM YYYY', $this->render("{{ none|datetime('MMMM YYYY') }}", 'fr', ['none' => null]));
         self::assertSame('MMMM YYYY', self::bare("{{ none|datetime('MMMM YYYY') }}", 'fr', ['none' => null]));
     }
+
+    /**
+     * A screen's moment (an ISO 8601 string, Base\Screen\Shape::moment()) prints
+     * what the DateTime it came from printed: the same instant, the same
+     * formatter, whatever zone either was written in (plan "omnibase
+     * agnostique", C5: the account's templates read their screens' moments).
+     */
+    public function testAMomentInIso8601IsThatMoment(): void
+    {
+        foreach ([new \DateTime('2022-03-15 23:30:00', new \DateTimeZone('Europe/Paris')), new \DateTime('2026-04-10 18:05:00', new \DateTimeZone('UTC'))] as $date) {
+            $moment = \Base\Screen\Shape::moment($date);
+            foreach (['dd MMMM YYYY', 'HH:mm', 'dd MMMM YYYY HH:mm', "'on' EEEE d MMMM"] as $pattern) {
+                foreach (['fr', 'en'] as $locale) {
+                    $template = "{{ date|datetime('".str_replace("'", "\\'", $pattern)."') }}";
+                    self::assertSame($this->render($template, $locale, ['date' => $date]), $this->render($template, $locale, ['date' => $moment]), $moment.', '.$pattern.', '.$locale);
+                }
+            }
+        }
+        self::assertSame(['2026-04-10'], [$this->render("{{ date|datetime('YYYY-MM-dd') }}", 'fr', ['date' => '2026-04-10T18:05:00Z'])]);
+        // A string that is no moment is still a word, lowered.
+        self::assertSame('2026-04-10 or later', $this->render("{{ '2026-04-10 or later'|datetime('MMMM YYYY') }}"));
+    }
 }
