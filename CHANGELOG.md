@@ -71,6 +71,8 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   (`OMNIBASE_FRAMEWORK=symfony`) names the six. Fondation 758 -> 763 (`Base\Entity\User`,
   `Base\Service\Flysystem`, `Base\Contract\{Framework, SecurityUser, TwoFactorUser}`).
 - `extra.branch-alias`: `dev-4.x` is `4.0.x-dev`.
+- **PHP 8.4 at least** (`"php": "^8.4"`, from `^8.2`): doctrine/collections 3.1 requires it, so `^8.2` announced
+  installs that could never resolve. The running sites are on 8.4; the harness runs 8.4.
 - **Doctrine: on suit la dernière majeure, pas de maintenance parallèle.** `doctrine/orm`
   `^3.4` and `doctrine/dbal` `^4.2` (omnibridge/doctrine's floors, which the core requires:
   `^2.15|^3.0` and `^3.6|^4.0` said what could never install), `doctrine/collections` `^3.1` (3.1 requires PHP 8.4),

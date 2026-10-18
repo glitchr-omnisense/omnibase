@@ -12,7 +12,7 @@ Composer now installs it in `vendor/omniscient/omnibase`; nothing in the package
 path (its templates, documentation and scripts are found from its own directory), but an
 application that names the old path in its configuration has to follow - see CHANGELOG.
 
-Requires PHP ≥ 8.2 (omnibridge/doctrine). Since 4.0 the package requires its Fondation alone
+Requires PHP ≥ 8.4 (doctrine/collections 3). Since 4.0 the package requires its Fondation alone
 (Doctrine, Twig, Symfony's standalone components): under Symfony 6, 7 or 8 the framework comes with
 `omnibridge/symfony`, see Installation. Licensed MIT (`LICENSE`) since 2026-10-09;
 earlier versions remain published under LGPL-3.0-or-later.
