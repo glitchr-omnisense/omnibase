@@ -19,12 +19,21 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 | `Base\Contract\Files` | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
 | `Base\Contract\Pictures` (step C5) | an image's address at a size, what `\|picture` answers | `Base\Bridge\Symfony\MediaPictures`: `CommonsTwigExtension::picture()` (MediaService's thumbnails) |
 | `Base\Contract\Texts` (step C5) | a stored text rendered (Editor.js or HTML), its table of contents, whether it is Editor.js | `Base\Bridge\Symfony\WysiwygTexts`: the pipeline of `\|wysiwyg` and `\|wysiwyg_toc` |
+| `Base\Contract\Tokens` (step C5) | the token a form carries for an intent (`csrf()`), what a screen's actions send back | `Base\Bridge\Symfony\CsrfTokens`: the CSRF token manager - Twig's `csrf_token()` |
 | `Psr\Clock\ClockInterface` (PSR-20) | `now()` | the framework's `clock` (symfony/clock); the machine's (`Base\Contract\SystemClock`) when there is none |
 | `Psr\EventDispatcher\EventDispatcherInterface` (PSR-14) | `dispatch()` | `event_dispatcher` |
 | `Symfony\Component\Mailer\MailerInterface` | `send()` | `mailer.mailer` |
 
 `Locales` is plural, as omnibridge's `Urls` and `Translations` are, and so that
 importing it never shadows PHP's `\Locale`.
+
+**A token per intent, under Symfony only.** Symfony's CSRF tokens are one per intent
+(`2fa_disable`, `passkey_delete_12`...): a screen's action carries the token of its own
+intent, and the controller checks that one. Laravel has a single session token for every
+intent: an action pointing at a Symfony route, rendered by Laravel, would carry a token
+Symfony refuses. Nothing does that today - the Laravel twin shows no account page; a
+framework rendering another's actions binds `Tokens` to the other's tokens, or posts to its
+own routes.
 
 **No contract for the mail.** symfony/mailer is a standalone component, allowed
 in the Fondation (decision D1), and Laravel's own mail is built on it: its

@@ -46,6 +46,8 @@
  * builder Base\Screen\Builder\Stories, the contracts Base\Contract\Pictures and Texts, and their Symfony side,
  * Base\Bridge\Symfony\MediaPictures, WysiwygTexts, SymfonyScreenContext, ScreenResponder, which name the
  * framework and load none of it).
+ * 743 with the Tokens contract (+2: Base\Contract\Tokens, a form's token for an intent, and its Symfony side,
+ * Base\Bridge\Symfony\CsrfTokens, which names the CSRF token manager and loads none of it).
  */
 
 return [
@@ -63,6 +65,7 @@ return [
     Base\Bridge\Doctrine\Registry::class,
     Base\Bridge\Doctrine\RepositoryFactory::class,
     Base\Bridge\Doctrine\Types::class,
+    Base\Bridge\Symfony\CsrfTokens::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\MediaPictures::class,
@@ -88,6 +91,7 @@ return [
     Base\Contract\Runtime::class,
     Base\Contract\SystemClock::class,
     Base\Contract\Texts::class,
+    Base\Contract\Tokens::class,
     Base\Contract\Urls::class,
     Base\Controller\SignatureController::class,
     Base\DatabaseSubscriber\AttributeSubscriber::class,

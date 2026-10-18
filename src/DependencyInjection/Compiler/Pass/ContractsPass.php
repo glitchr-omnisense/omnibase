@@ -7,6 +7,7 @@ use Base\Contract\Files;
 use Base\Contract\Locales;
 use Base\Contract\Pictures;
 use Base\Contract\Texts;
+use Base\Contract\Tokens;
 use Base\Contract\Urls;
 use Omnibridge\Twig\Contract\Translations;
 use Psr\Clock\ClockInterface;
@@ -43,6 +44,7 @@ final class ContractsPass implements CompilerPassInterface
         Files::class,
         Pictures::class,
         Texts::class,
+        Tokens::class,
         ClockInterface::class,
         EventDispatcherInterface::class,
         MailerInterface::class,
