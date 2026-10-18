@@ -5,9 +5,11 @@ namespace Base\DependencyInjection\Compiler\Pass;
 use Base\Contract\Access;
 use Base\Contract\Files;
 use Base\Contract\Locales;
+use Base\Contract\Nouns;
 use Base\Contract\Pictures;
 use Base\Contract\Texts;
 use Base\Contract\Tokens;
+use Base\Contract\Translations as BaseTranslations;
 use Base\Contract\Urls;
 use Omnibridge\Twig\Contract\Translations;
 use Psr\Clock\ClockInterface;
@@ -39,6 +41,8 @@ final class ContractsPass implements CompilerPassInterface
     public const CONTRACTS = [
         Urls::class,
         Translations::class,
+        BaseTranslations::class,
+        Nouns::class,
         Access::class,
         Locales::class,
         Files::class,

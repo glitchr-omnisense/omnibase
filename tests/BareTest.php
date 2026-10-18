@@ -295,6 +295,44 @@ final class BareTest extends TestCase
     }
 
     /**
+     * What omnibase's classes read through BaseTrait's services, answered through the contracts where
+     * there is no framework (plan "omnibase agnostique", C4b): tests/Contract/basetrait-seams-without-
+     * framework.php, run by bare with the autoloader alone, gives plain contracts and asks the real
+     * classes of the core. NounsTest and the tests named in the script compare each answer with the
+     * service it came from, under Symfony.
+     */
+    public function testTheBaseTraitSeamsAnswerWithoutTheFramework(): void
+    {
+        $script = __DIR__.'/Contract/basetrait-seams-without-framework.php';
+        [$status, $report] = self::bare([$script]);
+
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame([
+            // Nouns: EntityNouns over a Translations with exists(), a bundle's entity by its namespace.
+            'thread, no Nouns' => 'MissingContractException',
+            'key, thread' => 'thread',
+            'key, app' => 'thread.tag',
+            'key, bundle' => 'marketplace.order',
+            'thread' => 'Article',
+            'threads' => 'Articles',
+            'threads, feminine' => 'Publications',
+            'thread, published at' => 'Publié le',
+            'order' => 'Commande',
+            'order, polite' => 'Votre commande',
+            'ghost' => 'ghost._plural',
+            'exists, order' => true,
+            'exists, ghost' => false,
+            'thread, toString' => 'Article',
+            'thread with a slug, toString' => 'abbey-road',
+            'widget, toString' => 'Bloc #',
+        ], $run['result']);
+    }
+
+    /**
      * Runs docker/bin/bare apart, on the autoloader of this run.
      *
      * @param list<string> $classes none: the Fondation

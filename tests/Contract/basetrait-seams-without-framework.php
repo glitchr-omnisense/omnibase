@@ -1,0 +1,107 @@
+<?php
+
+/*
+ * What omnibase's classes read through BaseTrait's services before step C4b
+ * (plan "omnibase agnostique"), answered through the contracts where there is
+ * no framework: run by docker/bin/bare for tests/BareTest.php, with
+ * Composer's autoloader alone - no kernel, no container, no bundle, no
+ * BaseService - and bare reports every class and file of the framework loaded
+ * on the way (none may be).
+ *
+ * Plain PHP implementations of the contracts are set by hand, as another
+ * framework sets its own at boot, and the real classes of the core answer:
+ * - the Nouns contract (Base\Service\Model\EntityNouns over a Translations
+ *   with exists()): what an entity is called, a bundle's entity by its
+ *   namespace; Thread's and Widget's __toString() without a title.
+ * Returns what they answered.
+ */
+
+use Base\Contract\Locales;
+use Base\Contract\Nouns;
+use Base\Contract\Runtime;
+use Base\Contract\Translations;
+use Base\Entity\Layout\Widget;
+use Base\Entity\Thread;
+use Base\Exception\MissingContractException;
+use Base\Service\Model\EntityNouns;
+use Base\Service\Translator;
+
+$answers = [];
+
+// The catalogues of a host: domain => key => text, ICU's {0} replaced plainly.
+$translations = new class implements Translations {
+    public array $catalogue = [
+        'entities' => [
+            'thread._singular' => 'article',
+            'thread._plural' => 'articles',
+            'thread._plural._feminine' => 'publications',
+            'thread._properties.published_at._singular' => 'publié le',
+            'layout.widget._singular' => 'bloc',
+            'marketplace.order._singular' => 'commande',
+            'marketplace.order._singular._polite' => 'votre commande',
+        ],
+        'messages' => [],
+    ];
+
+    public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
+    {
+        $text = $this->catalogue[$domain ?? 'messages'][$id] ?? $id;
+        foreach ($parameters as $key => $value) {
+            $text = str_replace('{'.$key.'}', (string) $value, $text);
+        }
+
+        return $text;
+    }
+
+    public function exists(string $id, ?string $domain = null, ?string $locale = null): bool
+    {
+        return isset($this->catalogue[$domain ?? 'messages'][$id]);
+    }
+};
+
+// The site's languages: the translatable entities (Thread, Widget) need them to hold a title.
+Runtime::set(Locales::class, new class implements Locales {
+    public function getLocale(): string
+    {
+        return 'fr-FR';
+    }
+
+    public function getDefaultLocale(): string
+    {
+        return 'fr-FR';
+    }
+
+    public function getAvailableLocales(): array
+    {
+        return ['fr-FR', 'en-GB'];
+    }
+});
+
+// Nouns: before anything is set, said aloud.
+try {
+    (string) new Thread();
+} catch (MissingContractException $e) {
+    $answers['thread, no Nouns'] = 'MissingContractException';
+}
+
+$nouns = new EntityNouns($translations, EntityNouns::namespacesOf(['Base\\Marketplace\\MarketplaceBundle']));
+Runtime::set(Nouns::class, $nouns);
+$answers['key, thread'] = $nouns->key(Thread::class);
+$answers['key, app'] = $nouns->key('App\\Entity\\Thread\\Tag');
+$answers['key, bundle'] = $nouns->key('Base\\Marketplace\\Entity\\Order');
+$answers['thread'] = $nouns->entity(Thread::class);
+$answers['threads'] = $nouns->entity(new Thread(), null, Translator::NOUN_PLURAL);
+$answers['threads, feminine'] = $nouns->entity(Thread::class, null, [Translator::NOUN_PLURAL, Translator::GENDERNESS_FEMININE]);
+$answers['thread, published at'] = $nouns->entity(Thread::class, 'publishedAt');
+$answers['order'] = $nouns->entity('Base\\Marketplace\\Entity\\Order');
+$answers['order, polite'] = $nouns->entity('Base\\Marketplace\\Entity\\Order', null, [Translator::NOUN_SINGULAR, Translator::POLITENESS_POLITE]);
+$answers['ghost'] = $nouns->entity('App\\Entity\\Ghost', null, Translator::NOUN_PLURAL);
+$answers['exists, order'] = $nouns->entityExists('Base\\Marketplace\\Entity\\Order');
+$answers['exists, ghost'] = $nouns->entityExists('App\\Entity\\Ghost');
+$answers['thread, toString'] = (string) new Thread();
+$answers['thread with a slug, toString'] = (string) new Thread(null, null, null, 'abbey-road');
+$answers['widget, toString'] = (string) new Widget();
+
+Runtime::reset();
+
+return $answers;

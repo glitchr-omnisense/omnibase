@@ -28,11 +28,12 @@ use Symfony\Component\Mailer\MailerInterface;
  * - or one service at a time (set()), which wins over the container's.
  *
  * The contracts: Urls (path, url, asset), omnibridge/twig's Translations
- * (trans, ICU), Access (isGranted, the user), Locales (current, default,
- * available), Files (public URL, local path of a stored file), Pictures (an
- * image's address at a size), Texts (a stored text rendered, its table of
- * contents) and Tokens (a form's token for an intent) for the screens (C5),
- * PSR-20's clock,
+ * (trans, ICU) and omnibase's, which asks exists() too (C4b), Nouns (what
+ * an entity is called, the rule of Base\Service\Model\EntityNouns), Access
+ * (isGranted, the user), Locales (current, default, available), Files
+ * (public URL, local path of a stored file), Pictures (an image's address at
+ * a size), Texts (a stored text rendered, its table of contents) and Tokens
+ * (a form's token for an intent) for the screens (C5), PSR-20's clock,
  * PSR-14's event dispatcher, symfony/mailer's MailerInterface (a standalone
  * component, allowed in the Fondation by D1; Laravel's own mail is built on
  * it). A contract asked and not filled throws MissingContractException,
@@ -145,6 +146,12 @@ final class Runtime
     public static function translations(): Translations
     {
         return self::get(Translations::class);
+    }
+
+    /** What an entity is called (C4b): its noun, singular or plural, from the "entities" catalogues. */
+    public static function nouns(): Nouns
+    {
+        return self::get(Nouns::class);
     }
 
     public static function access(): Access

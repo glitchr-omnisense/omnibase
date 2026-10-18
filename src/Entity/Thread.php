@@ -77,11 +77,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     }
 
     /**
+     * Its title, its slug, else what its class is called (the Nouns contract,
+     * C4b: Base\Service\Translator::transEntity()'s answer under Symfony).
+     *
      * @return string|null
      */
     public function __toString()
     {
-        return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->transEntity(static::class);
+        return $this->getTitle() ?? $this->getSlug() ?? Runtime::nouns()->entity(static::class);
     }
 
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)

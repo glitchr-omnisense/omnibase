@@ -14,6 +14,8 @@ one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 |---|---|---|
 | `Base\Contract\Urls` (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
 | `Omnibridge\Twig\Contract\Translations` | `trans()`, ICU messages | `Base\Bridge\Symfony\TranslatorTranslations`: the `translator` chain (texts rewritten in the back office, `Base\Service\Translator`, Symfony's) - Twig's `\|trans` |
+| `Base\Contract\Translations` (step C4b; omnibridge/twig's `Translations` and `exists()`) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
+| `Base\Contract\Nouns` (step C4b) | what an entity is called: its noun (`entity()`), singular or plural, a gender, a level of politeness, a property's label; `entityExists()` | `Base\Service\Model\EntityNouns` from `Base\Service\Translator::getEntityNouns()`: the rule `transEntity()` answers by |
 | `Base\Contract\Access` | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
 | `Base\Contract\Locales` | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
 | `Base\Contract\Files` | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
@@ -140,3 +142,27 @@ keys (`Frame::RESERVED`): the responder refuses it. A template a site overrides 
 variables of before as well (`ScreenResponder::legacy()`); a host page renders the core's
 profile template with the user alone, `account_profile(user)` giving it the model. The
 forms (profile edit, sign-in, sign-up, passwords, two-factor setup) stay Symfony's (D3).
+
+## What the classes read through BaseTrait, on contracts (step C4b)
+
+What a class of the core still asked of `BaseTrait`'s services after C3e, now asked of the
+registry, in the order lesringostars' pages go through it. Each move keeps the answers under
+Symfony (a test compares them with the service's, its old code copied as it was) and gives
+answers where there is no framework (`tests/Contract/basetrait-seams-without-framework.php`,
+run by `BareTest`). `BaseTrait` itself stays, its accessors unchanged, for the bundles and the
+sites that call them.
+
+| Class | Before | Now |
+|---|---|---|
+| `Thread::__toString()`, `Widget::__toString()` without a title | `getTranslator()->transEntity(static::class)` | `Runtime::nouns()->entity(static::class)` (`NounsTest`) |
+
+**What an entity is called: `Base\Service\Model\EntityNouns`.** The rule of
+`Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:
+its name less its entity namespace, dotted, in snake case - `Base\Marketplace\Entity\Order`
+is `marketplace.order`; then the variants its options ask for, `NounVariants`, the first the
+"entities" catalogue holds) moved into a class of the Fondation, built on the Translations
+contract and the entity namespaces of the application's bundles. The translator now answers by
+an instance of it over itself (`getEntityNouns()`, the bundles `BaseBundle` knows), and that
+instance is the Nouns contract under Symfony: one rule, the same strings. A host without the
+framework builds one with `new EntityNouns($translations, EntityNouns::namespacesOf([...its
+bundle classes]))` and binds it to `Base\Contract\Nouns`.
