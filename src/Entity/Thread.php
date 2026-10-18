@@ -26,6 +26,7 @@ use Base\Database\Attribute\Versionable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
+use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Service\Model\Duration;
 use Base\Database\Entity\Extension\TranslatableInterface;
@@ -86,6 +87,19 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
     public function __toString()
     {
         return $this->getTitle() ?? $this->getSlug() ?? Runtime::nouns()->entity(static::class);
+    }
+
+    /**
+     * Its page's address: none for a thread as the core knows it - the core
+     * has no route showing one. A thread that has a page (a blog's Post, a
+     * forum's Topic...) says where, overriding this with the same signature.
+     * It is not a LinkableInterface for that: a bare thread links nowhere.
+     * Before, a core Thread had no __toLink() at all, and a member's profile
+     * listing one failed.
+     */
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
+    {
+        return null;
     }
 
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
