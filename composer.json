@@ -78,12 +78,12 @@
         "enshrined/svg-sanitize": "^1.0",
         "florianv/swap": "^4.0",
         "glitchr/backup-manager": "4.0.*-dev",
-        "glitchr/base-plugin": "2.0.*-dev",
         "hashids/hashids": "^5.0",
         "imagine/imagine": "^1.2",
         "jaybizzle/crawler-detect": "^1.2",
         "league/flysystem": "^3.0",
         "league/flysystem-ftp": "^3.0",
+        "omnibridge/composer": "1.x-dev",
         "omnibridge/doctrine": "1.x-dev",
         "omnibridge/twig": "1.x-dev",
         "phpoffice/phpspreadsheet": "^1.23|^2.0",
@@ -190,7 +190,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "php-http/discovery": true,
-            "glitchr/base-plugin": true,
+            "omnibridge/composer": true,
             "endroid/installer": true
         }
     },
@@ -199,8 +199,27 @@
         "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html var/coverage --coverage-text"
     },
     "extra": {
-        "base-plugin": {
-            "doctrine/orm": false
+        "omnibridge": {
+            "stubs": [
+                "Base\\Bridge\\Composer\\Stub\\EntityStub",
+                "Base\\Bridge\\Composer\\Stub\\EnumStub",
+                "Base\\Bridge\\Composer\\Stub\\FormStub",
+                "Base\\Bridge\\Composer\\Stub\\NotifierStub",
+                "Base\\Bridge\\Composer\\Stub\\RepositoryStub"
+            ],
+            "patches": [
+                {
+                    "id": "process-timeout-from-env",
+                    "package": "symfony/process",
+                    "versions": "^6.4 || ^7.0 || ^8.0",
+                    "file": "Process.php",
+                    "why": "A Process built without a timeout - the core's own, new Process([...]) in CacheClearTrait, IntegritySubscriber and WebpackTagRenderer, and any other - waits SYMFONY_PROCESS_TIMEOUT seconds (a site sets it to its PHP max execution time), 60 when it is not set: Process's default 60 becomes null, read from the environment in the constructor.",
+                    "do": [
+                        { "default": "null", "of": ["Symfony\\Component\\Process\\Process::__construct($timeout)", "Symfony\\Component\\Process\\Process::fromShellCommandline($timeout)"] },
+                        { "prepend": "$timeout ??= $_ENV['SYMFONY_PROCESS_TIMEOUT'] ?? 60;", "before": "$this->setTimeout($timeout);", "count": 1 }
+                    ]
+                }
+            ]
         },
         "branch-alias": {
             "dev-4.x": "4.0.x-dev"

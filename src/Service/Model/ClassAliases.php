@@ -12,8 +12,9 @@ namespace Base\Service\Model;
  * Mapping) registers the convention as an autoloader of its own - an
  * association names its target App\Entity\User\Notification.
  *
- * Composer is asked first: an application's own class, or the stub
- * glitchr/base-plugin wrote for it, is never replaced.
+ * Composer is asked first: an application's own class is never replaced
+ * (the stubs omnibridge/composer writes for the others, from the core's
+ * Base\Bridge\Composer\Stub providers, are read by no autoloader).
  */
 final class ClassAliases
 {

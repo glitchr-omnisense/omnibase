@@ -14,8 +14,8 @@ the `vault_filter`, the DQL functions. Since step C6 of the plan "omnibase
 agnostique" all of it is wired by `Base\Bridge\Doctrine` - under Symfony through
 the bundle, as before, and on an entity manager built by hand without
 DoctrineBundle - on doctrine/orm **as published**: nothing needs a member
-Doctrine keeps private, and glitchr/base-plugin leaves doctrine/orm alone for
-this core (its `composer.json` says `extra.base-plugin.doctrine/orm: false`).
+Doctrine keeps private, and nothing patches doctrine/orm (since 4.0 the core
+declares its one patch, on symfony/process, to omnibridge/composer: `extra.omnibridge`).
 
 ## Without Symfony
 

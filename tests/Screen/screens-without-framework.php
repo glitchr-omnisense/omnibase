@@ -82,7 +82,7 @@ $thread->setExcerpt('Une journée entière.');
 $thread->setHeadline('Au musée des beaux-arts');
 $thread->setContent('Nous sommes partis tôt.');
 $thread->setPublishedAt(new DateTime('2026-05-11 08:00:00', new DateTimeZone('UTC')));
-// The application's tag (a stub of glitchr/base-plugin's, or the alias of Base\Entity\Thread\Tag): what the thread's types name.
+// The application's tag (the alias of Base\Entity\Thread\Tag): what the thread's types name.
 $tagClass = 'App\\Entity\\Thread\\Tag';
 $thread->addTag(new $tagClass('Sorties', 'sorties'));
 $older = new Thread(null, null, 'La rentrée', 'la-rentree');
