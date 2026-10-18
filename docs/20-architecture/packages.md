@@ -12,7 +12,7 @@ a Laravel application does not.
 
 | | What | Where it comes from |
 |---|---|---|
-| **The Fondation** | PHP 8.2 and its extensions (exif, igbinary, imagick); Doctrine (orm, dbal, collections, persistence, event-manager, common) and its DQL functions; Twig and its extras (cache, cssinliner, inky, intl); the standalone Symfony components (asset, cache, error-handler, event-dispatcher, expression-language, filesystem, finder, http-client, intl, mailer, mime, notifier, options-resolver, password-hasher, process, property-access, serializer, string, translation, uid, validator, var-dumper, workflow, yaml, the contracts); the PSRs (cache, clock, container, event-dispatcher, log, simple-cache); league/flysystem; web-auth/webauthn-lib (`Base\Entity\User\Passkey`); omnibridge/doctrine and omnibridge/twig; the libraries (imagine, embed, qr-code, spreadsheets, barcodes...) | `require` of the core |
+| **The Fondation** | PHP 8.4 and its extensions (exif, igbinary, imagick); Doctrine (orm, dbal, collections, persistence, event-manager, common) and its DQL functions; Twig and its extras (cache, cssinliner, inky, intl); the standalone Symfony components (asset, cache, error-handler, event-dispatcher, expression-language, filesystem, finder, http-client, intl, mailer, mime, notifier, options-resolver, password-hasher, process, property-access, serializer, string, translation, uid, validator, var-dumper, workflow, yaml, the contracts); the PSRs (cache, clock, container, event-dispatcher, log, simple-cache); league/flysystem; web-auth/webauthn-lib (`Base\Entity\User\Passkey`); omnibridge/doctrine and omnibridge/twig; the libraries (imagine, embed, qr-code, spreadsheets, barcodes...) | `require` of the core |
 | **The framework** | FrameworkBundle, DoctrineBundle, SecurityBundle (security-core, -http, -csrf), TwigBundle and twig-bridge, MonologBundle, twig/extra-bundle, Config, DependencyInjection, HttpKernel, HttpFoundation, Routing, Form, Console, Messenger, Dotenv, doctrine-bridge | **omnibridge/symfony**, which a Symfony application requires beside the core |
 | **The bundles the core works with** | scheb/2fa, league/flysystem-bundle, hwi/oauth-bundle, web-auth/webauthn-symfony-bundle, api-platform/symfony and doctrine-orm, symfony/webpack-encore-bundle, symfony/ux-twig-component, glitchr/ux-google, glitchr/well-known, nelmio/cors-bundle, nelmio/security-bundle | `suggest` of the core; the application requires the ones its `config/bundles.php` registers |
 
@@ -22,7 +22,7 @@ the framework loaded*, not *absent from vendor*.
 
 **Doctrine: the latest major, one line.** The core follows each Doctrine package's current
 major, open upwards - `doctrine/orm` `^3.4`, `doctrine/dbal` `^4.2` (omnibridge/doctrine's
-floors), `doctrine/collections` `^3.1` (which requires PHP 8.4), `doctrine/event-manager` `^2.0`,
+floors), `doctrine/collections` `^3.1` (which requires PHP 8.4, the core's floor), `doctrine/event-manager` `^2.0`,
 `doctrine/persistence` `^4.0`, `doctrine/common` `^3.0` - with no older branch kept alive, no
 upper bound and no pinned version; Doctrine is used as published (no patch, no fork). A new
 major is taken up when it comes, not maintained beside the old one.
