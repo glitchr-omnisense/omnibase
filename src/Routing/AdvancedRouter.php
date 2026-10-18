@@ -60,9 +60,7 @@ class AdvancedRouter implements AdvancedRouterInterface
      * @var CacheInterface
      */
     protected CacheInterface $cache;
-    protected CacheItemInterface $cacheRoutes;
-    protected CacheItemInterface $cacheRouteMatches;
-    protected CacheItemInterface $cacheRouteGroups;
+    protected ?CacheItemInterface $cacheRoutes = null;
 
     protected FirewallMapInterface $firewallMap;
 
@@ -103,9 +101,6 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         $this->cache = $cache;
         $this->cacheName = "router." . hash('md5', self::class);
-        $this->cacheRoutes = $this->cache->getItem($this->cacheName . ".routes");
-        $this->cacheRouteMatches = $this->cache->getItem($this->cacheName . ".route_matches");
-        $this->cacheRouteGroups = $this->cache->getItem($this->cacheName . ".route_groups");
 
         $this->useAdvancedFeatures = $parameterBag->get("base.router.use_custom") ?? false;
         $this->useFallbacks = $parameterBag->get("base.router.use_fallbacks") ?? false;
@@ -141,7 +136,9 @@ class AdvancedRouter implements AdvancedRouterInterface
      */
     public function getCacheRoutes()
     {
-        return $this->cacheRoutes;
+        // Read when asked: the constructor read it, and two items nothing used (route_matches, route_groups), from
+        // the cache pool on every request, for a list the generator no longer writes there.
+        return $this->cacheRoutes ??= $this->cache->getItem($this->cacheName . ".routes");
     }
 
     public function warmUp(string $cacheDir, ?string $buildDir = null): array

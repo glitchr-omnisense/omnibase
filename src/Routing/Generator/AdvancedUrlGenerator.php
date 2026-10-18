@@ -4,7 +4,6 @@ namespace Base\Routing\Generator;
 
 use Base\Service\Localizer;
 use Exception;
-use Generator;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -287,23 +286,20 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 continue;
             }
 
-            $cache = self::$router->getCache();
-            if ($cache !== null) {
-                
-                $routeRequirements = [];
-                if (array_key_exists($routeName, $routes)) {
-                    $routeRequirements = $routes[$routeName]->getRequirements();
-                }
-                
-                // Cached without its locale: the cached path appends the visitor's.
-                $lang = $locale ?? (array_key_exists("_locale", $routeParameters) ? self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang());
-                $this->cachedRoutes[$hash] = [
-                    "_name" => $lang && str_ends_with($routeName, "." . $lang) ? substr($routeName, 0, -strlen("." . $lang)) : $routeName,
-                    "_requirements" => $routeRequirements
-                ];
-
-                $cache->save(self::$router->getCacheRoutes()->set($this->cachedRoutes));
+            // Remembered for the rest of the request. It was also written to the router's cache pool after each
+            // route found - 16 to 20 writes of the whole list on a page of lesringostars, 1.3 to 1.7 ms -, a pool
+            // nothing ever read back: every request started from an empty list.
+            $routeRequirements = [];
+            if (array_key_exists($routeName, $routes)) {
+                $routeRequirements = $routes[$routeName]->getRequirements();
             }
+
+            // Cached without its locale: the cached path appends the visitor's.
+            $lang = $locale ?? (array_key_exists("_locale", $routeParameters) ? self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang());
+            $this->cachedRoutes[$hash] = [
+                "_name" => $lang && str_ends_with($routeName, "." . $lang) ? substr($routeName, 0, -strlen("." . $lang)) : $routeName,
+                "_requirements" => $routeRequirements
+            ];
 
             // As the router wrote it, as a route found in the cache above is given: sanitize_url() here made
             // the first address of a route in the cache's life differ from every later one - a slash before
@@ -316,24 +312,32 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         throw new RouteNotFoundException("No valid route found for `$routeName`. Candidate routes are ". implode(", ", array_keys($routes)). "(please check mandatory variables?)");
     }
 
+    /** The compiled routes' names by their name before the first dot, in their order, each preceded by its name without the default locale. */
+    private ?array $groupIndex = null;
+
+    /**
+     * The routes of a group: the route named before its first dot and its variants ("app_x", "app_x.fr"...), in
+     * the compiled order. Read from an index made once, at the first call: it scanned the 575 compiled routes
+     * of lesringostars at every call, 2.4 to 3 ms of a page.
+     */
     public function groups(?string $routeName): array
     {
         $routeName = explode(".", $routeName ?? "")[0];
 
-        $routeNames = array_keys($this->getCompiledRoutes());
-        $routeGroups = array_transforms(function ($k, $_routeName) use ($routeName): ?Generator {
-            if ($_routeName !== $routeName && !str_starts_with($_routeName, $routeName . ".")) {
-                return null;
+        if ($this->groupIndex === null) {
+            $this->groupIndex = [];
+            $suffix = "." . Localizer::getDefaultLocaleLang();
+            foreach (array_keys($this->getCompiledRoutes()) as $_routeName) {
+                $group = explode(".", $_routeName)[0];
+                $_routeNameWithoutLocale = str_rstrip($_routeName, $suffix);
+                if ($_routeName != $_routeNameWithoutLocale) {
+                    $this->groupIndex[$group][] = $_routeNameWithoutLocale;
+                }
+
+                $this->groupIndex[$group][] = $_routeName;
             }
+        }
 
-            $_routeNameWithoutLocale = str_rstrip($_routeName, "." . Localizer::getDefaultLocaleLang());
-            if ($_routeName != $_routeNameWithoutLocale) {
-                yield null => $_routeNameWithoutLocale;
-            }
-
-            yield null => $_routeName;
-        }, $routeNames);
-
-        return array_unique($routeGroups);
+        return array_unique($this->groupIndex[$routeName] ?? []);
     }
 }
