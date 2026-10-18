@@ -49,9 +49,11 @@
  * 743 with the Tokens contract (+2: Base\Contract\Tokens, a form's token for an intent, and its Symfony side,
  * Base\Bridge\Symfony\CsrfTokens, which names the CSRF token manager and loads none of it).
  * 744 with Base\Screen\Confidential (+1: the marker of a screen carrying its viewer's secrets).
- * 756 with step C5's account view models (+12: Base\Screen\Account\* - ProfilePage, Member, AccountSummary,
- * SettingsPage, TwoFactor, Passkey, Session, Provider, Action, NotificationsPage, Notification - and their builder
- * Base\Screen\Builder\Accounts).
+ * 758 after step C5's account screens (+14: the view models Base\Screen\Account\* - ProfilePage, Member,
+ * AccountSummary, SettingsPage, TwoFactor, Passkey, Session, Provider, Action, NotificationsPage, Notification -,
+ * their builder Base\Screen\Builder\Accounts, their Symfony side Base\Bridge\Symfony\AccountScreens and the
+ * Twig function account_profile(), Base\Twig\Extension\AccountTwigExtension, which name the framework and load
+ * none of it).
  */
 
 return [
@@ -69,6 +71,7 @@ return [
     Base\Bridge\Doctrine\Registry::class,
     Base\Bridge\Doctrine\RepositoryFactory::class,
     Base\Bridge\Doctrine\Types::class,
+    Base\Bridge\Symfony\AccountScreens::class,
     Base\Bridge\Symfony\CsrfTokens::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
@@ -757,6 +760,7 @@ return [
     Base\Twig\AppVariable::class,
     Base\Twig\AssetPackage::class,
     Base\Twig\Environment::class,
+    Base\Twig\Extension\AccountTwigExtension::class,
     Base\Twig\Extension\AnalyticsTwigExtension::class,
     Base\Twig\Extension\BreadgrinderTwigExtension::class,
     Base\Twig\Extension\ClassTwigExtension::class,

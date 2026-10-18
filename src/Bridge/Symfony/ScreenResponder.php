@@ -81,6 +81,25 @@ class ScreenResponder
         return $view->screen instanceof Confidential ? $this->private($response, $frame, $view->screen) : $response;
     }
 
+    /**
+     * The variables a page had before its view model, given only to a template
+     * a site overrides (its templates/ folder, templates/bundles/...): one
+     * read from $own (the core's templates by default) reads its screen alone,
+     * and the variables - their queries - are not made at all.
+     *
+     * @param \Closure(): array<string, mixed> $variables
+     *
+     * @return array<string, mixed>
+     */
+    public function legacy(string $template, \Closure $variables, ?string $own = null): array
+    {
+        $own ??= \dirname(__DIR__, 3).'/templates';
+        $own = realpath($own) ?: $own;
+        $path = (string) $this->twig->getLoader()->getSourceContext($template)->getPath();
+
+        return str_starts_with(realpath($path) ?: $path, rtrim($own, '/').'/') ? [] : $variables();
+    }
+
     /** @return array<string, mixed> the frame's props and the screen's, as a front end reads them */
     public function props(Frame $frame, View $view): array
     {

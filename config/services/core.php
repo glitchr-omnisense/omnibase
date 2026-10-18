@@ -437,6 +437,14 @@ return static function (ContainerConfigurator $container): void {
         ->args([service('twig'), service('Base\Screen\ContextProvider'), '%base.screens.version%']);
     $services->set('Base\Screen\Builder\Stories')->public()
         ->args([service('Base\Contract\Texts'), service('Base\Contract\Pictures')]); // "now": Runtime::clock(), the framework's unless one is set by hand
+    // The account's screens (C5, its second part): the builder asks the security policy, the
+    // Urls and Tokens contracts; AccountScreens, a Twig runtime (it reads Twig's extensions:
+    // |thumbnail, oauth_available(), push_available()...), hands it what only Symfony knows.
+    $services->set('Base\Screen\Builder\Accounts')->public()
+        ->args([service('Base\Service\SecurityPolicy'), service('Base\Contract\Urls'), service('Base\Contract\Tokens')]); // "now": Runtime::clock()
+    $services->set('Base\Bridge\Symfony\AccountScreens')->public()
+        ->args([service('Base\Screen\Builder\Accounts'), service('twig'), service('Base\Contract\Access')->nullOnInvalid()])
+        ->tag('twig.runtime');
 
     // BaseService
     $services->set('Base\Service\BaseService')

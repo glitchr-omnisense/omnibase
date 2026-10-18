@@ -1,30 +1,31 @@
 {% extends 'layout1.html.twig' %}
-
-{% block title %}{{ user }}{% endblock %}
+{# A member's profile (Base\Screen\Account\ProfilePage, `screen`); a host page rendering it with the user alone gets the same model from account_profile(user). #}
+{% set screen = screen ?? account_profile(user) %}
+{% block title %}{{ screen.member.name }}{% endblock %}
 {% block content %}
 
-    {% if user is defined %}
+    {% if screen.member is defined %}
 
     {# Only the account holder - or an administrator - sees anything beyond
        the public header. Everything below this flag is about the account,
        not about the person's public presence on the site. #}
-    {% set isOwnProfile = app.user == user %}
-    {% set canSeeAccount = isOwnProfile or is_granted("ROLE_ADMIN") %}
+    {% set isOwnProfile = screen.own %}
+    {% set canSeeAccount = screen.account is not null %}
 
     <article class="wrapper extended">
         <div class="header">
 
             <ul class="field-avatar">
-                <li class="keep-opacity">{% include '@Base/client/user/_avatar.html.twig' with {user: user} only %}</li>
+                <li class="keep-opacity">{% if screen.member.avatarHtml is not null %}{{ screen.member.avatarHtml|raw }}{% elseif screen.member.avatar is not null %}<img class="avatar" alt="{{ screen.member.name }}" src="{{ screen.member.avatar }}" width="128" height="128">{% else %}<span class="avatar avatar-placeholder" title="{{ screen.member.name }}"><i class="fa-solid fa-user"></i></span>{% endif %}</li>
             </ul>
 
             <div class="text d-flex flex-column">
 
                 <h1>
-                    {{ '@messages.profile.member'|trans }} #{{ user.id }}: {{ user }}
-                    {% if user.isOnline() %}
+                    {{ '@messages.profile.member'|trans }} #{{ screen.member.id }}: {{ screen.member.name }}
+                    {% if screen.member.online %}
                         <span class="badge bg-success" title="{{'@messages.profile.online'|trans}}">{{'@messages.profile.online'|trans}}</span>
-                    {% elseif user.isActive() %}
+                    {% elseif screen.member.active %}
                         <span class="badge bg-warning" title="{{'@messages.profile.recentlyActive'|trans}}">{{'@messages.profile.recentlyActive'|trans}}</span>
                     {% endif %}
                 </h1>
@@ -35,39 +36,39 @@
                        which generates exactly this shape. The previous
                        '@enum.userRole.' ~ role built none of that, so every badge
                        rendered its raw key (e.g. "@enum.userRole.ROLE_EDITOR"). #}
-                    {% for role in user.roles %}
+                    {% for role in screen.member.roles %}
                         <span class="badge bg-secondary">{{ ('@enums.user_role.' ~ role|lower ~ '._singular')|trans }}</span>
                     {% endfor %}
                 </div>
 
                 <div class="info">
                     {{ '@messages.profile.registered'|trans([
-                        user.createdAt()|datetime("dd MMMM YYYY"),
-                        user.createdAt()|datetime("HH:mm")
+                        screen.member.registeredAt|datetime("dd MMMM YYYY"),
+                        screen.member.registeredAt|datetime("HH:mm")
                     ])|raw }}&nbsp
 
-                    {% if canSeeAccount %}
-                        - <a href="{{ path('user_profileEdit', {'id':user.id}) }}">{{ '@messages.profile.edit'|trans }}</a>
+                    {% if screen.editUrl %}
+                        - <a href="{{ screen.editUrl }}">{{ '@messages.profile.edit'|trans }}</a>
                     {% endif %}
                     {% if isOwnProfile %}
-                        - <a href="{{ path('user_settings') }}">{{ '@forms.settings.title'|trans }}</a>
-                        - <a href="{{ path('security_logout') }}" rel="nofollow">{{ '@messages.profile.logout'|trans }}</a>
+                        - <a href="{{ screen.settingsUrl }}">{{ '@forms.settings.title'|trans }}</a>
+                        - <a href="{{ screen.logoutUrl }}" rel="nofollow">{{ '@messages.profile.logout'|trans }}</a>
                     {% endif %}
                 </div>
 
                 <div class="stats">
                     {{ '@messages.profile.last_seen'|trans([
-                        user.updatedAt()|datetime("dd MMMM YYYY"),
-                        user.updatedAt()|datetime("HH:mm")
+                        screen.member.lastSeenAt|datetime("dd MMMM YYYY"),
+                        screen.member.lastSeenAt|datetime("HH:mm")
                     ])|raw }}&nbsp
                 </div>
 
                 <div class="activity d-flex mt-2">
                     <div class="me-4">
-                        <strong>{{ user.threads|length }}</strong> {{'@messages.profile.threads'|trans}}
+                        <strong>{{ screen.member.threads }}</strong> {{'@messages.profile.threads'|trans}}
                     </div>
                     <div class="me-4">
-                        <strong>{{ user.likes|length }}</strong> {{'@messages.profile.likes'|trans}}
+                        <strong>{{ screen.member.likes }}</strong> {{'@messages.profile.likes'|trans}}
                     </div>
                 </div>
             </div>
@@ -75,19 +76,19 @@
 
     </article>
 
-    {# Most recent published writing. Threads come back in no particular
-       order and include drafts, so sort and filter here rather than trusting
-       the collection - and cap it, because an author with hundreds of
-       articles should not turn their profile into an archive page. #}
-    {% set published = user.threads|filter(t => t.isPublished() and t.title)|sort((a, b) => (b.publishedAt ?? b.createdAt) <=> (a.publishedAt ?? a.createdAt))|slice(0, 5) %}
+    {# Most recent published writing: the five latest published threads with
+       a title, newest first, picked by the screen's builder (Accounts::recent()) -
+       an author with hundreds of articles should not turn their profile into
+       an archive page. #}
+    {% set published = screen.recent %}
     {% if published|length %}
     <article class="wrapper extended">
         <h3>{{ '@messages.profile.recentThreads'|trans }}</h3>
         <ul class="list-group">
             {% for thread in published %}
                 <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <a href="{{ thread.__toLink() }}">{{ thread.title }}</a>
-                    <small class="text-muted">{{ (thread.publishedAt ?? thread.createdAt)|datetime("dd MMMM YYYY") }}</small>
+                    <a href="{{ thread.url }}">{{ thread.title }}</a>
+                    <small class="text-muted">{{ thread.publishedAt|datetime("dd MMMM YYYY") }}</small>
                 </li>
             {% endfor %}
         </ul>
@@ -98,25 +99,25 @@
     <article class="wrapper extended">
         <h3>{{ '@messages.profile.accountSecurity'|trans }}</h3>
         <ul class="list-group">
-            {% if security_policy.isTwoFactorAvailable() %}
+            {% if screen.account.twoFactor is not null %}
             <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 {{ '@forms.settings.twoFactor'|trans }}
-                {% if security_policy.hasSecondFactor(user) %}
+                {% if screen.account.twoFactor %}
                     <span class="badge bg-success">{{ '@forms.settings.enabled'|trans }}</span>
                 {% else %}
                     <span class="badge bg-secondary">{{ '@messages.profile.notEnabled'|trans }}</span>
                 {% endif %}
             </li>
             {% endif %}
-            {% if security_policy.arePasskeysAvailable() %}
+            {% if screen.account.passkeys is not null %}
             <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 {{ '@forms.settings.passkeys'|trans }}
-                <span class="badge {{ user.getPasskeys()|length ? 'bg-success' : 'bg-secondary' }}">{{ user.getPasskeys()|length }}</span>
+                <span class="badge {{ screen.account.passkeys ? 'bg-success' : 'bg-secondary' }}">{{ screen.account.passkeys }}</span>
             </li>
             {% endif %}
             <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span><i class="fa-fw fa-brands fa-google"></i> Google</span>
-                {% if user.getIdentityProvider() == 'google' %}
+                {% if screen.account.identityProvider == 'google' %}
                     <span class="badge bg-success">{{ '@forms.settings.connected'|trans }}</span>
                 {% else %}
                     <span class="badge bg-secondary">{{ '@messages.profile.notConnected'|trans }}</span>
@@ -124,11 +125,11 @@
             </li>
             <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
                 {{ '@forms.settings.preferences'|trans }}
-                <small class="text-muted">{{ user.getLocale() }} &middot; {{ user.getTimezone() }}</small>
+                <small class="text-muted">{{ screen.account.locale }} &middot; {{ screen.account.timezone }}</small>
             </li>
         </ul>
         {% if isOwnProfile %}
-        <a class="btn btn-sm btn-primary mt-2" href="{{ path('user_settings') }}">
+        <a class="btn btn-sm btn-primary mt-2" href="{{ screen.settingsUrl }}">
             <i class="fa-fw fa-solid fa-user-cog"></i> {{ '@forms.settings.title'|trans }}
         </a>
         {% endif %}

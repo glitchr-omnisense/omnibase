@@ -112,6 +112,155 @@ final class AccountPagesSnapshotTest extends KernelTestCase
         }
     }
 
+    /**
+     * The same pages as data (plan "omnibase agnostique", C5): the frame's and
+     * the screen's props together, as a front end asks them - omnibridge/react's
+     * protocol where it is installed, else a request asking JSON alone.
+     *
+     * A visitor's profile carries what its HTML shows that visitor (the header,
+     * the threads) and nothing of the account (the pilot's parity rule); the
+     * owner's adds the summary and the addresses. The settings' actions carry
+     * the token of their own intent; the notifications' groups follow the
+     * screen's clock; answers with tokens are stored by no cache.
+     */
+    public function testTheAccountScreensAreGivenAsData(): void
+    {
+        $this->seed();
+        $member = $this->user('member');
+        $id = $this->ids['member'];
+
+        // A visitor: the props are what the page shows them.
+        $visitor = $this->props('/profile/'.$id, null, $response);
+        $html = $this->page('/profile/'.$id);
+        self::assertSame(['locale', 'site', 'links', 'viewer', 'theme', 'member', 'own', 'recent', 'account', 'editUrl', 'settingsUrl', 'logoutUrl'], array_keys($visitor));
+        self::assertSame([
+            'id' => $id, 'name' => 'anne.membre', 'avatar' => null, 'avatarHtml' => null, 'roles' => ['ROLE_USER'], 'online' => true, 'active' => true,
+            'registeredAt' => '2025-11-02T10:20:00+00:00', 'lastSeenAt' => '2026-04-10T19:00:00+00:00', 'threads' => 3, 'likes' => 0,
+        ], $visitor['member']);
+        self::assertSame([false, null, null, null, null], [$visitor['own'], $visitor['account'], $visitor['editUrl'], $visitor['settingsUrl'], $visitor['logoutUrl']]);
+        self::assertSame([
+            ['title' => 'Le club de lecture', 'url' => '/bbs/le-club-de-lecture', 'state' => 'STATE_PUBLISH', 'publishedAt' => '2026-04-08T18:00:00+00:00'],
+            ['title' => 'La sortie du samedi', 'url' => '/bbs/la-sortie-du-samedi', 'state' => 'STATE_PUBLISH', 'publishedAt' => '2026-04-03T09:30:00+00:00'],
+        ], $visitor['recent']);
+        // Each value the props carry, the visitor's page prints.
+        self::assertSame(\count($visitor['member']['roles']), preg_match_all('~<span class="badge bg-secondary">~', explode('<div class="info">', explode('<div class="roles mb-1">', $html)[1])[0]), 'a badge for each role');
+        foreach (['#'.$id.': anne.membre', 'title="Online"', 'Registered on 02 november 2025 at 10:20', 'Last seen on 10 april 2026 at 19:00', '<strong>3</strong> posts', '<strong>0</strong> likes', '/bbs/le-club-de-lecture', '08 april 2026', '/bbs/la-sortie-du-samedi', '03 april 2026'] as $shown) {
+            self::assertStringContainsString($shown, $html);
+        }
+        foreach (['Account security', '/settings', '/profile/'.$id.'/edit/', '/logout'] as $hidden) {
+            self::assertStringNotContainsString($hidden, explode('<main>', $html)[1], 'what the props leave out, the page does not show');
+        }
+        self::assertFalse($response->headers->hasCacheControlDirective('no-store'));
+
+        // Its owner: the account's summary, the addresses; private.
+        $owner = $this->props('/profile/'.$id, $member, $response);
+        self::assertTrue($owner['own']);
+        self::assertSame(['twoFactor' => true, 'passkeys' => 0, 'identityProvider' => null, 'locale' => 'en-GB', 'timezone' => 'UTC'], $owner['account'], 'passkeys counted (0) where they are available');
+        self::assertSame(['/profile/'.$id.'/edit/', '/settings', '/logout'], [$owner['editUrl'], $owner['settingsUrl'], $owner['logoutUrl']]);
+        self::assertTrue($response->headers->hasCacheControlDirective('private'));
+        self::assertContains('Cookie', $response->getVary());
+
+        // The settings: each action the token of its own intent; stored by no cache.
+        $settings = $this->props('/settings', $member, $response);
+        self::assertSame(['name', 'demo', 'twoFactor', 'passkeys', 'identifier', 'providers', 'sessions', 'language', 'timezone'], \array_slice(array_keys($settings), 5));
+        self::assertSame(['anne.membre', false, [], 'anne.membre@example.org', [], 'en-GB', 'UTC'], [$settings['name'], $settings['demo'], $settings['passkeys'], $settings['identifier'], $settings['providers'], $settings['language'], $settings['timezone']]);
+        $twoFactor = $settings['twoFactor'];
+        self::assertSame([false, false, false, '/settings/2fa', null, true, false, null], [$twoFactor['mandatory'], $twoFactor['enrolmentRequired'], $twoFactor['totp'], $twoFactor['totpEnable'], $twoFactor['totpDisable'], $twoFactor['email'], $twoFactor['emailLocked'], $twoFactor['backupCodes']]);
+        self::assertSame('/settings/2fa/email', $twoFactor['emailToggle']['url']);
+        self::assertTrue($this->tokenValid($response, '2fa_email', $twoFactor['emailToggle']['token']));
+        self::assertFalse($this->tokenValid($response, '2fa_disable', $twoFactor['emailToggle']['token']), 'one intent\'s token is not another\'s');
+        self::assertSame([['Safari - macOS', ['192.0.2.10'], '2026-04-10T08:15:00+00:00', true], ['Chrome - Linux', ['198.51.100.7'], '2026-04-02T21:40:00+00:00', false]], array_map(static fn ($session) => [$session['label'], $session['ips'], $session['updatedAt'], $session['valid']], $settings['sessions']));
+        self::assertSame('/settings/sessions/'.$this->ids['session:open'].'/logout', $settings['sessions'][0]['logout']['url']);
+        self::assertTrue($this->tokenValid($response, 'session_logout', $settings['sessions'][0]['logout']['token']));
+        self::assertNull($settings['sessions'][1]['logout']);
+        $this->assertStoredByNoCache($response);
+        $totp = $this->props('/settings', $this->user('admin'), $response)['twoFactor'];
+        self::assertSame([true, null, 3, '/settings/2fa/disable'], [$totp['totp'], $totp['totpEnable'], $totp['backupCodes'], $totp['totpDisable']['url']]);
+        self::assertTrue($this->tokenValid($response, '2fa_disable', $totp['totpDisable']['token']));
+
+        // The notifications: the groups by the screen's clock (the page's time zone, UTC here).
+        foreach (['2026-04-10 20:00:00' => ['today', 'yesterday', 'earlier'], '2026-04-11 10:00:00' => ['yesterday', 'week', 'earlier']] as $now => $groups) {
+            \Base\Contract\Runtime::set(\Psr\Clock\ClockInterface::class, new class($now) implements \Psr\Clock\ClockInterface {
+                public function __construct(private string $now)
+                {
+                }
+
+                public function now(): \DateTimeImmutable
+                {
+                    return new \DateTimeImmutable($this->now, new \DateTimeZone('UTC'));
+                }
+            });
+            try {
+                $page = $this->props('/notifications', $member, $response);
+            } finally {
+                \Base\Contract\Runtime::set(\Psr\Clock\ClockInterface::class, null);
+            }
+            self::assertSame($groups, array_map(static fn ($notification) => $notification['group'], $page['notifications']), $now);
+        }
+        self::assertSame([$this->ids['notification:unread'], $this->ids['notification:read'], $this->ids['notification:html']], array_map(static fn ($notification) => $notification['id'], $page['notifications']), 'the one with nothing to show is left out');
+        self::assertSame(['id' => $this->ids['notification:unread'], 'title' => 'Nouvelle réponse', 'content' => 'Paul a répondu à La sortie du samedi.', 'url' => '/bbs/la-sortie-du-samedi', 'adminUrl' => null, 'importance' => $page['notifications'][0]['importance'], 'isRead' => false, 'sentAt' => '2026-04-10T18:05:00+00:00', 'group' => 'yesterday'], $page['notifications'][0]);
+        self::assertSame(['Un message', ''], [$page['notifications'][2]['title'], $page['notifications'][2]['content']], 'the subject for no title; a text stripping to nothing is "", not null');
+        self::assertSame([2, false, '/notifications', '/notifications/read', '/notifications/latest', '/notifications/delete', '/push/subscribe', '/push/unsubscribe', false, null], [$page['unread'], $page['unreadOnly'], $page['allUrl'], $page['readUrl'], $page['latestUrl'], $page['deleteUrl'], $page['subscribeUrl'], $page['unsubscribeUrl'], $page['push'], $page['pushKey']]);
+        self::assertTrue($this->tokenValid($response, 'notifications', $page['token']));
+        $this->assertStoredByNoCache($response);
+        self::assertTrue($this->props('/notifications?unread=1', $member)['unreadOnly']);
+    }
+
+    private function assertStoredByNoCache(Response $response): void
+    {
+        self::assertTrue($response->headers->hasCacheControlDirective('private'));
+        self::assertTrue($response->headers->hasCacheControlDirective('no-store'));
+        self::assertFalse($response->headers->hasCacheControlDirective('public'));
+        self::assertContains('Cookie', $response->getVary());
+    }
+
+    /** Whether a token is the one the CSRF token manager accepts for that intent, in the session the answer was made in. */
+    private function tokenValid(Response $response, string $intent, string $token): bool
+    {
+        $request = Request::create('https://localhost/');
+        $request->cookies->set($this->sessionName, $this->sessionId);
+        $session = static::getContainer()->get('session.factory')->createSession();
+        $session->setId($this->sessionId);
+        $session->start();
+        $request->setSession($session);
+        static::getContainer()->get('request_stack')->push($request);
+        try {
+            return static::getContainer()->get('security.csrf.token_manager')->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken($intent, $token));
+        } finally {
+            static::getContainer()->get('request_stack')->pop();
+        }
+    }
+
+    private string $sessionName = '';
+    private string $sessionId = '';
+
+    /**
+     * A page's props, as a front end asks them.
+     *
+     * @return array<string, mixed>
+     */
+    private function props(string $path, ?object $user = null, ?Response &$response = null): array
+    {
+        $protocol = class_exists('Omnibridge\\React\\Protocol');
+        $server = $protocol ? ['HTTP_X_OMNIBRIDGE' => 'true'] : ['HTTP_ACCEPT' => 'application/json'];
+        self::ensureKernelShutdown();
+        self::bootKernel();
+        $request = Request::create('https://localhost'.$path, 'GET', [], [], [], $server);
+        if ($user) {
+            $session = static::getContainer()->get('session.factory')->createSession();
+            $user = $this->em()->find($user::class, $user->getId());
+            $session->set('_security_main', serialize(new UsernamePasswordToken($user, 'main', $user->getRoles())));
+            $session->save();
+            $request->cookies->set($this->sessionName = $session->getName(), $this->sessionId = $session->getId());
+        }
+        $response = static::$kernel->handle($request);
+        self::assertSame(200, $response->getStatusCode(), $path.': '.substr((string) $response->getContent(), 0, 3000));
+        self::assertStringContainsString('json', (string) $response->headers->get('Content-Type'));
+        $data = json_decode((string) $response->getContent(), true);
+
+        return $protocol ? $data['props'] : $data;
+    }
+
     /** The values a page draws anew at each request, set aside; the records' ids by their names (another suite may have numbered before). */
     private function normalize(string $html): string
     {

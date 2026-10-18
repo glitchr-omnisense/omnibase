@@ -13,6 +13,9 @@ use Base\Repository\User\PasskeyRepository;
 
 use Base\Form\Type\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
+use Base\Bridge\Symfony\AccountScreens;
+use Base\Bridge\Symfony\ScreenResponder;
+use Base\Screen\View;
 use Base\Entity\User\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -109,9 +112,16 @@ class UserSettingsController extends AbstractController
         return $this->redirectToRoute('user_settings');
     }
 
+    /**
+     * The account's settings: its template and its view model
+     * (Base\Screen\Account\SettingsPage, plan "omnibase agnostique", C5) to
+     * omnibase's ScreenResponder - each small form an action with its token,
+     * the answers stored by no cache; a template the site overrides gets
+     * `user`, `sessions` and `policy` as well (deprecated, gone in 4.0).
+     */
     #[Route("/settings", name: "user_settings")]
     #[Iconize("fa-solid fa-fw fa-user-cog")]
-    public function Settings(ConnectionRepository $connectionRepository)
+    public function Settings(Request $request, ConnectionRepository $connectionRepository, ScreenResponder $responder, AccountScreens $screens)
     {
         $user = $this->getUser();
 
@@ -123,11 +133,13 @@ class UserSettingsController extends AbstractController
         // should not be there.
         $sessions = $connectionRepository->findBy(["user" => $user], ["updatedAt" => "DESC"], self::SESSIONS_SHOWN);
 
-        return $this->render('client/user/settings.html.twig', [
+        $template = 'client/user/settings.html.twig';
+
+        return $responder->respond($request, new View($template, $screens->settings($user instanceof \Base\Entity\User ? $user : null, $sessions), 'Account/Settings'), $responder->legacy($template, fn () => [
             'user' => $user,
             'sessions' => $sessions,
             'policy' => $this->securityPolicy,
-        ]);
+        ]));
     }
 
     /**
