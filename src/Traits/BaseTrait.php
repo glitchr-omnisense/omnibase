@@ -3,6 +3,8 @@
 namespace Base\Traits;
 
 use Base\Attributes\AttributeReader;
+use Base\Contract\Environment as EnvironmentContract;
+use Base\Contract\Runtime;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Service\Obfuscator;
@@ -29,12 +31,22 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 /**
  * Static service accessors usable from anywhere (entities, attributes,
- * subscribers, ...). Backed by BaseService's static properties, which are
- * populated EITHER eagerly by BaseService's constructor (when something
- * actually injects it) OR lazily, one service at a time, through the
- * `base.runtime` ServiceLocator seeded in BaseBundle::boot() — see
- * BaseCommonTrait::runtimeGet(). Nothing here forces BaseService's full
- * dependency graph to be built anymore.
+ * subscribers, ...): the tool for writing an application quickly (plan
+ * "omnibase agnostique", C9 - Marco: "BaseTrait était un outil qui me
+ * permettait de développer rapidement"). It stays, and is not deprecated.
+ *
+ * The rule: BaseTrait to go fast in an application; the contracts
+ * (Base\Contract\Runtime and its interfaces) in the core and the bundles, which
+ * add no new use of it (docs/20-architecture/contracts.md).
+ *
+ * An accessor whose answer a contract gives asks the contract first, so it
+ * answers wherever the registry is filled, Symfony or not: getParameterBag()
+ * (Runtime::parameters()), getEnvironment() (Runtime::environment()->name()).
+ * The others hand out the framework's services, typed as they always were;
+ * they are resolved one at a time, lazily, through the `base.runtime`
+ * ServiceLocator seeded in BaseBundle::boot() (BaseCommonTrait::runtimeGet()),
+ * or pre-filled when BaseService is built - which nothing does any more on a
+ * page's path (BaseService is a lazy service, C9).
  */
 trait BaseTrait
 {
@@ -111,8 +123,13 @@ trait BaseTrait
         return (self::class === BaseService::class) ? BaseService::$projectDir : BaseService::getProjectDir();
     }
 
+    /** The Environment contract's name when the registry has it (C9), else the kernel's, seeded at boot. */
     public static function getEnvironment(): string
     {
+        if ($environment = Runtime::find(EnvironmentContract::class)) {
+            return $environment->name();
+        }
+
         return (self::class === BaseService::class) ? BaseService::$environment : BaseService::getEnvironment();
     }
 
@@ -233,7 +250,11 @@ trait BaseTrait
      */
     public static function getParameterBag(string $key = "", ?array $bag = null)
     {
-        $parameterBag = self::class === BaseService::class ? BaseService::runtimeGet('parameterBag', 'parameter_bag') : BaseService::getParameterBag();
-        return $key ? $parameterBag->get($key, $bag) : $parameterBag;
+        // The parameters contract when the registry has it (C9): under Symfony the same
+        // `parameter_bag` (the settings stored in the database over the container's).
+        $parameterBag = Runtime::find(ParameterBagInterface::class)
+            ?? (self::class === BaseService::class ? BaseService::runtimeGet('parameterBag', 'parameter_bag') : BaseService::getParameterBag());
+
+        return $key ? $parameterBag?->get($key, $bag) : $parameterBag;
     }
 }

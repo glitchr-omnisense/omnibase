@@ -362,6 +362,12 @@ final class BareTest extends TestCase
             'token, salted with the secret' => true,
             'vault, secured' => 'prod',
             'vault, not secured' => null,
+            // BaseTrait and BaseService on the contracts (C9): no container, no constructor.
+            'basetrait, a parameter' => 300,
+            'basetrait, the parameters' => true,
+            'basetrait, the environment' => 'prod',
+            'baseservice, debug, development, salt' => [true, true, 'not-so-secret'],
+            'baseservice, granted' => [true, false],
             // Sessions and Locales: the visitor signed out (not kicked), someone else kicked, the locales.
             'user, the visitor signed out' => [true, false],
             'user, someone else kicked' => true,

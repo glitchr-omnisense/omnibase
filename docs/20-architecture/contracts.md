@@ -47,6 +47,57 @@ in the Fondation (decision D1), and Laravel's own mail is built on it: its
 `MailerInterface` is the contract, and another framework hands a `Mailer` over
 its own transport.
 
+## BaseTrait and BaseService: the application's shortcuts (step C9)
+
+**The rule: BaseTrait to go fast in an application; the contracts in the core and the
+bundles.** `Base\Traits\BaseTrait` (static accessors usable from an entity, an attribute,
+a subscriber) and `Base\Service\BaseService` (its facade) are the tool for writing an
+application quickly, and they stay - neither is deprecated, nor removed in 5.0. The core and
+its bundles add no new use of either: a class of theirs asks `Base\Contract\Runtime` (or is
+given the service it needs), so that it runs where there is no Symfony.
+
+What changed in C9:
+
+- **BaseService is a lazy service.** The container hands out a ghost of the class (PHP 8.4's
+  lazy objects, not a proxy subclass), built with its 23 services the first time one of its
+  methods reads a property. Injected in a class that never calls it, it builds nothing.
+- **Nothing on a page's path injects it any more.** `SiteVariable` and `AdminVariable`
+  (`app.site`, `app.admin`) and `EmailVariable` read the settings from the `SettingBag` and
+  the route index from the router; `FormTypeBootstrapExtension` the parameters;
+  `ErrorController` the `Environment` contract (`Base\Service\Model\DevelopmentEnvironment`,
+  `isDevelopment()`'s rule); `MainController` and `UserSettingsController` never called it.
+  The core's `getService()->isDebug()`, `getSalt()`, `isGranted()`, `isEntity()` calls are
+  `Runtime::environment()->isDebug()`, `->secret()`, `Runtime::access()->isGranted()`, and
+  BaseTrait's static `isEntity()` (the class metadata manipulator).
+- **What a contract answers, they ask the contract** when the registry has it, so they answer
+  outside Symfony too, and the methods below read no property of BaseService - called on the
+  ghost, they build nothing:
+
+| Accessor | Asks | Else (no contract in the registry) |
+|---|---|---|
+| `BaseTrait::getParameterBag()` | `Runtime::parameters()` (under Symfony `parameter_bag`, the same object) | the `base.runtime` locator's `parameter_bag` |
+| `BaseTrait::getEnvironment()` | `Runtime::environment()->name()` | the kernel's environment, seeded at boot |
+| `BaseService::isDebug()` | `Runtime::environment()->isDebug()` | the kernel |
+| `BaseService::isDevelopment()` | `DevelopmentEnvironment::is(Runtime::environment())` | the same rule on the kernel |
+| `BaseService::getSecret()`, `getSalt()` | `Runtime::environment()->secret()` | `kernel.secret` |
+| `BaseService::isGranted()` | `Runtime::access()->isGranted()` | the authorization checker |
+
+  The other accessors hand out the framework's services, typed as they always were
+  (`getRouter()`, `getTranslator()`, `getLocalizer()`, `getTwig()`, `getTrading()`,
+  `getDoctrine()`, `getTokenStorage()`...): no contract has their type, so they stay on the
+  lazy `base.runtime` locator, one service built on its first call.
+
+**The bundles' uses** (for step C8, which moves them to the contracts; nothing changed in the
+bundles): no bundle injects BaseService or calls `getService()`. Fourteen entities use
+BaseTrait - marketplace's `Order` (`getTrading()` x8, `getTranslator()` x3, `getRouter()`,
+`getParameterBag()`), `Product` (`getParameterBag()`, `getRouter()`, `getTranslator()`,
+`getTwig()`), `Order\OrderItem` (`getTrading()` x3), `Order\Method\PaymentMethod`
+(`getParameterBag()`), `ShippingMethod` (`getParameterBag()` x2),
+`Sales\Attribute\Rule\TotalPriceAdapter` (`getTrading()`); forum's `Category`
+(`getRouter()`); and, calling none of its accessors, marketplace's `Sales\Discount`, `Fee`,
+`Sales\Attribute\Action\FixedAmountAdapter`, forum's `Post`, mailbox's `Conversation`,
+classroom's `Entitlement` and `Resource`.
+
 ## The registry
 
 ```php
@@ -154,8 +205,8 @@ What a class of the core still asked of `BaseTrait`'s services after C3e, now as
 registry, in the order lesringostars' pages go through it. Each move keeps the answers under
 Symfony (a test compares them with the service's, its old code copied as it was) and gives
 answers where there is no framework (`tests/Contract/basetrait-seams-without-framework.php`,
-run by `BareTest`). `BaseTrait` itself stays, its accessors unchanged, for the bundles and the
-sites that call them.
+run by `BareTest`). `BaseTrait` itself stays, its accessors' signatures unchanged, for the
+bundles and the sites that call them (since C9 the ones a contract answers ask it, above).
 
 | Class | Before | Now |
 |---|---|---|

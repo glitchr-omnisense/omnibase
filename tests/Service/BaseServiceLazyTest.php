@@ -64,4 +64,21 @@ final class BaseServiceLazyTest extends KernelTestCase
         self::assertLessThan(500, $response->getStatusCode(), $path.' answers');
         self::assertTrue((new \ReflectionClass($service))->isUninitializedLazyObject($service), $path.' built BaseService');
     }
+
+    /** BaseService asks the contracts what they answer (C9): the same answers, and the ghost stays one. */
+    public function testWhatAContractAnswersBuildsNothing(): void
+    {
+        $container = static::getContainer();
+        $service = $container->get('base.service');
+        $environment = $container->get('Base\\Contract\\Environment');
+
+        self::assertSame($environment->isDebug(), $service->isDebug());
+        self::assertSame($environment->secret(), $service->getSalt());
+        self::assertSame($container->getParameter('kernel.secret'), $service->getSecret());
+        self::assertSame(\Base\Service\Model\DevelopmentEnvironment::is($environment), $service->isDevelopment());
+        self::assertFalse($service->isGranted('ROLE_SUPERADMIN'));
+        self::assertSame($container->get('parameter_bag'), BaseService::getParameterBag());
+        self::assertSame($container->getParameter('kernel.environment'), BaseService::getEnvironment());
+        self::assertTrue((new \ReflectionClass($service))->isUninitializedLazyObject($service));
+    }
 }

@@ -233,6 +233,27 @@ compared under Symfony with the service it replaces, and run where there is no f
 - **An application's `bin/console`** keeps its line `use Base\Console\Application;`, written
   once (base-plugin rewrote it at each install).
 
+### Changed: BaseService lazy and off the request path, BaseTrait on the contracts (step C9)
+- **`Base\Service\BaseService` is a lazy service**: a ghost of the class (PHP 8.4 lazy
+  objects) until one of its methods reads a property; its 23 services are built then, not
+  when it is injected. `BaseServiceLazyTest`.
+- **Nothing on a page's path injects it**: `Base\Twig\Variable\SiteVariable` and
+  `AdminVariable` take the `SettingBagInterface` in its place, and the kernel last (the
+  execution time: the kernel's start in debug, else their construction, as BaseService
+  measured it); `EmailVariable` takes the router, the `SettingBagInterface` and the launcher;
+  `FormTypeBootstrapExtension` the parameters; `ErrorController` the `Base\Contract\Environment`
+  contract (its third argument); `MainController` and `UserSettingsController` lose an
+  argument they never used. New in the Fondation: `Base\Service\Model\DevelopmentEnvironment`
+  (`isDevelopment()`'s rule). The core's `getService()->isDebug()/getSalt()/isGranted()/
+  isEntity()` are on the contracts; `AutovalidateController` and `AssociationFileType` no
+  longer use BaseTrait. `SiteVariableTest`, `DevelopmentEnvironmentTest`. Fondation 777 -> 778.
+- **BaseTrait and BaseService are kept, not deprecated**: the application's shortcuts. What a
+  contract answers they ask it when the registry has it - `getParameterBag()`,
+  `getEnvironment()`, `isDebug()`, `isDevelopment()`, `getSecret()`/`getSalt()`,
+  `isGranted()` - so they answer without Symfony (`BareTest`), and on the ghost build
+  nothing. The rule, in docs/20-architecture/contracts.md: BaseTrait to go fast in an
+  application, the contracts in the core and the bundles (which add no new use of it).
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming
