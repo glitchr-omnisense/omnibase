@@ -37,11 +37,22 @@ final class FileLinks
 
     /**
      * The link format with the container-to-host mapping, or $ide unchanged
-     * (null for none) when there is nothing to map.
+     * (null for none) when there is nothing to map - in omnibase's former
+     * syntax, read as Symfony's.
      */
     public static function format(?string $ide, string $projectDir, ?string $hostDir): ?string
     {
         $ide = null === $ide || '' === $ide ? null : $ide;
+
+        // omnibase's former syntax, which the sites' framework.ide still writes:
+        // "vscode://file/%f[%b:/host/path]:%l", %b (the project directory) read as
+        // /host/path in %f. Read as Symfony's mapping; Symfony's formatter would
+        // keep "[%b:...]" in the link.
+        if (null !== $ide && preg_match('/%f\[%b[,:;]([^\]]*)\]/', $ide, $legacy)) {
+            $ide = str_replace($legacy[0], '%f', $ide);
+            $hostDir = '' !== trim($legacy[1]) ? $legacy[1] : $hostDir;
+        }
+
         $hostDir = null === $hostDir ? '' : rtrim($hostDir, '/');
         $projectDir = rtrim($projectDir, '/');
 

@@ -217,7 +217,9 @@ compared under Symfony with the service it replaces, and run where there is no f
 - **symfony/error-handler as published.** The file links of the error pages and of the
   profiler on the host (APP_PATH) are Symfony's own: `Base\Bridge\Symfony\FileLinks`
   decorates `debug.file_link_formatter` with Symfony's `FileLinkFormatter` on a mapped format
-  (`...&/srv/app/>/Users/me/site/`), and exports `SYMFONY_IDE` for the page the
+  (`...&/srv/app/>/Users/me/site/`; the sites' `framework.ide` in omnibase's former syntax,
+  `vscode://file/%%f[%%b:%env(APP_PATH)%]:%%l`, read as that mapping, so no site changes its
+  configuration), and exports `SYMFONY_IDE` for the page the
   `ErrorHandler` renders before a request is handled (docs/20-architecture/errors.md).
   `Base\Inspector\FileLinkFormatter` (it extended the `@final` formatter) and
   `Base\Inspector\HtmlErrorRenderer` are removed, and with them base-plugin's two hooks on

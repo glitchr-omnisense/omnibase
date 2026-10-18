@@ -38,6 +38,17 @@ final class FileLinksTest extends KernelTestCase
         self::assertSame('idea://%f:%l&/srv/app/>/Users/me/site/', FileLinks::format('idea://%f:%l', '/srv/app', '/Users/me/site'));
     }
 
+    public function testTheFormerSyntaxOfTheSitesIsReadAsSymfonys(): void
+    {
+        // framework.ide of the sites: "vscode://file/%%f[%%b:%env(APP_PATH)%]:%%l".
+        self::assertSame('vscode://file/%f:%l&/srv/app/>/Users/me/site/', FileLinks::format('vscode://file/%f[%b:/Users/me/site]:%l', '/srv/app', null));
+        self::assertSame('vscode://file/%f:%l&/srv/app/>/Users/me/site/', FileLinks::format('vscode://file/%f[%b:]:%l', '/srv/app', '/Users/me/site'));
+        self::assertSame('vscode://file/%f:%l', FileLinks::format('vscode://file/%f[%b:]:%l', '/srv/app', null));
+
+        $formatter = FileLinks::formatter(new FileLinkFormatter(''), 'vscode://file/%f[%b:/Users/me/site]:%l', '/srv/app', '/Users/me/site');
+        self::assertSame('vscode://file//Users/me/site/src/Kernel.php:7', $formatter->format('/srv/app/src/Kernel.php', 7));
+    }
+
     public function testNothingToMap(): void
     {
         self::assertNull(FileLinks::format(null, '/srv/app', null));
