@@ -75,6 +75,11 @@
  * SchemaManagerFactory and MySQLSchemaManager (a SET column read with its values, the "(DC2Type:...)" comments of
  * before left out) and Base\Database\Type\MySQLSetType (a SET column as the database has it); -1, Base\
  * DatabaseSubscriber\EnumSubscriber, removed from the core (it wrote those comments; CHANGELOG [4.0], plan C6b).
+ * 777 after step P3 (glitchr/base-plugin replaced by omnibridge/composer): +1, Base\Bridge\Symfony\FileLinks (the
+ * file links of the error pages mapped to the host with Symfony's own FileLinkFormatter, which it builds and does not
+ * extend); -2, Base\Inspector\FileLinkFormatter and HtmlErrorRenderer, removed from the core (they extended
+ * Symfony's @final FileLinkFormatter and its HtmlErrorRenderer, which base-plugin patched the ErrorHandler to use).
+ * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
 return [
@@ -96,6 +101,7 @@ return [
     Base\Bridge\Doctrine\Types::class,
     Base\Bridge\Symfony\AccountScreens::class,
     Base\Bridge\Symfony\CsrfTokens::class,
+    Base\Bridge\Symfony\FileLinks::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
     Base\Bridge\Symfony\KernelEnvironment::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
@@ -488,8 +494,6 @@ return [
     Base\Imagine\Svg\Effects::class,
     Base\Imagine\Svg\Image::class,
     Base\Imagine\Svg\Imagine::class,
-    Base\Inspector\FileLinkFormatter::class,
-    Base\Inspector\HtmlErrorRenderer::class,
     Base\Mailer\MailTrap::class,
     Base\Notifier\Abstract\BaseNotificationInterface::class,
     Base\Notifier\Abstract\BaseNotifier::class,

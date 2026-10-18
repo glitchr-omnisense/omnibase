@@ -78,16 +78,19 @@ return static function (ContainerConfigurator $container): void {
             new Reference('base.database.entity_hydrator'),
         ]);
 
-    // Inspector services
-    $services->set('Base\Inspector\HtmlErrorRenderer')
-        ->parent('error_handler.error_renderer.html')
-        ->decorate('error_handler.error_renderer.html');
-
-    $services->set('Base\Inspector\FileLinkFormatter')
-        ->parent('debug.file_link_formatter')
-        ->decorate('debug.file_link_formatter')
-        ->public(false)
-        ->tag('kernel.file_link_formatter');
+    // The file links of the error pages and of the profiler, on the developer's
+    // machine when the site runs in a container (APP_PATH): Symfony's own
+    // FileLinkFormatter on a mapped format (Base\Bridge\Symfony\FileLinks).
+    $services->set('base.debug.file_link_formatter', \Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter::class)
+        ->decorate('debug.file_link_formatter', null, 0, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
+        ->factory([\Base\Bridge\Symfony\FileLinks::class, 'formatter'])
+        ->args([
+            new Reference('.inner'),
+            '%debug.file_link_format%',
+            '%kernel.project_dir%',
+            '%env(default::APP_PATH)%',
+            new Reference('request_stack', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+        ]);
 
     // Twig Environment
     $services->set('Base\Twig\Environment')

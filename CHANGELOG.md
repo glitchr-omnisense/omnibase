@@ -188,6 +188,49 @@ compared under Symfony with the service it replaces, and run where there is no f
   through `getRouter()->generate($name, $parameters, $referenceType)` and can use
   `Link::to()` as they are, at C8). `RecentThreadsTest`.
 
+### Changed: glitchr/base-plugin replaced by omnibridge/composer (step P3)
+- **`require`: `omnibridge/composer` (1.x-dev) in place of `glitchr/base-plugin`**, and in
+  `allow-plugins`. omnibridge/composer is a Composer plugin that knows no package: the core
+  declares what it needs in `extra.omnibridge` (which replaces `extra.base-plugin`):
+  - **the stubs**: `Base\Bridge\Composer\Stub\{Entity, Enum, Form, Notifier, Repository}Stub`
+    (base-plugin's Cloner providers on the engine's `AbstractStub`; `Set`, which had no
+    `src/Set` to read, dropped) - the same stubs, one per plain `Base\<Name>\X` the
+    application does not define, now in `vendor/composer/omnibridge/stubs/<Name>/`, read by
+    no autoloader. `AbstractBaseBundle::isStub()` (base-plugin's `stubs/` too) keeps a stub
+    from ever passing for an application class. `StubsTest`: each stub is the alias
+    `ClassAliases` declares, deterministic, none for an application's own class.
+  - **one patch**, base-plugin's hook on symfony/process as a declaration
+    (`process-timeout-from-env`: Process's default timeout 60 becomes null, read from
+    `SYMFONY_PROCESS_TIMEOUT` in the constructor, 60 when unset) - applied after install and
+    update, recorded with checksums (`vendor/composer/omnibridge/patches.json`), checked by
+    `composer omnibridge:patches --check`.
+- **symfony/dependency-injection as published: `Base\Service\ParameterBag` wraps
+  `ContainerBag` instead of extending it.** It overrides `set()` (`HotParameterBag` `add()`)
+  returning `void`, which PHP refused against `FrozenParameterBag`'s `never`
+  (DependencyInjection 7 and 8): base-plugin rewrote every `never` of that file. The bag
+  implements DependencyInjection's `ParameterBagInterface` and `ContainerBagInterface` itself
+  (the `parameter_bag` service and its autowiring aliases are unchanged), reads through the
+  wrapped `ContainerBag`, and forbids what the frozen bag forbade (`clear()`, `add()`,
+  `remove()` throw its `LogicException`; `HotParameterBag::add()` still keeps what it is
+  given in its hot bag). It is no longer a `FrozenParameterBag` (nothing typed that).
+  `ParameterBagTest`.
+- **symfony/error-handler as published.** The file links of the error pages and of the
+  profiler on the host (APP_PATH) are Symfony's own: `Base\Bridge\Symfony\FileLinks`
+  decorates `debug.file_link_formatter` with Symfony's `FileLinkFormatter` on a mapped format
+  (`...&/srv/app/>/Users/me/site/`), and exports `SYMFONY_IDE` for the page the
+  `ErrorHandler` renders before a request is handled (docs/20-architecture/errors.md).
+  `Base\Inspector\FileLinkFormatter` (it extended the `@final` formatter) and
+  `Base\Inspector\HtmlErrorRenderer` are removed, and with them base-plugin's two hooks on
+  symfony/error-handler. Decorating `error_renderer.html` too was not needed: Symfony's HTML
+  renderer takes `debug.file_link_formatter`. `FileLinksTest`. Fondation 778 -> 777.
+- **Dropped with base-plugin**, its hooks for packages the core no longer needs patched:
+  doctrine/orm (as published since C6), league/flysystem-bundle (the core no longer extends
+  `LazyFactory`, C7b), hwi/oauth-bundle (2.5 uses DependencyInjection's `Extension`),
+  symfony/polyfill-mbstring (PHP 8.4 has `mb_ucfirst`/`mb_lcfirst`), easycorp/easyadmin-bundle
+  and paypal/rest-api-sdk-php (not installed: omnibase/admin, omnitrade/paypal).
+- **An application's `bin/console`** keeps its line `use Base\Console\Application;`, written
+  once (base-plugin rewrote it at each install).
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming

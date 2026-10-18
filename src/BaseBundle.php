@@ -45,6 +45,10 @@ class BaseBundle extends AbstractBaseBundle
         if (!$this->hasInstance()) {
             self::$_instance = $this;
         }
+
+        // Before the container is built: an error Symfony's ErrorHandler renders
+        // by itself (a container that does not compile) links to the host too.
+        \Base\Bridge\Symfony\FileLinks::export();
     }
 
     /**
