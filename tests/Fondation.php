@@ -61,6 +61,8 @@
  * 767 after step C4b's nouns (+4: the contracts Base\Contract\Translations - omnibridge/twig's and exists() - and
  * Nouns, what an entity is called, and its rule Base\Service\Model\EntityNouns with the keys it tries,
  * Base\Service\Model\NounVariants, which Base\Service\Translator now answers by).
+ * 768 after step C4b's durations (+1: Base\Service\Model\Duration, a number of seconds in words over the
+ * Translations contract, which Translator::transTime() answers by).
  */
 
 return [
@@ -653,6 +655,7 @@ return [
     Base\Service\Model\Currency\Api\ExchangeRatesApi::class,
     Base\Service\Model\Currency\Api\Fixer::class,
     Base\Service\Model\Currency\CurrencyApiInterface::class,
+    Base\Service\Model\Duration::class,
     Base\Service\Model\EntityNouns::class,
     Base\Service\Model\GraphInterface::class,
     Base\Service\Model\HtmlizeInterface::class,

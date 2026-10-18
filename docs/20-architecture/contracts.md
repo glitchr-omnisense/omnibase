@@ -155,6 +155,7 @@ sites that call them.
 | Class | Before | Now |
 |---|---|---|
 | `Thread::__toString()`, `Widget::__toString()` without a title | `getTranslator()->transEntity(static::class)` | `Runtime::nouns()->entity(static::class)` (`NounsTest`) |
+| `Thread::getPublishTimeStr()`, `Token::getRemainingTimeStr()`, `getThrottleTimeStr()` | `getTranslator()->transTime($seconds)` | `Duration::spell($seconds, Runtime::translations())` (`DurationTest`: the texts rewritten in the back office printed as before) |
 
 **What an entity is called: `Base\Service\Model\EntityNouns`.** The rule of
 `Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:
@@ -166,3 +167,9 @@ an instance of it over itself (`getEntityNouns()`, the bundles `BaseBundle` know
 instance is the Nouns contract under Symfony: one rule, the same strings. A host without the
 framework builds one with `new EntityNouns($translations, EntityNouns::namespacesOf([...its
 bundle classes]))` and binds it to `Base\Contract\Nouns`.
+
+**A number of seconds in words: `Base\Service\Model\Duration`.** `Translator::transTime()`'s
+words (`base.years` to `base.seconds`, ICU plurals; a month of 30 days) over the Translations
+contract - omnibridge/twig's, `trans()` alone. Under Symfony that is the `translator` chain, so
+a unit the team rewrote in the back office is the one printed, as before; `transTime()` now
+answers by it.

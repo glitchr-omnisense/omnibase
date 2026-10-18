@@ -102,6 +102,13 @@ compared under Symfony with the service it replaces, and run where there is no f
   `Thread::__toString()` and `Widget::__toString()` ask `Runtime::nouns()`. `NounsTest`: every
   entity of the application, five sets of options, three properties, two languages, the old
   rule copied as it was. Fondation 763 -> 767.
+- **A number of seconds in words**: `Base\Service\Model\Duration::spell($seconds,
+  $translations)`, `Translator::transTime()`'s words over the Translations contract (the
+  `translator` chain under Symfony: the texts rewritten in the back office first);
+  `transTime()` answers by it. `Thread::getPublishTimeStr()`, `Token::getRemainingTimeStr()`
+  and `getThrottleTimeStr()` ask it with `Runtime::translations()`. `DurationTest`: 24 lengths
+  in French and English against the old `transTime()` copied, a rewritten unit, the getters.
+  Fondation 767 -> 768.
 
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its

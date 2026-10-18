@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Base\Contract\Translations;
 use Base\Database\Type\SetType;
+use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
 use Base\Service\Model\NounVariants;
 use Doctrine\DBAL\Types\Type;
@@ -687,31 +688,9 @@ class Translator implements TranslatorInterface, Translations
         return $this->entityNouns ??= new EntityNouns($this, EntityNouns::namespacesOf(\Base\BaseBundle::getInstance()->getBundles()));
     }
 
+    /** A number of seconds in words (Base\Service\Model\Duration, C4b): "2 jours 3 heures". */
     public function transTime(int $time): string
     {
-        if ($time > 0) {
-            $seconds = fmod($time, 60);
-            $time = intdiv($time, 60);
-            $minutes = fmod($time, 60);
-            $time = intdiv($time, 60);
-            $hours = fmod($time, 24);
-            $time = intdiv($time, 24);
-            $days = fmod($time, 30);
-            $time = intdiv($time, 30);
-            $months = fmod($time, 12);
-            $years = intdiv($time, 12);
-
-            $str =
-                ($years ?: "") . " " . $this->trans("base.years", [$years]) . " " .
-                ($months ?: "") . " " . $this->trans("base.months", [$months]) . " " .
-                ($days ?: "") . " " . $this->trans("base.days", [$days]) . " " .
-                ($hours ?: "") . " " . $this->trans("base.hours", [$hours]) . " " .
-                ($minutes ?: "") . " " . $this->trans("base.minutes", [$minutes]) . " " .
-                ($seconds ?: "") . " " . $this->trans("base.seconds", [$seconds]);
-
-            return trim($str);
-        }
-
-        return "";
+        return Duration::spell($time, $this);
     }
 }

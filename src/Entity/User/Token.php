@@ -3,8 +3,10 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
+use Base\Contract\Runtime;
 use Base\Database\Attribute\Slugify;
 use Base\Database\Attribute\Timestamp;
+use Base\Service\Model\Duration;
 use Base\Service\Model\IconizeInterface;
 
 use DateTime;
@@ -284,7 +286,7 @@ class Token implements IconizeInterface
 
     public function getRemainingTimeStr(): string
     {
-        return $this->getTranslator()->transTime($this->getRemainingTime());
+        return Duration::spell($this->getRemainingTime(), Runtime::translations());
     }
 
 
@@ -322,7 +324,7 @@ class Token implements IconizeInterface
 
     public function getThrottleTimeStr(): string
     {
-        return $this->getTranslator()->transTime($this->getThrottleTime());
+        return Duration::spell($this->getThrottleTime(), Runtime::translations());
     }
 
     public function setThrottleTime(DateTimeInterface $allowAt): self
