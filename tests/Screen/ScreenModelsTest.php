@@ -112,4 +112,36 @@ final class ScreenModelsTest extends TestCase
         self::assertSame('2026-05-11T08:00:00+00:00', Shape::moment('2026-05-11 08:00:00'));
         self::assertSame('2026-05-11T08:00:00+00:00', Shape::moment(new \DateTimeImmutable('2026-05-11 17:00:00', new \DateTimeZone('Asia/Tokyo'))));
     }
+
+    /** A link dates itself only where a page shows the date (a member's latest threads): the blog's links keep their three fields. */
+    public function testALinkIsDatedOnlyWhereAPageShowsTheDate(): void
+    {
+        self::assertSame(['title', 'url', 'state'], array_keys((new Link('A', '/a', 'STATE_PUBLISH'))->toArray()));
+        self::assertSame(['title' => 'A', 'url' => '/a', 'state' => 'STATE_PUBLISH', 'publishedAt' => '2026-04-08T18:00:00+00:00'], (new Link('A', '/a', 'STATE_PUBLISH', '2026-04-08T18:00:00+00:00'))->toArray());
+    }
+
+    /**
+     * The account's screens (C5, its second part): the props of each page by
+     * their names; nothing counted is null where a page has no count (a
+     * profile's passkeys where passkeys are off); a page carrying tokens is
+     * confidential; a notification's group is one of four days.
+     */
+    public function testTheAccountsScreensSayWhatTheyHave(): void
+    {
+        $member = new \Base\Screen\Account\Member(1, 'anne');
+        self::assertSame(['id', 'name', 'avatar', 'avatarHtml', 'roles', 'online', 'active', 'registeredAt', 'lastSeenAt', 'threads', 'likes'], array_keys($member->toArray()));
+        self::assertSame(['member', 'own', 'recent', 'account', 'editUrl', 'settingsUrl', 'logoutUrl'], array_keys((new \Base\Screen\Account\ProfilePage($member))->toArray()));
+        self::assertSame(['twoFactor' => null, 'passkeys' => null, 'identityProvider' => null, 'locale' => null, 'timezone' => null], (new \Base\Screen\Account\AccountSummary())->toArray(), 'not available: null, never 0 nor false');
+        $settings = new \Base\Screen\Account\SettingsPage();
+        self::assertSame(['name', 'demo', 'twoFactor', 'passkeys', 'identifier', 'providers', 'sessions', 'language', 'timezone'], array_keys($settings->toArray()));
+        self::assertSame([], array_intersect(array_keys($settings->toArray()), Frame::RESERVED), 'no key of the frame\'s');
+        self::assertInstanceOf(\Base\Screen\Confidential::class, $settings);
+        $notifications = new \Base\Screen\Account\NotificationsPage([], 0, false, '/n', 't', '/r', '/l', '/d', '/s', '/u');
+        self::assertInstanceOf(\Base\Screen\Confidential::class, $notifications);
+        self::assertSame([], array_intersect(array_keys($notifications->toArray()), Frame::RESERVED));
+        self::assertNotInstanceOf(\Base\Screen\Confidential::class, new \Base\Screen\Account\ProfilePage($member));
+        self::assertSame(['url' => '/x', 'token' => 'y'], (new \Base\Screen\Account\Action('/x', 'y'))->toArray());
+        $this->expectException(\InvalidArgumentException::class);
+        new \Base\Screen\Account\Notification(1, group: 'tomorrow');
+    }
 }

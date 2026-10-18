@@ -49,6 +49,9 @@
  * 743 with the Tokens contract (+2: Base\Contract\Tokens, a form's token for an intent, and its Symfony side,
  * Base\Bridge\Symfony\CsrfTokens, which names the CSRF token manager and loads none of it).
  * 744 with Base\Screen\Confidential (+1: the marker of a screen carrying its viewer's secrets).
+ * 756 with step C5's account view models (+12: Base\Screen\Account\* - ProfilePage, Member, AccountSummary,
+ * SettingsPage, TwoFactor, Passkey, Session, Provider, Action, NotificationsPage, Notification - and their builder
+ * Base\Screen\Builder\Accounts).
  */
 
 return [
@@ -544,7 +547,19 @@ return [
     Base\Repository\User\TokenRepository::class,
     Base\Routing\AdminUrlGeneratorInterface::class,
     Base\Routing\NullAdminUrlGenerator::class,
+    Base\Screen\Account\AccountSummary::class,
+    Base\Screen\Account\Action::class,
+    Base\Screen\Account\Member::class,
+    Base\Screen\Account\Notification::class,
+    Base\Screen\Account\NotificationsPage::class,
+    Base\Screen\Account\Passkey::class,
+    Base\Screen\Account\ProfilePage::class,
+    Base\Screen\Account\Provider::class,
+    Base\Screen\Account\Session::class,
+    Base\Screen\Account\SettingsPage::class,
+    Base\Screen\Account\TwoFactor::class,
     Base\Screen\Author::class,
+    Base\Screen\Builder\Accounts::class,
     Base\Screen\Builder\Stories::class,
     Base\Screen\Card::class,
     Base\Screen\Comment::class,

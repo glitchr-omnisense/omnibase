@@ -224,6 +224,46 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The account's screens where there is no framework (plan "omnibase agnostique", C5, the account's
+     * part): tests/Screen/accounts-without-framework.php, run by bare with the autoloader alone, gives
+     * plain Urls, Tokens and a clock, turns omnibase's own Notification into the notifications' page
+     * (the days' groups by the clock, in a time zone given), and makes the profile's and the settings'
+     * models. Nothing of the framework is loaded. (A Base\Entity\User loads Security's and scheb/2fa's
+     * interfaces, so Accounts::profile() and settings() are proven by the harness's
+     * AccountPagesSnapshotTest, from real accounts.)
+     */
+    public function testTheAccountScreensAreBuiltWithoutTheFramework(): void
+    {
+        $script = __DIR__.'/Screen/accounts-without-framework.php';
+        [$status, $report] = self::bare([$script]);
+
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        $result = $run['result'];
+
+        self::assertSame(['member', 'own', 'recent', 'account', 'editUrl', 'settingsUrl', 'logoutUrl'], array_keys($result['profile']));
+        self::assertSame(['id' => 12, 'name' => 'anne@example.org', 'avatar' => '/uploads/avatars/anne.jpg?w=128', 'avatarHtml' => null, 'roles' => ['ROLE_USER'], 'online' => false, 'active' => false, 'registeredAt' => '2025-11-02T10:20:00+00:00', 'lastSeenAt' => null, 'threads' => 2, 'likes' => 0], $result['profile']['member']);
+        self::assertSame([['title' => 'Le club de lecture', 'url' => '/bbs/le-club-de-lecture', 'state' => 'STATE_PUBLISH', 'publishedAt' => '2026-04-08T18:00:00+00:00']], $result['profile']['recent']);
+        self::assertSame(['twoFactor' => true, 'passkeys' => 0, 'identityProvider' => null, 'locale' => 'fr-FR', 'timezone' => 'Europe/Paris'], $result['profile']['account']);
+        self::assertSame('/user/profileEdit/12', $result['profile']['editUrl']);
+
+        $settings = $result['settings'];
+        self::assertSame(['name', 'demo', 'twoFactor', 'passkeys', 'identifier', 'providers', 'sessions', 'language', 'timezone'], array_keys($settings));
+        self::assertSame(['url' => '/user/settings/2fa/email/toggle', 'token' => 'token-of-2fa_email'], $settings['twoFactor']['emailToggle']);
+        self::assertSame(['url' => '/user/settings/session/logout/3', 'token' => 'token-of-session_logout'], $settings['sessions'][0]['logout']);
+        self::assertSame([true, false], $result['confidential'], 'the settings carry tokens, the profile none');
+
+        $notifications = $result['notifications'];
+        self::assertSame([['id' => 5, 'title' => 'Nouvelle réponse', 'content' => 'Paul a répondu.', 'url' => '/bbs/le-club-de-lecture', 'adminUrl' => null, 'importance' => 'default', 'isRead' => false, 'sentAt' => '2026-04-10T18:05:00+00:00', 'group' => 'yesterday'], ['id' => 4, 'title' => 'Bienvenue', 'content' => null, 'url' => null, 'adminUrl' => null, 'importance' => 'low', 'isRead' => true, 'sentAt' => '2026-03-30T07:00:00+00:00', 'group' => 'earlier']], $notifications['notifications']);
+        self::assertSame(['token-of-notifications', '/user/notifications', '/user/notifications/read', false, null], [$notifications['token'], $notifications['allUrl'], $notifications['readUrl'], $notifications['push'], $notifications['pushKey']]);
+        self::assertSame(['today', 'yesterday', 'week', 'earlier'], $result['groups'], 'the days are Tokyo\'s: 10:00 and 23:00 there, the week, before it');
+        self::assertStringStartsWith('{"member":{"id":12,', $result['json']);
+    }
+
+    /**
      * Runs docker/bin/bare apart, on the autoloader of this run.
      *
      * @param list<string> $classes none: the Fondation
