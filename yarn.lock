@@ -2201,9 +2201,9 @@
   integrity sha512-4eoAeWAj5DE6Q3CfxOhqo8RXY4pWQH2Z2T/qyl5wJfjCJZ7W2LUR7PUzGoCT41bS4+aSG3d/EvN0VoQnfiOFBQ==
 
 "editorjs-paragraph@^1.0":
-  version "1.0.22"
-  resolved "https://registry.npmjs.org/editorjs-paragraph/-/editorjs-paragraph-1.0.22.tgz"
-  integrity sha512-VoC5hfVRy8kAzB5+hxTyCMFNi/nJ9mmqPcUhQHw+76kNW/+DxqIkF29dsbfZi2jpnuKUIwtTz/276dsRuODmWA==
+  version "1.0.23"
+  resolved "https://registry.npmjs.org/editorjs-paragraph/-/editorjs-paragraph-1.0.23.tgz"
+  integrity sha512-YdT6ZSxmFr8xcqfg8Vx9TlMI2HlMwiEmTCbbdsnMZkqHPVcgKNR9HSTp395cK05ZAyCixkeqMyGyHz1qusgvOg==
 
 "editorjs-undo@^2.0":
   version "2.0.28"
