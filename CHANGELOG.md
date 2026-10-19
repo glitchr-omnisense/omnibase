@@ -129,6 +129,27 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: the users' repository loads without Security (step R2)
+- **`Base\Repository\UserRepository` implements `Base\Contract\SecurityUserLoader` and
+  `Base\Contract\SecurityUserProvider`** instead of doctrine-bridge's `UserLoaderInterface` and
+  Security's `UserProviderInterface` and `PasswordUpgraderInterface` (audit "lesringostars face
+  au master plan", R2: the last hard seam between the core and Security on the way of a Laravel
+  application reading a site's `App\Repository`). Where symfony/doctrine-bridge, resp.
+  symfony/security-core, is installed, each contract is an alias of `Base\Bridge\Symfony\
+  SecurityUserLoader` (the loader), resp. `SecurityUserProvider` (the provider and the password
+  upgrader): under Symfony the repository implements exactly what it did (a site's
+  `App\Repository\UserRepository`, the firewalls' entity provider, `instanceof` unchanged);
+  elsewhere empty interfaces, and the repository loads without them. Two contracts, not one: an
+  interface cannot extend both the loader and the provider (`loadUserByIdentifier()` answers
+  `?UserInterface` in one, `UserInterface` in the other), a class implements both. Installed
+  means declared, as for `Base\Entity\User` (C7b, C7c, `Base\Contract\Framework::declares()`).
+  The methods and their signatures are unchanged: PHP does not load the Security types they name
+  to declare them.
+- Tests: `BareTest` - the repository loads nothing of the framework where it is not installed, and
+  on the run's vendor names the three interfaces, each asked by its contract;
+  `SuggestedBundlesTest` - the repository implements the three under Symfony. Fondation 774 -> 777
+  (`Base\Repository\UserRepository`, `Base\Contract\{SecurityUserLoader, SecurityUserProvider}`).
+
 ### Changed: the Symfony adapters of the host's contracts are omnibridge/symfony's (step A1)
 - **omnibridge/symfony holds code** (`Omnibridge\Symfony\`, the mirror of omnibridge/laravel's
   `Omnibridge\Laravel\`): the adapters that answer omniscient/omnibridge's contracts with

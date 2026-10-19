@@ -97,7 +97,13 @@ class and the storages load without either:
   but the methods the user has. Without the bundle registered (the package installed) the
   interfaces are still declared: only the two-factor sign-in itself is the bundle's. Where
   the framework is not installed is measured on such a vendor: `bare` loads the Fondation
-  with the core installed alone (`composer install --no-dev`, see the harness).
+  with the core installed alone (`composer install --no-dev`, see the harness). The users'
+  repository follows the same rule (step R2): `Base\Repository\UserRepository` implements
+  `Base\Contract\SecurityUserLoader` and `SecurityUserProvider`, aliases of
+  `Base\Bridge\Symfony\SecurityUserLoader` (doctrine-bridge's `UserLoaderInterface`) and
+  `SecurityUserProvider` (Security's `UserProviderInterface` and `PasswordUpgraderInterface`)
+  where symfony/doctrine-bridge and symfony/security-core are installed, empty interfaces
+  elsewhere.
 - **league/flysystem-bundle** - `Base\Service\Flysystem` (the `flysystem` service, which the
   file, image, upload, backup and cache-clear services read) is the core's own class, built from
   a PSR-11 container of storages by name: the services tagged `flysystem.storage`, which the

@@ -96,6 +96,10 @@
  * which the Fondation does not install; their former names (Base\Bridge\Symfony\*) are aliases declared only where
  * omnibridge/symfony is (src/Resources/Aliases.php). The moved classes load nothing of the framework either.
  * omnibase's own adapters (LocalizerLocales, FlysystemFiles, RouterRoutes, MediaPictures...) stay listed.
+ * 777 after step R2 of the audit "lesringostars face au master plan" (+3: Base\Repository\UserRepository, which
+ * declares Security's user provider and doctrine-bridge's user loader through Base\Contract\SecurityUserProvider
+ * and SecurityUserLoader - those interfaces when they are installed, empty ones otherwise, as
+ * Base\Contract\SecurityUser for the user -, and those two contracts).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -145,6 +149,8 @@ return [
     Base\Contract\Routes::class,
     Base\Contract\Runtime::class,
     Base\Contract\SecurityUser::class,
+    Base\Contract\SecurityUserLoader::class,
+    Base\Contract\SecurityUserProvider::class,
     Base\Contract\Sessions::class,
     Base\Contract\SystemClock::class,
     Base\Contract\Texts::class,
@@ -582,6 +588,7 @@ return [
     Base\Repository\Thread\MentionRepository::class,
     Base\Repository\Thread\TagRepository::class,
     Base\Repository\Thread\TaxonRepository::class,
+    Base\Repository\UserRepository::class,
     Base\Repository\User\AddressRepository::class,
     Base\Repository\User\Attribute\Action\GrantPermissionAdapterRepository::class,
     Base\Repository\User\Attribute\Action\GrantRoleAdapterRepository::class,

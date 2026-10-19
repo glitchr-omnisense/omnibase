@@ -73,9 +73,10 @@ final class BareTest extends TestCase
 
     /**
      * The check is not blind: the same report, for the bundle and the users' repository, names the
-     * framework and who asked for it. The users' repository is the framework's by its interfaces
-     * (Security's user provider); since step C3b its parent, omnibase's ServiceEntityRepository, is
-     * doctrine/orm's EntityRepository and no longer brings DoctrineBundle.
+     * framework and who asked for it. Where Security is installed (this run's vendor) the users'
+     * repository declares its interfaces (Security's user provider, doctrine-bridge's user loader)
+     * through Base\Contract\SecurityUserProvider and SecurityUserLoader (audit R2); since step C3b its parent, omnibase's
+     * ServiceEntityRepository, is doctrine/orm's EntityRepository and no longer brings DoctrineBundle.
      */
     public function testAClassOfTheFrameworkIsNamed(): void
     {
@@ -88,7 +89,16 @@ final class BareTest extends TestCase
         self::assertNotEmpty(preg_grep('~/symfony/http-kernel/~', $bundle['framework_files']));
 
         $repository = $report['classes'][UserRepository::class];
-        self::assertSame(UserRepository::class, $repository['framework']['Symfony\\Component\\Security\\Core\\User\\UserProviderInterface'] ?? null);
+        self::assertNull($repository['error']);
+        self::assertSame([
+            'Symfony\\Bridge\\Doctrine\\Security\\User\\UserLoaderInterface' => 'Base\\Contract\\SecurityUserLoader',
+            'Symfony\\Component\\Security\\Core\\User\\PasswordUpgraderInterface' => 'Base\\Contract\\SecurityUserProvider',
+            'Symfony\\Component\\Security\\Core\\User\\UserProviderInterface' => 'Base\\Contract\\SecurityUserProvider',
+        ], array_intersect_key($repository['framework'], array_flip([
+            'Symfony\\Bridge\\Doctrine\\Security\\User\\UserLoaderInterface',
+            'Symfony\\Component\\Security\\Core\\User\\PasswordUpgraderInterface',
+            'Symfony\\Component\\Security\\Core\\User\\UserProviderInterface',
+        ])));
         self::assertNotEmpty(preg_grep('~/symfony/security-core/~', $repository['framework_files']));
         self::assertArrayNotHasKey('Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository', $repository['framework']);
         self::assertSame([], preg_grep('~/doctrine/doctrine-bundle/~', $repository['framework_files']));
@@ -149,6 +159,22 @@ final class BareTest extends TestCase
             'Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInterface' => 'Base\\Contract\\SecurityUser',
             'Symfony\\Component\\Security\\Core\\User\\UserInterface' => 'Base\\Contract\\SecurityUser',
         ], $user['framework']);
+    }
+
+    /**
+     * Base\Repository\UserRepository where the framework is not installed (audit "lesringostars face au
+     * master plan", R2): its Base\Contract\SecurityUserProvider and SecurityUserLoader are empty interfaces, and loading it
+     * loads nothing of the framework - the last hard seam between the core and Security on the way of
+     * a Laravel application reading a site's App\Repository.
+     */
+    public function testTheUsersRepositoryLoadsWhereTheFrameworkIsNotInstalled(): void
+    {
+        [$status, $report] = self::bare([UserRepository::class]);
+        self::assertSame(0, $status);
+        $repository = $report['classes'][UserRepository::class];
+        self::assertNull($repository['error']);
+        self::assertSame([], $repository['framework']);
+        self::assertSame([], $repository['framework_files']);
     }
 
     /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
