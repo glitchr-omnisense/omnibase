@@ -310,6 +310,13 @@ compared under Symfony with the service it replaces, and run where there is no f
   `HandBuiltEntityManagerTest` recorded again, its values the same (110 `cache` arrays of 85 classes reordered,
   nothing else).
 
+### Fixed: the editor's paragraphs no longer break a line before a colon
+- **editorjs-paragraph 1.0.23** (`yarn.lock`, from 1.0.22): French typography's non-breaking
+  spaces. The space before `:` `;` `!` `?` `»` and after `«` becomes U+00A0 as it is typed, when
+  a paragraph is drawn and in the saved HTML (`&nbsp;`), so the editor no longer puts a colon
+  alone at the start of a line. An article written before is corrected once opened and saved
+  again. The tool's option `nonBreakingSpaces: false` turns it off.
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming
