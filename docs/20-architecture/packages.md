@@ -91,11 +91,13 @@ class and the storages load without either:
   `PasswordAuthenticatedUserInterface`) and `Base\Bridge\Symfony\TwoFactorUser` (scheb's
   TOTP, e-mail, backup-code and trusted-device interfaces): under Symfony the user implements
   exactly what it did. Elsewhere they are empty interfaces, and the user loads without them.
-  A host that holds those packages but runs without the framework (a Laravel application
-  reading a Symfony application's `vendor/`) says so with `OMNIBASE_FRAMEWORK=none` or
-  `Base\Contract\Framework::without()` before the user is loaded. Without the bundle
-  registered (the package installed) the interfaces are still declared: only the two-factor
-  sign-in itself is the bundle's.
+  Installed means declared, and nothing else decides (`Base\Contract\Framework::declares()`,
+  step C7c): no environment variable, no switch - a Laravel application reading a Symfony
+  application's `vendor/` gets the user with Security's interfaces, which ask nothing of it
+  but the methods the user has. Without the bundle registered (the package installed) the
+  interfaces are still declared: only the two-factor sign-in itself is the bundle's. Where
+  the framework is not installed is measured on such a vendor: `bare` loads the Fondation
+  with the core installed alone (`composer install --no-dev`, see the harness).
 - **league/flysystem-bundle** - `Base\Service\Flysystem` (the `flysystem` service, which the
   file, image, upload, backup and cache-clear services read) is the core's own class, built from
   a PSR-11 container of storages by name: the services tagged `flysystem.storage`, which the

@@ -53,10 +53,10 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   where those packages are installed, the contracts are aliases of
   `Base\Bridge\Symfony\SecurityUser` and `TwoFactorUser`, which extend exactly those
   interfaces (a site's `App\Entity\User` is unchanged: same class, table, mapping, methods,
-  and `instanceof` answers as before); elsewhere, empty interfaces. `Base\Contract\Framework`:
-  a host holding those packages but running without the framework says so
-  (`OMNIBASE_FRAMEWORK=none`, or `Framework::without()` before the user is loaded);
-  `docker/bin/bare` does. `getTotpAuthenticationConfiguration()` answers null without
+  and `instanceof` answers as before); elsewhere, empty interfaces. Installed means declared,
+  nothing else decides (`Base\Contract\Framework::declares()`; step C7c removed the
+  `OMNIBASE_FRAMEWORK` variable and `Framework::without()` C7b had added: a vendor without
+  the framework is how a host is without it). `getTotpAuthenticationConfiguration()` answers null without
   scheb/2fa. `Base\Service\Flysystem` no longer extends league/flysystem-bundle's
   `LazyFactory`: its constructor takes a PSR-11 container of storages, the service `flysystem`
   (and `FlysystemInterface`) is built from `tagged_locator('flysystem.storage', 'storage')` -
@@ -67,8 +67,8 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   "required de facto". Tests: `SuggestedBundlesTest` leaves out `SchebTwoFactorBundle` and
   `FlysystemBundle` too (the `flysystem` service on the local storages), the user implements
   the six interfaces under Symfony, `Flysystem` built from a plain locator; `BareTest`: the
-  user loads nothing of the framework, and measured as under Symfony
-  (`OMNIBASE_FRAMEWORK=symfony`) names the six. Fondation 758 -> 763 (`Base\Entity\User`,
+  user loads nothing of the framework where it is not installed (`var/bare/vendor`, step C7c),
+  and on the run's vendor, where it is, names the six. Fondation 758 -> 763 (`Base\Entity\User`,
   `Base\Service\Flysystem`, `Base\Contract\{Framework, SecurityUser, TwoFactorUser}`).
 - `extra.branch-alias`: `dev-4.x` is `4.0.x-dev`.
 - **PHP 8.4 at least** (`"php": "^8.4"`, from `^8.2`): doctrine/collections 3.1 requires it, so `^8.2` announced
@@ -110,6 +110,14 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   core's own) and `/`. `bare` on a `composer install --no-dev` of the core alone: the
   Fondation (758 classes) loads nothing of the framework, and none of it is installed but
   `symfony/console` (doctrine/orm's).
+- **`bare` measures where the framework is not installed** (step C7c): on `var/bare/vendor`,
+  the core installed alone by `composer install --no-dev` (`bare --install`, its autoload
+  pointed at the checkout's `src/`, made again when `composer.json` changes; `demo.sh` runs
+  it before `bare` and the core's suite), no longer on the harness's vendor with a variable
+  saying the framework is absent. `BareTest` measures the Fondation and the user there (and
+  checks that vendor holds no package of the framework, `symfony/console` aside), skipped
+  where it was not made (an application's suite); the user on the run's vendor declares the
+  six interfaces.
 - The harness: `docker/Dockerfile` requires `omniscient/omnibase:4.x-dev as 4.0.x-dev`,
   omnibridge/symfony and every bundle `docker/app/config/bundles.php` registers (`BUNDLES`);
   the root `Dockerfile` (the small demo) omnibridge/symfony and its bundles.

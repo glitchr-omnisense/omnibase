@@ -55,8 +55,8 @@
  * Twig function account_profile(), Base\Twig\Extension\AccountTwigExtension, which name the framework and load
  * none of it).
  * 763 after step C7b (+5: Base\Entity\User, which declares Security's and scheb/2fa's interfaces through
- * Base\Contract\SecurityUser and TwoFactorUser - those interfaces when they are installed and the host runs
- * the framework, empty ones otherwise, which bare measures as a host without it, see Base\Contract\Framework -,
+ * Base\Contract\SecurityUser and TwoFactorUser - those interfaces when they are installed, empty ones otherwise,
+ * which bare measures on a vendor without the framework (C7c: var/bare/vendor), see Base\Contract\Framework -,
  * Base\Contract\Framework itself, and Base\Service\Flysystem, no longer league/flysystem-bundle's LazyFactory).
  * 767 after step C4b's nouns (+4: the contracts Base\Contract\Translations - omnibridge/twig's and exists() - and
  * Nouns, what an entity is called, and its rule Base\Service\Model\EntityNouns with the keys it tries,

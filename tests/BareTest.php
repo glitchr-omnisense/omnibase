@@ -17,6 +17,18 @@ use PHPUnit\Framework\TestCase;
  * Platform, the third-party bundles. The standalone Symfony components,
  * Doctrine and Twig are allowed (plan "omnibase agnostique", §0, D1, D2, D4).
  *
+ * The Fondation is measured where the framework is not installed (plan
+ * "omnibase agnostique", C7c): on var/bare/vendor, the core installed alone by
+ * `composer install --no-dev` (docker/bin/bare --install, which the harness's
+ * demo.sh runs before this suite), not on this run's vendor, where Symfony
+ * and the bundles are - a class declares what is installed (Base\Entity\User,
+ * Security's and scheb/2fa's interfaces) -, and so are the repository and the
+ * scripts run "without the framework". Where that vendor was not made (an
+ * application's suite reading this package in its vendor/) those cases are
+ * skipped, saying so. The two that show the check is not blind (the bundle,
+ * the users' repository, the user's interfaces) run on this run's vendor,
+ * where the framework is installed.
+ *
  * The Fondation only grows: a class leaves it only by a decision written
  * down in the plan and in CHANGELOG.md.
  */
@@ -67,7 +79,7 @@ final class BareTest extends TestCase
      */
     public function testAClassOfTheFrameworkIsNamed(): void
     {
-        [$status, $report] = self::bare([BaseBundle::class, UserRepository::class]);
+        [$status, $report] = self::bare([BaseBundle::class, UserRepository::class], self::withTheFramework());
 
         self::assertSame(1, $status);
         $bundle = $report['classes'][BaseBundle::class];
@@ -83,14 +95,32 @@ final class BareTest extends TestCase
     }
 
     /**
-     * Base\Entity\User loads without the framework and without scheb/2fa (plan "omnibase agnostique",
-     * C7b): bare is a host without the framework (OMNIBASE_FRAMEWORK=none, as a Laravel application
-     * says), and the user's Base\Contract\SecurityUser and TwoFactorUser are then empty interfaces,
-     * although Security and scheb/2fa are installed here. The same class measured as Symfony loads it
-     * (OMNIBASE_FRAMEWORK=symfony) names Security's two interfaces and scheb/2fa's four: the check
-     * is not blind, and the interfaces are still declared where the framework runs.
+     * The vendor the Fondation is measured on holds nothing of the framework (plan "omnibase
+     * agnostique", C7c): none of Symfony's framework packages, no bundle, not omnibridge/symfony,
+     * security-core nor scheb/2fa - symfony/console aside, which doctrine/orm requires and no class
+     * of the Fondation loads; composer/ca-bundle, certificates, is no bundle -, and the classes
+     * measured are this checkout's src/.
      */
-    public function testTheUserLoadsWithoutTheFrameworkAndDeclaresItsInterfacesUnderIt(): void
+    public function testTheFondationIsMeasuredOnAVendorWithoutTheFramework(): void
+    {
+        $autoload = self::withoutTheFramework();
+        $installed = json_decode((string) file_get_contents(\dirname($autoload).'/composer/installed.json'), true);
+        $names = array_column($installed['packages'] ?? $installed, 'name');
+
+        self::assertContains('doctrine/orm', $names);
+        self::assertContains('twig/twig', $names);
+        self::assertSame([], array_values(preg_grep('~^(?:omnibridge/symfony|symfony/(?:framework-bundle|dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|(?!composer/ca-bundle$)[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/.+|hwi/.+|scheb/.+|nelmio/.+|web-auth/webauthn-symfony-bundle)$~', $names)), 'no package of the framework is installed');
+        // The map read, not the autoloader required: it is not to be registered in this process.
+        $psr4 = require \dirname($autoload).'/composer/autoload_psr4.php';
+        self::assertSame([realpath(__DIR__.'/../src')], array_map('realpath', $psr4['Base\\'] ?? []), 'the classes measured are this checkout\'s');
+    }
+
+    /**
+     * Base\Entity\User where the framework is not installed (plan "omnibase agnostique", C7b, C7c):
+     * its Base\Contract\SecurityUser and TwoFactorUser are empty interfaces, and loading it loads
+     * nothing of the framework.
+     */
+    public function testTheUserLoadsWhereTheFrameworkIsNotInstalled(): void
     {
         [$status, $report] = self::bare([\Base\Entity\User::class]);
         self::assertSame(0, $status);
@@ -98,8 +128,16 @@ final class BareTest extends TestCase
         self::assertNull($user['error']);
         self::assertSame([], $user['framework']);
         self::assertSame([], $user['framework_files']);
+    }
 
-        [$status, $report] = self::bare([\Base\Entity\User::class], ['OMNIBASE_FRAMEWORK' => 'symfony']);
+    /**
+     * Base\Entity\User where Security and scheb/2fa are installed (this run's vendor): it declares
+     * their interfaces, whoever loads it - here a PHP process with the autoloader alone, no kernel.
+     * Installed means declared (C7c): the check is not blind, and nothing but the vendor decides.
+     */
+    public function testTheUserDeclaresTheFrameworksInterfacesWhereTheyAreInstalled(): void
+    {
+        [$status, $report] = self::bare([\Base\Entity\User::class], self::withTheFramework());
         self::assertSame(1, $status);
         $user = $report['classes'][\Base\Entity\User::class];
         self::assertNull($user['error']);
@@ -259,9 +297,8 @@ final class BareTest extends TestCase
      * part): tests/Screen/accounts-without-framework.php, run by bare with the autoloader alone, gives
      * plain Urls, Tokens and a clock, turns omnibase's own Notification into the notifications' page
      * (the days' groups by the clock, in a time zone given), and makes the profile's and the settings'
-     * models. Nothing of the framework is loaded. (A Base\Entity\User loads Security's and scheb/2fa's
-     * interfaces, so Accounts::profile() and settings() are proven by the harness's
-     * AccountPagesSnapshotTest, from real accounts.)
+     * models. Nothing of the framework is loaded. (Accounts::profile() and settings() from real
+     * accounts are proven by the harness's AccountPagesSnapshotTest.)
      */
     public function testTheAccountScreensAreBuiltWithoutTheFramework(): void
     {
@@ -378,25 +415,48 @@ final class BareTest extends TestCase
     }
 
     /**
-     * Runs docker/bin/bare apart, on the autoloader of this run.
+     * The autoloader of var/bare/vendor, the core installed alone without the framework (docker/bin/bare
+     * --install); the case is skipped where it was not made.
+     */
+    private static function withoutTheFramework(): string
+    {
+        $autoload = __DIR__.'/../var/bare/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor without the framework here (var/bare/vendor): "docker/bin/bare --install" makes it, the harness does before this suite.');
+        }
+
+        return (string) realpath($autoload);
+    }
+
+    /**
+     * The autoloader of this run, the framework installed: the one that knows this package. Under
+     * symfony/phpunit-bridge's simple-phpunit (an application's suite) the first ClassLoader is
+     * PHPUnit's own, which knows no Base\ class.
+     */
+    private static function withTheFramework(): string
+    {
+        $autoload = \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2).'/autoload.php';
+        foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
+            if (false !== $loader->findFile(BaseBundle::class)) {
+                return $vendorDir.'/autoload.php';
+            }
+        }
+
+        return $autoload;
+    }
+
+    /**
+     * Runs docker/bin/bare apart, on the autoloader given, or the vendor without the framework.
      *
      * @param list<string> $classes none: the Fondation
      *
      * @return array{int, array<string, mixed>} the exit status, the report
      */
-    private static function bare(array $classes, array $env = []): array
+    private static function bare(array $classes, ?string $autoload = null): array
     {
-        // The autoloader that knows this package: under symfony/phpunit-bridge's simple-phpunit (an
-        // application's suite) the first ClassLoader is PHPUnit's own, which knows no Base\ class.
-        $autoload = \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2).'/autoload.php';
-        foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
-            if (false !== $loader->findFile(BaseBundle::class)) {
-                $autoload = $vendorDir.'/autoload.php';
-                break;
-            }
-        }
+        $autoload ??= self::withoutTheFramework();
         $output = (string) tempnam(sys_get_temp_dir(), 'bare');
-        $process = proc_open([\PHP_BINARY, __DIR__.'/../docker/bin/bare', '--json', ...$classes], [1 => ['file', $output, 'w'], 2 => ['pipe', 'w']], $pipes, null, $env + ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
+        $process = proc_open([\PHP_BINARY, __DIR__.'/../docker/bin/bare', '--json', ...$classes], [1 => ['file', $output, 'w'], 2 => ['pipe', 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
         self::assertIsResource($process);
         $err = (string) stream_get_contents($pipes[2]);
         $status = proc_close($process);

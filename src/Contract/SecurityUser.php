@@ -4,13 +4,13 @@ namespace Base\Contract;
 
 /*
  * What Base\Entity\User declares to a framework's security (plan "omnibase
- * agnostique", C7b): under Symfony, with symfony/security-core installed,
+ * agnostique", C7b): with symfony/security-core installed,
  * Base\Bridge\Symfony\SecurityUser - Security's UserInterface and
  * PasswordAuthenticatedUserInterface -, under this name; elsewhere (no
- * security-core, or a host that runs without the framework, see
- * Base\Contract\Framework) an interface that asks nothing. The user's methods
- * (getUserIdentifier(), getRoles(), getPassword(), eraseCredentials()) are
- * the same either way: only what PHP checks them against changes.
+ * security-core installed, see Base\Contract\Framework) an interface that
+ * asks nothing. The user's methods (getUserIdentifier(), getRoles(),
+ * getPassword(), eraseCredentials()) are the same either way: only what PHP
+ * checks them against changes.
  *
  * Declared at the file's level, not as a class of its own: the autoloader
  * loads this file once, when the user is loaded, and the choice is made then.

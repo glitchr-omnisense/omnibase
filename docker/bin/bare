@@ -14,6 +14,22 @@
  *   docker compose run --rm omnibase bare --json                # the same, whole, as JSON
  *   docker compose run --rm omnibase bare --names               # informative: the classes of the Fondation that name the framework
  *   docker compose run --rm omnibase bare path/to/script.php    # a script run with the autoloader alone (what it returns is in --json)
+ *   docker compose run --rm omnibase bare --install             # makes (or refreshes) the vendor without the framework, then exits
+ *
+ * Where the framework is absent (plan "omnibase agnostique", C7c): the classes
+ * are loaded with the autoloader of var/bare/vendor, the core installed alone
+ * by `composer install --no-dev` - its composer.json as it is, its require-dev
+ * not installed, so none of Symfony's framework packages (omnibridge/symfony, the
+ * bundles, security-core, scheb/2fa...) is there, symfony/console aside
+ * (doctrine/orm's). What a class declares then is what it declares where the
+ * framework is not installed: Base\Entity\User's contracts are empty
+ * interfaces there, and Security's and scheb/2fa's where they are installed
+ * (Base\Contract\Framework: installed means declared, nothing else decides).
+ * --install makes that vendor, and makes it again when the core's
+ * composer.json changed since (demo.sh runs it before `bare` and the core's
+ * suite). Without it, or with OMNIBASE_AUTOLOAD naming another autoloader,
+ * the classes are measured on that vendor (the core's own vendor/, or the host
+ * application's), whatever it holds: the report names the autoloader.
  *
  * --each loads every class in a fresh process (exact for each class, slower);
  * without it the classes are loaded one after the other in this process, and
@@ -45,25 +61,18 @@
 // A notice or a deprecation goes to the error output, not into the report.
 ini_set('display_errors', 'stderr');
 
-// A host without the framework, as a Laravel application is: it says so (Base\Contract\Framework,
-// plan "omnibase agnostique", C7b), and Base\Entity\User then declares none of the framework's
-// interfaces, even where they are installed (this harness, an application's vendor).
-// OMNIBASE_FRAMEWORK=symfony measures a class as it loads under Symfony instead.
-if (false === getenv('OMNIBASE_FRAMEWORK')) {
-    putenv('OMNIBASE_FRAMEWORK=none');
-}
-
 // A namespace segment ending in Bundle is a bundle's - except symfony/intl's resource readers
 // (Symfony\Component\Intl\Data\Bundle\...), a standalone component's (plan, C3e).
 const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
 const FRAMEWORK_FILES = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
 
-$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false];
+$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false, 'install' => false];
 $classes = [];
 foreach (array_slice($argv, 1) as $argument) {
     if (in_array($argument, ['-h', '--help'], true)) {
         echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Fondation (tests/Fondation.php), loaded with Composer's autoloader alone.\n";
         echo "bare --names [--all] [--json] [class...]: informative, not a guard: which of those classes name the framework in their use lines or code, themselves or through the Base\\ classes they name.\n";
+        echo "bare --install: makes var/bare/vendor, the core installed alone by composer install --no-dev, where the classes are then loaded (again when composer.json changed).\n";
         exit(0);
     }
     if (str_starts_with($argument, '--') && isset($options[substr($argument, 2)])) {
@@ -74,12 +83,15 @@ foreach (array_slice($argv, 1) as $argument) {
 }
 
 $core = dirname(__DIR__, 2);
+if ($options['install']) {
+    exit(install_bare_vendor($core));
+}
 $autoload = getenv('OMNIBASE_AUTOLOAD') ?: null;
-foreach ([$core.'/vendor/autoload.php', $core.'/../../autoload.php'] as $candidate) {
+foreach ([$core.'/var/bare/vendor/autoload.php', $core.'/vendor/autoload.php', $core.'/../../autoload.php'] as $candidate) {
     $autoload ??= is_file($candidate) ? realpath($candidate) : null;
 }
 if (null === $autoload) {
-    fwrite(STDERR, "No Composer autoloader found (vendor/autoload.php, or the host application's): run \"composer install\", or set OMNIBASE_AUTOLOAD.\n");
+    fwrite(STDERR, "No Composer autoloader found (var/bare/vendor, vendor/autoload.php, or the host application's): run \"bare --install\" or \"composer install\", or set OMNIBASE_AUTOLOAD.\n");
     exit(2);
 }
 
@@ -128,6 +140,52 @@ foreach ($failed as $class => $result) {
 }
 printf("\n%d without the framework, %d with it or not loaded.\n", count($classes) - count($failed), count($failed));
 exit($failed || $report['baseline']['symbols'] ? 1 : 0);
+
+/**
+ * Makes var/bare: the core's composer.json as it is, its autoload pointed back
+ * at the checkout's src/ (what is measured is the code being worked on, not a
+ * copy), installed by `composer install --no-dev`. Again only when the
+ * composer.json it would write changed (the core's requirements did) or the
+ * vendor is missing. Composer's output goes to the error output.
+ */
+function install_bare_vendor(string $core): int
+{
+    $dir = $core.'/var/bare';
+    $composer = json_decode((string) file_get_contents($core.'/composer.json'), true, 512, JSON_THROW_ON_ERROR);
+    unset($composer['autoload-dev']);
+    $composer['autoload']['psr-4'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['psr-4'] ?? []);
+    $composer['autoload']['files'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['files'] ?? []);
+    $json = json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n";
+
+    // composer.installed.json: the composer.json of the last install that succeeded.
+    if (is_file($dir.'/vendor/autoload.php') && $json === @file_get_contents($dir.'/composer.installed.json')) {
+        fwrite(STDERR, "var/bare/vendor is up to date (the core installed alone, --no-dev).\n");
+
+        return 0;
+    }
+    if (!is_dir($dir) && !mkdir($dir, 0777, true)) {
+        fwrite(STDERR, "Cannot make $dir.\n");
+
+        return 2;
+    }
+    file_put_contents($dir.'/composer.json', $json);
+    @unlink($dir.'/composer.lock');
+    // The root package is this branch of the core (its branch alias), whatever git says from var/bare.
+    $version = array_values($composer['extra']['branch-alias'] ?? [])[0] ?? null;
+    $process = proc_open(['composer', 'install', '--no-dev', '--no-interaction', '--no-progress', '--working-dir='.$dir], [1 => STDERR, 2 => STDERR], $pipes, $dir, (null === $version ? [] : ['COMPOSER_ROOT_VERSION' => $version]) + getenv());
+    if (!is_resource($process)) {
+        fwrite(STDERR, "Composer could not be run: it is needed on the PATH to make var/bare/vendor.\n");
+
+        return 2;
+    }
+
+    $status = proc_close($process);
+    if (0 === $status) {
+        file_put_contents($dir.'/composer.installed.json', $json);
+    }
+
+    return $status;
+}
 
 /**
  * Loads the classes one after the other in this process.

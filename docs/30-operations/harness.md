@@ -89,6 +89,19 @@ docker compose run --rm omnibase bare --names              # informative: the cl
 docker compose run --rm omnibase bare vendor/omniscient/omnibase/tests/Contract/runtime-without-framework.php   # a script, with the autoloader alone
 ```
 
+**Where the framework is not installed** (plan "omnibase agnostique", C7c): the
+classes are loaded with the autoloader of `var/bare/vendor`, the core installed
+alone by `composer install --no-dev` - its `composer.json` as it is, its
+autoload pointed back at the checkout's `src/` - so none of Symfony's framework
+packages is there (`symfony/console` aside, doctrine/orm's). `bare --install`
+makes it, and makes it again when `composer.json` changed; `demo.sh` runs it
+before `bare` and before the core's suite, whose `BareTest` measures the
+Fondation there (skipped in an application's suite, where it was not made).
+A class declares what is installed: `Base\Entity\User`'s contracts are empty
+interfaces there, Security's and scheb/2fa's on the harness's own vendor
+(`BareTest` checks both). `OMNIBASE_AUTOLOAD` names another autoloader to
+measure on.
+
 What is checked is what loading a class loads - its parents, interfaces,
 traits, what its file runs - not what its methods do when called: an
 attribute's class, a type in a signature and a `new` in a method body load
