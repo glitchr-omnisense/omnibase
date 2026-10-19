@@ -15,7 +15,7 @@ namespace Base\Contract;
  * the two the core, its bundles and the sites ask for. A relative path and a
  * network path have no equivalent in the contract; they are asked of the
  * Urls implementation's own generate($name, $parameters, $referenceType)
- * when it has one (Base\Bridge\Symfony\RouterUrls: the router, as before),
+ * when it has one (omnibridge/symfony's Omnibridge\Symfony\RouterUrls: the router, as before),
  * and refused otherwise.
  */
 final class Link

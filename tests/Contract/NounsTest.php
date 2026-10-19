@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Contract;
 
-use Base\Bridge\Symfony\TranslatorTranslations;
+use Omnibridge\Symfony\TranslatorTranslations;
 use Base\Contract\Nouns;
 use Base\Contract\Runtime;
 use Base\Contract\Translations;

@@ -90,6 +90,12 @@
  * {Urls, Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment, SystemClock} and Base\Exception\
  * MissingContractException - are aliases declared with the autoloader (src/Resources/Aliases.php) and load the
  * moved classes, which stand on PHP and the PSRs alone; Base\Contract\Runtime extends omnibridge's registry.
+ * 774 after step A1 (-7, a decision of the step: the classes left the core): the adapters of the host's contracts
+ * over Symfony's own services and FileLinks moved to omnibridge/symfony (Omnibridge\Symfony\RouterUrls,
+ * TranslatorTranslations, FileLinks, Contract\{KernelEnvironment, SecurityAccess, SecuritySessions, CsrfTokens}),
+ * which the Fondation does not install; their former names (Base\Bridge\Symfony\*) are aliases declared only where
+ * omnibridge/symfony is (src/Resources/Aliases.php). The moved classes load nothing of the framework either.
+ * omnibase's own adapters (LocalizerLocales, FlysystemFiles, RouterRoutes, MediaPictures...) stay listed.
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -111,21 +117,14 @@ return [
     Base\Bridge\Doctrine\SchemaManagerFactory::class,
     Base\Bridge\Doctrine\Types::class,
     Base\Bridge\Symfony\AccountScreens::class,
-    Base\Bridge\Symfony\CsrfTokens::class,
-    Base\Bridge\Symfony\FileLinks::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
-    Base\Bridge\Symfony\KernelEnvironment::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\MediaPictures::class,
     Base\Bridge\Symfony\NotificationMessages::class,
     Base\Bridge\Symfony\RouterRoutes::class,
-    Base\Bridge\Symfony\RouterUrls::class,
     Base\Bridge\Symfony\ScreenResponder::class,
-    Base\Bridge\Symfony\SecurityAccess::class,
-    Base\Bridge\Symfony\SecuritySessions::class,
     Base\Bridge\Symfony\ServiceMedia::class,
     Base\Bridge\Symfony\SymfonyScreenContext::class,
-    Base\Bridge\Symfony\TranslatorTranslations::class,
     Base\Bridge\Symfony\WysiwygTexts::class,
     Base\Cache\Abstract\AbstractLocalCache::class,
     Base\Cache\Abstract\AbstractLocalCacheInterface::class,

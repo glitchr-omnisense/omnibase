@@ -129,6 +129,34 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: the Symfony adapters of the host's contracts are omnibridge/symfony's (step A1)
+- **omnibridge/symfony holds code** (`Omnibridge\Symfony\`, the mirror of omnibridge/laravel's
+  `Omnibridge\Laravel\`): the adapters that answer omniscient/omnibridge's contracts with
+  Symfony's own services and nothing of omnibase moved there - `Base\Bridge\Symfony\RouterUrls`
+  and `TranslatorTranslations` (`Omnibridge\Symfony\RouterUrls`, `TranslatorTranslations`),
+  `KernelEnvironment`, `SecurityAccess`, `SecuritySessions`, `CsrfTokens`
+  (`Omnibridge\Symfony\Contract\*`), and `FileLinks` (`Omnibridge\Symfony\FileLinks`) - with
+  their wiring: `config/services/core.php` imports omnibridge/symfony's `config/services.php`
+  (`OmnibridgeBundle::SERVICES`) and gives `RouterUrls` and `SecuritySessions` omnibase's router
+  (`advanced_router`; the remember-me cookie's domain is now a closure on its `getDomain()`);
+  `ContractsPass` keeps omnibase's list (`CONTRACTS`, `FORMER`, `SERVICES`, `base.contracts`) and
+  hands it to omnibridge/symfony's `DependencyInjection\ContractsPass`, which builds the locator.
+- **Stay `Base\`** (they read omnibase's services or models, D3): `Base\Bridge\Symfony\{LocalizerLocales,
+  FlysystemFiles, RouterRoutes, MediaPictures, ServiceMedia, WysiwygTexts, SymfonyScreenContext,
+  ScreenResponder, AccountScreens, NotificationMessages, SettingBagWarmer, SecurityUser,
+  TwoFactorUser}`, `Base\Service\ParameterBag` and `HotParameterBag`, `BaseBundle` and its
+  extension, configuration and passes. omnibridge/symfony does not require the core: the
+  direction is one way (omnibridge/symfony's README classes each, with why).
+- **The former names keep working** where omnibridge/symfony is installed: each
+  `Base\Bridge\Symfony\X` moved is an alias of the moved class (`class_alias`, not a subclass),
+  declared with Composer's autoloader (`src/Resources/Aliases.php`); the former service ids are
+  aliases of the new ones. To be removed at omnibase 4's final pass.
+- **`BaseBundle` refuses to start without omnibridge/symfony**, with a message that says so (the
+  core still only suggests it: a Laravel site does not want it).
+- Fondation 781 -> 774: the seven moved classes left the core (a decision of the step, not a
+  class that stopped loading); omnibase's own adapters stay listed. `FormerNamesTest` checks the
+  moved adapters' former names.
+
 ### Changed: the host's contracts are omniscient/omnibridge's (step A2)
 - **omniscient/omnibridge** (new, required): the omnibridge family's core, the contracts any host
   answers and their registry, framework-free (PHP and three PSRs). Moved there:

@@ -16,12 +16,11 @@ use Omnibridge\Contract\Sessions;
 use Omnibridge\Contract\Tokens;
 use Omnibridge\Contract\Translations;
 use Omnibridge\Contract\Urls;
+use Omnibridge\Symfony\DependencyInjection\ContractsPass as HostContractsPass;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Mailer\MailerInterface;
 
 /**
@@ -29,15 +28,17 @@ use Symfony\Component\Mailer\MailerInterface;
  * through (plan "omnibase agnostique", C4), handed to it by
  * BaseBundle::boot() - omniscient/omnibridge's registry since A2, the host's
  * contracts (Omnibridge\Contract\*) with omnibase's own (Nouns, Media,
- * Pictures, Texts, the parameters): each contract by its interface's name, the service the
- * container binds to that name - omnibase's adapters (Base\Bridge\Symfony\*,
- * config/services/core.php), the framework's clock, event dispatcher and
- * mailer, or an application's own binding, which wins as any alias does.
+ * Pictures, Texts, the parameters) and the mailer: each contract by its
+ * interface's name, the service the container binds to that name -
+ * omnibridge/symfony's adapters and omnibase's (config/services/core.php),
+ * the framework's clock, event dispatcher and mailer, or an application's own
+ * binding, which wins as any alias does.
  *
- * Only the contracts whose service exists are listed (no clock without
- * symfony/clock, no mailer without symfony/mailer configured): the registry
- * says it has none rather than failing when the service is built. A locator
- * holds closures: nothing is constructed before a contract is asked.
+ * The building itself is omnibridge/symfony's since A1
+ * (Omnibridge\Symfony\DependencyInjection\ContractsPass: only the contracts
+ * whose service exists are listed, an adapter of omnibridge/symfony whose
+ * framework service is missing removed, a locator of closures); this pass
+ * gives it omnibase's list, its former names and its service id.
  */
 final class ContractsPass implements CompilerPassInterface
 {
@@ -100,22 +101,6 @@ final class ContractsPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container): void
     {
-        $contracts = [];
-        foreach (self::CONTRACTS as $contract) {
-            $id = self::SERVICES[$contract] ?? $contract;
-            if ($container->has($id)) {
-                $contracts[$contract] = new Reference($id);
-            }
-        }
-        foreach (self::FORMER as $former => $contract) {
-            if (isset($contracts[$contract])) {
-                $contracts[$former] = $contracts[$contract];
-            }
-        }
-
-        $container->register(self::SERVICE, ServiceLocator::class)
-            ->setPublic(true)
-            ->addTag('container.service_locator')
-            ->setArguments([$contracts]);
+        (new HostContractsPass(self::CONTRACTS, self::SERVICES, self::FORMER, self::SERVICE))->process($container);
     }
 }

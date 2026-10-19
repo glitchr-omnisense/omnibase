@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Contract;
 
-use Base\Bridge\Symfony\KernelEnvironment;
+use Omnibridge\Symfony\Contract\KernelEnvironment;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\SettingIntl;
 use Base\Entity\User\Token;

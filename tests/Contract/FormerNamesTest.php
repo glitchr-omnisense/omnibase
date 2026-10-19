@@ -14,7 +14,8 @@ use PHPUnit\Framework\TestCase;
  * declared with Composer's autoloader (src/Resources/Aliases.php), never on
  * demand, so a type or an instanceof naming it holds before anything asks for
  * it; one service in the registry under either name; omnibase's registry is
- * omnibridge's, with its own accessors.
+ * omnibridge's, with its own accessors. The same for the Symfony adapters
+ * moved to omnibridge/symfony (A1), where it is installed.
  */
 final class FormerNamesTest extends TestCase
 {
@@ -33,6 +34,21 @@ final class FormerNamesTest extends TestCase
         'Base\Exception\MissingContractException' => \Omnibridge\Exception\MissingContractException::class,
         'Omnibridge\Twig\Contract\Urls' => Contract\Urls::class,
         'Omnibridge\Twig\Contract\Translations' => Contract\Translations::class,
+    ];
+
+    /**
+     * The adapters moved to omnibridge/symfony (A1), aliased where it is installed.
+     *
+     * @var array<string, class-string>
+     */
+    private const FORMER_ADAPTERS = [
+        'Base\Bridge\Symfony\RouterUrls' => \Omnibridge\Symfony\RouterUrls::class,
+        'Base\Bridge\Symfony\TranslatorTranslations' => \Omnibridge\Symfony\TranslatorTranslations::class,
+        'Base\Bridge\Symfony\KernelEnvironment' => \Omnibridge\Symfony\Contract\KernelEnvironment::class,
+        'Base\Bridge\Symfony\SecurityAccess' => \Omnibridge\Symfony\Contract\SecurityAccess::class,
+        'Base\Bridge\Symfony\SecuritySessions' => \Omnibridge\Symfony\Contract\SecuritySessions::class,
+        'Base\Bridge\Symfony\CsrfTokens' => \Omnibridge\Symfony\Contract\CsrfTokens::class,
+        'Base\Bridge\Symfony\FileLinks' => \Omnibridge\Symfony\FileLinks::class,
     ];
 
     /** @var array<string, mixed> */
@@ -60,6 +76,21 @@ final class FormerNamesTest extends TestCase
             self::assertSame($class, $reflection->getName(), $former.' is an alias, not a subclass');
             self::assertSame((new \ReflectionClass($class))->getFileName(), $reflection->getFileName());
         }
+    }
+
+    public function testTheSymfonyAdaptersMovedToOmnibridgeKeepTheirFormerNames(): void
+    {
+        if (!class_exists(\Omnibridge\Symfony\RouterUrls::class)) {
+            self::markTestSkipped('omnibridge/symfony is not installed: neither name exists.');
+        }
+
+        foreach (self::FORMER_ADAPTERS as $former => $class) {
+            self::assertTrue(class_exists($former, false), $former.' declared without autoloading');
+            $reflection = new \ReflectionClass($former);
+            self::assertSame($class, $reflection->getName(), $former.' is an alias, not a subclass');
+            self::assertSame((new \ReflectionClass($class))->getFileName(), $reflection->getFileName());
+        }
+        self::assertSame(\Omnibridge\Symfony\FileLinks::DEFAULT_FORMAT, \Base\Bridge\Symfony\FileLinks::DEFAULT_FORMAT);
     }
 
     public function testAnObjectMadeForAFormerNameIsTheContractAndTheRegistryHoldsItUnderBoth(): void

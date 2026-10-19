@@ -5,6 +5,7 @@ use \Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\closure;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service_closure;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
@@ -401,44 +402,60 @@ return static function (ContainerConfigurator $container): void {
     // with either is the same one. The registry gets them
     // from the `base.contracts` locator (ContractsPass), with the framework's
     // clock, event dispatcher and mailer, seeded in BaseBundle::boot().
-    $services->set('Base\Bridge\Symfony\RouterUrls')
+    //
+    // Since A1 the adapters over Symfony's own services are omnibridge/symfony's
+    // (Omnibridge\Symfony\*) and so is their wiring: its config/services.php
+    // binds Urls, Translations, Environment, Access, Sessions and Tokens, and
+    // omnibase gives two of them its own router - addresses through
+    // advanced_router, the remember-me cookie's domain from it. Their former
+    // class names (Base\Bridge\Symfony\RouterUrls...) are aliases of the
+    // moved classes (src/Resources/Aliases.php) and their former service ids
+    // aliases of the new ones. omnibase's own adapters, over its own services
+    // (Localizer, Flysystem, MediaService, its router's route names and icons,
+    // the screens), stay Base\Bridge\Symfony.
+    $container->import(\Omnibridge\Symfony\OmnibridgeBundle::SERVICES);
+    $services->get('Omnibridge\Symfony\RouterUrls')
         ->args([service('advanced_router'), service('assets.packages')->nullOnInvalid()]);
-    $services->alias('Omnibridge\Contract\Urls', 'Base\Bridge\Symfony\RouterUrls');
-    $services->alias('Base\Contract\Urls', 'Omnibridge\Contract\Urls');
-    $services->alias('Omnibridge\Twig\Contract\Urls', 'Omnibridge\Contract\Urls');
-    $services->set('Base\Bridge\Symfony\KernelEnvironment')
-        ->args(['%kernel.environment%', '%kernel.debug%', '%kernel.secret%']);
-    $services->alias('Omnibridge\Contract\Environment', 'Base\Bridge\Symfony\KernelEnvironment');
-    $services->alias('Base\Contract\Environment', 'Omnibridge\Contract\Environment');
+    $services->get('Omnibridge\Symfony\Contract\SecuritySessions')
+        ->args([service('security.token_storage'), closure([service('advanced_router'), 'getDomain'])]);
+    foreach ([
+        'Base\Bridge\Symfony\RouterUrls' => 'Omnibridge\Symfony\RouterUrls',
+        'Base\Bridge\Symfony\TranslatorTranslations' => 'Omnibridge\Symfony\TranslatorTranslations',
+        'Base\Bridge\Symfony\KernelEnvironment' => 'Omnibridge\Symfony\Contract\KernelEnvironment',
+        'Base\Bridge\Symfony\SecurityAccess' => 'Omnibridge\Symfony\Contract\SecurityAccess',
+        'Base\Bridge\Symfony\SecuritySessions' => 'Omnibridge\Symfony\Contract\SecuritySessions',
+        'Base\Bridge\Symfony\CsrfTokens' => 'Omnibridge\Symfony\Contract\CsrfTokens',
+    ] as $former => $id) {
+        $services->alias($former, $id);
+    }
+    foreach ([
+        'Base\Contract\Urls' => 'Omnibridge\Contract\Urls',
+        'Omnibridge\Twig\Contract\Urls' => 'Omnibridge\Contract\Urls',
+        'Base\Contract\Environment' => 'Omnibridge\Contract\Environment',
+        'Base\Contract\Routes' => 'Omnibridge\Contract\Routes',
+        'Omnibridge\Twig\Contract\Translations' => 'Omnibridge\Contract\Translations',
+        'Base\Contract\Translations' => 'Omnibridge\Contract\Translations',
+        'Base\Contract\Access' => 'Omnibridge\Contract\Access',
+        'Base\Contract\Sessions' => 'Omnibridge\Contract\Sessions',
+        'Base\Contract\Locales' => 'Omnibridge\Contract\Locales',
+        'Base\Contract\Files' => 'Omnibridge\Contract\Files',
+        'Base\Contract\Tokens' => 'Omnibridge\Contract\Tokens',
+    ] as $former => $id) {
+        $services->alias($former, $id);
+    }
     $services->set('Base\Bridge\Symfony\RouterRoutes')
         ->args([service('advanced_router'), service('base.service.icon')->nullOnInvalid()]);
     $services->alias('Omnibridge\Contract\Routes', 'Base\Bridge\Symfony\RouterRoutes');
-    $services->alias('Base\Contract\Routes', 'Omnibridge\Contract\Routes');
-    $services->set('Base\Bridge\Symfony\TranslatorTranslations')
-        ->args([service('translator')]);
-    $services->alias('Omnibridge\Contract\Translations', 'Base\Bridge\Symfony\TranslatorTranslations');
-    $services->alias('Omnibridge\Twig\Contract\Translations', 'Omnibridge\Contract\Translations');
-    $services->alias('Base\Contract\Translations', 'Omnibridge\Contract\Translations');
     // What an entity is called (C4b): the translator's own EntityNouns, over the bundles BaseBundle knows.
     $services->set('Base\Service\Model\EntityNouns')
         ->factory([service('Base\Service\Translator'), 'getEntityNouns']);
     $services->alias('Base\Contract\Nouns', 'Base\Service\Model\EntityNouns');
-    $services->set('Base\Bridge\Symfony\SecurityAccess')
-        ->args([service('security.authorization_checker'), service('security.token_storage')]);
-    $services->alias('Omnibridge\Contract\Access', 'Base\Bridge\Symfony\SecurityAccess');
-    $services->alias('Base\Contract\Access', 'Omnibridge\Contract\Access');
-    $services->set('Base\Bridge\Symfony\SecuritySessions')
-        ->args([service('security.token_storage'), service('advanced_router')->nullOnInvalid()]);
-    $services->alias('Omnibridge\Contract\Sessions', 'Base\Bridge\Symfony\SecuritySessions');
-    $services->alias('Base\Contract\Sessions', 'Omnibridge\Contract\Sessions');
     $services->set('Base\Bridge\Symfony\LocalizerLocales')
         ->args([service('localizer')]);
     $services->alias('Omnibridge\Contract\Locales', 'Base\Bridge\Symfony\LocalizerLocales');
-    $services->alias('Base\Contract\Locales', 'Omnibridge\Contract\Locales');
     $services->set('Base\Bridge\Symfony\FlysystemFiles')
         ->args([service('flysystem'), service('base.service.image')->nullOnInvalid()]);
     $services->alias('Omnibridge\Contract\Files', 'Base\Bridge\Symfony\FlysystemFiles');
-    $services->alias('Base\Contract\Files', 'Omnibridge\Contract\Files');
     $services->set('Base\Bridge\Symfony\MediaPictures')
         ->args([service('Base\Twig\Extension\CommonsTwigExtension')]);
     $services->alias('Base\Contract\Pictures', 'Base\Bridge\Symfony\MediaPictures');
@@ -448,10 +465,6 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Bridge\Symfony\WysiwygTexts')
         ->args([service('Base\Twig\Extension\HtmlTwigExtension'), service('editor_enhancer')]);
     $services->alias('Base\Contract\Texts', 'Base\Bridge\Symfony\WysiwygTexts');
-    $services->set('Base\Bridge\Symfony\CsrfTokens')
-        ->args([service('security.csrf.token_manager')]);
-    $services->alias('Omnibridge\Contract\Tokens', 'Base\Bridge\Symfony\CsrfTokens');
-    $services->alias('Base\Contract\Tokens', 'Omnibridge\Contract\Tokens');
 
     // The screens (plan "omnibase agnostique", C5): a controller hands a
     // template and a view model (Base\Screen\View) to the ScreenResponder,
