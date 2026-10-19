@@ -62,6 +62,7 @@
     ],
     "require": {
         "php": "^8.4",
+        "ext-bcmath": "*",
         "ext-exif": "*",
         "ext-igbinary": "*",
         "ext-imagick": "*",
