@@ -21,6 +21,10 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   the code imports, doctrine/{dbal, collections, persistence, event-manager}, psr/{log, cache,
   simple-cache}, symfony/{cache, mime, string, event-dispatcher} and the contracts,
   `composer-runtime-api`.
+- **`ext-bcmath` is required** (plan "omnibase agnostique", step P4): `src/Resources/Functions.php`,
+  loaded by Composer's `files` autoload with the first class, throws "bcmath is not installed"
+  without it, and did not say so - a host whose image lacks it (lesringostars-laravel's) could
+  only leave the functions unloaded. Composer now refuses the install there instead.
 - **The framework left `require`** for **omnibridge/symfony**: doctrine/doctrine-bundle,
   symfony/{config, dependency-injection, dotenv, form, framework-bundle, messenger,
   monolog-bundle, security-bundle, twig-bundle}, twig/extra-bundle (and, through them,
