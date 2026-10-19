@@ -4,7 +4,9 @@
 # check: the container and the templates linted, the plugins' routes counted.
 # bare [--all] [--each] [--json] [class...]: the Fondation (tests/Fondation.php),
 # or the classes named, loaded with Composer's autoloader alone - no kernel, no
-# container - and every class or file of the framework loaded on the way named.
+# container - and every class or file of the framework loaded on the way named;
+# on var/bare/vendor of the core, the core installed alone (composer install
+# --no-dev), made first when missing or when the core's composer.json changed.
 # console ...: bin/console.
 # test <plugin> [args]: the plugin's PHPUnit suite (vendor/omnibase/<plugin>/phpunit.xml.dist),
 # or this bundle's with no plugin named, in the test environment (.env.test)
@@ -29,11 +31,15 @@ case "${1:-serve}" in
         php bin/console lint:twig templates
         for p in marketplace_ forum_ mailbox_ forge_ git_ admin; do printf '%-12s %s routes\n' "$p" "$(php bin/console debug:router --format=json | grep -c "\"$p")"; done ;;
     console) shift; exec php bin/console "$@" ;;
-    bare) shift; exec php vendor/omniscient/omnibase/docker/bin/bare "$@" ;;
+    bare)
+        shift
+        php vendor/omniscient/omnibase/docker/bin/bare --install
+        exec php vendor/omniscient/omnibase/docker/bin/bare "$@" ;;
     test)
         shift
         case "${1:-}" in
-            ""|-*) suite=vendor/omniscient/omnibase ;;
+            # The core's own: its BareTest measures the Fondation on var/bare/vendor, made here.
+            ""|-*) suite=vendor/omniscient/omnibase; php "$suite/docker/bin/bare" --install ;;
             *) suite="vendor/omnibase/$1"; shift ;;
         esac
         # The test environment (.env then .env.test, see tests/harness.php),

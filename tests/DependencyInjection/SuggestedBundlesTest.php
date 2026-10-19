@@ -75,11 +75,16 @@ class SuggestedBundlesTest extends KernelTestCase
     /**
      * Base\Entity\User under Symfony implements every interface it did up to 4.0 (plan "omnibase
      * agnostique", C7b): Security's and scheb/2fa's, through Base\Contract\SecurityUser and
-     * TwoFactorUser, the packages being installed here and the host not saying it runs without them.
+     * TwoFactorUser, the packages being installed here: installed means declared, nothing else
+     * decides (C7c).
      */
     public function testTheUserImplementsSecurityAndTwoFactorInterfacesUnderSymfony(): void
     {
-        $this->assertFalse(Framework::isWithout());
+        $this->assertTrue(Framework::declares(
+            'Symfony\\Component\\Security\\Core\\User\\UserInterface',
+            'Scheb\\TwoFactorBundle\\Model\\Totp\\TwoFactorInterface',
+        ), 'installed, so declared');
+        $this->assertFalse(Framework::declares('Symfony\\Component\\Security\\Core\\User\\UserInterface', 'Nowhere\\Installed\\Interface'), 'one missing, none declared');
         foreach ([
             'Symfony\\Component\\Security\\Core\\User\\UserInterface',
             'Symfony\\Component\\Security\\Core\\User\\PasswordAuthenticatedUserInterface',
