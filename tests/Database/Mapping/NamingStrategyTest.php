@@ -113,4 +113,24 @@ final class NamingStrategyTest extends TestCase
         $this->expectExceptionMessage('Table name will be truncated');
         $strategy->classToTableName('App\Entity\\'.implode('', array_map(static fn (int $i) => 'Part'.$i, range(1, 15))));
     }
+
+    /**
+     * An attribute of a package not installed (API Platform's #[ApiResource] on User and Thread,
+     * which the core only suggests) is left aside, as PHP leaves it: the core's entities are named
+     * under a host without it (audit "lesringostars face au master plan", R4, under Laravel).
+     */
+    public function testAnAttributeOfAPackageNotInstalledIsLeftAside(): void
+    {
+        self::assertFalse(class_exists('Nowhere\\Installed\\Resource'));
+        self::assertSame(
+            (new \Omnibridge\Doctrine\NamingStrategy())->classToTableName(WithAnAttributeNotInstalled::class),
+            (new NamingStrategy())->classToTableName(WithAnAttributeNotInstalled::class),
+            'named as omnibridge/doctrine names it, the attribute left aside',
+        );
+    }
+}
+
+#[\Nowhere\Installed\Resource(operations: [])]
+final class WithAnAttributeNotInstalled
+{
 }
