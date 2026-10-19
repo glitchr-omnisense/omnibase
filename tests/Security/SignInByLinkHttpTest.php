@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\Http\MovesTheClockTrait;
 
 /**
  * The sign-in by a link (base.user.login_with_token) answers the same
@@ -18,11 +19,15 @@ use Tests\Base\Http\HttpTestTrait;
  * for no other.
  *
  * Each page is asked of a kernel of its own, as in ForgottenPasswordHttpTest;
- * the option is put on in each of them.
+ * the option is put on in each of them. Between reading the form and sending
+ * it the clock is moved past the guard's minimum delay (base.guard.min_delay,
+ * 3 s in a site's suite): sent the moment it was read, the form was refused as
+ * a robot's, and the account was sent nothing - on a machine fast enough.
  */
 class SignInByLinkHttpTest extends KernelTestCase
 {
     use HttpTestTrait;
+    use MovesTheClockTrait;
 
     /** @var array<string, string> */
     private array $cookies = [];
@@ -35,6 +40,7 @@ class SignInByLinkHttpTest extends KernelTestCase
 
     protected function tearDown(): void
     {
+        $this->putTheClockBack();
         self::ensureKernelShutdown();
         $this->bootHost();
         $this->removeUsers();
@@ -112,6 +118,7 @@ class SignInByLinkHttpTest extends KernelTestCase
             $fields[$name] = preg_match('/value="([^"]*)"/', $tag, $value) ? html_entity_decode($value[1]) : '';
         }
         $this->assertArrayHasKey('email', $fields, 'the form asks for an address');
+        $this->takeTheTimeAPersonTakes();
 
         // With the token the test environment's captcha (omnishield's fixed gateway) prints in the page, outside the form.
         $answer = $this->browse('/login/token', ['_base_security_login_token' => ['email' => $email] + $fields, 'omnishield-token' => 'omnishield-fixed-token']);

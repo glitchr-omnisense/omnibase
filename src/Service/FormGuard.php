@@ -2,12 +2,14 @@
 
 namespace Base\Service;
 
+use Base\Contract\Runtime;
 use Base\Repository\Thread\CommentRepository;
 use Omnishield\Exception\InvalidKeyException;
 use Omnishield\Exception\ProviderException;
 use Omnishield\Model\Identity;
 use Omnishield\Registry;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\FormInterface;
@@ -77,6 +79,9 @@ class FormGuard
      * @param array{challenge?: string|bool|null, fallback?: ?string, reputation?: list<string>, classifier?: ?string, unreachable?: string, min_delay?: int, sign_in_after?: int, captcha_after?: int} $config base.guard
      * @param string|null $defaultChallenge omnishield.challenge.gateway, when glitchr/omnishield is installed (GuardPass)
      * @param CacheItemPoolInterface|null $cache where a form's refused tries are counted; without it, the captcha is always asked
+     * @param ClockInterface|null $clock what "now" is for the stamp and the delays: the framework's clock (Symfony's
+     *                                   `clock`, autowired), else the clock contract of the Fondation (Runtime::clock(),
+     *                                   the machine's when no framework gave one) - a test moves it instead of waiting
      */
     public function __construct(
         #[Autowire('%kernel.secret%')] #[\SensitiveParameter] protected readonly string $secret,
@@ -87,7 +92,14 @@ class FormGuard
         protected readonly ?LoggerInterface $logger = null,
         protected readonly bool $acceptUnreachableChallenge = false,
         protected readonly ?CacheItemPoolInterface $cache = null,
+        protected readonly ?ClockInterface $clock = null,
     ) {
+    }
+
+    /** Now, in seconds, by the clock (never the machine's time() directly: a test moves the clock, it does not sleep). */
+    public function now(): int
+    {
+        return ($this->clock ?? Runtime::clock())->now()->getTimestamp();
     }
 
     /** Whether glitchr/omnishield is here, with its gateways. */
@@ -220,7 +232,7 @@ class FormGuard
     /** When the form was shown, signed: "<time>.<signature>". */
     public function stamp(?int $time = null): string
     {
-        $time ??= time();
+        $time ??= $this->now();
 
         return $time.'.'.$this->sign((string) $time);
     }
@@ -232,7 +244,7 @@ class FormGuard
             return null;
         }
 
-        return hash_equals($this->sign($parts[1]), $parts[2]) ? time() - (int) $parts[1] : null;
+        return hash_equals($this->sign($parts[1]), $parts[2]) ? $this->now() - (int) $parts[1] : null;
     }
 
     /**
@@ -350,7 +362,7 @@ class FormGuard
         }
         if ($form->has('opened')) {
             $opened = (int) $form->get('opened')->getData();
-            if ($minDelay > 0 && ($opened <= 0 || time() - $opened < $minDelay)) {
+            if ($minDelay > 0 && ($opened <= 0 || $this->now() - $opened < $minDelay)) {
                 return self::TOO_FAST;
             }
         }
@@ -361,7 +373,7 @@ class FormGuard
         $ip = $request->getClientIp();
         if ($floodInterval > 0 && $ip && $this->comments) {
             $last = $this->comments->findLastFromIp($ip);
-            if ($last && $last->getCreatedAt() && time() - $last->getCreatedAt()->getTimestamp() < $floodInterval) {
+            if ($last && $last->getCreatedAt() && $this->now() - $last->getCreatedAt()->getTimestamp() < $floodInterval) {
                 return self::FLOOD;
             }
         }

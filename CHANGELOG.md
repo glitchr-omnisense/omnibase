@@ -289,6 +289,27 @@ compared under Symfony with the service it replaces, and run where there is no f
   optional warmer). Fondation 778 -> 781 (`DottedParameterBag`, `HotParameters`, `SettingBag`).
   `HotParametersTest`, `ParameterBagTest`, `ParameterBagServicesTest`, `BareTest`.
 
+### Fixed: two tests that depended on the machine and on the cache (step C11)
+- **The forms' guard reads the clock** (`Base\Service\FormGuard::now()`), never `time()`: the
+  stamp, the minimum delay, the comments' `opened` time (`CommentType`) and their flood
+  interval. The clock is the framework's (Symfony's `clock`, autowired: symfony/clock's global
+  clock), else the clock contract of the Fondation (`Runtime::clock()`, the machine's when
+  none was given); in production the same 3 s and the same signed stamp. The HTTP tests that
+  send a guarded form (`SignInByLinkHttpTest`, `RegisterAfterLoginHttpTest`,
+  `ForgottenPasswordHttpTest`) move the clock past `base.guard.min_delay` between reading the
+  form and sending it (`Tests\Base\Http\MovesTheClockTrait`), instead of sending it at once:
+  in a site's suite (3 s) the sign-in link was refused as a robot's form on a fast machine.
+  `FormGuardTest::testTheDelayIsCountedOnTheClock`.
+- **A second-level cache configuration in Doctrine's order** (`usage`, then `region`):
+  `IntlSubscriber` wrote the translatable's and its translations' region first, `#[Cache]` usage
+  first, and the translation copied whichever its translatable held when it was loaded -
+  `ClassMetadataManipulator` applies the attributes again to metadata already loaded when it
+  warms the completors, so it came one way on a cold metadata cache and another on a warm one
+  (`HandBuiltEntityManagerTest` failed once after `cache:clear`, on four `*Intl` classes). The
+  subscriber writes Doctrine's order and puts the copy in it; the fixture of
+  `HandBuiltEntityManagerTest` recorded again, its values the same (110 `cache` arrays of 85 classes reordered,
+  nothing else).
+
 ### What a Symfony application adds
 `omnibridge/symfony` (1.x-dev) beside `omniscient/omnibase`, and the bundles its
 `config/bundles.php` registers that it did not require itself - for an application coming

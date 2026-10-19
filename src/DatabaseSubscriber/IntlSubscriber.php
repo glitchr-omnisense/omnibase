@@ -294,6 +294,24 @@ class IntlSubscriber
     }
 
     /**
+     * A second-level cache configuration with its keys in Doctrine's order - usage, then region -, the
+     * order of ClassMetadata::enableCache(), of Doctrine's attribute driver and of omnibase's #[Cache],
+     * the order this subscriber writes its own in too. The translatable's was written here region
+     * first, and #[Cache] writes it usage first: which
+     * of the two a class held, and so the copy its translation took, came from the order the
+     * metadata was built in (ClassMetadataManipulator applies the attributes again to metadata already
+     * loaded when it warms the completors) - one way on a cold metadata cache, another on a warm one.
+     *
+     * @param array<string, mixed> $cache
+     *
+     * @return array<string, mixed>
+     */
+    private static function cacheInDoctrinesOrder(array $cache): array
+    {
+        return array_replace(array_intersect_key(['usage' => null, 'region' => null], $cache), $cache);
+    }
+
+    /**
      * Convert string FETCH mode to required string.
      */
     private function convertFetchString($fetchMode): int
@@ -324,16 +342,16 @@ class IntlSubscriber
         if (!$classMetadata->hasAssociation('translations')) {
 
             $classMetadata->cache = [
-                'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
             ];
 
             $classMetadata->mapOneToMany([
                 'fieldName' => 'translations',
                 'mappedBy' => 'translatable',
                 'cache' => [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translations',
                     'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translations',
                 ],
                 'indexBy' => TranslatableWalker::LOCALE,
                 'cascade' => ['persist', 'refresh', 'remove'],
@@ -352,16 +370,16 @@ class IntlSubscriber
         if (!$classMetadata->hasAssociation('translatable')) {
 
             $classMetadata->cache = [
-                'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
                 'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName),
             ];
 
             $classMetadata->mapManyToOne([
                 'fieldName' => 'translatable',
                 'inversedBy' => 'translations',
                 'cache' => [
-                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translatable',
                     'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                    'region' => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName) . '__translatable',
                 ],
                 'cascade' => ['persist', 'refresh'],
                 'fetch' => $this->convertFetchString('LAZY'),
@@ -376,10 +394,11 @@ class IntlSubscriber
             ]);
         }
 
-        $classMetadata->cache = $targetClassMetadata->cache;
-        if (array_key_exists('region', $classMetadata->cache ?? [])) {
-            $classMetadata->cache['region'] .= '_translation';
+        $cache = $targetClassMetadata->cache;
+        if (array_key_exists('region', $cache ?? [])) {
+            $cache['region'] .= '_translation';
         }
+        $classMetadata->cache = null === $cache ? null : self::cacheInDoctrinesOrder($cache);
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' . TranslatableWalker::SALT;

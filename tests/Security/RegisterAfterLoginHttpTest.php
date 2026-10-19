@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\Http\MovesTheClockTrait;
 
 /**
  * A visitor reads the sign-in page, follows "no account yet? sign up" with
@@ -15,11 +16,14 @@ use Tests\Base\Http\HttpTestTrait;
  * without it, and the visitor met a 500 in place of their new account.
  *
  * Each page is asked of a kernel of its own, as each is of a PHP process of
- * its own: nothing a service kept from the page before is there.
+ * its own: nothing a service kept from the page before is there. The form is
+ * sent after the guard's minimum delay, by the clock moved ahead
+ * (MovesTheClockTrait), not the moment it was read.
  */
 class RegisterAfterLoginHttpTest extends KernelTestCase
 {
     use HttpTestTrait;
+    use MovesTheClockTrait;
 
     /** @var array<string, string> the visitor's cookies, kept from one page to the next */
     private array $cookies = [];
@@ -35,6 +39,7 @@ class RegisterAfterLoginHttpTest extends KernelTestCase
 
     protected function tearDown(): void
     {
+        $this->putTheClockBack();
         if ($this->signedUp) {
             self::ensureKernelShutdown();
             $this->bootHost();
@@ -86,6 +91,7 @@ class RegisterAfterLoginHttpTest extends KernelTestCase
         // The guard's stamp (when the form was shown) and the test environment's captcha token, as the page prints them.
         preg_match('/name="_base_security_registration\[guard_opened\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $stamp);
         $this->signedUp[] = $email;
+        $this->takeTheTimeAPersonTakes();
 
         return $this->browse('/register', ['_base_security_registration' => [
             'email' => $email,
@@ -177,6 +183,7 @@ class RegisterAfterLoginHttpTest extends KernelTestCase
         preg_match('/name="_base_security_registration\[_csrf_token\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $token);
         // The guard's stamp (when the form was shown) and the test environment's captcha token, as the page prints them.
         preg_match('/name="_base_security_registration\[guard_opened\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $stamp);
+        $this->takeTheTimeAPersonTakes();
         $refused = $this->browse('/register', ['_base_security_registration' => [
             'email' => 'new'.bin2hex(random_bytes(4)).'@example.org',
             'plainPassword' => ['first' => 'A-long-Passphrase-42!', 'second' => 'Another-Passphrase-43!'],

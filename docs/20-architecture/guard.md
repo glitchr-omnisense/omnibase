@@ -156,6 +156,11 @@ when@test:
             sign_in_after: 0
 ```
 
+Or keep the site's delay and move the clock rather than wait: the guard reads the time from
+the clock (Symfony's `clock`, else `Base\Contract\Runtime::clock()`), never `time()`; the
+core's HTTP tests use `Tests\Base\Http\MovesTheClockTrait` (`takeTheTimeAPersonTakes()`
+between reading the form and sending it, `putTheClockBack()` in `tearDown()`).
+
 With `factory: fixed` as the test captcha, the page prints a hidden `omnishield-token` field
 holding `omnishield-fixed-token`, outside the form: a test client that submits the page's form
 sends it; a request built by hand adds it. Below `captcha_after` the page prints no captcha and
