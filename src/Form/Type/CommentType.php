@@ -2,6 +2,7 @@
 
 namespace Base\Form\Type;
 
+use Base\Contract\Runtime;
 use Base\Form\Model\CommentModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -46,7 +47,8 @@ class CommentType extends AbstractType
             ->add('url', TextType::class, ['mapped' => false, 'required' => false, 'label' => false,
                 'row_attr' => ['class' => $options['trap_class'], 'aria-hidden' => 'true', 'style' => 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden'],
                 'attr' => ['tabindex' => '-1', 'autocomplete' => 'off']])
-            ->add('opened', HiddenType::class, ['mapped' => false, 'data' => (string) time()]);
+            // When it was opened, by the clock FormGuard::check() reads it with (the clock contract, Runtime::clock()).
+            ->add('opened', HiddenType::class, ['mapped' => false, 'data' => (string) Runtime::clock()->now()->getTimestamp()]);
 
         if ($options['recaptcha'] && class_exists(\Google\Form\Type\ReCaptchaV3Type::class)) {
             $builder->add('captcha', \Google\Form\Type\ReCaptchaV3Type::class, ['mapped' => false]);

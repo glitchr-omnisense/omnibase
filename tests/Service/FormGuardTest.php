@@ -6,6 +6,7 @@ use AltchaOrg\Altcha\Altcha;
 use AltchaOrg\Altcha\Challenge;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\SolveChallengeOptions;
+use Base\Contract\Runtime;
 use Base\Form\Extension\FormTypeGuardExtension;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FormGuard;
@@ -28,6 +29,7 @@ use Omnishield\ReputationInterface;
 use Omnishield\Testing\FixedGateway;
 use Omnishield\Testing\FixedGatewayFactory;
 use Omnishield\WidgetPrinter;
+use Psr\Clock\ClockInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -169,6 +171,46 @@ class FormGuardTest extends TestCase
         $form = $this->send($this->form($this->forms()), [FormGuard::TRAP_FIELD => 'https://spam.example'], post: $this->token());
 
         $this->assertSame(['' => [FormGuard::TRAPPED]], $this->errors($form));
+    }
+
+    /**
+     * The time is the clock's, never the machine's: a stamp made and read on the guard's clock, the
+     * delay counted as that clock moves - its own (Symfony's `clock`, autowired), else the clock
+     * contract of the Fondation (Runtime::clock()). Nothing here waits.
+     */
+    public function testTheDelayIsCountedOnTheClock(): void
+    {
+        $clock = new class implements ClockInterface {
+            public \DateTimeImmutable $now;
+
+            public function __construct()
+            {
+                $this->now = new \DateTimeImmutable('2026-10-19 10:00:00');
+            }
+
+            public function now(): \DateTimeImmutable
+            {
+                return $this->now;
+            }
+        };
+        $guard = new FormGuard(self::SECRET, ['min_delay' => 3], clock: $clock);
+
+        $stamp = $guard->stamp();
+        $this->assertStringStartsWith($clock->now->getTimestamp().'.', $stamp, 'stamped at the clock\'s time');
+        $this->assertSame(0, $guard->elapsed($stamp));
+        $clock->now = $clock->now->modify('+2 seconds');
+        $this->assertSame(2, $guard->elapsed($stamp), 'too fast still');
+        $clock->now = $clock->now->modify('+1 second');
+        $this->assertSame(3, $guard->elapsed($stamp), 'as a person');
+
+        // Without a clock of its own, the Fondation's.
+        Runtime::set(ClockInterface::class, $clock);
+        try {
+            $this->assertSame($clock->now->getTimestamp(), (new FormGuard(self::SECRET))->now());
+            $this->assertSame(3, (new FormGuard(self::SECRET))->elapsed($stamp));
+        } finally {
+            Runtime::set(ClockInterface::class, null);
+        }
     }
 
     public function testAFormSentTooFastIsRefused(): void

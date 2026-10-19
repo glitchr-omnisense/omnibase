@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\Http\MovesTheClockTrait;
 
 /**
  * "Forgotten password" answers the same whether the address has an account
@@ -14,11 +15,14 @@ use Tests\Base\Http\HttpTestTrait;
  * address is taken (it cannot hide it: a sign-up that succeeds signs in);
  * this page is where nothing may be learnt about an address.
  *
- * Each page is asked of a kernel of its own, as in RegisterAfterLoginHttpTest.
+ * Each page is asked of a kernel of its own, as in RegisterAfterLoginHttpTest;
+ * the form is sent after the guard's minimum delay, by the clock moved ahead
+ * (MovesTheClockTrait), not the moment it was read.
  */
 class ForgottenPasswordHttpTest extends KernelTestCase
 {
     use HttpTestTrait;
+    use MovesTheClockTrait;
 
     /** @var array<string, string> */
     private array $cookies = [];
@@ -30,6 +34,7 @@ class ForgottenPasswordHttpTest extends KernelTestCase
 
     protected function tearDown(): void
     {
+        $this->putTheClockBack();
         self::ensureKernelShutdown();
         $this->bootHost();
         $this->removeUsers();
@@ -72,6 +77,7 @@ class ForgottenPasswordHttpTest extends KernelTestCase
             $fields[$name] = preg_match('/value="([^"]*)"/', $tag, $value) ? html_entity_decode($value[1]) : '';
         }
         $this->assertArrayHasKey('email', $fields, 'the form asks for an address');
+        $this->takeTheTimeAPersonTakes();
 
         // With the token the test environment's captcha (omnishield's fixed gateway) prints in the page, outside the form.
         $answer = $this->browse('/reset-password', ['security_reset_password' => ['email' => $email] + $fields, 'omnishield-token' => 'omnishield-fixed-token']);
