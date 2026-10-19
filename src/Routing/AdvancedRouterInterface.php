@@ -2,6 +2,7 @@
 
 namespace Base\Routing;
 
+use Base\Contract\MediaRouter;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
@@ -15,7 +16,7 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 
-interface AdvancedRouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
+interface AdvancedRouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface, MediaRouter
 {
     public function getRouteIndex(): string;
 

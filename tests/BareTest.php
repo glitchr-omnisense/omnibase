@@ -3,6 +3,7 @@
 namespace Tests\Base;
 
 use Base\BaseBundle;
+use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Repository\UserRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -437,6 +438,34 @@ final class BareTest extends TestCase
             'user, someone else kicked' => true,
             'user, the page\'s locale' => 'fr-FR',
             'user, its own locale' => 'en-GB',
+        ], $run['result']);
+    }
+
+    /**
+     * omnibase's image rule without the framework (audit "lesringostars face au master plan", R6):
+     * tests/Service/media-without-framework.php builds MediaService by hand - a plain router over
+     * ImageRoute::ROUTES, the Obfuscator, omnibase's Flysystem over local storages, Imagine - then makes a
+     * thumbnail's address, reads it back and makes its file, loading nothing of the framework.
+     */
+    public function testTheImageRuleWorksWithoutTheFramework(): void
+    {
+        $script = __DIR__.'/Service/media-without-framework.php';
+        [$status, $report] = self::bare([$script]);
+
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame([
+            'thumbnail, its route' => 'ux_imageExtension',
+            'thumbnail, its address' => true,
+            'thumbnail, the same address again' => true,
+            'thumbnail, read back' => [true, [ThumbnailFilter::class], 0.8],
+            'thumbnail, its file' => [100, 50, 'image/png'],
+            'thumbnail, kept in the local cache' => true,
+            'image, webp' => true,
+            'image, extension' => 'png',
         ], $run['result']);
     }
 

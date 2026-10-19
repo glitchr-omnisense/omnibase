@@ -2,8 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Routing\AdvancedRouter;
-use Base\Routing\AdvancedRouterInterface;
+use Base\Contract\MediaRouter;
 use finfo;
 use Symfony\Component\Uid\Uuid;
 use Twig\Environment;
@@ -33,9 +32,12 @@ class FileService implements FileServiceInterface
     protected FlysystemInterface $flysystem;
 
     /**
-     * @var AdvancedRouterInterface
+     * The router as the media rule asks it (Base\Contract\MediaRouter): under
+     * Symfony omnibase's advanced_router, elsewhere the host's.
+     *
+     * @var MediaRouter
      */
-    protected AdvancedRouterInterface $router;
+    protected MediaRouter $router;
 
     /**
      * @var Environment
@@ -51,7 +53,7 @@ class FileService implements FileServiceInterface
     /** @var string     */
     protected string $localCache;
 
-    public function __construct(Environment $twig, AdvancedRouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag)
+    public function __construct(Environment $twig, MediaRouter $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag)
     {
         $this->twig = $twig;
         $this->router = $router;
@@ -62,6 +64,15 @@ class FileService implements FileServiceInterface
 
         $this->mimeTypes = new MimeTypes();
         $this->localCache = "local.cache";
+    }
+
+    /**
+     * The router the addresses are made and read with (Base\Service\ImageRoute's
+     * redirections too).
+     */
+    public function getRouter(): MediaRouter
+    {
+        return $this->router;
     }
 
     /**
@@ -141,7 +152,7 @@ class FileService implements FileServiceInterface
         } catch (InvalidArgumentException $e) {
 
             if(is_string($fileOrContentsOrArray) && !is_binary($fileOrContentsOrArray) && is_url($fileOrContentsOrArray))
-                $fileOrContentsOrArray = $this->router->getUrl($fileOrContentsOrArray, [], AdvancedRouter::ABSOLUTE_URL);
+                $fileOrContentsOrArray = $this->router->getUrl($fileOrContentsOrArray, [], 0 /* an absolute URL */);
 
             // Attempt to read based on custom mime_content_content method
             try { $mimeType = mime_content_type2($fileOrContentsOrArray); }

@@ -129,6 +129,30 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: the image route's rule without the framework (step R6)
+- **`Base\Contract\MediaRouter`**: the five questions omnibase's media rule asks a router -
+  `generate()`, `getRouteMatch()`, `getRouteName()`, `getAssetUrl()`, `getUrl()` - with the
+  signatures of `AdvancedRouterInterface`, which now extends it. `FileService` and `MediaService`
+  take it instead of `AdvancedRouterInterface` (under Symfony `advanced_router` is passed as
+  before), and `MediaService` takes the core's `Base\Service\ParameterBagInterface` instead of
+  DependencyInjection's (every `parameter_bag` omnibase gives implements both).
+  `FileService::getRouter()` gives it back. A host without the framework builds `MediaService` on
+  its own router (audit "lesringostars face au master plan", R6: omnibridge/laravel).
+- **`Base\Service\ImageRoute`**: `MediaController`'s answers (`contents`, `imageCrop`,
+  `imageWebp`, `imageSvg`, `image`: the resolution of the obfuscated data, the redirection to the
+  right extension and to the cacheless routes, the crops, the filters, the local cache, the
+  placeholder) moved there as they were, for any host, with `ROUTES`, the image routes' names,
+  paths and actions in Symfony's order. `MediaController` keeps its routes, names and actions and
+  delegates; the profiler stays its own (left aside on an `ux_` route, as before). Two
+  differences, both where Symfony never goes: the crops' repository may be absent (no crop then),
+  and `ux_serve` on data that resolves to nothing answers 404 instead of a TypeError.
+- Fondation 777 -> 779 (`Base\Contract\MediaRouter`, `Base\Service\ImageRoute`). `BareTest`
+  builds `MediaService` by hand without the framework (`tests/Service/media-without-framework.php`:
+  a plain router over `ImageRoute::ROUTES`, the Obfuscator, omnibase's Flysystem over local
+  storages, Imagine) and makes a thumbnail's address, reads it back and makes its file;
+  `ImageRouteTest`: `ROUTES` is `MediaController`'s routes, and the controller still redirects a
+  thumbnail's address to its extension and serves it, the same bytes as `ImageRoute`.
+
 ### Fixed: an attribute of a package not installed no longer stops the mapping (step R4)
 - `Base\Database\Mapping\NamingStrategy::classToTableName()` and `Base\Attributes\AttributeReader`
   (class, method and property attributes) instantiated every attribute of an entity, so the core's
