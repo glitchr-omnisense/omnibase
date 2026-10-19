@@ -100,6 +100,9 @@
  * declares Security's user provider and doctrine-bridge's user loader through Base\Contract\SecurityUserProvider
  * and SecurityUserLoader - those interfaces when they are installed, empty ones otherwise, as
  * Base\Contract\SecurityUser for the user -, and those two contracts).
+ * 779 after step R6 of the same audit (+2: Base\Contract\MediaRouter, the five questions omnibase's media rule asks a
+ * router, which AdvancedRouterInterface extends and FileService and MediaService now take; Base\Service\ImageRoute,
+ * the image route's answers moved out of MediaController for any host, with the routes' list).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -144,6 +147,7 @@ return [
     Base\Contract\Link::class,
     Base\Contract\Locales::class,
     Base\Contract\Media::class,
+    Base\Contract\MediaRouter::class,
     Base\Contract\Nouns::class,
     Base\Contract\Pictures::class,
     Base\Contract\Routes::class,
@@ -672,6 +676,7 @@ return [
     Base\Service\GroupManager::class,
     Base\Service\HotParameters::class,
     Base\Service\IconProvider::class,
+    Base\Service\ImageRoute::class,
     Base\Service\Invitations::class,
     Base\Service\Launcher::class,
     Base\Service\LauncherInterface::class,

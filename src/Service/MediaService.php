@@ -10,7 +10,7 @@ use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
-use Base\Routing\AdvancedRouterInterface;
+use Base\Contract\MediaRouter;
 use Imagine\Image\Palette\RGB;
 use League\Flysystem\UnableToCreateDirectory;
 use LogicException;
@@ -25,7 +25,6 @@ use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use InvalidArgumentException;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 use Base\Controller\UX\MediaController;
@@ -81,7 +80,7 @@ class MediaService extends FileService implements MediaServiceInterface
 
     public function __construct(
         Environment             $twig,
-        AdvancedRouterInterface $router,
+        MediaRouter             $router,
         ObfuscatorInterface     $obfuscator,
         FlysystemInterface      $flysystem,
         ParameterBagInterface   $parameterBag,
