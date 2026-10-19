@@ -2,15 +2,15 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Access;
-use Base\Contract\Locales;
-use Base\Contract\Urls;
 use Base\Screen\ContextProvider;
 use Base\Screen\Frame;
 use Base\Screen\Site;
 use Base\Screen\Viewer;
 use Base\Service\SettingBagInterface;
 use Base\Service\ThemizerInterface;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Locales;
+use Omnibridge\Contract\Urls;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
 

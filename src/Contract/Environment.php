@@ -1,27 +1,12 @@
 <?php
 
-namespace Base\Contract;
-
-/**
- * What the application runs as (plan "omnibase agnostique", C4b): its
- * environment's name ("prod", "dev", "test" - the vault a secured entity is
- * sealed for), whether it runs in debug, and its secret (the salt of the
- * hashed identifiers a token carries). An entity asks it instead of
- * BaseTrait's getEnvironment() and BaseService's isDebug() and getSalt().
- *
- * The Fondation's own contract, reached by Runtime::environment(). Under
- * Symfony, Base\Bridge\Symfony\KernelEnvironment: the kernel's environment,
- * debug and secret (kernel.environment, kernel.debug, kernel.secret). The
- * application's other parameters are Base\Service\ParameterBagInterface,
- * reached by Runtime::parameters().
+/*
+ * Base\Contract\Environment is omniscient/omnibridge's Omnibridge\Contract\Environment: a host's
+ * contract, generic to any framework, moved to the omnibridge family's core
+ * (plan "omnibase agnostique", A2). The same interface under its former name, an
+ * alias, not a subclass, declared with the others when Composer's autoloader is
+ * loaded (src/Resources/Aliases.php, autoload.files). To be removed at omnibase
+ * 4's final pass.
  */
-interface Environment
-{
-    /** The environment's name: "prod", "dev", "test"... */
-    public function name(): string;
 
-    public function isDebug(): bool;
-
-    /** The application's secret, which salts what it hashes. */
-    public function secret(): string;
-}
+require_once __DIR__.'/../Resources/Aliases.php';

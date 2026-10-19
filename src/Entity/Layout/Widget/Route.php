@@ -5,7 +5,7 @@ namespace Base\Entity\Layout\Widget;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Database\Attribute\DiscriminatorEntry;
-use Base\Exception\MissingContractException;
+use Omnibridge\Exception\MissingContractException;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;

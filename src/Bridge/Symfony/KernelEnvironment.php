@@ -2,7 +2,7 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Environment;
+use Omnibridge\Contract\Environment;
 
 /**
  * The Environment contract under Symfony (plan "omnibase agnostique", C4b):

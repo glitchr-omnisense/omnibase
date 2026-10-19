@@ -6,7 +6,7 @@ use Base\Screen\Screen;
 
 /**
  * A POST a page sends (plan "omnibase agnostique", C5): the address it goes
- * to and the token of its intent (Base\Contract\Tokens), which the action
+ * to and the token of its intent (Omnibridge\Contract\Tokens), which the action
  * checks. Only on a confidential screen (Base\Screen\Confidential): its
  * answers are stored by no cache.
  */

@@ -2,8 +2,8 @@
 
 namespace Base\Service\Model;
 
-use Base\Contract\Locales;
 use Base\Contract\Runtime;
+use Omnibridge\Contract\Locales;
 use Symfony\Component\Intl\Locales as IntlLocales;
 
 /**

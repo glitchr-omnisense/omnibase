@@ -2,12 +2,12 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Files;
 use Base\Service\FlysystemInterface;
 use Base\Service\MediaServiceInterface;
+use Omnibridge\Contract\Files;
 
 /**
- * Base\Contract\Files under Symfony: omnibase's Flysystem service (its storages
+ * Omnibridge\Contract\Files under Symfony: omnibase's Flysystem service (its storages
  * from flysystem.yaml) and, for a remote storage, MediaService's image route -
  * what Base\Database\Attribute\Uploader resolves a stored file to: a remote
  * storage's file through the /images route first (no local file to link), a

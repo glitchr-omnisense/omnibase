@@ -14,7 +14,7 @@ use DOMXPath;
 use Exception;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
-use Base\Exception\MissingContractException;
+use Omnibridge\Exception\MissingContractException;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: SemanticRepository::class)]

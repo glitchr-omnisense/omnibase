@@ -10,24 +10,38 @@ object) asks of the application it runs in, by an interface, never by a
 Symfony service (plan "omnibase agnostique", step C4). Each is reached through
 one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 
+**The host's contracts are omniscient/omnibridge's** (plan "omnibase agnostique", A2).
+What any host answers - addresses, translations, languages, access, sessions, tokens,
+stored files, routes, environment - lives in the omnibridge family's core,
+[omniscient/omnibridge](https://github.com/glitchr-studio/omnibridge), as
+`Omnibridge\Contract\*`, with the registry itself (`Omnibridge\Runtime`, its
+`MissingContractException` and `SystemClock`). What describes omnibase's own models stays
+here as `Base\Contract\*`: `Nouns`, `Media`, `Pictures`, `Texts`, the screens'
+`ContextProvider`, the user's `SecurityUser`/`TwoFactorUser`. `Base\Contract\Runtime` is
+omnibridge's registry (the same state) with omnibase's accessors beside it: `parameters()`,
+`nouns()`, `media()`, `pictures()`, `texts()`, `mailer()`. The former names
+(`Base\Contract\Urls`... and omnibridge/twig's `Omnibridge\Twig\Contract\Urls` and
+`Translations`) are aliases of the moved interfaces, declared with Composer's autoloader
+(`src/Resources/Aliases.php`): the same interface, one service under either name, until
+omnibase 4's final pass. New code names `Omnibridge\Contract\*`.
+
 | Contract | What it answers | Under Symfony |
 |---|---|---|
-| `Base\Contract\Urls` (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
-| `Base\Contract\Environment` (step C4b) | the environment's name (`prod`, `dev`, `test`), debug, the application's secret | `Base\Bridge\Symfony\KernelEnvironment`: `kernel.environment`, `kernel.debug`, `kernel.secret` - `BaseService::getEnvironment()`, `isDebug()`, `getSalt()` |
+| `Omnibridge\Contract\Urls` (formerly `Base\Contract\Urls`) (omnibridge/twig's `Urls`, whose `url()` it declared itself before omnibridge/twig d786505) | `path()` and `url()` of a route, `asset()` of a public file | `Base\Bridge\Symfony\RouterUrls`: `advanced_router`, the asset packages - Twig's `path()`, `url()`, `asset()` |
+| `Omnibridge\Contract\Environment` (formerly `Base\Contract\Environment`) (step C4b) | the environment's name (`prod`, `dev`, `test`), debug, the application's secret | `Base\Bridge\Symfony\KernelEnvironment`: `kernel.environment`, `kernel.debug`, `kernel.secret` - `BaseService::getEnvironment()`, `isDebug()`, `getSalt()` |
 | `Base\Service\ParameterBagInterface` (step C3c; in the registry since C4b) | the application's parameters by a dotted path | `parameter_bag`: `HotParameterBag`, the settings stored in the database over the container's - `BaseTrait::getParameterBag()`, and the autowiring of this interface since C9; where there is no container, `Base\Service\ArrayParameterBag`, and `Base\Service\HotParameters` over it for the settings (below) |
-| `Base\Contract\Routes` (step C4b) | what the routes are beyond their addresses: a route's declared path (`pattern()`), the route an address leads to (`match()`), a route's icons | `Base\Bridge\Symfony\RouterRoutes`: `advanced_router` (its route collection, `getRouteName()`) and the `IconProvider` |
-| `Omnibridge\Twig\Contract\Translations` | `trans()`, ICU messages | `Base\Bridge\Symfony\TranslatorTranslations`: the `translator` chain (texts rewritten in the back office, `Base\Service\Translator`, Symfony's) - Twig's `\|trans` |
-| `Base\Contract\Translations` (step C4b; omnibridge/twig's `Translations` and `exists()`) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
+| `Omnibridge\Contract\Routes` (formerly `Base\Contract\Routes`) (step C4b) | what the routes are beyond their addresses: a route's declared path (`pattern()`), the route an address leads to (`match()`), a route's icons | `Base\Bridge\Symfony\RouterRoutes`: `advanced_router` (its route collection, `getRouteName()`) and the `IconProvider` |
+| `Omnibridge\Contract\Translations` (formerly `Base\Contract\Translations` and omnibridge/twig's `Translations`, one interface since A2) | `trans()`, and whether the catalogue holds a key (`exists()`), for a code that tries several keys | `Base\Bridge\Symfony\TranslatorTranslations`: the same chain - `Base\Service\Translator::transExists()` |
 | `Base\Contract\Nouns` (step C4b) | what an entity is called: its noun (`entity()`), singular or plural, a gender, a level of politeness, a property's label; `entityExists()` | `Base\Service\Model\EntityNouns` from `Base\Service\Translator::getEntityNouns()`: the rule `transEntity()` answers by |
-| `Base\Contract\Access` | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
-| `Base\Contract\Sessions` (step C4b) | a user signed out when it is the visitor signed in (`signOut()`), false otherwise | `Base\Bridge\Symfony\SecuritySessions`: the token storage, the `REMEMBERME` cookie on the path and the site's domain |
-| `Base\Contract\Locales` | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
-| `Base\Contract\Files` | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
+| `Omnibridge\Contract\Access` (formerly `Base\Contract\Access`) | `isGranted()` an attribute, on a subject (a `Thread`...), `getUser()` | `Base\Bridge\Symfony\SecurityAccess`: the authorization checker and the token storage - `BaseService::isGranted()`, Twig's `is_granted()` |
+| `Omnibridge\Contract\Sessions` (formerly `Base\Contract\Sessions`) (step C4b) | a user signed out when it is the visitor signed in (`signOut()`), false otherwise | `Base\Bridge\Symfony\SecuritySessions`: the token storage, the `REMEMBERME` cookie on the path and the site's domain |
+| `Omnibridge\Contract\Locales` (formerly `Base\Contract\Locales`) | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
+| `Omnibridge\Contract\Files` (formerly `Base\Contract\Files`) | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
 | `Base\Contract\Media` (step C4b) | the image route for a stored image: the extension it is served with, its obfuscated `data`, the route's address | `Base\Bridge\Symfony\ServiceMedia`: `MediaService` (`getExtension()`, `obfuscate()`, `generate()`) |
 | `Base\Contract\Pictures` (step C5) | an image's address at a size, what `\|picture` answers | `Base\Bridge\Symfony\MediaPictures`: `CommonsTwigExtension::picture()` (MediaService's thumbnails) |
 | `Base\Contract\Texts` (step C5) | a stored text rendered (Editor.js or HTML), its table of contents, whether it is Editor.js | `Base\Bridge\Symfony\WysiwygTexts`: the pipeline of `\|wysiwyg` and `\|wysiwyg_toc` |
-| `Base\Contract\Tokens` (step C5) | the token a form carries for an intent (`csrf()`), what a screen's actions send back | `Base\Bridge\Symfony\CsrfTokens`: the CSRF token manager - Twig's `csrf_token()` |
-| `Psr\Clock\ClockInterface` (PSR-20) | `now()` | the framework's `clock` (symfony/clock); the machine's (`Base\Contract\SystemClock`) when there is none |
+| `Omnibridge\Contract\Tokens` (formerly `Base\Contract\Tokens`) (step C5) | the token a form carries for an intent (`csrf()`), what a screen's actions send back | `Base\Bridge\Symfony\CsrfTokens`: the CSRF token manager - Twig's `csrf_token()` |
+| `Psr\Clock\ClockInterface` (PSR-20) | `now()` | the framework's `clock` (symfony/clock); the machine's (`Omnibridge\SystemClock`) when there is none |
 | `Psr\EventDispatcher\EventDispatcherInterface` (PSR-14) | `dispatch()` | `event_dispatcher` |
 | `Symfony\Component\Mailer\MailerInterface` | `send()` | `mailer.mailer` |
 
@@ -286,6 +300,6 @@ bundle classes]))` and binds it to `Base\Contract\Nouns`.
 
 **A number of seconds in words: `Base\Service\Model\Duration`.** `Translator::transTime()`'s
 words (`base.years` to `base.seconds`, ICU plurals; a month of 30 days) over the Translations
-contract - omnibridge/twig's, `trans()` alone. Under Symfony that is the `translator` chain, so
+contract (`trans()`). Under Symfony that is the `translator` chain, so
 a unit the team rewrote in the back office is the one printed, as before; `transTime()` now
 answers by it.

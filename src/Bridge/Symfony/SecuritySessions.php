@@ -2,8 +2,8 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Sessions;
 use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Contract\Sessions;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**

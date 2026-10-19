@@ -2,7 +2,7 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Tokens;
+use Omnibridge\Contract\Tokens;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 /**

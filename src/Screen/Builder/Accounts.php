@@ -3,8 +3,6 @@
 namespace Base\Screen\Builder;
 
 use Base\Contract\Runtime;
-use Base\Contract\Tokens;
-use Base\Contract\Urls;
 use Base\Entity\Thread;
 use Base\Entity\User;
 use Base\Entity\User\Connection;
@@ -23,6 +21,8 @@ use Base\Screen\Account\TwoFactor;
 use Base\Screen\Link;
 use Base\Screen\Shape;
 use Base\Service\SecurityPolicy;
+use Omnibridge\Contract\Tokens;
+use Omnibridge\Contract\Urls;
 use Psr\Clock\ClockInterface;
 
 /**

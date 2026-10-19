@@ -1,22 +1,12 @@
 <?php
 
-namespace Base\Contract;
-
-/**
- * What the visitor may do: an attribute (a role, "ROLE_ADMIN", or a
- * permission a voter answers, "edit" on a Thread) granted or not, on a subject
- * or none, and who the visitor is.
- *
- * The Fondation's own contract (plan "omnibase agnostique", C4, D8): an
- * entity's getter asks it instead of the framework's authorization checker.
- * Under Symfony, Base\Bridge\Symfony\SecurityAccess: Security's authorization
- * checker and token storage, the answers of BaseService::isGranted().
+/*
+ * Base\Contract\Access is omniscient/omnibridge's Omnibridge\Contract\Access: a host's
+ * contract, generic to any framework, moved to the omnibridge family's core
+ * (plan "omnibase agnostique", A2). The same interface under its former name, an
+ * alias, not a subclass, declared with the others when Composer's autoloader is
+ * loaded (src/Resources/Aliases.php, autoload.files). To be removed at omnibase
+ * 4's final pass.
  */
-interface Access
-{
-    /** Whether the visitor holds the attribute, on the subject when one is given; false for nobody signed in unless the attribute is granted to anyone. */
-    public function isGranted(mixed $attribute, mixed $subject = null): bool;
 
-    /** The visitor signed in (an application's user entity), null for nobody. */
-    public function getUser(): ?object;
-}
+require_once __DIR__.'/../Resources/Aliases.php';

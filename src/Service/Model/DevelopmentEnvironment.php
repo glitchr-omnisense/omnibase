@@ -2,7 +2,7 @@
 
 namespace Base\Service\Model;
 
-use Base\Contract\Environment;
+use Omnibridge\Contract\Environment;
 
 /**
  * Whether the application runs for its developers (plan "omnibase agnostique",

@@ -2,9 +2,9 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Routes;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\IconProvider;
+use Omnibridge\Contract\Routes;
 
 /**
  * The Routes contract under Symfony (plan "omnibase agnostique", C4b):

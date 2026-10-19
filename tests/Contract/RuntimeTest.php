@@ -9,6 +9,7 @@ use Base\Contract\Runtime;
 use Base\Contract\SystemClock;
 use Base\Contract\Urls;
 use Base\Exception\MissingContractException;
+use Omnibridge\Runtime as HostRuntime;
 use Omnibridge\Twig\Contract\Translations;
 use PHPUnit\Framework\TestCase;
 use Psr\Clock\ClockInterface;
@@ -30,14 +31,15 @@ final class RuntimeTest extends TestCase
 
     protected function setUp(): void
     {
-        // The registry is process-wide and the kernel tests fill it: kept, emptied, given back.
-        $this->snapshot = (new \ReflectionClass(Runtime::class))->getStaticProperties();
+        // The registry is process-wide and the kernel tests fill it: kept, emptied, given back
+        // (its state is omnibridge's registry's, which omnibase's extends since A2).
+        $this->snapshot = (new \ReflectionClass(HostRuntime::class))->getStaticProperties();
         Runtime::reset();
     }
 
     protected function tearDown(): void
     {
-        $class = new \ReflectionClass(Runtime::class);
+        $class = new \ReflectionClass(HostRuntime::class);
         foreach ($this->snapshot as $name => $value) {
             $class->setStaticPropertyValue($name, $value);
         }

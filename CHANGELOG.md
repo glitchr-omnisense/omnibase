@@ -129,6 +129,29 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: the host's contracts are omniscient/omnibridge's (step A2)
+- **omniscient/omnibridge** (new, required): the omnibridge family's core, the contracts any host
+  answers and their registry, framework-free (PHP and three PSRs). Moved there:
+  `Base\Contract\{Urls, Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment}`
+  as `Omnibridge\Contract\*` (Translations is omnibridge/twig's `trans()` and omnibase's `exists()`
+  in one interface; `Urls` the same, `url()` included), `Base\Contract\SystemClock` as
+  `Omnibridge\SystemClock`, `Base\Exception\MissingContractException` as
+  `Omnibridge\Exception\MissingContractException`, and the registry: `Base\Contract\Runtime` now
+  extends `Omnibridge\Runtime` (the same state) and keeps omnibase's own accessors -
+  `parameters()`, `nouns()`, `media()`, `pictures()`, `texts()`, `mailer()`. Stay omnibase's:
+  `Nouns`, `Media`, `Pictures`, `Texts`, `Link`, `Framework`, `SecurityUser`, `TwoFactorUser`, the
+  screens' `ContextProvider`.
+- **The former names keep working**: each is an alias of the moved class (`class_alias`, not a
+  subclass), declared when Composer's autoloader is loaded (`src/Resources/Aliases.php`, a new
+  `autoload.files` entry; each former file requires it, for a host that maps `Base\` by hand), so
+  a type or an `instanceof` naming it holds before anything asks for it. omnibridge/twig's
+  `Omnibridge\Twig\Contract\{Urls, Translations}` are its own aliases of the same interfaces. The
+  registry resolves a former name to the interface's own: one service under either. Under Symfony
+  each contract is bound under its own name (`Omnibridge\Contract\Urls` →
+  `Base\Bridge\Symfony\RouterUrls`...), the former names aliasing it; `base.contracts` lists both
+  (`ContractsPass::FORMER`). To be removed at omnibase 4's final pass.
+- The core's own code (the Symfony adapters, the entities, the services) names the new classes.
+
 ### Changed: what the classes read through BaseTrait, on contracts (step C4b)
 Names constant (`BaseTrait` and its accessors stay for the bundles and the sites); each move
 compared under Symfony with the service it replaces, and run where there is no framework

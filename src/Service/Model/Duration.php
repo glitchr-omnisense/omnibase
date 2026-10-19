@@ -2,7 +2,7 @@
 
 namespace Base\Service\Model;
 
-use Omnibridge\Twig\Contract\Translations;
+use Omnibridge\Contract\Translations;
 
 /**
  * A number of seconds in words - "2 jours 3 heures 5 minutes" - from the
