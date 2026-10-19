@@ -543,6 +543,9 @@ class AttributeReader extends AbstractLocalCache
             
             foreach($reflClass->getAttributes() as $attribute) {
 
+                // A package's attribute, the package not installed (#[ApiResource] without API
+                // Platform, audit R4): ignored, as PHP ignores it until it is instantiated.
+                if (!class_exists($attribute->getName())) continue;
                 $attribute = $attribute->newInstance();
                 if (!is_serializable($attribute)) {
                     throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
@@ -601,6 +604,7 @@ class AttributeReader extends AbstractLocalCache
                 $this->methodAttributes[$reflClass->name][$reflMethod->name] = [];
                 foreach($reflMethod->getAttributes() as $attribute) {
 
+                    if (!class_exists($attribute->getName())) continue; // not installed (audit R4)
                     $attribute = $attribute->newInstance();
                     if (!is_serializable($attribute)) {
                         throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
@@ -662,6 +666,7 @@ class AttributeReader extends AbstractLocalCache
                 $this->propertyAttributes[$reflClass->name][$reflProperty->name] = [];
                 foreach($reflProperty->getAttributes() as $attribute) {
 
+                    if (!class_exists($attribute->getName())) continue; // not installed (audit R4)
                     $attribute = $attribute->newInstance();
                     if (!is_serializable($attribute)) {
                         throw new Exception("Attribute \"" . get_class($attribute) . "\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");

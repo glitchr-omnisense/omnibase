@@ -129,6 +129,16 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Fixed: an attribute of a package not installed no longer stops the mapping (step R4)
+- `Base\Database\Mapping\NamingStrategy::classToTableName()` and `Base\Attributes\AttributeReader`
+  (class, method and property attributes) instantiated every attribute of an entity, so the core's
+  entities could not be mapped where a package whose attribute they carry is not installed:
+  API Platform's `#[ApiResource]` on `User` and `Thread`, which the core only suggests ("Attribute
+  class ApiPlatform\Metadata\ApiResource not found", under Laravel with omnibridge/laravel's
+  `omnibridge.doctrine.omnibase`). Such an attribute is left aside, as PHP itself leaves it until
+  it is instantiated; where the package is installed nothing changes. `NamingStrategyTest` names a
+  class carrying an attribute nobody installs (audit "lesringostars face au master plan", R4).
+
 ### Changed: the users' repository loads without Security (step R2)
 - **`Base\Repository\UserRepository` implements `Base\Contract\SecurityUserLoader` and
   `Base\Contract\SecurityUserProvider`** instead of doctrine-bridge's `UserLoaderInterface` and
