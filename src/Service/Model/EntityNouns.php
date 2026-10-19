@@ -3,9 +3,9 @@
 namespace Base\Service\Model;
 
 use Base\Contract\Nouns;
-use Base\Contract\Translations;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use Omnibridge\Contract\Translations;
 
 /**
  * The Nouns contract's rule (plan "omnibase agnostique", C4b): an entity's

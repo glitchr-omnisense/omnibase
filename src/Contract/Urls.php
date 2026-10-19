@@ -1,24 +1,12 @@
 <?php
 
-namespace Base\Contract;
-
-use Omnibridge\Twig\Contract\Urls as ViewUrls;
-
-/**
- * Addresses, as omnibase's framework-free code asks for them: a route by its
- * name, as a path (`path()`) or whole, with the scheme and the host (`url()`,
- * for a mail, a feed, a link shared), and a public file (`asset()`).
- *
- * It is omnibridge/twig's Urls under omnibase's name: a page rendered by any
- * framework asks the same contract, so one object answers both (plan
- * "omnibase agnostique", C4, D8). omnibridge/twig has had url() since
- * d786505; this interface declared it on its own side before, and now only
- * extends it. Under Symfony, Base\Bridge\Symfony\RouterUrls: the router and
- * the asset packages, the same strings as Twig's path(), url() and asset().
- *
- * Base\Contract\Link::to() reaches it with a router's reference type, as the
- * entities' __toLink() take one.
+/*
+ * Base\Contract\Urls is omniscient/omnibridge's Omnibridge\Contract\Urls: a host's
+ * contract, generic to any framework, moved to the omnibridge family's core
+ * (plan "omnibase agnostique", A2). The same interface under its former name, an
+ * alias, not a subclass, declared with the others when Composer's autoloader is
+ * loaded (src/Resources/Aliases.php, autoload.files). To be removed at omnibase
+ * 4's final pass.
  */
-interface Urls extends ViewUrls
-{
-}
+
+require_once __DIR__.'/../Resources/Aliases.php';

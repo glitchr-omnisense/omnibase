@@ -3,7 +3,7 @@
 namespace Base\Traits;
 
 use Base\Attributes\AttributeReader;
-use Base\Contract\Environment as EnvironmentContract;
+use Omnibridge\Contract\Environment as EnvironmentContract;
 use Base\Contract\Runtime;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;

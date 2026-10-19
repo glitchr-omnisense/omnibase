@@ -2,7 +2,7 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Translations;
+use Omnibridge\Contract\Translations;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 

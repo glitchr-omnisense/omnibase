@@ -2,12 +2,12 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Urls;
+use Omnibridge\Contract\Urls;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * Base\Contract\Urls under Symfony: the router (omnibase's advanced_router,
+ * Omnibridge\Contract\Urls under Symfony: the router (omnibase's advanced_router,
  * which generates through the application's) and the asset packages - what
  * Twig's path(), url() and asset() answer, the same strings.
  */

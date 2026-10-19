@@ -2,7 +2,6 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Access;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Screen\Account\NotificationsPage;
@@ -12,6 +11,7 @@ use Base\Screen\Builder\Accounts;
 use Base\Twig\Extension\MediaTwigExtension;
 use Base\Twig\Extension\NotificationTwigExtension;
 use Base\Twig\Extension\OAuthTwigExtension;
+use Omnibridge\Contract\Access;
 use Twig\Environment;
 use Twig\Extension\CoreExtension;
 

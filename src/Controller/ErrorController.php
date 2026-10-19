@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Contract\Environment;
+use Omnibridge\Contract\Environment;
 use Base\Service\Model\DevelopmentEnvironment;
 
 use Base\Routing\AdvancedRouterInterface;

@@ -1,19 +1,10 @@
 <?php
 
-namespace Base\Contract;
-
-use Psr\Clock\ClockInterface;
-
-/**
- * The clock of the machine, the registry's clock when no framework gave one
- * (Base\Contract\Runtime::clock()). Under Symfony the registry holds the
- * framework's `clock` service instead (symfony/clock, a PSR-20 clock that a
- * test can freeze).
+/*
+ * Base\Contract\SystemClock is omniscient/omnibridge's Omnibridge\SystemClock, the
+ * registry's clock when no host gave one (plan "omnibase agnostique", A2): an
+ * alias, declared with the others (src/Resources/Aliases.php). To be removed at
+ * omnibase 4's final pass.
  */
-final class SystemClock implements ClockInterface
-{
-    public function now(): \DateTimeImmutable
-    {
-        return new \DateTimeImmutable();
-    }
-}
+
+require_once __DIR__.'/../Resources/Aliases.php';

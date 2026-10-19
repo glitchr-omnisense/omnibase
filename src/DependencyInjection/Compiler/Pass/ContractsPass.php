@@ -2,21 +2,20 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
-use Base\Contract\Access;
-use Base\Contract\Environment;
-use Base\Contract\Files;
-use Base\Contract\Locales;
 use Base\Contract\Media;
 use Base\Contract\Nouns;
 use Base\Contract\Pictures;
-use Base\Contract\Routes;
-use Base\Contract\Sessions;
 use Base\Contract\Texts;
-use Base\Contract\Tokens;
-use Base\Contract\Translations as BaseTranslations;
-use Base\Contract\Urls;
 use Base\Service\ParameterBagInterface;
-use Omnibridge\Twig\Contract\Translations;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Environment;
+use Omnibridge\Contract\Files;
+use Omnibridge\Contract\Locales;
+use Omnibridge\Contract\Routes;
+use Omnibridge\Contract\Sessions;
+use Omnibridge\Contract\Tokens;
+use Omnibridge\Contract\Translations;
+use Omnibridge\Contract\Urls;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -28,7 +27,9 @@ use Symfony\Component\Mailer\MailerInterface;
 /**
  * The locator Base\Contract\Runtime reaches the contracts of the Fondation
  * through (plan "omnibase agnostique", C4), handed to it by
- * BaseBundle::boot(): each contract by its interface's name, the service the
+ * BaseBundle::boot() - omniscient/omnibridge's registry since A2, the host's
+ * contracts (Omnibridge\Contract\*) with omnibase's own (Nouns, Media,
+ * Pictures, Texts, the parameters): each contract by its interface's name, the service the
  * container binds to that name - omnibase's adapters (Base\Bridge\Symfony\*,
  * config/services/core.php), the framework's clock, event dispatcher and
  * mailer, or an application's own binding, which wins as any alias does.
@@ -49,7 +50,6 @@ final class ContractsPass implements CompilerPassInterface
         Environment::class,
         ParameterBagInterface::class,
         Translations::class,
-        BaseTranslations::class,
         Nouns::class,
         Access::class,
         Sessions::class,
@@ -62,6 +62,28 @@ final class ContractsPass implements CompilerPassInterface
         ClockInterface::class,
         EventDispatcherInterface::class,
         MailerInterface::class,
+    ];
+
+    /**
+     * The former names of the contracts that moved to omniscient/omnibridge
+     * (A2), aliases of its interfaces until omnibase 4's final pass: listed in
+     * the locator too, the same service as the contract's own name. The
+     * registry asks by the own name first.
+     *
+     * @var array<string, class-string>
+     */
+    public const FORMER = [
+        'Base\\Contract\\Urls' => Urls::class,
+        'Omnibridge\\Twig\\Contract\\Urls' => Urls::class,
+        'Base\\Contract\\Translations' => Translations::class,
+        'Omnibridge\\Twig\\Contract\\Translations' => Translations::class,
+        'Base\\Contract\\Locales' => Locales::class,
+        'Base\\Contract\\Access' => Access::class,
+        'Base\\Contract\\Sessions' => Sessions::class,
+        'Base\\Contract\\Tokens' => Tokens::class,
+        'Base\\Contract\\Files' => Files::class,
+        'Base\\Contract\\Routes' => Routes::class,
+        'Base\\Contract\\Environment' => Environment::class,
     ];
 
     /**
@@ -83,6 +105,11 @@ final class ContractsPass implements CompilerPassInterface
             $id = self::SERVICES[$contract] ?? $contract;
             if ($container->has($id)) {
                 $contracts[$contract] = new Reference($id);
+            }
+        }
+        foreach (self::FORMER as $former => $contract) {
+            if (isset($contracts[$contract])) {
+                $contracts[$former] = $contracts[$contract];
             }
         }
 

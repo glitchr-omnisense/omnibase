@@ -2,12 +2,12 @@
 
 namespace Base\Service;
 
-use Base\Contract\Translations;
 use Base\Database\Type\SetType;
 use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
 use Base\Service\Model\NounVariants;
 use Doctrine\DBAL\Types\Type;
+use Omnibridge\Contract\Translations;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
@@ -668,7 +668,7 @@ class Translator implements TranslatorInterface, Translations
     }
 
     /**
-     * The Translations contract's question (Base\Contract\Translations):
+     * The Translations contract's question (Omnibridge\Contract\Translations):
      * whether the catalogue holds the key, as transExists() answers.
      */
     public function exists(string $id, ?string $domain = null, ?string $locale = null): bool

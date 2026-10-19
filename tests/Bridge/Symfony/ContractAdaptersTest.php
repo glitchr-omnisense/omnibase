@@ -78,6 +78,31 @@ final class ContractAdaptersTest extends KernelTestCase
         self::assertSame(Runtime::urls(), $container->get(ContractsPass::SERVICE)->get(Urls::class));
     }
 
+    /**
+     * The host's contracts are omniscient/omnibridge's since A2: the container
+     * binds each under its own name (Omnibridge\Contract\*) and its former names
+     * alias it - the same object autowired by either, in the locator under
+     * either, and what the registry answers.
+     */
+    public function testEachContractIsOneServiceUnderItsOwnAndItsFormerNames(): void
+    {
+        $container = static::getContainer();
+        $locator = $container->get(ContractsPass::SERVICE);
+
+        foreach (ContractsPass::FORMER as $former => $contract) {
+            if (!$locator->has($contract)) {
+                continue;
+            }
+            self::assertSame($locator->get($contract), $locator->get($former), $former);
+            self::assertSame(Runtime::get($contract), Runtime::get($former), $former);
+            self::assertSame(Runtime::get($contract), $locator->get($contract), $contract);
+        }
+        self::assertSame(Runtime::urls(), $container->get(\Omnibridge\Contract\Urls::class));
+        self::assertSame(Runtime::urls(), $container->get(Urls::class));
+        self::assertSame(Runtime::translations(), $container->get(Translations::class));
+        self::assertSame(Runtime::translations(), $container->get(\Base\Contract\Translations::class));
+    }
+
     public function testANewKernelReplacesTheRegistrysServices(): void
     {
         $urls = Runtime::urls();

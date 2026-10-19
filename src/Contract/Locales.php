@@ -1,29 +1,12 @@
 <?php
 
-namespace Base\Contract;
-
-/**
- * The languages of the site, in omnibase's form: language and country joined
- * by a dash (fr-FR, en-GB, Base\Service\Localizer::SEPARATOR).
- *
- * The Fondation's own contract (plan "omnibase agnostique", C4): the
- * translatable entities and their getters ask it instead of the Localizer
- * service. Named in the plural, as omnibridge/twig's Urls and Translations,
- * and so as not to shadow PHP's \Locale where it is imported. Under Symfony,
- * Base\Bridge\Symfony\LocalizerLocales: the Localizer's answers.
+/*
+ * Base\Contract\Locales is omniscient/omnibridge's Omnibridge\Contract\Locales: a host's
+ * contract, generic to any framework, moved to the omnibridge family's core
+ * (plan "omnibase agnostique", A2). The same interface under its former name, an
+ * alias, not a subclass, declared with the others when Composer's autoloader is
+ * loaded (src/Resources/Aliases.php, autoload.files). To be removed at omnibase
+ * 4's final pass.
  */
-interface Locales
-{
-    /** The locale of the request being answered (or of the command), fr-FR. */
-    public function getLocale(): string;
 
-    /** The site's default locale, the language its texts are written in first. */
-    public function getDefaultLocale(): string;
-
-    /**
-     * Every locale the site speaks, the default first.
-     *
-     * @return list<string>
-     */
-    public function getAvailableLocales(): array;
-}
+require_once __DIR__.'/../Resources/Aliases.php';

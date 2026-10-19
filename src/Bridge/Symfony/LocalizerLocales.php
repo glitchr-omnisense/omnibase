@@ -2,11 +2,11 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Contract\Locales;
 use Base\Service\LocalizerInterface;
+use Omnibridge\Contract\Locales;
 
 /**
- * Base\Contract\Locales under Symfony: omnibase's Localizer (the request's
+ * Omnibridge\Contract\Locales under Symfony: omnibase's Localizer (the request's
  * locale, the site's default and fallbacks from base.yaml), its answers in a
  * list.
  */

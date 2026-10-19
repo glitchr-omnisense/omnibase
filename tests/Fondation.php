@@ -85,6 +85,11 @@
  * ArrayParameterBag and the Symfony ParameterBag read through; Base\Service\HotParameters, the settings stored
  * in the database laid over any parameters, HotParameterBag's logic; Base\Service\SettingBag, on psr/cache since
  * its cache warmer moved to Base\Bridge\Symfony\SettingBagWarmer).
+ * 781 after step A2, unchanged: the host's contracts moved to omniscient/omnibridge (Omnibridge\Contract\*, with
+ * Omnibridge\Runtime, SystemClock and MissingContractException); their former names listed here - Base\Contract\
+ * {Urls, Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment, SystemClock} and Base\Exception\
+ * MissingContractException - are aliases declared with the autoloader (src/Resources/Aliases.php) and load the
+ * moved classes, which stand on PHP and the PSRs alone; Base\Contract\Runtime extends omnibridge's registry.
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 

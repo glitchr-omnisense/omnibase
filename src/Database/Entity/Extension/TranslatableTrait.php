@@ -5,7 +5,7 @@ namespace Base\Database\Entity\Extension;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\Entity\Extension\TranslationInterface;
 
-use Base\Contract\Locales;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
 use Base\Service\Model\LocaleNormalizer;
 use Doctrine\Common\Collections\ArrayCollection;
