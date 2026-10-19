@@ -36,3 +36,33 @@ foreach ([
 ] as $former => $class) {
     Omnibridge\Runtime::alias($class, $former);
 }
+
+/*
+ * The former names of what moved from omniscient/omnibase to omnibridge/symfony
+ * (plan "omnibase agnostique", A1): the adapters of the host's contracts over
+ * Symfony's own services, and FileLinks. Each is the moved class under its
+ * former name, a class_alias, not a subclass. Declared only where
+ * omnibridge/symfony is installed (a Symfony site: the core's Symfony bundle
+ * needs it; a Laravel site or the Fondation alone has neither name), when the
+ * autoloader is loaded, as above. omnibase's own adapters (those that read
+ * omnibase's services: LocalizerLocales, FlysystemFiles, RouterRoutes,
+ * MediaPictures...) stay Base\Bridge\Symfony.
+ *
+ * To be removed at omnibase 4's final pass, with the ones above.
+ */
+
+if (class_exists(Omnibridge\Symfony\RouterUrls::class)) {
+    foreach ([
+        'Base\Bridge\Symfony\RouterUrls' => Omnibridge\Symfony\RouterUrls::class,
+        'Base\Bridge\Symfony\TranslatorTranslations' => Omnibridge\Symfony\TranslatorTranslations::class,
+        'Base\Bridge\Symfony\KernelEnvironment' => Omnibridge\Symfony\Contract\KernelEnvironment::class,
+        'Base\Bridge\Symfony\SecurityAccess' => Omnibridge\Symfony\Contract\SecurityAccess::class,
+        'Base\Bridge\Symfony\SecuritySessions' => Omnibridge\Symfony\Contract\SecuritySessions::class,
+        'Base\Bridge\Symfony\CsrfTokens' => Omnibridge\Symfony\Contract\CsrfTokens::class,
+        'Base\Bridge\Symfony\FileLinks' => Omnibridge\Symfony\FileLinks::class,
+    ] as $former => $class) {
+        if (!class_exists($former, false)) {
+            class_alias($class, $former);
+        }
+    }
+}

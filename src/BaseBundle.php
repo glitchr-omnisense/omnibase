@@ -46,9 +46,18 @@ class BaseBundle extends AbstractBaseBundle
             self::$_instance = $this;
         }
 
+        // omnibase under Symfony stands on omnibridge/symfony (plan "omnibase
+        // agnostique", A1): the adapters of the host's contracts over Symfony's
+        // services, their wiring and the framework packages. The core only
+        // suggests it (a Laravel site does not want it): said here, before
+        // anything of it is asked, rather than as a class not found.
+        if (!class_exists(\Omnibridge\Symfony\OmnibridgeBundle::class)) {
+            throw new \LogicException('omniscient/omnibase under Symfony needs omnibridge/symfony 1.x (the adapters of the host\'s contracts, Omnibridge\\Symfony\\*, and the framework packages): composer require omnibridge/symfony:1.x-dev');
+        }
+
         // Before the container is built: an error Symfony's ErrorHandler renders
         // by itself (a container that does not compile) links to the host too.
-        \Base\Bridge\Symfony\FileLinks::export();
+        \Omnibridge\Symfony\FileLinks::export();
     }
 
     /**

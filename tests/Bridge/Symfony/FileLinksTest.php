@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Bridge\Symfony;
 
-use Base\Bridge\Symfony\FileLinks;
+use Omnibridge\Symfony\FileLinks;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;

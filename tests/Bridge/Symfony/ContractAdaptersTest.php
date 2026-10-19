@@ -4,9 +4,9 @@ namespace Tests\Base\Bridge\Symfony;
 
 use Base\Bridge\Symfony\FlysystemFiles;
 use Base\Bridge\Symfony\LocalizerLocales;
-use Base\Bridge\Symfony\RouterUrls;
-use Base\Bridge\Symfony\SecurityAccess;
-use Base\Bridge\Symfony\TranslatorTranslations;
+use Omnibridge\Symfony\RouterUrls;
+use Omnibridge\Symfony\Contract\SecurityAccess;
+use Omnibridge\Symfony\TranslatorTranslations;
 use Base\Contract\Access;
 use Base\Contract\Files;
 use Base\Contract\Locales;

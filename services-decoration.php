@@ -86,10 +86,10 @@ return static function (ContainerConfigurator $container): void {
 
     // The file links of the error pages and of the profiler, on the developer's
     // machine when the site runs in a container (APP_PATH): Symfony's own
-    // FileLinkFormatter on a mapped format (Base\Bridge\Symfony\FileLinks).
+    // FileLinkFormatter on a mapped format (omnibridge/symfony's Omnibridge\Symfony\FileLinks).
     $services->set('base.debug.file_link_formatter', \Symfony\Component\ErrorHandler\ErrorRenderer\FileLinkFormatter::class)
         ->decorate('debug.file_link_formatter', null, 0, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
-        ->factory([\Base\Bridge\Symfony\FileLinks::class, 'formatter'])
+        ->factory([\Omnibridge\Symfony\FileLinks::class, 'formatter'])
         ->args([
             new Reference('.inner'),
             '%debug.file_link_format%',

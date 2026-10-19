@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Bridge\Symfony;
 
-use Base\Bridge\Symfony\CsrfTokens;
+use Omnibridge\Symfony\Contract\CsrfTokens;
 use Base\Bridge\Symfony\MediaPictures;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Bridge\Symfony\SymfonyScreenContext;

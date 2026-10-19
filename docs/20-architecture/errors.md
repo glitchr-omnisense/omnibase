@@ -44,7 +44,7 @@ The debug page's and the profiler's links open the file on the developer's machi
 when the site runs in a container: `APP_PATH` (the project's path on the host, which
 a site's Makefile writes in `.env.local`) is mapped from `kernel.project_dir` with
 Symfony's own format, `vscode://file/%f:%l&/srv/app/>/Users/me/site/`
-(`Base\Bridge\Symfony\FileLinks`). `debug.file_link_formatter` is decorated with
+(omnibridge/symfony's `Omnibridge\Symfony\FileLinks`, formerly `Base\Bridge\Symfony\FileLinks`). `debug.file_link_formatter` is decorated with
 Symfony's `FileLinkFormatter` on that format (the HTML error renderer and the
 profiler receive it), and `SYMFONY_IDE` is set to it when `Base\BaseBundle` is
 constructed, for the page Symfony's `ErrorHandler` renders by itself before a

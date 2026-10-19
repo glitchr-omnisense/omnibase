@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Contract;
 
-use Base\Bridge\Symfony\SecuritySessions;
+use Omnibridge\Symfony\Contract\SecuritySessions;
 use Base\Contract\Runtime;
 use Base\Service\Localizer;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

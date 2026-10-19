@@ -306,7 +306,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
      * An administrator sees every thread; anyone else an approved, published,
      * not secret one. Asked of the Access contract (plan "omnibase
      * agnostique", C3e), not of BaseService: under Symfony the same
-     * authorization checker (Base\Bridge\Symfony\SecurityAccess).
+     * authorization checker (Omnibridge\Symfony\Contract\SecurityAccess).
      *
      * It also asked whether the owners contained the token storage's token -
      * a token compared with users, never one of them: never true, so dropped
