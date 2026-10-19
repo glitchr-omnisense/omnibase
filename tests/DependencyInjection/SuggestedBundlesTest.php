@@ -3,7 +3,10 @@
 namespace Tests\Base\DependencyInjection;
 
 use Base\Contract\Framework;
+use Base\Contract\SecurityUserLoader;
+use Base\Contract\SecurityUserProvider;
 use Base\Entity\User;
+use Base\Repository\UserRepository;
 use Base\Security\OAuthUserProvider;
 use Base\Service\Flysystem;
 use Base\Service\FlysystemInterface;
@@ -101,6 +104,30 @@ class SuggestedBundlesTest extends KernelTestCase
         $this->assertNull($user->getTotpAuthenticationConfiguration());
         $user->setTotpSecret('JBSWY3DPEHPK3PXP');
         $this->assertSame('JBSWY3DPEHPK3PXP', $user->getTotpAuthenticationConfiguration()?->getSecret());
+    }
+
+    /**
+     * Base\Repository\UserRepository under Symfony implements every interface it did up to 4.0
+     * (audit "lesringostars face au master plan", R2): doctrine-bridge's user loader, Security's
+     * user provider and password upgrader, through Base\Contract\SecurityUserLoader and SecurityUserProvider - the
+     * packages being installed here, installed means declared, as for the user (C7b, C7c).
+     */
+    public function testTheUsersRepositoryImplementsSecurityInterfacesUnderSymfony(): void
+    {
+        $this->assertTrue(Framework::declares(
+            'Symfony\\Bridge\\Doctrine\\Security\\User\\UserLoaderInterface',
+            'Symfony\\Component\\Security\\Core\\User\\UserProviderInterface',
+            'Symfony\\Component\\Security\\Core\\User\\PasswordUpgraderInterface',
+        ), 'installed, so declared');
+        foreach ([
+            'Symfony\\Bridge\\Doctrine\\Security\\User\\UserLoaderInterface',
+            'Symfony\\Component\\Security\\Core\\User\\UserProviderInterface',
+            'Symfony\\Component\\Security\\Core\\User\\PasswordUpgraderInterface',
+        ] as $interface) {
+            $this->assertTrue(is_subclass_of(UserRepository::class, $interface), $interface);
+        }
+        $this->assertSame('Base\\Bridge\\Symfony\\SecurityUserProvider', (new \ReflectionClass(SecurityUserProvider::class))->getName(), 'the alias of the Symfony side');
+        $this->assertSame('Base\\Bridge\\Symfony\\SecurityUserLoader', (new \ReflectionClass(SecurityUserLoader::class))->getName(), 'the alias of the Symfony side');
     }
 
     /**

@@ -3,14 +3,12 @@
 namespace Base\Repository;
 
 use App\Entity\User;
-use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
-
+use Base\Contract\SecurityUserLoader;
+use Base\Contract\SecurityUserProvider;
 use Base\Database\Repository\ServiceEntityRepository;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -18,8 +16,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * Security's user loader, user provider and password upgrader where
+ * symfony/doctrine-bridge and symfony/security-core are installed, through
+ * Base\Contract\SecurityUserLoader and SecurityUserProvider (audit
+ * "lesringostars face au master plan", R2): installed means declared, as for Base\Entity\User (C7b, C7c).
+ * Elsewhere the repository loads without them, and its Security methods are
+ * left uncalled.
  */
-class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, UserProviderInterface, PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements SecurityUserLoader, SecurityUserProvider
 {
     public function supportsClass(string $class): bool
     {
