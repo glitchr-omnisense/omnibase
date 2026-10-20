@@ -86,3 +86,41 @@ its roles, not "mandatory for everyone" - and it changes none of its
 credentials (`isDemoAccount($user)`, `canChangeCredentials($user)`,
 `canEnableTwoFactor($user)`). Every other account, and every environment
 other than `demo`, is as described here.
+
+## Under omniauth (`Base\Auth\`)
+
+With `omniscient/omniauth` installed (the core suggests it, and its methods
+`omniauth/passkey`, `omniauth/totp`, `omniauth/oauth`), `Base\Auth\` fills its
+contracts on omnibase's own tables - the same rows Symfony's sign-in reads
+today, so an account signs in the same way under any host. Nothing is wired
+by the core itself: a host bridge (omnibridge/symfony, omnibridge/laravel)
+mounts them.
+
+| omniauth's store | `Base\Auth\` | What it reads and writes |
+|---|---|---|
+| `Accounts` | `UserAccounts` | `user` (and the application's table): by address, then by the application's identifier field; the id as the handle; `check()` refuses `restricted`, `banned`, `locked`, `disabled` (`@notifications.login.<reason>`) |
+| `Passwords` | `UserPasswords` | `user.password` |
+| `LinkTokens`, `PlainLinkTokens` | `UserLinkTokens` | `userToken` "login-token": the link's SHA-256, used once; the links sent before in clear until their deadline |
+| `TotpSecrets` | `UserTotpSecrets` | `user.secret` |
+| `EmailCodes` | `UserEmailCodes` | `user.emailAuthEnabled`, `user.emailAuthCode` (the code's keyed hash) |
+| `BackupCodes` | `UserBackupCodes` | `user.backupCodes` |
+| `TrustedVersion` | `UserTrustedVersion` | `user.trustedTokenVersion` |
+| `Passkeys` | `UserPasskeys` | `userPasskey` |
+| `Identities` | `UserIdentities` | `userIdentity`: provider, subject, the account, the address then and whether it was vouched for, created, last used |
+
+`Base\Auth\Policy` is this page's rule on omniauth's second-factor rule: a
+demonstration account is never asked for one; an account a second factor is
+required of and that has none is signed in, then sent to enrol
+(`needsEnrolment()`); turning off the last second factor of such an account is
+refused (`onRevoking()`, reason `two-factor-mandatory`), any credential of a
+demonstration account too (`demo-account`); and an account that has a second
+factor or an administration role (`SecurityPolicy::isAdministrator()`) is
+never linked to an identity provider by its address alone
+(`allowsEmailLinking()`, through `PolicyLinking`).
+
+The listeners, `Base\Auth\Listener\*`, each say which events they take
+(`events()`): `GuardSignIn` (the captcha after failures from an address,
+`SignInGuard`), `TrackConnections` (the browsers' connections), `WarnNewDevice`
+(the e-mail and the offer of a new device), `UpdateAccount` (unknown roles,
+time zone, language, kick, at each sign-in) and `WelcomeBack` (the e-mail of a
+disabled account).

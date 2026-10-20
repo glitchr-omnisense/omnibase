@@ -182,6 +182,17 @@ class Token implements IconizeInterface
         return $this->value;
     }
 
+    /**
+     * Keeps another value than the one generate() drew: a sign-in link's
+     * SHA-256, whose value only the mailbox holds (Base\Auth\UserLinkTokens,
+     * plan "omniauth", QA4).
+     */
+    public function setValue(string $value): self
+    {
+        $this->value = $value;
+        return $this;
+    }
+
     public function generate(?int $expiry = null, ?int $throttle = null): self
     {
         // Creation date
