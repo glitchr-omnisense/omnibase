@@ -50,6 +50,10 @@ class NewDeviceSubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
+        // omniauth's sign-ins are Base\Auth\Listener\WarnNewDevice's, after TrackConnections made the connection.
+        if (\Base\Security\SignInGuard::byOmniauth($event->getPassport())) {
+            return;
+        }
         $email = $this->securityPolicy->isNewDeviceEmailEnabled();
         $prompt = $this->securityPolicy->isNewDevicePromptEnabled();
         if (!$email && !$prompt) {

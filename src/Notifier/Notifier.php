@@ -311,6 +311,45 @@ class Notifier extends BaseNotifier implements NotifierInterface
     }
 
     /**
+     * The sign-in link omniauth issued (plan "omniauth", QA4): its token in
+     * the address, only here - the table keeps its hash -, and until when it
+     * serves. The same e-mail as loginToken()'s.
+     */
+    public function loginLink(User $user, string $token, \DateTimeInterface $until): Notification
+    {
+        $notification = new Notification("loginToken.confirmation");
+        $notification->setUser($user);
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
+            "subject" => $this->translator->trans("@emails.loginToken.subject"),
+            "content" => $this->translator->trans("@emails.loginToken.content"),
+            "action_text" => $this->translator->trans("@emails.loginToken.action_text"),
+            "action_url" => $this->router->getUrl("security_loginWithToken", ["token" => $token]),
+            "footer_text" => $this->translator->trans("@emails.loginToken.expiry", [$this->translator->transTime(max(1, $until->getTimestamp() - time()))]),
+        ]);
+
+        return $notification;
+    }
+
+    /**
+     * The code of the second factor by e-mail omniauth drew (plan "omniauth",
+     * QA5: the table keeps its hash), and until when it serves.
+     */
+    public function emailCode(User $user, string $code, \DateTimeInterface $until): Notification
+    {
+        $notification = new Notification("emailCode.subject");
+        $notification->setUser($user);
+        $notification->setHtmlTemplate("email.html.twig");
+        $notification->setHtmlParameters([
+            "subject" => $this->translator->trans("@emails.emailCode.subject"),
+            "content" => $this->translator->trans("@emails.emailCode.content", [$code]),
+            "footer_text" => $this->translator->trans("@emails.emailCode.expiry", [$this->translator->transTime(max(1, $until->getTimestamp() - time()))]),
+        ]);
+
+        return $notification;
+    }
+
+    /**
      * @param User $user
      * @param Token $token
      * @return Notification

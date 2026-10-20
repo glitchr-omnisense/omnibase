@@ -11,6 +11,20 @@ D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it w
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
 ### Changed
+- **omniauth signs in, where an application turns it on** (plan "omniauth", step AU7):
+  `config/services/auth.php`, where omniscient/omniauth is installed, binds each of omniauth's
+  stores by its contract's name to `Base\Auth\`'s, omniauth's `Sender` to
+  `Base\Auth\NotifierSender` (the sign-in link and the e-mailed code by e-mail alone:
+  `Notifier::loginLink()`, `Notifier::emailCode()`, the `@emails.emailCode.*` texts), decorates
+  omniauth's second-factor rule with `Base\Auth\Policy` (and its `Revoking` listener), offers
+  `Base\Auth\PolicyLinking` to omniauth/oauth, and registers the listeners of omniauth's events
+  (`TrackConnections` before `WarnNewDevice`, `UpdateAccount`, `WelcomeBack`, `GuardSignIn`;
+  their Symfony readings in `Base\Bridge\Symfony\AuthListeners`). `BaseBundle` registers
+  omnibridge/symfony's `OmniauthExtension`: `config/packages/omniauth.yaml` wires it all, nothing
+  without it. `SignInGuard`, `ConnectionSubscriber` and `NewDeviceSubscriber` leave a sign-in
+  omniauth decided (its passport's `OmniauthBadge`, its refusal) to their listener of omniauth's
+  events. `SecurityController::LoginTokenRequest()` issues the links through omniauth when its
+  link is mounted (15 minutes, once, hashed, a new one at each request). Foundation 816 → 817.
 - **English names for the French ones** (Marco, 2026-10-21: code and routes in English, but
   the routes localized in French): the Foundation (`tests/Foundation.php`, formerly
   `tests/Fondation.php`, read by `docker/bin/bare` and `BareTest`); `is_multiline()`, with

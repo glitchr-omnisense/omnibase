@@ -89,6 +89,9 @@ class SignInGuard implements EventSubscriberInterface
 
     public function onLoginFailure(LoginFailureEvent $event): void
     {
+        if (self::byOmniauth($event->getPassport()) || $event->getException() instanceof \Omnibridge\Symfony\Auth\Exception\SignInRefused) {
+            return; // Base\Auth\Listener\GuardSignIn counted it, on omniauth's SignInFailed
+        }
         $ip = $event->getRequest()->getClientIp();
         if (null !== $ip) {
             $this->failed($ip);
@@ -107,6 +110,9 @@ class SignInGuard implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
+        if (self::byOmniauth($event->getPassport())) {
+            return;
+        }
         $ip = $event->getRequest()->getClientIp();
         if (null !== $ip) {
             $this->forget($ip);
@@ -121,6 +127,9 @@ class SignInGuard implements EventSubscriberInterface
 
     public function onCheckPassport(CheckPassportEvent $event): void
     {
+        if (self::byOmniauth($event->getPassport())) {
+            return; // the captcha was asked before omniauth checked the password (GuardSignIn, on Verifying)
+        }
         $request = $this->requests?->getCurrentRequest();
         if (null === $request || LoginFormAuthenticator::LOGIN_ROUTE !== $request->attributes->get('_route') || !$request->isMethod('POST') || $event->getAuthenticator() instanceof RescueFormAuthenticator) {
             return;
@@ -136,6 +145,16 @@ class SignInGuard implements EventSubscriberInterface
         if (!$this->passes($gateway, \is_string($token) ? $token : '', $request->getClientIp())) {
             throw new CustomUserMessageAuthenticationException(self::MESSAGE);
         }
+    }
+
+    /**
+     * A sign-in omniauth decided (omnibridge/symfony's OmniauthAuthenticator,
+     * plan "omniauth" AU7): its own events were heard, Base\Auth\Listener\GuardSignIn
+     * guarded it.
+     */
+    public static function byOmniauth(?\Symfony\Component\Security\Http\Authenticator\Passport\Passport $passport): bool
+    {
+        return null !== $passport && $passport->hasBadge(\Omnibridge\Symfony\Auth\OmniauthBadge::class);
     }
 
     /** The form field the captcha's widget posts its answer in. */

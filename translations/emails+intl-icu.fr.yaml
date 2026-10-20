@@ -53,6 +53,13 @@ verifyEmail:
     action_text._polite: "Confirmer votre compte"
     expiry: "Le lien expirera dans {0}"
 
+emailCode:
+    subject: "Ton code de connexion"
+    subject._polite: "Votre code de connexion"
+    content: "Voici le code pour terminer ta connexion : <b>{0}</b>. Si tu n'as pas essayé de te connecter, change ton mot de passe."
+    content._polite: "Voici le code pour terminer votre connexion : <b>{0}</b>. Si vous n'avez pas essayé de vous connecter, changez votre mot de passe."
+    expiry: "Le code expirera dans {0}"
+
 loginToken:
     subject: "Lien de connexion"
     content: "Tu as reçu cet email car tu as fait une demande de connexion par lien sur notre site.

@@ -172,6 +172,10 @@ settings:
     enrolmentSkipped: "Tu pourras activer la double authentification à tout moment depuis tes réglages."
     enrolmentSkipped._polite: "Vous pourrez activer la double authentification à tout moment depuis vos réglages."
 
+emailCode:
+    subject: "Ton code de connexion"
+    subject._polite: "Votre code de connexion"
+
 newDevice:
     subject: "Nouvelle connexion à ton compte, {0}"
     subject._polite: "Nouvelle connexion à votre compte, {0}"

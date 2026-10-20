@@ -4,6 +4,7 @@ namespace Base\EntitySubscriber;
 
 use App\Entity\User;
 use Base\Enum\ConnectionState;
+use Base\Security\SignInGuard;
 use Base\Security\UserTracker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -48,6 +49,8 @@ class ConnectionSubscriber implements EventSubscriberInterface
     {
         $passport = $event->getPassport();
         if(!$passport) return;
+        // omniauth's sign-ins are Base\Auth\Listener\TrackConnections's, on its own events.
+        if (SignInGuard::byOmniauth($passport)) return;
 
         $user = $passport->getUser();
         if (!$user instanceof User) return;
@@ -62,6 +65,7 @@ class ConnectionSubscriber implements EventSubscriberInterface
     {
         $passport = $event->getPassport();
         if(!$passport) return;
+        if (SignInGuard::byOmniauth($passport)) return;
 
         // The passport loads its user here, and may have none to give: an
         // identifier nobody has (UserNotFoundException), or an attempt refused
@@ -81,6 +85,7 @@ class ConnectionSubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event)
     {
+        if (SignInGuard::byOmniauth($event->getPassport())) return;
         $user = $event->getUser();
         if (!$user instanceof User) return;
 

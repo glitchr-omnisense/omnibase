@@ -121,6 +121,8 @@
  * 816 after step R10 of the audit "lesringostars face au master plan" (+9: Base\Screen\Negotiation, how an action's
  * result is answered whichever framework hosts it - ScreenResponder's body, which is now Symfony's adapter of it -, and
  * what an action hands back and gets: Template, Json, Fragments, Shell, File, Visit, Cache, Answer).
+ * 817 after step AU7 of the plan "omniauth" (+1: Base\Auth\NotifierSender, omniauth's Sender on omnibase's Notifier:
+ * the sign-in link and the e-mailed code).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -137,6 +139,7 @@ return [
     Base\Auth\Listener\UpdateAccount::class,
     Base\Auth\Listener\WarnNewDevice::class,
     Base\Auth\Listener\WelcomeBack::class,
+    Base\Auth\NotifierSender::class,
     Base\Auth\Policy::class,
     Base\Auth\PolicyLinking::class,
     Base\Auth\UserAccounts::class,
