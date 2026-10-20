@@ -3156,10 +3156,18 @@ namespace {
         }
     }
 
+    if (!function_exists('is_multiline')) {
+        function is_multiline(string $str): bool
+        {
+            return str_contains($str, PHP_EOL);
+        }
+    }
+
     if (!function_exists('is_multiligne')) {
+        /** @deprecated since 4.x, is_multiline()'s former (French) name, kept for the sites that call it. */
         function is_multiligne(string $str): bool
         {
-            return strstr($str, PHP_EOL);
+            return is_multiline($str);
         }
     }
 
@@ -3212,7 +3220,7 @@ namespace {
     if (!function_exists('pathinfo_relationship')) {
         function pathinfo_relationship(string $path): ?string
         {
-            if (is_multiligne($path)) {
+            if (is_multiline($path)) {
                 return null;
             }
 

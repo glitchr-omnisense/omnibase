@@ -6,13 +6,13 @@
  * Composer autoloader is required, then each class asked is loaded in turn,
  * and every class, interface, trait and file PHP loaded on the way is checked
  * against the framework (see FRAMEWORK below). tests/BareTest.php runs it in
- * a PHP process of its own over tests/Fondation.php.
+ * a PHP process of its own over tests/Foundation.php.
  *
- *   docker compose run --rm omnibase bare                       # the Fondation (tests/Fondation.php); exits 1 when a class of the framework was loaded
+ *   docker compose run --rm omnibase bare                       # the Foundation (tests/Foundation.php); exits 1 when a class of the framework was loaded
  *   docker compose run --rm omnibase bare 'Base\BaseBundle'     # the classes named
  *   docker compose run --rm omnibase bare --all --each          # every class of src/, each in a PHP process of its own
  *   docker compose run --rm omnibase bare --json                # the same, whole, as JSON
- *   docker compose run --rm omnibase bare --names               # informative: the classes of the Fondation that name the framework
+ *   docker compose run --rm omnibase bare --names               # informative: the classes of the Foundation that name the framework
  *   docker compose run --rm omnibase bare path/to/script.php    # a script run with the autoloader alone (what it returns is in --json)
  *   docker compose run --rm omnibase bare --install             # makes (or refreshes) the vendor without the framework, then exits
  *
@@ -45,7 +45,7 @@
  * the class loads none of it (a type in a signature, a `new` in a method).
  * Two counts: the classes that name it themselves, and those that name it
  * themselves or through the Base\ classes they name, followed to the end.
- * It is the dashboard of the seams (C3-C5): the Fondation only grows, this
+ * It is the dashboard of the seams (C3-C5): the Foundation only grows, this
  * report only falls.
  *
  * The framework (plan "omnibase agnostique", §0 and D1-D4): symfony/framework-
@@ -72,7 +72,7 @@ $options = ['json' => false, 'all' => false, 'each' => false, 'names' => false, 
 $classes = [];
 foreach (array_slice($argv, 1) as $argument) {
     if (in_array($argument, ['-h', '--help'], true)) {
-        echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Fondation (tests/Fondation.php), loaded with Composer's autoloader alone.\n";
+        echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Foundation (tests/Foundation.php), loaded with Composer's autoloader alone.\n";
         echo "bare --names [--all] [--json] [class...]: informative, not a guard: which of those classes name the framework in their use lines or code, themselves or through the Base\\ classes they name.\n";
         echo "bare --install: makes var/bare/vendor, the core installed alone by composer install --no-dev, where the classes are then loaded (again when composer.json changed).\n";
         exit(0);
@@ -106,7 +106,7 @@ if ($options['all']) {
         }
     }
 } elseif (!$classes) {
-    $classes = require $core.'/tests/Fondation.php';
+    $classes = require $core.'/tests/Foundation.php';
 }
 $classes = array_values(array_unique($classes));
 sort($classes);
@@ -155,7 +155,7 @@ function install_bare_vendor(string $core): int
     $dir = $core.'/var/bare';
     $composer = json_decode((string) file_get_contents($core.'/composer.json'), true, 512, JSON_THROW_ON_ERROR);
     unset($composer['autoload-dev']);
-    // The suggested packages some classes of the Fondation implement the contracts of (extra.omnibase.bare:
+    // The suggested packages some classes of the Foundation implement the contracts of (extra.omnibase.bare:
     // omniauth, for Base\Auth\): installed beside the core, none of them a framework.
     $composer['require'] = ($composer['require'] ?? []) + ($composer['extra']['omnibase']['bare'] ?? []);
     $composer['autoload']['psr-4'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['psr-4'] ?? []);

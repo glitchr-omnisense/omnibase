@@ -7,13 +7,13 @@ order: 20
 
 The bundle is organised around a few long-lived pieces:
 
-- **What the core requires** — since 4.0 its Fondation alone (Doctrine, Twig,
+- **What the core requires** — since 4.0 its Foundation alone (Doctrine, Twig,
   the standalone components); under Symfony the framework comes with
   `omnibridge/symfony`, and the bundles the core works with are suggested:
   [What the core requires](packages.md).
 - **Entities** — `Thread` and its subtypes carry the shared title/slug/content
   model that articles, comments and pages all reuse.
-- **The contracts of the Fondation** — what framework-free code asks of the
+- **The contracts of the Foundation** — what framework-free code asks of the
   application (URLs, translations, access, locales, files, the clock, events,
   mail), through `Base\Contract\Runtime`: [The contracts](contracts.md).
 - **The Doctrine mapping** — what omnibase assembles at runtime (the

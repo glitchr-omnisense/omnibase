@@ -60,7 +60,7 @@ COPY . /srv/base-bundle
 # google/recaptcha contrib recipe even breaks it). The overlay ships every
 # config file the demo needs; the container is compiled at first run instead.
 RUN composer config repositories.base-bundle '{"type": "path", "url": "/srv/base-bundle", "options": {"symlink": false}}' \
-    # Since 4.0 the core requires its Fondation alone: the framework comes with omnibridge/symfony,
+    # Since 4.0 the core requires its Foundation alone: the framework comes with omnibridge/symfony,
     # and the bundles example/app/config/bundles.php registers are the application's to require.
     && composer require "omniscient/omnibase:*@dev" "omnibridge/symfony:1.x-dev" \
         scheb/2fa league/flysystem-bundle "glitchr/well-known:1.0.*-dev" nelmio/security-bundle nelmio/cors-bundle \

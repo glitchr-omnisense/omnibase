@@ -8,7 +8,7 @@ namespace Base\Contract;
  * links, media, headings anchored - and its table of contents. What
  * omnibase's `|wysiwyg` and `|wysiwyg_toc` filters answer.
  *
- * The Fondation's own contract, reached by Runtime::texts() or given to a
+ * The Foundation's own contract, reached by Runtime::texts() or given to a
  * screen's builder. Under Symfony, Base\Bridge\Symfony\WysiwygTexts: the
  * filters' own pipeline, so a screen's HTML is the page's of before.
  */

@@ -11,14 +11,14 @@ use PHPUnit\Framework\TestCase;
  * The core outside the framework: docker/bin/bare, run in a PHP process of
  * its own - this one has loaded PHPUnit and the suite - requires Composer's
  * autoloader alone (no kernel, no container, no bundle booted), loads every
- * class of the Fondation (tests/Fondation.php) and reports every class,
+ * class of the Foundation (tests/Foundation.php) and reports every class,
  * interface, trait and file PHP loaded on the way. None may be the
  * framework's: the Symfony bundles and bridges, dependency-injection, config,
  * http-kernel, http-foundation, routing, security-*, form, console, API
  * Platform, the third-party bundles. The standalone Symfony components,
  * Doctrine and Twig are allowed (plan "omnibase agnostique", §0, D1, D2, D4).
  *
- * The Fondation is measured where the framework is not installed (plan
+ * The Foundation is measured where the framework is not installed (plan
  * "omnibase agnostique", C7c): on var/bare/vendor, the core installed alone by
  * `composer install --no-dev` (docker/bin/bare --install, which the harness's
  * demo.sh runs before this suite), not on this run's vendor, where Symfony
@@ -30,17 +30,17 @@ use PHPUnit\Framework\TestCase;
  * the users' repository, the user's interfaces) run on this run's vendor,
  * where the framework is installed.
  *
- * The Fondation only grows: a class leaves it only by a decision written
+ * The Foundation only grows: a class leaves it only by a decision written
  * down in the plan and in CHANGELOG.md.
  */
 final class BareTest extends TestCase
 {
-    public function testTheFondationLoadsWithNoClassNorFileOfTheFramework(): void
+    public function testTheFoundationLoadsWithNoClassNorFileOfTheFramework(): void
     {
         [$status, $report] = self::bare([]);
 
-        $fondation = require __DIR__.'/Fondation.php';
-        self::assertSame($fondation, array_keys($report['classes']), 'every class of the Fondation was loaded');
+        $foundation = require __DIR__.'/Foundation.php';
+        self::assertSame($foundation, array_keys($report['classes']), 'every class of the Foundation was loaded');
         self::assertSame([], $report['baseline']['symbols'], 'the autoloader alone loads no class of the framework');
 
         $failures = [];
@@ -55,19 +55,19 @@ final class BareTest extends TestCase
                 $failures[] = $class.' loads the file '.$file;
             }
         }
-        self::assertSame([], $failures, "a class of the Fondation loads the framework:\n".implode("\n", $failures));
+        self::assertSame([], $failures, "a class of the Foundation loads the framework:\n".implode("\n", $failures));
         self::assertSame(0, $status);
     }
 
-    public function testTheFondationIsSortedAndNamesClassesOfTheCore(): void
+    public function testTheFoundationIsSortedAndNamesClassesOfTheCore(): void
     {
-        $fondation = require __DIR__.'/Fondation.php';
-        $sorted = $fondation;
+        $foundation = require __DIR__.'/Foundation.php';
+        $sorted = $foundation;
         sort($sorted);
 
-        self::assertSame($sorted, $fondation, 'sorted');
-        self::assertSame(array_values(array_unique($fondation)), $fondation, 'each class once');
-        foreach ($fondation as $class) {
+        self::assertSame($sorted, $foundation, 'sorted');
+        self::assertSame(array_values(array_unique($foundation)), $foundation, 'each class once');
+        foreach ($foundation as $class) {
             self::assertFileExists(__DIR__.'/../src/'.str_replace('\\', '/', substr($class, \strlen('Base\\'))).'.php', $class);
         }
     }
@@ -106,13 +106,13 @@ final class BareTest extends TestCase
     }
 
     /**
-     * The vendor the Fondation is measured on holds nothing of the framework (plan "omnibase
+     * The vendor the Foundation is measured on holds nothing of the framework (plan "omnibase
      * agnostique", C7c): none of Symfony's framework packages, no bundle, not omnibridge/symfony,
      * security-core nor scheb/2fa - symfony/console aside, which doctrine/orm requires and no class
-     * of the Fondation loads; composer/ca-bundle, certificates, is no bundle -, and the classes
+     * of the Foundation loads; composer/ca-bundle, certificates, is no bundle -, and the classes
      * measured are this checkout's src/.
      */
-    public function testTheFondationIsMeasuredOnAVendorWithoutTheFramework(): void
+    public function testTheFoundationIsMeasuredOnAVendorWithoutTheFramework(): void
     {
         $autoload = self::withoutTheFramework();
         $installed = json_decode((string) file_get_contents(\dirname($autoload).'/composer/installed.json'), true);
@@ -252,7 +252,7 @@ final class BareTest extends TestCase
     }
 
     /**
-     * The contracts of the Fondation work where there is no framework (plan "omnibase agnostique",
+     * The contracts of the Foundation work where there is no framework (plan "omnibase agnostique",
      * C4): tests/Contract/runtime-without-framework.php, run by bare with the autoloader alone, binds
      * plain PHP implementations by the contracts' names in a PSR-11 container, as another framework
      * does at boot, hands it to Base\Contract\Runtime, and a user of the contracts written as C3e
@@ -289,9 +289,9 @@ final class BareTest extends TestCase
             'mailer' => false,
         ], $run['result']);
 
-        $fondation = require __DIR__.'/Fondation.php';
+        $foundation = require __DIR__.'/Foundation.php';
         foreach ([\Base\Contract\Runtime::class, \Base\Contract\Urls::class, \Base\Contract\Access::class, \Base\Contract\Locales::class, \Base\Contract\Files::class, \Base\Contract\SystemClock::class, \Base\Exception\MissingContractException::class] as $contract) {
-            self::assertContains($contract, $fondation, $contract.' is in the Fondation');
+            self::assertContains($contract, $foundation, $contract.' is in the Foundation');
         }
     }
 
@@ -563,7 +563,7 @@ final class BareTest extends TestCase
     /**
      * Runs docker/bin/bare apart, on the autoloader given, or the vendor without the framework.
      *
-     * @param list<string> $classes none: the Fondation
+     * @param list<string> $classes none: the Foundation
      *
      * @return array{int, array<string, mixed>} the exit status, the report
      */

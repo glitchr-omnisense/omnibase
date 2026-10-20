@@ -80,7 +80,7 @@ class FormGuard
      * @param string|null $defaultChallenge omnishield.challenge.gateway, when glitchr/omnishield is installed (GuardPass)
      * @param CacheItemPoolInterface|null $cache where a form's refused tries are counted; without it, the captcha is always asked
      * @param ClockInterface|null $clock what "now" is for the stamp and the delays: the framework's clock (Symfony's
-     *                                   `clock`, autowired), else the clock contract of the Fondation (Runtime::clock(),
+     *                                   `clock`, autowired), else the clock contract of the Foundation (Runtime::clock(),
      *                                   the machine's when no framework gave one) - a test moves it instead of waiting
      */
     public function __construct(

@@ -13,7 +13,7 @@ use Omnibridge\Composer\Stub\StubContext;
  *
  * Run by omnibridge/composer alone, on post-autoload-dump (the core declares
  * these providers in its composer.json, extra.omnibridge.stubs): never loaded
- * by an application, hence outside the Fondation and its bare check. The
+ * by an application, hence outside the Foundation and its bare check. The
  * stubs land in vendor/composer/omnibridge/stubs/<Name>/, which no autoloader
  * reads.
  */

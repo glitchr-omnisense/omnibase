@@ -17,7 +17,7 @@ docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test   
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test admin        # a plugin's: admin, marketplace, forge...
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test forge --filter License
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase check             # container and templates linted
-docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase bare              # the Fondation loaded without the framework
+docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase bare              # the Foundation loaded without the framework
 docker compose -f compose.yml -f compose.checkouts.yml up                                  # the demo, http://localhost:8000/
 ```
 
@@ -55,9 +55,9 @@ admin's widgets, the forge's entities) run here as they do inside an
 application. Those that need rows to look at skip when the fresh database has
 none.
 
-## The Fondation: `bare`
+## The Foundation: `bare`
 
-`tests/Fondation.php` lists the classes of the core that load without the
+`tests/Foundation.php` lists the classes of the core that load without the
 framework, sorted. `tests/BareTest.php`, part of the suite, runs
 `docker/bin/bare` in a PHP process of its own: Composer's autoloader alone - no
 kernel, no container, no bundle booted - then each class of the list, and every
@@ -81,11 +81,11 @@ users' repository): the check is not blind. A third loads a repository
 framework (plan "omnibase agnostique", C3b).
 
 ```sh
-docker compose run --rm omnibase bare                      # the Fondation; exits 1 when the framework was loaded
+docker compose run --rm omnibase bare                      # the Foundation; exits 1 when the framework was loaded
 docker compose run --rm omnibase bare 'Base\Entity\User'    # the classes named
 docker compose run --rm omnibase bare --all --each         # every class of src/, each in a process of its own: those that can join
 docker compose run --rm omnibase bare --json               # the whole report
-docker compose run --rm omnibase bare --names              # informative: the classes of the Fondation that name the framework
+docker compose run --rm omnibase bare --names              # informative: the classes of the Foundation that name the framework
 docker compose run --rm omnibase bare vendor/omniscient/omnibase/tests/Contract/runtime-without-framework.php   # a script, with the autoloader alone
 ```
 
@@ -96,7 +96,7 @@ autoload pointed back at the checkout's `src/` - so none of Symfony's framework
 packages is there (`symfony/console` aside, doctrine/orm's). `bare --install`
 makes it, and makes it again when `composer.json` changed; `demo.sh` runs it
 before `bare` and before the core's suite, whose `BareTest` measures the
-Fondation there (skipped in an application's suite, where it was not made).
+Foundation there (skipped in an application's suite, where it was not made).
 A class declares what is installed: `Base\Entity\User`'s contracts are empty
 interfaces there, Security's and scheb/2fa's on the harness's own vendor
 (`BareTest` checks both). `OMNIBASE_AUTOLOAD` names another autoloader to
@@ -112,8 +112,8 @@ any class: it is reported, not held against one.
 A script given in place of a class (a path ending in `.php`) is run the same
 way, with the autoloader alone, and what it returns is in the `--json` report:
 `BareTest` runs `tests/Contract/runtime-without-framework.php` so, the
-contracts of the Fondation used without the framework (see
-[The contracts of the Fondation](../20-architecture/contracts.md)).
+contracts of the Foundation used without the framework (see
+[The contracts of the Foundation](../20-architecture/contracts.md)).
 
 **The list only grows.** A class enters it when it loads without the framework
 (`bare --all --each`); a class leaves it only by a decision written down in the
@@ -131,9 +131,9 @@ in a method, an attribute). Nothing is loaded; each file of `src/` is read, its
 its fully qualified names. Two counts: the classes that name the framework
 themselves (●), and those that name it through the `Base\` classes they name,
 followed to the end (○, with the chain). It is the dashboard of the seams
-(C3-C5): the Fondation only grows, this report only falls. `--all` reads every
+(C3-C5): the Foundation only grows, this report only falls. `--all` reads every
 class of `src/`, a list of classes reads those; `--json` gives the whole
-report. On 2026-10-18 (after C4): of the 691 classes of the Fondation, 133
+report. On 2026-10-18 (after C4): of the 691 classes of the Foundation, 133
 name the framework themselves (131 of the 679 before it, the two more are
 Symfony adapters), 420 themselves or through a `Base\` name. After C3e and C3f:
 of 694, 129 name it themselves (128 of the classes of before, and Notification's

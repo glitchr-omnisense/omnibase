@@ -25,7 +25,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 
 /**
- * The contracts of the Fondation under Symfony (plan "omnibase agnostique",
+ * The contracts of the Foundation under Symfony (plan "omnibase agnostique",
  * C4): the bundle fills Base\Contract\Runtime at boot with omnibase's adapters
  * (Base\Bridge\Symfony\*) and the framework's clock, event dispatcher and
  * mailer, and each adapter answers what the services entities reach today

@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Tests\Base\DependencyInjection\Fixtures\WithoutSuggestedBundlesKernel;
 
 /**
- * omniscient/omnibase 4.0 requires its Fondation alone (plan "omnibase agnostique", C7):
+ * omniscient/omnibase 4.0 requires its Foundation alone (plan "omnibase agnostique", C7):
  * the framework comes with omnibridge/symfony, the bundles it works with are suggested.
  * composer.json says so, and a Symfony application without the suggested bundles the core
  * can do without still compiles its container and answers its pages.
@@ -53,8 +53,8 @@ class SuggestedBundlesTest extends KernelTestCase
 
         $this->assertSame([], array_values(array_intersect(self::NOT_REQUIRED, array_keys($composer['require']))));
         $this->assertArrayNotHasKey('omnibridge/symfony', $composer['require'], 'a Laravel application would receive Symfony');
-        foreach (['symfony/var-dumper', 'symfony/error-handler', 'web-auth/webauthn-lib', 'doctrine/common', 'omnibridge/doctrine', 'omnibridge/twig', 'doctrine/orm', 'twig/twig'] as $fondation) {
-            $this->assertArrayHasKey($fondation, $composer['require'], $fondation.' is loaded by the Fondation');
+        foreach (['symfony/var-dumper', 'symfony/error-handler', 'web-auth/webauthn-lib', 'doctrine/common', 'omnibridge/doctrine', 'omnibridge/twig', 'doctrine/orm', 'twig/twig'] as $foundation) {
+            $this->assertArrayHasKey($foundation, $composer['require'], $foundation.' is loaded by the Foundation');
         }
         foreach (['scheb/2fa', 'league/flysystem-bundle'] as $package) {
             $this->assertStringNotContainsString('de facto', $composer['suggest'][$package], $package.' is no longer required de facto (C7b)');

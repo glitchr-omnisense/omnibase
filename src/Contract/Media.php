@@ -12,10 +12,10 @@ use Base\Imagine\FilterInterface;
  * extension it is served with. Image::__toLink() and ImageCrop::__toLink()
  * ask it instead of BaseTrait's MediaService.
  *
- * The Fondation's own contract, reached by Runtime::media(). Under Symfony,
+ * The Foundation's own contract, reached by Runtime::media(). Under Symfony,
  * Base\Bridge\Symfony\ServiceMedia: MediaService's answers. A host without
  * the framework that serves omnibase's images gives its own (the obfuscation
- * is Base\Service\Obfuscator's, a class of the Fondation).
+ * is Base\Service\Obfuscator's, a class of the Foundation).
  */
 interface Media
 {

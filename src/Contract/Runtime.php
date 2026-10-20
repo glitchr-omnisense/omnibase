@@ -26,7 +26,7 @@ use Symfony\Component\Mailer\MailerInterface;
  * Base\Service\Model\EntityNouns), Media (the image route's addresses, C4b),
  * Pictures (an image's address at a size) and Texts (a stored text rendered,
  * its table of contents) for the screens (C5), and symfony/mailer's
- * MailerInterface (a standalone component, allowed in the Fondation by D1;
+ * MailerInterface (a standalone component, allowed in the Foundation by D1;
  * Laravel's own mail is built on it).
  *
  * Under Symfony, omnibase's bundle hands its `base.contracts` locator in

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * omnibase's own entities answering through the contracts of the Fondation
+ * omnibase's own entities answering through the contracts of the Foundation
  * where there is no framework (plan "omnibase agnostique", C3e): run by
  * docker/bin/bare for tests/BareTest.php, with Composer's autoloader alone -
  * no kernel, no container, no bundle, no BaseService - and bare reports every

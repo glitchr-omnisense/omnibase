@@ -6,18 +6,18 @@ order: 21
 # What the core requires (4.0)
 
 Since 4.0 (branch `4.x`, plan "omnibase agnostique", step C7) `omniscient/omnibase`
-requires its **Fondation** alone: what `tests/Fondation.php` loads, and what it stands on.
+requires its **Foundation** alone: what `tests/Foundation.php` loads, and what it stands on.
 The framework is no longer a requirement of the core: a Symfony application adds it,
 a Laravel application does not.
 
 | | What | Where it comes from |
 |---|---|---|
-| **The Fondation** | PHP 8.4 and its extensions (exif, igbinary, imagick); Doctrine (orm, dbal, collections, persistence, event-manager, common) and its DQL functions; Twig and its extras (cache, cssinliner, inky, intl); the standalone Symfony components (asset, cache, error-handler, event-dispatcher, expression-language, filesystem, finder, http-client, intl, mailer, mime, notifier, options-resolver, password-hasher, process, property-access, serializer, string, translation, uid, validator, var-dumper, workflow, yaml, the contracts); the PSRs (cache, clock, container, event-dispatcher, log, simple-cache); league/flysystem; web-auth/webauthn-lib (`Base\Entity\User\Passkey`); omnibridge/doctrine and omnibridge/twig; the libraries (imagine, embed, qr-code, spreadsheets, barcodes...) | `require` of the core |
+| **The Foundation** | PHP 8.4 and its extensions (exif, igbinary, imagick); Doctrine (orm, dbal, collections, persistence, event-manager, common) and its DQL functions; Twig and its extras (cache, cssinliner, inky, intl); the standalone Symfony components (asset, cache, error-handler, event-dispatcher, expression-language, filesystem, finder, http-client, intl, mailer, mime, notifier, options-resolver, password-hasher, process, property-access, serializer, string, translation, uid, validator, var-dumper, workflow, yaml, the contracts); the PSRs (cache, clock, container, event-dispatcher, log, simple-cache); league/flysystem; web-auth/webauthn-lib (`Base\Entity\User\Passkey`); omnibridge/doctrine and omnibridge/twig; the libraries (imagine, embed, qr-code, spreadsheets, barcodes...) | `require` of the core |
 | **The framework** | FrameworkBundle, DoctrineBundle, SecurityBundle (security-core, -http, -csrf), TwigBundle and twig-bridge, MonologBundle, twig/extra-bundle, Config, DependencyInjection, HttpKernel, HttpFoundation, Routing, Form, Console, Messenger, Dotenv, doctrine-bridge | **omnibridge/symfony**, which a Symfony application requires beside the core |
 | **The bundles the core works with** | scheb/2fa, league/flysystem-bundle, hwi/oauth-bundle, web-auth/webauthn-symfony-bundle, api-platform/symfony and doctrine-orm, symfony/webpack-encore-bundle, symfony/ux-twig-component, glitchr/ux-google, glitchr/well-known, nelmio/cors-bundle, nelmio/security-bundle | `suggest` of the core; the application requires the ones its `config/bundles.php` registers |
 
 `symfony/console` is still installed with the core alone: doctrine/orm 3 requires it. Nothing
-of the Fondation loads it, which is what `bare` checks: "free of Symfony" reads *nothing of
+of the Foundation loads it, which is what `bare` checks: "free of Symfony" reads *nothing of
 the framework loaded*, not *absent from vendor*.
 
 **Doctrine: the latest major, one line.** The core follows each Doctrine package's current
@@ -62,7 +62,7 @@ glitchr/base-plugin until 4.0), and declares what it asks of it in its own
   the providers `Base\Bridge\Composer\Stub\*`, written after every
   `dump-autoload` into `vendor/composer/omnibridge/stubs/`, which no autoloader
   reads (for an IDE; never a definition at run time; `StubsTest`). The providers
-  are loaded by the engine alone, outside the Fondation;
+  are loaded by the engine alone, outside the Foundation;
 - **one patch**, `process-timeout-from-env` on symfony/process: a `Process` built
   without a timeout waits `SYMFONY_PROCESS_TIMEOUT` seconds, 60 when unset.
 
@@ -96,7 +96,7 @@ class and the storages load without either:
   application's `vendor/` gets the user with Security's interfaces, which ask nothing of it
   but the methods the user has. Without the bundle registered (the package installed) the
   interfaces are still declared: only the two-factor sign-in itself is the bundle's. Where
-  the framework is not installed is measured on such a vendor: `bare` loads the Fondation
+  the framework is not installed is measured on such a vendor: `bare` loads the Foundation
   with the core installed alone (`composer install --no-dev`, see the harness). The users'
   repository follows the same rule (step R2): `Base\Repository\UserRepository` implements
   `Base\Contract\SecurityUserLoader` and `SecurityUserProvider`, aliases of

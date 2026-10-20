@@ -77,7 +77,7 @@ final class ParameterBagTest extends TestCase
         self::assertSame('Les Ringo Stars', $bag->get('base.site.title'));
     }
 
-    /** HotParameterBag is HotParameters (the Fondation's overlay) as DependencyInjection's two interfaces (C9). */
+    /** HotParameterBag is HotParameters (the Foundation's overlay) as DependencyInjection's two interfaces (C9). */
     public function testTheHotBagIsTheOverlayAsTheFrameworksBag(): void
     {
         $bag = new HotParameterBag(self::container());

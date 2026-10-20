@@ -30,9 +30,9 @@ trait SingletonTrait
         self::$_instance = $instance;
     }
 
-    public static function getInstance(bool $instanciateIfNotFound = true): ?self
+    public static function getInstance(bool $instantiateIfNotFound = true): ?self
     {
-        if ($instanciateIfNotFound && !self::$_instance) {
+        if ($instantiateIfNotFound && !self::$_instance) {
 
             try {
                 self::setInstance(new self());

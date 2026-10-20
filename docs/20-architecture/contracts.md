@@ -1,9 +1,9 @@
 ---
-title: The contracts of the Fondation
+title: The contracts of the Foundation
 order: 27
 ---
 
-# The contracts of the Fondation
+# The contracts of the Foundation
 
 What omnibase's framework-free code (an entity's getter, an attribute, a value
 object) asks of the application it runs in, by an interface, never by a
@@ -58,7 +58,7 @@ framework rendering another's actions binds `Tokens` to the other's tokens, or p
 own routes.
 
 **No contract for the mail.** symfony/mailer is a standalone component, allowed
-in the Fondation (decision D1), and Laravel's own mail is built on it: its
+in the Foundation (decision D1), and Laravel's own mail is built on it: its
 `MailerInterface` is the contract, and another framework hands a `Mailer` over
 its own transport.
 
@@ -115,14 +115,14 @@ classroom's `Entitlement` and `Resource`.
 
 ## The parameters and the settings over them (step C9)
 
-`Base\Service\DottedParameterBag` (Fondation) reads parameters given by their full names
+`Base\Service\DottedParameterBag` (Foundation) reads parameters given by their full names
 (`base.user.active_delay` => 300) by a dotted path - a path naming the values under it
 (`base.user`) gives them all. `ArrayParameterBag` (an array) and `ParameterBag` (the Symfony
 container's parameters, and DependencyInjection's two interfaces) read through it.
 `has()` is whether `get()` finds a value: a parameter set to `false`, `0` or `""` is there,
 one set to `null` is not (it was the value's truth).
 
-`Base\Service\HotParameters` (Fondation) lays the settings stored in the database - a back
+`Base\Service\HotParameters` (Foundation) lays the settings stored in the database - a back
 office's setting linked to a parameter - over any `ParameterBagInterface`. `get()` reads, in
 this order, by the presence of a value:
 
@@ -148,7 +148,7 @@ are one object (`ParameterBagServicesTest`). Elsewhere:
 
 `Base\Service\SettingBag` (the settings themselves) keeps its snapshot in a PSR-6 pool
 (`Psr\Cache\CacheItemPoolInterface`, no longer Symfony's `CacheInterface`); its cache warmer
-is `Base\Bridge\Symfony\SettingBagWarmer`. It is in the Fondation: Doctrine and psr/cache.
+is `Base\Bridge\Symfony\SettingBagWarmer`. It is in the Foundation: Doctrine and psr/cache.
 
 ## The registry
 
@@ -177,7 +177,7 @@ Runtime::translations()->trans('@entities.article._singular', [], null, Runtime:
   forgets everything (a test's tear-down).
 
 The contracts, the registry, `SystemClock` and the adapters load without the
-framework (`tests/Fondation.php`); `tests/BareTest.php` runs
+framework (`tests/Foundation.php`); `tests/BareTest.php` runs
 `tests/Contract/runtime-without-framework.php` with the autoloader alone: plain
 PHP implementations bound as another framework binds them, and a user of the
 contracts that answers through them. `tests/Bridge/Symfony/ContractAdaptersTest`
@@ -238,7 +238,7 @@ Viewer, Author, Tag, Link, StoryText, Card, Story, Comment, Reply, Discussion) k
 lesringostars' prop names (`App\Screen\*`, the pilot's); `Base\Screen\Builder\Stories`
 makes them from a `Thread` and its comments with the Texts and Pictures contracts and
 the clock (`recent`, so that no template compares a moment). All of them are in the
-Fondation (`tests/Screen/screens-without-framework.php`).
+Foundation (`tests/Screen/screens-without-framework.php`).
 
 The account's pages are screens too (C5, its second part): a member's profile, the
 settings, the notifications (`Base\Screen\Account\{ProfilePage, SettingsPage,
@@ -288,7 +288,7 @@ call its accessors on a user).
 Twig and the project's directory - its message half is already `Bridge\Symfony`, step C3f;
 the notifier is a Symfony service by nature), `AbstractExtension::isEntity()` (Doctrine's
 metadata, a question for `Bridge/Doctrine`), `Uploader`'s `AttributeReader` (omnibase's own
-service, already in the Fondation), `MediaEnhancer` (the media service inside the Wysiwyg
+service, already in the Foundation), `MediaEnhancer` (the media service inside the Wysiwyg
 pipeline, which `Texts` already covers from outside), the forms, fields, controllers and
 validators (Symfony by nature, decision D3), and the bundles' entities (step C8).
 
@@ -296,7 +296,7 @@ validators (Symfony by nature, decision D3), and the bundles' entities (step C8)
 `Translator::transEntity()`, `transEntityExists()` and `parseClass()` (the key of a class:
 its name less its entity namespace, dotted, in snake case - `Base\Marketplace\Entity\Order`
 is `marketplace.order`; then the variants its options ask for, `NounVariants`, the first the
-"entities" catalogue holds) moved into a class of the Fondation, built on the Translations
+"entities" catalogue holds) moved into a class of the Foundation, built on the Translations
 contract and the entity namespaces of the application's bundles. The translator now answers by
 an instance of it over itself (`getEntityNouns()`, the bundles `BaseBundle` knows), and that
 instance is the Nouns contract under Symfony: one rule, the same strings. A host without the

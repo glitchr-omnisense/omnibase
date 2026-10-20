@@ -176,7 +176,7 @@ class FormGuardTest extends TestCase
     /**
      * The time is the clock's, never the machine's: a stamp made and read on the guard's clock, the
      * delay counted as that clock moves - its own (Symfony's `clock`, autowired), else the clock
-     * contract of the Fondation (Runtime::clock()). Nothing here waits.
+     * contract of the Foundation (Runtime::clock()). Nothing here waits.
      */
     public function testTheDelayIsCountedOnTheClock(): void
     {
@@ -203,7 +203,7 @@ class FormGuardTest extends TestCase
         $clock->now = $clock->now->modify('+1 second');
         $this->assertSame(3, $guard->elapsed($stamp), 'as a person');
 
-        // Without a clock of its own, the Fondation's.
+        // Without a clock of its own, the Foundation's.
         Runtime::set(ClockInterface::class, $clock);
         try {
             $this->assertSame($clock->now->getTimestamp(), (new FormGuard(self::SECRET))->now());
