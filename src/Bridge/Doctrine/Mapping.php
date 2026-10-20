@@ -2,6 +2,7 @@
 
 namespace Base\Bridge\Doctrine;
 
+use Base\Service\FlysystemInterface;
 use Base\Attributes\AttributeReader;
 use Base\Database\Entity\EntityExtension;
 use Base\Database\Entity\EntityHydrator;
@@ -67,6 +68,10 @@ use Doctrine\ORM\Tools\ResolveTargetEntityListener;
  * of attributes: a bundle's src/Attribute), resolve_target_entities
  * (interface => class), entity_listeners (entity class => list of
  * {event, class, method}: what a bundle tags doctrine.orm.entity_listener), localizer (a LocalizerInterface, none by default),
+ * flysystem (omnibase's Base\Service\FlysystemInterface over the host's storages, none by default: the
+ * attributes that read a stored file - #[Uploader]'s public address of an upload, an article's audio -
+ * read it through the reader's; without it they cannot answer), services (a closure giving the host's service of a
+ * type, or null: what a repository takes beside the registry, a site's cache pool - RepositoryFactory::services()),
  * filters (true: enabled).
  */
 final class Mapping
@@ -114,10 +119,14 @@ final class Mapping
         $repositories = $factory instanceof RepositoryFactory ? $factory : null;
         $registry = $repositories?->registryFor($entityManager) ?? new Registry($entityManager);
         $repositories ??= new RepositoryFactory($registry);
+        if (($services = $options['services'] ?? null) instanceof \Closure) {
+            $repositories->services($services);
+        }
 
         $manipulator = new ClassMetadataManipulator($registry, $entityManager, $cacheDir);
         $hydrator = new EntityHydrator($entityManager, $manipulator);
-        $reader = new AttributeReader(null, null, $entityManager, $parameters, null, null, null, $hydrator, $manipulator, $projectDir, $environment, $cacheDir);
+        $flysystem = $options['flysystem'] ?? null;
+        $reader = new AttributeReader(null, null, $entityManager, $parameters, $flysystem instanceof FlysystemInterface ? $flysystem : null, null, null, $hydrator, $manipulator, $projectDir, $environment, $cacheDir);
 
         $attributes = new AttributeSubscriber($entityManager, $manipulator, $reader);
         $localizer = $options['localizer'] ?? null;
