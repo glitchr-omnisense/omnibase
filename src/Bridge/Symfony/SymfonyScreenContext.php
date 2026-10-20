@@ -6,10 +6,12 @@ use Base\Screen\ContextProvider;
 use Base\Screen\Frame;
 use Base\Screen\Site;
 use Base\Screen\Viewer;
+use Base\Security\SignOut;
 use Base\Service\SettingBagInterface;
 use Base\Service\ThemizerInterface;
 use Omnibridge\Contract\Access;
 use Omnibridge\Contract\Locales;
+use Omnibridge\Contract\Tokens;
 use Omnibridge\Contract\Urls;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
@@ -24,8 +26,10 @@ use Twig\Environment;
  * - the site: the host application's Twig global `site` (its name, slogan,
  *   description: the sites' App\Site\Identity) when it has one, else
  *   omnibase's settings (base.settings.title, slogan, logo, meta.description);
- * - the links: home (app_index, else "/"), login, register, logout, and each
- *   language's address (_switch_locale), those whose route exists;
+ * - the links: home (app_index, else "/"), login, register, logout (with the
+ *   token the firewall's sign-out asks, Base\Security\SignOut, when someone is
+ *   signed in), and each language's address (_switch_locale), those whose
+ *   route exists;
  * - the viewer: the Access contract's user (the token storage's);
  * - the theme: the Themizer's colour scheme;
  * - the flashes: Twig's `app.flashes()` itself (read, and so taken).
@@ -45,6 +49,7 @@ class SymfonyScreenContext implements ContextProvider
         private readonly ?Environment $twig = null,
         /** Twig's `app` (Symfony's AppVariable, or omnibase's, which proxies it): its getFlashes(). */
         private readonly ?object $app = null,
+        private readonly ?Tokens $tokens = null,
     ) {
     }
 
@@ -131,7 +136,7 @@ class SymfonyScreenContext implements ContextProvider
             'home' => $this->path('app_index') ?? '/',
             'login' => $this->path('security_login'),
             'register' => $this->path('security_register'),
-            'logout' => $this->path('security_logout'),
+            'logout' => $this->logout(),
         ];
         $locales = [];
         foreach ($this->locales?->getAvailableLocales() ?? [] as $locale) {
@@ -142,6 +147,23 @@ class SymfonyScreenContext implements ContextProvider
         }
 
         return $links + ['locales' => $locales];
+    }
+
+    /**
+     * The sign-out's address. For someone signed in it carries their session's
+     * token (Base\Security\SignOut); for a visitor it is the bare address, so a
+     * page drawn for nobody makes no token (no session) and stays the same.
+     */
+    protected function logout(): ?string
+    {
+        if (null !== $this->tokens && null !== $this->viewer()) {
+            try {
+                return $this->path(SignOut::ROUTE, SignOut::parameters($this->tokens));
+            } catch (\Throwable) {
+            }
+        }
+
+        return $this->path(SignOut::ROUTE);
     }
 
     /** @return array{scheme?: string} */

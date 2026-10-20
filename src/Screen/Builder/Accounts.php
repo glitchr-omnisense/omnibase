@@ -20,6 +20,7 @@ use Base\Screen\Account\SettingsPage;
 use Base\Screen\Account\TwoFactor;
 use Base\Screen\Link;
 use Base\Screen\Shape;
+use Base\Security\SignOut;
 use Base\Service\SecurityPolicy;
 use Omnibridge\Contract\Tokens;
 use Omnibridge\Contract\Urls;
@@ -93,7 +94,7 @@ final class Accounts
             account: $account ? $this->summary($user) : null,
             editUrl: $account ? $this->urls()->path('user_profileEdit', ['id' => $user->getId()]) : null,
             settingsUrl: $own ? $this->urls()->path('user_settings') : null,
-            logoutUrl: $own ? $this->urls()->path('security_logout') : null,
+            logoutUrl: $own ? SignOut::path($this->urls(), $this->tokens()) : null,
         );
     }
 

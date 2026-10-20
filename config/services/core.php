@@ -481,6 +481,7 @@ return static function (ContainerConfigurator $container): void {
             service('Base\Service\Themizer')->nullOnInvalid(),
             service('twig')->nullOnInvalid(),
             service('twig.app_variable')->nullOnInvalid(),
+            service('Omnibridge\Contract\Tokens')->nullOnInvalid(),
         ]);
     $services->alias('Base\Screen\ContextProvider', 'Base\Bridge\Symfony\SymfonyScreenContext')->public();
     $services->set('Base\Bridge\Symfony\ScreenResponder')->public()

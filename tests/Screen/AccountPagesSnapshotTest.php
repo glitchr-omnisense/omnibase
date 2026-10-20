@@ -156,7 +156,13 @@ final class AccountPagesSnapshotTest extends KernelTestCase
         $owner = $this->props('/profile/'.$id, $member, $response);
         self::assertTrue($owner['own']);
         self::assertSame(['twoFactor' => true, 'passkeys' => 0, 'identityProvider' => null, 'locale' => 'en-GB', 'timezone' => 'UTC'], $owner['account'], 'passkeys counted (0) where they are available');
-        self::assertSame(['/profile/'.$id.'/edit/', '/settings', '/logout'], [$owner['editUrl'], $owner['settingsUrl'], $owner['logoutUrl']]);
+        self::assertSame(['/profile/'.$id.'/edit/', '/settings'], [$owner['editUrl'], $owner['settingsUrl']]);
+        // The sign-out carries the token the firewall's logout asks (Base\Security\SignOut).
+        self::assertMatchesRegularExpression('~^/logout\?_csrf_token=[^&]+$~', $owner['logoutUrl']);
+        // (Its value is the token manager's: here a stateless one, logout being among this
+        // harness's stateless_token_ids; a site's firewall checks it, lesringostars' tests/SignIn.)
+        self::assertMatchesRegularExpression('~^/logout\?_csrf_token=[^&]+$~', $owner['links']['logout'], 'the frame\'s too, for someone signed in');
+        self::assertSame('/logout', $visitor['links']['logout'], 'a visitor\'s is the bare address: no token, no session');
         self::assertTrue($response->headers->hasCacheControlDirective('private'));
         self::assertContains('Cookie', $response->getVary());
 
@@ -266,6 +272,7 @@ final class AccountPagesSnapshotTest extends KernelTestCase
     {
         $html = preg_replace('~(name="_token" value=")[^"]*(")~', '$1*$2', $html);
         $html = preg_replace('~(data-csrf=")[^"]*(")~', '$1*$2', $html);
+        $html = preg_replace('~([?&]_csrf_token=)[^"&]*~', '$1*', $html);
         // Each kind of record by its names: the users in their profile's address and number, the sessions in theirs, the notifications in their items.
         $names = fn (string $kind): array => array_flip(array_filter($this->ids, static fn ($id, $name) => str_starts_with($name, $kind), \ARRAY_FILTER_USE_BOTH));
         foreach (['~(/profile/|Member #)(\d+)~' => array_flip(array_intersect_key($this->ids, ['member' => 0, 'admin' => 0])), '~(/settings/sessions/)(\d+)~' => $names('session:'), '~(data-id=")(\d+)~' => $names('notification:')] as $pattern => $kind) {

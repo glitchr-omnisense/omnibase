@@ -215,7 +215,8 @@ return static function (ContainerConfigurator $container): void {
                 new Reference('parameter_bag'),
                 new Reference('base.service.maintenance'),
                 new Reference('base.service.launcher'),
-                new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE)
+                new Reference('profiler', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference('Omnibridge\Contract\Tokens', ContainerInterface::NULL_ON_INVALID_REFERENCE)
             ]
         ],
         'Base\Subscriber\ReferrerSubscriber' => [

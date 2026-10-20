@@ -1,0 +1,24 @@
+{% extends 'layout1.html.twig' %}
+
+{#- A sign-out asked without this session's token (SecurityController::Logout,
+    where the firewall's logout asks one): nothing is done until the visitor
+    confirms, by a link that carries a token of this session. -#}
+{% block title %}{{ '@forms.logout.title'|trans }}{% endblock %}
+
+{% block content %}
+<article class="login wrapper half">
+<div class="card">
+    <div class="card-header">
+        <h3 class="text-center">{{ '@forms.logout.title'|trans }}</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-center">{{ '@forms.logout.confirm'|trans }}</p>
+        <hr>
+        <div class="col d-flex login-btn justify-content-center">
+            <a class="btn btn-lg m-1" href="{{ returnUrl }}">{{ '@forms.cancel'|trans }}</a>
+            <a class="btn btn-lg btn-primary m-1" href="{{ logoutPath }}" rel="nofollow">{{ '@forms.login.logout'|trans }}</a>
+        </div>
+    </div>
+</div>
+</article>
+{% endblock %}
