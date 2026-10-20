@@ -125,8 +125,9 @@ class FileService implements FileServiceInterface
     /**
      * The type of a stored file named by its public path ("/uploads/...",
      * "/wysiwyg/...", what the uploader keeps), read from its bytes in the
-     * public directory, where the local storages are linked; null for anything
-     * else (a type, a file elsewhere, a remote storage).
+     * public directory, where the local storages are linked - or, for an
+     * address of the image route, the type of the file it is made from; null
+     * for anything else (a type, a file elsewhere, a remote storage).
      *
      * Without it a public path had no extensions at all - mime_content_type2()
      * looks for it at the root of the disk -, so an image address took the
@@ -143,7 +144,21 @@ class FileService implements FileServiceInterface
         }
 
         $file = rtrim($this->publicDir, "/") . $path;
-        return is_file($file) ? mime_content_type2($file) : null;
+        if (is_file($file)) {
+            return mime_content_type2($file);
+        }
+
+        // An address of the image route (a thumbnail's, given again to image() or imagify()):
+        // the type of the file it is made from, as its own address names it.
+        $match = $this->router->getRouteMatch($path);
+        if (isset($match["data"]) && str_starts_with((string) ($match["_route"] ?? ""), "ux_")) {
+            $source = $this->resolve($path)["path"] ?? null;
+            if (is_string($source) && $source !== $path) {
+                return mime_content_type2($source) ?? $this->getPublicMimeType($source);
+            }
+        }
+
+        return null;
     }
 
     public function getMimeType(null|string|array $fileOrContentsOrArray): null|string|array
@@ -153,6 +168,16 @@ class FileService implements FileServiceInterface
         }
         if (is_array($fileOrContentsOrArray)) {
             return array_map(fn($f) => $this->getMimeType($f), $fileOrContentsOrArray);
+        }
+
+        // A public path or an address of the image route ("/uploads/...", "/contents/..."): its
+        // file's type. The cache storage below answered text/plain for them (an audio player's
+        // <source type> was text/plain).
+        if (strlen($fileOrContentsOrArray) < 2048 && !str_contains($fileOrContentsOrArray, "\n")) {
+            $mimeType = $this->getPublicMimeType($fileOrContentsOrArray);
+            if ($mimeType && $mimeType !== "application/x-empty") {
+                return $mimeType;
+            }
         }
 
         // Attempt to read from flysystem
