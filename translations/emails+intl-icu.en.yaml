@@ -46,6 +46,11 @@ verifyEmail:
     action_text: "Confirm my Email"
     expiry: "The link will expire in {0}"
 
+emailCode:
+    subject: "Your sign-in code"
+    content: "Here is the code to finish signing in: <b>{0}</b>. If you did not try to sign in, change your password."
+    expiry: "The code will expire in {0}"
+
 loginToken:
     subject: "Credential request"
     content: "You are receiving this email because you made a credential request.

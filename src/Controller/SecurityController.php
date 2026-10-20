@@ -246,14 +246,19 @@ class SecurityController extends AbstractController
 
     #[Route("/login/token/{token}", name: "security_loginWithToken")]
     #[Iconize("fa-solid fa-fw fa-arrow-right-to-bracket")]
-    public function LoginTokenRequest(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ?string $token = null): Response
+    public function LoginTokenRequest(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ?string $token = null, ?\Omniauth\Omniauth $omniauth = null, ?\Omnibridge\Symfony\Auth\Contexts $contexts = null): Response
     {
+        // Where omniauth signs in (omnibridge/symfony's OmniauthAuthenticator answered a link with a token
+        // before this page; a refused one reaches it without), it issues the links too: 15 minutes, once,
+        // hashed, a new one at each request (plan "omniauth", QA4).
+        $byOmniauth = null !== $omniauth && null !== $contexts && $omniauth->methods()->has(\Omniauth\Factor::Link);
+
         if(!$this->parameterBag->get("base.user.login_with_token")) {
             return $this->redirectToRoute(LoginFormAuthenticator::LOGIN_ROUTE);
         }
 
         // e.g. query the "access token" database to search for this token
-        $loginToken = $this->tokenRepository->findOneByNameAndValueAndIsLogginable("login-token", $token, true);
+        $loginToken = $byOmniauth ? null : $this->tokenRepository->findOneByNameAndValueAndIsLogginable("login-token", $token, true);
         if ($loginToken !== null && $loginToken->isValid() && $loginToken->getUser() !== null) {
 
             // and return a UserBadge object containing the user identifier from the found token
@@ -268,10 +273,12 @@ class SecurityController extends AbstractController
         // Generate form
         $formProcessor = $this->formProxy
             ->createProcessor("form:login", SecurityLoginTokenType::class)
-            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($referrer, $userAuthenticator, $authenticator) {
+            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($referrer, $userAuthenticator, $authenticator, $byOmniauth, $omniauth, $contexts) {
 
                 $email = $formProcessor->getForm()->get('email')->getData();
-                if (($user = $this->userRepository->findOneByEmail($email))) {
+                if ($byOmniauth) {
+                    $omniauth->begin(\Omniauth\Factor::Link, $contexts->of($request), ['identifier' => (string) $email]);
+                } elseif (($user = $this->userRepository->findOneByEmail($email))) {
 
                     $user->removeExpiredTokens();
 

@@ -437,6 +437,12 @@ class BaseBundle extends AbstractBaseBundle
         parent::build($container);
 	    $this->container = $container;
 
+        // omniauth's sign-in (config/packages/omniauth.yaml; plan "omniauth", AU7), where omniauth and
+        // an omnibridge/symfony that bridges it are installed: an omnibase site registers no OmnibridgeBundle.
+        if (class_exists(\Omnibridge\Symfony\Auth\DependencyInjection\OmniauthExtension::class)) {
+            \Omnibridge\Symfony\Auth\DependencyInjection\OmniauthExtension::register($container);
+        }
+
         if (!self::$cache) {
             $this->warmUp();
         }
