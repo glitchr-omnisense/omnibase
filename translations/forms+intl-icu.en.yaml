@@ -15,6 +15,7 @@ register:
 
 logout:
     title: "Sign Out"
+    confirm: "Do you want to sign out?"
 
 login:
     title: "Sign In"

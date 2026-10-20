@@ -15,6 +15,7 @@ register:
 
 logout:
     title: "Se déconnecter"
+    confirm: "Voulez-vous vous déconnecter ?"
 
 login:
     title: "Connexion"

@@ -2,6 +2,8 @@
 
 namespace Base\Subscriber;
 
+use Base\Security\SignOut;
+use Omnibridge\Contract\Tokens;
 use Base\Entity\User as BaseUser;
 use App\Repository\UserRepository;
 use Base\Service\LocalizerInterface;
@@ -109,7 +111,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         ParameterBagInterface        $parameterBag,
         MaintenanceProviderInterface $maintenanceProvider,
         LauncherInterface            $launcher,
-        ?Profiler                    $profiler = null
+        ?Profiler                    $profiler = null,
+        // The sign-out of a kicked account carries the token the firewall's
+        // logout asks (Base\Security\SignOut): the server signs it out itself.
+        protected ?Tokens            $tokens = null
     )
     {
         $this->authorizationChecker = $authorizationChecker;
@@ -286,7 +291,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
 
             $this->referrer->setUrl($event->getRequest()->getUri());
-            $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
+            $this->router->redirectEvent($event, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, null !== $this->tokens ? SignOut::parameters($this->tokens) : []);
 
             // Nothing to write: the kick is lifted by the next sign-in (LoginFormAuthenticator).
             $event->stopPropagation();

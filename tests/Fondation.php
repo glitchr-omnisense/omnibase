@@ -108,6 +108,8 @@
  * Base\Contract\PasskeyRecords and PasskeyUsers, those interfaces when the bundle is installed, empty ones otherwise -,
  * those two contracts, and Base\Database\Type\Passkey\{Base64, Aaguid, TrustPath}, the columns of
  * Base\Entity\User\Passkey, which no longer extends webauthn-lib's CredentialRecord).
+ * 787 with the sign-out's token (+1: Base\Security\SignOut, the sign-out's address with the CSRF token the firewall's
+ * logout asks, through the Urls and Tokens contracts).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -656,6 +658,7 @@ return [
     Base\Security\CookieAnswer::class,
     Base\Security\LoginRestrictionInterface::class,
     Base\Security\SignInGuard::class,
+    Base\Security\SignOut::class,
     Base\Security\UserTracker::class,
     Base\Security\WebauthnUserEntityRepository::class,
     Base\Serializer\Aco::class,

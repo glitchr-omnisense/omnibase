@@ -10,6 +10,7 @@ use Base\Notifier\NotifierInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Security\LoginFormAuthenticator;
 use Base\Security\SignInGuard;
+use Base\Security\SignOut;
 
 use App\Form\Type\SecurityRegistrationType;
 use App\Form\Type\SecurityLoginType;
@@ -182,7 +183,25 @@ class SecurityController extends AbstractController
 
         // If user is found.. go to the logout request page
         if ($this->getUser()) {
-            $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
+            // Where the firewall's logout asks a CSRF token (enable_csrf), the
+            // link carries it (Base\Security\SignOut) and it is handed on to
+            // the firewall, which checks it. Without it - a link from another
+            // site, an <img>, a page kept from a session that has ended - the
+            // visitor stays signed in and is asked to confirm, by a link with
+            // a token of this session.
+            $logout = $this->router->getRouteFirewall($this->router->generate(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE))?->getLogout() ?? [];
+            $parameter = $logout["csrf_parameter"] ?? SignOut::PARAMETER;
+            $token = $request->query->get($parameter);
+            if (($logout["enable_csrf"] ?? false) && !$this->isCsrfTokenValid($logout["csrf_token_id"] ?? SignOut::TOKEN_ID, is_string($token) ? $token : null)) {
+                $tokenId = $logout["csrf_token_id"] ?? SignOut::TOKEN_ID;
+
+                return $this->render('security/logout.html.twig', [
+                    "logoutPath" => $this->router->generate(LoginFormAuthenticator::LOGOUT_ROUTE, [$parameter => $this->container->get('security.csrf.token_manager')->getToken($tokenId)->getValue()]),
+                    "returnUrl" => $referrer->getUrl() ?? $this->router->getUrlIndex(),
+                ], new Response(null, Response::HTTP_OK, ["Cache-Control" => "no-store"]));
+            }
+
+            $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, is_string($token) ? [$parameter => $token] : []);
             $response->headers->clearCookie('REMEMBERME', "/", $this->router->getDomain());
 
             return $response;
