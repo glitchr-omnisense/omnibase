@@ -114,10 +114,36 @@ class FileService implements FileServiceInterface
         }
 
         if (!filter_var($fileOrMimetypeOrArray, FILTER_VALIDATE_URL)) {
-            $fileOrMimetypeOrArray = mime_content_type2($fileOrMimetypeOrArray) ?? $fileOrMimetypeOrArray;
+            $fileOrMimetypeOrArray = mime_content_type2($fileOrMimetypeOrArray)
+                ?? $this->getPublicMimeType($fileOrMimetypeOrArray)
+                ?? $fileOrMimetypeOrArray;
         }
 
         return $this->mimeTypes->getExtensions($fileOrMimetypeOrArray);
+    }
+
+    /**
+     * The type of a stored file named by its public path ("/uploads/...",
+     * "/wysiwyg/...", what the uploader keeps), read from its bytes in the
+     * public directory, where the local storages are linked; null for anything
+     * else (a type, a file elsewhere, a remote storage).
+     *
+     * Without it a public path had no extensions at all - mime_content_type2()
+     * looks for it at the root of the disk -, so an image address took the
+     * standard extension, png, whatever the file was: an uploaded JPEG (an
+     * avatar is stored without extension) was asked as image.png, its
+     * thumbnail kept the JPEG's bytes and was cached as image_400x400.png,
+     * and a web server serving that cache by extension (Caddy) sent a JPEG as
+     * image/png, where the route answered image/jpeg.
+     */
+    protected function getPublicMimeType(string $path): ?string
+    {
+        if (!str_starts_with($path, "/") || str_contains($path, "\0") || str_contains($path, "/../")) {
+            return null;
+        }
+
+        $file = rtrim($this->publicDir, "/") . $path;
+        return is_file($file) ? mime_content_type2($file) : null;
     }
 
     public function getMimeType(null|string|array $fileOrContentsOrArray): null|string|array

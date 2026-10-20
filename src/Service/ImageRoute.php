@@ -228,9 +228,26 @@ class ImageRoute
         }
 
         $output = pathinfo_extension($data . "/" . $identifier, $extension);
-        $path = $this->mediaService->filter($path, ["local_cache" => $localCache, "output" => $output, "storage" => $config["storage"] ?? null], new BitmapFilter(null, $options, $filters));
+        $path = $this->mediaService->filter($path, ["local_cache" => $localCache, "output" => $output, "storage" => $config["storage"] ?? null], new BitmapFilter(null, self::format($options, $extension), $filters));
 
         return $this->mediaService->serve($path, 200, ["http_cache" => $path !== null, "profiler" => $this->profiler]);
+    }
+
+    /**
+     * The bitmap written in the format its address names: image.png is a PNG,
+     * image.jpg a JPEG, whatever the source is. The thumbnail is written to a
+     * temporary file without extension, so Imagine kept the source's format:
+     * a JPEG asked as image.png was cached as a .png holding a JPEG, which a
+     * web server serving the cache by extension sent as image/png. The
+     * address names the source's own format whenever its type can be read
+     * (FileService::getExtensions()); this holds the rule when it cannot.
+     */
+    private static function format(array $options, string $extension): array
+    {
+        $extension = strtolower($extension);
+        $options["format"] ??= ["jpe" => "jpeg"][$extension] ?? $extension;
+
+        return $options;
     }
 
     public function imageWebp($data): Response
@@ -323,7 +340,7 @@ class ImageRoute
         $localCache = $this->localCache ?? $config["local_cache"] ?? $localCache;
 
         $output = pathinfo_extension($data . "/image", $extension);
-        $path = $this->mediaService->filter($config["path"] ?? "", ["local_cache" => $localCache, "output" => $output, "storage" => $config["storage"] ?? null], new BitmapFilter(null, $options, $filters));
+        $path = $this->mediaService->filter($config["path"] ?? "", ["local_cache" => $localCache, "output" => $output, "storage" => $config["storage"] ?? null], new BitmapFilter(null, self::format($options, $extension), $filters));
         if ($debug) {
 
             dump($data, $config, $path);
