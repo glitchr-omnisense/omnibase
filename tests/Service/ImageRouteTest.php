@@ -18,7 +18,12 @@ use Symfony\Component\HttpFoundation\Request;
  * - MediaController still answers its routes, through ImageRoute: a
  *   thumbnail's address without its extension is sent to the one with it
  *   (301), which answers the thumbnail's file; ImageRoute itself answers the
- *   same bytes.
+ *   same bytes;
+ * - a bitmap's address names its own type and its bytes are of the type the
+ *   address names: an uploaded JPEG stored without extension (an avatar) is
+ *   image.jpg and answers a JPEG - it was image.png, holding a JPEG, which a
+ *   web server serving the cache by extension sent as image/png -, and a
+ *   bitmap asked as png is written as a PNG.
  */
 final class ImageRouteTest extends KernelTestCase
 {
@@ -92,6 +97,60 @@ final class ImageRouteTest extends KernelTestCase
             $match = $media->getRouter()->getRouteMatch($thumbnail);
             $direct = (new ImageRoute($media, self::getContainer()->get(\Base\Service\Flysystem::class)))->image($match['data'], 'png');
             self::assertSame($response->getContent(), $direct->getContent());
+        } finally {
+            @unlink($source);
+        }
+    }
+
+    public function testAStoredJpegWithoutExtensionIsAddressedAndAnsweredAsAJpeg(): void
+    {
+        $publicDir = rtrim((string) \Base\Service\Flysystem::getPublicDir(), '/');
+        $name = '/omnibase-image-route-'.getmypid();
+        $picture = new \Imagick();
+        $picture->newImage(400, 200, 'steelblue', 'jpeg');
+        $picture->writeImage('jpeg:'.$publicDir.$name);
+
+        try {
+            /** @var MediaService $media */
+            $media = self::getContainer()->get(MediaService::class);
+            self::assertSame('jpg', $media->getExtension($name), 'the type of a public path, read from its bytes');
+
+            $thumbnail = (string) $media->thumbnail($name, 100, 100, ['webp' => false]);
+            self::assertMatchesRegularExpression('#^/images/.+/image\.jpg$#', $thumbnail);
+
+            $png = substr($thumbnail, 0, -\strlen('jpg')).'png';
+            $redirection = self::$kernel->handle(Request::create($png));
+            self::assertSame(301, $redirection->getStatusCode(), 'a JPEG asked as png goes to its own address');
+            self::assertSame($thumbnail, $redirection->headers->get('Location'));
+
+            $response = self::$kernel->handle(Request::create($thumbnail));
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame('image/jpeg', $response->headers->get('Content-Type'));
+            self::assertSame('image/jpeg', (new \finfo(\FILEINFO_MIME_TYPE))->buffer((string) $response->getContent()));
+        } finally {
+            @unlink($publicDir.$name);
+        }
+    }
+
+    public function testABitmapIsWrittenInTheFormatItsAddressNames(): void
+    {
+        $source = sys_get_temp_dir().'/omnibase-image-route-'.getmypid().'.jpg';
+        $picture = new \Imagick();
+        $picture->newImage(400, 200, 'steelblue', 'jpeg');
+        $picture->writeImage($source);
+
+        try {
+            $format = new \ReflectionMethod(ImageRoute::class, 'format');
+            self::assertSame(['quality' => 0.8, 'format' => 'png'], $format->invoke(null, ['quality' => 0.8], 'png'));
+            self::assertSame('jpeg', $format->invoke(null, [], 'JPE')['format']);
+
+            /** @var MediaService $media */
+            $media = self::getContainer()->get(MediaService::class);
+            foreach (['png' => 'image/png', 'jpg' => 'image/jpeg', 'gif' => 'image/gif'] as $extension => $type) {
+                $file = $media->filter($source, ['local_cache' => false], new \Base\Imagine\Filter\Format\BitmapFilter(null, $format->invoke(null, [], $extension), [new \Base\Imagine\Filter\Basic\ThumbnailFilter(100, 100)]));
+                self::assertSame($type, mime_content_type((string) $file), "a JPEG asked as $extension");
+                @unlink((string) $file);
+            }
         } finally {
             @unlink($source);
         }
