@@ -18,7 +18,7 @@ use Base\Service\TranslatorInterface;
  * snake case: Base\Entity\Thread\Tag is "thread.tag", Base\Marketplace\Entity\
  * Order "marketplace.order".
  *
- * The rule is the Fondation's, Base\Service\Model\EntityNouns, over the
+ * The rule is the Foundation's, Base\Service\Model\EntityNouns, over the
  * Translations contract and the entity namespaces of the application's
  * bundles; a host gives it those two. Under Symfony it is the one
  * Base\Service\Translator::transEntity() answers by, the same strings.

@@ -43,7 +43,7 @@ foreach ([
  * Symfony's own services, and FileLinks. Each is the moved class under its
  * former name, a class_alias, not a subclass. Declared only where
  * omnibridge/symfony is installed (a Symfony site: the core's Symfony bundle
- * needs it; a Laravel site or the Fondation alone has neither name), when the
+ * needs it; a Laravel site or the Foundation alone has neither name), when the
  * autoloader is loaded, as above. omnibase's own adapters (those that read
  * omnibase's services: LocalizerLocales, FlysystemFiles, RouterRoutes,
  * MediaPictures...) stay Base\Bridge\Symfony.

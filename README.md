@@ -12,7 +12,7 @@ Composer now installs it in `vendor/omniscient/omnibase`; nothing in the package
 path (its templates, documentation and scripts are found from its own directory), but an
 application that names the old path in its configuration has to follow - see CHANGELOG.
 
-Requires PHP ≥ 8.4 (doctrine/collections 3). Since 4.0 the package requires its Fondation alone
+Requires PHP ≥ 8.4 (doctrine/collections 3). Since 4.0 the package requires its Foundation alone
 (Doctrine, Twig, Symfony's standalone components): under Symfony 6, 7 or 8 the framework comes with
 `omnibridge/symfony`, see Installation. Licensed MIT (`LICENSE`) since 2026-10-09;
 earlier versions remain published under LGPL-3.0-or-later.
@@ -27,7 +27,7 @@ page that seeds members and a shop and signs you in:
 cd docker
 docker compose up                                        # → http://localhost:8000/
 docker compose run --rm omnibase check                   # container and templates linted, routes counted
-docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase bare   # the Fondation loaded without the framework
+docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase bare   # the Foundation loaded without the framework
 docker compose -f compose.yml -f compose.checkouts.yml up   # the checkouts beside this one instead of Packagist
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test [admin|marketplace|forge|...]   # a suite, on the checkouts
 ```

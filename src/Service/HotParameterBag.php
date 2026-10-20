@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 /**
  * `parameter_bag` under Symfony: the container's parameters (Base\Service\ParameterBag)
  * with the settings stored in the database laid over them - Base\Service\HotParameters,
- * the Fondation's overlay, as DependencyInjection's ParameterBagInterface and
+ * the Foundation's overlay, as DependencyInjection's ParameterBagInterface and
  * ContainerBagInterface (plan "omnibase agnostique", C9). It decorates `parameter_bag`
  * over Base\Service\ParameterBag; `parameter_bag`, the autowiring of
  * Base\Service\ParameterBagInterface (and of DependencyInjection's two interfaces) and

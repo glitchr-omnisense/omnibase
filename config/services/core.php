@@ -392,7 +392,7 @@ return static function (ContainerConfigurator $container): void {
             'parameter_bag' => new Reference('parameter_bag'),
         ]]);
 
-    // The contracts of the Fondation and their Symfony adapters (plan
+    // The contracts of the Foundation and their Symfony adapters (plan
     // "omnibase agnostique", C4): what omnibase's framework-free code asks
     // through Base\Contract\Runtime, each bound to its interface's name (an
     // application rebinds one by aliasing that name). The host's contracts are

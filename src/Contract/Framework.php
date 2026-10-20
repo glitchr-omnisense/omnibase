@@ -15,7 +15,7 @@ namespace Base\Contract;
  * PHP's preloading, a Laravel application reading a vendor that holds
  * Symfony's packages) gets the same class. A host without the framework is a
  * vendor without its packages (`composer install --no-dev` of the core alone,
- * where docker/bin/bare measures the Fondation). Kept as a class, not written
+ * where docker/bin/bare measures the Foundation). Kept as a class, not written
  * out in each contract: the one place of the rule, which a third contract
  * follows the same way.
  */

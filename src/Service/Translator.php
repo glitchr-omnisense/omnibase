@@ -14,7 +14,7 @@ use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
 /**
- * omnibase's translator, and the Translations contract of the Fondation
+ * omnibase's translator, and the Translations contract of the Foundation
  * (trans(), exists()) where it runs: an entity's noun is asked of an
  * EntityNouns over it (getEntityNouns(), plan "omnibase agnostique", C4b),
  * the rule a host without the framework runs over its own Translations.

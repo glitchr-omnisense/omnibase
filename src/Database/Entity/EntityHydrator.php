@@ -63,9 +63,9 @@ class EntityHydrator implements EntityHydratorInterface
     protected bool $hydrateAssociationReferences = true;
 
     /*
-     * Make sure the property has been hydrated (to avoid double hydratation between properties and associations)
+     * Make sure the property has been hydrated (to avoid double hydration between properties and associations)
      */
-    protected array $hydratationMapping = [];
+    protected array $hydrationMapping = [];
 
     /**
      * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback, but initializing properties
@@ -134,7 +134,7 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         if (!$this->hydrateByArrayObject($entity, $data, $aggregateModel)) {
-            $this->hydratationMapping = [];
+            $this->hydrationMapping = [];
             $this->hydrateProperties($entity, $data, $aggregateModel);
             $this->hydrateAssociations($entity, $data, $aggregateModel);
         }
@@ -414,9 +414,9 @@ class EntityHydrator implements EntityHydratorInterface
     /**
      * @return $this
      */
-    protected function resetHydratationMapping()
+    protected function resetHydrationMapping()
     {
-        $this->hydratationMapping = [];
+        $this->hydrationMapping = [];
         return $this;
     }
 
@@ -427,7 +427,7 @@ class EntityHydrator implements EntityHydratorInterface
      */
     protected function isHydrated(mixed $entity, string $propertyName)
     {
-        return in_array(spl_object_hash($entity) . "::" . $propertyName, $this->hydratationMapping);
+        return in_array(spl_object_hash($entity) . "::" . $propertyName, $this->hydrationMapping);
     }
 
     /**
@@ -437,7 +437,7 @@ class EntityHydrator implements EntityHydratorInterface
      */
     protected function markAsHydrated(mixed $entity, string $propertyName)
     {
-        $this->hydratationMapping[] = spl_object_hash($entity) . "::" . $propertyName;
+        $this->hydrationMapping[] = spl_object_hash($entity) . "::" . $propertyName;
         return $this;
     }
 

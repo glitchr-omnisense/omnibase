@@ -1,7 +1,7 @@
 <?php
 
 /*
- * The contracts of the Fondation used where there is no framework (plan
+ * The contracts of the Foundation used where there is no framework (plan
  * "omnibase agnostique", C4): run by docker/bin/bare for tests/BareTest.php,
  * with Composer's autoloader alone - no kernel, no container, no bundle - and
  * bare reports every class and file of the framework loaded on the way (none

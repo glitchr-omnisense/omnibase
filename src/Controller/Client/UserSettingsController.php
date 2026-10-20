@@ -266,7 +266,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa", name: "user_settings_2fa")]
-    public function TwoFactorAuthentification(Request $request, EntityManagerInterface $entityManager, TotpAuthenticatorInterface $totpAuthenticator)
+    public function TwoFactorAuthentication(Request $request, EntityManagerInterface $entityManager, TotpAuthenticatorInterface $totpAuthenticator)
     {
         $user = $this->getUser();
         $session = $request->getSession();
@@ -329,7 +329,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa/disable", name: "user_settings_2fa_disable", methods: ["POST"])]
-    public function TwoFactorAuthentification_Disable(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    public function TwoFactorAuthentication_Disable(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
     {
         $user = $this->getUser();
 
@@ -369,7 +369,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa/email", name: "user_settings_2fa_email_toggle", methods: ["POST"])]
-    public function TwoFactorAuthentification_ToggleEmail(Request $request, EntityManagerInterface $entityManager)
+    public function TwoFactorAuthentication_ToggleEmail(Request $request, EntityManagerInterface $entityManager)
     {
         if ($refusal = $this->refuseDemoAccount()) {
             return $refusal;
@@ -408,7 +408,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa/qr-code", name: "user_settings_2fa_qrcode")]
-    public function TwoFactorAuthentification_QrCode(Request $request, TotpAuthenticatorInterface $totpAuthenticator)
+    public function TwoFactorAuthentication_QrCode(Request $request, TotpAuthenticatorInterface $totpAuthenticator)
     {
         $user = $this->getUser();
         $secret = $request->getSession()->get(self::SESSION_PENDING_SECRET);

@@ -2,7 +2,7 @@
 #
 #   docker compose up                 # → http://localhost:8000/ (OMNIBASE_PORT to change)
 #   docker compose run --rm omnibase check          # container and templates linted, routes counted
-#   docker compose run --rm omnibase bare           # the Fondation (tests/Fondation.php) loaded without the framework
+#   docker compose run --rm omnibase bare           # the Foundation (tests/Foundation.php) loaded without the framework
 #   docker compose run --rm omnibase console debug:router
 #   docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test marketplace   # a plugin's tests, on its checkout
 #   docker compose run --rm test                    # this bundle's test suite

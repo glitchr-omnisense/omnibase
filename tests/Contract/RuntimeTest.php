@@ -18,7 +18,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\MailerInterface;
 
 /**
- * The registry of the Fondation's contracts (plan "omnibase agnostique", C4),
+ * The registry of the Foundation's contracts (plan "omnibase agnostique", C4),
  * on its own: what C3e's getters will rely on. A contract asked and not
  * filled is an exception that names it (where the static locator returned
  * null in silence), a container's service is resolved once, a different

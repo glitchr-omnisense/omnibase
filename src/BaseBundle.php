@@ -323,7 +323,7 @@ class BaseBundle extends AbstractBaseBundle
         if ($this->container->has('base.runtime')) {
             BaseService::setRuntime($this->container->get('base.runtime'));
         }
-        // The contracts of the Fondation (Base\Contract\Runtime), from the
+        // The contracts of the Foundation (Base\Contract\Runtime), from the
         // locator ContractsPass builds: closures as well, nothing constructed
         // before a contract is asked; a new kernel's locator replaces the
         // previous one's, and what was resolved from it is forgotten.

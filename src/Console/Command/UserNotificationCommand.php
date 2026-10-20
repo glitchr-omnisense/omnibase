@@ -22,7 +22,7 @@ class UserNotificationCommand extends Command
         $this->addOption('event', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific event ?');
         $this->addOption('expiry', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific expiry value ?');
         $this->addOption('pretty', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific pretty value ?');
-        $this->addOption('statutCode', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific status code ?');
+        $this->addOption('statusCode', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific status code ?');
 
         $this->addOption('show', null, InputOption::VALUE_NONE, 'Should I show them ?');
         $this->addOption('clear', null, InputOption::VALUE_NONE, 'Should I clear them ?');

@@ -2,7 +2,7 @@
 # serve (default): the schema into SQLite, the bundles' public files, the
 # container compiled, then a plain PHP dev server on :8000.
 # check: the container and the templates linted, the plugins' routes counted.
-# bare [--all] [--each] [--json] [class...]: the Fondation (tests/Fondation.php),
+# bare [--all] [--each] [--json] [class...]: the Foundation (tests/Foundation.php),
 # or the classes named, loaded with Composer's autoloader alone - no kernel, no
 # container - and every class or file of the framework loaded on the way named;
 # on var/bare/vendor of the core, the core installed alone (composer install
@@ -38,7 +38,7 @@ case "${1:-serve}" in
     test)
         shift
         case "${1:-}" in
-            # The core's own: its BareTest measures the Fondation on var/bare/vendor, made here.
+            # The core's own: its BareTest measures the Foundation on var/bare/vendor, made here.
             ""|-*) suite=vendor/omniscient/omnibase; php "$suite/docker/bin/bare" --install ;;
             *) suite="vendor/omnibase/$1"; shift ;;
         esac

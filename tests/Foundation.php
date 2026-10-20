@@ -1,7 +1,7 @@
 <?php
 
 /*
- * The Fondation: the classes of the core that load without the framework.
+ * The Foundation: the classes of the core that load without the framework.
  *
  * Each is loaded by docker/bin/bare, in a PHP process apart from PHPUnit's, with
  * Composer's autoloader alone - no kernel, no container, no bundle booted -
@@ -93,7 +93,7 @@
  * 774 after step A1 (-7, a decision of the step: the classes left the core): the adapters of the host's contracts
  * over Symfony's own services and FileLinks moved to omnibridge/symfony (Omnibridge\Symfony\RouterUrls,
  * TranslatorTranslations, FileLinks, Contract\{KernelEnvironment, SecurityAccess, SecuritySessions, CsrfTokens}),
- * which the Fondation does not install; their former names (Base\Bridge\Symfony\*) are aliases declared only where
+ * which the Foundation does not install; their former names (Base\Bridge\Symfony\*) are aliases declared only where
  * omnibridge/symfony is (src/Resources/Aliases.php). The moved classes load nothing of the framework either.
  * omnibase's own adapters (LocalizerLocales, FlysystemFiles, RouterRoutes, MediaPictures...) stay listed.
  * 777 after step R2 of the audit "lesringostars face au master plan" (+3: Base\Repository\UserRepository, which

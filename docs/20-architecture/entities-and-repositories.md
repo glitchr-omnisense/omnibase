@@ -13,7 +13,7 @@ DoctrineBundle's service repository is - `__construct(ManagerRegistry $registry,
 ?string $entityName = null)`, the entity guessed from the repository's name -
 plus the finder language (`findByStateAndLocale()`, `cacheOneBySlug()`,
 `countByDomain()`...). It does not extend DoctrineBundle's class: a repository
-loads without the framework (it is in `tests/Fondation.php`). Under Symfony
+loads without the framework (it is in `tests/Foundation.php`). Under Symfony
 every service extending it is tagged `doctrine.repository_service`
 (`BaseExtension`, `registerForAutoconfiguration()`), so an application's
 `App\Repository\*` is still handed out by `getRepository()` and autowired.

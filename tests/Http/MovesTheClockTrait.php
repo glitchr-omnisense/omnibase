@@ -13,7 +13,7 @@ use Symfony\Component\Clock\Clock;
  * (Base\Service\FormGuard) refuses a form sent sooner than base.guard.min_delay
  * after it was shown (3 s by default; a site's suite runs with its own, the
  * harness with 0), by the clock - the framework's (Symfony's `clock`, which
- * reads symfony/clock's global clock) or the clock contract of the Fondation
+ * reads symfony/clock's global clock) or the clock contract of the Foundation
  * (Runtime::clock()). Both are moved, and they outlive the kernels a test
  * boots one after the other; putTheClockBack() (tearDown) puts them back.
  */

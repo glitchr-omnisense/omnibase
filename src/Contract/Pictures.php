@@ -8,7 +8,7 @@ namespace Base\Contract;
  * image, an address or a public path as it is, an asset of the build. Null for
  * no image.
  *
- * The Fondation's own contract, reached by Runtime::pictures() or given to a
+ * The Foundation's own contract, reached by Runtime::pictures() or given to a
  * screen's builder. Under Symfony, Base\Bridge\Symfony\MediaPictures: the
  * filter's own answers (MediaService's thumbnails).
  */

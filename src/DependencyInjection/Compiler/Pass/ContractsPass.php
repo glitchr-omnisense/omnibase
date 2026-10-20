@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Mailer\MailerInterface;
 
 /**
- * The locator Base\Contract\Runtime reaches the contracts of the Fondation
+ * The locator Base\Contract\Runtime reaches the contracts of the Foundation
  * through (plan "omnibase agnostique", C4), handed to it by
  * BaseBundle::boot() - omniscient/omnibridge's registry since A2, the host's
  * contracts (Omnibridge\Contract\*) with omnibase's own (Nouns, Media,
