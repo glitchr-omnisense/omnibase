@@ -208,4 +208,34 @@ final class ScreenResponderTest extends TestCase
         $html = $this->responder(new Viewer(3, 'louis'), omnibridge: false)->respond(Request::create('/chroniques/le-fuji'), self::view());
         self::assertFalse($html->headers->hasCacheControlDirective('no-store'));
     }
+
+    /**
+     * An action's other results under Symfony (step R10 of the audit "lesringostars face au master
+     * plan"; the negotiation itself is Base\Screen\Negotiation's, NegotiationTest): a Template's
+     * markup (alone: omnibase's tags kept out, `_omnibase_inject: false`), JSON data a JsonResponse
+     * (Symfony's FlashBagSubscriber folds the session's messages into one), a File a
+     * BinaryFileResponse, the caching asked; no result, no page.
+     */
+    public function testAnActionsResultsAreSymfonysResponses(): void
+    {
+        $request = Request::create('/screen');
+        $html = $this->responder()->respond($request, new \Base\Screen\Template('card.html.twig', ['screen' => ['title' => 'Le Fuji', 'url' => '/a'], 'frame' => ['locale' => 'fr', 'site' => ['title' => 'x']]], alone: true));
+        self::assertSame('<html lang="fr"><h1>Le Fuji</h1><a href="/a">x</a></html>', $html->getContent());
+        self::assertFalse($request->attributes->get('_omnibase_inject'));
+
+        $json = $this->responder()->respond(Request::create('/feed'), new \Base\Screen\Json(['html' => '<p>'], cache: \Base\Screen\Cache::public(3600, mustRevalidate: true)));
+        self::assertInstanceOf(\Symfony\Component\HttpFoundation\JsonResponse::class, $json);
+        self::assertSame('{"html":"\u003Cp\u003E"}', $json->getContent());
+        self::assertTrue($json->headers->hasCacheControlDirective('public'));
+        self::assertTrue($json->headers->hasCacheControlDirective('must-revalidate'));
+        self::assertSame('3600', $json->headers->getCacheControlDirective('max-age'));
+
+        $file = $this->responder()->respond(Request::create('/file'), new \Base\Screen\File(__FILE__, 'text/plain', \Base\Screen\Cache::private()));
+        self::assertInstanceOf(\Symfony\Component\HttpFoundation\BinaryFileResponse::class, $file);
+        self::assertSame('text/plain', $file->headers->get('Content-Type'));
+        self::assertTrue($file->headers->hasCacheControlDirective('private'));
+
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+        $this->responder()->respond(Request::create('/nothing'), null);
+    }
 }

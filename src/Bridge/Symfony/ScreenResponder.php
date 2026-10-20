@@ -2,83 +2,106 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Screen\Confidential;
+use Base\Screen\Answer;
 use Base\Screen\ContextProvider;
+use Base\Screen\File;
 use Base\Screen\Frame;
+use Base\Screen\Json;
+use Base\Screen\Negotiation;
 use Base\Screen\Screen;
+use Base\Screen\Shell;
+use Base\Screen\Template;
 use Base\Screen\View;
-use Omnibridge\React\Page;
-use Omnibridge\React\Protocol;
+use Base\Screen\Visit;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Twig\Environment;
 
 /**
- * A screen answered under Symfony (plan "omnibase agnostique", C5): what a
- * controller hands back - a template, a view model (Base\Screen\View) - and
- * the frame of the request (the ContextProvider's).
- *
- * - A visit within a front end (omnibridge/react's protocol: the request
- *   header X-Omnibridge, when omnibridge/react is installed): the page in
- *   JSON - the View's component, the frame's and the screen's props
- *   together, the address, the front end's version (base.screens.version) -;
- *   a front end of another version gets 409 and the address to reload.
- * - Without omnibridge/react, a request asking JSON alone (Accept:
- *   application/json, no text/html): the props in JSON. React does not rely
- *   on it.
- * - Otherwise the HTML: Twig renders the View's template with `frame` and
- *   `screen` (and, for the templates a site overrides, the variables the page
- *   had before - `$legacy`, deprecated, gone in 4.0).
- *
- * Every answer varies on what chooses between them (X-Omnibridge, Accept); a
- * JSON answer carrying a visitor (the frame's viewer) is private to them and
- * varies on the session's cookie: no cache serves one person's name to
- * another. A screen carrying its viewer's secrets (Base\Screen\Confidential:
- * its forms' tokens) is stored by no cache at all: `private, no-store` and
- * `Vary: Cookie`, the HTML as the JSON.
- *
- * A screen's props never take a key of the frame's (Frame::RESERVED: locale,
- * site, links, viewer, theme): the frame's would win and the screen's be lost
- * without a word, so such a screen is refused, in every answer.
+ * An action's result answered under Symfony: Symfony's adapter of
+ * Base\Screen\Negotiation (step R10 of the audit "lesringostars face au
+ * master plan" - the negotiation itself, HTML, JSON, omnibridge/react's
+ * protocol and its 409, is framework-free there; omnibridge/laravel's
+ * Screen\Responder is Laravel's adapter of it). What a controller hands back
+ * - a View (a screen of omnibase, plan "omnibase agnostique" C5), a Template,
+ * Json, a Shell, a File, or null for no such page - becomes Symfony's
+ * response: the request read as a Visit, the template rendered by Twig, the
+ * Answer made a Response (a JsonResponse for JSON data, a BinaryFileResponse
+ * for a file), its caching set. A Template rendered alone, and a Shell, keep
+ * omnibase's tags out of the page (`_omnibase_inject: false`, as a route
+ * default says it).
  */
 class ScreenResponder
 {
+    private ?Negotiation $negotiation = null;
+
     public function __construct(
         private readonly Environment $twig,
         private readonly ContextProvider $context,
         private readonly ?string $version = null,
-        /** Whether omnibridge/react's protocol is spoken; null: when omnibridge/react is installed. */
+        /** Whether omnibridge/react's protocol is spoken for a View; null: when omnibridge/react is installed. */
         private readonly ?bool $omnibridge = null,
     ) {
     }
 
-    /** @param array<string, mixed> $legacy the variables of before, for a site's own template */
-    public function respond(Request $request, View $view, array $legacy = [], ?Frame $frame = null): Response
+    /** @param array<string, mixed> $legacy a View's variables of before, for a site's own template */
+    public function respond(Request $request, View|Template|Json|Shell|File|null $result, array $legacy = [], ?Frame $frame = null): Response
     {
-        self::guard($view->screen);
-        $frame ??= $this->context->frame();
-
-        if ($this->omnibridge() && Protocol::wantsJson($request->headers->get(Protocol::HEADER))) {
-            $page = new Page($view->component ?? $view->template, $this->props($frame, $view), $request->getRequestUri(), $this->version);
-            $answer = Protocol::answer($page, $request->headers->get(Protocol::HEADER), $request->headers->get(Protocol::VERSION), static fn (string $root): string => $root);
-            $response = new Response($answer['body'], 200 === $answer['status'] ? $view->status : $answer['status'], $answer['headers']);
-
-            return $this->private($response, $frame, $view->screen);
+        if (null === $result) {
+            throw new NotFoundHttpException();
+        }
+        if (($result instanceof Template && $result->alone) || $result instanceof Shell) {
+            $request->attributes->set('_omnibase_inject', false);
         }
 
-        if (!$this->omnibridge() && self::asksJsonAlone($request)) {
-            // A Response, not a JsonResponse: the props as the screen gave them (FlashBagSubscriber folds the
-            // session's messages into a JsonResponse, and takes them).
-            $response = new Response(json_encode($this->props($frame, $view), \JSON_UNESCAPED_UNICODE | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR), $view->status, ['Content-Type' => 'application/json']);
-            $response->setVary(['Accept'], false);
+        return self::response($this->negotiation()->answer($result, self::visit($request), $legacy, $frame));
+    }
 
-            return $this->private($response, $frame, $view->screen);
+    /** What the client asked, off Symfony's request. */
+    public static function visit(Request $request): Visit
+    {
+        return new Visit(
+            $request->getRequestUri(),
+            (string) $request->headers->get('Accept', ''),
+            $request->headers->get('X-Omnibridge'),
+            $request->headers->get('X-Omnibridge-Version'),
+        );
+    }
+
+    /** Symfony's response of an Answer. */
+    public static function response(Answer $answer): Response
+    {
+        if (null !== $answer->file) {
+            $response = new BinaryFileResponse($answer->file, $answer->status, $answer->headers);
+        } elseif ($answer->json) {
+            $response = JsonResponse::fromJsonString($answer->body, $answer->status, $answer->headers);
+        } else {
+            $response = new Response($answer->body, $answer->status, $answer->headers);
         }
 
-        $response = new Response($this->twig->render($view->template, ['frame' => $frame, 'screen' => $view->screen] + $legacy), $view->status);
-        $response->setVary([$this->omnibridge() ? Protocol::HEADER : 'Accept'], false);
+        $cache = $answer->cache;
+        if ($cache->vary) {
+            $response->setVary($cache->vary, false);
+        }
+        if (false === $cache->shared) {
+            $response->setPrivate();
+        } elseif (true === $cache->shared) {
+            $response->setPublic();
+        }
+        if (null !== $cache->maxAge) {
+            $response->setMaxAge($cache->maxAge);
+        }
+        if ($cache->mustRevalidate) {
+            $response->headers->addCacheControlDirective('must-revalidate');
+        }
+        if ($cache->noStore) {
+            $response->headers->addCacheControlDirective('no-store');
+        }
 
-        return $view->screen instanceof Confidential ? $this->private($response, $frame, $view->screen) : $response;
+        return $response;
     }
 
     /**
@@ -103,41 +126,17 @@ class ScreenResponder
     /** @return array<string, mixed> the frame's props and the screen's, as a front end reads them */
     public function props(Frame $frame, View $view): array
     {
-        self::guard($view->screen);
-
-        return $frame->toArray() + $view->screen->toArray();
+        return $this->negotiation()->props($frame, $view);
     }
 
     /** A screen whose props would take a key of the frame's is refused: its own would be lost in the JSON. */
     public static function guard(Screen $screen): void
     {
-        if ($taken = array_intersect(array_keys($screen->toArray()), Frame::RESERVED)) {
-            throw new \InvalidArgumentException(sprintf('A screen\'s props may not take the frame\'s keys: "%s" (%s).', implode('", "', $taken), $screen::class));
-        }
+        Negotiation::guard($screen);
     }
 
-    private function omnibridge(): bool
+    public function negotiation(): Negotiation
     {
-        return $this->omnibridge ?? class_exists(Protocol::class);
-    }
-
-    private function private(Response $response, Frame $frame, Screen $screen): Response
-    {
-        if (null !== $frame->viewer || $screen instanceof Confidential) {
-            $response->setPrivate();
-            $response->setVary(['Cookie'], false);
-        }
-        if ($screen instanceof Confidential) {
-            $response->headers->addCacheControlDirective('no-store');
-        }
-
-        return $response;
-    }
-
-    private static function asksJsonAlone(Request $request): bool
-    {
-        $accept = (string) $request->headers->get('Accept', '');
-
-        return str_contains($accept, 'application/json') && !str_contains($accept, 'text/html');
+        return $this->negotiation ??= new Negotiation(fn (string $template, array $context): string => $this->twig->render($template, $context), $this->context, $this->version, $this->omnibridge);
     }
 }
