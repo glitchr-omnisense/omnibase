@@ -105,8 +105,8 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
             self::assertNotContains($className, $this->attributeClasses, $className.' is mapped by attributes');
             unset($symfony['classes'][$className]);
         }
-        // And the fields an entity inherits from one of them (Base\Entity\User\Passkey from Webauthn's
-        // CredentialRecord), declared there.
+        // And the fields an entity inherits from one of them, declared there (Base\Entity\User\Passkey's,
+        // from Webauthn's CredentialRecord, up to step AU1 of the plan "omniauth": it declares them itself now).
         foreach ($symfony['classes'] as $className => $metadata) {
             foreach ($metadata['fieldMappings'] as $field => $mapping) {
                 if (in_array($mapping['declared'] ?? null, $own, true)) {

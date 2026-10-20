@@ -17,7 +17,7 @@ stored files, routes, environment - lives in the omnibridge family's core,
 `Omnibridge\Contract\*`, with the registry itself (`Omnibridge\Runtime`, its
 `MissingContractException` and `SystemClock`). What describes omnibase's own models stays
 here as `Base\Contract\*`: `Nouns`, `Media`, `Pictures`, `Texts`, the screens'
-`ContextProvider`, the user's `SecurityUser`/`TwoFactorUser` and its repository's `SecurityUserLoader`/`SecurityUserProvider`. `Base\Contract\Runtime` is
+`ContextProvider`, the user's `SecurityUser`/`TwoFactorUser`, its repository's `SecurityUserLoader`/`SecurityUserProvider` and the passkeys' repositories' `PasskeyRecords`/`PasskeyUsers`. `Base\Contract\Runtime` is
 omnibridge's registry (the same state) with omnibase's accessors beside it: `parameters()`,
 `nouns()`, `media()`, `pictures()`, `texts()`, `mailer()`. The former names
 (`Base\Contract\Urls`... and omnibridge/twig's `Omnibridge\Twig\Contract\Urls` and

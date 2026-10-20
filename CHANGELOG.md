@@ -129,6 +129,48 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: the passkey described by the core (plan "omniauth", step AU1)
+- **`Base\Entity\User\Passkey` no longer extends `Webauthn\CredentialRecord`**: its 13 fields
+  (`publicKeyCredentialId`, `type`, `transports`, `attestationType`, `trustPath`, `aaguid`,
+  `credentialPublicKey`, `userHandle`, `counter`, `otherUI`, `backupEligible`, `backupStatus`,
+  `uvInitialized`) are its own attributes, under the same public names, so the same columns of
+  `userPasskey`, mapped by the core instead of WebauthnBundle's XML - described once, and read the
+  same by a host without the bundle (the Laravel twin; decision O6). Their values are plain: the
+  credential id and the public key as bytes, the AAGUID as its text, the trust path as
+  webauthn-lib normalizes it (`[]`, `["x5c" => [...]]`); the entity loads nothing of webauthn-lib.
+  `Passkey::createFromCredentialRecord()` stays.
+- **Three column types of the core**, `Base\Database\Type\Passkey\{Base64, Aaguid, TrustPath}`
+  (`passkey_base64`, `passkey_aaguid`, `passkey_trust_path`), registered with the others
+  (`Base\Bridge\Doctrine\Types::core()`, `passkey()`, and the bundle's prepended DBAL types):
+  the SQL of the bundle's `base64`, `aaguid` and `trust_path` (LONGTEXT, TINYTEXT, JSON on
+  MySQL) and the same text written and read - no migration, the rows written by the bundle's
+  types are read as they are, and the other way round.
+- **`PasskeyRepository` and `WebauthnUserEntityRepository` declare the bundle's interfaces through
+  `Base\Contract\PasskeyRecords` and `PasskeyUsers`** (the pattern of R2): aliases of
+  `Base\Bridge\Symfony\PasskeyRecords` (`CredentialRecordRepositoryInterface`,
+  `CanSaveCredentialRecord`) and `PasskeyUsers` (`PublicKeyCredentialUserEntityRepositoryInterface`)
+  where web-auth/webauthn-symfony-bundle is installed, empty interfaces elsewhere; both load
+  without the bundle. The repository gives the bundle the `CredentialRecord`s it asks for, made
+  from the passkeys (`credentialRecord()`), and copies onto the passkey of that credential what it
+  hands back (`fill()`), or makes a new passkey of the account its handle names at a registration.
+- **WebauthnBundle's own Doctrine mapping is taken out of the entity managers' chains**
+  (`WebauthnMappingPass`): it mapped webauthn-lib's three classes as superclasses for an entity to
+  inherit, and none does any more (no site's either). Its DBAL types stay registered.
+- Fixed: **a passkey could not sign in**. The bundle looks a credential up by its raw id;
+  `findOneByCredentialId()` asked omnibase's `findOneBy()`, which binds a criterion as it is, not
+  through the column's type, and the raw bytes never matched their base64 text ("The credential
+  ID is invalid.", measured on lesringostars). `PasskeyRepository::findOneByCredential()` compares
+  the column with the id typed `passkey_base64`.
+- Fondation 779 -> 786 (`PasskeyRepository`, `WebauthnUserEntityRepository`, the two contracts, the
+  three types). Tests: `PasskeyTypesTest` (the bundle's SQL on MySQL, SQLite and PostgreSQL, each
+  value written by one read by the other), `PasskeyRepositoryTest` (a registration becomes a
+  passkey of its account, the records the bundle asks for are the passkey's 13 fields, a sign-in's
+  counter saved on the same passkey, a certificate trust path, the accounts' entities),
+  `BareTest` (the passkey and both repositories load without the framework; a passkey made and its
+  columns written loads no class of webauthn-lib; with the bundle installed both repositories
+  declare its interfaces through the contracts). `HandBuiltEntityManagerTest`'s fixture: Passkey's
+  13 fields and the three types recorded.
+
 ### Changed: the image route's rule without the framework (step R6)
 - **`Base\Contract\MediaRouter`**: the five questions omnibase's media rule asks a router -
   `generate()`, `getRouteMatch()`, `getRouteName()`, `getAssetUrl()`, `getUrl()` - with the

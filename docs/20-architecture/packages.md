@@ -103,7 +103,9 @@ class and the storages load without either:
   `Base\Bridge\Symfony\SecurityUserLoader` (doctrine-bridge's `UserLoaderInterface`) and
   `SecurityUserProvider` (Security's `UserProviderInterface` and `PasswordUpgraderInterface`)
   where symfony/doctrine-bridge and symfony/security-core are installed, empty interfaces
-  elsewhere.
+  elsewhere. So do the passkeys' repositories (plan "omniauth", AU1): `PasskeyRepository` and
+  `WebauthnUserEntityRepository` implement `Base\Contract\PasskeyRecords` and `PasskeyUsers`,
+  WebauthnBundle's interfaces where it is installed.
 - **league/flysystem-bundle** - `Base\Service\Flysystem` (the `flysystem` service, which the
   file, image, upload, backup and cache-clear services read) is the core's own class, built from
   a PSR-11 container of storages by name: the services tagged `flysystem.storage`, which the
@@ -119,7 +121,7 @@ The others have a fallback:
 | scheb/2fa | the user still declares its interfaces when the package is installed; no two-factor sign-in |
 | league/flysystem-bundle | the `flysystem` service on omnibase's local storages (above) |
 | hwi/oauth-bundle | the service `Base\Security\UserProvider` is a `UserProvider` (with it, an `OAuthUserProvider`: the same, declared OAuth-aware); `oauth_available()` false |
-| web-auth/webauthn-symfony-bundle | `PasskeyRepository` and `WebauthnUserEntityRepository` are not registered (their interfaces are the bundle's); no passkeys |
+| web-auth/webauthn-symfony-bundle | `PasskeyRepository` and `WebauthnUserEntityRepository` declare nothing of it (`Base\Contract\PasskeyRecords` and `PasskeyUsers` are empty interfaces) and nobody asks them; the passkeys' table is the core's (`Passkey` and its three column types); no passkey ceremony |
 | api-platform/symfony | the decoration of its resource name collection is dropped; `#[ApiResource]` is an attribute nothing reads |
 | symfony/webpack-encore-bundle | `encore_entry_*_tags` (the core's own functions) print the core's build alone; the warmer reads no application build |
 | symfony/ux-twig-component | the `twig_component` defaults are not prepended |

@@ -103,6 +103,11 @@
  * 779 after step R6 of the same audit (+2: Base\Contract\MediaRouter, the five questions omnibase's media rule asks a
  * router, which AdvancedRouterInterface extends and FileService and MediaService now take; Base\Service\ImageRoute,
  * the image route's answers moved out of MediaController for any host, with the routes' list).
+ * 786 after step AU1 of the plan "omniauth" (+7: the passkeys described by the core - Base\Repository\User\PasskeyRepository
+ * and Base\Security\WebauthnUserEntityRepository, which declare WebauthnBundle's repositories through
+ * Base\Contract\PasskeyRecords and PasskeyUsers, those interfaces when the bundle is installed, empty ones otherwise -,
+ * those two contracts, and Base\Database\Type\Passkey\{Base64, Aaguid, TrustPath}, the columns of
+ * Base\Entity\User\Passkey, which no longer extends webauthn-lib's CredentialRecord).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -149,6 +154,8 @@ return [
     Base\Contract\Media::class,
     Base\Contract\MediaRouter::class,
     Base\Contract\Nouns::class,
+    Base\Contract\PasskeyRecords::class,
+    Base\Contract\PasskeyUsers::class,
     Base\Contract\Pictures::class,
     Base\Contract\Routes::class,
     Base\Contract\Runtime::class,
@@ -233,6 +240,9 @@ return [
     Base\Database\Type\DateTimeTypeUTC::class,
     Base\Database\Type\EnumType::class,
     Base\Database\Type\MySQLSetType::class,
+    Base\Database\Type\Passkey\Aaguid::class,
+    Base\Database\Type\Passkey\Base64::class,
+    Base\Database\Type\Passkey\TrustPath::class,
     Base\Database\Type\SetType::class,
     Base\Database\Type\Utc::class,
     Base\Database\Type\UtcDateTimeImmutableType::class,
@@ -605,6 +615,7 @@ return [
     Base\Repository\User\ConnectionRepository::class,
     Base\Repository\User\GroupRepository::class,
     Base\Repository\User\NotificationRepository::class,
+    Base\Repository\User\PasskeyRepository::class,
     Base\Repository\User\PenaltyRepository::class,
     Base\Repository\User\PermissionRepository::class,
     Base\Repository\User\PushSubscriptionRepository::class,
@@ -646,6 +657,7 @@ return [
     Base\Security\LoginRestrictionInterface::class,
     Base\Security\SignInGuard::class,
     Base\Security\UserTracker::class,
+    Base\Security\WebauthnUserEntityRepository::class,
     Base\Serializer\Aco::class,
     Base\Serializer\Encoder\AcoEncoder::class,
     Base\Serializer\Encoder\ExcelEncoder::class,

@@ -3,10 +3,17 @@
 namespace Base\Security;
 
 use App\Repository\UserRepository;
+use Base\Contract\PasskeyUsers;
 use Webauthn\PublicKeyCredentialUserEntity;
-use Webauthn\Bundle\Repository\PublicKeyCredentialUserEntityRepositoryInterface;
 
-class WebauthnUserEntityRepository implements PublicKeyCredentialUserEntityRepositoryInterface
+/**
+ * The accounts as passkeys know them (WebauthnBundle's user repository): an
+ * account's username is the key's name, its id (as text) the user handle.
+ * The bundle's interface is declared through Base\Contract\PasskeyUsers
+ * (plan "omniauth", AU1): theirs where the bundle is installed, empty
+ * elsewhere, so the class loads without the bundle.
+ */
+class WebauthnUserEntityRepository implements PasskeyUsers
 {
     protected UserRepository $userRepository;
 

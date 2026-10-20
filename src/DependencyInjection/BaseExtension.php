@@ -140,6 +140,8 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
             UtcDateTimeImmutableType::NAME => UtcDateTimeImmutableType::class,
             UtcDateTimeType::NAME => UtcDateTimeType::class,
         ];
+        // The columns of a passkey, which the core describes (plan "omniauth", AU1).
+        $types += \Base\Bridge\Doctrine\Types::passkey();
 
         $classList = array_merge(
             BaseBundle::getAllClasses(BaseBundle::getBundleDir() . "/src/Enum"),
