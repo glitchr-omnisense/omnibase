@@ -87,13 +87,17 @@ final class PasskeyRepositoryTest extends KernelTestCase
         self::assertNotNull($passkey->getCreatedAt());
 
         $row = $this->entityManager()->getConnection()->fetchAssociative('SELECT publicKeyCredentialId, trustPath, aaguid, credentialPublicKey, transports FROM userPasskey WHERE id = ?', [$passkey->getId()]);
+        // The JSON columns compared decoded: a JSON column of MySQL keeps its own text of the value
+        // (["internal", "hybrid"]), SQLite the one written.
+        $row['trustPath'] = json_decode($row['trustPath'], true);
+        $row['transports'] = json_decode($row['transports'], true);
         self::assertSame([
             'publicKeyCredentialId' => base64_encode($record->publicKeyCredentialId),
-            'trustPath' => '[]',
+            'trustPath' => [],
             'aaguid' => 'adce0002-35bc-c60a-648b-0b25f1f05503',
             'credentialPublicKey' => base64_encode($record->credentialPublicKey),
-            'transports' => '["internal","hybrid"]',
-        ], $row, 'the text WebauthnBundle\'s types wrote');
+            'transports' => ['internal', 'hybrid'],
+        ], $row, 'what WebauthnBundle\'s types wrote');
     }
 
     public function testTheBundleFindsTheRecordOfACredentialAndOfAnAccount(): void
@@ -140,7 +144,8 @@ final class PasskeyRepositoryTest extends KernelTestCase
         $this->repository()->saveCredentialRecord($record);
         $this->entityManager()->clear();
 
-        self::assertSame('{"x5c":["MIIB\/w==","MIIC"]}', $this->entityManager()->getConnection()->fetchOne('SELECT trustPath FROM userPasskey WHERE userHandle = ?', [(string) $user->getId()]));
+        $stored = (string) $this->entityManager()->getConnection()->fetchOne('SELECT trustPath FROM userPasskey WHERE userHandle = ?', [(string) $user->getId()]);
+        self::assertSame(['x5c' => ['MIIB/w==', 'MIIC']], json_decode($stored, true), 'webauthn-lib\'s normal form (the text is the database\'s: MySQL rewrites a JSON column\'s)');
         self::assertEquals($record->trustPath, $this->repository()->findOneByCredentialId($record->publicKeyCredentialId)->trustPath);
     }
 
