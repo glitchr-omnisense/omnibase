@@ -162,6 +162,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Extension\ThemizerTwigExtension')
         ->tag('twig.extension')
         ->args([new Reference('themizer')]);
+    // The language and theme menus, framework-free: the host's Locales contract and the Themizer.
+    $services->set('Base\Twig\Extension\MenuTwigExtension')
+        ->tag('twig.extension')
+        ->args([service('Omnibridge\Contract\Locales'), new Reference('themizer')]);
     $services->set('Base\Twig\Extension\TranslatorTwigExtension')
         ->tag('twig.extension')
         ->args([new Reference('localizer')]);

@@ -110,6 +110,8 @@
  * Base\Entity\User\Passkey, which no longer extends webauthn-lib's CredentialRecord).
  * 787 with the sign-out's token (+1: Base\Security\SignOut, the sign-out's address with the CSRF token the firewall's
  * logout asks, through the Urls and Tokens contracts).
+ * 788 after step R9 of the audit "lesringostars face au master plan" (+1: Base\Twig\Extension\MenuTwigExtension,
+ * the language and theme menus on the host's Locales contract and the ThemizerInterface, which Laravel registers too).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -861,6 +863,7 @@ return [
     Base\Twig\Extension\LocalizerTwigExtension::class,
     Base\Twig\Extension\MathTwigExtension::class,
     Base\Twig\Extension\MediaTwigExtension::class,
+    Base\Twig\Extension\MenuTwigExtension::class,
     Base\Twig\Extension\NotificationTwigExtension::class,
     Base\Twig\Extension\OAuthTwigExtension::class,
     Base\Twig\Extension\PaginatorTwigExtension::class,

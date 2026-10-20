@@ -9,6 +9,11 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+/**
+ * omnibase's locale filters and its timezone, country and currency menus, on
+ * its Localizer. The language menu, render_locale(), is MenuTwigExtension's
+ * (on the host's Locales contract, the same under Laravel).
+ */
 final class LocalizerTwigExtension extends AbstractExtension
 {
     protected LocalizerInterface $localizer;
@@ -44,17 +49,8 @@ final class LocalizerTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction('compatible_locale', [Localizer::class, 'compatibleLocale'], ['is_safe' => ['all']]),
-            new TwigFunction('render_locale', [$this, 'renderLocale'], ['needs_environment' => true, 'is_safe' => ['all']]),
             new TwigFunction('render_timezone', [$this, 'renderTimezone'], ['needs_environment' => true, 'is_safe' => ['all']]),
         ];
-    }
-
-    public function renderLocale(Environment $twig, array $options = [], string $template = '@Base/localizer/locale_dropdown.html.twig'): ?string
-    {
-        return $twig->render($template, array_merge($options, [
-            'available_locales' => $this->localizer->getAvailableLocales(),
-            'current_locale' => $this->localizer->getLocale(),
-        ]));
     }
 
     public function renderCountry(Environment $twig, array $options = [], string $template = '@Base/localizer/country_dropdown.html.twig'): ?string
