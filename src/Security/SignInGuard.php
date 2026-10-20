@@ -89,9 +89,15 @@ class SignInGuard implements EventSubscriberInterface
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
         $ip = $event->getRequest()->getClientIp();
-        if (null !== $this->cache && null !== $ip) {
-            $this->cache->deleteItem($this->key($ip));
+        if (null !== $ip) {
+            $this->forget($ip);
         }
+    }
+
+    /** The failures counted from an address forgotten: a success does it; a test that starts afresh too. */
+    public function forget(string $ip): void
+    {
+        $this->cache?->deleteItem($this->key($ip));
     }
 
     public function onCheckPassport(CheckPassportEvent $event): void

@@ -3,6 +3,7 @@
 namespace Tests\Base\Demo;
 
 use Base\Demo\DemoAccountFactory;
+use Base\Security\SignInGuard;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +23,9 @@ abstract class DemoKernelTestCase extends KernelTestCase
     /** @var object[] */
     private array $created = [];
 
+    /** Whether this test booted a kernel already (its first boot forgets the sign-in failures of its address). */
+    private bool $afresh = false;
+
     protected static function getKernelClass(): string
     {
         return DemoTestKernel::class;
@@ -39,6 +43,17 @@ abstract class DemoKernelTestCase extends KernelTestCase
 
         self::bootKernel(['environment' => $environment, 'debug' => false]);
         $this->cookies = [];
+
+        // Each test starts with no failed sign-in from its address, as a visitor at another address
+        // would: the suite's own refused sign-ins all come from one address (Request::create()'s
+        // 127.0.0.1) and SignInGuard counts them in cache.app, kept between tests and between runs
+        // (a quarter of an hour), so from base.guard.sign_in_after of them on (3) a host whose guard
+        // has a captcha (glitchr/omnishield: lesringostars) asked it of the tests that then sign in
+        // with the right password, and refused them. Within a test, the failures still count.
+        if (!$this->afresh && static::getContainer()->has(SignInGuard::class)) {
+            static::getContainer()->get(SignInGuard::class)->forget('127.0.0.1');
+        }
+        $this->afresh = true;
     }
 
     protected function tearDown(): void
@@ -61,6 +76,7 @@ abstract class DemoKernelTestCase extends KernelTestCase
             }
         }
         $this->created = [];
+        $this->afresh = false;
         unset($_SERVER['DEMO_SUPERADMIN_PASSWORD'], $_ENV['DEMO_SUPERADMIN_PASSWORD'], $_SERVER['DEMO_ADMIN_PASSWORD'], $_ENV['DEMO_ADMIN_PASSWORD'], $_SERVER['DEMO_TEST_PRODUCTION_DATABASE'], $_ENV['DEMO_TEST_PRODUCTION_DATABASE']);
 
         parent::tearDown();
