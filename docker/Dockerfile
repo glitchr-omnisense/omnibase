@@ -35,7 +35,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # --- bare Symfony skeleton ---------------------------------------------------
 WORKDIR /srv/demo
-RUN composer create-project symfony/skeleton . --no-interaction --no-progress
+# --mount: Composer's GitHub token when the build is given one (the CI passes its own with
+# --secret id=composer_auth,env=COMPOSER_AUTH), for the API's dist archives; no layer keeps it.
+RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH composer create-project symfony/skeleton . --no-interaction --no-progress
 
 # The glitchr packages are branch releases (N.x-dev); omnibridge/composer, the
 # one Composer plugin the core requires, applies the patches and writes the stubs
@@ -71,7 +73,8 @@ ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelm
 # A layer cached from an older build keeps an older 1.x: `docker compose
 # build --build-arg OMNI_REFRESH=$(date +%s)` refetches it.
 ARG OMNI_REFRESH=0
-RUN echo "omni families as of ${OMNI_REFRESH}" \
+# --mount: the same token, when given.
+RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families as of ${OMNI_REFRESH}" \
     && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omniscient/omnibase": "4.x-dev"}}}' \
     # Since 4.0 the core requires its Foundation alone (Doctrine, Twig, standalone components):
     # a Symfony application adds omnibridge/symfony (the framework) and the bundles its
