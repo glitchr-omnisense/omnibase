@@ -112,6 +112,12 @@
  * logout asks, through the Urls and Tokens contracts).
  * 788 after step R9 of the audit "lesringostars face au master plan" (+1: Base\Twig\Extension\MenuTwigExtension,
  * the language and theme menus on the host's Locales contract and the ThemizerInterface, which Laravel registers too).
+ * 807 after step AU4 of the plan "omniauth" (+19: Base\Auth\, omniauth's stores on omnibase's tables - UserStore,
+ * UserAccounts, UserPasswords, UserLinkTokens, UserTotpSecrets, UserEmailCodes, UserBackupCodes, UserTrustedVersion,
+ * UserPasskeys, UserIdentities -, Policy and PolicyLinking, the listeners Listener\{GuardSignIn, TrackConnections,
+ * WarnNewDevice, UpdateAccount, WelcomeBack}; Base\Entity\User\Identity and Base\Repository\User\IdentityRepository,
+ * the userIdentity table). They load with omniauth and its methods, which var/bare installs beside the core
+ * (composer.json, extra.omnibase.bare: suggested, not required), and without the framework.
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -123,6 +129,23 @@ return [
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
     Base\Attributes\Traits\HierarchifyTrait::class,
+    Base\Auth\Listener\GuardSignIn::class,
+    Base\Auth\Listener\TrackConnections::class,
+    Base\Auth\Listener\UpdateAccount::class,
+    Base\Auth\Listener\WarnNewDevice::class,
+    Base\Auth\Listener\WelcomeBack::class,
+    Base\Auth\Policy::class,
+    Base\Auth\PolicyLinking::class,
+    Base\Auth\UserAccounts::class,
+    Base\Auth\UserBackupCodes::class,
+    Base\Auth\UserEmailCodes::class,
+    Base\Auth\UserIdentities::class,
+    Base\Auth\UserLinkTokens::class,
+    Base\Auth\UserPasskeys::class,
+    Base\Auth\UserPasswords::class,
+    Base\Auth\UserStore::class,
+    Base\Auth\UserTotpSecrets::class,
+    Base\Auth\UserTrustedVersion::class,
     Base\Bridge\Doctrine\Configuration::class,
     Base\Bridge\Doctrine\Mapping::class,
     Base\Bridge\Doctrine\MappingDriver::class,
@@ -376,6 +399,7 @@ return [
     Base\Entity\User\Complaint::class,
     Base\Entity\User\Connection::class,
     Base\Entity\User\Group::class,
+    Base\Entity\User\Identity::class,
     Base\Entity\User\Invitation::class,
     Base\Entity\User\Notification::class,
     Base\Entity\User\Passkey::class,
@@ -618,6 +642,7 @@ return [
     Base\Repository\User\ComplaintRepository::class,
     Base\Repository\User\ConnectionRepository::class,
     Base\Repository\User\GroupRepository::class,
+    Base\Repository\User\IdentityRepository::class,
     Base\Repository\User\NotificationRepository::class,
     Base\Repository\User\PasskeyRepository::class,
     Base\Repository\User\PenaltyRepository::class,

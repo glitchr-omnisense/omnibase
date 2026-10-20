@@ -60,6 +60,11 @@ $tokens = new class implements Tokens {
     {
         return 'token-of-'.$intent;
     }
+
+    public function isValid(string $intent, ?string $token): bool
+    {
+        return $token === $this->csrf($intent);
+    }
 };
 $clock = new class implements ClockInterface {
     public function now(): DateTimeImmutable

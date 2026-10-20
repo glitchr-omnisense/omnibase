@@ -37,6 +37,11 @@ class SignOutTest extends TestCase
             {
                 return 'token-of-'.$intent;
             }
+
+            public function isValid(string $intent, ?string $token): bool
+            {
+                return $token === $this->csrf($intent);
+            }
         };
 
         self::assertSame(['_csrf_token' => 'token-of-logout'], SignOut::parameters($tokens));

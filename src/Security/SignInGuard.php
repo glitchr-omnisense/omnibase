@@ -57,13 +57,24 @@ class SignInGuard implements EventSubscriberInterface
     /** The captcha's gateway when a sign-in from this request must pass it; null otherwise. */
     public function required(?Request $request): ?string
     {
+        return $this->requiredFor($request?->getClientIp());
+    }
+
+    /**
+     * The captcha's gateway when a sign-in from this address must pass it;
+     * null otherwise. What required() asks of a request, asked of its address
+     * alone: omniauth's listener (Base\Auth\Listener\GuardSignIn) has no
+     * request, only omniauth's Context.
+     */
+    public function requiredFor(?string $ip): ?string
+    {
         $after = $this->guard->signInAfter();
-        if ($this->google || $after <= 0 || null === $request?->getClientIp()) {
+        if ($this->google || $after <= 0 || null === $ip || '' === $ip) {
             return null;
         }
         $gateway = $this->guard->challengeGateway();
 
-        return null !== $gateway && $this->failures($request->getClientIp()) >= $after ? $gateway : null;
+        return null !== $gateway && $this->failures($ip) >= $after ? $gateway : null;
     }
 
     public function failures(string $ip): int
@@ -79,7 +90,15 @@ class SignInGuard implements EventSubscriberInterface
     public function onLoginFailure(LoginFailureEvent $event): void
     {
         $ip = $event->getRequest()->getClientIp();
-        if (null === $this->cache || null === $ip) {
+        if (null !== $ip) {
+            $this->failed($ip);
+        }
+    }
+
+    /** One more failure from this address, remembered WINDOW seconds. */
+    public function failed(string $ip): void
+    {
+        if (null === $this->cache || '' === $ip) {
             return;
         }
         $item = $this->cache->getItem($this->key($ip));
@@ -110,26 +129,38 @@ class SignInGuard implements EventSubscriberInterface
             return;
         }
 
-        $challenge = $this->guard->getRegistry()->challenge($gateway);
-        $field = $challenge->widget(self::ACTION)->field;
+        $field = $this->field($gateway);
         $form = $request->request->all('_base_security_login') ?: $request->request->all('security_login') ?: [];
         $token = $request->request->get($field) ?? ($form[FormGuard::CHALLENGE_FIELD] ?? '');
 
+        if (!$this->passes($gateway, \is_string($token) ? $token : '', $request->getClientIp())) {
+            throw new CustomUserMessageAuthenticationException(self::MESSAGE);
+        }
+    }
+
+    /** The form field the captcha's widget posts its answer in. */
+    public function field(string $gateway): string
+    {
+        return $this->guard->getRegistry()->challenge($gateway)->widget(self::ACTION)->field;
+    }
+
+    /**
+     * Does the captcha's answer pass? A key the captcha refuses lets the
+     * sign-in through (the site's mistake, logged); a captcha that does not
+     * answer, unless the guard rejects the unreachable (base.guard).
+     */
+    public function passes(string $gateway, string $token, ?string $ip): bool
+    {
         try {
-            $verdict = $challenge->verify(new Attempt(\is_string($token) ? $token : '', $request->getClientIp(), self::ACTION));
+            return $this->guard->getRegistry()->challenge($gateway)->verify(new Attempt($token, $ip, self::ACTION))->passed;
         } catch (InvalidKeyException $e) {
             $this->logger?->error('Sign-in guard: the captcha refused the site\'s key: {message}', ['message' => $e->getMessage()]);
 
-            return;
+            return true;
         } catch (ProviderException $e) {
             $this->logger?->warning('Sign-in guard: the captcha did not answer: {message}', ['message' => $e->getMessage()]);
-            if (!$this->guard->rejectsUnreachable()) {
-                return;
-            }
-            throw new CustomUserMessageAuthenticationException(self::MESSAGE);
-        }
-        if (!$verdict->passed) {
-            throw new CustomUserMessageAuthenticationException(self::MESSAGE);
+
+            return !$this->guard->rejectsUnreachable();
         }
     }
 

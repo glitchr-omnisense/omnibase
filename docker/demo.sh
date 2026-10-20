@@ -62,6 +62,8 @@ case "${1:-serve}" in
         php bin/console assets:install public --symlink --env=test --no-interaction --quiet
         rm -rf var/cache/test
         php bin/console doctrine:schema:create --env=test --no-interaction --quiet
-        exec vendor/bin/phpunit -c "$suite/phpunit.xml.dist" --bootstrap tests/harness.php "$@" ;;
+        # A gigabyte: PHPUnit keeps every test case to the end of the run, and the core's
+        # suite (its kernels, its entity managers) came to the image's 512M with step AU4's.
+        exec php -d memory_limit=1G vendor/bin/phpunit -c "$suite/phpunit.xml.dist" --bootstrap tests/harness.php "$@" ;;
     *) exec "$@" ;;
 esac

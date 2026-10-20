@@ -6,7 +6,6 @@ use Base\Demo\DemoAccountRegistry;
 use Base\Demo\DemoMode;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * The site-wide account-security policy an administrator sets, and the single
@@ -35,6 +34,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * Hence the optional $user of the questions below: without one they answer
  * for the whole site, with one for that account.
  *
+ * The accounts are asked of as plain objects (omnibase's users), not as
+ * Security's UserInterface: omniauth's Base\Auth\Policy asks the same
+ * questions under any host (plan "omniauth", AU4, the former P4). The role
+ * hierarchy is Symfony's where there is one, else the account's own roles.
+ *
  * In the `demo` environment a demonstration account (Base\Demo) is shared by
  * every visitor: nothing is required of it - not the second factor of its
  * role, not the administrator's "mandatory" - and it may change none of its
@@ -47,6 +51,9 @@ class SecurityPolicy
     public const PASSKEYS = 'base.settings.security.passkeys';
     public const NEW_DEVICE_EMAIL = 'base.settings.security.new_device_email';
     public const NEW_DEVICE_PROMPT = 'base.settings.security.new_device_prompt';
+
+    /** The roles of the administration: an account holding one is never linked by its address (isAdministrator()). */
+    public const ADMINISTRATION_ROLES = ['ROLE_ADMIN', 'ROLE_SUPERADMIN'];
 
     /**
      * Session key set by a sign-in from a browser this account has never
@@ -80,7 +87,7 @@ class SecurityPolicy
      * environment? Never true anywhere else: in dev and test the same
      * accounts are ordinary ones.
      */
-    public function isDemoAccount(?UserInterface $user): bool
+    public function isDemoAccount(?object $user): bool
     {
         return null !== $user && $this->demoMode?->isActive() && null !== $this->demoAccounts?->of($user);
     }
@@ -90,7 +97,7 @@ class SecurityPolicy
      * or close itself? Not a demonstration account: every visitor signs in
      * with it, and whoever changed one of these would lock the next out.
      */
-    public function canChangeCredentials(?UserInterface $user): bool
+    public function canChangeCredentials(?object $user): bool
     {
         return !$this->isDemoAccount($user);
     }
@@ -121,7 +128,7 @@ class SecurityPolicy
      * first place - an administrator who turns two-factor off entirely and
      * leaves this checkbox ticked has not thereby locked everyone out.
      */
-    public function isTwoFactorMandatory(?UserInterface $user = null): bool
+    public function isTwoFactorMandatory(?object $user = null): bool
     {
         if (!$this->isTwoFactorAvailable() || $this->isDemoAccount($user)) {
             return false;
@@ -142,18 +149,43 @@ class SecurityPolicy
      * hierarchy? Asked of the account itself, not of the current token: the
      * settings page and the enrolment prompt may be asked about any user.
      */
-    public function isTwoFactorRequiredByRole(?UserInterface $user): bool
+    public function isTwoFactorRequiredByRole(?object $user): bool
     {
         if (null === $user || [] === $this->requiredRoles || !$this->isTwoFactorAvailable() || $this->isDemoAccount($user)) {
             return false;
         }
 
-        $roles = array_map(static fn ($role) => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $user->getRoles());
-        if ($this->roleHierarchy) {
-            $roles = $this->roleHierarchy->getReachableRoleNames($roles);
+        return [] !== array_intersect($this->requiredRoles, $this->roles($user));
+    }
+
+    /**
+     * Does this account hold an administration role (ROLE_ADMIN,
+     * ROLE_SUPERADMIN, directly or through the role hierarchy) or one a second
+     * factor is required of? Such an account is never linked to an identity
+     * provider by its address alone (plan "omniauth", Marco's decision QA3,
+     * Base\Auth\Policy): whoever holds the provider's account would hold the
+     * administration's.
+     */
+    public function isAdministrator(?object $user): bool
+    {
+        if (null === $user || !method_exists($user, 'getRoles')) {
+            return false;
         }
 
-        return [] !== array_intersect($this->requiredRoles, $roles);
+        return [] !== array_intersect(self::ADMINISTRATION_ROLES, $this->roles($user)) || $this->isTwoFactorRequiredByRole($user);
+    }
+
+    /**
+     * The account's roles, those the role hierarchy reaches from them included
+     * when there is one (Symfony's; a host without one gives the account's own).
+     *
+     * @return string[]
+     */
+    private function roles(object $user): array
+    {
+        $roles = array_map(static fn ($role) => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $user->getRoles());
+
+        return $this->roleHierarchy ? $this->roleHierarchy->getReachableRoleNames($roles) : $roles;
     }
 
     /** Are passkeys offered as a login method? */
@@ -176,7 +208,7 @@ class SecurityPolicy
      * one factor, not two, and a site that mandates two-factor should still
      * ask for the second one.
      */
-    public function hasSecondFactor(?UserInterface $user): bool
+    public function hasSecondFactor(?object $user): bool
     {
         if (null === $user) {
             return false;
@@ -195,13 +227,13 @@ class SecurityPolicy
      * This is the precedence rule in one line: no, while the administrator
      * requires one.
      */
-    public function canDisableTwoFactor(?UserInterface $user = null): bool
+    public function canDisableTwoFactor(?object $user = null): bool
     {
         return !$this->isTwoFactorMandatory($user);
     }
 
     /** May this user still enrol - i.e. is the feature switched on for them? (Never a demonstration account.) */
-    public function canEnableTwoFactor(?UserInterface $user = null): bool
+    public function canEnableTwoFactor(?object $user = null): bool
     {
         return $this->isTwoFactorAvailable() && !$this->isDemoAccount($user);
     }
@@ -227,7 +259,7 @@ class SecurityPolicy
      * none. Whether the user is then allowed to postpone the answer is
      * decided by the caller, not here - see canPostponeEnrolment().
      */
-    public function needsEnrolment(?UserInterface $user): bool
+    public function needsEnrolment(?object $user): bool
     {
         return null !== $user && $this->isTwoFactorMandatory($user) && !$this->hasSecondFactor($user);
     }
@@ -241,7 +273,7 @@ class SecurityPolicy
      * patients' files) sets base.security.two_factor.postpone: false - the
      * prompt then comes back on every page until the account has one.
      */
-    public function canSkipEnrolment(?UserInterface $user = null): bool
+    public function canSkipEnrolment(?object $user = null): bool
     {
         return $this->postpone || !$this->needsEnrolment($user);
     }
@@ -254,7 +286,7 @@ class SecurityPolicy
      * comes back on the next sign-in. When two-factor is merely offered, a
      * dismissal can be kept for good.
      */
-    public function canPostponeEnrolmentPermanently(?UserInterface $user = null): bool
+    public function canPostponeEnrolmentPermanently(?object $user = null): bool
     {
         return !$this->isTwoFactorMandatory($user);
     }

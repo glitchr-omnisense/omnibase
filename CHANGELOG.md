@@ -129,6 +129,64 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Added: omniauth's stores on omnibase's tables (plan "omniauth", step AU4)
+- **`Base\Auth\`**, omniscient/omniauth's contracts filled on the tables the core has, over
+  Doctrine's entity manager (Symfony's, or the one a Laravel host builds on the same mapping),
+  each write flushed at once: `UserAccounts` (by address, then by the application's identifier
+  field - lesringostars' username -; the id as the handle; `check()` is `UserChecker`'s rule,
+  reasons `restricted`, `banned`, `locked`, `disabled`, a disabled account with a valid
+  "welcome-back" token enabled again), `UserPasswords` (`user.password`), `UserLinkTokens`
+  (`userToken` "login-token" holding the link's SHA-256 - QA4 -, claimed once by an UPDATE then
+  removed; `PlainLinkTokens`: the links of before, in clear, until their deadline, never a value
+  shaped like a hash), `UserTotpSecrets` (`user.secret`), `UserEmailCodes`
+  (`user.emailAuthEnabled`, `user.emailAuthCode` holding the code's keyed hash - QA5 -, null once
+  used), `UserBackupCodes` (`user.backupCodes`), `UserTrustedVersion`
+  (`user.trustedTokenVersion`), `UserPasskeys` (omniauth/passkey's records over
+  `Base\Entity\User\Passkey`: base64 in the record, bytes in the entity), `UserIdentities`
+  (omniauth/oauth's identities, `userIdentity` below). A store given an account the entity
+  manager no longer holds writes its managed copy.
+- **`Base\Auth\Policy`**: `SecurityPolicy` around omniauth's second-factor rule - a
+  demonstration account is never asked for one, `needsEnrolment()` for the host's prompt,
+  `onRevoking()` (omniauth's `Revoking`) refuses to turn off the last second factor of an
+  account that must keep one (`two-factor-mandatory`) and any credential of a demonstration
+  account (`demo-account`), `allowsEmailLinking()` never for an account with a second factor or
+  an administration role; `PolicyLinking` gives that to omniauth/oauth (QA3).
+- **The listeners, `Base\Auth\Listener\*`**, on omniauth's PSR-14 events, each with its
+  `events()`: `GuardSignIn` (`SignInGuard`'s captcha after failures from an address; the
+  captcha's answer from a closure the host gives), `TrackConnections` (`ConnectionSubscriber`'s
+  connections), `WarnNewDevice` (`NewDeviceSubscriber`'s e-mail and offer; the session as
+  omniauth's `State`), `UpdateAccount` (`LoginFormAuthenticator::onAuthenticationSuccess()`'s
+  roles, time zone, language, kick), `WelcomeBack` (`UserChecker`'s e-mail of a disabled
+  account). Nothing is wired: omnibridge/symfony (AU6) and omnibridge/laravel (AU8) mount them.
+- **`Base\Entity\User\Identity`, the `userIdentity` table** (QA3): the account
+  (`user_id`, `ON DELETE CASCADE`), `provider` (32), `subject` (255), `email` (180, the address
+  the provider gave then), `emailVerified`, `createdAt`, `lastUsedAt`; unique
+  (`provider`, `subject`) and (`user_id`, `provider`), which serves the account's lookups;
+  `Base\Repository\User\IdentityRepository`. `User::$identityProvider` keeps its meaning (where
+  the account came from). An application adds the table by its own migration
+  (`doctrine:migrations:diff`: lesringostars' `Version20261021100000`).
+- `SecurityPolicy` and `DemoAccountRegistry` ask of accounts as objects, no longer as Security's
+  `UserInterface` (the former P4), and `SecurityPolicy::isAdministrator()` (ROLE_ADMIN,
+  ROLE_SUPERADMIN through the hierarchy, or a role a second factor is required of).
+  `SignInGuard::requiredFor()`, `failed()`, `passes()` and `field()`: its rule by address, its
+  subscriber unchanged. `User::getBackupCodeHashes()`/`setBackupCodeHashes()`,
+  `User::setEmailAuthCode(?string)`, `Token::setValue()`.
+- composer.json: omniscient/omniauth, omniauth/{passkey, totp, oauth} suggested and in
+  `require-dev`, and under `extra.omnibase.bare`, which `bare --install` adds to var/bare (the
+  Fondation implements their contracts). The harness's image requires them; its `demo test`
+  runs PHPUnit with a gigabyte (the suite came to the image's 512M).
+- Fondation 788 -> 807. Tests (`tests/Auth`): every method of omniauth and its three packages
+  signs accounts of the harness's database in through the stores (password and the account
+  brought up to date; TOTP, its replay refused, a backup code, a trusted device and its version;
+  the code by e-mail hashed and used once; a link hashed, once, a link of before in clear, a hash
+  refused as a link; a passkey registered then signing in without a second factor, its counter;
+  Google linked by its verified address then by its subject, the address and the last use kept,
+  unlinked; administration accounts never linked by address; banned, locked, disabled and the
+  welcome back; the last second factor kept when it is mandatory), the stores' edges (the
+  identifier field, the table's two keys, a passkey's account), the listeners (the captcha after
+  two failures, not at the rescue door, forgotten after a success; the connections and the offer
+  of a new device). `HandBuiltEntityManagerTest`'s fixture: Identity recorded.
+
 ### Changed: the passkey described by the core (plan "omniauth", step AU1)
 - **`Base\Entity\User\Passkey` no longer extends `Webauthn\CredentialRecord`**: its 13 fields
   (`publicKeyCredentialId`, `type`, `transports`, `attestationType`, `trustPath`, `aaguid`,

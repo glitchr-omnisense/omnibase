@@ -6,7 +6,6 @@ use Doctrine\DBAL\Types\Type;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Every demonstration account declared by the bundles and the application
@@ -129,7 +128,7 @@ class DemoAccountRegistry
     }
 
     /** The declaration this account was created from, if it is a demonstration account. */
-    public function of(?UserInterface $user): ?DemoAccount
+    public function of(?object $user): ?DemoAccount
     {
         if (null === $user) {
             return null;
@@ -154,7 +153,7 @@ class DemoAccountRegistry
         return \in_array(self::SUPER_ADMIN, $this->reachable($roles), true);
     }
 
-    public function isSuperAdmin(?UserInterface $user): bool
+    public function isSuperAdmin(?object $user): bool
     {
         return null !== $user && $this->reachesSuperAdmin($user->getRoles());
     }
@@ -171,7 +170,7 @@ class DemoAccountRegistry
         return [] !== array_intersect($this->adminRoles, $this->reachable($roles));
     }
 
-    public function isAdministrator(?UserInterface $user): bool
+    public function isAdministrator(?object $user): bool
     {
         return null !== $user && $this->reachesAdministration($user->getRoles());
     }

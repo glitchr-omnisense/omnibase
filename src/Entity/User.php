@@ -295,6 +295,24 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
     }
 
     /**
+     * The backup codes as they are kept: password_hash()'s of each (omniauth's
+     * BackupCodes store, Base\Auth\UserBackupCodes).
+     *
+     * @return list<string>
+     */
+    public function getBackupCodeHashes(): array
+    {
+        return array_values($this->backupCodes ?? []);
+    }
+
+    /** @param list<string> $hashes password_hash()'s of the codes, never the codes */
+    public function setBackupCodeHashes(array $hashes): self
+    {
+        $this->backupCodes = array_values($hashes);
+        return $this;
+    }
+
+    /**
      * @param string[] $plainCodes
      */
     public function setBackupCodes(array $plainCodes): self
@@ -330,7 +348,11 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
         return $this->emailAuthCode;
     }
 
-    public function setEmailAuthCode(string $authCode): void
+    /**
+     * The code sent by e-mail as it is kept: scheb/2fa wrote the code itself,
+     * omniauth its keyed hash (Base\Auth\UserEmailCodes, QA5); null once used.
+     */
+    public function setEmailAuthCode(?string $authCode): void
     {
         $this->emailAuthCode = $authCode;
     }
