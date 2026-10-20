@@ -178,6 +178,66 @@ final class BareTest extends TestCase
         self::assertSame([], $repository['framework_files']);
     }
 
+    /**
+     * The passkeys where the framework is not installed (plan "omniauth", AU1): Base\Entity\User\Passkey,
+     * its repository and WebauthnBundle's user repository load, their Base\Contract\PasskeyRecords and
+     * PasskeyUsers being empty interfaces there; and tests/Security/passkey-without-webauthn.php makes a
+     * passkey and writes its columns by the core's types without loading a class of webauthn-lib - the
+     * entity no longer extends its CredentialRecord.
+     */
+    public function testThePasskeysLoadWhereTheFrameworkIsNotInstalled(): void
+    {
+        $classes = [\Base\Entity\User\Passkey::class, \Base\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class];
+        [$status, $report] = self::bare($classes);
+        self::assertSame(0, $status);
+        foreach ($classes as $class) {
+            self::assertNull($report['classes'][$class]['error'], $class);
+            self::assertSame([], $report['classes'][$class]['framework'], $class);
+            self::assertSame([], $report['classes'][$class]['framework_files'], $class);
+        }
+
+        $script = __DIR__.'/Security/passkey-without-webauthn.php';
+        [$status, $report] = self::bare([$script]);
+        self::assertSame(0, $status);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([
+            'parent' => false,
+            'row' => [
+                'publicKeyCredentialId' => 'AQL/',
+                'credentialPublicKey' => 'pQEC',
+                'aaguid' => '00000000-0000-0000-0000-000000000000',
+                'trustPath' => '{"x5c":["MIIB\\/w=="]}',
+            ],
+            'read back' => true,
+            'webauthn loaded' => [],
+        ], $run['result']);
+    }
+
+    /**
+     * The passkeys' repositories where WebauthnBundle is installed (this run's vendor): they declare its
+     * interfaces, through Base\Contract\PasskeyRecords and PasskeyUsers, whoever loads them.
+     */
+    public function testThePasskeysRepositoriesDeclareTheBundlesInterfacesWhereItIsInstalled(): void
+    {
+        [, $report] = self::bare([\Base\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class], self::withTheFramework());
+
+        self::assertSame([
+            'Webauthn\\Bundle\\Repository\\CanSaveCredentialRecord' => 'Base\\Contract\\PasskeyRecords',
+            'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface' => 'Base\\Contract\\PasskeyRecords',
+        ], array_intersect_key($report['classes'][\Base\Repository\User\PasskeyRepository::class]['framework'], array_flip([
+            'Webauthn\\Bundle\\Repository\\CanSaveCredentialRecord',
+            'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface',
+        ])));
+        self::assertSame(
+            'Base\\Contract\\PasskeyUsers',
+            $report['classes'][\Base\Security\WebauthnUserEntityRepository::class]['framework']['Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface'] ?? null,
+        );
+        self::assertTrue(is_subclass_of(\Base\Repository\User\PasskeyRepository::class, 'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface'));
+        self::assertTrue(is_subclass_of(\Base\Security\WebauthnUserEntityRepository::class, 'Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface'));
+    }
+
     /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
     public function testARepositoryLoadsWithoutTheFramework(): void
     {

@@ -5,6 +5,7 @@ namespace Base\Bridge\Doctrine;
 use Base\Database\Type\ArrayType;
 use Base\Database\Type\DateTimeTypeUTC;
 use Base\Database\Type\EnumType;
+use Base\Database\Type\Passkey;
 use Base\Database\Type\UtcDateTimeImmutableType;
 use Base\Database\Type\UtcDateTimeType;
 use Base\Service\Model\ClassFinder;
@@ -18,7 +19,10 @@ use Doctrine\DBAL\Types\Type;
  * - `datetime` and `datetimetz` are Base\Database\Type\DateTimeTypeUTC (the
  *   moment kept in UTC whatever zone PHP was put in), `array` the core's
  *   ArrayType (the serialized arrays of before DBAL 4), `utc_datetime` and
- *   `utc_datetime_immutable` the core's UTC types;
+ *   `utc_datetime_immutable` the core's UTC types, `passkey_base64`,
+ *   `passkey_aaguid` and `passkey_trust_path` the columns of
+ *   Base\Entity\User\Passkey (plan "omniauth", AU1: those of
+ *   web-auth/webauthn-symfony-bundle, without it);
  * - every enumeration (Base\Database\Type\EnumType, SetType) of the folders
  *   given, under its getStaticName(), when no type has that name yet;
  * - the types given by name (a bundle's enumerations), replacing a type of
@@ -35,6 +39,16 @@ final class Types
             'array' => ArrayType::class,
             UtcDateTimeImmutableType::NAME => UtcDateTimeImmutableType::class,
             UtcDateTimeType::NAME => UtcDateTimeType::class,
+        ] + self::passkey();
+    }
+
+    /** @return array<string, class-string<Type>> the columns of a passkey (Base\Entity\User\Passkey), by name */
+    public static function passkey(): array
+    {
+        return [
+            Passkey\Base64::NAME => Passkey\Base64::class,
+            Passkey\Aaguid::NAME => Passkey\Aaguid::class,
+            Passkey\TrustPath::NAME => Passkey\TrustPath::class,
         ];
     }
 
