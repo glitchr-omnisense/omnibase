@@ -36,6 +36,9 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
 
     protected function setUp(): void
     {
+        if (null !== $missing = AuthKit::missing()) {
+            self::markTestSkipped($missing);
+        }
         $this->keepServerGlobals();
         $this->bootHost();
         $this->kit = new AuthKit($this->entityManager(), $this->security());
@@ -43,6 +46,11 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
 
     protected function tearDown(): void
     {
+        if (null !== AuthKit::missing()) {
+            parent::tearDown();
+
+            return;
+        }
         $connection = $this->entityManager()->getConnection();
         foreach ($this->createdUsers as $user) {
             $connection->executeStatement('DELETE FROM userPasskey WHERE user_id = ?', [$user->getId()]);

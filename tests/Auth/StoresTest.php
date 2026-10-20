@@ -25,12 +25,20 @@ final class StoresTest extends KernelTestCase
 
     protected function setUp(): void
     {
+        if (null !== $missing = AuthKit::missing()) {
+            self::markTestSkipped($missing);
+        }
         $this->keepServerGlobals();
         $this->bootHost();
     }
 
     protected function tearDown(): void
     {
+        if (null !== AuthKit::missing()) {
+            parent::tearDown();
+
+            return;
+        }
         foreach ($this->createdUsers as $user) {
             $this->entityManager()->getConnection()->executeStatement('DELETE FROM userIdentity WHERE user_id = ?', [$user->getId()]);
         }
