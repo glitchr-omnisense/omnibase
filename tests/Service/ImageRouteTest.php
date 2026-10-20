@@ -117,6 +117,10 @@ final class ImageRouteTest extends KernelTestCase
 
             $thumbnail = (string) $media->thumbnail($name, 100, 100, ['webp' => false]);
             self::assertMatchesRegularExpression('#^/images/.+/image\.jpg$#', $thumbnail);
+            self::assertSame('jpg', $media->getExtension($thumbnail), 'an address of the route: the type of its source');
+            self::assertSame('image/jpeg', $media->getMimeType($name), 'the type a template prints (|mimetype: an audio or video <source>)');
+            self::assertSame('image/jpeg', $media->getMimeType($thumbnail));
+            self::assertMatchesRegularExpression('#^/images/.+/image\.jpg$#', (string) $media->image($thumbnail, ['webp' => false]), 'its address given again (imagify)');
 
             $png = substr($thumbnail, 0, -\strlen('jpg')).'png';
             $redirection = self::$kernel->handle(Request::create($png));
