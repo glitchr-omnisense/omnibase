@@ -47,12 +47,20 @@ final class ListenersTest extends KernelTestCase
 
     protected function setUp(): void
     {
+        if (null !== $missing = AuthKit::missing()) {
+            self::markTestSkipped($missing);
+        }
         $this->keepServerGlobals();
         $this->bootHost();
     }
 
     protected function tearDown(): void
     {
+        if (null !== AuthKit::missing()) {
+            parent::tearDown();
+
+            return;
+        }
         $this->removeUsers();
         $this->restoreServerGlobals();
         parent::tearDown();

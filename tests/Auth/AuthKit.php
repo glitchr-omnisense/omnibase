@@ -120,6 +120,24 @@ final class AuthKit
         $this->omniauth = new Omniauth($this->accounts, $this->methods, new ArrayState($this->session), $this->policy, events: $this->events, clock: $this->clock);
     }
 
+    /**
+     * The packages these tests sign in with: the core only suggests them (the
+     * harness's image installs them; an application's suite reading this
+     * package in its vendor/ may not).
+     *
+     * @return string|null why the tests cannot run, or null
+     */
+    public static function missing(): ?string
+    {
+        foreach (['omniscient/omniauth' => \Omniauth\Omniauth::class, 'omniauth/passkey' => \Omniauth\Passkey\PasskeyMethod::class, 'omniauth/totp' => \Omniauth\Totp\TotpMethod::class, 'omniauth/oauth' => \Omniauth\OAuth\OAuthMethod::class] as $package => $class) {
+            if (!class_exists($class)) {
+                return $package.' is not installed (the core suggests it).';
+            }
+        }
+
+        return null;
+    }
+
     public static function context(?string $trustedDevice = null): Context
     {
         return new Context(self::ORIGIN, 'localhost', '203.0.113.9', 'PHPUnit', $trustedDevice);
