@@ -129,6 +129,29 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omnibridge/symfony themselves: they are Symfony bundles, and used the framework through
   the core's requirements.
 
+### Changed: an action's answer negotiated without the framework (step R10)
+- **`Base\Screen\Negotiation`**: the body of `Base\Bridge\Symfony\ScreenResponder` moved there as
+  it was, framework-free (audit "lesringostars face au master plan", R10: a site's actions written
+  once for Symfony and Laravel): a `View` within a front end (omnibridge/react's page in JSON, 409
+  for another version), in JSON alone without omnibridge/react, or rendered with `frame` and
+  `screen`, with their caching (private and varying on Cookie for a visitor, no-store for a
+  Confidential screen). With what an action written once hands back: `Template` (a template and its
+  data; `json`: a client preferring JSON gets the data, both answers varying on Accept; `alone`: the
+  page is its own markup only), `Json` (data whose `Template`s and `Fragments` the host renders,
+  encoded as Symfony's JsonResponse encodes them, under every host), `Shell` (omnibridge/react's
+  protocol: the shell on a first visit, the page in JSON, 409), `File`; the client's request read as
+  a `Visit` (its address, its Accept - the first type naming a format decides, as Symfony's
+  getPreferredFormat() -, omnibridge/react's headers), the caching an action asks as a `Cache`, the
+  result as an `Answer`. The host renders the templates by a closure (`Negotiation::PAGE`, `PART`:
+  a value of a JSON answer, `ALONE`).
+- **`ScreenResponder` is Symfony's adapter of it**: `respond()` takes any of these, or null (no such
+  page: a 404), reads the Visit off the Request, makes a Response, a JsonResponse (FlashBagSubscriber
+  still folds the session's messages into one) or a BinaryFileResponse of the Answer, and sets
+  `_omnibase_inject: false` for a page alone. Unchanged for a View: `respond()`, `legacy()`,
+  `props()`, `guard()`. omnibridge/laravel's `Screen\Responder` is Laravel's adapter.
+- Fondation 807 -> 816. `NegotiationTest` (each result, the Accept rule, the Shell's protocol),
+  `ScreenResponderTest` (a View's answers as before; a Template alone, JSON, a File, no result).
+
 ### Added: omniauth's stores on omnibase's tables (plan "omniauth", step AU4)
 - **`Base\Auth\`**, omniscient/omniauth's contracts filled on the tables the core has, over
   Doctrine's entity manager (Symfony's, or the one a Laravel host builds on the same mapping),

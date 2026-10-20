@@ -224,7 +224,11 @@ it was and compares both paths with it.
 
 A controller hands a template and a view model (`Base\Screen\View`: template,
 `Base\Screen\Screen`, the React component's name, the status) to
-`Base\Bridge\Symfony\ScreenResponder`, which renders it with the request's frame
+`Base\Bridge\Symfony\ScreenResponder` - Symfony's adapter of the framework-free
+`Base\Screen\Negotiation` (step R10; omnibridge/laravel's `Screen\Responder` is
+Laravel's), which also answers what an action written once for every host hands back:
+a `Template` (its data in JSON too when it allows it), `Json` (its templates rendered),
+a `Shell` (omnibridge/react's protocol), a `File`, or null for no such page -, which renders it with the request's frame
 (`Base\Screen\ContextProvider`, under Symfony `SymfonyScreenContext`: locale, site,
 links, viewer, theme, a site's own fields; the flashes) - Twig with `frame` and
 `screen`, or omnibridge/react's page in JSON (`X-Omnibridge`; without omnibridge/react,

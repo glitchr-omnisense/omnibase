@@ -118,6 +118,9 @@
  * WarnNewDevice, UpdateAccount, WelcomeBack}; Base\Entity\User\Identity and Base\Repository\User\IdentityRepository,
  * the userIdentity table). They load with omniauth and its methods, which var/bare installs beside the core
  * (composer.json, extra.omnibase.bare: suggested, not required), and without the framework.
+ * 816 after step R10 of the audit "lesringostars face au master plan" (+9: Base\Screen\Negotiation, how an action's
+ * result is answered whichever framework hosts it - ScreenResponder's body, which is now Symfony's adapter of it -, and
+ * what an action hands back and gets: Template, Json, Fragments, Shell, File, Visit, Cache, Answer).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -663,25 +666,34 @@ return [
     Base\Screen\Account\Session::class,
     Base\Screen\Account\SettingsPage::class,
     Base\Screen\Account\TwoFactor::class,
+    Base\Screen\Answer::class,
     Base\Screen\Author::class,
     Base\Screen\Builder\Accounts::class,
     Base\Screen\Builder\Stories::class,
+    Base\Screen\Cache::class,
     Base\Screen\Card::class,
     Base\Screen\Comment::class,
     Base\Screen\Confidential::class,
     Base\Screen\ContextProvider::class,
     Base\Screen\Discussion::class,
+    Base\Screen\File::class,
+    Base\Screen\Fragments::class,
     Base\Screen\Frame::class,
+    Base\Screen\Json::class,
     Base\Screen\Link::class,
+    Base\Screen\Negotiation::class,
     Base\Screen\Reply::class,
     Base\Screen\Screen::class,
     Base\Screen\Shape::class,
+    Base\Screen\Shell::class,
     Base\Screen\Site::class,
     Base\Screen\Story::class,
     Base\Screen\StoryText::class,
     Base\Screen\Tag::class,
+    Base\Screen\Template::class,
     Base\Screen\View::class,
     Base\Screen\Viewer::class,
+    Base\Screen\Visit::class,
     Base\Security\CookieAnswer::class,
     Base\Security\LoginRestrictionInterface::class,
     Base\Security\SignInGuard::class,
