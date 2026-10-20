@@ -190,6 +190,13 @@ trait BaseTrait
 
     public static function getMediaService(): ?MediaService
     {
+        // The host's when the registry has it (audit R7: omnibridge/laravel binds omnibase's
+        // MediaService with its media on), else the container's, as before.
+        $mediaService = Runtime::find(MediaService::class);
+        if ($mediaService instanceof MediaService) {
+            return $mediaService;
+        }
+
         return (self::class === BaseService::class) ? BaseService::runtimeGet('mediaService', 'base.service.image') : BaseService::getMediaService();
     }
 

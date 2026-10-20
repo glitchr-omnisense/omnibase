@@ -136,6 +136,35 @@ final class ImageRouteTest extends KernelTestCase
         }
     }
 
+    /**
+     * A sound kept in public/ (an article's audio: Uploader's public path, made an address of the
+     * image route by MediaService::audio(), soundify's): its address answers the file, of its type.
+     * The route read the resolved path as a file of the project or of a storage only, and every
+     * audio player of the sites asked a 404.
+     */
+    public function testAPublicFileIsServedByItsContentsAddress(): void
+    {
+        $publicDir = rtrim((string) \Base\Service\Flysystem::getPublicDir(), '/');
+        $name = '/omnibase-image-route-sound-'.getmypid();
+        $bytes = "ID3\x03\x00\x00\x00\x00\x00\x00".str_repeat("\xff\xfb\x90\x00", 64);
+        file_put_contents($publicDir.$name, $bytes);
+
+        try {
+            /** @var MediaService $media */
+            $media = self::getContainer()->get(MediaService::class);
+            $address = (string) $media->audio($name);
+            self::assertMatchesRegularExpression('#^/contents/#', $address);
+            self::assertSame($name, $media->resolve(substr($address, \strlen('/contents/')))['path'] ?? null, 'the address keeps the public path');
+
+            $response = self::$kernel->handle(Request::create($address));
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame($bytes, $response->getContent());
+            self::assertSame($media->getMimeType($name), $response->headers->get('Content-Type'), 'served as the player says it is');
+        } finally {
+            @unlink($publicDir.$name);
+        }
+    }
+
     public function testABitmapIsWrittenInTheFormatItsAddressNames(): void
     {
         $source = sys_get_temp_dir().'/omnibase-image-route-'.getmypid().'.jpg';

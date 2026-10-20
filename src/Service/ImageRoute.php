@@ -119,6 +119,13 @@ class ImageRoute
 
         $path = $config["path"];
 
+        // A file of the project, else a public path (what the addresses keep of an upload in public/,
+        // /uploads/...: an article's audio, which answered 404 on every site), else the storage's.
+        $public = rtrim((string) $this->fileService->getPublicDir(), "/") . $path;
+        if (!file_exists($path) && str_starts_with($path, "/") && !str_contains($path, "\0") && !str_contains($path, "/../") && is_file($public)) {
+            $path = $public;
+        }
+
         $contents = file_exists($path) ? file_get_contents($path) : $this->flysystem->read($path, $config["storage"] ?? null);
         if ($contents === null) {
             throw new NotFoundHttpException('Not Found');
