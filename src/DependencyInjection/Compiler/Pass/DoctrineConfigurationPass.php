@@ -4,6 +4,7 @@ namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\Bridge\Doctrine\Configuration;
 use Base\Bridge\Doctrine\MappingDriver;
+use Omnibridge\Doctrine\DeclarationDriver;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -17,9 +18,12 @@ use Symfony\Component\DependencyInjection\Reference;
  *
  * - the filters, the DQL functions and the default hint of
  *   Base\Bridge\Doctrine\Configuration, on `doctrine.orm.configuration`;
- * - every entity manager's mapping driver wrapped in
- *   Base\Bridge\Doctrine\MappingDriver (the discriminator maps generated, the
- *   `resolveDiscriminator` event), given its entity manager lazily.
+ * - every entity manager's mapping driver wrapped in omnibridge/doctrine's
+ *   DeclarationDriver (the metadata built from the classes' declarations,
+ *   Omnibridge\Schema\Declaration: the structure described outside Doctrine,
+ *   audit R14), then in Base\Bridge\Doctrine\MappingDriver (the discriminator
+ *   maps generated, the `resolveDiscriminator` event), given its entity
+ *   manager lazily.
  */
 class DoctrineConfigurationPass implements CompilerPassInterface
 {
@@ -58,7 +62,9 @@ class DoctrineConfigurationPass implements CompilerPassInterface
                     continue;
                 }
 
-                $driver = new Definition(MappingDriver::class, [$arguments[0], new ServiceClosureArgument(new Reference($entityManager))]);
+                // Doctrine reads the classes' declarations (omnibridge/doctrine's DeclarationDriver over the
+                // application's driver, audit R14), and around it omnibase's MappingDriver.
+                $driver = new Definition(MappingDriver::class, [new Definition(DeclarationDriver::class, [$arguments[0]]), new ServiceClosureArgument(new Reference($entityManager))]);
                 $calls[$i] = [$method, [$driver]];
             }
             $configuration->setMethodCalls($calls);

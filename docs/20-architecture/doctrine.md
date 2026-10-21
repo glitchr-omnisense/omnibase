@@ -100,5 +100,9 @@ application's vendor suite):
   `DOCTRINE_SNAPSHOT=1`; the discriminator maps and the subclasses compared
   sorted: generated, they come in the order PHP declared the classes).
 
+Since step R14 the mapping driver also reads the classes' declarations rather
+than the attributes (omnibridge/doctrine's `DeclarationDriver`): the structure is
+described once, outside Doctrine - see [schema.md](schema.md).
+
 The harness runs it on doctrine/orm as released:
 `docker compose -f compose.yml -f compose.checkouts.yml run --rm -v <doctrine/orm's release>/src:/srv/demo/vendor/doctrine/orm/src:ro omnibase test`.

@@ -125,6 +125,10 @@
  * the sign-in link and the e-mailed code), 818 (+1: Base\Auth\DemoPasswords, the back office's secrets where omniauth checks
  * the password in a demonstration).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
+ * 826 after step R14 of the audit "lesringostars face au master plan" (+8: Base\Database\Schema\, omnibase's
+ * rules on the description built without any ORM - Omnibridge\Schema of omniscient/omnibridge -: the
+ * discriminators, the translations, the vaults, the order columns, the extensions, the targets resolved,
+ * and the Describer that builds an application's description from its entities' folders).
  */
 
 return [
@@ -271,6 +275,14 @@ return [
     Base\Database\Middleware\PlatformMiddleware::class,
     Base\Database\Repository\ServiceEntityParser::class,
     Base\Database\Repository\ServiceEntityRepository::class,
+    Base\Database\Schema\Attributes::class,
+    Base\Database\Schema\Describer::class,
+    Base\Database\Schema\DiscriminatorRule::class,
+    Base\Database\Schema\ExtensionRule::class,
+    Base\Database\Schema\OrderColumnRule::class,
+    Base\Database\Schema\TargetRule::class,
+    Base\Database\Schema\TranslationRule::class,
+    Base\Database\Schema\VaultRule::class,
     Base\Database\Type\ArrayType::class,
     Base\Database\Type\DateTimeTypeUTC::class,
     Base\Database\Type\EnumType::class,

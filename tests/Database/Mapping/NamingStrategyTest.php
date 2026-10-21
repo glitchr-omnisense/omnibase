@@ -3,6 +3,7 @@
 namespace Tests\Base\Database\Mapping;
 
 use Base\Database\Mapping\NamingStrategy;
+use Omnibridge\Schema\CamelCaseNaming;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -27,16 +28,19 @@ final class NamingStrategyTest extends TestCase
     {
         $declared = array_map(static fn (array $row) => $row['table'], array_filter(self::site(), static fn (array $row) => $row['declared']));
 
-        return new class($declared) extends NamingStrategy {
+        // The declared tables given to the naming the strategy answers with (Omnibridge\Schema\CamelCaseNaming,
+        // since R14): the join columns are named through it, not through this class.
+        return new NamingStrategy(new class($declared) extends CamelCaseNaming {
             public function __construct(private readonly array $declared)
             {
+                parent::__construct();
             }
 
-            public function classToTableName($className): string
+            public function classToTableName(string $className): string
             {
                 return $this->declared[$className] ?? parent::classToTableName($className);
             }
-        };
+        });
     }
 
     public function testEveryTableOfTheSite(): void

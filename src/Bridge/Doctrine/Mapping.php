@@ -24,6 +24,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Tools\AttachEntityListenersListener;
 use Doctrine\ORM\Tools\ResolveTargetEntityListener;
+use Omnibridge\Doctrine\DeclarationDriver;
 
 /**
  * omnibase's Doctrine mapping on an entity manager built by hand - no kernel,
@@ -41,8 +42,10 @@ use Doctrine\ORM\Tools\ResolveTargetEntityListener;
  *   enumerations of the core and of the project (src/Enum), those given;
  * - the configuration: omnibase's naming strategy, the filters and the DQL
  *   functions (Base\Bridge\Doctrine\Configuration), the mapping driver wrapped
- *   (Base\Bridge\Doctrine\MappingDriver: the discriminator maps, the
- *   `resolveDiscriminator` event);
+ *   twice (omnibridge/doctrine's DeclarationDriver: the metadata built from the
+ *   classes' declarations, Omnibridge\Schema\Declaration, no longer from the
+ *   attributes read by Doctrine - audit R14; then Base\Bridge\Doctrine\MappingDriver:
+ *   the discriminator maps, the `resolveDiscriminator` event);
  * - the repositories built from a registry (Base\Bridge\Doctrine\Registry,
  *   RepositoryFactory): configure() sets the factory on the configuration
  *   before the entity manager exists (omnibridge/doctrine's `configure:`), and
@@ -111,7 +114,9 @@ final class Mapping
         $configuration = $entityManager->getConfiguration();
         $configuration->setNamingStrategy(new NamingStrategy());
         Configuration::apply($configuration);
-        $configuration->setMetadataDriverImpl(new MappingDriver($configuration->getMetadataDriverImpl(), $entityManager));
+        // Doctrine reads the structure described outside of it (omnibridge/doctrine's DeclarationDriver over the
+        // application's driver, audit R14), and around it what omnibase's factory did (MappingDriver).
+        $configuration->setMetadataDriverImpl(new MappingDriver(new DeclarationDriver($configuration->getMetadataDriverImpl()), $entityManager));
 
         // The repository factory configure() set, and its registry; else a factory of our own, which only
         // getRepository() (deprecated) reaches: the entity manager keeps the one it was built with.
