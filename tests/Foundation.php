@@ -129,6 +129,8 @@
  * rules on the description built without any ORM - Omnibridge\Schema of omniscient/omnibridge -: the
  * discriminators, the translations, the vaults, the order columns, the extensions, the targets resolved,
  * and the Describer that builds an application's description from its entities' folders).
+ * 832 after step R15 (+6: the repositories behind interfaces - Base\Database\Repository\Entities, what every
+ * repository answers, and Base\Repository\{Threads, Users, Thread\Tags, User\Notifications, Layout\Settings}).
  */
 
 return [
@@ -273,6 +275,7 @@ return [
     Base\Database\Mapping\ClassMetadataManipulator::class,
     Base\Database\Mapping\NamingStrategy::class,
     Base\Database\Middleware\PlatformMiddleware::class,
+    Base\Database\Repository\Entities::class,
     Base\Database\Repository\ServiceEntityParser::class,
     Base\Database\Repository\ServiceEntityRepository::class,
     Base\Database\Schema\Attributes::class,
@@ -629,6 +632,7 @@ return [
     Base\Repository\Layout\RedirectionRepository::class,
     Base\Repository\Layout\SemanticRepository::class,
     Base\Repository\Layout\SettingRepository::class,
+    Base\Repository\Layout\Settings::class,
     Base\Repository\Layout\ShortLinkRepository::class,
     Base\Repository\Layout\TextOverrideRepository::class,
     Base\Repository\Layout\TooltipRepository::class,
@@ -649,7 +653,9 @@ return [
     Base\Repository\Thread\LikeRepository::class,
     Base\Repository\Thread\MentionRepository::class,
     Base\Repository\Thread\TagRepository::class,
+    Base\Repository\Thread\Tags::class,
     Base\Repository\Thread\TaxonRepository::class,
+    Base\Repository\Threads::class,
     Base\Repository\UserRepository::class,
     Base\Repository\User\AddressRepository::class,
     Base\Repository\User\Attribute\Action\GrantPermissionAdapterRepository::class,
@@ -664,12 +670,14 @@ return [
     Base\Repository\User\GroupRepository::class,
     Base\Repository\User\IdentityRepository::class,
     Base\Repository\User\NotificationRepository::class,
+    Base\Repository\User\Notifications::class,
     Base\Repository\User\PasskeyRepository::class,
     Base\Repository\User\PenaltyRepository::class,
     Base\Repository\User\PermissionRepository::class,
     Base\Repository\User\PushSubscriptionRepository::class,
     Base\Repository\User\SanctionRepository::class,
     Base\Repository\User\TokenRepository::class,
+    Base\Repository\Users::class,
     Base\Routing\AdminUrlGeneratorInterface::class,
     Base\Routing\NullAdminUrlGenerator::class,
     Base\Screen\Account\AccountSummary::class,

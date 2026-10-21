@@ -11,6 +11,22 @@ D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it w
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
 ### Changed
+- **The repositories behind interfaces** (audit "lesringostars face au master plan", step R15;
+  Marco's bridge principle, the other half of R14): what a site's code and the core type-hint
+  says nothing of the ORM - arrays of criteria and of order, the entities, lists of them,
+  integers; no `QueryBuilder`, `Query`, `Criteria` or Doctrine `Collection` -, and Doctrine's
+  repository answers it. `Base\Database\Repository\Entities` is what every repository answers
+  (`find()`, `findAll()`, `findBy()`, `findOneBy()`, `count()`, `persist()`, `remove()`,
+  `flush()`: `ServiceEntityRepository` implements it); `Base\Repository\Threads` what a site
+  asks of its threads (the one of a slug, of a parent, of a state, the previous and the next,
+  those published within a delay...), `Thread\Tags`, `Users`, `User\Notifications`,
+  `Layout\Settings`. Each method is answered by the finder call its callers made by name
+  before (`oneBySlugAndState()` is `cacheOneBySlugWithRouteAndState()`...): the same query, the
+  same cache. Under Symfony each interface is an alias of the repository service
+  (`config/services/database.php`; `Users` the application's `App\Repository\UserRepository`).
+  `NotificationController` and `NotificationTwigExtension` take `Notifications`.
+  `RepositoryInterfacesTest`. Foundation 826 → 832. See
+  [docs/20-architecture/entities-and-repositories.md](docs/20-architecture/entities-and-repositories.md).
 - **The data structure described outside Doctrine** (audit "lesringostars face au master plan",
   step R14; Marco's bridge principle): `Base\Database\Schema\` writes omnibase's own rules on
   the description omniscient/omnibridge builds without any ORM (`Omnibridge\Schema`) - the

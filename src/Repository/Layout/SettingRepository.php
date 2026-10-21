@@ -13,6 +13,6 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Setting[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
-class SettingRepository extends ServiceEntityRepository
+class SettingRepository extends ServiceEntityRepository implements Settings
 {
 }

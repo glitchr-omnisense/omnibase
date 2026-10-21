@@ -28,10 +28,14 @@ use LogicException;
  * isRepositoryService() for the bundles' mapped repositories), and
  * DoctrineBundle's ContainerRepositoryFactory hands it out as before.
  *
+ * What it answers without the ORM in or out is Entities, the interface the code
+ * of an application and of the core is given (audit "lesringostars face au
+ * master plan", step R15), with one per entity (Base\Repository\Threads...).
+ *
  * @method Entity[]    findBy*(...array $customs,
  *      array $criteria, array ??array $orderBy = null, $limit = null, $offset = null)
  */
-class ServiceEntityRepository extends EntityRepository
+class ServiceEntityRepository extends EntityRepository implements Entities
 {
     /**
      * @var ClassMetadata

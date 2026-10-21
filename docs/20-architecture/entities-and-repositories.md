@@ -34,6 +34,28 @@ and extends omnibase's `ServiceEntityRepository` or implements DoctrineBundle's
 interface or a trait in that directory is aliased, never registered: a bundle
 may keep `AbstractCatalogueRepository` beside the repositories that extend it.
 
+**Repositories behind interfaces.** The code of a site and of the core asks
+its repositories through interfaces named by what they answer, in the
+namespace of their entity (audit "lesringostars face au master plan", step R15):
+`Base\Database\Repository\Entities` - what every repository answers:
+`find()`, `findAll()`, `findBy()`, `findOneBy()`, `count()`, `persist()`,
+`remove()`, `flush()` -, and one per entity: `Base\Repository\Threads`,
+`Users`, `Thread\Tags`, `User\Notifications`, `Layout\Settings`; a site
+adds its own beside its repositories (`App\Repository\Article\Articles extends
+Threads`). Nothing of the ORM in what they take or give back: arrays of
+criteria and of order (`field => ASC|DESC`), the entities, lists of them,
+integers. The Doctrine repository implements its interface, each method by
+the finder call it replaces (`Threads::oneBySlugAndState()` is
+`cacheOneBySlugWithRouteAndState()`): same query, same result cache. Under
+Symfony each interface is an alias of the repository service
+(`config/services/database.php`; a site's own by `#[AsAlias]` on its
+repository); under Laravel the application binds each to the repository
+omnibridge/laravel resolves by its class. Another persistence implements the
+same interfaces over the same tables (the structure: [schema.md](schema.md)).
+
+The finder language (`cacheOneBySlug()`...) stays the repositories' own: an
+application calls the interface's methods, never the finder through it.
+
 ## Translations
 
 An entity using `TranslatableTrait` reads and writes its translated fields

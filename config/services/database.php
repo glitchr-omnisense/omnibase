@@ -73,4 +73,19 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     $services->set('Base\Database\Entity\EntityExtension')->public();
+
+    // The repositories by their interfaces (audit "lesringostars face au master plan", step R15):
+    // what the code of a site and of the core type-hints, Doctrine's repository behind. The users'
+    // is the application's (App\Repository\UserRepository: the site's own, else omnibase's under
+    // that name), as every other service of the core that takes it. Public, as the repositories
+    // themselves are handed out by getRepository(): kept when nothing of the container asks them.
+    foreach ([
+        'Base\Repository\Users' => 'App\Repository\UserRepository',
+        'Base\Repository\Threads' => 'Base\Repository\ThreadRepository',
+        'Base\Repository\Thread\Tags' => 'Base\Repository\Thread\TagRepository',
+        'Base\Repository\User\Notifications' => 'Base\Repository\User\NotificationRepository',
+        'Base\Repository\Layout\Settings' => 'Base\Repository\Layout\SettingRepository',
+    ] as $interface => $repository) {
+        $services->alias($interface, $repository)->public();
+    }
 };

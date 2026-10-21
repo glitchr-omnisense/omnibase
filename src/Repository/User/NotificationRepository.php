@@ -12,7 +12,7 @@ use Base\Entity\User\Notification;
  * @method Notification[]    findAll()
  * @method Notification[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NotificationRepository extends ServiceEntityRepository
+class NotificationRepository extends ServiceEntityRepository implements Notifications
 {
     /**
      * A real COUNT. Not the inherited count()/countBy(): base-bundle's

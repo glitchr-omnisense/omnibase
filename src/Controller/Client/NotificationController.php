@@ -7,7 +7,7 @@ use Base\Bridge\Symfony\AccountScreens;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Entity\User\Notification;
 use Base\Notifier\NotificationLinkerInterface;
-use Base\Repository\User\NotificationRepository;
+use Base\Repository\User\Notifications;
 use Base\Screen\View;
 use Base\Service\Push\WebPushService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,7 +32,7 @@ class NotificationController extends AbstractController
 
     public function __construct(
         protected readonly EntityManagerInterface $entityManager,
-        protected readonly NotificationRepository $notificationRepository,
+        protected readonly Notifications $notificationRepository,
         protected readonly WebPushService $webPush,
         protected readonly CsrfTokenManagerInterface $csrfTokenManager,
         protected readonly ?NotificationLinkerInterface $linker = null,
