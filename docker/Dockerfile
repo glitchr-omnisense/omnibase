@@ -108,7 +108,13 @@ COPY docker/demo.sh /usr/local/bin/demo
 # composer's recipe scripts compiled the container BEFORE the overlay was
 # copied - drop that stale cache so the first warmup starts clean. The
 # bundle's warmers need more than the 128M default.
+# The stubs were written by omnibridge/composer at the install, before the
+# overlay brought the demo's own App\Entity\User and App\Repository\UserRepository:
+# dump-autoload writes them again for the application as it now is (the
+# stubs of those two dropped), which `composer omnibridge:stubs --check`
+# then finds on disk.
 RUN rm -rf var/cache \
+    && composer dump-autoload --no-interaction \
     && echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/zz-demo.ini \
     && chmod +x /usr/local/bin/demo
 
