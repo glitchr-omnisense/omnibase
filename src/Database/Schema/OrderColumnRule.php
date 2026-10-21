@@ -2,6 +2,7 @@
 
 namespace Base\Database\Schema;
 
+use Base\Database\Attribute\Alias;
 use Base\Database\Attribute\OrderColumn;
 use Base\Database\Type\SetType;
 use Omnibridge\Schema\Builder;
@@ -13,7 +14,7 @@ use Omnibridge\Schema\Declaration\ClassDeclaration;
  * #[OrderColumn(orderBy: ...)]'s column, as the attribute gives it to
  * Doctrine: on a to-many relation or a set column, the field named by orderBy
  * is mapped if nothing maps it - a nullable json column, where the positions
- * are kept. The set types by name, to know a set column (omnibase's
+ * are kept; a property that is an #[Alias] of a relation counts as that relation. The set types by name, to know a set column (omnibase's
  * enumerations: Base\Bridge\Doctrine\Types::enumerations()).
  */
 final class OrderColumnRule implements Rule
@@ -33,11 +34,14 @@ final class OrderColumnRule implements Rule
 
     public function loaded(Draft $class, ClassDeclaration $declaration, Builder $builder): void
     {
+        $aliases = Attributes::ofProperties($class->name, Alias::class);
         foreach (Attributes::ofProperties($class->name, OrderColumn::class) as $property => $attributes) {
             $orderBy = end($attributes)['orderBy'] ?? null;
-            $type = $class->fieldMappings[$property]['type'] ?? null;
+            // A property that is an #[Alias] of a column (Gallery::$photos for Thread::$children) is read as that column.
+            $target = isset($aliases[$property]) ? (string) (end($aliases[$property])['column'] ?? $property) : $property;
+            $type = $class->fieldMappings[$target]['type'] ?? null;
             $isSet = null !== $type && is_subclass_of($this->types[$type] ?? '', SetType::class);
-            $isToMany = in_array($class->associationMappings[$property]['type'] ?? null, ['one_to_many', 'many_to_many'], true);
+            $isToMany = in_array($class->associationMappings[$target]['type'] ?? null, ['one_to_many', 'many_to_many'], true);
             if (!$isSet && !$isToMany) {
                 continue;
             }

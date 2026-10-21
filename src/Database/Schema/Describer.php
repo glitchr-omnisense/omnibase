@@ -7,6 +7,8 @@ use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Service\Model\ClassAliases;
 use Base\Service\Model\ClassFinder;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Types\Type;
 use Omnibridge\Schema\Builder;
 use Omnibridge\Schema\Builder\Rule;
 use Omnibridge\Schema\CamelCaseNaming;
@@ -94,7 +96,9 @@ final class Describer
 
     /**
      * The SQL type MySQL writes for each of omnibase's own column types (Omnibridge\Schema\Database\MySqlSchema's
-     * $types): ENUM or SET of the enumeration's values, a long text for the serialized arrays and the passkeys'.
+     * $types): ENUM or SET of the enumeration's values; for any other type of the family, what the type itself
+     * declares for MySQL (a long text for the serialized arrays, a tiny text for a passkey's aaguid, json for its
+     * trust path), lower-cased as information_schema writes it.
      *
      * @param array<string, class-string> $types by name (types())
      *
@@ -108,8 +112,18 @@ final class Describer
                 $sql[$name] = static fn (Column $column) => MySqlSchema::set(new Column($column->name, $name, values: array_values($className::getPermittedValues())));
             } elseif (is_subclass_of($className, EnumType::class)) {
                 $sql[$name] = static fn (Column $column) => MySqlSchema::enumeration(new Column($column->name, $name, values: array_values($className::getPermittedValues())));
-            } elseif (in_array($name, ['array', 'passkey_base64', 'passkey_aaguid', 'passkey_trust_path'], true)) {
-                $sql[$name] = static fn (Column $column) => 'longtext';
+            } elseif (is_subclass_of($className, Type::class) && !str_starts_with($className, 'Doctrine\\')) {
+                $sql[$name] = static function (Column $column) use ($name, $className): string {
+                    if (!Type::hasType($name)) {
+                        Type::addType($name, $className);
+                    }
+                    $declaration = Type::getType($name)->getSQLDeclaration(array_filter([
+                        'length' => $column->length, 'precision' => $column->precision, 'scale' => $column->scale,
+                        'fixed' => $column->fixed, 'unsigned' => $column->unsigned, 'notnull' => !$column->nullable,
+                    ], static fn ($value) => null !== $value), new MySQLPlatform());
+
+                    return strtolower(preg_replace('/\s+/', ' ', $declaration) ?? $declaration);
+                };
             }
         }
 

@@ -59,6 +59,8 @@ final class SchemaDescriptionTest extends KernelTestCase
     {
         $entityManager = $this->entityManager();
         $doctrine = MetadataDescription::of($entityManager);
+        // The tables Symfony's listeners add to the schema (Messenger's transport), no entity's.
+        $doctrine = new Description($doctrine->entities, array_diff_key($doctrine->tables, array_flip(self::FOREIGN_TABLES)));
         $built = $this->describe();
 
         self::assertGreaterThan(50, count($built->entities));
