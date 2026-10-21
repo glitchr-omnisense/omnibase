@@ -110,7 +110,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([$entityManager])
         ->tag('kernel.event_listener', ['event' => SignedIn::class, 'method' => 'onSignedIn']);
     $services->set(WelcomeBack::class)
-        ->args([$entityManager])
+        ->args([$entityManager, service('Base\Notifier\Notifier')])
         ->tag('kernel.event_listener', ['event' => AccountRefused::class, 'method' => 'onAccountRefused']);
     $services->set('Base\Auth\Listener\GuardSignIn')
         ->factory([AuthListeners::class, 'guardSignIn'])

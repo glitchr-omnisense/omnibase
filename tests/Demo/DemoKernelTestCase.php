@@ -129,6 +129,24 @@ abstract class DemoKernelTestCase extends KernelTestCase
     }
 
     /**
+     * The sign-in page's form, sent as a browser sends it: under its name, with
+     * its CSRF token when the page prints one (an application signing in through
+     * omniauth checks it; the harness's blank page prints none, and its
+     * LoginFormAuthenticator reads the same fields without).
+     */
+    protected function signIn(string $identifier, string $password): Response
+    {
+        $fields = ['identifier' => $identifier, 'password' => $password];
+        $page = (string) $this->browse('/login')->getContent();
+        if (preg_match('~name="_base_security_login\[_csrf_token\]"[^>]*value="([^"]*)"~', $page, $token)
+            || preg_match('~value="([^"]*)"[^>]*name="_base_security_login\[_csrf_token\]"~', $page, $token)) {
+            $fields['_csrf_token'] = html_entity_decode($token[1]);
+        }
+
+        return $this->browse('/login', 'POST', ['_base_security_login' => $fields]);
+    }
+
+    /**
      * What a controller of the application's own does while it handles a
      * request - a form saved, a row deleted: the request stack holds a
      * request with a session, as the firewall leaves it.

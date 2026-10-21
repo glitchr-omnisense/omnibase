@@ -25,6 +25,12 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   omniauth decided (its passport's `OmniauthBadge`, its refusal) to their listener of omniauth's
   events. `SecurityController::LoginTokenRequest()` issues the links through omniauth when its
   link is mounted (15 minutes, once, hashed, a new one at each request). Foundation 816 → 817.
+  Then, from lesringostars' switch: in the `demo` environment `Base\Auth\DemoPasswords` gives the
+  back office's accounts their secrets where omniauth checks the password (the database's never
+  serves), as `DemoBackOfficeSubscriber` does under Security; the welcome-back e-mail is
+  `Notifier::userWelcomeBack()`'s (`WelcomeBack` and `UserChecker` named
+  `@Base/security/email/account_welcomeBack.html.twig`, which never existed); the demonstration's
+  tests sign in through the form with its CSRF token. Foundation 818.
 - **English names for the French ones** (Marco, 2026-10-21: code and routes in English, but
   the routes localized in French): the Foundation (`tests/Foundation.php`, formerly
   `tests/Fondation.php`, read by `docker/bin/bare` and `BareTest`); `is_multiline()`, with

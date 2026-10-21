@@ -61,6 +61,13 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
     $services->set('Base\Subscriber\DemoBackOfficeSubscriber')
         ->tag('kernel.event_subscriber');
 
+    // The same two secrets where omniauth checks the password (config/services/auth.php's stores).
+    if (interface_exists('Omniauth\Contract\Passwords')) {
+        $services->set('Base\Auth\DemoPasswords')
+            ->decorate('Omniauth\Contract\Passwords', null, 0, \Symfony\Component\DependencyInjection\ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
+            ->args([service('.inner'), service('Base\Demo\DemoAccountRegistry'), '%base.demo.superadmin_password%', '%base.demo.admin_password%']);
+    }
+
     // A demonstration account keeps its identifier, address, password and second factor.
     $services->set('Base\DatabaseSubscriber\DemoAccountLockSubscriber')
         ->arg('$translator', service('translator')->nullOnInvalid())

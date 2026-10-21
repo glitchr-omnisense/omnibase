@@ -41,7 +41,7 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
         }
         $this->keepServerGlobals();
         $this->bootHost();
-        $this->kit = new AuthKit($this->entityManager(), $this->security());
+        $this->kit = new AuthKit($this->entityManager(), $this->security(), notifier: static::getContainer()->has('Base\\Notifier\\Notifier') ? static::getContainer()->get('Base\\Notifier\\Notifier') : null);
     }
 
     protected function tearDown(): void

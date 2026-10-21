@@ -6,6 +6,7 @@ use Base\Auth\UserAccounts;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
+use Base\Notifier\Notifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Event\AccountRefused;
 
@@ -19,8 +20,11 @@ class WelcomeBack
 {
     public const LIFETIME = 3600;
 
-    public function __construct(protected readonly EntityManagerInterface $entityManager)
-    {
+    /** @param Notifier|null $notifier its welcome-back e-mail (Notifier::userWelcomeBack()); without it, the same e-mail, bare */
+    public function __construct(
+        protected readonly EntityManagerInterface $entityManager,
+        protected readonly ?Notifier $notifier = null,
+    ) {
     }
 
     public function onAccountRefused(AccountRefused $event): void
@@ -34,12 +38,20 @@ class WelcomeBack
         $token = new Token(UserAccounts::WELCOME_BACK, self::LIFETIME);
         $token->setUser($user);
 
-        $notification = new Notification('accountWelcomeBack.success', [$user]);
-        $notification->setUser($user);
-        $notification->setHtmlTemplate('@Base/security/email/account_welcomeBack.html.twig', ['token' => $token]);
+        // The e-mail of Notifier::userWelcomeBack() (no template of its own: @Base/security/email/account_welcomeBack.html.twig never existed).
+        $notification = $this->notifier?->userWelcomeBack($user, $token) ?? self::bare($user, $token);
         $notification->send('email');
 
         $this->entityManager->flush();
+    }
+
+    private static function bare(User $user, Token $token): Notification
+    {
+        $notification = new Notification('accountWelcomeBack.success', [$user]);
+        $notification->setUser($user);
+        $notification->setHtmlTemplate('email.html.twig', ['token' => $token]);
+
+        return $notification;
     }
 
     /** @return array<class-string, string> omniauth's events and the method of this class each calls */

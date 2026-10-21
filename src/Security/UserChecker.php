@@ -18,7 +18,7 @@ class UserChecker implements UserCheckerInterface
      */
     protected $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, protected ?\Base\Notifier\Notifier $notifier = null)
     {
         $this->entityManager = $entityManager;
     }
@@ -62,9 +62,14 @@ class UserChecker implements UserCheckerInterface
             $welcomeBackToken = new Token("welcome-back", 3600);
             $welcomeBackToken->setUser($user);
 
-            $notification = new Notification("accountWelcomeBack.success", [$user]);
-            $notification->setUser($user);
-            $notification->setHtmlTemplate("@Base/security/email/account_welcomeBack.html.twig", ["token" => $welcomeBackToken]);
+            // Notifier::userWelcomeBack()'s e-mail: @Base/security/email/account_welcomeBack.html.twig never existed.
+            if (null !== $this->notifier) {
+                $notification = $this->notifier->userWelcomeBack($user, $welcomeBackToken);
+            } else {
+                $notification = new Notification("accountWelcomeBack.success", [$user]);
+                $notification->setUser($user);
+                $notification->setHtmlTemplate("email.html.twig", ["token" => $welcomeBackToken]);
+            }
             $notification->send("email");
 
             $this->entityManager->flush();

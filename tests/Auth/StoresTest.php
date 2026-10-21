@@ -54,11 +54,13 @@ final class StoresTest extends KernelTestCase
         $accounts = new UserAccounts($this->entityManager());
 
         self::assertSame($user, $accounts->byIdentifier(' '.strtoupper($user->getEmail()).' '));
-        self::assertNull($accounts->byIdentifier($user->getUsername()), 'the harness identifies its members by address');
+        if ('email' === AppUser::getUserIdentifierField()) {
+            self::assertNull($accounts->byIdentifier($user->getUsername()), 'the harness identifies its members by address');
+        }
         self::assertNull($accounts->byIdentifier(''));
         self::assertSame($user, $accounts->byHandle((string) $user->getId()));
         self::assertNull($accounts->byHandle('1 OR 1=1'));
-        self::assertSame([(string) $user->getId(), $user->getEmail(), $user->getEmail()], [$accounts->handle($user), $accounts->identifier($user), $accounts->email($user)]);
+        self::assertSame([(string) $user->getId(), $user->getUserIdentifier(), $user->getEmail()], [$accounts->handle($user), $accounts->identifier($user), $accounts->email($user)]);
 
         // An application whose identifier is the user name (lesringostars): found by it too.
         $field = AppUser::$userIdentifier;

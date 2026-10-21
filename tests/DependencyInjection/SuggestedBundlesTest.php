@@ -69,8 +69,9 @@ class SuggestedBundlesTest extends KernelTestCase
     public function testTheUserProviderNamesNoInterfaceOfHwi(): void
     {
         $this->assertNotContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(UserProvider::class))->getInterfaceNames());
-        $this->assertTrue(is_subclass_of(OAuthUserProvider::class, UserProvider::class));
         if (interface_exists('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface')) {
+            // OAuthUserProvider declares hwi's interface: it loads only where hwi/oauth-bundle is (an application without it, lesringostars since AU7, never names it).
+            $this->assertTrue(is_subclass_of(OAuthUserProvider::class, UserProvider::class));
             $this->assertContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(OAuthUserProvider::class))->getInterfaceNames());
         }
     }
@@ -171,6 +172,12 @@ class SuggestedBundlesTest extends KernelTestCase
                 throw $e;
             }
             self::markTestSkipped('The application\'s own configuration uses a bundle left out: '.$e->getMessage());
+        } catch (\Symfony\Component\DependencyInjection\Exception\RuntimeException $e) {
+            // So may its own code (lesringostars' GmController, glitchr/ux-google's GmBuilder): its choice too.
+            if (!preg_match('~Cannot autowire service "App\\\\~', $e->getMessage())) {
+                throw $e;
+            }
+            self::markTestSkipped('The application\'s own code uses a bundle left out: '.$e->getMessage());
         }
         $container = static::getContainer();
 
