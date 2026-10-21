@@ -11,6 +11,7 @@ use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Tools\AttachEntityListenersListener;
 use Doctrine\ORM\Tools\ResolveTargetEntityListener;
+use Omnibridge\Doctrine\DeclarationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -155,6 +156,7 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
 
         $driver = $entityManager->getConfiguration()->getMetadataDriverImpl();
         $driver = $driver instanceof MappingDriver ? $driver->getDriver() : $driver;
+        $driver = $driver instanceof DeclarationDriver ? $driver->getDriver() : $driver;
         $paths = [];
         $this->attributeClasses = [];
         foreach ($driver instanceof MappingDriverChain ? $driver->getDrivers() : [$driver] as $inner) {

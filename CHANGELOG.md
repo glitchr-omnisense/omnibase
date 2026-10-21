@@ -11,6 +11,20 @@ D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it w
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
 ### Changed
+- **The data structure described outside Doctrine** (audit "lesringostars face au master plan",
+  step R14; Marco's bridge principle): `Base\Database\Schema\` writes omnibase's own rules on
+  the description omniscient/omnibridge builds without any ORM (`Omnibridge\Schema`) - the
+  discriminators (`DiscriminatorRule`: the maps under class names, `#[DiscriminatorEntry]`'s
+  values), the vaults, the order columns, the translations (`TranslationRule`: a translation's
+  inheritance, `translations`/`translatable`, `locale`, `<table>_unique_translation`), the
+  targets resolved, the extensions' index - and `Describer::describe($directories)` builds an
+  application's description from its entities' folders. Doctrine reads the same declarations:
+  `DoctrineConfigurationPass` and `Mapping::register()` wrap the application's driver in
+  omnibridge/doctrine's `DeclarationDriver` before `MappingDriver`. `SchemaDescriptionTest`:
+  the description built without Doctrine is `MetadataDescription`'s of the entity manager,
+  entity by entity and table by table (the harness: 202 classes), and on MySQL the database's
+  own `information_schema`. Foundation 818 → 826. See
+  [docs/20-architecture/schema.md](docs/20-architecture/schema.md).
 - **omniauth signs in, where an application turns it on** (plan "omniauth", step AU7):
   `config/services/auth.php`, where omniscient/omniauth is installed, binds each of omniauth's
   stores by its contract's name to `Base\Auth\`'s, omniauth's `Sender` to

@@ -24,6 +24,9 @@ services:
       # omnibridge/doctrine as checked out over the image's (cf6b3b9): the hand-built entity manager's
       # test passes it Mapping::configure() (its configure:, from 4d2436d).
       - ${OMNIBRIDGE:-../../../omnibridge}/doctrine:/srv/demo/vendor/omnibridge/doctrine:ro
+      # omniscient/omnibridge as checked out over the image's (audit R14): Omnibridge\Schema, which
+      # the Doctrine checkout above and the core's Base\Database\Schema read.
+      - ${OMNIBRIDGE:-../../../omnibridge}/core:/srv/demo/vendor/omniscient/omnibridge:ro
       - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
       - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
       - ./demo.sh:/usr/local/bin/demo:ro
