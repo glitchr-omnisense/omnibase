@@ -75,7 +75,8 @@ final class AuthKit
     /** @var list<object> */
     public array $dispatched = [];
 
-    public function __construct(EntityManagerInterface $entityManager, SecurityPolicy $security, string $now = 'now')
+    /** @param \Base\Notifier\Notifier|null $notifier the host's (its welcome-back e-mail) */
+    public function __construct(EntityManagerInterface $entityManager, SecurityPolicy $security, string $now = 'now', ?\Base\Notifier\Notifier $notifier = null)
     {
         $this->clock = new FixedClock((new \DateTimeImmutable($now))->format('Y-m-d H:i:s').' UTC');
         $this->sender = new RecordingSender();
@@ -106,7 +107,7 @@ final class AuthKit
         foreach (Policy::events() as $event => $method) {
             $this->events->addListener($event, [$this->policy, $method]);
         }
-        foreach ([new UpdateAccount($entityManager), new WelcomeBack($entityManager)] as $listener) {
+        foreach ([new UpdateAccount($entityManager), new WelcomeBack($entityManager, $notifier)] as $listener) {
             foreach ($listener::events() as $event => $method) {
                 $this->events->addListener($event, [$listener, $method]);
             }

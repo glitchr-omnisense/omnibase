@@ -122,7 +122,8 @@
  * result is answered whichever framework hosts it - ScreenResponder's body, which is now Symfony's adapter of it -, and
  * what an action hands back and gets: Template, Json, Fragments, Shell, File, Visit, Cache, Answer).
  * 817 after step AU7 of the plan "omniauth" (+1: Base\Auth\NotifierSender, omniauth's Sender on omnibase's Notifier:
- * the sign-in link and the e-mailed code).
+ * the sign-in link and the e-mailed code), 818 (+1: Base\Auth\DemoPasswords, the back office's secrets where omniauth checks
+ * the password in a demonstration).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  */
 
@@ -134,6 +135,7 @@ return [
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
     Base\Attributes\Traits\HierarchifyTrait::class,
+    Base\Auth\DemoPasswords::class,
     Base\Auth\Listener\GuardSignIn::class,
     Base\Auth\Listener\TrackConnections::class,
     Base\Auth\Listener\UpdateAccount::class,

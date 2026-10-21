@@ -161,7 +161,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->assertTrue($policy->needsEnrolment($colleague));
 
         // ...the demonstration's member of staff, signed in with the back office's secret, walks in.
-        $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => self::BACK_OFFICE_SECRET]]);
+        $this->signIn(TestDemoAccounts::STAFF, self::BACK_OFFICE_SECRET);
 
         $response = $this->browse('/profile');
         $this->assertStringNotContainsString('/settings/security-required', (string) $response->headers->get('Location'));
@@ -174,7 +174,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
     public function testTheSuperAdministratorSignsInWithTheSecretOrNotAtAll(): void
     {
         // No secret: the account is unusable, with the password the fixtures gave it too.
-        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => self::ROOT, 'password' => self::ROOT_STORED_PASSWORD]]);
+        $response = $this->signIn(self::ROOT, self::ROOT_STORED_PASSWORD);
         $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'));
         $this->browse('/settings');
         $this->assertNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());
@@ -184,10 +184,10 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $_SERVER['DEMO_SUPERADMIN_PASSWORD'] = $_ENV['DEMO_SUPERADMIN_PASSWORD'] = 'not-a-real-secret-example';
         $this->bootIn(DemoMode::ENVIRONMENT);
 
-        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => self::ROOT, 'password' => self::ROOT_STORED_PASSWORD]]);
+        $response = $this->signIn(self::ROOT, self::ROOT_STORED_PASSWORD);
         $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'));
 
-        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => self::ROOT, 'password' => 'not-a-real-secret-example']]);
+        $response = $this->signIn(self::ROOT, 'not-a-real-secret-example');
         $this->assertSame(302, $response->getStatusCode());
         $this->assertStringNotContainsString('/login', (string) $response->headers->get('Location'));
         $this->browse('/settings');
@@ -197,7 +197,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
     public function testTheBackOfficesAccountSignsInWithItsSecretOrNotAtAll(): void
     {
         // No secret: the password everyone could guess - its identifier - opens nothing.
-        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => TestDemoAccounts::STAFF]]);
+        $response = $this->signIn(TestDemoAccounts::STAFF, TestDemoAccounts::STAFF);
         $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'));
         $this->browse('/settings');
         $this->assertNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());
@@ -207,7 +207,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $_SERVER['DEMO_ADMIN_PASSWORD'] = $_ENV['DEMO_ADMIN_PASSWORD'] = self::BACK_OFFICE_SECRET;
         $this->bootIn(DemoMode::ENVIRONMENT);
 
-        $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => self::BACK_OFFICE_SECRET]]);
+        $response = $this->signIn(TestDemoAccounts::STAFF, self::BACK_OFFICE_SECRET);
         $this->assertSame(302, $response->getStatusCode());
         $this->assertStringNotContainsString('/login', (string) $response->headers->get('Location'));
         $this->browse('/settings');
@@ -217,7 +217,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         self::ensureKernelShutdown();
         $this->bootIn(DemoMode::ENVIRONMENT);
         foreach ([[TestDemoAccounts::STAFF, TestDemoAccounts::STAFF], [self::ROOT, self::BACK_OFFICE_SECRET]] as [$identifier, $password]) {
-            $response = $this->browse('/login', 'POST', ['security_login' => ['identifier' => $identifier, 'password' => $password]]);
+            $response = $this->signIn($identifier, $password);
             $this->assertStringEndsWith('/login', (string) $response->headers->get('Location'), $identifier);
         }
         $this->browse('/settings');
@@ -240,7 +240,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         self::ensureKernelShutdown();
         $_SERVER['DEMO_ADMIN_PASSWORD'] = $_ENV['DEMO_ADMIN_PASSWORD'] = self::BACK_OFFICE_SECRET;
         $this->bootIn(DemoMode::ENVIRONMENT);
-        $this->browse('/login', 'POST', ['security_login' => ['identifier' => TestDemoAccounts::STAFF, 'password' => self::BACK_OFFICE_SECRET]]);
+        $this->signIn(TestDemoAccounts::STAFF, self::BACK_OFFICE_SECRET);
         $this->assertNotSame(403, $this->browse('/admin')->getStatusCode());
     }
 

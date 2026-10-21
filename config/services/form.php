@@ -167,7 +167,7 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     $services->set('Base\Security\UserChecker')
-        ->args([new Reference('doctrine.orm.entity_manager')]);
+        ->args([new Reference('doctrine.orm.entity_manager'), new Reference('Base\Notifier\Notifier', ContainerInterface::NULL_ON_INVALID_REFERENCE)]);
 
     // hwi/oauth-bundle is a suggestion since 4.0: the provider is OAuth-aware when it is there.
     $services->set('Base\Security\UserProvider', interface_exists('HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface') ? 'Base\Security\OAuthUserProvider' : 'Base\Security\UserProvider')
