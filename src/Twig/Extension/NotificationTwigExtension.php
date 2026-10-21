@@ -5,7 +5,7 @@ namespace Base\Twig\Extension;
 use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Notifier\NotificationLinkerInterface;
-use Base\Repository\User\NotificationRepository;
+use Base\Repository\User\Notifications;
 use Base\Service\Push\WebPushService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -23,7 +23,7 @@ class NotificationTwigExtension extends AbstractExtension
 {
     public function __construct(
         protected readonly Security $security,
-        protected readonly NotificationRepository $repository,
+        protected readonly Notifications $repository,
         protected readonly WebPushService $webPush,
         protected readonly CsrfTokenManagerInterface $csrfTokenManager,
         protected readonly ?NotificationLinkerInterface $linker = null,

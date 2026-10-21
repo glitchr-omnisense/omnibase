@@ -24,8 +24,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * Elsewhere the repository loads without them, and its Security methods are
  * left uncalled.
  */
-class UserRepository extends ServiceEntityRepository implements SecurityUserLoader, SecurityUserProvider
+class UserRepository extends ServiceEntityRepository implements SecurityUserLoader, SecurityUserProvider, Users
 {
+    /** Users (step R15): the account of a username, through the finder's cache. */
+    public function oneByUsername(string $username): ?\Base\Entity\User
+    {
+        return $this->cacheOneByUsername($username);
+    }
+
     public function supportsClass(string $class): bool
     {
         return is_instanceof($class, User::class);
