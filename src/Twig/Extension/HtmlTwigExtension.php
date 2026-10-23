@@ -8,7 +8,6 @@ use Base\Service\EditorEnhancerInterface;
 use Base\Service\WysiwygEnhancerInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 final class HtmlTwigExtension extends AbstractExtension
@@ -25,15 +24,10 @@ final class HtmlTwigExtension extends AbstractExtension
         $this->editorEnhancer = $editorEnhancer;
     }
 
-    public function getFilters(): array
-    {
-        return [
-            new TwigFilter('wysiwyg', [$this, 'renderWysiwyg']),
-            new TwigFilter('wysiwyg_toc', [$this, 'getTableOfContents']),
-        ];
-    }
-
     /**
+     * The pipeline of `|wysiwyg` (TextsTwigExtension, through the Texts
+     * contract: Base\Bridge\Symfony\WysiwygTexts under Symfony).
+     *
      * @param string|null $htmlOrJson
      * @param array $options
      * @param int|null $maxLevel

@@ -131,6 +131,10 @@
  * and the Describer that builds an application's description from its entities' folders).
  * 832 after step R15 (+6: the repositories behind interfaces - Base\Database\Repository\Entities, what every
  * repository answers, and Base\Repository\{Threads, Users, Thread\Tags, User\Notifications, Layout\Settings}).
+ * +9 after step R24 of the audit (omnibase's Twig extensions on both hosts): Base\Twig\Extension\{Picture, Link,
+ * Icon, Enum, Texts}TwigExtension, which Symfony and Laravel register alike, and what they stand on -
+ * Base\Service\Icons (|iconify's rule), Base\Service\Model\EnumNouns (|trans_enum's), Base\Routing\AdminRouteNames
+ * (omnibase/admin's names of its routes) and Base\Twig\Variable\AdminLinks (app.admin.crudify() without the admin).
  */
 
 return [
@@ -678,6 +682,7 @@ return [
     Base\Repository\User\SanctionRepository::class,
     Base\Repository\User\TokenRepository::class,
     Base\Repository\Users::class,
+    Base\Routing\AdminRouteNames::class,
     Base\Routing\AdminUrlGeneratorInterface::class,
     Base\Routing\NullAdminUrlGenerator::class,
     Base\Screen\Account\AccountSummary::class,
@@ -755,6 +760,7 @@ return [
     Base\Service\GroupManager::class,
     Base\Service\HotParameters::class,
     Base\Service\IconProvider::class,
+    Base\Service\Icons::class,
     Base\Service\ImageRoute::class,
     Base\Service\Invitations::class,
     Base\Service\Launcher::class,
@@ -787,6 +793,7 @@ return [
     Base\Service\Model\DevelopmentEnvironment::class,
     Base\Service\Model\Duration::class,
     Base\Service\Model\EntityNouns::class,
+    Base\Service\Model\EnumNouns::class,
     Base\Service\Model\GraphInterface::class,
     Base\Service\Model\HtmlizeInterface::class,
     Base\Service\Model\IconProvider\AbstractIconAdapter::class,
@@ -918,9 +925,12 @@ return [
     Base\Twig\Extension\CommonsTwigExtension::class,
     Base\Twig\Extension\DemoTwigExtension::class,
     Base\Twig\Extension\DeployVersionExtension::class,
+    Base\Twig\Extension\EnumTwigExtension::class,
     Base\Twig\Extension\FormTwigExtension::class,
     Base\Twig\Extension\FunctionTwigExtension::class,
     Base\Twig\Extension\HtmlTwigExtension::class,
+    Base\Twig\Extension\IconTwigExtension::class,
+    Base\Twig\Extension\LinkTwigExtension::class,
     Base\Twig\Extension\LocalBusinessTwigExtension::class,
     Base\Twig\Extension\LocalizerTwigExtension::class,
     Base\Twig\Extension\MathTwigExtension::class,
@@ -929,9 +939,11 @@ return [
     Base\Twig\Extension\NotificationTwigExtension::class,
     Base\Twig\Extension\OAuthTwigExtension::class,
     Base\Twig\Extension\PaginatorTwigExtension::class,
+    Base\Twig\Extension\PictureTwigExtension::class,
     Base\Twig\Extension\SecurityPolicyTwigExtension::class,
     Base\Twig\Extension\SemanticTwigExtension::class,
     Base\Twig\Extension\SharingFilter::class,
+    Base\Twig\Extension\TextsTwigExtension::class,
     Base\Twig\Extension\ThemizerTwigExtension::class,
     Base\Twig\Extension\TradingTwigExtension::class,
     Base\Twig\Extension\TranslatorTwigExtension::class,
@@ -943,6 +955,7 @@ return [
     Base\Twig\Renderer\Adapter\HtmlTagRenderer::class,
     Base\Twig\Renderer\Adapter\WebpackTagRenderer::class,
     Base\Twig\Renderer\TagRendererInterface::class,
+    Base\Twig\Variable\AdminLinks::class,
     Base\Twig\Variable\AdminVariable::class,
     Base\Twig\Variable\EmailVariable::class,
     Base\Twig\Variable\RandomVariable::class,

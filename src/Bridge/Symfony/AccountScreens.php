@@ -8,7 +8,7 @@ use Base\Screen\Account\NotificationsPage;
 use Base\Screen\Account\ProfilePage;
 use Base\Screen\Account\SettingsPage;
 use Base\Screen\Builder\Accounts;
-use Base\Twig\Extension\MediaTwigExtension;
+use Base\Twig\Extension\PictureTwigExtension;
 use Base\Twig\Extension\NotificationTwigExtension;
 use Base\Twig\Extension\OAuthTwigExtension;
 use Omnibridge\Contract\Access;
@@ -20,7 +20,7 @@ use Twig\Extension\CoreExtension;
  * the framework-free builder (Base\Screen\Builder\Accounts) cannot know, asked
  * where the templates of before asked it - the viewer and their roles (the
  * Access contract: `app.user`, `is_granted`), an avatar's thumbnail
- * (`|thumbnail`, MediaTwigExtension), the providers one may link
+ * (`|thumbnail`, PictureTwigExtension), the providers one may link
  * (`oauth_available()`), web push and the back-office address of a
  * notification (`push_available()`, `push_vapid_key()`, NotificationTwigExtension),
  * Twig's time zone (the days of the notifications' groups) -, handed to the
@@ -84,7 +84,7 @@ class AccountScreens
         if (!$user->getAvatar()) {
             return null;
         }
-        $thumbnail = $this->extension(MediaTwigExtension::class)?->thumbnail([], $user->getAvatar(), self::AVATAR, self::AVATAR);
+        $thumbnail = $this->extension(PictureTwigExtension::class)?->thumbnail([], $user->getAvatar(), self::AVATAR, self::AVATAR);
 
         return \is_string($thumbnail) ? $thumbnail : '';
     }

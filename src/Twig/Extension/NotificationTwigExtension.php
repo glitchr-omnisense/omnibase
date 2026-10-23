@@ -7,8 +7,8 @@ use Base\Entity\User\Notification;
 use Base\Notifier\NotificationLinkerInterface;
 use Base\Repository\User\Notifications;
 use Base\Service\Push\WebPushService;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Tokens;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -18,14 +18,20 @@ use Twig\TwigFunction;
  * CSRF token every mutation carries and whether push can be offered at all.
  * All of it is for the CURRENT user; anonymous visitors get zeros so the
  * templates need no guards of their own.
+ *
+ * Framework-free (audit "lesringostars face au master plan", R24): the user
+ * signed in is the host's Access contract, the token its Tokens contract
+ * (Symfony's security and CSRF manager under Symfony, the guard and the
+ * session's token under Laravel); push is offered where WebPushService is
+ * configured (none given: never).
  */
 class NotificationTwigExtension extends AbstractExtension
 {
     public function __construct(
-        protected readonly Security $security,
+        protected readonly Access $access,
         protected readonly Notifications $repository,
-        protected readonly WebPushService $webPush,
-        protected readonly CsrfTokenManagerInterface $csrfTokenManager,
+        protected readonly ?WebPushService $webPush,
+        protected readonly Tokens $tokens,
         protected readonly ?NotificationLinkerInterface $linker = null,
     ) {
     }
@@ -44,7 +50,7 @@ class NotificationTwigExtension extends AbstractExtension
 
     public function unread(): int
     {
-        $user = $this->security->getUser();
+        $user = $this->access->getUser();
         if (!$user instanceof User) {
             return 0;
         }
@@ -54,7 +60,7 @@ class NotificationTwigExtension extends AbstractExtension
     /** @return Notification[] */
     public function latest(int $limit = 8): array
     {
-        $user = $this->security->getUser();
+        $user = $this->access->getUser();
         if (!$user instanceof User) {
             return [];
         }
@@ -63,12 +69,12 @@ class NotificationTwigExtension extends AbstractExtension
 
     public function token(): string
     {
-        return $this->csrfTokenManager->getToken("notifications")->getValue();
+        return $this->tokens->csrf("notifications");
     }
 
     public function pushKey(): string
     {
-        return (string) $this->webPush->getPublicKey();
+        return (string) $this->webPush?->getPublicKey();
     }
 
     /** The back-office page of what a notification is about, or null. */
@@ -79,6 +85,6 @@ class NotificationTwigExtension extends AbstractExtension
 
     public function pushAvailable(): bool
     {
-        return $this->webPush->isConfigured() && $this->security->getUser() instanceof User;
+        return (bool) $this->webPush?->isConfigured() && $this->access->getUser() instanceof User;
     }
 }

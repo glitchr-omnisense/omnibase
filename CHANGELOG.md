@@ -10,6 +10,27 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: omnibase's Twig extensions built on contracts, for any host
+
+What a page asks of omnibase's Twig no longer needs Symfony (audit "lesringostars face au master plan",
+R24); omnibridge/laravel registers the same classes. Same names, same output under Symfony:
+- `PictureTwigExtension` (MediaService, FileService): `image()`, `imageset()`, `video()`, `audio()`,
+  `embed_base64`, `|thumbnail` and its variants, `|crop`, `|soundify`, `|vidify`, `|imagify`,
+  `|mimetype`, `|extensions`, `|filesize`, `|public`, `|downloadable`, `|obfuscate_file`,
+  `|obfuscate_image`, `|lightbox` - formerly `MediaTwigExtension`'s, which keeps what needs the router;
+- `LinkTwigExtension`: `|urlify`, `|linkify` (whether an address is the page's own: a closure,
+  `MediaTwigExtension::links()` under Symfony);
+- `IconTwigExtension` over `Base\Service\Icons` (`|iconify`'s rule, `IconProvider::icons()`);
+- `EnumTwigExtension` (the Translations contract): `enum()`, `|colorify` (from `FunctionTwigExtension`),
+  `|trans_enum`, `|trans_enumExists` (from `TranslatorTwigExtension`), over
+  `Base\Service\Model\EnumNouns`, which `Translator::transEnum()` now answers by;
+- `TextsTwigExtension` (the Texts contract): `|wysiwyg`, `|wysiwyg_toc` (from `HtmlTwigExtension`);
+- `NotificationTwigExtension` takes the Access and Tokens contracts (no longer Security and the CSRF
+  manager), its WebPushService optional; `DemoTwigExtension` its registry and factory optional;
+- `|at` and `|emoji_only` are omnibridge/twig's `HelperExtension`'s;
+- `Base\Routing\AdminRouteNames` (omnibase/admin's names of its routes, which its registry uses) and
+  `Base\Twig\Variable\AdminLinks` (`app.admin.crudify()` on the Routes and Urls contracts).
+
 ### Fixed: a label a language gives as its key is that language's word
 
 `Base\Service\Translator` took a humanised label translated to itself ("Clicks": "Clicks" in an

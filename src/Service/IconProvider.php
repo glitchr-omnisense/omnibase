@@ -142,36 +142,19 @@ class IconProvider extends AbstractLocalCache
         return $this;
     }
 
+    /**
+     * The icons' rule over this provider's adapters and the routes' icons it
+     * reads (Icons, framework-free: what `|iconify` answers by).
+     */
+    public function icons(): Icons
+    {
+        return $this->icons ??= new Icons(fn (): array => $this->adapters, $this->getRouteIcons(...));
+    }
+
+    private ?Icons $icons = null;
+
     public function iconify(null|string|array|EnumType|IconizeInterface $icon, array $attributes = [], bool $wrap = true): null|string|array
     {
-        if (!$icon) {
-            return $icon;
-        }
-   
-        if ($icon instanceof IconizeInterface) {
-            $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
-        } elseif (($routeIcons = $this->getRouteIcons($icon))) {
-            $icon = $routeIcons;
-        }
-
-        if (is_array($icon) && is_associative($icon)) {
-            return array_map_recursive(fn($i) => $this->iconify($i, $attributes, false), $icon);
-        }
-        if (is_array($icon)) {
-            $icon = array_filter(array_map(fn($i) => $this->iconify($i, $attributes, $wrap), $icon));
-            if ($icon) {
-                return array_merge(...$icon);
-            }
-        } else {
-            foreach ($this->adapters as $provider) {
-                if ($provider->supports($icon)) {
-                    $icon = $provider->iconify($icon, $attributes, $wrap);
-                    return $wrap ? [$icon] : $icon;
-                }
-            }
-        }
-
-        if($icon == "fa-solid fa-question-circle") return [];
-        return $this->iconify("fa-solid fa-question-circle", $attributes, $wrap) ?? null;
+        return $this->icons()->iconify($icon, $attributes, $wrap);
     }
 }
