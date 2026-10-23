@@ -190,9 +190,13 @@ class FormGuard
 
     /**
      * The captcha's gateway: base.guard.challenge, else omnishield's default -
-     * null when there is none, or when omnishield's form field is missing.
+     * null when there is none, or, for a Symfony form ($field), when
+     * omnishield's form field is missing. A host that prints the gateway's
+     * widget itself (the sign-in page under Laravel: SignInCaptcha) asks
+     * without $field - omnishield's field is a Symfony form type, whose
+     * class does not even load without symfony/form.
      */
-    public function challengeGateway(): ?string
+    public function challengeGateway(bool $field = true): ?string
     {
         $name = $this->config['challenge'] ?? null;
         if (false === $name || 'false' === $name || '' === $name) {
@@ -200,7 +204,7 @@ class FormGuard
         }
         $name ??= $this->defaultChallenge;
 
-        return null !== $name && $this->registry?->has((string) $name) && class_exists(\Omnishield\Bridge\Symfony\Form\ChallengeType::class) ? (string) $name : null;
+        return null !== $name && $this->registry?->has((string) $name) && (!$field || (class_exists(\Symfony\Component\Form\AbstractType::class) && class_exists(\Omnishield\Bridge\Symfony\Form\ChallengeType::class))) ? (string) $name : null;
     }
 
     /** The captcha shown to a visitor who refused the third party the default one reaches. */

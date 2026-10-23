@@ -8,7 +8,7 @@
 #   with the autoloader alone (docker/bin/bare: no framework class loaded).
 # - harness: the harness of docker/ (the core with every omnibase/* plugin
 #   as one Symfony application, docker/Dockerfile as it is), each plugin and
-#   omnibridge/react and omnibridge/doctrine from its repository as
+#   omnibridge/react, omnibridge/doctrine and omniscient/omnibridge from its repository as
 #   compose.checkouts.yml mounts them: the core's suite (its BareTest on the
 #   --no-dev vendor, AppClassOverAliasTest, StubsTest among them), each
 #   plugin's suite, the container and templates linted, the stubs and the
@@ -65,6 +65,10 @@ jobs:
         with: {repository: glitchr-studio/omnibridge-react, path: omnibridge/react}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-studio/omnibridge-doctrine, path: omnibridge/doctrine}
+      # omniscient/omnibridge, which compose.checkouts.yml mounts over the image's since R14 (Omnibridge\Schema,
+      # Omnibridge\Runtime): without it the mount is an empty folder and the suite stops at the first class.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-studio/omnibridge, path: omnibridge/core}
 
       - name: Build the harness
         run: DOCKER_BUILDKIT=1 docker build -f core/docker/Dockerfile -t omniscient/omnibase-harness --secret id=composer_auth,env=COMPOSER_AUTH core

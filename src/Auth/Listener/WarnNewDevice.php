@@ -4,8 +4,9 @@ namespace Base\Auth\Listener;
 
 use Base\Entity\User;
 use Base\Entity\User\Notification;
+use Base\Notifier\Mail\SignInMails;
 use Base\Repository\User\ConnectionRepository;
-use Base\Security\UserTracker;
+use Base\Security\ConnectionTracker;
 use Base\Service\SecurityPolicy;
 use Omniauth\Contract\State;
 use Omniauth\Event\SignedIn;
@@ -27,13 +28,17 @@ class WarnNewDevice
     /** A connection made within this many seconds of the sign-in is one this sign-in made. */
     public const FRESH_SECONDS = 120;
 
-    /** @param \Closure(): bool $declined whether this browser said "no thanks" (SecurityPolicy::COOKIE_NEW_DEVICE_PROMPT_DISMISSED) */
+    /**
+     * @param \Closure(): bool $declined whether this browser said "no thanks" (SecurityPolicy::COOKIE_NEW_DEVICE_PROMPT_DISMISSED)
+     * @param SignInMails|null $mails    the e-mail written and sent without Symfony's Notifier (a host without it: omnibridge/laravel); the Notifier's otherwise
+     */
     public function __construct(
         protected readonly SecurityPolicy $securityPolicy,
-        protected readonly UserTracker $tracker,
+        protected readonly ConnectionTracker $tracker,
         protected readonly ConnectionRepository $connections,
         protected readonly ?State $state = null,
         protected readonly ?\Closure $declined = null,
+        protected readonly ?SignInMails $mails = null,
     ) {
     }
 
@@ -54,13 +59,12 @@ class WarnNewDevice
             return; // its very first sign-in
         }
 
-        if ($email) {
+        if ($email && null !== $this->mails) {
+            $this->mails->newDevice($user, $connection);
+        } elseif ($email) {
             $notification = new Notification('newDevice.subject', [$user]);
             $notification->setUser($user);
-            $notification->setHtmlTemplate('@Base/client/email/security_newDevice.html.twig', [
-                'connection' => $connection,
-                'recipient' => $user,
-            ]);
+            $notification->setHtmlTemplate(SignInMails::NEW_DEVICE_TEMPLATE, SignInMails::newDeviceParameters($user, $connection));
             $notification->send('email');
         }
         if ($prompt && !$this->securityPolicy->hasSecondFactor($user) && !(null !== $this->declined && ($this->declined)())) {

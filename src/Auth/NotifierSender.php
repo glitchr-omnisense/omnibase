@@ -3,21 +3,26 @@
 namespace Base\Auth;
 
 use Base\Entity\User;
+use Base\Notifier\Mail\SignInMails;
 use Base\Notifier\Notifier;
 use Omniauth\Contract\Sender;
 use Omniauth\Factor;
 use Omniauth\Message;
 
 /**
- * omniauth's Sender on omnibase's Notifier (plan "omniauth", §1.9): a
+ * omniauth's Sender on omnibase's e-mails (plan "omniauth", §1.9): a
  * sign-in link (Notifier::loginLink(), the e-mail of the former
  * loginToken()) and the second factor's code (Notifier::emailCode()), by
  * e-mail alone - what the page tells the visitor is the same whether an
  * account goes with the address or not.
+ *
+ * Under Symfony the Notifier sends them; under a host without Symfony's
+ * Notifier (omnibridge/laravel) Base\Notifier\Mail\SignInMails writes the
+ * same e-mails and sends them through the host's mailer (R26).
  */
 class NotifierSender implements Sender
 {
-    public function __construct(protected readonly Notifier $notifier)
+    public function __construct(protected readonly Notifier|SignInMails $notifier)
     {
     }
 
@@ -25,6 +30,15 @@ class NotifierSender implements Sender
     {
         if (!$account instanceof User) {
             throw new \InvalidArgumentException(\sprintf('omnibase sends to %s accounts, not %s.', User::class, $account::class));
+        }
+        if ($this->notifier instanceof SignInMails) {
+            match ($message->factor) {
+                Factor::Link => $this->notifier->loginLink($account, $message->secret, $message->until),
+                Factor::EmailCode => $this->notifier->emailCode($account, $message->secret, $message->until),
+                default => throw new \LogicException(\sprintf('Nothing to send for "%s".', $message->factor->value)),
+            };
+
+            return;
         }
         $notification = match ($message->factor) {
             Factor::Link => $this->notifier->loginLink($account, $message->secret, $message->until),

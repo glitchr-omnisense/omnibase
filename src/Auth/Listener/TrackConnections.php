@@ -3,7 +3,7 @@
 namespace Base\Auth\Listener;
 
 use Base\Entity\User;
-use Base\Security\UserTracker;
+use Base\Security\ConnectionTracker;
 use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Contract\Accounts;
 use Omniauth\Event\SignedIn;
@@ -22,7 +22,7 @@ use Omniauth\Event\SignInFailed;
 class TrackConnections
 {
     public function __construct(
-        protected readonly UserTracker $tracker,
+        protected readonly ConnectionTracker $tracker,
         protected readonly EntityManagerInterface $entityManager,
         protected readonly ?Accounts $accounts = null,
     ) {
