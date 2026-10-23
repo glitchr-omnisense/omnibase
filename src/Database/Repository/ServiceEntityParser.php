@@ -1232,7 +1232,15 @@ class ServiceEntityParser
             return null;
         }
 
-        return $this->classMetadata->getTypeOfField($fieldHead);
+        $type = $this->classMetadata->getTypeOfField($fieldHead);
+
+        // A bound the finder computes (YoungerThan, IsOver...) is a DateTime: on a field of an
+        // immutable type it is bound with the mutable type of the same name, the same column format.
+        if ($fieldValue instanceof DateTime && \is_string($type) && str_ends_with($type, '_immutable')) {
+            return substr($type, 0, -\strlen('_immutable'));
+        }
+
+        return $type;
     }
 
     protected function buildQueryExpr(QueryBuilder $queryBuilder, $field, $fieldValue)
@@ -1366,12 +1374,17 @@ class ServiceEntityParser
             } elseif ($this->validateDate($fieldValue) && !$fieldValue instanceof DateTime) {
                 $fieldValue = new DateTime($fieldValue);
             } elseif (!$fieldValue instanceof DateTime) {
-                $subtract = $fieldValue;
-                if (in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
-                    $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
+                // An age (YoungerThan, OlderThan: "+2 days", 172800) is counted back from now;
+                // Within's offset is counted forward. The bound is rounded to the minute, so a
+                // cached query (the cache* finders) keeps its key for that minute. It used to be
+                // round_datetime(now, $age): now rounded to a multiple of the age, an instant at
+                // or after now - YoungerThan matched nothing and OlderThan nearly everything.
+                $offset = $fieldValue;
+                if (in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL])) {
+                    $offset = strtr($fieldValue, ["+" => "-", "-" => "+"]);
                 }
 
-                $fieldValue = round_datetime(new DateTime("now"), $subtract);
+                $fieldValue = round_datetime((new DateTime("now"))->modify($offset), "+1 minute");
             }
         }
 
