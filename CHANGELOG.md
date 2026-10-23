@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: omniauth's new names, and the TOTP secrets sealed at rest
+- omniauth's family took its final shape (as omnishield's): the identity providers' mechanics
+  are omniscient/omniauth's own (`Omniauth\OAuth\`, the same names), omniauth/passkey is
+  **omniauth/webauthn** (`Omniauth\WebAuthn\`), omniauth/totp is **omniauth/otp**
+  (`Omniauth\Otp\`); the former names are aliases for one release. `Base\Auth\UserPasskeys`,
+  `config/services/auth.php` and the tests use the new ones; `suggest`, `require-dev`, the
+  harness image and the CI's consumer install name omniauth/webauthn, omniauth/otp and
+  omniauth/google (omniauth/oauth is gone).
+- `UserSettingsController`'s TOTP enrolment keeps the confirmed secret through omniauth's
+  `TotpSecrets` when omniauth is installed, and `qr_code_totp` draws the QR code of the secret
+  that store opens: with `omniauth.yaml`'s `totp.secret_key`, the secret is sealed at rest
+  (omniauth/otp's `SodiumSecretBox`, decision QA5). Without omniauth, as before.
+
 ### Fixed: the finder's YoungerThan and OlderThan compare with now moved by their age
 - `findBy…YoungerThan($age)`, `countBy…YoungerThan()`, `…OlderThan()` and their `EqualTo`
   forms (an age in seconds or `"+2 days"`) gave `round_datetime(now, $age)` as their bound

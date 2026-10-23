@@ -30,14 +30,14 @@ use Omniauth\OAuth\OAuthMethod;
 use Omniauth\OAuth\Provider\Providers;
 use Omniauth\OAuth\Testing\FakeProvider;
 use Omniauth\Omniauth;
-use Omniauth\Passkey\PasskeyMethod;
-use Omniauth\Passkey\RelyingParty;
+use Omniauth\Otp\CacheUsedSteps;
+use Omniauth\Otp\TotpMethod;
 use Omniauth\Password\PasswordMethod;
 use Omniauth\Testing\FixedClock;
 use Omniauth\Testing\RecordingSender;
-use Omniauth\Totp\CacheUsedSteps;
-use Omniauth\Totp\TotpMethod;
 use Omniauth\TrustedDevice\TrustedDevices;
+use Omniauth\WebAuthn\PasskeyMethod;
+use Omniauth\WebAuthn\RelyingParty;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
@@ -130,7 +130,7 @@ final class AuthKit
      */
     public static function missing(): ?string
     {
-        foreach (['omniscient/omniauth' => \Omniauth\Omniauth::class, 'omniauth/passkey' => \Omniauth\Passkey\PasskeyMethod::class, 'omniauth/totp' => \Omniauth\Totp\TotpMethod::class, 'omniauth/oauth' => \Omniauth\OAuth\OAuthMethod::class] as $package => $class) {
+        foreach (['omniscient/omniauth' => \Omniauth\Omniauth::class, 'omniauth/webauthn' => \Omniauth\WebAuthn\PasskeyMethod::class, 'omniauth/otp' => \Omniauth\Otp\TotpMethod::class, 'omniscient/omniauth (Omniauth\\OAuth\\)' => \Omniauth\OAuth\OAuthMethod::class] as $package => $class) {
             if (!class_exists($class)) {
                 return $package.' is not installed (the core suggests it).';
             }

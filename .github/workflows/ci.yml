@@ -30,7 +30,7 @@ jobs:
     uses: glitchr-studio/ci/.github/workflows/php-package.yml@main
     with:
       phpunit: false
-      consumer-require: 'omniscient/omniauth:1.x-dev omniauth/oauth:1.x-dev omniauth/passkey:1.x-dev omniauth/totp:1.x-dev'
+      consumer-require: 'omniscient/omniauth:1.x-dev omniauth/webauthn:1.x-dev omniauth/otp:1.x-dev'
       consumer-script: 'OMNIBASE_AUTOLOAD="$PWD/vendor/autoload.php" php "$PACKAGE_DIR/docker/bin/bare"'
 
   harness:

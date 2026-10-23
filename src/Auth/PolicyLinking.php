@@ -6,10 +6,10 @@ use Omniauth\OAuth\Contract\EmailLinking;
 use Omniauth\OAuth\Identity;
 
 /**
- * omniauth/oauth's rule for a link by a verified address, on omnibase's
+ * omniauth's rule for a link by a verified address, on omnibase's
  * Policy (QA3): never for an account with a second factor or an
  * administration role, nor a demonstration account; $also adds another rule
- * (omniauth/oauth's NoSecondFactorLinking, which reads the methods mounted).
+ * (omniauth's NoSecondFactorLinking, which reads the methods mounted).
  */
 class PolicyLinking implements EmailLinking
 {

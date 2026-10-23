@@ -11,7 +11,7 @@ use Omniauth\Contract\Identities;
  * (Base\Entity\User\Identity), by Marco's decision QA3 - an account is found
  * by the provider's subject, never by user.identityProvider (which keeps its
  * own meaning: where the account came from) nor by the address alone. The
- * table's two unique keys refuse what omniauth/oauth refuses before them: a
+ * table's two unique keys refuse what omniauth's OAuthMethod refuses before them: a
  * subject linked to two accounts, two identities of one provider on one
  * account.
  */

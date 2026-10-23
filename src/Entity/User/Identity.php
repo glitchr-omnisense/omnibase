@@ -36,7 +36,7 @@ class Identity
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     protected $user;
 
-    /** The provider's key, as omniauth/oauth names it ("google"). */
+    /** The provider's key, as omniauth's OAuthMethod names it ("google"). */
     #[ORM\Column(type: "string", length: 32)]
     protected string $provider;
 

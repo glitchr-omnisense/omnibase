@@ -89,8 +89,10 @@ other than `demo`, is as described here.
 
 ## Under omniauth (`Base\Auth\`)
 
-With `omniscient/omniauth` installed (the core suggests it, and its methods
-`omniauth/passkey`, `omniauth/totp`, `omniauth/oauth`), `Base\Auth\` fills its
+With `omniscient/omniauth` installed (the core suggests it, its identity
+providers included, and its method packages `omniauth/webauthn` and
+`omniauth/otp` - formerly `omniauth/passkey` and `omniauth/totp`; Google is
+`omniauth/google`), `Base\Auth\` fills its
 contracts on omnibase's own tables - the same rows Symfony's sign-in reads
 today, so an account signs in the same way under any host. Nothing is wired
 by the core itself: a host bridge (omnibridge/symfony, omnibridge/laravel)
@@ -101,12 +103,24 @@ mounts them.
 | `Accounts` | `UserAccounts` | `user` (and the application's table): by address, then by the application's identifier field; the id as the handle; `check()` refuses `restricted`, `banned`, `locked`, `disabled` (`@notifications.login.<reason>`) |
 | `Passwords` | `UserPasswords` | `user.password` |
 | `LinkTokens`, `PlainLinkTokens` | `UserLinkTokens` | `userToken` "login-token": the link's SHA-256, used once; the links sent before in clear until their deadline |
-| `TotpSecrets` | `UserTotpSecrets` | `user.secret` |
+| `TotpSecrets` | `UserTotpSecrets` | `user.secret`: sealed at rest (`otp:v1:...`, omniauth/otp's `SodiumSecretBox`) when `omniauth.yaml` sets `totp.secret_key` - the bridge wraps the store, and the settings' enrolment and QR code go through it |
 | `EmailCodes` | `UserEmailCodes` | `user.emailAuthEnabled`, `user.emailAuthCode` (the code's keyed hash) |
 | `BackupCodes` | `UserBackupCodes` | `user.backupCodes` |
 | `TrustedVersion` | `UserTrustedVersion` | `user.trustedTokenVersion` |
 | `Passkeys` | `UserPasskeys` | `userPasskey` |
 | `Identities` | `UserIdentities` | `userIdentity`: provider, subject, the account, the address then and whether it was vouched for, created, last used |
+
+**The TOTP secrets at rest** (Marco's decision QA5). A site turns sealing on with
+`totp: { secret_key: '%env(OMNIAUTH_TOTP_KEY)%' }` in `omniauth.yaml` (its Laravel twin:
+`'secret_key' => env('OMNIAUTH_TOTP_KEY')` in `config/omniauth.php`, the same key): base64 of
+32 bytes, from the secrets vault in production, `.env.local` in development, a fixed key of
+the test environment's own in `.env.test` - never a committed real key. The settings page
+(`UserSettingsController`) writes the enrolled secret through omniauth's `TotpSecrets` and opens
+it only to draw the QR code; the sign-in opens it only to verify a code. The secrets written in
+clear before are read as they are until the site's migration rewrites them (lesringostars:
+`Version20261023120000`, up seals, down opens, idempotent); the column (`VARCHAR(255)`) holds
+the 130 characters of a sealed secret unchanged. Rotating the key: omniauth/otp's
+`docs/otp.md`.
 
 `Base\Auth\Policy` is this page's rule on omniauth's second-factor rule: a
 demonstration account is never asked for one; an account a second factor is

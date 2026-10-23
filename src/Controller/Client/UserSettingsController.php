@@ -31,6 +31,7 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 
+use Omniauth\Contract\TotpSecrets;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface as TotpTwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 
@@ -53,14 +54,20 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/members/qr/totp", name: "qr_code_totp")]
-    public function displayTotpQrCode(TotpAuthenticatorInterface $totpAuthenticator): Response
+    public function displayTotpQrCode(TotpAuthenticatorInterface $totpAuthenticator, ?TotpSecrets $totpSecrets = null): Response
     {
         $user = $this->getUser();
         if (!($user instanceof TotpTwoFactorInterface) || !$user->isTotpAuthenticationEnabled()) {
             throw new NotFoundHttpException('Cannot display QR code');
         }
 
-        return $this->displayQrCode($totpAuthenticator->getQRContent($user));
+        // The secret as the authenticator application scans it: opened by omniauth's store when the
+        // site seals its secrets at rest (omniauth.yaml's totp.secret_key), the column's value otherwise.
+        $secret = null !== $totpSecrets ? $totpSecrets->secret($user) : $user->getTotpSecret();
+        $shown = clone $user;
+        $shown->setTotpSecret($secret);
+
+        return $this->displayQrCode($totpAuthenticator->getQRContent($shown));
     }
 
     private function displayQrCode(string $qrCodeContent): Response
@@ -266,7 +273,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa", name: "user_settings_2fa")]
-    public function TwoFactorAuthentication(Request $request, EntityManagerInterface $entityManager, TotpAuthenticatorInterface $totpAuthenticator)
+    public function TwoFactorAuthentication(Request $request, EntityManagerInterface $entityManager, TotpAuthenticatorInterface $totpAuthenticator, ?TotpSecrets $totpSecrets = null)
     {
         $user = $this->getUser();
         $session = $request->getSession();
@@ -304,7 +311,13 @@ class UserSettingsController extends AbstractController
 
             if ($totpAuthenticator->checkCode($pendingUser, $form->get('code')->getData())) {
 
-                $user->setTotpSecret($pendingSecret);
+                // Kept through omniauth's store when there is one: sealed at rest when the site sets
+                // omniauth.yaml's totp.secret_key (Marco's decision QA5), as it is otherwise.
+                if (null !== $totpSecrets) {
+                    $totpSecrets->enable($user, $pendingSecret);
+                } else {
+                    $user->setTotpSecret($pendingSecret);
+                }
                 $backupCodes = $this->generateBackupCodes();
                 $user->setBackupCodes($backupCodes);
                 $entityManager->flush();

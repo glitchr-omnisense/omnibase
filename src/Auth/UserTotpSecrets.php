@@ -5,9 +5,12 @@ namespace Base\Auth;
 use Omniauth\Contract\TotpSecrets;
 
 /**
- * The authenticator applications' secrets, base32: user.secret, as scheb/2fa
- * kept them (still in clear: their encryption is a step of its own, QA5,
- * through omniauth/totp's SealedTotpSecrets).
+ * The authenticator applications' secrets: user.secret, as the column holds
+ * it. Sealed at rest when the site sets omniauth's totp.secret_key (QA5): the
+ * hosts' bridges then wrap this store in omniauth/otp's SealedTotpSecrets, so
+ * the column holds "otp:v1:..." and its readers the base32 secret; a secret
+ * kept in clear before (scheb/2fa's) is read as it is until the site's
+ * migration rewrites it.
  */
 class UserTotpSecrets extends UserStore implements TotpSecrets
 {

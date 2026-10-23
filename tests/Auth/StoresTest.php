@@ -8,7 +8,7 @@ use Base\Auth\UserIdentities;
 use Base\Auth\UserPasskeys;
 use Base\Entity\User\Identity;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Omniauth\Passkey\PasskeyRecord;
+use Omniauth\WebAuthn\PasskeyRecord;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\Http\HttpTestTrait;
 
