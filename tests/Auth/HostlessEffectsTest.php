@@ -249,6 +249,21 @@ final class HostlessEffectsTest extends KernelTestCase
         $settings->set(SecurityPolicy::TWO_FACTOR, false);
     }
 
+    /** `app` for the e-mail templates where the host has no AppVariable: the settings SiteVariable and EmailVariable read, the same way. */
+    public function testTheEmailsAppVariablesReadTheSettingsAsSymfonysDo(): void
+    {
+        $year = (int) date('Y');
+        $settings = ['base.settings.title' => 'Les Ringo Stars', 'base.settings.logo' => '/logo.png', 'base.settings.launchdate' => ['date' => ($year - 3).'-05-01 00:00:00.000000', 'timezone' => 'UTC']];
+        $app = new \Base\Notifier\Mail\MailVariables(new ReadSettings(static fn (string $path) => $settings[$path] ?? null), static fn (): string => 'example.org');
+
+        self::assertSame('example.org', $app->site->domain());
+        self::assertSame('/logo.png', $app->site->logo());
+        self::assertSame('Les Ringo Stars', $app->email->title(), 'the e-mails\' own title, else the site\'s');
+        self::assertSame('/logo.png', $app->email->logo());
+        self::assertSame(($year - 3).'-'.$year, $app->email->age(), 'Launcher::since()');
+        self::assertSame((string) $year, (new \Base\Notifier\Mail\MailVariables(new ReadSettings(static fn () => null), static fn (): ?string => null))->email->age(), 'no launch date: this year');
+    }
+
     /** SignInMails as a host without the Notifier builds it, on this kernel's Twig, words and addresses: e-mails kept in $this->sent. */
     private function mails(): SignInMails
     {

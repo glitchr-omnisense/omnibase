@@ -39,9 +39,35 @@ class Launcher implements LauncherInterface
             return null;
         }
 
+        return self::date($launchdate);
+    }
+
+    /**
+     * A stored launch date as a date: the setting's DateTime, its text, or a
+     * DateTime as JSON holds it ({"date": ...}, a host reading the row itself).
+     */
+    public static function date(mixed $launchdate): ?DateTime
+    {
+        if (!$launchdate) {
+            return null;
+        }
         if ($launchdate instanceof DateTime) return $launchdate;
         if (is_string($launchdate)) return new DateTime($launchdate);
+        if (is_array($launchdate) && is_string($launchdate["date"] ?? null)) return new DateTime($launchdate["date"]);
         return null;
+    }
+
+    /** The site's years ("2019-2026", "2026"), since a launch date (since()). */
+    public static function yearsSince(?DateTime $launchdate): string
+    {
+        $currentYear = date("Y");
+        if (!$launchdate) {
+            return $currentYear;
+        }
+
+        $launchYear = $launchdate->format("Y");
+        $launched = $launchdate < new DateTime("now");
+        return $launched && $launchYear < $currentYear ? date("$launchYear-Y") : $launchYear;
     }
 
     public function isLaunched(?string $locale = null): ?bool
@@ -57,14 +83,7 @@ class Launcher implements LauncherInterface
 
     public function since(?string $locale = null): string
     {
-        $currentYear = date("Y");
-        $launchdate = $this->getLaunchdate($locale);
-        if (!$launchdate) {
-            return $currentYear;
-        }
-
-        $launchYear = $launchdate->format("Y");
-        return $this->isLaunched($locale) && $launchYear < $currentYear ? date("$launchYear-Y") : $launchYear;
+        return self::yearsSince($this->getLaunchdate($locale));
     }
 
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool

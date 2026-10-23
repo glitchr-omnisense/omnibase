@@ -43,12 +43,14 @@ final class EmailComposer
      * @param string|\Closure(): string             $from   the sender: the technical address (the Notifier's getTechnicalRecipient())
      * @param (\Closure(string $to): bool)|null      $isTest whether an e-mail to that address goes to the technical address instead (the Notifier's isTest(): base.notifier.technical_loopback, test_recipients)
      * @param (\Closure(string $id): string)|null    $trans  the words of a test e-mail (@emails.fake_test.*)
+     * @param (\Closure(): array<string, mixed>)|null $globals what the templates read as globals where the host's Twig has none of omnibase's (`app`: MailVariables)
      */
     public function __construct(
         private readonly Environment $twig,
         private readonly string|\Closure $from,
         private readonly ?\Closure $isTest = null,
         private readonly ?\Closure $trans = null,
+        private readonly ?\Closure $globals = null,
     ) {
     }
 
@@ -187,7 +189,7 @@ final class EmailComposer
         }
 
         $email = new Email();
-        $context = [
+        $context = (null !== $this->globals ? ($this->globals)() : []) + [
             'raw' => true,
             'warmup' => true,
             'title' => '',
