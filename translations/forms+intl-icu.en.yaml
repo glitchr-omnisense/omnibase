@@ -53,7 +53,7 @@ changePassword:
 resetPassword:
     title: "Reset your password"
     descriptionRequest: "If you forgot your password or just want to reset it, please enter your email address !
-    In case the address you used is in our records, you will receive a special email to reinitialise your password."
+      In case the address you used is in our records, you will receive a special email to reinitialise your password."
     description: "You are now about to change your password, please enter the password of your choice."
     email: "E-mail address"
     submit: "Send a request"

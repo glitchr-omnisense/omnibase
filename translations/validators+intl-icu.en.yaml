@@ -28,7 +28,7 @@ password:
    min_length: "{0, plural,
       =1 {Password is expected to be # character long.}
       other {Password is expected to be # characters long.}
-   }"
+     }"
    min_strength: "Minimum required strength is {0}."
 
 not_blank: "Field \"{label}\" is blank."
