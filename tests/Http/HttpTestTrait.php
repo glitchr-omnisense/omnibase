@@ -18,7 +18,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  *     $response = $this->request('/settings', $user);
  *
  * The signed-in user is carried by a session, as after a real sign-in (the
- * "main" firewall reads it back and refreshes the user from the database).
+ * firewall of the address reads it back and refreshes the user from the database).
  * Users created here are removed by removeUsers(), to call from tearDown().
  */
 trait HttpTestTrait
@@ -84,13 +84,18 @@ trait HttpTestTrait
      * @param array<string, mixed> $parameters query (GET) or body (POST)
      * @param array<string, string> $server    e.g. ['HTTP_ACCEPT' => 'application/json']
      */
-    protected function request(string $path, ?object $user = null, string $method = 'GET', array $parameters = [], array $server = [], string $firewall = 'main'): Response
+    protected function request(string $path, ?object $user = null, string $method = 'GET', array $parameters = [], array $server = [], ?string $firewall = null): Response
     {
         $request = Request::create($path, $method, $parameters, [], [], $server);
 
         if ($user) {
+            // Under the key of the firewall that guards the address: "_security_" and its context,
+            // its name when it has none - "main" in the harness; an application's may be named
+            // otherwise or share a context (lesringostars: "rescue" and "main", both "common").
+            $config = null === $firewall ? static::getContainer()->get('security.firewall.map')->getFirewallConfig(Request::create($path)) : null;
+            $firewall ??= $config?->getName() ?? 'main';
             $session = static::getContainer()->get('session.factory')->createSession();
-            $session->set('_security_'.$firewall, serialize(new UsernamePasswordToken($user, $firewall, $user->getRoles())));
+            $session->set('_security_'.($config?->getContext() ?? $firewall), serialize(new UsernamePasswordToken($user, $firewall, $user->getRoles())));
             $session->save();
             $request->cookies->set($session->getName(), $session->getId());
         }

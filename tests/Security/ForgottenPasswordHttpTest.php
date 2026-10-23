@@ -109,13 +109,19 @@ class ForgottenPasswordHttpTest extends KernelTestCase
         return $session->getFlashBag()->peekAll();
     }
 
-    /** What a page says, without what differs from one visit to the next: its tokens, the address typed. */
+    /**
+     * What a page says, without what differs from one visit to the next: its tokens, the address
+     * typed, and the time the page took, which a layout may print (app.site.execution_time: the
+     * core's credits "[0.12s]", lesringostars' footer "[0.12]") - the first visit of a run, its
+     * caches cold, takes longer whatever the address.
+     */
     private function text(Response $response, string $email): string
     {
         $html = (string) preg_replace('~<(script|style)\b.*?</\1>~s', '', (string) $response->getContent());
         $html = (string) preg_replace('/<input[^>]*type="hidden"[^>]*>/', '', $html);
+        $text = (string) preg_replace('/\[\d+(?:\.\d+)?s?\]/', '[time]', strip_tags($html));
 
-        return trim((string) preg_replace('/\s+/', ' ', str_replace($email, '<address>', strip_tags($html))));
+        return trim((string) preg_replace('/\s+/', ' ', str_replace($email, '<address>', $text)));
     }
 
     public function testTheAnswerIsTheSameWhetherTheAddressHasAnAccountOrNot(): void

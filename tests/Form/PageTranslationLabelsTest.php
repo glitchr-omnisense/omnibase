@@ -71,10 +71,15 @@ class PageTranslationLabelsTest extends KernelTestCase
         $labels = $this->labels('fr');
 
         $this->assertSame([], array_values(array_intersect($labels, self::ENGLISH)), 'shown in English in a French back office');
-        foreach (['Adresse', 'Titre', 'Sous-titre', 'Extrait', 'Contenu'] as $french) {
-            $this->assertContains($french, $labels);
+        // Each in the French of the back office's form domain: the core's words (Adresse, Titre,
+        // Sous-titre, Extrait, Contenu) or those an application gives instead (lesringostars: Chapeau).
+        $translator = static::getContainer()->get('translator');
+        $french = array_map(static fn (string $english): string => $translator->trans($english, [], 'forms', 'fr'), self::ENGLISH);
+        $this->assertSame([], array_values(array_intersect($french, self::ENGLISH)), 'the forms domain has French words for them');
+        foreach ($french as $word) {
+            $this->assertContains($word, $labels);
         }
-        $this->assertGreaterThan(1, \count(array_keys($labels, 'Titre')), 'the title of each language');
+        $this->assertGreaterThan(1, \count(array_keys($labels, $french[1])), 'the title of each language');
     }
 
     public function testAnEnglishPageFormIsInEnglish(): void
