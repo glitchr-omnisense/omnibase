@@ -89,6 +89,7 @@
         "omnibridge/doctrine": "1.x-dev",
         "omnibridge/twig": "1.x-dev",
         "omniscient/omnibridge": "1.x-dev",
+        "omniscient/omnidrive": "1.x-dev",
         "phpoffice/phpspreadsheet": "^1.23|^2.0",
         "picqer/php-barcode-generator": "^2.0",
         "psr/cache": "^1.0|^2.0|^3.0",

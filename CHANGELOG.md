@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the storages read through omniscient/omnidrive
+
+`Base\Service\Flysystem` reads and writes its storages as omniscient/omnidrive's drives
+(`Omnidrive\Drives`): under Symfony the `Omnidrive\Drives` service omnibridge/symfony registers over
+the services tagged `flysystem.storage` (flysystem-bundle's storages, or the core's local ones without
+it), under Laravel omnibridge/laravel's disks; a PSR-11 container of Flysystem operators is still
+accepted (read as `Omnidrive\Flysystem\OperatorDrives`). Its read, write, delete, fileExists, mkdir and
+mimeType go through `Omnidrive\Drive`, `isRemote()` is what the drive says of itself
+(`capabilities()->local`); `getDrives()` and `getDrive()` are new. `FlysystemInterface`,
+`getOperator()`, `getAdapter()`, `getDefaultStorage()` and `createStorage()` are deprecated, kept for one
+release: new code type-hints `Omnidrive\Drives`. The core requires omniscient/omnidrive 1.x-dev (an
+application names it in its own composer.json, as the other branch releases).
+
 ### Changed: omniauth's new names, and the TOTP secrets sealed at rest
 - omniauth's family took its final shape (as omnishield's): the identity providers' mechanics
   are omniscient/omniauth's own (`Omniauth\OAuth\`, the same names), omniauth/passkey is

@@ -11,38 +11,37 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\PathPrefixer;
 
-use League\Flysystem\UnableToDeleteDirectory;
-use League\Flysystem\UnableToDeleteFile;
-use League\Flysystem\UnableToReadFile;
-use League\Flysystem\UnableToRetrieveMetadata;
-use League\Flysystem\UnableToWriteFile;
-use Psr\Container\ContainerExceptionInterface;
+use LogicException;
+use Omnidrive\Drive;
+use Omnidrive\Drives;
+use Omnidrive\Exception\DriveException;
+use Omnidrive\Flysystem\FlysystemDrive;
+use Omnidrive\Flysystem\OperatorDrives;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use ReflectionProperty;
 use Symfony\Component\Finder\Finder;
 use InvalidArgumentException;
 use League\Flysystem\UnableToCreateDirectory;
 use ReflectionException;
-use Symfony\Contracts\Service\ServiceProviderInterface;
 
 /**
- * omnibase's storages, by name ("local.cache", "local.uploads", "s3.private"...), over a
- * PSR-11 container of Flysystem operators. Its own class since 4.0 (plan "omnibase agnostique",
- * C7b): it no longer extends league/flysystem-bundle's LazyFactory. Under Symfony the service
- * `flysystem` is built from the services tagged flysystem.storage by their `storage` name - the
- * storages of the bundle's configuration, as the bundle's own lazy factory reads them -, or,
- * without the bundle, omnibase's local storages (FlysystemStoragesPass); elsewhere from any
- * container of operators.
+ * omnibase's storages, by name ("local.cache", "local.uploads", "s3.private"...), read and written
+ * through omniscient/omnidrive (plan "omnidrive", 2026-10-23): each storage is an Omnidrive\Drive
+ * of the Omnidrive\Drives the host gives - under Symfony the storages of flysystem-bundle's
+ * configuration (the services tagged flysystem.storage), or omnibase's local ones without the bundle
+ * (FlysystemStoragesPass); under Laravel its disks (omnibridge/laravel). A PSR-11 container of
+ * Flysystem operators is still accepted, read as Omnidrive\Flysystem\OperatorDrives.
+ *
+ * New code type-hints Omnidrive\Drives (getDrives(), getDrive()). What speaks Flysystem itself -
+ * getOperator(), getAdapter(), getConnectionOptions() and the FilesystemOperator arguments - is
+ * kept for one release, deprecated (FlysystemInterface).
  */
 class Flysystem implements FlysystemInterface
 {
-    protected ContainerInterface $storages;
+    protected Drives $drives;
 
-    /**
-     * @var FilesystemOperator
-     */
-    protected FilesystemOperator $operator;
+    /** The default storage: its name, or an operator given as it (deprecated). */
+    protected FilesystemOperator|string $default = "local.cache";
 
     protected static string $projectDir;
 
@@ -64,9 +63,9 @@ class Flysystem implements FlysystemInterface
         return self::$publicDir;
     }
 
-    public function __construct(ContainerInterface $storages)
+    public function __construct(Drives|ContainerInterface $storages)
     {
-        $this->storages = $storages;
+        $this->drives = $storages instanceof Drives ? $storages : new OperatorDrives($storages);
 
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir = self::$projectDir . "/public";
@@ -78,52 +77,60 @@ class Flysystem implements FlysystemInterface
         $this->setDefaultStorage("local.cache");
     }
 
-    /**
-     * @param string $source
-     * @param string|null $storageName
-     * @return mixed
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function createStorage(string $source, ?string $storageName = null): \League\Flysystem\FilesystemOperator
+    /** The storages, as omnidrive's drives. */
+    public function getDrives(): Drives
     {
-        if ($storageName === null) {
-            $storageName = $source;
+        return $this->drives;
+    }
+
+    /** A storage as an omnidrive drive: by its name, the default one when null. */
+    public function getDrive(FilesystemOperator|string|null $storage = null): Drive
+    {
+        $storage ??= $this->default;
+        if (is_string($storage)) {
+            if (!$this->hasStorage($storage)) {
+                throw new InvalidArgumentException("\"" . $storage . "\" storage not found in your Flysystem configuration.");
+            }
+
+            return $this->drives->get($storage);
         }
 
-        // NB: Nah.. I never experienced this..
-        // if ($source === $storageName) {
-        //     throw new \InvalidArgumentException('The "lazy" adapter source is referring to itself as "'.$source.'", which would lead to infinite recursion.');
-        // }
+        // An operator given as it (deprecated): a drive over it, under no name of the host's.
+        return FlysystemDrive::of('operator', $storage);
+    }
 
-        if (!$this->storages->has($source)) {
-            throw new InvalidArgumentException('You have requested a non-existent source storage "' . $source . '" in lazy storage "' . $storageName . '".');
+    /**
+     * @deprecated since omnibase 4.0, the operator behind a drive: getDrive()
+     */
+    public function createStorage(string $source, ?string $storageName = null): FilesystemOperator
+    {
+        if (!$this->hasStorage($source)) {
+            throw new InvalidArgumentException('You have requested a non-existent source storage "' . $source . '" in lazy storage "' . ($storageName ?? $source) . '".');
         }
 
-        return $this->storages->get($source);
+        return $this->operatorOf($this->drives->get($source));
     }
 
     public function hasStorage(string $storageName): bool
     {
-        return $this->storages instanceof ServiceProviderInterface
-            ? array_key_exists($storageName, $this->storages->getProvidedServices())
-            : $this->storages->has($storageName);
+        return $this->drives->has($storageName);
     }
 
     public function getStorageNames(bool $public = true): array
     {
-        // A plain PSR-11 container cannot list its ids: only a service provider's are known.
-        $names = $this->storages instanceof ServiceProviderInterface ? array_keys($this->storages->getProvidedServices()) : [];
-
+        // The names the host can list (a service locator's, Laravel's disks): a plain container lists none.
         return array_filter(
-            $names,
+            $this->drives->names(),
             fn($s) => $public || !str_ends_with($s, ".public"),
         );
     }
 
+    /**
+     * @deprecated since omnibase 4.0, the default drive: getDrive()
+     */
     public function getDefaultStorage(): FilesystemOperator
     {
-        return $this->operator;
+        return $this->getOperator($this->default);
     }
 
     /**
@@ -132,27 +139,33 @@ class Flysystem implements FlysystemInterface
      */
     public function setDefaultStorage(FilesystemOperator|string $operator)
     {
-        $this->operator = $this->getOperator($operator);
+        if (is_string($operator) && !$this->hasStorage($operator)) {
+            throw new InvalidArgumentException("\"" . $operator . "\" storage not found in your Flysystem configuration.");
+        }
+        $this->default = $operator;
         return $this;
     }
 
+    /**
+     * @deprecated since omnibase 4.0, Flysystem's operator behind a storage: getDrive() reads and writes it
+     */
     public function getOperator(FilesystemOperator|string|null $operator = null): FilesystemOperator
     {
-        if (class_implements_interface($operator, FilesystemOperator::class)) {
+        if ($operator instanceof FilesystemOperator) {
             return $operator;
         }
 
-        if (is_string($operator)) {
-            if (!$this->hasStorage($operator)) {
-                throw new InvalidArgumentException("\"" . $operator . "\" storage not found in your Flysystem configuration.");
-            }
-
-            return $this->createStorage($operator);
-        }
-
-        return $this->operator;
+        return $this->operatorOf($this->getDrive($operator));
     }
 
+    private function operatorOf(Drive $drive): FilesystemOperator
+    {
+        return $drive instanceof FlysystemDrive ? $drive->operator() : throw new LogicException(sprintf("The \"%s\" storage is a %s: no Flysystem operator behind it.", $drive->name(), get_debug_type($drive)));
+    }
+
+    /**
+     * @deprecated since omnibase 4.0, Flysystem's adapter behind a storage
+     */
     public function getAdapter(FilesystemOperator|string|null $operator = null): FilesystemAdapter
     {
         $operator = $this->getOperator($operator);
@@ -220,7 +233,7 @@ class Flysystem implements FlysystemInterface
 
     public function read(string $path, FilesystemOperator|string|null $operator = null): ?string
     {
-        $operator = $this->getOperator($operator);
+        $drive = $this->getDrive($operator);
         $path = $this->stripPrefix($path, $operator);
 
         if (!$this->fileExists($path, $operator)) {
@@ -228,15 +241,15 @@ class Flysystem implements FlysystemInterface
         }
 
         try {
-            return $operator->read($path);
-        } catch (UnableToReadFile $e) {
+            return $drive->read($path);
+        } catch (DriveException $e) {
             throw new NotReadableException("Unable to read file \"$path\".. " . $e->getMessage());
         }
     }
 
     public function write(string $path, string $contents, FilesystemOperator|string|null $operator = null, array $config = []): bool
     {
-        $operator = $this->getOperator($operator);
+        $drive = $this->getDrive($operator);
         $path = $this->stripPrefix($path, $operator);
 
         if ($this->fileExists($path, $operator)) {
@@ -244,8 +257,8 @@ class Flysystem implements FlysystemInterface
         }
 
         try {
-            $operator->write($path, $contents, $config);
-        } catch (UnableToWriteFile $e) {
+            $drive->write($path, $contents, $config);
+        } catch (DriveException $e) {
             throw new NotWritableException("Unable to write file \"$path\".. " . $e->getMessage());
         }
         return true;
@@ -253,7 +266,7 @@ class Flysystem implements FlysystemInterface
 
     public function delete(string $path, FilesystemOperator|string|null $operator = null): bool
     {
-        $operator = $this->getOperator($operator);
+        $drive = $this->getDrive($operator);
         $path = $this->stripPrefix($path, $operator);
 
         if (!$this->fileExists($path, $operator)) {
@@ -261,8 +274,8 @@ class Flysystem implements FlysystemInterface
         }
 
         try {
-            $operator->delete($path);
-        } catch (UnableToDeleteFile|UnableToDeleteDirectory $e) {
+            $drive->delete($path);
+        } catch (DriveException $e) {
             throw new NotDeletableException("Unable to delete file \"$path\".. " . $e->getMessage());
         }
         return true;
@@ -270,19 +283,22 @@ class Flysystem implements FlysystemInterface
 
     public function fileExists(string $path, FilesystemOperator|string|null $operator = null): bool
     {
-        $operator = $this->getOperator($operator);
+        $drive = $this->getDrive($operator);
         $path = $this->stripPrefix($path, $operator);
 
         try {
-            return $operator->fileExists($path);
-        } catch (CorruptedPathDetected $e) {
-            return false;
+            return $drive->exists($path);
+        } catch (DriveException $e) {
+            if ($e->getPrevious() instanceof CorruptedPathDetected) {
+                return false;
+            }
+            throw $e;
         }
     }
 
     public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []): bool
     {
-        $operator = $this->getOperator($operator);
+        $drive = $this->getDrive($operator);
         $path = $this->stripPrefix($path, $operator);
 
         if ($this->fileExists($path, $operator)) {
@@ -290,15 +306,15 @@ class Flysystem implements FlysystemInterface
         }
 
         try {
-            $operator->createDirectory($path, $config);
-        } catch (UnableToDeleteFile|UnableToDeleteDirectory $e) {
+            $drive->createDirectory($path, $config);
+        } catch (DriveException $e) {
         }
         return true;
     }
 
     public function mimeType(string $path, FilesystemOperator|string|null $operator = null): ?string
     {
-        $operator = $this->getOperator($operator);
+        $drive = $this->getDrive($operator);
         $path = $this->stripPrefix($path, $operator);
 
         if (!$this->fileExists($path, $operator)) {
@@ -306,11 +322,10 @@ class Flysystem implements FlysystemInterface
         }
 
         try {
-            return $operator->mimeType($path);
-        } catch (UnableToRetrieveMetadata $e) {
-            throw new NotDeletableException("Unable to read mimetype \"$path\".. " . $e->getMessage());
+            return $drive->mimeType($path);
+        } catch (DriveException $e) {
+            throw new NotReadableException("Unable to read mimetype \"$path\".. " . $e->getMessage());
         }
-        return null;
     }
 
     /**
@@ -359,12 +374,9 @@ class Flysystem implements FlysystemInterface
      */
     public function isRemote(FilesystemOperator|string|null $operator = null)
     {
-        // Anything that is not the local adapter has no locally-openable file
-        // behind it (S3/MinIO, SFTP, FTP, ...). The previous property-based
-        // detection (connectionOptions/connectionProvider) only matched
-        // SFTP/FTP adapters and silently reported S3 adapters as local.
-        $adapter = $this->getAdapter($operator);
-        return !$adapter instanceof \League\Flysystem\Local\LocalFilesystemAdapter;
+        // Anything that has no file of this machine behind its paths (S3/MinIO, SFTP, FTP...):
+        // what the drive says of itself.
+        return !$this->getDrive($operator)->capabilities()->local;
     }
 
     /**
