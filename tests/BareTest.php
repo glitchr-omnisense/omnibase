@@ -234,8 +234,8 @@ final class BareTest extends TestCase
             'Base\\Contract\\PasskeyUsers',
             $report['classes'][\Base\Security\WebauthnUserEntityRepository::class]['framework']['Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface'] ?? null,
         );
-        self::assertTrue(is_subclass_of(\Base\Repository\User\PasskeyRepository::class, 'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface'));
-        self::assertTrue(is_subclass_of(\Base\Security\WebauthnUserEntityRepository::class, 'Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface'));
+        self::assertContains('Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface', class_implements(\Base\Repository\User\PasskeyRepository::class));
+        self::assertContains('Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface', class_implements(\Base\Security\WebauthnUserEntityRepository::class));
     }
 
     /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
@@ -248,7 +248,7 @@ final class BareTest extends TestCase
         self::assertNull($repository['error']);
         self::assertSame([], $repository['framework']);
         self::assertSame([], $repository['framework_files']);
-        self::assertTrue(is_subclass_of(\Base\Repository\ThreadRepository::class, \Doctrine\ORM\EntityRepository::class));
+        self::assertContains(\Doctrine\ORM\EntityRepository::class, class_parents(\Base\Repository\ThreadRepository::class));
     }
 
     /**

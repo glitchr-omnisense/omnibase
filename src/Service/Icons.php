@@ -22,7 +22,7 @@ final class Icons
 {
     /**
      * @param iterable<IconAdapterInterface>|\Closure(): iterable<IconAdapterInterface> $adapters
-     * @param (\Closure(mixed $route): ?array)|null                                     $routeIcons a route's icons, null for none
+     * @param (\Closure(mixed $route): ?array<array-key, mixed>)|null                    $routeIcons a route's icons, null for none
      */
     public function __construct(private readonly iterable|\Closure $adapters, private readonly ?\Closure $routeIcons = null)
     {
@@ -34,6 +34,12 @@ final class Icons
         return $this->adapters instanceof \Closure ? ($this->adapters)() : $this->adapters;
     }
 
+    /**
+     * @param string|array<array-key, mixed>|EnumType|IconizeInterface|null $icon
+     * @param array<string, mixed>                                          $attributes
+     *
+     * @return string|array<array-key, mixed>|null
+     */
     public function iconify(null|string|array|EnumType|IconizeInterface $icon, array $attributes = [], bool $wrap = true): null|string|array
     {
         if (!$icon) {
@@ -57,7 +63,7 @@ final class Icons
         } else {
             foreach ($this->getAdapters() as $provider) {
                 if ($provider->supports($icon)) {
-                    $icon = $provider->iconify($icon, $attributes, $wrap);
+                    $icon = $provider->iconify($icon, $attributes);
                     return $wrap ? [$icon] : $icon;
                 }
             }

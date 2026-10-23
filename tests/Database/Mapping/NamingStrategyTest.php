@@ -31,6 +31,7 @@ final class NamingStrategyTest extends TestCase
         // The declared tables given to the naming the strategy answers with (Omnibridge\Schema\CamelCaseNaming,
         // since R14): the join columns are named through it, not through this class.
         return new NamingStrategy(new class($declared) extends CamelCaseNaming {
+            /** @param array<array-key, string> $declared the tables declared, by name */
             public function __construct(private readonly array $declared)
             {
                 parent::__construct();

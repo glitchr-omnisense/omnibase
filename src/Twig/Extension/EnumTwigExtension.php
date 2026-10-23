@@ -51,6 +51,11 @@ final class EnumTwigExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @param string|list<string>|null $class
+     *
+     * @return Type|list<Type|null>|null
+     */
     public function enum(null|string|array $class): null|Type|array
     {
         if (\is_array($class)) {
@@ -64,6 +69,11 @@ final class EnumTwigExtension extends AbstractExtension
         return Type::hasType($class) ? Type::getType($class) : null;
     }
 
+    /**
+     * @param string|array<array-key, mixed>|ColorizeInterface|null $color
+     *
+     * @return string|array<array-key, mixed>|null
+     */
     public function colorify(null|string|array|ColorizeInterface $color, ?string $entry = null): null|string|array
     {
         if (!$color) {

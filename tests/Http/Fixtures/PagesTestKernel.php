@@ -53,7 +53,8 @@ final class PagesTestKernel extends Kernel
 
     public function getProjectDir(): string
     {
-        return \dirname((new \ReflectionClass('App\\Kernel'))->getFileName(), 2);
+        // The host application's folder: the root package Composer installed (App\\Kernel's dirname(2) before).
+        return (string) realpath(\Composer\InstalledVersions::getRootPackage()['install_path']);
     }
 
     public function getCacheDir(): string
@@ -63,7 +64,9 @@ final class PagesTestKernel extends Kernel
 
     private function configureContainer(ContainerConfigurator $container, LoaderInterface $loader, ContainerBuilder $builder): void
     {
-        $this->configureHostContainer($container, $loader, $builder);
+        // MicroKernelTrait's configureContainer() takes the configurator alone under Symfony 8, the loader and the builder too before.
+        $arguments = [$container, $loader, $builder];
+        $this->configureHostContainer(...\array_slice($arguments, 0, (new \ReflectionMethod($this, 'configureHostContainer'))->getNumberOfParameters()));
 
         $container->extension('framework', ['test' => true]);
         $container->extension('twig', ['paths' => [__DIR__.'/templates' => 'BaseTestPages']]);

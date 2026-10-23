@@ -61,7 +61,11 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $this->referrer = $referrer;
         $this->entityManager = $entityManager;
         $this->authorizationChecker = $authorizationChecker;
-        $this->userRepository = $entityManager->getRepository(User::class);
+        $userRepository = $entityManager->getRepository(User::class);
+        if (!$userRepository instanceof UserRepository) {
+            throw new \LogicException(sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
+        }
+        $this->userRepository = $userRepository;
 
         $this->router = $router;
     }

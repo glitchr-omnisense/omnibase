@@ -3,6 +3,7 @@
 namespace Tests\Base\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -48,7 +49,7 @@ final class UserSearchTest extends KernelTestCase
     {
         $class = 'App\\Entity\\User';
         $user = new $class();
-        $user->setUsername($username);
+        PropertyAccess::createPropertyAccessor()->setValue($user, 'username', $username);
         $user->setEmail($username.'.secret-c4b@example.org');
         $user->setPlainPassword('c4b-'.bin2hex(random_bytes(6)));
         $em = static::getContainer()->get('doctrine')->getManager();

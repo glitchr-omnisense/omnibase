@@ -1,6 +1,9 @@
 # Level 6, and phpstan-baseline.neon lists the violations there were when the CI started (2026-10-21,
 # written by glitchr-studio/ci's baseline workflow): the CI fails on any other. Fix one, then drop its entry.
+# extension.neon: what PHPStan must know of omnibase, as an application includes it (the finder language).
+# tests/phpstan-bootstrap.php: the App\ classes the core names are the Base\ ones, aliased as at run time.
 includes:
+    - extension.neon
     - phpstan-baseline.neon
 
 parameters:
@@ -8,5 +11,12 @@ parameters:
   paths:
     - src
     - tests
+  # Classes that cannot load on purpose (Tests\Base\Fixtures\Absent\* is never defined): the
+  # warm-up's fixtures of an optional extension whose parent package is absent.
+  excludePaths:
+    - tests/Fixtures/Warmup/OptionalExtension.php
+    - tests/Fixtures/Warmup/OptionalImplementation.php
+  bootstrapFiles:
+    - tests/phpstan-bootstrap.php
   tmpDir: .tmp
   reportUnmatchedIgnoredErrors: false

@@ -1,0 +1,8 @@
+# PHPStan's knowledge of omnibase: an application includes it from its phpstan.neon
+# (includes: [vendor/omniscient/omnibase/extension.neon]), the core's own phpstan.neon does.
+# - the finder language of the repositories (findOneBySlug(), cacheByParentAndState()...):
+#   Base\Bridge\PHPStan\FinderMethodsExtension.
+services:
+    -
+        class: Base\Bridge\PHPStan\FinderMethodsExtension
+        tags: [phpstan.broker.methodsClassReflectionExtension]

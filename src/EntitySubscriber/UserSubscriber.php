@@ -3,7 +3,6 @@
 namespace Base\EntitySubscriber;
 
 use App\Entity\User;
-use Base\Entity\User as BaseUser;
 
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
@@ -58,9 +57,6 @@ class UserSubscriber implements EventSubscriberInterface
             return;
         } // Only notify when user requests itself
 
-        if (!$user instanceof BaseUser) {
-            return;
-        }
 
         $notification = $this->notifier->sendUserWelcomeBack($user);
         if ($this->tokenStorage->getToken()->getUser() === $user) {
@@ -96,9 +92,6 @@ class UserSubscriber implements EventSubscriberInterface
             return;
         } // Only notify when user requests itself
 
-        if (!$user instanceof BaseUser) {
-            return;
-        }
         if ($user->isVerified()) { // Social account connection
             $notification = new Notification("verifyEmail.success");
             $notification->setUser($user);
@@ -120,9 +113,6 @@ class UserSubscriber implements EventSubscriberInterface
     public function onApproval(UserEvent $event)
     {
         $user = $event->getUser();
-        if (!$user instanceof BaseUser) {
-            return;
-        }
 
         $adminApprovalToken = $user->getValidToken("admin-approval");
         if ($adminApprovalToken) {

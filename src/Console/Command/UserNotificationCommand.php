@@ -3,6 +3,7 @@
 namespace Base\Console\Command;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Base\Entity\User\Notification;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,11 +38,15 @@ class UserNotificationCommand extends Command
 
         $notificationRepository = $this->entityManager->getRepository(Notification::class);
         $userRepository = $this->entityManager->getRepository(User::class);
+        if (!$userRepository instanceof UserRepository) {
+            throw new \LogicException(sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
+        }
 
         $notificationExpiry = $this->baseService->getParameterBag("base.user.notifications.expiry");
 
         // Format monitored entries
-        $user = $userRepository->loadUserByIdentifier($userIdentifier);
+        // Every account's without --user (loadUserByIdentifier() throws on an identifier nobody has).
+        $user = null !== $userIdentifier ? $userRepository->loadUserByIdentifier($userIdentifier) : null;
         if ($user) {
             $notifications = $notificationRepository->findByUser($user)->getResult();
             $notifications_toErase = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry, [], "user.id")->getResult();

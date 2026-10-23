@@ -127,8 +127,13 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
         $user->setId(0);
         $user->setIdentityProvider($identityProvider);
         $user->setEmail($email);
-        $user->setFirstname($response->getFirstName());
-        $user->setLastname($response->getLastName());
+        // The names where the application's user has them (Base\Entity\User has none).
+        $accessor = \Symfony\Component\PropertyAccess\PropertyAccess::createPropertyAccessor();
+        foreach (['firstname' => $response->getFirstName(), 'lastname' => $response->getLastName()] as $property => $value) {
+            if ($accessor->isWritable($user, $property)) {
+                $accessor->setValue($user, $property, $value);
+            }
+        }
         $user->verify(true); // Google already verified ownership of this email address
 
         return $user;

@@ -73,13 +73,21 @@ final class PictureTwigExtension extends AbstractExtension
                 new TwigFilter('crop', [$this, 'imageCrop'], ['needs_context' => true]),
 
                 new TwigFilter('thumbnail', [$this, 'thumbnail'], ['needs_context' => true]),
-                new TwigFilter('thumbnail_inset   ', [$this, 'thumbnailInset   '], ['needs_context' => true]),
+                new TwigFilter('thumbnail_inset', [$this, 'thumbnailInset'], ['needs_context' => true]),
                 new TwigFilter('thumbnail_outbound', [$this, 'thumbnailOutbound'], ['needs_context' => true]),
-                new TwigFilter('thumbnail_noclone ', [$this, 'thumbnailNoclone '], ['needs_context' => true]),
-                new TwigFilter('thumbnail_upscale ', [$this, 'thumbnailUpscale '], ['needs_context' => true]),
+                new TwigFilter('thumbnail_noclone', [$this, 'thumbnailNoclone'], ['needs_context' => true]),
+                new TwigFilter('thumbnail_upscale', [$this, 'thumbnailUpscale'], ['needs_context' => true]),
             ];
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function image(array $context, array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
         $config['local_cache'] ??= true;
@@ -87,6 +95,14 @@ final class PictureTwigExtension extends AbstractExtension
         return $this->media->image($path, self::config($context, $config), $filters);
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function imageCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = 'leftop', array $config = [], array $filters = []): array|string|null
     {
         $config['local_cache'] ??= true;
@@ -94,32 +110,79 @@ final class PictureTwigExtension extends AbstractExtension
         return $this->media->crop($path, $x, $y, $width, $height, $position, self::config($context, $config), $filters);
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function thumbnailInset(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ['mode' => ImageInterface::THUMBNAIL_INSET]), $filters);
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function thumbnailOutbound(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ['mode' => ImageInterface::THUMBNAIL_OUTBOUND]), $filters);
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function thumbnailNoclone(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ['mode' => ImageInterface::THUMBNAIL_FLAG_NOCLONE]), $filters);
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function thumbnailUpscale(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->thumbnail($context, $path, $width, $height, array_merge($config, ['mode' => ImageInterface::THUMBNAIL_FLAG_UPSCALE]), $filters);
     }
 
+    /**
+     * @param array<string, mixed>              $context the template's
+     * @param array<array-key, mixed>|string|null $path    a path, or several
+     * @param array<string, mixed>              $config
+     * @param array<array-key, mixed>           $filters
+     *
+     * @return array<array-key, mixed>|string|null
+     */
     public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
         return $this->media->thumbnail($path, $width, $height, self::config($context, $config), $filters);
     }
 
-    /** A context's warmup handed on; in an e-mail, made at once and never as WebP. */
+    /**
+     * A context's warmup handed on; in an e-mail, made at once and never as WebP.
+     *
+     * @param array<string, mixed> $context
+     * @param array<string, mixed> $config
+     *
+     * @return array<string, mixed>
+     */
     private static function config(array $context, array $config): array
     {
         if (array_key_exists('warmup', $context)) {

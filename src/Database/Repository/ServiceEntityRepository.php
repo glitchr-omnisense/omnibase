@@ -32,8 +32,10 @@ use LogicException;
  * of an application and of the core is given (audit "lesringostars face au
  * master plan", step R15), with one per entity (Base\Repository\Threads...).
  *
- * @method Entity[]    findBy*(...array $customs,
- *      array $criteria, array ??array $orderBy = null, $limit = null, $offset = null)
+ * The finder's methods (findBy...(), cacheOneBy...(), countBy...()) are known to
+ * PHPStan by Base\Bridge\PHPStan\FinderMethodsExtension (extension.neon).
+ *
+ * @implements Entities<object>
  */
 class ServiceEntityRepository extends EntityRepository implements Entities
 {
@@ -247,8 +249,8 @@ class ServiceEntityRepository extends EntityRepository implements Entities
     }
 
     /**
-     * @param $entity
-     * @return void
+     * @param mixed $entity checked here: anything else than an entity of the class is refused
+     *
      * @throws Exception
      */
     public function persist($entity, bool $flush = false): void
@@ -266,6 +268,11 @@ class ServiceEntityRepository extends EntityRepository implements Entities
         }
     }
 
+    /**
+     * @param mixed $entity checked as persist() checks it
+     *
+     * @throws Exception
+     */
     public function remove($entity, bool $flush = false): void
     {
         $entityClass = $this->getClassName();

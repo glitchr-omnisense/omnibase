@@ -215,7 +215,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     {
         if (!$this->threads->contains($thread)) {
             $this->threads[] = $thread;
-            $thread->addTag($this);
+            $thread->addTaxon($this);
         }
 
         return $this;
@@ -224,7 +224,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     public function removeThread(Thread $thread): self
     {
         if ($this->threads->removeElement($thread)) {
-            $thread->removeTag($this);
+            $thread->removeTaxon($this);
         }
 
         return $this;

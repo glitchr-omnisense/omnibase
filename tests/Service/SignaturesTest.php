@@ -3,6 +3,7 @@
 namespace Tests\Base\Service;
 
 use Base\Entity\Signature\Envelope;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Event\SignatureEvent;
 use Base\Service\Signatures;
 use Doctrine\ORM\EntityManagerInterface;
@@ -63,8 +64,8 @@ final class SignaturesTest extends KernelTestCase
     {
         $user = new \App\Entity\User();
         $user->setEmail('tenant-'.bin2hex(random_bytes(4)).'@example.org');
-        if (method_exists($user, 'setUsername')) {
-            $user->setUsername('tenant-'.bin2hex(random_bytes(4)));
+        if (PropertyAccess::createPropertyAccessor()->isWritable($user, 'username')) {
+            PropertyAccess::createPropertyAccessor()->setValue($user, 'username', 'tenant-'.bin2hex(random_bytes(4)));
         }
         $user->setPlainPassword(bin2hex(random_bytes(8)));
         $this->em->persist($user);

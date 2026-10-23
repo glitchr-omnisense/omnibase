@@ -48,7 +48,7 @@ final class RepositoryInterfacesTest extends KernelTestCase
     {
         foreach (self::INTERFACES as $interface => $repository) {
             self::assertTrue(interface_exists($interface), $interface);
-            self::assertTrue(is_subclass_of($repository, $interface), "$repository implements $interface");
+            self::assertContains($interface, class_implements($repository), "$repository implements $interface");
             self::assertTrue(is_subclass_of($interface, Entities::class) || Entities::class === $interface, "$interface extends Entities");
         }
     }
@@ -158,6 +158,10 @@ trait RecordedFinder
     {
     }
 
+    /**
+     * @param string       $method
+     * @param array<mixed> $arguments
+     */
     public function __call($method, $arguments): mixed
     {
         $this->calls[] = [$method, $arguments];
@@ -169,6 +173,7 @@ trait RecordedFinder
         }
 
         return new class {
+            /** @return list<object> */
             public function getResult(): array
             {
                 return [];

@@ -12,7 +12,6 @@ use Omnibridge\Contract\Translations;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
-use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
 /**
@@ -499,7 +498,7 @@ class Translator implements TranslatorInterface, Translations
      */
     protected function definedBeforeDefault(string $id, ?string $domain, ?string $locale): bool
     {
-        if (null === $locale || null === Localizer::getDefaultLocale() || !$this->translator instanceof TranslatorBagInterface) {
+        if (null === $locale || null === Localizer::getDefaultLocale()) {
             return false;
         }
 

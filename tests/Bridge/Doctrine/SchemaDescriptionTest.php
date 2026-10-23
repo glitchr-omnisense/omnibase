@@ -110,7 +110,11 @@ final class SchemaDescriptionTest extends KernelTestCase
         return Describer::describe($options['paths'], $options);
     }
 
-    /** The entity folders Symfony's attribute drivers map, the project, the targets DoctrineBundle resolves: as HandBuiltEntityManagerTest reads them. @return array<string, mixed> */
+    /**
+     * The entity folders Symfony's attribute drivers map, the project, the targets DoctrineBundle resolves: as HandBuiltEntityManagerTest reads them.
+     *
+     * @return array<string, mixed>
+     */
     private function options(): array
     {
         $entityManager = $this->entityManager();

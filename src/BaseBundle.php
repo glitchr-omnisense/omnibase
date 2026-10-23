@@ -380,7 +380,7 @@ class BaseBundle extends AbstractBaseBundle
                 
             // Start session here to access client information
             $timezone = null;
-            if (method_exists(User::class, "getCookie")) $timezone = User::getCookie("timezone");
+            $timezone = User::getCookie("timezone");
             if (!in_array($timezone, timezone_identifiers_list())) $timezone = "UTC";
 
             // Set default time to UTC everywhere

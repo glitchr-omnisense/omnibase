@@ -159,7 +159,8 @@ class ThreadController extends AbstractController
             return $denied;
         }
         $thread = $this->threadRepository->findOneBySlug($slug) ?? throw new NotFoundHttpException();
-        if ($this->getUser() === null) {
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
 
             return JsonResponse::fromJsonString(json_encode([
                 "response" => "Unknown user",
@@ -172,8 +173,8 @@ class ThreadController extends AbstractController
         $this->entityManager->beginTransaction();
         try {
             $this->entityManager->lock($thread, LockMode::PESSIMISTIC_WRITE);
-            if (!$this->likeRepository->findOneByThreadAndUser($thread, $this->getUser())) {
-                $thread->addLike(new Like($this->getUser()));
+            if (!$this->likeRepository->findOneByThreadAndUser($thread, $user)) {
+                $thread->addLike(new Like($user));
                 $this->entityManager->flush();
             }
             $this->entityManager->commit();
