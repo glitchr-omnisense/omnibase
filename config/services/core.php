@@ -135,7 +135,6 @@ return static function (ContainerConfigurator $container): void {
     // runs on a cloned kernel, kernel.request never runs between messenger
     // messages - see the class docblock.
     $services->set('Base\Subscriber\EntityDispatcherFlushSubscriber')
-        ->args([tagged_iterator('base.entity_dispatcher')])
         ->tag('kernel.event_subscriber');
 
     $services->set('Base\Subscriber\RequestScopedStateSubscriber')

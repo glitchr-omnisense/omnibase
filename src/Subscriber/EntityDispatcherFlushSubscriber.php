@@ -15,13 +15,15 @@ use Symfony\Component\Messenger\Event\WorkerMessageHandledEvent;
  * flush that raised those events is completely over: when the response goes
  * out, when a command ends, after each message a worker handles. See
  * AbstractEventDispatcher::$flushPending for why not from postFlush.
+ *
+ * The dispatchers built in this process alone (AbstractEventDispatcher::live()):
+ * one never built has nothing pending, and building it then - from the tagged
+ * services, at the end of every command - required its file from the container's
+ * folder, which bin/console cache:clear had just removed: the command died at
+ * console.terminate ("Failed opening required .../getNewsletterEventDispatcherService.php").
  */
 final class EntityDispatcherFlushSubscriber implements EventSubscriberInterface
 {
-    /** @param iterable<AbstractEventDispatcher> $dispatchers */
-    public function __construct(private readonly iterable $dispatchers)
-    {
-    }
 
     public static function getSubscribedEvents(): array
     {
@@ -43,10 +45,8 @@ final class EntityDispatcherFlushSubscriber implements EventSubscriberInterface
 
     public function flush(): void
     {
-        foreach ($this->dispatchers as $dispatcher) {
-            if ($dispatcher instanceof AbstractEventDispatcher) {
-                $dispatcher->flushPending();
-            }
+        foreach (AbstractEventDispatcher::live() as $dispatcher) {
+            $dispatcher->flushPending();
         }
     }
 }

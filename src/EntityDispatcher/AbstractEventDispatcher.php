@@ -38,6 +38,25 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     protected bool $flushing = false;
 
     /**
+     * The dispatchers built in this process (a weak map: a dispatcher gone is
+     * forgotten): the only ones that can have something pending.
+     *
+     * @var \WeakMap<AbstractEventDispatcher, true>|null
+     */
+    private static ?\WeakMap $live = null;
+
+    /** @return list<AbstractEventDispatcher> the dispatchers built in this process */
+    public static function live(): array
+    {
+        $live = [];
+        foreach (self::$live ?? [] as $dispatcher => $_) {
+            $live[] = $dispatcher;
+        }
+
+        return $live;
+    }
+
+    /**
      * @var SymfonyEventDispatcherInterface
      */
     protected SymfonyEventDispatcherInterface $dispatcher;
@@ -64,6 +83,8 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
 
     public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, EntityManagerInterface $entityManager, RequestStack $requestStack)
     {
+        self::$live ??= new \WeakMap();
+        self::$live[$this] = true;
         $this->dispatcher = $dispatcher;
         $this->entityManager = $entityManager;
         $this->entityHydrator = $entityHydrator;
