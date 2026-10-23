@@ -67,8 +67,8 @@ ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelm
 # ships through glitchr/omnibus (two carriers here): the sibling families,
 # from Packagist, their development branches - the marketplace follows
 # omnitrade's 1.x (its catalogue: Model\Product, Stock, Registry::options()).
-# The sign-in's family, omniscient/omniauth and its three methods (passkey,
-# totp, oauth), likewise: the core suggests them, its Base\Auth\ stores and
+# The sign-in's family, omniscient/omniauth (identity providers included) and
+# its two method packages (webauthn, otp), likewise: the core suggests them, its Base\Auth\ stores and
 # their tests (tests/Auth) need them.
 # A layer cached from an older build keeps an older 1.x: `docker compose
 # build --build-arg OMNI_REFRESH=$(date +%s)` refetches it.
@@ -82,7 +82,7 @@ RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families a
     && composer require "omniscient/omnibase:4.x-dev as 4.0.x-dev" "omnibridge/symfony:1.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
         $BUNDLES \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
-        "omniscient/omniauth:1.x-dev" "omniauth/passkey:1.x-dev" "omniauth/totp:1.x-dev" "omniauth/oauth:1.x-dev" \
+        "omniscient/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \
         omnipay/stripe symfony/translation symfony/messenger symfony/lock \
         dompdf/dompdf horstoeko/zugferd --no-interaction --no-progress --no-scripts \
     # The guard of the forms (Base\Service\FormGuard): glitchr/omnishield and three of its gateways,

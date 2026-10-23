@@ -160,9 +160,9 @@
         "omniscient/omnisign": "Base\\Service\\Signatures: documents signed for any entity (Base\\Entity\\Signature\\Envelope, mapped only with it), the signed file and its evidence kept in the private storage; register Omnisign\\Bridge\\Symfony\\OmnisignBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-studio/omnisign",
         "omnisign/docuseal": "A DocuSeal instance of one's own: nothing leaves for a third party (omnisign/yousign, omnisign/docusign for the providers)",
         "omniscient/omniauth": "Signing in under any host (Symfony, Laravel, plain PHP): Base\\Auth\\ fills omniauth's stores on omnibase's tables (the accounts, user.password, the sign-in links of userToken hashed, the e-mailed codes hashed, the backup codes, the trusted devices' version, the identities of userIdentity), Base\\Auth\\Policy is SecurityPolicy on its second-factor rule, Base\\Auth\\Listener\\* listen to its events; nothing is wired without it (1.x-dev)",
-        "omniauth/passkey": "Passkeys through omniauth: Base\\Auth\\UserPasskeys, the userPasskey table as omniauth/passkey's records (1.x-dev)",
-        "omniauth/totp": "Authenticator applications through omniauth, on user.secret (Base\\Auth\\UserTotpSecrets) (1.x-dev)",
-        "omniauth/oauth": "Identity providers through omniauth, linked by their subject in userIdentity (Base\\Auth\\UserIdentities; Base\\Auth\\PolicyLinking: never by the address an account with a second factor or an administration role) (1.x-dev)"
+        "omniauth/webauthn": "Passkeys through omniauth: Base\\Auth\\UserPasskeys, the userPasskey table as omniauth/webauthn's records (formerly omniauth/passkey) (1.x-dev)",
+        "omniauth/otp": "Authenticator applications through omniauth, on user.secret (Base\\Auth\\UserTotpSecrets), sealed at rest when omniauth.yaml sets totp.secret_key (formerly omniauth/totp) (1.x-dev)",
+        "omniauth/google": "Google sign-in through omniauth, linked by its subject in userIdentity (Base\\Auth\\UserIdentities; Base\\Auth\\PolicyLinking: never by the address an account with a second factor or an administration role); the providers' mechanics are omniscient/omniauth's own (1.x-dev)"
     },
     "require-dev": {
         "api-platform/symfony": "^4.0",
@@ -171,9 +171,8 @@
         "glitchr/ux-google": "1.0.*-dev",
         "hwi/oauth-bundle": "^2.1",
         "league/flysystem-bundle": "^3.1",
-        "omniauth/oauth": "1.x-dev",
-        "omniauth/passkey": "1.x-dev",
-        "omniauth/totp": "1.x-dev",
+        "omniauth/otp": "1.x-dev",
+        "omniauth/webauthn": "1.x-dev",
         "omnibridge/symfony": "1.x-dev",
         "omniscient/omniauth": "1.x-dev",
         "omniscient/omnishield": "1.x-dev",
@@ -235,9 +234,8 @@
         "omnibase": {
             "bare": {
                 "omniscient/omniauth": "1.x-dev",
-                "omniauth/oauth": "1.x-dev",
-                "omniauth/passkey": "1.x-dev",
-                "omniauth/totp": "1.x-dev"
+                "omniauth/webauthn": "1.x-dev",
+                "omniauth/otp": "1.x-dev"
             }
         },
         "branch-alias": {

@@ -30,7 +30,7 @@ use Omniauth\Factor;
  * - Linking by the address alone (QA3): allowsEmailLinking() refuses an
  *   account that has a second factor or an administration role
  *   (SecurityPolicy::isAdministrator()); PolicyLinking hands it to
- *   omniauth/oauth.
+ *   omniauth's OAuthMethod.
  */
 class Policy implements SecondFactorPolicy
 {

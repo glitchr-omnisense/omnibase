@@ -13,10 +13,12 @@ use Omniauth\Event\AccountRefused;
 use Omniauth\Factor;
 use Omniauth\Failure;
 use Omniauth\Link\LinkMethod;
-use Omniauth\Passkey\Testing\SoftwareAuthenticator;
+use Omniauth\Otp\SealedTotpSecrets;
+use Omniauth\Otp\SodiumSecretBox;
+use Omniauth\Otp\Testing\AuthenticatorApp;
+use Omniauth\Otp\TotpMethod;
 use Omniauth\Status;
-use Omniauth\Totp\Testing\AuthenticatorApp;
-use Omniauth\Totp\TotpMethod;
+use Omniauth\WebAuthn\Testing\SoftwareAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\Http\HttpTestTrait;
 
@@ -117,7 +119,7 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
         self::assertSame([Factor::Password, Factor::Totp], $result->passed);
         self::assertNotNull($result->trustDevice, 'the trusted_device cookie, scheb\'s format');
 
-        // The same code again: refused (omniauth/totp, once only); a backup code serves, once.
+        // The same code again: refused (omniauth/otp, once only); a backup code serves, once.
         $this->password_($user);
         self::assertSame('replayed', $this->kit->omniauth->verify('totp', AuthKit::context(), ['code' => $app->code()])->reason);
         self::assertTrue($this->kit->omniauth->verify('backup-code', AuthKit::context(), ['code' => $codes[0]])->isAuthenticated());
@@ -130,6 +132,35 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
         $this->kit->trustedVersion->revokeAll($reloaded);
         self::assertSame(1, (int) $this->entityManager()->getConnection()->fetchOne('SELECT trustedTokenVersion FROM user WHERE id = ?', [$user->getId()]));
         self::assertTrue($this->kit->omniauth->verify('password', AuthKit::context($result->trustDevice), ['identifier' => $user->getEmail(), 'password' => self::password($user)])->needsSecondFactor());
+    }
+
+    /**
+     * QA5 on the user table: UserTotpSecrets wrapped in omniauth/otp's
+     * SealedTotpSecrets (what a bridge does when omniauth.yaml sets
+     * totp.secret_key) - user.secret holds the sealed text, whole, in its
+     * column as it is; the sign-in verifies against the opened secret; a
+     * secret kept in clear before is still read.
+     */
+    public function testATotpSecretSealedAtRestInUserSecret(): void
+    {
+        $user = $this->createUser();
+        $secret = TotpMethod::secret();
+        $sealed = new SealedTotpSecrets($this->kit->totpSecrets, new SodiumSecretBox(random_bytes(32)));
+        $sealed->enable($user, $secret);
+        $this->entityManager()->clear();
+
+        $stored = (string) $this->entityManager()->getConnection()->fetchOne('SELECT secret FROM user WHERE id = ?', [$user->getId()]);
+        self::assertTrue(SodiumSecretBox::isSealed($stored), 'the column holds the box\'s text');
+        self::assertSame(130, \strlen($stored), 'whole: the column is not cut');
+        self::assertStringNotContainsString($secret, $stored);
+        $reloaded = $this->kit->accounts->byHandle((string) $user->getId());
+        self::assertNotNull($reloaded);
+        self::assertSame($secret, $sealed->secret($reloaded));
+        self::assertTrue($sealed->has($reloaded));
+
+        $clear = $this->createUser();
+        $this->kit->totpSecrets->enable($clear, $secret);
+        self::assertSame($secret, $sealed->secret($clear), 'a secret kept in clear before, read as it is');
     }
 
     public function testACodeByEmailIsKeptHashedAndUsedOnce(): void

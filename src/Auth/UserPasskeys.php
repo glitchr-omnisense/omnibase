@@ -4,17 +4,17 @@ namespace Base\Auth;
 
 use Base\Entity\User\Passkey;
 use Base\Repository\User\PasskeyRepository;
-use Omniauth\Passkey\Contract\Passkeys;
-use Omniauth\Passkey\PasskeyRecord;
+use Omniauth\WebAuthn\Contract\Passkeys;
+use Omniauth\WebAuthn\PasskeyRecord;
 
 /**
- * omniauth/passkey's passkeys: the userPasskey table through
+ * omniauth/webauthn's passkeys: the userPasskey table through
  * Base\Entity\User\Passkey, which the core describes since AU1. The record
  * holds the credential id and the public key as base64 - the text of the
  * columns -, the entity their bytes (the passkey_base64 type turns one into
  * the other); the other eleven fields are the same values. A passkey added
  * here is a row web-auth/webauthn-symfony-bundle reads, and one it wrote is a
- * record here (omniauth/passkey's tests prove both ways on those very
+ * record here (omniauth/webauthn's tests prove both ways on those very
  * columns).
  */
 class UserPasskeys extends UserStore implements Passkeys

@@ -8,7 +8,7 @@
  * trusted devices' version, the identities at providers, the TOTP secrets
  * and the passkeys where their packages are -, the e-mails sent by omnibase's
  * Notifier (NotifierSender), Base\Auth\Policy around omniauth's second-factor
- * rule, PolicyLinking for omniauth/oauth's address linking, and the
+ * rule, PolicyLinking for omniauth's address linking, and the
  * listeners of omniauth's events. omnibridge/symfony's OmniauthExtension
  * (config/packages/omniauth.yaml) reads them; without that file they are
  * never used, and without omniauth none of this is declared.
@@ -50,7 +50,7 @@ use Omniauth\Event\SignedIn;
 use Omniauth\Event\SignInFailed;
 use Omniauth\Event\Verifying;
 use Omniauth\OAuth\NoSecondFactorLinking;
-use Omniauth\Passkey\Contract\Passkeys;
+use Omniauth\WebAuthn\Contract\Passkeys;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
