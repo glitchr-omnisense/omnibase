@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the finder's YoungerThan and OlderThan compare with now moved by their age
+- `findBy…YoungerThan($age)`, `countBy…YoungerThan()`, `…OlderThan()` and their `EqualTo`
+  forms (an age in seconds or `"+2 days"`) gave `round_datetime(now, $age)` as their bound
+  since 2023-01: now rounded to the nearest multiple of the age, an instant up to half the age
+  before or after now. YoungerThan matched, at best, a fraction of the age, and nothing when the
+  bound fell after now (`Threads::countByStatePublishedYoungerThan(…, 48 hours)` answered 0:
+  lesringostars' menu never marked a recent article; AnalyticsSubscriber's online users were
+  mostly none); OlderThan did not wait the age (`user:notification --clear` and
+  `base.user.notifications.expiry`). The bound is now minus the age (Within:
+  now plus its offset, as before 2023), rounded to the minute so a `cache…` finder keeps its
+  key for that minute. A bound on a field of an immutable date type is bound with the mutable
+  type of the same name (DBAL refused a `DateTime` there). `tests/Database/Repository/DateFinderTest`.
+
 ### Fixed: six catalogues read alike by every YAML parser
 - A double-quoted message over several lines had a line at its key's own indentation
   (`fields+intl-icu.fr.yaml`'s `password.min_length`, line 80; `emails+intl-icu.fr.yaml`'s
