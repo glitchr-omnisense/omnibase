@@ -295,6 +295,32 @@ class TranslatorTest extends TestCase
         $this->assertSame('FooBar value', $translator->trans('foo.bar', [], null, 'fr-FR'));
     }
 
+    /**
+     * A humanised label whose word is the same as its key in a language ("Contact":
+     * "Contact" in French) is that language's word: it used to be taken for a missing
+     * key and replaced by the default language's ("Get in touch") - lesringostars'
+     * English back office showed "Clics" and "Statut" so. A label the language lacks
+     * still falls back to the default language's.
+     */
+    public function testALabelTheLanguageGivesAsItsKeyIsNotTheDefaultLanguages(): void
+    {
+        $symfony = new SymfonyTranslator('en');
+        $symfony->addLoader('array', new ArrayLoader());
+        $symfony->addResource('array', ['Contact' => 'Get in touch', 'Published at' => 'Out on', 'Sent on' => 'Mailed on'], 'en', 'forms+intl-icu');
+        $symfony->addResource('array', ['Contact' => 'Contact'], 'fr', 'forms+intl-icu');
+        $symfony->addResource('array', ['Sent on' => 'Sent on'], 'fr', 'forms');
+
+        $kernel = $this->createMock(KernelInterface::class);
+        $kernel->method('isDebug')->willReturn(false);
+        $translator = new Translator($symfony, $kernel, $this->createMock(ParameterBagInterface::class));
+        $translator->setLocale('en');
+
+        $this->assertSame('Contact', $translator->trans('Contact', [], 'forms', 'fr-FR'));
+        $this->assertSame('Sent on', $translator->trans('Sent on', [], 'forms', 'fr-FR'), 'a catalogue without ICU too');
+        $this->assertSame('Out on', $translator->trans('Published at', [], 'forms', 'fr-FR'), 'missing in French: the default language\'s');
+        $this->assertSame('Get in touch', $translator->trans('Contact', [], 'forms', 'en-GB'));
+    }
+
     public function testTransRouteWrapsTheControllersDomain(): void
     {
         $translator = $this->makeTranslator(isDebug: true);
