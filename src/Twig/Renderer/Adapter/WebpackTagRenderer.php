@@ -95,6 +95,14 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
         $this->renderedLinkTags = $this->getCache('/Link', $this->renderedLinkTags ?? []);
         $this->renderedScriptTags = $this->getCache('/Script', $this->renderedScriptTags ?? []);
 
+        // The breakpoints (base.twig.breakpoints) and the alternatives (-async, -defer) are the
+        // configuration's, not the build's: set here too, for a renderer that boots from a warm
+        // cache and never runs discoverEntrypoints(). They were set there alone, so only the
+        // first boot of a cache (the warmer's) knew them: every later process printed no
+        // stylesheet of a breakpoint's (layout1-async-mobile.css...), and a page answered
+        // otherwise from a warm cache than from a cold one (master plan §5, invariant 3).
+        $this->configure($this->parameterBag->get('base.twig.breakpoints') ?? []);
+
         return [];
     }
 
@@ -133,7 +141,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      */
     public function addBreakpoint(string $name, string $media)
     {
-        $this->breakpoints[$media] = array_merge($this->breakpoints[$media] ?? [], [$name]);
+        $this->breakpoints[$media] = array_values(array_unique(array_merge($this->breakpoints[$media] ?? [], [$name])));
 
         return $this;
     }
@@ -165,7 +173,7 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
      */
     public function addAlternative(string $alternative)
     {
-        if (!array_key_exists($alternative, $this->alternatives)) {
+        if (!\in_array($alternative, $this->alternatives, true)) {
             $this->alternatives[] = $alternative;
         }
 
@@ -230,13 +238,19 @@ class WebpackTagRenderer extends AbstractTagRenderer implements AbstractLocalCac
             }
         }
 
+        $this->configure($breakpoints);
+
+        return $complete;
+    }
+
+    /** @param list<array{name: string, media?: string}> $breakpoints */
+    private function configure(array $breakpoints): void
+    {
         foreach ($breakpoints as $breakpoint) {
             $this->addBreakpoint($breakpoint['name'], $breakpoint['media'] ?? 'all');
         }
         $this->addAlternative('async');
         $this->addAlternative('defer');
-
-        return $complete;
     }
 
     private bool $discovered = false;

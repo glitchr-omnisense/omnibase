@@ -221,6 +221,21 @@ EOF);
                 : "\n // <info>All</info> cache warmers requested."
             );
 
+            // What reads the application's services runs before the cache goes: once it is cleared,
+            // a service this container has not built yet cannot be built any more (its file was in
+            // the folder just removed) - the technical recipient's check and the phpinfo/symlinks
+            // ended every cache:clear with "Failed opening required .../get...Service.php", from
+            // a warm cache, debug or not (lesringostars' CacheLifecycleTest, master plan §5
+            // invariant 3). The second clear runs in a process of its own, on the new cache.
+            if (!$noExtension) {
+                $this->webpackCheck($io);
+                $this->technicalSupportCheck($io);
+                $this->generatePhpInfo($io, !$this->router->isDebug());
+                if (!self::applicationNotStarted()) {
+                    $this->generateSymlinks($io);
+                }
+            }
+
             $ret = $this->cacheClearCommand->execute($input, $output);
 
             self::markAsFirstClear(!file_exists(self::$testFile));
@@ -232,14 +247,7 @@ EOF);
 
             if (!$noExtension) {
                 $this->doubleCacheClear($io);
-                $this->webpackCheck($io);
-                $this->technicalSupportCheck($io);
                 $this->clearOPCache($io);
-
-                $this->generatePhpInfo($io, !$this->router->isDebug());
-                if (!self::applicationNotStarted()) {
-                    $this->generateSymlinks($io);
-                }
             }
 
             return $ret;
