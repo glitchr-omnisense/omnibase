@@ -1,5 +1,6 @@
 title: "BO"
 subtitle: "Manage your website from this page"
+welcome: "Welcome to the administration interface!"
 
 crud:
   user:
