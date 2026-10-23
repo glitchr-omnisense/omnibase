@@ -123,7 +123,9 @@ abstract class AbstractAttribute implements AttributeInterface
 
     public static function getUser(): ?User
     {
-        return AttributeReader::getInstance()->getUser();
+        $user = AttributeReader::getInstance()->getUser();
+
+        return $user instanceof User ? $user : null;
     }
 
     /**

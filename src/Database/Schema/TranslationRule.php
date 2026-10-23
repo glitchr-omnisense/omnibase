@@ -51,7 +51,7 @@ final class TranslationRule implements Rule
         $subClasses = [];
         foreach ($translatable->subClasses as $subClass) {
             $translation = $subClass::getTranslationEntityClass();
-            if (null !== $translation && $translation !== $class->name) {
+            if (\is_string($translation) && $translation !== $class->name) {
                 $subClasses[] = $translation;
             }
         }

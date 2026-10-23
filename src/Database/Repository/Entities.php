@@ -25,7 +25,11 @@ namespace Base\Database\Repository;
  */
 interface Entities
 {
-    /** @return T|null */
+    /**
+     * @param int|string $id
+     *
+     * @return T|null
+     */
     public function find($id): ?object;
 
     /** @return list<T> */
@@ -34,6 +38,8 @@ interface Entities
     /**
      * @param array<string, mixed>       $criteria field => value, a list of values for one of them
      * @param array<string, string>|null $orderBy  field => ASC|DESC
+     * @param int|null                   $limit
+     * @param int|null                   $offset
      *
      * @return list<T>
      */
@@ -56,6 +62,10 @@ interface Entities
     /** @param T $entity */
     public function remove($entity, bool $flush = false): void;
 
-    /** Writes what was persisted, changed or removed. */
+    /**
+     * Writes what was persisted, changed or removed.
+     *
+     * @return void
+     */
     public function flush(bool $autoclear = false);
 }

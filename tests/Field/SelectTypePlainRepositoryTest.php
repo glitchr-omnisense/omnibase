@@ -3,6 +3,7 @@
 namespace Tests\Base\Field;
 
 use Base\Entity\Thread;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\User\PushSubscription;
 use Base\Field\Type\SelectType;
 use Doctrine\ORM\Decorator\EntityManagerDecorator;
@@ -47,8 +48,8 @@ class SelectTypePlainRepositoryTest extends KernelTestCase
         foreach (['one', 'two'] as $n) {
             $user = new \App\Entity\User();
             $name = 'plain'.$n.bin2hex(random_bytes(4));
-            if (method_exists($user, 'setUsername')) {
-                $user->setUsername($name);
+            if (PropertyAccess::createPropertyAccessor()->isWritable($user, 'username')) {
+                PropertyAccess::createPropertyAccessor()->setValue($user, 'username', $name);
             }
             $user->setEmail($name.'@example.org');
             $user->setPlainPassword('test-'.$name);
@@ -62,9 +63,17 @@ class SelectTypePlainRepositoryTest extends KernelTestCase
         $property = new \ReflectionProperty(SelectType::class, 'entityManager');
         $this->original = $property->getValue($this->type);
         $property->setValue($this->type, new class($this->original) extends EntityManagerDecorator {
+            /**
+             * @template T of object
+             *
+             * @param class-string<T> $className
+             *
+             * @return EntityRepository<T>
+             */
             public function getRepository(string $className): EntityRepository
             {
-                if (is_a($className, 'App\\Entity\\User', true)) {
+                $requested = $className; // narrowed alone: $className keeps its T
+                if (is_a($requested, 'App\\Entity\\User', true)) {
                     return new EntityRepository($this->wrapped, $this->wrapped->getClassMetadata($className));
                 }
 

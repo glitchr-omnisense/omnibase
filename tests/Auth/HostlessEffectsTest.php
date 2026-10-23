@@ -319,7 +319,8 @@ final class HostlessEffectsTest extends KernelTestCase
     private function summary(Email $email): array
     {
         // The embedded pictures' random names, and the seconds that passed between the two e-mails ("expires in 14 minutes 59 seconds").
-        $cid = static fn (?string $s): string => (string) preg_replace(['/cid:[^"\'\s)]+/', '/\d+ (?=\S*\s*(seconds?|secondes?|minutes?)\b)/u'], ['cid:*', 'N '], (string) $s);
+        // A second may also pass between the two (15 minutes against 14 minutes 59 seconds): the seconds after minutes go.
+        $cid = static fn (?string $s): string => (string) preg_replace(['/cid:[^"\'\s)]+/', '/\d+ (?=\S*\s*(seconds?|secondes?|minutes?)\b)/u', '/(N minutes?) N (?:seconds?|secondes?)\b/u'], ['cid:*', 'N ', '$1'], (string) $s);
 
         $email->getPreparedHeaders(); // the Notifier's NotificationEmail sets its priority there
 

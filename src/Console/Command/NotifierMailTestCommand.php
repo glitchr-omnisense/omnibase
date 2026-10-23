@@ -58,7 +58,10 @@ class NotifierMailTestCommand extends Command
             if (!$user) {
                 $io->warning("No user found in database as technical recipient: " . $this->notifier->getTechnicalRecipient());
                 $user = new User();
-                $user->setUsername(first($mail));
+                // A username where the application's user has one (Base\Entity\User has none).
+                if (\Symfony\Component\PropertyAccess\PropertyAccess::createPropertyAccessor()->isWritable($user, 'username')) {
+                    \Symfony\Component\PropertyAccess\PropertyAccess::createPropertyAccessor()->setValue($user, 'username', first($mail));
+                }
                 $user->setEmail(first(array_keys($mail)));
                 $userId = 0;
             }

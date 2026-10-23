@@ -11,5 +11,5 @@ use Base\Validator\ConstraintEntity;
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class StringCaseEntity extends ConstraintEntity
 {
-    public ?string $message = 'string_case';
+    public string $message = 'string_case';
 }

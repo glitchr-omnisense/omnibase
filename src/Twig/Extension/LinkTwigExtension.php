@@ -36,7 +36,7 @@ final class LinkTwigExtension extends AbstractExtension
     /**
      * @param LinkableInterface|string|null $urlOrPath
      * @param string|null $label
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      * @return string
      */
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])

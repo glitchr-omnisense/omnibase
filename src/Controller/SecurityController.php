@@ -218,7 +218,7 @@ class SecurityController extends AbstractController
                 $notification = new Notification("kickout", [$user]);
                 $notification->setUser($user);
                 $notification->send("warning");
-                $user->kick(0);
+                $user->kick(false);
 
             } else {
 
@@ -427,6 +427,9 @@ class SecurityController extends AbstractController
     {
         // Check if accound is already verified..
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         if ($user->isVerified()) {
         
             $notification = new Notification("verifyEmail.already");
@@ -464,7 +467,7 @@ class SecurityController extends AbstractController
         }
 
         $user = $this->getUser();
-        if(!$user) {
+        if(!$user instanceof User) {
             $notification = new Notification("verifyEmail.invalidToken");
             $notification->send("danger");
 
@@ -506,6 +509,9 @@ class SecurityController extends AbstractController
     public function AdminApprovalRequest(Request $request)
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $user->removeExpiredTokens();
 
         if (!$user->isVerified()) {

@@ -39,6 +39,7 @@ final class FrameworkFreeExtensionsTest extends KernelTestCase
     private static function translations(array $catalogue): Translations
     {
         return new class($catalogue) implements Translations {
+            /** @param array<string, string> $catalogue */
             public function __construct(private readonly array $catalogue)
             {
             }
@@ -82,11 +83,15 @@ final class FrameworkFreeExtensionsTest extends KernelTestCase
     {
         $adapter = new class implements IconAdapterInterface {
             public function supports(IconizeInterface|string|null $icon): bool { return \is_string($icon) && str_starts_with($icon, 'fa-'); }
+            /** @param array<string, mixed> $attributes */
             public function iconify(IconizeInterface|string $icon, array $attributes): string { return "<i class='fa-fw ".$icon."'></i>"; }
             public static function getName(): string { return 'fa'; }
+            /** @return array<string, string> */
             public static function getOptions(): array { return ['class' => 'fa-fw']; }
             public function getVersion(): string { return '6'; }
+            /** @return list<string> */
             public function getAssets(): array { return []; }
+            /** @return array<string, string> */
             public function getChoices(string $term = '') { return []; }
         };
         $icons = new Icons([$adapter], static fn ($route): ?array => 'app_article' === $route ? ['fa-solid fa-book'] : null);
@@ -135,9 +140,6 @@ final class FrameworkFreeExtensionsTest extends KernelTestCase
             public function url(string $name, array $parameters = []): string { return 'https://site'.$this->path($name, $parameters); }
             public function asset(string $path): string { return $path; }
         };
-        if (!class_exists('Tests\Base\Twig\Entity\Comment')) {
-            eval('namespace Tests\Base\Twig\Entity; final class Comment { public function __construct(private ?int $id = null) {} public function getId(): ?int { return $this->id; } } final class Tag { public function getId(): int { return 1; } }');
-        }
         $links = new AdminLinks($routes, $urls);
 
         self::assertSame('/admin_crud_comments_edit/7', $links->crudify(new \Tests\Base\Twig\Entity\Comment(7)));

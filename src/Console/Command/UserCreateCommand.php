@@ -77,8 +77,10 @@ class UserCreateCommand extends Command
         }
 
         $user = new User();
-        if (method_exists($user, 'setUsername')) {
-            $user->setUsername($username);
+        // A username where the application's user has one (Base\Entity\User has none).
+        $accessor = \Symfony\Component\PropertyAccess\PropertyAccess::createPropertyAccessor();
+        if ($accessor->isWritable($user, 'username')) {
+            $accessor->setValue($user, 'username', $username);
         }
         $user->setEmail($email);
         $user->setRoles($roles);

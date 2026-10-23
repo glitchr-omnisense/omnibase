@@ -3,6 +3,7 @@
 namespace Tests\Base\Screen;
 
 use Base\Entity\User\Connection;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\User\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -439,7 +440,7 @@ final class AccountPagesSnapshotTest extends KernelTestCase
         $class = 'App\\Entity\\User';
         $user = new $class();
         $handle = strtolower(str_replace(' ', '.', $name));
-        $user->setUsername($handle);
+        PropertyAccess::createPropertyAccessor()->setValue($user, 'username', $handle);
         $user->setEmail($handle.'@example.org');
         $user->setPlainPassword('test-'.$handle.'-password');
         $user->setRoles($roles);

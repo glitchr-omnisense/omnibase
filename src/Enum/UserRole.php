@@ -2,7 +2,6 @@
 
 namespace Base\Enum;
 
-use Base\Controller\Backoffice\Crud\UserCrudController;
 use Base\Database\Type\SetType;
 use Base\Service\Model\IconizeInterface;
 
@@ -30,10 +29,11 @@ class UserRole extends SetType implements IconizeInterface
         ];
     }
 
+    /** The back office's screen of the accounts of that role: omnibase/admin's, when it is installed. */
     public static function getCrudController(string $role): ?string
     {
         return match ($role) {
-            self::EDITOR, self::SUPERADMIN, self::ADMIN, self::USER => UserCrudController::class,
+            self::EDITOR, self::SUPERADMIN, self::ADMIN, self::USER => 'Base\Admin\Controller\Crud\UserCrudController',
             default => null
         };
     }

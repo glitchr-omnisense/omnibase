@@ -268,9 +268,6 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $token = $this->tokenStorage->getToken();
 
-        /**
-         * @var User $user
-         */
         $user = $token?->getUser();
         if (!$user instanceof BaseUser) {
             return;
@@ -359,9 +356,6 @@ class SecuritySubscriber implements EventSubscriberInterface
             return;
         }
 
-        /**
-         * @var User $user
-         */
         if (!($user = $token->getUser())) {
             return;
         }
@@ -408,9 +402,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event)
     {
-        /**
-         * @var User $event
-         */
         $user = $event->getUser();
         if ($user instanceof BaseUser) {
 

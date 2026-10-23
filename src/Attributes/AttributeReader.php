@@ -330,7 +330,9 @@ class AttributeReader extends AbstractLocalCache
     public function getImpersonator(): ?User
     {
         $token = $this->tokenStorage?->getToken();
-        return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
+        $impersonator = $token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null;
+
+        return $impersonator instanceof User ? $impersonator : null;
     }
 
     protected array $attributeNames = [];

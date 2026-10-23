@@ -32,7 +32,6 @@ use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 
 use Omniauth\Contract\TotpSecrets;
-use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface as TotpTwoFactorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 
 class UserSettingsController extends AbstractController
@@ -57,7 +56,8 @@ class UserSettingsController extends AbstractController
     public function displayTotpQrCode(TotpAuthenticatorInterface $totpAuthenticator, ?TotpSecrets $totpSecrets = null): Response
     {
         $user = $this->getUser();
-        if (!($user instanceof TotpTwoFactorInterface) || !$user->isTotpAuthenticationEnabled()) {
+        // An account of omnibase (scheb's TOTP interface has no setter for the secret shown).
+        if (!$user instanceof \Base\Entity\User || !$user->isTotpAuthenticationEnabled()) {
             throw new NotFoundHttpException('Cannot display QR code');
         }
 

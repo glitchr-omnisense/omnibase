@@ -5,6 +5,7 @@ namespace Base\EntitySubscriber;
 use Base\Entity\Thread;
 use Base\Entity\Thread\Mention;
 use Base\Entity\ThreadIntl;
+use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\EntityDispatcher\Event\ThreadEvent;
 use Base\Enum\ThreadState;

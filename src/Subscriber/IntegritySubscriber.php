@@ -252,9 +252,6 @@ class IntegritySubscriber implements EventSubscriberInterface
             return true;
         }
 
-        /**
-         * @var User $user
-         */
         $user = $token->getUser();
         if ($user === null) {
             return true;

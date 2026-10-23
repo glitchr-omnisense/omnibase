@@ -23,7 +23,11 @@ class UserSearchController extends AbstractController
     {
         $this->formProxy = $formProxy;
         $this->entityManager = $entityManager;
-        $this->userRepository = $entityManager->getRepository(User::class);
+        $userRepository = $entityManager->getRepository(User::class);
+        if (!$userRepository instanceof UserRepository) {
+            throw new \LogicException(sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
+        }
+        $this->userRepository = $userRepository;
     }
 
     #[Route("/search/user", name:"user_search")]

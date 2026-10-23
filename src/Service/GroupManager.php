@@ -52,7 +52,7 @@ class GroupManager
     {
         $eligible = [];
         foreach ($this->groupRepository->findAll() as $group) {
-            if ($group instanceof Group && $group->isOpenTo($user)) {
+            if ($group->isOpenTo($user)) {
                 $eligible[] = $group;
             }
         }

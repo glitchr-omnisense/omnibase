@@ -152,9 +152,11 @@ final class PasskeyRepositoryTest extends KernelTestCase
     public function testTheAccountsAreThePasskeysUsers(): void
     {
         $user = $this->createUser();
+        $accounts = $this->entityManager()->getRepository($user::class);
+        self::assertInstanceOf(\Base\Repository\UserRepository::class, $accounts);
         $users = static::getContainer()->has(WebauthnUserEntityRepository::class)
             ? static::getContainer()->get(WebauthnUserEntityRepository::class)
-            : new WebauthnUserEntityRepository($this->entityManager()->getRepository($user::class));
+            : new WebauthnUserEntityRepository($accounts);
 
         $entity = $users->findOneByUserHandle((string) $user->getId());
         self::assertSame((string) $user->getId(), $entity->id);

@@ -71,7 +71,7 @@ class SuggestedBundlesTest extends KernelTestCase
         $this->assertNotContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(UserProvider::class))->getInterfaceNames());
         if (interface_exists('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface')) {
             // OAuthUserProvider declares hwi's interface: it loads only where hwi/oauth-bundle is (an application without it, lesringostars since AU7, never names it).
-            $this->assertTrue(is_subclass_of(OAuthUserProvider::class, UserProvider::class));
+            $this->assertContains(UserProvider::class, class_parents(OAuthUserProvider::class));
             $this->assertContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(OAuthUserProvider::class))->getInterfaceNames());
         }
     }
@@ -97,7 +97,7 @@ class SuggestedBundlesTest extends KernelTestCase
             'Scheb\\TwoFactorBundle\\Model\\BackupCodeInterface',
             'Scheb\\TwoFactorBundle\\Model\\TrustedDeviceInterface',
         ] as $interface) {
-            $this->assertTrue(is_subclass_of(User::class, $interface), $interface);
+            $this->assertContains($interface, class_implements(User::class), $interface);
         }
 
         // Without its constructor: it reads the application's App\Enum\UserRole, not needed here.
@@ -125,7 +125,7 @@ class SuggestedBundlesTest extends KernelTestCase
             'Symfony\\Component\\Security\\Core\\User\\UserProviderInterface',
             'Symfony\\Component\\Security\\Core\\User\\PasswordUpgraderInterface',
         ] as $interface) {
-            $this->assertTrue(is_subclass_of(UserRepository::class, $interface), $interface);
+            $this->assertContains($interface, class_implements(UserRepository::class), $interface);
         }
         $this->assertSame('Base\\Bridge\\Symfony\\SecurityUserProvider', (new \ReflectionClass(SecurityUserProvider::class))->getName(), 'the alias of the Symfony side');
         $this->assertSame('Base\\Bridge\\Symfony\\SecurityUserLoader', (new \ReflectionClass(SecurityUserLoader::class))->getName(), 'the alias of the Symfony side');
@@ -226,7 +226,7 @@ class SuggestedBundlesTest extends KernelTestCase
         $this->assertSame(['local.cache', 'local.uploads', 'local.wysiwyg'], array_values($flysystem->getStorageNames(false)));
         $this->assertSame($kernel->getProjectDir().'/var/cache/test/images/', $flysystem->getPublicRoot());
         // scheb/2fa's bundle left out: the user still declares its interfaces (the package is installed).
-        $this->assertTrue(is_subclass_of(User::class, 'Scheb\\TwoFactorBundle\\Model\\Totp\\TwoFactorInterface'));
+        $this->assertContains('Scheb\\TwoFactorBundle\\Model\\Totp\\TwoFactorInterface', class_implements(User::class));
 
         // Pages: the sign-in page prints the core's encore_entry_script_tags() without Encore's bundle.
         foreach (['/login', '/'] as $uri) {

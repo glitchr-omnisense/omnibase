@@ -32,19 +32,34 @@ interface Threads extends Entities
      * The first in that order of these states, of that slug when one is given
      * (no slug: of any) - a page's thread from its address, which may name none.
      *
+     * @param string|list<string> $states
      * @param array<string, string> $orderBy
      *
      * @return T|null
      */
     public function oneBySlugAndState(?string $slug, array|string $states, array $orderBy = []): ?Thread;
 
-    /** @return T|null */
+    /**
+     * @param string|list<string> $states
+     * @param array<string, string> $orderBy
+     *
+     * @return T|null
+     */
     public function oneByState(array|string $states, array $orderBy = []): ?Thread;
 
-    /** @return T|null the first of all in that order */
+    /**
+     * @param array<string, string> $orderBy
+     *
+     * @return T|null the first of all in that order
+     */
     public function first(array $orderBy): ?Thread;
 
-    /** @return list<T> */
+    /**
+     * @param string|list<string> $states
+     * @param array<string, string> $orderBy
+     *
+     * @return list<T>
+     */
     public function byState(array|string $states, array $orderBy = []): array;
 
     /**
@@ -57,23 +72,44 @@ interface Threads extends Entities
      */
     public function byStates(array $states): array;
 
-    /** @return T|null */
+    /**
+     * @param string|list<string> $states
+     * @param array<string, string> $orderBy
+     *
+     * @return T|null
+     */
     public function oneByParentAndSlugAndState(?Thread $parent, string $slug, array|string $states, array $orderBy = []): ?Thread;
 
-    /** @return list<T> */
+    /**
+     * @param string|list<string> $states
+     * @param array<string, string> $orderBy
+     *
+     * @return list<T>
+     */
     public function byParentAndState(?Thread $parent, array|string $states, array $orderBy = [], ?int $limit = null, ?int $offset = null): array;
 
     /**
      * Those published within $within of now (a relative date: "+8 days").
      *
+     * @param string|list<string> $states
+     * @param array<string, string> $orderBy
+     *
      * @return list<T>
      */
     public function byParentAndStatePublishedWithin(?Thread $parent, array|string $states, string $within, array $orderBy = []): array;
 
-    /** @return T|null */
+    /**
+     * @param string|list<string> $states
+     *
+     * @return T|null
+     */
     public function oneByStateAndSlugStartingWith(array|string $states, string $prefix): ?Thread;
 
-    /** How many were published less than $age ago (seconds, or a relative date). */
+    /**
+     * How many were published less than $age ago (seconds, or a relative date).
+     *
+     * @param string|list<string> $states
+     */
     public function countByStatePublishedYoungerThan(array|string $states, int|string $age): int;
 
     /**
@@ -81,6 +117,7 @@ interface Threads extends Entities
      * $class exactly when one is given.
      *
      * @param array<string, mixed> $at
+     * @param string|list<string> $states
      *
      * @return T|null
      */
@@ -88,6 +125,7 @@ interface Threads extends Entities
 
     /**
      * @param array<string, mixed> $at
+     * @param string|list<string> $states
      *
      * @return T|null
      */
@@ -95,6 +133,8 @@ interface Threads extends Entities
 
     /**
      * The level of the class's #[Hierarchify] (the last one by default).
+     *
+     * @param int|string $id
      *
      * @return string|null
      */

@@ -113,11 +113,12 @@ class EnumNouns
     private function key(?string $value, string $class, string $declaringClass): string
     {
         while ((count(array_filter($declaringClass::getPermittedValues(false), fn ($c) => $c === $value)) == 0)) {
-            $declaringClass = get_parent_class($declaringClass);
-            if ($declaringClass === Type::class) {
+            $parent = get_parent_class($declaringClass);
+            if (false === $parent || $parent === Type::class) {
                 $declaringClass = $class;
                 break;
             }
+            $declaringClass = $parent;
         }
 
         $value = $value ? "." . $value : "";

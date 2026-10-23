@@ -49,11 +49,11 @@ class UserRepository extends ServiceEntityRepository implements SecurityUserLoad
     public function refreshUser(UserInterface $user): UserInterface
     {
         $user = $this->cacheOneByEmail($user->getEmail());
-        if (!$user instanceof User || $user === null) {
-            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        if (!$user instanceof User) {
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_debug_type($user)));
         }
 
-        if ($user?->isKicked()) {
+        if ($user->isKicked()) {
             throw new UnsupportedUserException('You have been kicked..');
         }
 
