@@ -132,8 +132,9 @@ final class SignInMails
         if (!\is_string($email) || '' === $email) {
             return;
         }
-        // The account's address as its Notifier recipient writes it (User::getRecipient()).
-        $this->mailer->send($this->composer->compose($user->getUserIdentifier().' <'.$email.'>', $template, $parameters, $content));
+        // The address as the account's own Notifier recipient writes it (User::getRecipient(), which an
+        // application overrides: lesringostars names its members by their full name).
+        $this->mailer->send($this->composer->compose($user->getRecipient()->getEmail(), $template, $parameters, $content));
     }
 
     /** @param array<int|string, mixed> $parameters */
