@@ -115,7 +115,7 @@ COPY docker/demo.sh /usr/local/bin/demo
 # then finds on disk.
 RUN rm -rf var/cache \
     && composer dump-autoload --no-interaction \
-    && echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/zz-demo.ini \
+    && printf 'memory_limit = 512M\nsession.upload_progress.enabled = 0\n' > /usr/local/etc/php/conf.d/zz-demo.ini \
     && chmod +x /usr/local/bin/demo
 
 EXPOSE 8000

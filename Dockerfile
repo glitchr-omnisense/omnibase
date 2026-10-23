@@ -78,7 +78,7 @@ COPY example/app/ ./
 # The bundle's warmers (icons, translations, images) need more than the
 # 128M default.
 RUN rm -rf var/cache \
-    && echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/zz-demo.ini
+    && printf 'memory_limit = 512M\nsession.upload_progress.enabled = 0\n' > /usr/local/etc/php/conf.d/zz-demo.ini
 
 EXPOSE 8000
 
