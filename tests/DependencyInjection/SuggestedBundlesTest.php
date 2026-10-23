@@ -153,6 +153,33 @@ class SuggestedBundlesTest extends KernelTestCase
         (new Filesystem())->remove($root);
     }
 
+    /**
+     * Its storages are omniscient/omnidrive's drives (plan "omnidrive"): given as Omnidrive\Drives,
+     * read and written through them, the Flysystem operator behind each still reachable (deprecated).
+     */
+    public function testFlysystemReadsItsStoragesThroughOmnidrive(): void
+    {
+        $root = sys_get_temp_dir().'/omnibase-omnidrive-'.bin2hex(random_bytes(4));
+        $cache = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($root.'/cache'));
+        $remote = new \League\Flysystem\Filesystem(new \League\Flysystem\Ftp\FtpAdapter(\League\Flysystem\Ftp\FtpConnectionOptions::fromArray(['host' => 'ftp.invalid', 'root' => '/', 'username' => 'u', 'password' => 'p'])));
+        $drives = new \Omnidrive\Flysystem\OperatorDrives(new ServiceLocator(['local.cache' => fn () => $cache, 'ftp.backup' => fn () => $remote]));
+        $flysystem = new Flysystem($drives);
+
+        $this->assertSame($drives, $flysystem->getDrives());
+        $this->assertSame(['local.cache', 'ftp.backup'], array_values($flysystem->getStorageNames()));
+        $this->assertTrue($flysystem->write('a/b.txt', 'abbey road'));
+        $this->assertFalse($flysystem->write('a/b.txt', 'again'), 'a file there is not replaced');
+        $this->assertSame('abbey road', $drives->get('local.cache')->read('a/b.txt'), 'written through the drive');
+        $this->assertSame($root.'/cache/a/b.txt', $flysystem->getDrive()->localPath('a/b.txt'));
+        $this->assertFalse($flysystem->isRemote('local.cache'));
+        $this->assertTrue($flysystem->isRemote('ftp.backup'), 'what the drive says of itself');
+        $this->assertSame($cache, $flysystem->getOperator('local.cache'), 'the operator behind it, deprecated');
+        $this->assertSame('text/plain', $flysystem->mimeType('a/b.txt'));
+        $this->assertTrue($flysystem->delete('a/b.txt'));
+        $this->assertNull($flysystem->read('a/b.txt'));
+        (new Filesystem())->remove($root);
+    }
+
     public function testAnApplicationWithoutTheSuggestedBundlesCompilesAndAnswers(): void
     {
         if (!class_exists('App\\Kernel') || !class_exists('App\\Entity\\User')) {

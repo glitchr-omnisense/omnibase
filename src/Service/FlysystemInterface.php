@@ -5,6 +5,12 @@ namespace Base\Service;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 
+/**
+ * omnibase's storages over Flysystem's types.
+ *
+ * @deprecated since omnibase 4.0, kept for one release: Base\Service\Flysystem reads its storages through
+ * omniscient/omnidrive (Flysystem::getDrives(), getDrive()); new code type-hints Omnidrive\Drives.
+ */
 interface FlysystemInterface
 {
     public static function getProjectDir();
