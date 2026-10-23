@@ -2,18 +2,18 @@
 
 namespace Base\Auth\Listener;
 
-use Base\Security\SignInGuard;
+use Base\Security\SignInCaptcha;
 use Omniauth\Event\SignedIn;
 use Omniauth\Event\SignInFailed;
 use Omniauth\Event\Verifying;
 use Omniauth\Factor;
 
 /**
- * Base\Security\SignInGuard on omniauth's events: each failed sign-in from an
+ * Base\Security\SignInCaptcha on omniauth's events: each failed sign-in from an
  * address counts (SignInFailed), a success forgets them (SignedIn), and from
  * base.guard.sign_in_after failures on, a password sign-in from that address
  * must pass the captcha before its password is checked (Verifying, refused
- * `captcha`: SignInGuard::MESSAGE is what the page says).
+ * `captcha`: SignInCaptcha::MESSAGE is what the page says).
  *
  * The captcha's answer is a field of the host's form, which omniauth's events
  * do not carry (no proof is handed to a listener): $answer gives it - the
@@ -29,7 +29,7 @@ class GuardSignIn
      * @param list<string>                     $firewalls the sign-ins guarded (Context::$firewall)
      */
     public function __construct(
-        protected readonly SignInGuard $guard,
+        protected readonly SignInCaptcha $guard,
         protected readonly ?\Closure $answer = null,
         protected readonly array $firewalls = ['main'],
     ) {

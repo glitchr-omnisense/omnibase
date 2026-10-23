@@ -13,7 +13,6 @@ use Base\Service\Obfuscator;
 use Base\Twig\Environment;
 use Imagine\Image\ImageInterface;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -241,14 +240,7 @@ final class MediaTwigExtension extends AbstractExtension
 
     public function inline_css_email(array $context, string $body, string ...$css): string
     {
-        static $inliner;
-        if (null === $inliner) {
-            $inliner = new CssToInlineStyles();
-        }
-
-        $email = $context['email'] ?? null;
-
-        return $email ? $inliner->convert($body, implode("\n", $css)) : $body;
+        return MailTwigExtension::inlineCss($context, $body, ...$css);
     }
 
     /**
@@ -256,36 +248,10 @@ final class MediaTwigExtension extends AbstractExtension
      * @param array $context
      * @param string $src
      * @param array $options
-     * @return string|null
+     * @return string
      */
     public function embed(Environment $twig, array $context, string $src, array $options = [])
     {
-        if (!$src) {
-            return $src;
-        }
-
-        if (!str_starts_with($src, '@')) {
-            $src = '@Public/' . str_lstrip($src, [$this->projectDir . '/public', '/']);
-        }
-
-        $path = $src;
-        $url = explode('/', $src);
-        try {
-            $path = $twig->getLoader()->getSourceContext($src)->getPath();
-            $contentType = mime_content_type($twig->getLoader()->getSourceContext($src)->getPath());
-
-            $url = explode('/', $twig->getLoader()->getSourceContext($src)->getName());
-        } catch (LoaderError $e) {
-            return $src;
-        }
-
-        $prefix = str_rstrip($path, [implode('/', tail($url)), '/']);
-        $email = $options['email'] ?? $context['email'] ?? null;
-
-        return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
-            $prefix,
-            $this->projectDir . '/public',
-            $this->projectDir,
-        ]);
+        return MailTwigExtension::source($twig, $context, $src, $options, $this->projectDir);
     }
 }

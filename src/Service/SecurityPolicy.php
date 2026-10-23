@@ -71,6 +71,7 @@ class SecurityPolicy
     /**
      * @param string[] $requiredRoles roles whose holders must have a second factor (base.security.two_factor.required_roles)
      * @param bool     $postpone      whether the enrolment prompt offers a "not now" (base.security.two_factor.postpone)
+     * @param (\Closure(string[]): string[])|null $reachableRoles the roles some roles reach, where the host has no Symfony hierarchy (omnibridge/laravel: config/omniauth.php's role_hierarchy)
      */
     public function __construct(
         private SettingBagInterface $settingBag,
@@ -79,6 +80,7 @@ class SecurityPolicy
         #[Autowire('%base.security.two_factor.postpone%')] private bool $postpone = true,
         private ?DemoMode $demoMode = null,
         private ?DemoAccountRegistry $demoAccounts = null,
+        private ?\Closure $reachableRoles = null,
     ) {
     }
 
@@ -184,6 +186,10 @@ class SecurityPolicy
     private function roles(object $user): array
     {
         $roles = array_map(static fn ($role) => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $user->getRoles());
+
+        if (null === $this->roleHierarchy && null !== $this->reachableRoles) {
+            return ($this->reachableRoles)($roles);
+        }
 
         return $this->roleHierarchy ? $this->roleHierarchy->getReachableRoleNames($roles) : $roles;
     }

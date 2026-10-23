@@ -4,8 +4,8 @@ namespace Base\Bridge\Symfony;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
+use Base\Notifier\Mail\EmailComposer;
 use Base\Notifier\Abstract\BaseNotifierInterface;
-use RuntimeException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
@@ -17,7 +17,6 @@ use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Throwable;
 use Twig\Environment;
-use Twig\Error\LoaderError;
 use UnexpectedValueException;
 
 /**
@@ -40,7 +39,7 @@ use UnexpectedValueException;
 final class NotificationMessages
 {
     /** The e-mail frame: the HTML of a notification whose template is missing or not found. */
-    public const FRAME = "@Base/notifier/email.html.twig";
+    public const FRAME = EmailComposer::FRAME;
 
     /**
      * The error to describe, when the notification's content is one: an ExceptionEvent's throwable,
@@ -90,19 +89,17 @@ final class NotificationMessages
 
         if ($notifier->isTest($recipient)) {
 
-            $fwd .= "Test: ";
-            $email = mailparse($recipient->getEmail());
-            $email = mailformat(mailparse($technicalRecipient->getEmail()), first($email));
-            $to = "[" . $notifier->getTranslator()->trans("@emails.fake_test.author") . "] " . $email;
+            // A test address (base.notifier.technical_loopback, test_recipients): Base\Notifier\Mail\EmailComposer's rule.
+            $trans = fn (string $id): string => $notifier->getTranslator()->trans($id);
+            $fwd .= EmailComposer::TEST_PREFIX;
+            $to = EmailComposer::testAddress($technicalRecipient->getEmail(), $recipient->getEmail(), $trans);
 
-            $footer = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
-            $footer = implode(" - ", array_filter($footer));
+            $footer = EmailComposer::testFooter($footer, $trans);
 
             $htmlFooter = $notification->getHtmlParameters()["footer_text"] ?? null;
             if ($htmlFooter) {
 
-                $htmlFooter = [$htmlFooter, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
-                $htmlFooter = implode(" - ", array_filter($htmlFooter));
+                $htmlFooter = EmailComposer::testFooter($htmlFooter, $trans);
                 $notification->addHtmlParameter("footer_text", $htmlFooter);
             }
         }
@@ -167,39 +164,17 @@ final class NotificationMessages
             $email->embed(fopen($projectDir . "/" . $path, 'rb'), $path /* replace by alias */);
         }
 
-        // A notification without an HTML template of its own is written in the e-mail frame, as one whose
-        // template is not found: "" was given to Twig, which refused it ("Failed to render template """).
-        $htmlTemplate = $notification->getHtmlTemplate() ?: self::FRAME;
-        try {
-            $context["html"] = $twig->render($htmlTemplate, $htmlParameters);
-        } catch (LoaderError $e) {
-            $context["html"] = $twig->render(self::FRAME, $htmlParameters);
-        } catch (RuntimeException $e) {
-            throw new UnexpectedValueException("Failed to render template \"$htmlTemplate\". See below", 500, $e);
-        }
-
-        if (preg_match('/<title>(.*)<\/title>/ims', $context["html"], $matches)) {
-            $subject = html_entity_decode(trim($matches[1]));
-        }
+        // The template in the e-mail frame, the subject its <title> gives (Base\Notifier\Mail\EmailComposer:
+        // the same lines under every host).
+        $rendered = EmailComposer::render($twig, $notification->getHtmlTemplate(), $htmlParameters);
+        $context["html"] = $rendered["html"];
+        $subject = $rendered["subject"] ?? $subject;
 
         $subject ??= $notification->getSubject();
         $subject = $fwd . $subject;
 
         // Alias cid://
-        $search = [];
-        $replacement = [];
-        foreach ($email->getAttachments() as $key => $attachment) {
-
-            $ext = pathinfo($attachment->GetName(), PATHINFO_EXTENSION);
-            $newFilename = rand_str(6) . ($ext ? ".".$ext : "");
-
-            $filename = $attachment->getFilename();
-            object_hydrate($attachment, ["name" => $newFilename, "filename" => $newFilename]);
-            $search[] = "cid:".$filename;
-            $replacement[] = "cid:".$newFilename;
-        }
-
-        $context["html"] = str_replace($search, $replacement, $context["html"]);
+        $context["html"] = EmailComposer::alias($email, $context["html"]);
 
         // Priority
         $priority = [Notification::IMPORTANCE_HIGH, Notification::IMPORTANCE_MEDIUM, Notification::IMPORTANCE_LOW];

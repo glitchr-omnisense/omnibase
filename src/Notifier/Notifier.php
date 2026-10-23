@@ -2,6 +2,7 @@
 
 namespace Base\Notifier;
 
+use Base\Notifier\Mail\SignInMails;
 use Base\Routing\AdvancedRouter;
 
 use Base\Entity\User;
@@ -320,13 +321,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("loginToken.confirmation");
         $notification->setUser($user);
         $notification->setHtmlTemplate("email.html.twig");
-        $notification->setHtmlParameters([
-            "subject" => $this->translator->trans("@emails.loginToken.subject"),
-            "content" => $this->translator->trans("@emails.loginToken.content"),
-            "action_text" => $this->translator->trans("@emails.loginToken.action_text"),
-            "action_url" => $this->router->getUrl("security_loginWithToken", ["token" => $token]),
-            "footer_text" => $this->translator->trans("@emails.loginToken.expiry", [$this->translator->transTime(max(1, $until->getTimestamp() - time()))]),
-        ]);
+        $notification->setHtmlParameters(SignInMails::loginLinkParameters($this->words(), $this->duration(), $this->router->getUrl(SignInMails::LINK_ROUTE, ["token" => $token]), $until));
 
         return $notification;
     }
@@ -340,11 +335,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("emailCode.subject");
         $notification->setUser($user);
         $notification->setHtmlTemplate("email.html.twig");
-        $notification->setHtmlParameters([
-            "subject" => $this->translator->trans("@emails.emailCode.subject"),
-            "content" => $this->translator->trans("@emails.emailCode.content", [$code]),
-            "footer_text" => $this->translator->trans("@emails.emailCode.expiry", [$this->translator->transTime(max(1, $until->getTimestamp() - time()))]),
-        ]);
+        $notification->setHtmlParameters(SignInMails::emailCodeParameters($this->words(), $this->duration(), $code, $until));
 
         return $notification;
     }
@@ -361,13 +352,24 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
-        $notification->setHtmlParameters([
-            "subject" => $this->translator->trans("@emails.accountWelcomeBack.subject", [$user]),
-            "content" => $this->translator->trans("@emails.accountWelcomeBack.content"),
-            "action_text" => $this->translator->trans("@emails.accountWelcomeBack.action_text"),
-            "action_url" => $this->router->getUrl("security_accountWelcomeBackWithToken", ["token" => $token->get()])
-        ]);
+        $notification->setHtmlParameters(SignInMails::welcomeBackParameters($this->words(), $user, $this->router->getUrl(SignInMails::WELCOME_BACK_ROUTE, ["token" => $token->get()])));
 
         return $notification;
+    }
+
+    /**
+     * The translator, as Base\Notifier\Mail\SignInMails' words are asked of it.
+     *
+     * @return \Closure(string, array<int|string, mixed>=): string
+     */
+    private function words(): \Closure
+    {
+        return fn (string $id, array $parameters = []): string => $this->translator->trans($id, $parameters);
+    }
+
+    /** @return \Closure(int): string a duration spelled (Translator::transTime()) */
+    private function duration(): \Closure
+    {
+        return fn (int $seconds): string => $this->translator->transTime($seconds);
     }
 }
