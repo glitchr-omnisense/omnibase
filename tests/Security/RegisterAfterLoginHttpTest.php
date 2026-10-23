@@ -87,19 +87,36 @@ class RegisterAfterLoginHttpTest extends KernelTestCase
         $page = $this->browse('/register', null, '/login');
         $this->assertSame(200, $page->getStatusCode(), $this->said($page));
 
-        preg_match('/name="_base_security_registration\[_csrf_token\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $token);
-        // The guard's stamp (when the form was shown) and the test environment's captcha token, as the page prints them.
-        preg_match('/name="_base_security_registration\[guard_opened\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $stamp);
         $this->signedUp[] = $email;
         $this->takeTheTimeAPersonTakes();
 
-        return $this->browse('/register', ['_base_security_registration' => [
+        return $this->browse('/register', self::filled((string) $page->getContent(), [
             'email' => $email,
             'plainPassword' => ['first' => 'A-long-Passphrase-42!', 'second' => 'A-long-Passphrase-42!'],
             'agreeTerms' => '1',
-            '_csrf_token' => html_entity_decode($token[1] ?? ''),
-            'guard_opened' => html_entity_decode($stamp[1] ?? ''),
-        ]] + $more, '/register');
+        ]) + $more, '/register');
+    }
+
+    /**
+     * The sign-up form as the page prints it, filled: under the form's name - the core's
+     * (_base_security_registration) or the one of an application's own type - with its hidden
+     * fields as printed (the CSRF token, the guard's stamp of when the form was shown, its trap).
+     *
+     * @param array<string, mixed> $fields what the visitor types
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private static function filled(string $html, array $fields): array
+    {
+        self::assertSame(1, preg_match('/name="([^"\[]+)\[plainPassword\]\[first\]"/', $html, $form), 'the sign-up form is on the page');
+        preg_match_all('/<input[^>]*type="hidden"[^>]*>/', $html, $inputs);
+        foreach ($inputs[0] as $input) {
+            if (preg_match('/name="'.preg_quote($form[1], '/').'\[([^\]"]+)\]"/', $input, $name)) {
+                $fields += [$name[1] => preg_match('/value="([^"]*)"/', $input, $value) ? html_entity_decode($value[1]) : ''];
+            }
+        }
+
+        return [$form[1] => $fields];
     }
 
     private function account(string $email): ?object
@@ -180,17 +197,13 @@ class RegisterAfterLoginHttpTest extends KernelTestCase
         $page = $this->browse('/register', null, '/login');
         $this->assertStringNotContainsString('signup-account-exists', (string) $page->getContent());
 
-        preg_match('/name="_base_security_registration\[_csrf_token\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $token);
-        // The guard's stamp (when the form was shown) and the test environment's captcha token, as the page prints them.
-        preg_match('/name="_base_security_registration\[guard_opened\]"[^>]*value="([^"]+)"/', (string) $page->getContent(), $stamp);
         $this->takeTheTimeAPersonTakes();
-        $refused = $this->browse('/register', ['_base_security_registration' => [
+        // With the test environment's captcha token, as the page prints it.
+        $refused = $this->browse('/register', self::filled((string) $page->getContent(), [
             'email' => 'new'.bin2hex(random_bytes(4)).'@example.org',
             'plainPassword' => ['first' => 'A-long-Passphrase-42!', 'second' => 'Another-Passphrase-43!'],
             'agreeTerms' => '1',
-            '_csrf_token' => html_entity_decode($token[1] ?? ''),
-            'guard_opened' => html_entity_decode($stamp[1] ?? ''),
-        ], 'omnishield-token' => 'omnishield-fixed-token'], '/register');
+        ]) + ['omnishield-token' => 'omnishield-fixed-token'], '/register');
 
         $this->assertContains($refused->getStatusCode(), [200, 422], $this->said($refused));
         $this->assertStringNotContainsString('signup-account-exists', (string) $refused->getContent());

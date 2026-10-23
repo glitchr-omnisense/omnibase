@@ -28,7 +28,10 @@ class FormProxyAcrossRequestsHttpTest extends KernelTestCase
 
         $register = static::$kernel->handle(Request::create('/register'));
         self::assertSame(200, $register->getStatusCode(), substr(strip_tags((string) $register->getContent()), 0, 400));
-        self::assertStringContainsString('_base_security_registration[email]', (string) $register->getContent(), 'the sign-up form, not the sign-in one');
+        // The sign-up form, not the sign-in one: its password asked twice, and an address - under the
+        // form's name, the core's (_base_security_registration) or the one of an application's own type.
+        self::assertSame(1, preg_match('/name="([^"\[]+)\[plainPassword\]\[first\]"/', (string) $register->getContent(), $form), 'the sign-up form, not the sign-in one');
+        self::assertStringContainsString('name="'.$form[1].'[email]"', (string) $register->getContent());
     }
 
     public function testAProcessorOfTheSameNameForAnotherTypeIsAnotherOne(): void

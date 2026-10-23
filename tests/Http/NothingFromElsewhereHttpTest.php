@@ -5,6 +5,7 @@ namespace Tests\Base\Http;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Base\Http\Fixtures\PagesTestKernel;
 
 /**
  * A page of the site loads nothing from anyone else: what the contact page
@@ -19,7 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
  * 3-Clause, its licence beside it), linked by the editor's script only where
  * an editor or a block of code is shown. The emoji picker (picmo) fetched
  * its emojis from jsDelivr: they are the bundle's copy too (bundles/base/
- * emoji/, emojibase-data, MIT), on the harness's /fields.
+ * emoji/, emojibase-data, MIT), on the test pages' /base-test/fields
+ * (Fixtures\PagesTestKernel: the host application and that page).
  */
 class NothingFromElsewhereHttpTest extends KernelTestCase
 {
@@ -29,6 +31,11 @@ class NothingFromElsewhereHttpTest extends KernelTestCase
 
     /** Hosts a page must not reach on its own. */
     private const CDNS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com', 'ajax.googleapis.com', 'code.jquery.com'];
+
+    protected static function getKernelClass(): string
+    {
+        return PagesTestKernel::class;
+    }
 
     protected function setUp(): void
     {
@@ -162,7 +169,7 @@ class NothingFromElsewhereHttpTest extends KernelTestCase
      */
     public function testAPageWithAnEmojiFieldLoadsNothingFromElsewhere(): void
     {
-        [$html, $files] = $this->assertNothingFromElsewhere('/fields');
+        [$html, $files] = $this->assertNothingFromElsewhere('/base-test/fields');
 
         self::assertStringContainsString('data-emoji-field', $html, 'the page has an emoji field');
         $picker = self::script($files, 'form-defer.emoji');

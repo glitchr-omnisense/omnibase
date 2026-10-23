@@ -104,7 +104,7 @@ class SignInByLinkHttpTest extends KernelTestCase
     /**
      * The page read, its form sent with this address - by a visitor of their own.
      *
-     * @return array{0: int, 1: string, 2: array<string, list<string>>} the answer's status, where it sends, the messages left for the next page
+     * @return array{0: int, 1: string, 2: array<string, list<string>>, 3: string} the answer's status, where it sends, the messages left for the next page, what the answer says
      */
     private function ask(string $email): array
     {
@@ -123,7 +123,20 @@ class SignInByLinkHttpTest extends KernelTestCase
         // With the token the test environment's captcha (omnishield's fixed gateway) prints in the page, outside the form.
         $answer = $this->browse('/login/token', ['_base_security_login_token' => ['email' => $email] + $fields, 'omnishield-token' => 'omnishield-fixed-token']);
 
-        return [$answer->getStatusCode(), (string) $answer->headers->get('Location'), $this->flashes()];
+        return [$answer->getStatusCode(), (string) $answer->headers->get('Location'), $this->flashes(), self::text($answer, $email)];
+    }
+
+    /**
+     * What a page says, without what differs from one visit to the next: its tokens, the address
+     * typed, the time the page took (app.site.execution_time, which a layout may print).
+     */
+    private static function text(Response $response, string $email): string
+    {
+        $html = (string) preg_replace('~<(script|style)\b.*?</\1>~s', '', (string) $response->getContent());
+        $html = (string) preg_replace('/<input[^>]*type="hidden"[^>]*>/', '', $html);
+        $text = (string) preg_replace('/\[\d+(?:\.\d+)?s?\]/', '[time]', strip_tags($html));
+
+        return trim((string) preg_replace('/\s+/', ' ', str_replace($email, '<address>', $text)));
     }
 
     public function testTheAnswerIsTheSameWhetherTheAddressHasAnAccountOrNot(): void
@@ -140,12 +153,18 @@ class SignInByLinkHttpTest extends KernelTestCase
         ];
 
         $this->assertLessThan(400, $answers['an account'][0]);
-        $this->assertSame($answers['an address nobody has'], $answers['an account'], 'status, redirection, messages: nothing tells an account from nobody');
+        $this->assertSame($answers['an address nobody has'], $answers['an account'], 'status, redirection, messages, the page: nothing tells an account from nobody');
         $this->assertSame($answers['an address nobody has'], $answers['an account that already has a link']);
 
+        // One message, the same for every address - left for the next page (the harness's layout prints
+        // none), or printed by the answer itself (a site's layout prints the messages of the request).
         $confirmation = static::getContainer()->get('translator')->trans('@notifications.loginToken.confirmation');
         $messages = array_merge(...array_values($answers['an address nobody has'][2] ?: [[]]));
-        $this->assertSame([$confirmation], $messages, 'one message, the same for every address');
+        if ($messages) {
+            $this->assertSame([$confirmation], $messages, 'one message, the same for every address');
+        } else {
+            $this->assertSame(1, substr_count(html_entity_decode($answers['an address nobody has'][3]), $confirmation), 'one message, on the page, the same for every address');
+        }
     }
 
     public function testAnAccountThatAsksIsSentItsLink(): void
