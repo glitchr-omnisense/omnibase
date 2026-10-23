@@ -442,6 +442,11 @@ class BaseBundle extends AbstractBaseBundle
         if (class_exists(\Omnibridge\Symfony\Auth\DependencyInjection\OmniauthExtension::class)) {
             \Omnibridge\Symfony\Auth\DependencyInjection\OmniauthExtension::register($container);
         }
+        // omnimap's maps and their cache (config/packages/omnimap.yaml), where omnimap and an
+        // omnibridge/symfony that bridges it are installed - for the same reason.
+        if (class_exists(\Omnibridge\Symfony\Map\DependencyInjection\OmnimapExtension::class)) {
+            \Omnibridge\Symfony\Map\DependencyInjection\OmnimapExtension::register($container);
+        }
 
         if (!self::$cache) {
             $this->warmUp();
