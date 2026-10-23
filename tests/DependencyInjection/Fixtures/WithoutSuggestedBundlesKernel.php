@@ -40,6 +40,9 @@ final class WithoutSuggestedBundlesKernel extends Kernel
         'Well\\Known\\WellKnownBundle',
     ];
 
+    /** The routing types of the bundles left out: their loaders are not registered. */
+    public const LEFT_OUT_ROUTE_TYPES = ['api_platform', 'webauthn'];
+
     public function registerBundles(): iterable
     {
         $contents = require $this->getProjectDir().'/config/bundles.php';
@@ -89,6 +92,14 @@ final class WithoutSuggestedBundlesKernel extends Kernel
 
         $container->import($configDir.'/{services}.yaml');
         $container->import($configDir.'/{services}_'.$this->environment.'.yaml');
+
+        // The routes a left-out bundle's loader gives by its type ("type: api_platform", "type: webauthn"
+        // in the application's routing files): none, as in an application without the bundle. Until
+        // then this kernel built its routes only from a router cache the full application had left
+        // (lesringostars, 2026-10-23: a new routing file made it stale, and the import failed).
+        $container->services()->set('test.left_out_route_types', LeftOutRouteTypes::class)
+            ->args([self::LEFT_OUT_ROUTE_TYPES])
+            ->tag('routing.loader');
     }
 
     /** The application's routes, but for the files importing a bundle left out (hwi_oauth_routing.yaml...). */
