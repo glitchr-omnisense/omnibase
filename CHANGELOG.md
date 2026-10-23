@@ -10,6 +10,14 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: a label a language gives as its key is that language's word
+
+`Base\Service\Translator` took a humanised label translated to itself ("Clicks": "Clicks" in an
+English catalogue) for a missing key and gave the default language's word ("Clics"): an English back
+office showed French column headers. A text the language's own catalogues define (the locale's and its
+fallbacks short of the default language, ICU or not) is kept; one they lack still falls back to the
+default language (`definedBeforeDefault()`).
+
 ### Changed: the legacy administration's welcome from the catalogue
 
 `templates/admin-legacy/layout.html.twig` prints `'@admin.welcome'|trans` - "Bienvenue sur l'interface

@@ -11,6 +11,7 @@ use Omnibridge\Contract\Translations;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\Translator as SymfonyTranslator;
 
 /**
@@ -376,7 +377,10 @@ class Translator implements TranslatorInterface, Translations
             // take this early path and never reached the default-language
             // fallback at the end of the method - so a language without the
             // key kept the English text while dotted keys fell back to French.
-            if ($ret === $id && ($lookupLocale ?? $this->getLocale()) != Localizer::__toLocale(Localizer::getDefaultLocale(), "_")) {
+            // A text the language's own catalogue gives as its key ("Clicks":
+            // "Clicks" in English) is that language's word, not a missing one.
+            if ($ret === $id && ($lookupLocale ?? $this->getLocale()) != Localizer::__toLocale(Localizer::getDefaultLocale(), "_")
+                && !$this->definedBeforeDefault($id, $domain, $lookupLocale ?? $this->getLocale())) {
                 $fallback = $this->translator->trans($id, $parameters, $domain, Localizer::__toLocale(Localizer::getDefaultLocale(), "_"));
                 if ($fallback !== $id && !preg_match("/^{[a-zA-Z0-9]*}$/", $fallback)) {
                     return $fallback;
@@ -445,7 +449,7 @@ class Translator implements TranslatorInterface, Translations
             // shows raw keys on every button and title, on beta, to the
             // people who review it there. debug:translation is the tool for
             // finding missing keys; the pages fall back like production does.
-            if ($locale != Localizer::getDefaultLocale()) {
+            if ($locale != Localizer::getDefaultLocale() && !$this->definedBeforeDefault($id, $domain, $lookupLocale ?? $this->getLocale())) {
                 if ($trans == $id) {
                     $trans = $this->transQuiet($id, $parameters, $domain, Localizer::getDefaultLocale());
                 }
@@ -493,6 +497,33 @@ class Translator implements TranslatorInterface, Translations
         }
 
         return "";
+    }
+
+    /**
+     * Whether the language's own catalogues - the locale's, then its fallbacks
+     * up to the default language, which is not counted - define the id in the
+     * domain (ICU or not): then a text equal to its id is that language's word
+     * ("Clicks": "Clicks"), not a key to look up in the default language.
+     */
+    protected function definedBeforeDefault(string $id, ?string $domain, ?string $locale): bool
+    {
+        if (null === $locale || null === Localizer::getDefaultLocale() || !$this->translator instanceof TranslatorBagInterface) {
+            return false;
+        }
+
+        $domain ??= self::DOMAIN_DEFAULT;
+        $default = Localizer::__toLocaleLang(Localizer::getDefaultLocale());
+        $catalogue = $this->translator->getCatalogue(Localizer::__toLocale($locale, "_"));
+        for ($depth = 0; $catalogue && $depth < 8; $catalogue = $catalogue->getFallbackCatalogue(), ++$depth) {
+            if (Localizer::__toLocaleLang($catalogue->getLocale()) === $default) {
+                return false;
+            }
+            if ($catalogue->defines($id, $domain) || $catalogue->defines($id, $domain . MessageCatalogueInterface::INTL_DOMAIN_SUFFIX)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function transExists(TranslatableMessage|string $id, ?string $domain = null, ?string $locale = null, bool $localeCountry = true): bool
