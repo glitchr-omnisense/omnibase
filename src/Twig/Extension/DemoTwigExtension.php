@@ -18,13 +18,16 @@ use Twig\TwigFunction;
  * @Base/demo/_banner.html.twig and @Base/demo/_accounts.html.twig are what a
  * layout and a sign-in page include; both print nothing outside `demo`. The
  * banner names the first of these accounts to a visitor who is not signed in.
+ *
+ * Framework-free: a host that runs no demonstration (Laravel: no `demo`
+ * kernel environment) gives the mode alone - never active, no account.
  */
 class DemoTwigExtension extends AbstractExtension
 {
     public function __construct(
         private readonly DemoMode $mode,
-        private readonly DemoAccountRegistry $registry,
-        private readonly DemoAccountFactory $factory,
+        private readonly ?DemoAccountRegistry $registry = null,
+        private readonly ?DemoAccountFactory $factory = null,
     ) {
     }
 
@@ -45,7 +48,7 @@ class DemoTwigExtension extends AbstractExtension
      */
     public function accounts(): array
     {
-        if (!$this->mode->isActive()) {
+        if (!$this->mode->isActive() || null === $this->registry || null === $this->factory) {
             return [];
         }
 

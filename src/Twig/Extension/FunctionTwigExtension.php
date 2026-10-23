@@ -34,7 +34,7 @@ use Twig\TwigFunction;
 
 /**
  * omnibase's Twig functions and filters. html_attributes, mb_ucfirst, second,
- * join_if_exists and less_than are omnibridge/twig's HelperExtension's
+ * join_if_exists, less_than, at and emoji_only are omnibridge/twig's HelperExtension's
  * (registered beside this one, the same results); str_shorten, highlight and
  * datetime stay here, they do more than its copies (str_shorten's
  * SHORTEN_BACK_SHRINK/EXTEND, highlight's excerpt, datetime's patterns lists,
@@ -109,7 +109,6 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('mailto', [$this, 'mailto'], ['is_safe' => ['all']]),
 
             new TwigFunction('addslashes', 'addslashes'),
-            new TwigFunction('enum', [$this, 'enum']),
             new TwigFunction('email_preview', [$this, 'email'], ['needs_context' => true]),
         ];
     }
@@ -137,7 +136,6 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('ceil', 'ceil'),
                 new TwigFilter('floor', 'floor'),
                 new TwigFilter('count_leaves', 'count_leaves'),
-                new TwigFilter('at', [$this, 'at']),
                 new TwigFilter('color_name', [$this, 'color_name']),
 
                 new TwigFilter('sign', 'sign'),
@@ -167,29 +165,10 @@ final class FunctionTwigExtension extends AbstractExtension
                 new TwigFilter('head', 'begin'), // omnibase's head(): null for an empty list, whatever head() Laravel defines
                 new TwigFilter('tail', 'tail'),
 
-                new TwigFilter('colorify', [$this, 'colorify']),
                 new TwigFilter('crudify', [$this, 'crudify'], ['is_safe' => ['all']]),
                 new TwigFilter('htmlify', [$this, 'htmlify'], ['is_safe' => ['all']]),
 
-                new TwigFilter('emoji_only', [$this, 'isEmojiOnly'], ['is_safe' => ['all']]),
             ];
-    }
-
-    public function isEmojiOnly(?string $value): bool
-    {
-        if ($value === null || $value === '') {
-            return false;
-        }
-
-        return (bool) preg_match(
-            '/^[\p{Extended_Pictographic}\x{200D}\x{FE0F}\s]+$/u',
-            $value
-        );
-    }
-
-    public function at(array $array, int|string $index) 
-    {
-        return $array[$index];
     }
 
     /**
@@ -325,41 +304,6 @@ final class FunctionTwigExtension extends AbstractExtension
     public function transforms(array $array = [], $arrow = null)
     {
         return $arrow instanceof \Closure ? $arrow($array) : $array;
-    }
-
-    public function enum(null|string|array $class): null|Type|array
-    {
-        if (\is_array($class)) {
-            return array_map(fn($c) => $this->enum($c), $class);
-        }
-
-        if (class_exists($class) && is_instanceof($class, EnumType::class)) {
-            return new $class();
-        }
-
-        return Type::hasType($class) ? Type::getType($class) : null;
-    }
-
-    public function colorify(null|string|array|ColorizeInterface $color, ?string $entry = null): null|string|array
-    {
-        if (!$color) {
-            return $color;
-        }
-
-        if ($color instanceof ColorizeInterface) {
-            $color = $color->__colorize() ?? $color->__colorizeStatic();
-            return $color[$entry] ?? $color ?? null;
-        }
-
-        if (\is_array($color)) {
-
-            $color = array_filter(array_map(fn($i) => $this->colorify($i), $color));
-            if ($color) {
-                return array_merge(...$color);
-            }
-        }
-
-        return null;
     }
 
     /**

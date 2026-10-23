@@ -98,15 +98,40 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Extension\WebpackTwigExtension')
         ->tag('twig.extension', ['priority' => -1]);
 
+    // The bell, framework-free: the host's Access (the user signed in) and Tokens (its token).
     $services->set('Base\Twig\Extension\NotificationTwigExtension')
         ->tag('twig.extension')
         ->args([
-            new Reference('security.helper'),
+            service('Omnibridge\Contract\Access'),
             new Reference('Base\Repository\User\NotificationRepository'),
             new Reference('Base\Service\Push\WebPushService'),
-            new Reference('security.csrf.token_manager'),
+            service('Omnibridge\Contract\Tokens'),
             new Reference('Base\Notifier\NotificationLinkerInterface'),
         ]);
+
+    // omnibase's framework-free extensions (audit "lesringostars face au
+    // master plan", R24), which omnibridge/laravel registers too: what a
+    // template shows of a stored file (MediaService), links, icons,
+    // enumerations, stored texts. The functions and filters they carry were
+    // MediaTwigExtension's, FunctionTwigExtension's, TranslatorTwigExtension's
+    // and HtmlTwigExtension's, under the same names.
+    $services->set('Base\Twig\Extension\PictureTwigExtension')->public()
+        ->tag('twig.extension')
+        ->args([service('Base\Service\MediaService'), service('Base\Service\FileService')]);
+    $services->set('Base\Twig\Extension\LinkTwigExtension')
+        ->factory([service('Base\Twig\Extension\MediaTwigExtension'), 'links'])
+        ->tag('twig.extension');
+    $services->set('Base\Service\Icons')
+        ->factory([service('Base\Service\IconProvider'), 'icons']);
+    $services->set('Base\Twig\Extension\IconTwigExtension')
+        ->tag('twig.extension')
+        ->args([service('Base\Service\Icons')]);
+    $services->set('Base\Twig\Extension\EnumTwigExtension')
+        ->tag('twig.extension')
+        ->args([service('Base\Service\Translator')]);
+    $services->set('Base\Twig\Extension\TextsTwigExtension')
+        ->tag('twig.extension')
+        ->args([service('Base\Contract\Texts')]);
 
     $services->set('Base\Twig\Extension\HtmlTwigExtension')
         ->tag('twig.extension')

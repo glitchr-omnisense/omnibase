@@ -5,6 +5,7 @@ namespace Base\Service;
 use Base\Database\Type\SetType;
 use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
+use Base\Service\Model\EnumNouns;
 use Base\Service\Model\NounVariants;
 use Doctrine\DBAL\Types\Type;
 use Omnibridge\Contract\Translations;
@@ -477,17 +478,8 @@ class Translator implements TranslatorInterface, Translations
         switch ($parseBy) {
             case self::PARSE_EXTENDS:
 
-                $parent = class_exists($class) ? get_parent_class($class) : null;
-
-                $class = class_name($class);
-                if ($parent) {
-                    $class .= "." . class_name($parent);
-                }
-                while (class_exists($parent) && ($parent = get_parent_class($parent))) {
-                    $class .= "." . class_name($parent);
-                }
-
-                return camel2snake($class);
+                // A class and its parents, dotted, in snake case: EnumNouns's rule.
+                return EnumNouns::extends($class);
 
             default:
             case self::PARSE_NAMESPACE:
@@ -643,49 +635,23 @@ class Translator implements TranslatorInterface, Translations
         return $this->transExists($domain . $routeName . ".title");
     }
 
+    /** The words of an enumeration's value: the Foundation's rule, Base\Service\Model\EnumNouns, over this translator. */
     public function transEnum(?string $value, string $class, null|string|array $options = self::NOUN_SINGULAR): ?string
     {
-        if (class_exists($class)) {
-            $declaringClass = $class;
-        } elseif (Type::hasType($class)) {
-            $declaringClass = get_class(Type::getType($class));
-        } else {
-            return $value;
-        }
-
-        while ((count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0)) {
-            $declaringClass = get_parent_class($declaringClass);
-            if ($declaringClass === Type::class) {
-                $declaringClass = $class;
-                break;
-            }
-        }
-
-        $value = $value ? "." . $value : "";
-        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
-        $class = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
-        $class = implode(".", array_slice(explode(".", $class), 0, $offset));
-
-        return $class ? $this->transPerms($class . $value, $options, [], self::DOMAIN_ENUM) : null;
+        return $this->getEnumNouns()->value($value, $class, $options);
     }
 
     public function transEnumExists(string $value, string $class, string|array $options = self::NOUN_SINGULAR): bool
     {
-        $declaringClass = $class;
-        while ((count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0)) {
-            $declaringClass = get_parent_class($declaringClass);
-            if ($declaringClass === Type::class) {
-                $declaringClass = $class;
-                break;
-            }
-        }
+        return $this->getEnumNouns()->exists($value, $class, $options);
+    }
 
-        $value = $value ? "." . $value : "";
-        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
-        $class = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
-        $class = implode(".", array_slice(explode(".", $class), 0, $offset));
+    private ?EnumNouns $enumNouns = null;
 
-        return $class && $this->transPermExists($class . $value, $options, self::DOMAIN_ENUM);
+    /** The enumerations' words over this translator (EnumNouns). */
+    public function getEnumNouns(): EnumNouns
+    {
+        return $this->enumNouns ??= new EnumNouns($this);
     }
 
     public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
