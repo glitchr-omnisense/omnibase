@@ -27,7 +27,7 @@ file:
    mime_type: "{0, plural,
       =1 {Format de fichier supporté : {1}}
       other {Formats de fichier supportés : {1}}
-   }"
+     }"
 
 password:
    not_matching: "Les mots de passe ne correspondent pas"
@@ -35,7 +35,7 @@ password:
    min_length: "{0, plural,
       =1 {Le mot de passe doit contenir au moins # caractère}
       other {Le mot de passe doit contenir au moins # caractères}
-   }"
+     }"
 
 not_blank: "Le champ \"{field}\" est vide."
 

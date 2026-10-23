@@ -77,7 +77,7 @@ adminApproval:
 adminApprovalConfirm:
   subject: "Compte validé !"
   content: "Bonjour <b>{0}</b> ! Ton compte vient d'être approuvé par un administrateur.
-  Tu peux à présent te connecter ! Clique sur le lien suivant pour te connecter"
+    Tu peux à présent te connecter ! Clique sur le lien suivant pour te connecter"
   content._polite: "Bonjour <b>{0}</b> ! Votre compte vient d'être approuvé par un administrateur. Vous pouvez à présent vous connecter ! Cliquez sur le lien suivant pour vous connecter"
   action_text: "Se connecter"
 

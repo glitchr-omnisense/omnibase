@@ -53,8 +53,8 @@ changePassword:
 resetPassword:
     title: "Réinitialiser votre mot de passe"
     descriptionRequest: "Si tu as oublié ton mot de passe ou si tu veux le réinitialiser, tu es au bon endroit !.
-    Merci d'écrire ton adresse email dans le champ à cet effet.
-    Si ton adresse est utilisée sur notre site, tu recevras un email permettant de réinitialiser ton mot de passe."
+      Merci d'écrire ton adresse email dans le champ à cet effet.
+      Si ton adresse est utilisée sur notre site, tu recevras un email permettant de réinitialiser ton mot de passe."
     descriptionRequest._polite: "Si vous avez oublié votre mot de passe ou si vous voulez le réinitialiser, vous êtes au bon endroit ! Merci d'écrire votre adresse e-mail dans le champ à cet effet. Si votre adresse est utilisée sur notre site, vous recevrez un e-mail permettant de réinitialiser votre mot de passe."
     description: "Tu t'appretes à changer de mot de passe ! Choisis en un nouveau."
     description._polite: "Vous vous apprêtez à changer de mot de passe ! Choisissez-en un nouveau."

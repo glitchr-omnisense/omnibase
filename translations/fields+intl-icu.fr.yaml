@@ -77,7 +77,7 @@ password:
     min_length: "{0, plural,
         =1 {Le mot de passe doit contenir au moins # caractère.}
         other {Le mot de passe doit contenir au moins # caractères.}
-    }"
+      }"
 
 clipboard:
   info:

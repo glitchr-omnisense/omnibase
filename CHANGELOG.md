@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: six catalogues read alike by every YAML parser
+- A double-quoted message over several lines had a line at its key's own indentation
+  (`fields+intl-icu.fr.yaml`'s `password.min_length`, line 80; `emails+intl-icu.fr.yaml`'s
+  `adminApprovalConfirm.content`; `forms+intl-icu.{en,fr}.yaml`'s
+  `resetPassword.descriptionRequest`; `validators+intl-icu.en.yaml`'s `password.min_length`;
+  `validators+intl-icu.fr.yaml`'s `file.mime_type` and `password.min_length`). YAML 1.2 wants
+  the continuation lines of a flow scalar in a block mapping deeper than its key: Symfony's
+  YAML is lenient and read the message, a parser that follows the specification (JavaScript's
+  `yaml`, which lesringostars-react reads the catalogues with) refused the whole file. Those
+  lines are indented one step deeper; Symfony reads every catalogue exactly as before (the 28
+  files parsed before and after, equal), and `yaml` now reads the six as Symfony does.
+  `tests/Translation/QuotedScalarIndentationTest` keeps it so.
+
 ### Changed
 - **The repositories behind interfaces** (audit "lesringostars face au master plan", step R15;
   Marco's bridge principle, the other half of R14): what a site's code and the core type-hint
