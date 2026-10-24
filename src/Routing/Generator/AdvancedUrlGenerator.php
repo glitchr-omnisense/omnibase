@@ -271,9 +271,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             $locale ??= array_key_exists("_locale", $routeParameters) ? self::$router->getLocalizer()->getLocaleLang($routeParameters["_locale"]) : self::$router->getLocalizer()->getLocaleLang();
             try {
-                return parent::generate($cachedRoute["_name"] . ($locale ? "." . $locale : ""), $routeParameters, $referenceType);
+                return self::withoutEmptySegments(parent::generate($cachedRoute["_name"] . ($locale ? "." . $locale : ""), $routeParameters, $referenceType), $referenceType);
             } catch (Exception $_) {
-                return parent::generate($cachedRoute["_name"], $routeParameters, $referenceType);
+                return self::withoutEmptySegments(parent::generate($cachedRoute["_name"], $routeParameters, $referenceType), $referenceType);
             }
         }
 
@@ -305,11 +305,33 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             // the first address of a route in the cache's life differ from every later one - a slash before
             // the query (/chroniques/?page=2, then /chroniques?page=2), the root's slash dropped
             // (http://localhost, then http://localhost/) -, so a page's links depended on the order they
-            // were made in.
-            return $routeUrl;
+            // were made in. Only an empty segment of the path is dropped, the first time as every time after:
+            // a variable given empty (path("app_wishlist", {store: null})) made /boutique//wishlist where the
+            // router does not check requirements (strict_requirements: null), which sanitize_url() cleaned
+            // in the first address only.
+            return self::withoutEmptySegments($routeUrl, $referenceType);
         }
 
         throw new RouteNotFoundException("No valid route found for `$routeName`. Candidate routes are ". implode(", ", array_keys($routes)). "(please check mandatory variables?)");
+    }
+
+    /**
+     * The address without an empty segment in its path ("/boutique//wishlist" is "/boutique/wishlist"); its
+     * scheme, host, query and fragment as they were, a path's trailing slash kept. A network path
+     * (//host/path, UrlGeneratorInterface::NETWORK_PATH) keeps its leading host.
+     */
+    public static function withoutEmptySegments(string $url, int $referenceType = self::ABSOLUTE_PATH): string
+    {
+        if (!str_contains($url, "//")) {
+            return $url;
+        }
+
+        $cut = strcspn($url, "?#");
+        $authority = $referenceType === self::NETWORK_PATH ? '~^//[^/?#]*~' : '~^[a-z][a-z0-9+.-]*://[^/?#]*~i';
+        $start = preg_match($authority, $url, $match) ? strlen($match[0]) : 0;
+        $path = substr($url, $start, $cut - $start);
+
+        return substr($url, 0, $start) . preg_replace('#/{2,}#', '/', $path) . substr($url, $cut);
     }
 
     /** The compiled routes' names by their name before the first dot, in their order, each preceded by its name without the default locale. */
