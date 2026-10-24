@@ -3,6 +3,7 @@
 namespace Base\Bridge\Symfony;
 
 use Base\Screen\File;
+use Base\Screen\Redirect;
 use Base\Screen\Json;
 use Base\Screen\Shell;
 use Base\Screen\Template;
@@ -15,13 +16,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * "lesringostars face au master plan"): an action written once for every
  * host - a plain class whose #[Route] Symfony's router reads, as
  * omnibridge/laravel's Routing\ActionRoutes does - returns a View, a
- * Template, Json, a Shell or a File, and the ScreenResponder answers it;
+ * Template, Json, a Shell, a File or a Redirect, and the ScreenResponder answers it;
  * null from an action declared to return one of them is no such page (404).
  * A controller that answers a Response itself is left alone.
  */
 final class ActionResults
 {
-    private const RESULTS = [View::class, Template::class, Json::class, Shell::class, File::class];
+    private const RESULTS = [View::class, Template::class, Json::class, Shell::class, File::class, Redirect::class];
 
     public function __construct(private readonly ScreenResponder $responder)
     {

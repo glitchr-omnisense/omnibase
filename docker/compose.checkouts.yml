@@ -27,6 +27,9 @@ services:
       # omniscient/omnibridge as checked out over the image's (audit R14): Omnibridge\Schema, which
       # the Doctrine checkout above and the core's Base\Database\Schema read.
       - ${OMNIBRIDGE:-../../../omnibridge}/core:/srv/demo/vendor/omniscient/omnibridge:ro
+      # omnibridge/twig as checked out over the image's (audit R24): its HelperExtension (|at,
+      # |emoji_only), which the core's Twig extensions leave to it (FrameworkFreeExtensionsTest).
+      - ${OMNIBRIDGE:-../../../omnibridge}/twig:/srv/demo/vendor/omnibridge/twig:ro
       - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
       - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
       - ./demo.sh:/usr/local/bin/demo:ro

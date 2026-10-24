@@ -718,6 +718,7 @@ return [
     Base\Screen\Json::class,
     Base\Screen\Link::class,
     Base\Screen\Negotiation::class,
+    Base\Screen\Redirect::class,
     Base\Screen\Reply::class,
     Base\Screen\Screen::class,
     Base\Screen\Shape::class,

@@ -8,6 +8,7 @@ use Base\Screen\File;
 use Base\Screen\Frame;
 use Base\Screen\Json;
 use Base\Screen\Negotiation;
+use Base\Screen\Redirect;
 use Base\Screen\Screen;
 use Base\Screen\Shell;
 use Base\Screen\Template;
@@ -48,7 +49,7 @@ class ScreenResponder
     }
 
     /** @param array<string, mixed> $legacy a View's variables of before, for a site's own template */
-    public function respond(Request $request, View|Template|Json|Shell|File|null $result, array $legacy = [], ?Frame $frame = null): Response
+    public function respond(Request $request, View|Template|Json|Shell|File|Redirect|null $result, array $legacy = [], ?Frame $frame = null): Response
     {
         if (null === $result) {
             throw new NotFoundHttpException();

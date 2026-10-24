@@ -29,6 +29,7 @@ use Omnibridge\React\Protocol;
  * - A Shell: omnibridge/react's protocol - the shell on a first visit, the
  *   page in JSON within the front end, 409 for another version.
  * - A File: the file, as it is stored.
+ * - A Redirect: the client sent to its address (Location), with its status.
  *
  * A screen's props never take a key of the frame's (Frame::RESERVED): the
  * frame's would win and the screen's be lost without a word, so such a screen
@@ -62,7 +63,7 @@ final class Negotiation
     }
 
     /** @param array<string, mixed> $legacy a View's variables of before, for a site's own template */
-    public function answer(View|Template|Json|Shell|File $result, Visit $visit, array $legacy = [], ?Frame $frame = null): Answer
+    public function answer(View|Template|Json|Shell|File|Redirect $result, Visit $visit, array $legacy = [], ?Frame $frame = null): Answer
     {
         return match (true) {
             $result instanceof View => $this->view($result, $visit, $legacy, $frame),
@@ -70,6 +71,7 @@ final class Negotiation
             $result instanceof Json => new Answer($result->status, self::encode($this->rendered($result->data)), [], $result->cache, json: true),
             $result instanceof Shell => $this->shell($result, $visit),
             $result instanceof File => new Answer(200, '', null !== $result->type ? ['Content-Type' => $result->type] : [], $result->cache, file: $result->path),
+            $result instanceof Redirect => new Answer($result->status, '', ['Location' => $result->url], $result->cache),
         };
     }
 
