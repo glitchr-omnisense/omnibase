@@ -20,9 +20,10 @@ use Symfony\Component\String\Inflector\EnglishInflector;
  *
  * - #[Alias] (AliasTrait::__call()): get/set/is/has of an alias - the property
  *   carrying #[Alias(column: ...)], or the `alias` of a class-level
- *   #[Alias(column: ..., alias: ...)] - and add/remove of a class-level alias,
- *   as AliasTrait resolves them: Article::getDestination() is getParent(),
- *   Comment::getReplies() getChildren(), addReplies() addChild();
+ *   #[Alias(column: ..., alias: ...)] - and add/remove of an alias or of its
+ *   singular, as AliasTrait resolves them: Article::getDestination() is
+ *   getParent(), Comment::getReplies() getChildren(), addReply() addChild(),
+ *   Destination::addGallery() addChild() (R29);
  * - translations (TranslatableTrait::__call()): a public method of the
  *   entity's translation class (X + "Intl", else its parent's), called on the
  *   entity - Location::getLabel() is TagIntl::getLabel() on translate().
@@ -70,7 +71,7 @@ final class EntityAccessorsExtension implements MethodsClassReflectionExtension
             [$properties, $classLevel] = $this->aliases($class);
             $action = $match[1];
             $alias = lcfirst($match[2]);
-            $column = $classLevel[$alias] ?? (\in_array($action, ['add', 'remove'], true) ? null : ($properties[$alias] ?? null));
+            $column = \in_array($action, ['add', 'remove'], true) ? self::collection($properties + $classLevel, $alias) : ($classLevel[$alias] ?? $properties[$alias] ?? null);
             if (null !== $column) {
                 $candidates = [$action.ucfirst($column)];
                 if (\in_array($action, ['add', 'remove'], true)) {
@@ -90,6 +91,26 @@ final class EntityAccessorsExtension implements MethodsClassReflectionExtension
             $translation = $this->translationClass($class);
             if (null !== $translation && $translation->hasNativeMethod($methodName) && $translation->getNativeMethod($methodName)->isPublic()) {
                 return $translation->getNativeMethod($methodName);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The column an add or remove means, as AliasTrait resolves it (R29): the alias as given, else its plural - the
+     * singular of a property alias (addGallery() of $galleries) or of a class one (addReply() of "replies").
+     *
+     * @param array<string, string> $aliases alias => column
+     */
+    private static function collection(array $aliases, string $alias): ?string
+    {
+        if (isset($aliases[$alias])) {
+            return $aliases[$alias];
+        }
+        foreach ((new EnglishInflector())->pluralize($alias) as $plural) {
+            if (isset($aliases[$plural])) {
+                return $aliases[$plural];
             }
         }
 

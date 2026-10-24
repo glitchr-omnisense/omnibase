@@ -19,8 +19,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 /**
- * The notification center's HTTP surface: the list page, the read marks the
- * bell uses, the push subscription registry, and the service worker itself.
+ * The notification center's HTTP surface: the list page, the push
+ * subscription registry, and the service worker itself (the bell's payload,
+ * read marks and removals: Base\Controller\Action\Notification).
  *
  * Every mutation is a JSON POST carrying the "notifications" CSRF token in
  * its body (the toolbar renders it as data-csrf), same-origin only. They
@@ -76,64 +77,8 @@ class NotificationController extends AbstractController
     // The bell's payload (/notifications/latest) is an action written once for every host:
     // Base\Controller\Action\Notification\Latest (audit "lesringostars face au master plan", R27).
 
-    /**
-     * Body: {token, id?, read?} - one notification, or every unread one when
-     * id is absent. read defaults to true; false puts one back to unread.
-     */
-    #[Route("/notifications/read", name: "user_notifications_read", methods: ["POST"])]
-    public function MarkRead(Request $request): JsonResponse
-    {
-        $user = $this->getUser();
-        $vars = $this->body($request);
-        if (!$user instanceof User || !$this->csrfOk($vars)) {
-            return new JsonResponse(["success" => false], 403);
-        }
-
-        $read = !array_key_exists("read", $vars) || filter_var($vars["read"], FILTER_VALIDATE_BOOLEAN);
-        $isRead = null;
-        if (!empty($vars["id"])) {
-            $notification = $this->notificationRepository->findOneBy(["id" => (int) $vars["id"], "user" => $user]);
-            if ($notification) {
-                $notification->setIsRead($read);
-                $isRead = $read;
-            }
-        } else {
-            foreach ($this->notificationRepository->findBy(["user" => $user, "isRead" => false]) as $notification) {
-                $notification->setIsRead(true);
-            }
-        }
-        $this->entityManager->flush();
-
-        return new JsonResponse(["success" => true, "unread" => $this->countUnread($user), "isRead" => $isRead]);
-    }
-
-    /** Body: {token, id?} - deletes one notification, or every READ one when id is absent. */
-    #[Route("/notifications/delete", name: "user_notifications_delete", methods: ["POST"])]
-    public function Delete(Request $request): JsonResponse
-    {
-        $user = $this->getUser();
-        $vars = $this->body($request);
-        if (!$user instanceof User || !$this->csrfOk($vars)) {
-            return new JsonResponse(["success" => false], 403);
-        }
-
-        $deleted = [];
-        if (!empty($vars["id"])) {
-            $notification = $this->notificationRepository->findOneBy(["id" => (int) $vars["id"], "user" => $user]);
-            if ($notification) {
-                $deleted[] = $notification->getId();
-                $this->entityManager->remove($notification);
-            }
-        } else {
-            foreach ($this->notificationRepository->findBy(["user" => $user, "isRead" => true]) as $notification) {
-                $deleted[] = $notification->getId();
-                $this->entityManager->remove($notification);
-            }
-        }
-        $this->entityManager->flush();
-
-        return new JsonResponse(["success" => true, "deleted" => $deleted, "unread" => $this->countUnread($user)]);
-    }
+    // The bell's read marks and removals (/notifications/read, /notifications/delete) are actions written
+    // once for every host too: Base\Controller\Action\Notification\Read and Delete (R29).
 
     /** What the browser needs before it can subscribe: the VAPID public key, or null when push is off. */
     #[Route("/push/config", name: "push_config", methods: ["GET"])]

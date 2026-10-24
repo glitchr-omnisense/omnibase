@@ -15,7 +15,7 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
  * signed into before: tells the user by email (administrator's switch), and
  * on an account with no second factor, flags the session so the next page
  * offers - once, optionally - to set up a one-time code
- * (SecurityEnrolmentSubscriber, UserSettingsController::Enrolment).
+ * (SecurityEnrolmentSubscriber, Base\Controller\Action\Settings\Enrolment).
  *
  * "Browser" here means what UserTracker already means by it: a Connection,
  * keyed by the long-lived id it keeps in a cookie. A sign-in that has to

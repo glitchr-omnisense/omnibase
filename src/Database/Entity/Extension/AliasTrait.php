@@ -12,7 +12,10 @@ use Symfony\Component\String\Inflector\EnglishInflector;
 
 trait AliasTrait
 {
+    /** @var array<class-string, array<string, string>> per class: an alias of a property's #[Alias] => its column */
     private static array $aliasPropertyMap = [];
+    /** @var array<class-string, array<string, string>> per class: a property declared as an alias => its column (#[Alias] on the property) */
+    private static array $aliasCollectionMap = [];
     private static ?EnglishInflector $inflector = null;
 
     /** Build alias map once per class */
@@ -20,14 +23,51 @@ trait AliasTrait
     {
         $class = new ReflectionClass($obj);
         $map = [];
+        $properties = [];
         foreach ($class->getProperties() as $prop) {
             foreach ($prop->getAttributes(Alias::class) as $attr) {
                 /** @var Alias $alias */
                 $alias = $attr->newInstance();
                 $map[$alias->alias] = $alias->column;
+                // On a property, the alias is the property itself (Alias::loadClassMetadata()): what add*() and
+                // remove*() of its singular resolve to ($destination->addGallery() adds to its children).
+                if ('' === $alias->alias && '' !== $alias->column) {
+                    $properties[$prop->getName()] = $alias->column;
+                }
+            }
+        }
+        // The class's own aliases (#[Alias(column:, alias:)] on the class), which the metadata read too.
+        $classes = [];
+        for ($each = $class; $each; $each = $each->getParentClass()) {
+            foreach ($each->getAttributes(Alias::class) as $attr) {
+                $alias = $attr->newInstance();
+                if ('' !== $alias->alias && '' !== $alias->column) {
+                    $classes[$alias->alias] ??= $alias->column;
+                }
             }
         }
         self::$aliasPropertyMap[$class->getName()] = $map;
+        self::$aliasCollectionMap[$class->getName()] = $properties + $classes;
+    }
+
+    /**
+     * The column an add*() or remove*() means, its token read as the singular of an alias: "gallery" of
+     * the property alias $galleries, "reply" of the class alias "replies"; null for none.
+     */
+    private static function resolveCollectionAlias(string $class, string $token): ?string
+    {
+        $aliases = (self::$aliasCollectionMap[$class] ?? []) + array_filter(self::$aliasPropertyMap[$class] ?? [], 'is_string');
+        if (isset($aliases[$token])) {
+            return $aliases[$token];
+        }
+        self::$inflector ??= new EnglishInflector();
+        foreach (self::$inflector->pluralize($token) as $plural) {
+            if (isset($aliases[$plural])) {
+                return $aliases[$plural];
+            }
+        }
+
+        return null;
     }
 
     /** Reflection property fetch (safe, no __get) */
@@ -42,7 +82,11 @@ trait AliasTrait
         return null;
     }
 
-    /** Convert any iterable to array */
+    /**
+     * Convert any iterable to array
+     *
+     * @return array<mixed>
+     */
     private function toArray(mixed $value): array
     {
         if ($value instanceof Collection) return $value->toArray();
@@ -109,6 +153,7 @@ trait AliasTrait
         return false;
     }
 
+    /** @param array<mixed> $arguments */
     public function __call(string $name, array $arguments): mixed
     {
         $class = static::class;
@@ -153,10 +198,13 @@ trait AliasTrait
                 }
                 throw new AccessException("Cannot resolve {$action} for alias '{$aliasToken}' → '{$property}'");
 
-            case 'add':
-            case 'remove':
+            default: // add, remove (the pattern's last two actions)
                 if (self::$inflector === null) {
                     self::$inflector = new EnglishInflector();
+                }
+                // The singular of an alias (addGallery() of $galleries, addReply() of "replies"): its column's add or remove.
+                if (!isset($map[$aliasToken]) && null !== ($column = self::resolveCollectionAlias($class, $aliasToken))) {
+                    $property = $column;
                 }
                 $singulars = self::$inflector->singularize($property);
                 if (empty($singulars)) {
@@ -179,7 +227,5 @@ trait AliasTrait
                 }
                 return $this;
         }
-
-        throw new AccessException("Unsupported alias action in {$name}");
     }
 }

@@ -10,6 +10,27 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the bell's marks, the second factor's enrolment and the cookies' domain on every host
+
+What a sign-in still did only under Symfony (audit "lesringostars face au master plan", R29), written once:
+- actions (`src/Controller/Action`, read by both hosts' routers): `Notification\{Read, Delete}`
+  (`/notifications/read`, `/notifications/delete`, formerly `NotificationController::MarkRead()`, `Delete()`:
+  the bell's token in the JSON body checked through `Omnibridge\Contract\Tokens::isValid()`),
+  `Settings\{Enrolment, EnrolmentSkip, EmailCodeToggle}` (`/settings/security-required`, its `/skip`,
+  `/settings/2fa/email`, formerly `UserSettingsController::Enrolment()`, `EnrolmentSkip()`,
+  `TwoFactorAuthentication_ToggleEmail()`; a visitor sent to sign in; the account told through
+  `Settings\Notice`: a host's own notice, else the Notifier); an action is given `array $body` (what a POST
+  sent: its JSON object, else its form fields) as it is given `array $query` (`ActionArguments`);
+- `Base\Auth\EnrolmentPrompt`: when a signed-in account is sent to the enrolment (the offer after a new
+  device, a required second factor until "not now"), `SecurityEnrolmentSubscriber`'s rule, which omnibridge/laravel
+  asks too;
+- `Base\Routing\CookieDomain`: the domain of the site's cookies (the browser's PHPUSERID),
+  `AdvancedRouter::getDomain()`'s rule, framework-free;
+- `Redirect` carries more headers (a cookie: the enrolment's "no thanks");
+- `AliasTrait`: add*() and remove*() of an alias's singular reach their column (`addGallery()` of a property
+  `#[Alias(column: "children")] $galleries`, `addReply()` of a class alias "replies"; they failed at run time),
+  and `EntityAccessorsExtension` knows them for PHPStan.
+
 ### Changed: the core without direct Doctrine on lesringostars' path
 
 The classes an application's pages, sign-in and crontab reach (measured on lesringostars: the lines its

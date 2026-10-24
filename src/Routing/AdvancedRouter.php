@@ -760,14 +760,10 @@ class AdvancedRouter implements AdvancedRouterInterface, ResetInterface
         return $domainFallback ?: null;
     }
 
+    /** The domain of the site's cookies: CookieDomain's rule (the request's domain when configured, else the first configured). */
     public function getDomain(?string $locale = null, ?string $environment = null): ?string
     {
-        $parsedUrl = parse_url2(get_url());
-        if (!in_array($parsedUrl["domain"] ?? null, $this->getDomainFallbacks())) {
-            return $this->getDomainFallback();
-        }
-
-        return $parsedUrl["domain"] ?? null;
+        return CookieDomain::of((string) get_url(), array_values(array_filter($this->getDomainFallbacks(), 'is_string')));
     }
 
     public function getRouteIndex(): string

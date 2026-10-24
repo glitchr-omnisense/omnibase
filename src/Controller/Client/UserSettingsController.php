@@ -16,7 +16,6 @@ use Base\Bridge\Symfony\AccountScreens;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Screen\View;
 use Base\Entity\User\Notification;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -145,72 +144,9 @@ class UserSettingsController extends AbstractController
         ]));
     }
 
-    /**
-     * The one-off "your account needs a second factor" prompt.
-     *
-     * Reached only by being redirected here (see SecurityEnrolmentSubscriber),
-     * and only while the administrator requires a second factor this account
-     * does not have. It offers the same three methods the settings page does,
-     * plus a way out: the skip is deliberate, so nobody is trapped mid-task by
-     * a policy that changed under them. While enrolment is mandatory that
-     * answer lives in the session and the prompt returns on the next sign-in;
-     * SecurityPolicy::canPostponeEnrolmentPermanently() is what decides.
-     */
-    #[Route("/settings/security-required", name: "user_settings_enrolment")]
-    public function Enrolment(Request $request)
-    {
-        $user = $this->getUser();
-        $mandatory = $this->securityPolicy->needsEnrolment($user);
-        // The same page doubles as the optional offer made after a sign-in
-        // from an unknown browser (NewDeviceSubscriber) - different wording,
-        // and a "no thanks" that is remembered for good.
-        $offered = !$mandatory && $user
-            && $request->getSession()->get(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT)
-            && !$this->securityPolicy->hasSecondFactor($user);
-        if (!$mandatory && !$offered) {
-            $request->getSession()->remove(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
-
-            return $this->redirectToRoute('user_settings');
-        }
-
-        return $this->render('client/user/settings_enrolment.html.twig', [
-            'user' => $user,
-            'policy' => $this->securityPolicy,
-            'optional' => $offered,
-            // No "not now" where the application allows none (base.security.two_factor.postpone: false).
-            'skippable' => $offered || $this->securityPolicy->canSkipEnrolment($user),
-        ]);
-    }
-
-    #[Route("/settings/security-required/skip", name: "user_settings_enrolment_skip", methods: ["POST"])]
-    public function EnrolmentSkip(Request $request)
-    {
-        if (!$this->isCsrfTokenValid('2fa_enrolment_skip', $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $session = $request->getSession();
-        $offered = (bool) $session->get(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
-
-        // A hand-made POST gets the same answer as the missing button.
-        if (!$this->securityPolicy->canSkipEnrolment($this->getUser())) {
-            return $this->redirectToRoute('user_settings_enrolment');
-        }
-        $session->remove(SecurityPolicy::SESSION_NEW_DEVICE_PROMPT);
-        $session->set(SecurityPolicy::SESSION_ENROLMENT_SKIPPED, true);
-
-        $notification = new Notification("@notifications.settings.enrolmentSkipped");
-        $notification->send("info");
-
-        $response = $this->redirectToRoute($offered ? 'user_profile' : 'user_settings');
-        if ($offered) {
-            // Declined once = not asked again from this browser for a year;
-            // the cookie is the only memory there is without a per-user column.
-            $response->headers->setCookie(Cookie::create(SecurityPolicy::COOKIE_NEW_DEVICE_PROMPT_DISMISSED, '1', new \DateTimeImmutable('+1 year'), '/', null, null, true, false, Cookie::SAMESITE_LAX));
-        }
-
-        return $response;
-    }
+    // The one-off "your account needs a second factor" page and its "not now"
+    // (/settings/security-required, /settings/security-required/skip) are actions written once
+    // for every host: Base\Controller\Action\Settings\Enrolment and EnrolmentSkip (R29).
 
     #[Route("/settings/passkeys/{id}/rename", name: "user_settings_passkey_rename", methods: ["POST"])]
     public function RenamePasskey(int $id, Request $request, Passkeys $passkeyRepository)
@@ -379,44 +315,8 @@ class UserSettingsController extends AbstractController
         return $this->redirectToRoute('user_settings');
     }
 
-    #[Route("/settings/2fa/email", name: "user_settings_2fa_email_toggle", methods: ["POST"])]
-    public function TwoFactorAuthentication_ToggleEmail(Request $request)
-    {
-        if ($refusal = $this->refuseDemoAccount()) {
-            return $refusal;
-        }
-
-        if (!$this->isCsrfTokenValid('2fa_email', $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $user = $this->getUser();
-        $enabling = !$user->isEmailAuthEnabled();
-
-        if ($enabling && !$this->securityPolicy->canEnableTwoFactor()) {
-            $notification = new Notification("@notifications.settings.twoFactorUnavailable");
-            $notification->send("warning");
-
-            return $this->redirectToRoute('user_settings');
-        }
-
-        // Turning email codes off is only a problem when they are the second
-        // factor the site insists on - i.e. when nothing else would be left.
-        if (!$enabling && !$this->securityPolicy->canDisableTwoFactor($user) && !$user->isTotpAuthenticationEnabled()) {
-            $notification = new Notification("@notifications.settings.twoFactorMandatory");
-            $notification->send("warning");
-
-            return $this->redirectToRoute('user_settings');
-        }
-
-        $user->setEmailAuthEnabled($enabling);
-        $this->userRepository->flush();
-
-        $notification = new Notification($user->isEmailAuthEnabled() ? "@notifications.settings.emailCodeEnabled" : "@notifications.settings.emailCodeDisabled");
-        $notification->send("success");
-
-        return $this->redirectToRoute('user_settings');
-    }
+    // The e-mailed code turned on or off (/settings/2fa/email) is an action written once for every host:
+    // Base\Controller\Action\Settings\EmailCodeToggle (R29).
 
     #[Route("/settings/2fa/qr-code", name: "user_settings_2fa_qrcode")]
     public function TwoFactorAuthentication_QrCode(Request $request, TotpAuthenticatorInterface $totpAuthenticator)
