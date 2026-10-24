@@ -1612,9 +1612,7 @@ class ServiceEntityParser
 
                 if ($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
                     // Cast to array
-                    if ($this->classMetadata->hasAssociation($fieldHead)) {
-                        $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
-                    }
+                    $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
 
                     if (!is_array($fieldValue)) {
                         $fieldValue = ($fieldValue !== null) ? [$fieldValue] : [];
@@ -1626,9 +1624,7 @@ class ServiceEntityParser
 
                     if (!is_array($fieldValue)) {
 
-                        if ($this->classMetadata->hasAssociation($fieldHead)) {
-                            $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
-                        }
+                        $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
 
                         if(!$isEmpty && !$isNotEmpty && !$isBool) {
                             $queryBuilder->setParameter($fieldID, $fieldValue, $this->dateTypeOf($fieldHead, $fieldValue));
@@ -1637,9 +1633,7 @@ class ServiceEntityParser
 
                         $fieldValue = array_filter($fieldValue);
                         if ($fieldValue) {
-                            if ($this->classMetadata->hasAssociation($fieldHead)) {
-                                $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
-                            }
+                            $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
 
                             $queryBuilder->setParameter($fieldID, $fieldValue);
                         }
