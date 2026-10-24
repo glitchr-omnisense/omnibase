@@ -7,15 +7,15 @@ use Base\Bridge\Symfony\LocalizerLocales;
 use Omnibridge\Symfony\RouterUrls;
 use Omnibridge\Symfony\Contract\SecurityAccess;
 use Omnibridge\Symfony\TranslatorTranslations;
-use Base\Contract\Access;
-use Base\Contract\Files;
-use Base\Contract\Locales;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Files;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
-use Base\Contract\Urls;
+use Omnibridge\Contract\Urls;
 use Base\DependencyInjection\Compiler\Pass\ContractsPass;
 use Base\Entity\Thread;
 use Base\Service\BaseService;
-use Omnibridge\Twig\Contract\Translations;
+use Omnibridge\Contract\Translations;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -84,7 +84,7 @@ final class ContractAdaptersTest extends KernelTestCase
      * alias it - the same object autowired by either, in the locator under
      * either, and what the registry answers.
      */
-    public function testEachContractIsOneServiceUnderItsOwnAndItsFormerNames(): void
+    public function testEachContractIsOneServiceInTheLocatorAndTheRegistry(): void
     {
         $container = static::getContainer();
         $locator = $container->get(ContractsPass::SERVICE);
@@ -100,7 +100,7 @@ final class ContractAdaptersTest extends KernelTestCase
         self::assertSame(Runtime::urls(), $container->get(\Omnibridge\Contract\Urls::class));
         self::assertSame(Runtime::urls(), $container->get(Urls::class));
         self::assertSame(Runtime::translations(), $container->get(Translations::class));
-        self::assertSame(Runtime::translations(), $container->get(\Base\Contract\Translations::class));
+        self::assertSame(Runtime::translations(), $container->get(\Omnibridge\Contract\Translations::class));
     }
 
     public function testANewKernelReplacesTheRegistrysServices(): void

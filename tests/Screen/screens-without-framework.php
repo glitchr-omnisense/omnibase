@@ -12,7 +12,7 @@
  * them, as a controller hands them to a view bridge. Returns their props.
  */
 
-use Base\Contract\Locales;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Pictures;
 use Base\Contract\Runtime;
 use Base\Contract\Texts;

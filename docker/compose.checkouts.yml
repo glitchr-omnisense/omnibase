@@ -18,6 +18,7 @@ services:
       # checked out as well.
       - ${OMNIBASE_PLUGINS:-../..}/blog:/srv/demo/vendor/omnibase/blog
       - ${OMNIBASE_PLUGINS:-../..}/classroom:/srv/demo/vendor/omnibase/classroom
+      - ${OMNIBASE_PLUGINS:-../..}/agenda:/srv/demo/vendor/omnibase/agenda
       # omnibridge/react, which the image does not install: the core's ScreenResponderTest
       # speaks its protocol when it finds the checkout here (OMNIBRIDGE: ../../../omnibridge).
       - ${OMNIBRIDGE:-../../../omnibridge}/react:/srv/omnibridge/react:ro

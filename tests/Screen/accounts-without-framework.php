@@ -20,8 +20,8 @@
  */
 
 use Base\Contract\Runtime;
-use Base\Contract\Tokens;
-use Base\Contract\Urls;
+use Omnibridge\Contract\Tokens;
+use Omnibridge\Contract\Urls;
 use Base\Entity\User\Notification;
 use Base\Screen\Account\AccountSummary;
 use Base\Screen\Account\Action;

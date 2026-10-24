@@ -10,6 +10,18 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Removed: the former names of A1 and A2
+
+Removed at omnibase 4's final pass, once no site and no bundle under the workspace named them (the last
+callers, omnibase/blog's `BlogScreens` and lesringostars' screens, now name `Omnibridge\Contract\Urls`):
+`src/Resources/Aliases.php` and its `autoload.files` line; `Base\Contract\{Urls, Translations, Locales,
+Access, Sessions, Tokens, Files, Routes, Environment, SystemClock}` and `Base\Exception\MissingContractException`
+(name `Omnibridge\Contract\*`, `Omnibridge\SystemClock`, `Omnibridge\Exception\MissingContractException`);
+`Base\Bridge\Symfony\{RouterUrls, TranslatorTranslations, KernelEnvironment, SecurityAccess, SecuritySessions,
+CsrfTokens, FileLinks}` (name omnibridge/symfony's `Omnibridge\Symfony\*`); their service ids, and
+`ContractsPass::FORMER` is empty. omnibridge/twig's `Omnibridge\Twig\Contract\{Urls, Translations}` go with
+them. Test: `tests/Contract/FormerNamesTest` (none of them is declared).
+
 ### Fixed: no empty segment in a generated address
 
 `AdvancedUrlGenerator::generate()` gave `/boutique//wishlist` for `path("app_wishlist", {store: null})` where the
