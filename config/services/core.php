@@ -153,6 +153,7 @@ return static function (ContainerConfigurator $container): void {
     // AdvancedRouter
     $services->set('Base\Routing\AdvancedRouter')
         ->tag('twig.runtime')
+        ->tag('kernel.reset', ['method' => 'reset'])
         ->args([
             service('router'),
             service('request_stack'),
