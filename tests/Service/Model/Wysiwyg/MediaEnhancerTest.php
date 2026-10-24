@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service\Model\Wysiwyg;
 
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Wysiwyg\MediaEnhancer;
 use PHPUnit\Framework\TestCase;
@@ -11,13 +11,14 @@ use Psr\Log\LoggerInterface;
 class MediaEnhancerTest extends TestCase
 {
     private MediaServiceInterface $mediaService;
-    private FlysystemInterface $flysystem;
+    /** @var Storages&\PHPUnit\Framework\MockObject\MockObject */
+    private Storages $flysystem;
     private LoggerInterface $logger;
 
     protected function setUp(): void
     {
         $this->mediaService = $this->createMock(MediaServiceInterface::class);
-        $this->flysystem = $this->createMock(FlysystemInterface::class);
+        $this->flysystem = $this->createMock(Storages::class);
         $this->logger = $this->createMock(LoggerInterface::class);
     }
 

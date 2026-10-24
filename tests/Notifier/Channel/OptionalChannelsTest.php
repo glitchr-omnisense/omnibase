@@ -44,7 +44,10 @@ class OptionalChannelsTest extends TestCase
         $entityManager->method('getRepository')->willReturn($repository);
         $entityManager->expects($this->never())->method('persist');
 
-        return new InAppChannel($entityManager);
+        $users = $this->createMock(\Base\Repository\Users::class);
+        $users->method('findOneBy')->willReturn(null);
+
+        return new InAppChannel($entityManager, $users);
     }
 
     public function testANotifyPolicySendDoesNotThrowWithoutVapidKeys(): void

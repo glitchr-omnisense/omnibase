@@ -4,7 +4,7 @@ namespace Base\Security;
 
 use Base\Entity\User;
 use Base\Entity\User\Connection;
-use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\Connections;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -22,7 +22,7 @@ class ConnectionTracker
     public const PHPUSERID = "PHPUSERID";
 
     /**
-     * @var ConnectionRepository
+     * @var Connections
      */
     protected $connectionRepository;
 
@@ -35,7 +35,7 @@ class ConnectionTracker
      * @param (\Closure(): string)|null  $uniqid the browser's PHPUSERID (made and kept by the host when it has none)
      * @param (\Closure(): ?string)|null $host   the host the request reached
      */
-    public function __construct(EntityManagerInterface $entityManager, ConnectionRepository $connectionRepository, private readonly ?\Closure $uniqid = null, private readonly ?\Closure $host = null)
+    public function __construct(EntityManagerInterface $entityManager, Connections $connectionRepository, private readonly ?\Closure $uniqid = null, private readonly ?\Closure $host = null)
     {
         $this->entityManager = $entityManager;
         $this->connectionRepository = $connectionRepository;
@@ -53,7 +53,7 @@ class ConnectionTracker
     public function getCurrentConnection(?User $user = NULL, bool $allowNewConnection = true): ?Connection
     {
         // @phpstan-ignore method.notFound (the repository's findOneBy<Fields>() of omnibase's ServiceEntityRepository)
-        $connection = $this->connectionRepository->findOneByUniqidAndUser($this->getUniqid(), ["user" => $user]);
+        $connection = $this->connectionRepository->oneByUniqidAndUser($this->getUniqid(), $user);
         if ($connection == NULL && $user != NULL && $allowNewConnection) $connection = $this->createNewConnection($user);
 
         return $connection;

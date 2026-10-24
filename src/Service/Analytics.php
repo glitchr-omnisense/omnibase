@@ -2,9 +2,9 @@
 
 namespace Base\Service;
 
-use Base\Repository\Analytics\PageViewRepository;
-use Base\Repository\Analytics\VisitRepository;
-use Base\Repository\Analytics\PageVisitRepository;
+use Base\Repository\Analytics\PageViews;
+use Base\Repository\Analytics\Visits;
+use Base\Repository\Analytics\PageVisits;
 use Base\Entity\Analytics\PageView;
 use Base\Entity\Analytics\Visit;
 use Base\Service\Analytics\UserAgentClassifier;
@@ -24,12 +24,12 @@ use Base\Service\Analytics\UserAgentClassifier;
 class Analytics
 {
     public function __construct(
-        private readonly PageViewRepository $pageViews,
-        private readonly VisitRepository $visits,
+        private readonly PageViews $pageViews,
+        private readonly Visits $visits,
         private readonly UserAgentClassifier $userAgentClassifier,
         // Nullable so a caller wiring the first three by hand keeps working;
         // without it unique views are simply not recorded.
-        private readonly ?PageVisitRepository $pageVisits = null,
+        private readonly ?PageVisits $pageVisits = null,
     ) {
     }
 

@@ -2,13 +2,13 @@
 
 namespace Base\Service\Model\Wysiwyg;
 
-use Base\Repository\Layout\SemanticRepository;
+use Base\Repository\Layout\Semantics;
 
 class SemanticEnhancer implements SemanticEnhancerInterface
 {
-    protected SemanticRepository $semanticRepository;
+    protected Semantics $semanticRepository;
 
-    public function __construct(SemanticRepository $semanticRepository)
+    public function __construct(Semantics $semanticRepository)
     {
         $this->semanticRepository = $semanticRepository;
     }
@@ -20,7 +20,7 @@ class SemanticEnhancer implements SemanticEnhancerInterface
         }
 
         $words ??= [];
-        $semantics = $this->semanticRepository->cacheAll()->getResult();
+        $semantics = $this->semanticRepository->every();
 
         $array = $strOrArray;
         if (!is_array($array)) {

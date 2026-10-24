@@ -4,45 +4,42 @@ namespace Base\Service\Model\Wysiwyg;
 
 use App\Entity\User;
 use Base\Entity\Thread;
-use Base\Repository\Thread\MentionRepository;
-use Base\Repository\UserRepository;
+use Base\Database\Repository\Repositories;
+use Base\Repository\Thread\Mentions;
+use Base\Repository\Users;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\ObfuscatorInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
 
 class MentionEnhancer implements MentionEnhancerInterface
 {
-    /**
-     * @var MentionRepository
-     */
-    protected MentionRepository $mentionRepository;
+    /** The mentions, the accounts and any linkable entity by their interfaces (step R28), where it asked the entity manager. */
+    protected Mentions $mentionRepository;
 
-    /**
-     * @var UserRepository
-     */
-    protected UserRepository $userRepository;
+    protected Users $userRepository;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
+    protected Repositories $repositories;
 
     /**
      * @var ObfuscatorInterface
      */
     protected ObfuscatorInterface $obfuscator;
 
-    public function __construct(MentionRepository $mentionRepository, UserRepository $userRepository, EntityManagerInterface $entityManager, ObfuscatorInterface $obfuscator)
+    public function __construct(Mentions $mentionRepository, Users $userRepository, Repositories $repositories, ObfuscatorInterface $obfuscator)
     {
         $this->mentionRepository = $mentionRepository;
         $this->userRepository = $userRepository;
-        
-        $this->entityManager = $entityManager; 
+        $this->repositories = $repositories;
         $this->obfuscator = $obfuscator;
     }
 
-    public function getRepository(): MentionRepository
+    public function mentions(): Mentions
+    {
+        return $this->mentionRepository;
+    }
+
+    /** @deprecated since omnibase 4.0 (step R28), the mentions by their interface: mentions() */
+    public function getRepository(): Mentions
     {
         return $this->mentionRepository;
     }
@@ -92,7 +89,7 @@ class MentionEnhancer implements MentionEnhancerInterface
             }
         }
 
-        return $mentionees ? $this->userRepository->cacheById($mentionees)->getResult() : [];        
+        return $mentionees ? $this->userRepository->byIds($mentionees) : [];        
     }
 
     public function enhance(string|array|null $strOrArray, array $attributes = []): string|array|null
@@ -140,13 +137,12 @@ class MentionEnhancer implements MentionEnhancerInterface
                     
                     if(class_exists($className) && $id !== NULL) {
 
-                        $entityRepository = $this->entityManager->getRepository($className);
-                        if($entityRepository && is_instanceof($className, LinkableInterface::class)) {
+                        if(is_instanceof($className, LinkableInterface::class)) {
 
-                            $entity = $entityRepository->cacheOneById($id);
+                            $entity = $this->repositories->oneById($className, $id);
                             if($entity) {
                                 $tagLink->setAttribute("href", $entity->__toLink($parameters) ?? "");
-                                $tagLink->nodeValue = $entity?->__toString() ?? "";
+                                $tagLink->nodeValue = $entity->__toString() ?? "";
                             }
                         }
                     }

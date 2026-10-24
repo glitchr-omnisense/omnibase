@@ -82,7 +82,7 @@ class MediaService extends FileService implements MediaServiceInterface
         Environment             $twig,
         MediaRouter             $router,
         ObfuscatorInterface     $obfuscator,
-        FlysystemInterface      $flysystem,
+        Storages                $flysystem,
         ParameterBagInterface   $parameterBag,
         ImagineInterface        $imagineBitmap,
         ImagineInterface        $imagineSvg,

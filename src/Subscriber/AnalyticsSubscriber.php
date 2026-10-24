@@ -5,7 +5,7 @@ namespace Base\Subscriber;
 use App\Entity\User;
 use Base\Entity\User as BaseUser;
 
-use App\Repository\UserRepository;
+use Base\Repository\Users;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\TranslatorInterface;
 use Google\Service\GaService;
@@ -34,9 +34,9 @@ class AnalyticsSubscriber implements EventSubscriberInterface
      */
     protected Environment $twig;
     /**
-     * @var UserRepository
+     * @var Users
      */
-    protected UserRepository $userRepository;
+    protected Users $userRepository;
     /**
      * @var ?GaService
      */
@@ -47,7 +47,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         AdvancedRouterInterface       $router,
         TranslatorInterface   $translator,
         Environment           $twig,
-        UserRepository        $userRepository,
+        Users                 $userRepository,
         ?GaService            $googleAnalyticsService = null
     )
     {
@@ -89,11 +89,9 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         // This request has variable datetime this will nto be cached
         // @TODO Round within absolute timegate; 15:00; 15:05, 15:10 etc..
         $onlineUsers = $user ?
-            $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) :
-            $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay());
-
-        $onlineUsers = $onlineUsers->getResult();
-        $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
+            $this->userRepository->activeWithin(User::getOnlineDelay(), $user->getId()) :
+            $this->userRepository->activeWithin(User::getOnlineDelay());
+        $activeUsers = array_filter($onlineUsers, fn($u) => $u->isActive());
 
         $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),

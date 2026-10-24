@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\BaseService;
+use Base\Service\Locator;
 
 use Base\Service\EditorEnhancerInterface;
 use Base\Service\WysiwygEnhancerInterface;
@@ -55,7 +55,7 @@ final class HtmlTwigExtension extends AbstractExtension
         if ($mediaConfig) {
             
             $mediaConfig = is_array($mediaConfig) ? $mediaConfig : [];
-            $mediaConfig["storage"] ??= BaseService::getParameterBag("base.twig.editor.storage");
+            $mediaConfig["storage"] ??= Locator::getParameterBag("base.twig.editor.storage");
 
             $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson, $mediaConfig);
         }

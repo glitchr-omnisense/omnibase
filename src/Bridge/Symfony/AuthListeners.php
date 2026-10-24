@@ -4,7 +4,7 @@ namespace Base\Bridge\Symfony;
 
 use Base\Auth\Listener\GuardSignIn;
 use Base\Auth\Listener\WarnNewDevice;
-use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\Connections;
 use Base\Security\SignInGuard;
 use Base\Security\UserTracker;
 use Base\Service\SecurityPolicy;
@@ -35,7 +35,7 @@ final class AuthListeners
         }, $firewalls);
     }
 
-    public static function warnNewDevice(SecurityPolicy $policy, UserTracker $tracker, ConnectionRepository $connections, RequestStack $requests, ?State $state = null): WarnNewDevice
+    public static function warnNewDevice(SecurityPolicy $policy, UserTracker $tracker, Connections $connections, RequestStack $requests, ?State $state = null): WarnNewDevice
     {
         return new WarnNewDevice($policy, $tracker, $connections, $state, static fn (): bool => (bool) $requests->getCurrentRequest()?->cookies->has(SecurityPolicy::COOKIE_NEW_DEVICE_PROMPT_DISMISSED));
     }

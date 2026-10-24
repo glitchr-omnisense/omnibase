@@ -2,7 +2,7 @@
 
 namespace Base\Attributes\Attribute;
 
-use Base\Service\BaseService;
+use Base\Service\Locator;
 use Composer\InstalledVersions;
 use ReflectionProperty;
 use Symfony\Component\Yaml\Yaml;
@@ -119,14 +119,14 @@ class Route extends \Symfony\Component\Routing\Attribute\Route
      * #[Route] attributes are reflected and instantiated during Symfony's
      * own container compilation (AttributeAutoconfigurationPass scans every
      * attribute on every class, controllers included) — well before
-     * BaseBundle::boot() has run, so BaseService::getProjectDir() (which
+     * BaseBundle::boot() has run, so Locator::getProjectDir() (which
      * throws when unset) is not reliably available yet. Peek at its backing
      * property directly (no throw), falling back to Composer's
      * InstalledVersions, which needs no kernel/container at all.
      */
     private static function projectDir(): string
     {
-        $projectDir = (new ReflectionProperty(BaseService::class, 'projectDir'))->getValue();
+        $projectDir = (new ReflectionProperty(Locator::class, 'projectDir'))->getValue();
         if ($projectDir !== null) {
             return $projectDir;
         }

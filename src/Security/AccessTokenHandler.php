@@ -2,7 +2,7 @@
     
 namespace Base\Security;
 
-use Base\Repository\User\TokenRepository;
+use Base\Repository\User\Tokens;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\AccessToken\AccessTokenHandlerInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -10,10 +10,10 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 class AccessTokenHandler implements AccessTokenHandlerInterface
 {
     /**
-     * @var TokenRepository
+     * @var Tokens
      */
     protected $tokenRepository;
-    public function __construct(TokenRepository $tokenRepository) {
+    public function __construct(Tokens $tokenRepository) {
     
         $this->tokenRepository = $tokenRepository;
     }
@@ -21,13 +21,13 @@ class AccessTokenHandler implements AccessTokenHandlerInterface
     public function getUserBadgeFrom(string $token): UserBadge
     {
         // e.g. query the "access token" database to search for this token
-        $token = $this->tokenRepository->findOneByValueAndIsLogginable($token);
+        $token = $this->tokenRepository->oneSigningInByValue($token);
         if (null === $token || !$token->isValid() || null === $token->getUser()) {
             throw new BadCredentialsException('Invalid credentials.');
         }
 
         // and return a UserBadge object containing the user identifier from the found token
         $user = $token->getUser();
-        return new UserBadge($user->getId());
+        return new UserBadge((string) $user->getId());
     }
 }

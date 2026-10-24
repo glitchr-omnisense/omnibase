@@ -4,7 +4,7 @@ namespace Tests\Base\Bridge\Doctrine;
 
 use Base\Bridge\Doctrine\Mapping;
 use Base\Bridge\Doctrine\RepositoryFactory;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
@@ -40,7 +40,7 @@ final class RepositoryServicesTest extends TestCase
     public function testARepositoryIsGivenTheHostsServicesByType(): void
     {
         $pool = new ArrayAdapter();
-        $flysystem = $this->createStub(FlysystemInterface::class);
+        $flysystem = $this->createStub(Storages::class);
         $entityManager = $this->entityManager();
         $mapping = Mapping::register($entityManager, ['filters' => false, 'flysystem' => $flysystem, 'services' => static fn (string $type) => CacheItemPoolInterface::class === $type ? $pool : null]);
 

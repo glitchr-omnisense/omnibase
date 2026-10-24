@@ -87,6 +87,8 @@ return static function (ContainerConfigurator $container): void {
 
     $services->alias('flysystem', 'Base\Service\Flysystem');
     $services->alias('Base\Service\FlysystemInterface', 'flysystem');
+    // omnibase's storages over omnidrive (step R28), what the core's services type-hint.
+    $services->alias('Base\Service\Storages', 'flysystem')->public();
 
     // Settings / Notifier / Translator / ParameterBag
     $services->alias('setting_bag', 'Base\Service\SettingBag');

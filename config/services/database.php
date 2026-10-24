@@ -80,6 +80,7 @@ return static function (ContainerConfigurator $container): void {
     // that name), as every other service of the core that takes it. Public, as the repositories
     // themselves are handed out by getRepository(): kept when nothing of the container asks them.
     // The list is Base\Repository\Aliases' (step R27), which omnibridge/laravel binds as well.
+    $services->set(\Base\Bridge\Doctrine\DoctrineRepositories::class)->args([service('doctrine.orm.entity_manager')]);
     foreach (\Base\Repository\Aliases::INTERFACES as $interface => $repository) {
         $services->alias($interface, $repository)->public();
     }

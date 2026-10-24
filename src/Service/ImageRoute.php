@@ -6,7 +6,7 @@ use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\Format\WebpFilter;
-use Base\Repository\Layout\ImageCropRepository;
+use Base\Repository\Layout\ImageCrops;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -62,15 +62,15 @@ class ImageRoute
     /** @var FileService MediaService read as its parent: the contents' resolution (ux_serve) */
     protected mixed $fileService;
 
-    protected FlysystemInterface $flysystem;
+    protected Storages $flysystem;
 
-    protected ?ImageCropRepository $imageCropRepository;
+    protected ?ImageCrops $imageCropRepository;
 
     protected ?bool $localCache;
 
     protected bool $profiler = true;
 
-    public function __construct(MediaService $mediaService, FlysystemInterface $flysystem, ?ImageCropRepository $imageCropRepository = null, ?bool $localCache = null)
+    public function __construct(MediaService $mediaService, Storages $flysystem, ?ImageCrops $imageCropRepository = null, ?bool $localCache = null)
     {
         $this->mediaService = $mediaService;
         $this->fileService = cast($mediaService, FileService::class);
@@ -178,14 +178,14 @@ class ImageRoute
         }
 
         // Providing "label" information
-        $imageCrop = $this->imageCropRepository?->cacheOneBySlug($identifier, ["image.source" => $uuid]);
+        $imageCrop = $this->imageCropRepository?->oneBySlugOfImage($identifier, $uuid);
 
         // Providing just a "ratio" number
         if ($imageCrop === null && $this->imageCropRepository !== null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
             $ratio = floatval($matches[1]);
             $ratio0 = $ratio / ($naturalWidth / $naturalHeight);
 
-            $imageCrop = $this->imageCropRepository->cacheOneByRatio0ClosestTo($ratio0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+            $imageCrop = $this->imageCropRepository->oneClosestToRatio($ratio0, $uuid);
         }
 
         // Providing a "width:height" information
@@ -203,7 +203,7 @@ class ImageRoute
                 throw new NotFoundHttpException('Not Found');
             }
 
-            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+            $imageCrop = $this->imageCropRepository->oneClosestToRatioAndSize($ratio0, $width0, $height0, $uuid);
             if($imageCrop) $identifier = $imageCrop->getWidth() . "x" . $imageCrop->getHeight();
         }
 

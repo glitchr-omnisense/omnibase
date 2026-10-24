@@ -36,7 +36,7 @@ use Webauthn\TrustPath\TrustPath;
  * @method Passkey[]    findAll()
  * @method Passkey[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PasskeyRepository extends ServiceEntityRepository implements PasskeyRecords
+class PasskeyRepository extends ServiceEntityRepository implements PasskeyRecords, Passkeys
 {
     /**
      * The passkey of this credential id (bytes), compared as the column keeps it (base64).
@@ -83,7 +83,7 @@ class PasskeyRepository extends ServiceEntityRepository implements PasskeyRecord
             return;
         }
 
-        $user = $entityManager->getRepository(User::class)->find((int) $credentialRecord->userHandle);
+        $user = $entityManager->find(User::class, (int) $credentialRecord->userHandle);
         if (!$user) {
             throw new \RuntimeException('Cannot save passkey: unknown user handle.');
         }

@@ -11,7 +11,7 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Revision[]    findAll()
  * @method Revision[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class RevisionRepository extends ServiceEntityRepository
+class RevisionRepository extends ServiceEntityRepository implements Revisions
 {
     /**
      * History of one entity, newest first.

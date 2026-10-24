@@ -5,7 +5,7 @@ namespace Base\Service;
 use Base\Database\Attribute\Trasheable;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Entity\Extension\TrashBall;
-use Base\Repository\Extension\TrashBallRepository;
+use Base\Repository\Extension\TrashBalls;
 use Closure;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,12 +27,24 @@ class TrashManager
 
     public function __construct(
         protected EntityManagerInterface $entityManager,
+        protected TrashBalls $trashBalls,
     ) {
     }
 
-    protected function repository(): TrashBallRepository
+    /** The trash by its interface (step R28), where it asked the entity manager's repository. */
+    protected function repository(): TrashBalls
     {
-        return $this->entityManager->getRepository(TrashBall::class);
+        return $this->trashBalls;
+    }
+
+    /**
+     * The entries past their grace period at $now (now when null), the oldest first: what purge() destroys.
+     *
+     * @return TrashBall[]
+     */
+    public function expired(?DateTimeInterface $now = null, ?int $limit = null): array
+    {
+        return $this->repository()->expired($now, $limit);
     }
 
     /**

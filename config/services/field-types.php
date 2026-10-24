@@ -46,7 +46,7 @@ return function (ContainerConfigurator $configurator) {
         ->tag('form.type')
         ->args([
             new Reference('form.factory'),
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Base\Database\Repository\Repositories'),
             new Reference('translator'),
             new Reference('base.database.metadata_manipulator'),
             new Reference('security.csrf.token_manager'),

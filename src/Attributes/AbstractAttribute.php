@@ -8,7 +8,7 @@ use Base\Database\Event\DoctrineQueryEventArgs;
 use Base\Database\Event\ResolveDiscriminatorEventArgs;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\ClassMetadataCompletor;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -111,7 +111,7 @@ abstract class AbstractAttribute implements AttributeInterface
         return AttributeReader::getInstance()->getClassMetadataManipulator()->getClassMetadataCompletor($entityOrClassOrMetadata);
     }
 
-    public static function getFlysystem(): FlysystemInterface
+    public static function getFlysystem(): Storages
     {
         return AttributeReader::getInstance()->getFlysystem();
     }

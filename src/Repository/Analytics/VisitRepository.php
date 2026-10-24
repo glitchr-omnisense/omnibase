@@ -9,7 +9,7 @@ use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 /**
  * @extends ServiceEntityRepository<Visit>
  */
-class VisitRepository extends ServiceEntityRepository
+class VisitRepository extends ServiceEntityRepository implements Visits
 {
     /**
      * Insert-if-absent, not insert-or-update: a presence row only ever

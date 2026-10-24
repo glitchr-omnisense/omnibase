@@ -14,7 +14,7 @@
 namespace {
 
     use Base\BaseBundle;
-    use Base\Service\BaseService;
+    use Base\Service\Locator;
     use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
     use Symfony\Component\HttpFoundation\Request;
 
@@ -503,7 +503,7 @@ namespace {
          */
         function get_url_request(): Request
         {
-            $request = class_exists(BaseService::class) ? BaseService::getRequestStack()?->getMainRequest() : null;
+            $request = class_exists(Locator::class) ? Locator::getRequestStack()?->getMainRequest() : null;
 
             return $request ?? new Request([], [], [], [], [], $_SERVER);
         }

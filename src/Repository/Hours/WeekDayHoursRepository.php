@@ -9,7 +9,7 @@ use Base\Entity\Hours\WeekDayHours;
  * @method WeekDayHours|null find($id, $lockMode = null, $lockVersion = null)
  * @method WeekDayHours[]    findAll()
  */
-class WeekDayHoursRepository extends ServiceEntityRepository
+class WeekDayHoursRepository extends ServiceEntityRepository implements WeekDays
 {
     /** @return array<int, array<array{0: string, 1: string}>> ISO day => hours; empty when never set */
     public function week(): array

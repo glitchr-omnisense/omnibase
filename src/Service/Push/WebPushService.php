@@ -4,7 +4,7 @@ namespace Base\Service\Push;
 
 use App\Entity\User;
 use Base\Entity\User\PushSubscription;
-use Base\Repository\User\PushSubscriptionRepository;
+use Base\Repository\User\PushSubscriptions;
 use Doctrine\ORM\EntityManagerInterface;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\VAPID;
@@ -28,7 +28,7 @@ class WebPushService
 
     public function __construct(
         protected readonly EntityManagerInterface $entityManager,
-        protected readonly PushSubscriptionRepository $repository,
+        protected readonly PushSubscriptions $repository,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly ?string $publicKey = null,
         protected readonly ?string $privateKey = null,

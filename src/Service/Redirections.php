@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Entity\Layout\Redirection;
-use Base\Repository\Layout\RedirectionRepository;
+use Base\Repository\Layout\Redirections as RedirectionRows;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 class Redirections
 {
     public function __construct(
-        protected readonly RedirectionRepository $repository,
+        protected readonly RedirectionRows $repository,
         protected readonly ?LoggerInterface $logger = null,
     ) {
     }

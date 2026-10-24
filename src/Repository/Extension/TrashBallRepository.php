@@ -13,7 +13,7 @@ use DateTimeInterface;
  * @method TrashBall[]    findAll()
  * @method TrashBall[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TrashBallRepository extends ServiceEntityRepository
+class TrashBallRepository extends ServiceEntityRepository implements TrashBalls
 {
     /**
      * Everything currently in the trash, newest first.

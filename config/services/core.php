@@ -270,14 +270,14 @@ return static function (ContainerConfigurator $container): void {
     // command are its only callers and both fetch it by id.
     $services->set('Base\Service\TrashManager')
         ->public()
-        ->args([service('doctrine.orm.entity_manager')]);
+        ->args([service('doctrine.orm.entity_manager'), service(\Base\Repository\Extension\TrashBalls::class)]);
     $services->alias('trash_manager', 'Base\Service\TrashManager')->public();
 
     // Reads the modification history back - for the per-field badge in form
     // labels and for the entity-level history page.
     $services->set('Base\Service\VersionManager')
         ->public()
-        ->args([service('doctrine.orm.entity_manager'), '%base.extension.max_revisions%']);
+        ->args([service('doctrine.orm.entity_manager'), service(\Base\Repository\Extension\Revisions::class), '%base.extension.max_revisions%']);
     $services->alias('version_manager', 'Base\Service\VersionManager')->public();
 
     // ...and the subscriber that HANDLES those events, which is the same bug
@@ -328,7 +328,9 @@ return static function (ContainerConfigurator $container): void {
         ])
         ->bind('$debug', '%kernel.debug%')
         // what could not be sent is said there (BaseNotifier::send)
-        ->call('setLogger', [service('logger')->ignoreOnInvalid()]);
+        ->call('setLogger', [service('logger')->ignoreOnInvalid()])
+        // the administrators it notifies (step R28: the accounts by their interface)
+        ->call('setUsers', [service(\Base\Repository\Users::class)]);
 
     // LocalCache / CacheWarmers
     $cacheServices = [
@@ -582,7 +584,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\WidgetProvider')
         ->public(true)
         ->tag('twig.runtime')
-        ->args([service('doctrine.orm.entity_manager')]);
+        ->args([service(\Base\Repository\Layout\Widgets::class), service(\Base\Repository\Layout\Widget\Slots::class)]);
 
     // Form extensions
     $services->set('Base\Form\Extension\FormTypeTranslateExtension')->tag('form.type_extension');
@@ -645,6 +647,9 @@ return static function (ContainerConfigurator $container): void {
         if (str_contains($command, 'TimeMachineSnapshot')) {
             $definition->args([service('time_machine'), service('flysystem')]);
         }
+        if ($command === 'Base\Console\Command\ThreadPublishableCommand') {
+            $definition->call('setThreads', [service(\Base\Repository\Threads::class)]);
+        }
         if ($command === 'Base\Console\Command\TrashPurgeCommand') {
             $definition->call('setTrashManager', [service('Base\Service\TrashManager')]);
         }
@@ -679,7 +684,8 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('Base\Console\Command\UploaderEntitiesCommand')
         ->parent('Base\Console\Command')
-        ->tag('console.command');
+        ->tag('console.command')
+        ->call('setRepositories', [service('Base\Database\Repository\Repositories')]);
 
     $services->set('Base\Console\Command\UploaderImagesCommand')
         ->parent('Base\Console\Command\UploaderEntitiesCommand')

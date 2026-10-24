@@ -2,7 +2,7 @@
 
 namespace Base\Bridge\Doctrine;
 
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Attributes\AttributeReader;
 use Base\Database\Entity\EntityExtension;
 use Base\Database\Entity\EntityHydrator;
@@ -71,7 +71,7 @@ use Omnibridge\Doctrine\DeclarationDriver;
  * of attributes: a bundle's src/Attribute), resolve_target_entities
  * (interface => class), entity_listeners (entity class => list of
  * {event, class, method}: what a bundle tags doctrine.orm.entity_listener), localizer (a LocalizerInterface, none by default),
- * flysystem (omnibase's Base\Service\FlysystemInterface over the host's storages, none by default: the
+ * flysystem (omnibase's Base\Service\Storages over the host's storages, none by default: the
  * attributes that read a stored file - #[Uploader]'s public address of an upload, an article's audio -
  * read it through the reader's; without it they cannot answer), services (a closure giving the host's service of a
  * type, or null: what a repository takes beside the registry, a site's cache pool - RepositoryFactory::services()),
@@ -131,7 +131,7 @@ final class Mapping
         $manipulator = new ClassMetadataManipulator($registry, $entityManager, $cacheDir);
         $hydrator = new EntityHydrator($entityManager, $manipulator);
         $flysystem = $options['flysystem'] ?? null;
-        $reader = new AttributeReader(null, null, $entityManager, $parameters, $flysystem instanceof FlysystemInterface ? $flysystem : null, null, null, $hydrator, $manipulator, $projectDir, $environment, $cacheDir);
+        $reader = new AttributeReader(null, null, $entityManager, $parameters, $flysystem instanceof Storages ? $flysystem : null, null, null, $hydrator, $manipulator, $projectDir, $environment, $cacheDir);
 
         $attributes = new AttributeSubscriber($entityManager, $manipulator, $reader);
         $localizer = $options['localizer'] ?? null;

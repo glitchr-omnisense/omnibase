@@ -41,9 +41,7 @@ class TrashPurgeCommand extends Command
         $limit = $input->getOption('limit') !== null ? (int) $input->getOption('limit') : null;
 
         $now = new DateTime();
-        $expired = $this->entityManager
-            ->getRepository(\Base\Entity\Extension\TrashBall::class)
-            ->expired($now, $limit);
+        $expired = $this->trashManager->expired($now, $limit);
 
         if (empty($expired)) {
             $output->writeln("<info>Nothing to purge.</info> The trash holds " . $this->trashManager->count() . " entr" . ($this->trashManager->count() === 1 ? "y" : "ies") . ", none past its grace period.");

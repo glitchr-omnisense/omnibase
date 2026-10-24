@@ -12,7 +12,7 @@ use Base\Enum\CommentState;
  * @method Comment|null findOneBy(array $criteria, array $orderBy = null)
  * @method Comment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CommentRepository extends ServiceEntityRepository
+class CommentRepository extends ServiceEntityRepository implements Comments
 {
     /**
      * The comments online under a thread - or the visitors' book when

@@ -25,8 +25,8 @@ use Base\Entity\Thread;
  */
 interface Threads extends Entities
 {
-    /** @return T|null */
-    public function oneBySlug(string $slug): ?Thread;
+    /** @return T|null through the finder's cache unless $cached is false (a row about to be locked) */
+    public function oneBySlug(string $slug, bool $cached = true): ?Thread;
 
     /**
      * The first in that order of these states, of that slug when one is given
@@ -71,6 +71,16 @@ interface Threads extends Entities
      * @return list<T>
      */
     public function byStates(array $states): array;
+
+    /**
+     * The threads in a state, read again from the database - no result cache
+     * (step R28: thread:publishable, which must see what was just published).
+     *
+     * @param list<string>|string $states
+     *
+     * @return list<T>
+     */
+    public function byStateUncached(array|string $states): array;
 
     /**
      * @param string|list<string> $states

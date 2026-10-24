@@ -5,10 +5,10 @@ namespace Base\Controller\Client;
 use Base\Service\SecurityPolicy;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use App\Repository\UserRepository;
 use Base\Entity\User\Connection;
-use Base\Repository\User\ConnectionRepository;
-use Base\Repository\User\PasskeyRepository;
+use Base\Repository\User\Connections;
+use Base\Repository\User\Passkeys;
+use Base\Repository\Users;
 
 use Base\Form\Type\Login2FAType;
 use Base\Attributes\Attribute\Iconize;
@@ -16,7 +16,6 @@ use Base\Bridge\Symfony\AccountScreens;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Screen\View;
 use Base\Entity\User\Notification;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,11 +40,11 @@ class UserSettingsController extends AbstractController
     /** How many of the account's sessions the settings page lists. */
     private const SESSIONS_SHOWN = 20;
 
-    private UserRepository $userRepository;
+    private Users $userRepository;
     private SecurityPolicy $securityPolicy;
     private TranslatorInterface $translator;
 
-    public function __construct(UserRepository $userRepository, SecurityPolicy $securityPolicy, TranslatorInterface $translator)
+    public function __construct(Users $userRepository, SecurityPolicy $securityPolicy, TranslatorInterface $translator)
     {
         $this->userRepository = $userRepository;
         $this->securityPolicy = $securityPolicy;
@@ -125,7 +124,7 @@ class UserSettingsController extends AbstractController
      */
     #[Route("/settings", name: "user_settings")]
     #[Iconize("fa-solid fa-fw fa-user-cog")]
-    public function Settings(Request $request, ConnectionRepository $connectionRepository, ScreenResponder $responder, AccountScreens $screens)
+    public function Settings(Request $request, Connections $connectionRepository, ScreenResponder $responder, AccountScreens $screens)
     {
         $user = $this->getUser();
 
@@ -214,7 +213,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/passkeys/{id}/rename", name: "user_settings_passkey_rename", methods: ["POST"])]
-    public function RenamePasskey(int $id, Request $request, PasskeyRepository $passkeyRepository, EntityManagerInterface $entityManager)
+    public function RenamePasskey(int $id, Request $request, Passkeys $passkeyRepository)
     {
         if (!$this->isCsrfTokenValid('passkey_rename_' . $id, $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
@@ -226,13 +225,13 @@ class UserSettingsController extends AbstractController
         }
 
         $passkey->setLabel(trim((string) $request->request->get('label')) ?: null);
-        $entityManager->flush();
+        $passkeyRepository->flush();
 
         return $this->redirectToRoute('user_settings');
     }
 
     #[Route("/settings/passkeys/{id}/delete", name: "user_settings_passkey_delete", methods: ["POST"])]
-    public function DeletePasskey(int $id, Request $request, PasskeyRepository $passkeyRepository, EntityManagerInterface $entityManager)
+    public function DeletePasskey(int $id, Request $request, Passkeys $passkeyRepository)
     {
         if (!$this->isCsrfTokenValid('passkey_delete_' . $id, $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
@@ -243,8 +242,7 @@ class UserSettingsController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $entityManager->remove($passkey);
-        $entityManager->flush();
+        $passkeyRepository->remove($passkey, true);
 
         $notification = new Notification("@notifications.settings.passkeyDeleted");
         $notification->send("success");
@@ -253,7 +251,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/sessions/{id}/logout", name: "user_settings_session_logout", methods: ["POST"])]
-    public function LogoutSession(int $id, Request $request, ConnectionRepository $connectionRepository, EntityManagerInterface $entityManager)
+    public function LogoutSession(int $id, Request $request, Connections $connectionRepository)
     {
         if (!$this->isCsrfTokenValid('session_logout', $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
@@ -267,13 +265,13 @@ class UserSettingsController extends AbstractController
         }
 
         $connection->markAsLogout();
-        $entityManager->flush();
+        $connectionRepository->flush();
 
         return $this->redirectToRoute('user_settings');
     }
 
     #[Route("/settings/2fa", name: "user_settings_2fa")]
-    public function TwoFactorAuthentication(Request $request, EntityManagerInterface $entityManager, TotpAuthenticatorInterface $totpAuthenticator, ?TotpSecrets $totpSecrets = null)
+    public function TwoFactorAuthentication(Request $request, TotpAuthenticatorInterface $totpAuthenticator, ?TotpSecrets $totpSecrets = null)
     {
         $user = $this->getUser();
         $session = $request->getSession();
@@ -320,7 +318,7 @@ class UserSettingsController extends AbstractController
                 }
                 $backupCodes = $this->generateBackupCodes();
                 $user->setBackupCodes($backupCodes);
-                $entityManager->flush();
+                $this->userRepository->flush();
 
                 $session->remove(self::SESSION_PENDING_SECRET);
 
@@ -342,7 +340,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa/disable", name: "user_settings_2fa_disable", methods: ["POST"])]
-    public function TwoFactorAuthentication_Disable(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    public function TwoFactorAuthentication_Disable(Request $request, UserPasswordHasherInterface $passwordHasher)
     {
         $user = $this->getUser();
 
@@ -373,7 +371,7 @@ class UserSettingsController extends AbstractController
         $user->setTotpSecret(null);
         $user->setBackupCodes([]);
         $user->invalidateTrustedDevices();
-        $entityManager->flush();
+        $this->userRepository->flush();
 
         $notification = new Notification("@notifications.settings.twoFactorDisabled");
         $notification->send("success");
@@ -382,7 +380,7 @@ class UserSettingsController extends AbstractController
     }
 
     #[Route("/settings/2fa/email", name: "user_settings_2fa_email_toggle", methods: ["POST"])]
-    public function TwoFactorAuthentication_ToggleEmail(Request $request, EntityManagerInterface $entityManager)
+    public function TwoFactorAuthentication_ToggleEmail(Request $request)
     {
         if ($refusal = $this->refuseDemoAccount()) {
             return $refusal;
@@ -412,7 +410,7 @@ class UserSettingsController extends AbstractController
         }
 
         $user->setEmailAuthEnabled($enabling);
-        $entityManager->flush();
+        $this->userRepository->flush();
 
         $notification = new Notification($user->isEmailAuthEnabled() ? "@notifications.settings.emailCodeEnabled" : "@notifications.settings.emailCodeDisabled");
         $notification->send("success");

@@ -2,7 +2,7 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\MediaServiceInterface;
 use Omnibridge\Contract\Files;
 
@@ -18,7 +18,7 @@ use Omnibridge\Contract\Files;
 final class FlysystemFiles implements Files
 {
     public function __construct(
-        private readonly FlysystemInterface $flysystem,
+        private readonly Storages $flysystem,
         private readonly ?MediaServiceInterface $media = null,
     ) {
     }

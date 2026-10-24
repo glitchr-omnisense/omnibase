@@ -44,7 +44,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     /** @var CompressorProvider */
     protected $compressors;
 
-    /** @var FlysystemInterface */
+    /** @var Storages */
     protected $flysystem;
 
     /** @var FilesystemProvider */

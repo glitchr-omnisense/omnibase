@@ -11,7 +11,8 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use App\Repository\UserRepository;
+use Base\Contract\SecurityUserLoader;
+use Base\Repository\Users;
 
 /**
  * The users of the firewalls, by their identifier, refreshed from their row.
@@ -30,11 +31,11 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
     protected UserTracker $userTracker;
 
     /**
-     * @var UserRepository
+     * @var Users&SecurityUserLoader
      */
-    protected UserRepository $userRepository;
+    protected Users&SecurityUserLoader $userRepository;
 
-    public function __construct(UserTracker $userTracker, UserRepository $userRepository)
+    public function __construct(UserTracker $userTracker, Users&SecurityUserLoader $userRepository)
     {
         $this->userTracker = $userTracker;
         $this->userRepository = $userRepository;
@@ -110,7 +111,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
         $identityProvider = $response->getResourceOwner()->getName();
         $email = $response->getEmail();
 
-        if ($email && ($user = $this->userRepository->findOneByEmail($email))) {
+        if ($email && ($user = $this->userRepository->oneByEmail($email))) {
 
             // Link this IdP to an existing local (or previously-linked) account.
             if ($user->getIdentityProvider() === null) {

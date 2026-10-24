@@ -3,7 +3,7 @@
 namespace Base\Security;
 
 use App\Entity\User;
-use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\Connections;
 use Base\Routing\AdvancedRouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -25,7 +25,7 @@ class UserTracker extends ConnectionTracker
      */
     protected $router;
 
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, AdvancedRouterInterface $router, ConnectionRepository $connectionRepository)
+    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, AdvancedRouterInterface $router, Connections $connectionRepository)
     {
         parent::__construct($entityManager, $connectionRepository);
 

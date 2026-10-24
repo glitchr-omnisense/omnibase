@@ -4,15 +4,14 @@ namespace Base\Controller\Client;
 
 use App\Entity\User;
 use App\Form\Type\UserProfileType;
-use App\Repository\UserRepository;
 use Base\Attributes\Attribute\Iconize;
 use Base\Bridge\Symfony\AccountScreens;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Enum\UserRole;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
+use Base\Repository\Users;
 use Base\Screen\View;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,32 +24,20 @@ class UserProfileController extends AbstractController
      */
     protected FormProxyInterface $formProxy;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
+    /** The accounts by their interface (step R28), where it asked the entity manager for their repository. */
+    protected Users $users;
 
-    /**
-     * @var UserRepository
-     */
-    protected UserRepository $userRepository;
-
-    public function __construct(EntityManagerInterface $entityManager, FormProxyInterface $formProxy)
+    public function __construct(Users $users, FormProxyInterface $formProxy)
     {
         $this->formProxy = $formProxy;
-        $this->entityManager = $entityManager;
-        $userRepository = $entityManager->getRepository(User::class);
-        if (!$userRepository instanceof UserRepository) {
-            throw new \LogicException(sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
-        }
-        $this->userRepository = $userRepository;
+        $this->users = $users;
     }
 
     #[Route("/profile/{id}/edit/", name: "user_profileEdit")]
     public function Edit(Request $request, int $id = -1)
     {
         if ($id > 0) {
-            if (!($user = $this->userRepository->cacheOneById($id))) {
+            if (!($user = $this->users->oneById($id))) {
                 throw $this->createNotFoundException('User not found.');
             }
         } else {
@@ -74,7 +61,7 @@ class UserProfileController extends AbstractController
             })
             ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
                 $user = $formProcessor->hydrate($user);
-                $this->entityManager->flush();
+                $this->users->flush();
 
                 return $this->redirectToRoute('user_profileEdit');
             })
@@ -94,7 +81,7 @@ class UserProfileController extends AbstractController
     public function Show(Request $request, ScreenResponder $responder, AccountScreens $screens, int $id = -1)
     {
         if ($id > 0) {
-            if (!($user = $this->userRepository->cacheOneById($id))) {
+            if (!($user = $this->users->oneById($id))) {
                 throw $this->createNotFoundException('User not found.');
             }
         } else {
@@ -103,6 +90,7 @@ class UserProfileController extends AbstractController
             }
         }
 
+        \assert($user instanceof \Base\Entity\User);
         $template = 'client/user/profile_show.html.twig';
 
         return $responder->respond($request, new View($template, $screens->profile($user), 'Account/Profile'), $responder->legacy($template, fn () => ['user' => $user]));

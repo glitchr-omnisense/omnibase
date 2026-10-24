@@ -7,7 +7,7 @@ use Base\Console\Command;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TimeMachineInterface;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,7 +25,7 @@ class TimeMachineSnapshotCommand extends Command
     protected $timeMachine;
 
     /**
-     * @var FlysystemInterface
+     * @var Storages
      */
     protected $flysystem;
 
@@ -40,7 +40,7 @@ class TimeMachineSnapshotCommand extends Command
         EntityManagerInterface $entityManager,
         ParameterBagInterface  $parameterBag,
         TimeMachineInterface   $timeMachine,
-        FlysystemInterface     $flysystem
+        Storages     $flysystem
     )
     {
         $this->environment = $parameterBag->get("kernel.environment");

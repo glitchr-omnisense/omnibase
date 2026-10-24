@@ -106,7 +106,7 @@ return static function (ContainerConfigurator $container): void {
     // Web Push to the browsers that opted in. See each channel's docblock.
     $services->set('Base\Notifier\Channel\InAppChannel')
         ->tag('notifier.channel', ['channel' => 'inapp'])
-        ->args([new Reference('doctrine.orm.entity_manager')]);
+        ->args([new Reference('doctrine.orm.entity_manager'), new Reference('Base\Repository\Users')]);
 
     $services->set('Base\Service\Push\WebPushService')->public()
         ->args([
@@ -182,7 +182,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Security\LoginFormAuthenticator')
         ->args([
             new Reference('referrer'),
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Base\Repository\Users'),
             new Reference('advanced_router'),
             new Reference('security.authorization_checker')
         ]);

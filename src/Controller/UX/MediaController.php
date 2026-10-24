@@ -3,7 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\Attributes\Attribute\IsGranted;
-use Base\Repository\Layout\ImageCropRepository;
+use Base\Repository\Layout\ImageCrops;
 use Base\Service\FileService;
 use Base\Service\Flysystem;
 use Base\Service\ImageRoute;
@@ -39,9 +39,9 @@ class MediaController extends AbstractController
     protected Flysystem $flysystem;
 
     /**
-     * @var ImageCropRepository
+     * @var ImageCrops
      */
-    protected ImageCropRepository $imageCropRepository;
+    protected ImageCrops $imageCropRepository;
 
     /**
      * @var Profiler|null
@@ -65,7 +65,7 @@ class MediaController extends AbstractController
      */
     protected ImageRoute $imageRoute;
 
-    public function __construct(RequestStack $requestStack, Flysystem $flysystem, MediaService $mediaService, ImageCropRepository $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
+    public function __construct(RequestStack $requestStack, Flysystem $flysystem, MediaService $mediaService, ImageCrops $imageCropRepository, ?Profiler $profiler = null, ?bool $localCache = null)
     {
         $this->imageCropRepository = $imageCropRepository;
 

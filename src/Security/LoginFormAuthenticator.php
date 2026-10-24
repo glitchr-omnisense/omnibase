@@ -2,13 +2,12 @@
 
 namespace Base\Security;
 
-use App\Entity\User;
 use App\Enum\UserRole;
-use App\Repository\UserRepository;
+use Base\Repository\Users;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Base\Entity\User\Connection;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\ReferrerInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Google\Badge\CaptchaBadge;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,10 +39,6 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
      */
     protected ReferrerInterface $referrer;
     /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
-    /**
      * @var AuthorizationCheckerInterface
      */
     protected AuthorizationCheckerInterface $authorizationChecker;
@@ -51,21 +46,14 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
      * @var AdvancedRouterInterface
      */
     protected AdvancedRouterInterface $router;
-    /**
-     * @var UserRepository
-     */
-    protected UserRepository $userRepository;
+    /** The accounts by their interface (step R28), where it asked the entity manager for their repository. */
+    protected Users $userRepository;
 
-    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, AdvancedRouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(ReferrerInterface $referrer, Users $users, AdvancedRouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->referrer = $referrer;
-        $this->entityManager = $entityManager;
         $this->authorizationChecker = $authorizationChecker;
-        $userRepository = $entityManager->getRepository(User::class);
-        if (!$userRepository instanceof UserRepository) {
-            throw new \LogicException(sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
-        }
-        $this->userRepository = $userRepository;
+        $this->userRepository = $users;
 
         $this->router = $router;
     }
@@ -112,7 +100,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         if (array_key_exists("password", $loginData)) {
-            $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
+            $badges[] = new PasswordUpgradeBadge($password, $this->userRepository instanceof PasswordUpgraderInterface ? $this->userRepository : null);
         }
         if (array_key_exists("_captcha", $loginData) && class_exists(CaptchaBadge::class)) {
             $badges[] = new CaptchaBadge("_captcha", $loginData["_captcha"]);
@@ -145,7 +133,7 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
             $user->setLocale();
             $user->kick(0);
 
-            $this->entityManager->flush();
+            $this->userRepository->flush();
         }
 
         //

@@ -29,7 +29,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 class SelectTypePlainRepositoryTest extends KernelTestCase
 {
     private ?SelectType $type = null;
-    private ?EntityManagerInterface $original = null;
+    private ?\Base\Database\Repository\Repositories $original = null;
     /** @var object[] */
     private array $users = [];
 
@@ -58,11 +58,11 @@ class SelectTypePlainRepositoryTest extends KernelTestCase
         }
         $em->flush();
 
-        // The SelectType service, its entity manager answering a plain repository for the user class.
+        // The SelectType service, its repositories (step R28) over an entity manager answering a plain repository for the user class.
         $this->type = static::getContainer()->get('form.registry')->getType(SelectType::class)->getInnerType();
-        $property = new \ReflectionProperty(SelectType::class, 'entityManager');
+        $property = new \ReflectionProperty(SelectType::class, 'repositories');
         $this->original = $property->getValue($this->type);
-        $property->setValue($this->type, new class($this->original) extends EntityManagerDecorator {
+        $property->setValue($this->type, new \Base\Bridge\Doctrine\DoctrineRepositories(new class($em) extends EntityManagerDecorator {
             /**
              * @template T of object
              *
@@ -79,13 +79,13 @@ class SelectTypePlainRepositoryTest extends KernelTestCase
 
                 return $this->wrapped->getRepository($className);
             }
-        });
+        }));
     }
 
     protected function tearDown(): void
     {
         if ($this->type) {
-            (new \ReflectionProperty(SelectType::class, 'entityManager'))->setValue($this->type, $this->original);
+            (new \ReflectionProperty(SelectType::class, 'repositories'))->setValue($this->type, $this->original);
             $em = static::getContainer()->get('doctrine')->getManager();
             foreach ($this->users as $user) {
                 if ($managed = $em->find($user::class, $user->getId())) {

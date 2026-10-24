@@ -28,7 +28,7 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 use Base\Entity\User\Token;
 use Base\Form\Type\SecurityResetPasswordType;
-use App\Repository\UserRepository;
+use Base\Repository\Users;
 use Base\Attributes\Attribute\Iconize;
 use Base\Form\FormProxy;
 use Base\Form\FormProcessorInterface;
@@ -36,7 +36,7 @@ use Base\Form\Type\SecurityLoginTokenType;
 use Base\Service\SpeculativeRequest;
 use Base\Service\ReferrerInterface;
 use Base\Form\Type\SecurityResetPasswordConfirmType;
-use Base\Repository\User\TokenRepository;
+use Base\Repository\User\Tokens;
 
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\MaintenanceProviderInterface;
@@ -89,20 +89,20 @@ class SecurityController extends AbstractController
     protected EntityManagerInterface $entityManager;
 
     /**
-     * @var UserRepository
+     * @var Users
      */
-    protected UserRepository $userRepository;
+    protected Users $userRepository;
 
     /**
-     * @var TokenRepository
+     * @var Tokens
      */
-    protected TokenRepository $tokenRepository;
+    protected Tokens $tokenRepository;
 
     public function __construct(
         NotifierInterface       $notifier,
         EntityManagerInterface  $entityManager,
-        TokenRepository         $tokenRepository,
-        UserRepository          $userRepository,
+        Tokens                  $tokenRepository,
+        Users                   $userRepository,
         AdvancedRouterInterface $router,
         FormProxy               $formProxy,
         TokenStorageInterface   $tokenStorage,
@@ -258,7 +258,7 @@ class SecurityController extends AbstractController
         }
 
         // e.g. query the "access token" database to search for this token
-        $loginToken = $byOmniauth ? null : $this->tokenRepository->findOneByNameAndValueAndIsLogginable("login-token", $token, true);
+        $loginToken = $byOmniauth ? null : $this->tokenRepository->oneSigningInByNameAndValue("login-token", $token);
         if ($loginToken !== null && $loginToken->isValid() && $loginToken->getUser() !== null) {
 
             // and return a UserBadge object containing the user identifier from the found token
@@ -278,7 +278,7 @@ class SecurityController extends AbstractController
                 $email = $formProcessor->getForm()->get('email')->getData();
                 if ($byOmniauth) {
                     $omniauth->begin(\Omniauth\Factor::Link, $contexts->of($request), ['identifier' => (string) $email]);
-                } elseif (($user = $this->userRepository->findOneByEmail($email))) {
+                } elseif (($user = $this->userRepository->oneByEmail($email))) {
 
                     $user->removeExpiredTokens();
 
@@ -412,9 +412,8 @@ class SecurityController extends AbstractController
         $base = preg_replace('/[^\p{L}\p{N}._-]+/u', "", mb_strtolower((string) strstr($user->getEmail() . "@", "@", true)));
         $base = mb_substr($base !== "" && $base !== null ? $base : "user", 0, 200);
 
-        $repository = $this->entityManager->getRepository($user::class);
         $username = $base;
-        for ($n = 2; $repository->findOneBy(["username" => $username]); ++$n) {
+        for ($n = 2; $this->userRepository->findOneBy(["username" => $username]); ++$n) {
             $username = $base . $n;
         }
 
@@ -461,7 +460,7 @@ class SecurityController extends AbstractController
     #[Route("/verify-email/{token}", name: "security_verifyEmailWithToken")]
     public function VerifyEmailResponse(Request $request, UserAuthenticatorInterface $userAuthenticator, LoginFormAuthenticator $authenticator, string $token): Response
     {
-        $token = $this->tokenRepository->findOneByValueAndName($token, "verify-email");
+        $token = $this->tokenRepository->oneByValueAndName($token, "verify-email");
         if ($token) {
             $userAuthenticator->authenticateUser($token->getUser(), $authenticator, $request);
         }
@@ -564,8 +563,9 @@ class SecurityController extends AbstractController
     #[Route("/welcome-back/{token}", name: "security_accountWelcomeBackWithToken")]
     public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ?string $token = null): Response
     {
-        $welcomeBackToken = $this->tokenRepository->findOneByValueAndName($token, "welcome-back");
+        $welcomeBackToken = $this->tokenRepository->oneByValueAndName($token, "welcome-back");
         $user = $welcomeBackToken ? $welcomeBackToken->getUser() : $this->getUser();
+        \assert(null === $user || $user instanceof \Base\Entity\User);
 
         if ($user && !$user->isDisabled()) {
             $welcomeBackToken->revoke();
@@ -614,7 +614,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("resetPassword.confirmation");
 
             $email = $form->get('email')->getData();
-            $user = $this->userRepository->findOneByEmail($email);
+            $user = $this->userRepository->oneByEmail($email);
             if ($user && !$securityPolicy->canChangeCredentials($user)) {
 
                 // A demonstration account keeps its password: said plainly, there is no secret about who it is.
@@ -626,7 +626,7 @@ class SecurityController extends AbstractController
 
             if ($user) {
 
-                $user->removeExpiredTokens("reset-password");
+                $user->removeExpiredTokens();
                 if (!$user->getToken("reset-password")) {
                     $resetPasswordToken = new Token("reset-password", 3600);
                     $resetPasswordToken->setUser($user);
@@ -662,7 +662,7 @@ class SecurityController extends AbstractController
         }
 
         // A reset link's token, still valid: not one of another kind, not an expired or revoked one.
-        $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
+        $resetPasswordToken = $this->tokenRepository->oneByValue($token);
         if (!$resetPasswordToken || 'reset-password' !== $resetPasswordToken->getName() || !$resetPasswordToken->isValid()) {
 
             $notification = new Notification("resetPassword.invalidToken");

@@ -3,7 +3,7 @@
 namespace Base\Service\Model\Wysiwyg;
 
 use Base\Imagine\FilterInterface;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\MediaServiceInterface;
 use Base\Traits\BaseTrait;
 use Psr\Log\LoggerInterface;
@@ -18,16 +18,16 @@ class MediaEnhancer implements MediaEnhancerInterface
     protected MediaServiceInterface $mediaService;
 
     /**
-     * @var FlysystemInterface
+     * @var Storages
      */
-    protected FlysystemInterface $flysystem;
+    protected Storages $flysystem;
 
     /**
      * @var LoggerInterface|null
      */
     protected ?LoggerInterface $logger;
 
-    public function __construct(MediaServiceInterface $mediaService, FlysystemInterface $flysystem, ?LoggerInterface $logger = null)
+    public function __construct(MediaServiceInterface $mediaService, Storages $flysystem, ?LoggerInterface $logger = null)
     {
         $this->mediaService = $mediaService;
         $this->flysystem = $flysystem;

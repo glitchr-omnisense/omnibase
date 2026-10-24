@@ -9,7 +9,6 @@ use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\EntityDispatcher\Event\ThreadEvent;
 use Base\Enum\ThreadState;
-use Base\Repository\Thread\MentionRepository;
 use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
@@ -18,11 +17,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ThreadSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var MentionRepository
-     */
-    protected $mentionRepository;
-
     /**
      * @var MentionEnhancerInterface
      */
@@ -134,8 +128,7 @@ class ThreadSubscriber implements EventSubscriberInterface
             $extractedMentionees = array_unique(array_merge($extractedMentionees, $this->mentionEnhancer->extractMentionees($content)));
         }
 
-        $mentionRepository = $this->mentionEnhancer->getRepository();
-        $persistentMentions = $thread->getId() === null ? [] : $mentionRepository->cacheByThread($thread)->getResult();
+        $persistentMentions = $thread->getId() === null ? [] : $this->mentionEnhancer->mentions()->byThread($thread);
         $persistentMentionees = array_map(fn($m) => $m->getMentionee(), $persistentMentions);
         
         $newMentionees = array_diff_object($extractedMentionees, $persistentMentionees);

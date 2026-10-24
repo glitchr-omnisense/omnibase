@@ -16,7 +16,7 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -103,11 +103,11 @@ class AttributeReader extends AbstractLocalCache
     }
 
     /**
-     * @var FlysystemInterface|null
+     * @var Storages|null
      */
-    protected ?FlysystemInterface $flysystem = null;
+    protected ?Storages $flysystem = null;
 
-    public function getFlysystem(): ?FlysystemInterface
+    public function getFlysystem(): ?Storages
     {
         return $this->flysystem;
     }
@@ -176,7 +176,7 @@ class AttributeReader extends AbstractLocalCache
         ?AdvancedRouterInterface          $router,
         EntityManager            $entityManager,
         ParameterBagInterface    $parameterBag,
-        ?FlysystemInterface       $flysystem,
+        ?Storages       $flysystem,
         ?RequestStack             $requestStack,
         ?TokenStorageInterface    $tokenStorage,
         EntityHydrator           $entityHydrator,
