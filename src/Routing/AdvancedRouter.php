@@ -2,6 +2,7 @@
 
 namespace Base\Routing;
 
+use Symfony\Contracts\Service\ResetInterface;
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\LocalizerInterface;
@@ -29,7 +30,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-class AdvancedRouter implements AdvancedRouterInterface
+class AdvancedRouter implements AdvancedRouterInterface, ResetInterface
 {
     /**
      * @var Router
@@ -431,16 +432,21 @@ class AdvancedRouter implements AdvancedRouterInterface
         }
 
         $routeName = $this->getRouteName($routeNameOrUrl);
-        if (array_key_exists($routeName, $this->routes)) {
-            return $this->routes[$routeName];
-        }
 
         $generator = $this->getGenerator();
-        $matcher = $this->getMatcher();
         $lang = $this->localizer->getLocaleLang();
-
         $compiledRoutes = $generator->getCompiledRoutes();
-        $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName . "." . $lang] ?? null;
+
+        // Kept under the name of the route it is - a localized one under its locale's name
+        // (thread_search.fr): kept under the canonical name, the language of the first page
+        // that asked it was every later page's in a process answering several (a worker).
+        $key = array_key_exists($routeName, $compiledRoutes) ? $routeName : $routeName . "." . $lang;
+        if (array_key_exists($key, $this->routes)) {
+            return $this->routes[$key];
+        }
+
+        $matcher = $this->getMatcher();
+        $compiledRoute = $compiledRoutes[$key] ?? null;
 
         if ($compiledRoute !== null) {
 
@@ -452,7 +458,7 @@ class AdvancedRouter implements AdvancedRouterInterface
             $replace = array_values($args[1]);
             $args[4] = str_replace($search, $replace, $args[4]);
 
-            $this->routes[$routeName] = new Route(
+            $this->routes[$key] = new Route(
                 $args[3],
                 $args[1],
                 array_merge($locale, $args[2]),
@@ -462,10 +468,16 @@ class AdvancedRouter implements AdvancedRouterInterface
                 $args[6]
             );
 
-            return $this->routes[$routeName];
+            return $this->routes[$key];
         }
 
         return null;
+    }
+
+    /** The routes read for a request, forgotten before the next one (ResetInterface, kernel.reset). */
+    public function reset(): void
+    {
+        $this->routes = [];
     }
 
     /**

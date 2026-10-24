@@ -78,6 +78,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Twig\Renderer\Adapter\HtmlTagRenderer')->public()
         ->parent('Base\Twig\Renderer\AbstractTagRenderer')
         ->tag('twig.runtime')
+        ->tag('kernel.reset', ['method' => 'reset'])
         ->tag('twig.tag_renderer')
         ->args([
             new Reference('request_stack'),
@@ -371,6 +372,7 @@ $services->set('Base\Database\Mapping\NamingStrategy')->public();
         ->parent('Base\Twig\Renderer\AbstractTagRenderer')
         ->public()
         ->tag('twig.runtime')
+        ->tag('kernel.reset', ['method' => 'reset'])
         ->tag('twig.tag_renderer')
         ->args([
             new Reference('request_stack'),

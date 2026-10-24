@@ -9,10 +9,17 @@ use Base\Twig\Renderer\AbstractTagRenderer;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Contracts\Service\ResetInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 
-class HtmlTagRenderer extends AbstractTagRenderer
+/**
+ * Collects the HTML a page's templates add to its locations (html_entry_*), to print them where the
+ * layout asks. Reset between two requests (ResetInterface, kernel.reset): in a process that answers
+ * several - FrankenPHP's worker, a static export - one page's content (timeline.css...) was printed
+ * on every page after it.
+ */
+class HtmlTagRenderer extends AbstractTagRenderer implements ResetInterface
 {
     protected RequestStack $requestStack;
 
@@ -47,6 +54,12 @@ class HtmlTagRenderer extends AbstractTagRenderer
     }
 
     protected array $htmlContent = [];
+
+    /** What the page's templates added, forgotten before the next request. */
+    public function reset(): void
+    {
+        $this->htmlContent = [];
+    }
 
     /**
      * @param string $location
