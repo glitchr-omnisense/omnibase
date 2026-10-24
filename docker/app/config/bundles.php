@@ -39,11 +39,11 @@ return [
     // The back office's contextual help.
     Base\Wikidoc\WikidocBundle::class => ['all' => true],
 ]
-// Not installed by the image: the blog, the classroom and the agenda, for their own suites (`demo test blog`, `test classroom`, `test agenda`,
+// Not installed by the image: the blog, the classroom, the agenda, the scholar, the press and the consulting, for their own suites (`demo test blog`, `test classroom`, `test agenda`, `test scholar`, `test press`, `test consulting`,
 // their checkouts mounted by compose.checkouts.yml). Their tests' bootstrap registers their classes; it is read
 // here too, so that the commands run before the suite (the schema) see the same bundles as the tests.
 + (static function (): array {
-    $bundles = ['blog' => 'Base\Blog\BlogBundle', 'classroom' => 'Base\Classroom\ClassroomBundle', 'agenda' => 'Base\Agenda\AgendaBundle'];
+    $bundles = ['blog' => 'Base\Blog\BlogBundle', 'classroom' => 'Base\Classroom\ClassroomBundle', 'agenda' => 'Base\Agenda\AgendaBundle', 'scholar' => 'Base\Scholar\ScholarBundle', 'press' => 'Base\Press\PressBundle', 'consulting' => 'Base\Consulting\ConsultingBundle'];
     $suite = (string) getenv('HARNESS_SUITE_BOOTSTRAP');
     foreach ($bundles as $plugin => $bundle) {
         if (str_contains($suite, '/omnibase/'.$plugin.'/') && is_file(dirname(__DIR__).'/'.$suite)) {
