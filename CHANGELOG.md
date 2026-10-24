@@ -10,6 +10,16 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: no empty segment in a generated address
+
+`AdvancedUrlGenerator::generate()` gave `/boutique//wishlist` for `path("app_wishlist", {store: null})` where the
+router does not check requirements (`strict_requirements: null`, the sites' dev and test): until 4bf08f94,
+`sanitize_url()` cleaned the first address of a route (with the slash before the query it also changed), and every
+later one already had the empty segment. An empty segment of the path is now dropped every time
+(`AdvancedUrlGenerator::withoutEmptySegments()`: scheme, host, query, fragment and a trailing slash untouched, a
+network path keeps its host). Test: `tests/Routing/EmptySegmentTest` (the harness's `demo_shelf` routes,
+`docker/app/src/Controller/ShelfController.php`).
+
 ### Changed: the bell's marks, the second factor's enrolment and the cookies' domain on every host
 
 What a sign-in still did only under Symfony (audit "lesringostars face au master plan", R29), written once:
