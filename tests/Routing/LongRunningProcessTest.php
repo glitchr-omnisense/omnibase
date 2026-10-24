@@ -78,15 +78,19 @@ final class LongRunningProcessTest extends KernelTestCase
         self::ensureKernelShutdown();
         $alone = self::bootKernel()->handle(Request::create('/search'));
 
-        // The addresses the page links and loads, after another page or alone: the same.
+        // The addresses the page links and the stylesheets it loads, after another page or alone: the same.
         self::assertSame(self::addresses((string) $alone->getContent()), self::addresses((string) $second->getContent()));
     }
 
-    /** @return list<string> every href and src of a page, sorted */
+    /**
+     * @return list<string> every href of a page - its links and its stylesheets, where a page left its language
+     *                      and its additions -, sorted; not its images (a site may pick one at random: lesringostars'
+     *                      badge), nor the profiler's addresses, which name each request by its token
+     */
     private static function addresses(string $html): array
     {
-        preg_match_all('/\b(?:href|src)="([^"]*)"/', $html, $matches);
-        $addresses = array_values(array_unique($matches[1]));
+        preg_match_all('/\bhref="([^"]*)"/', $html, $matches);
+        $addresses = array_values(array_unique(array_filter($matches[1], static fn (string $address) => !preg_match('~_(profiler|wdt)/~', $address))));
         sort($addresses);
 
         return $addresses;
