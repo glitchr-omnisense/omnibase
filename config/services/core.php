@@ -502,6 +502,24 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Controller\Action\Notification\Latest')->public()
         ->args([service('Omnibridge\Contract\Access'), service('Base\Repository\User\Notifications'), service('Base\Notifier\NotificationLinkerInterface')->nullOnInvalid()])
         ->tag('controller.service_arguments');
+    // The bell's read marks and removals (formerly NotificationController::MarkRead() and Delete()).
+    foreach (['Read', 'Delete'] as $action) {
+        $services->set('Base\Controller\Action\Notification\\'.$action)->public()
+            ->args([service('Omnibridge\Contract\Access'), service('Omnibridge\Contract\Tokens'), service('Base\Repository\User\Notifications')])
+            ->tag('controller.service_arguments');
+    }
+    // The second factor's enrolment page, its "not now" and the e-mailed code turned on or off (formerly
+    // UserSettingsController::Enrolment(), EnrolmentSkip(), TwoFactorAuthentication_ToggleEmail()); the session is
+    // omniauth's State where omniauth is set up.
+    $services->set('Base\Controller\Action\Settings\Enrolment')->public()
+        ->args([service('Omnibridge\Contract\Access'), service('Base\Service\SecurityPolicy'), service('Omnibridge\Contract\Urls'), service('Omniauth\Contract\State')->nullOnInvalid()])
+        ->tag('controller.service_arguments');
+    $services->set('Base\Controller\Action\Settings\EnrolmentSkip')->public()
+        ->args([service('Omnibridge\Contract\Access'), service('Omnibridge\Contract\Tokens'), service('Base\Service\SecurityPolicy'), service('Omnibridge\Contract\Urls'), service('Omniauth\Contract\State')->nullOnInvalid()])
+        ->tag('controller.service_arguments');
+    $services->set('Base\Controller\Action\Settings\EmailCodeToggle')->public()
+        ->args([service('Omnibridge\Contract\Access'), service('Omnibridge\Contract\Tokens'), service('Base\Service\SecurityPolicy'), service('Omnibridge\Contract\Urls'), service('Base\Repository\Users')])
+        ->tag('controller.service_arguments');
     // A widget's page (formerly WidgetController::Page()).
     $services->set('Base\Controller\Action\Widget\Page')->public()
         ->args([service('Base\Repository\Layout\Widget\PageRepository')])

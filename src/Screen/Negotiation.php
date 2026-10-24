@@ -71,7 +71,7 @@ final class Negotiation
             $result instanceof Json => new Answer($result->status, self::encode($this->rendered($result->data)), [], $result->cache, json: true),
             $result instanceof Shell => $this->shell($result, $visit),
             $result instanceof File => new Answer(200, '', null !== $result->type ? ['Content-Type' => $result->type] : [], $result->cache, file: $result->path),
-            $result instanceof Redirect => new Answer($result->status, '', ['Location' => $result->url], $result->cache),
+            $result instanceof Redirect => new Answer($result->status, '', ['Location' => $result->url] + $result->headers, $result->cache),
         };
     }
 
