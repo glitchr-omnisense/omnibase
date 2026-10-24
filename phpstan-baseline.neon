@@ -6541,12 +6541,6 @@ parameters:
 			path: src/Database/Repository/ServiceEntityParser.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 2
-			path: src/Database/Repository/ServiceEntityParser.php
-
-		-
 			message: '#^Method Base\\Database\\Repository\\ServiceEntityParser\:\:__countBy\(\) has parameter \$criteria with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
