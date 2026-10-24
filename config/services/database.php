@@ -79,13 +79,8 @@ return static function (ContainerConfigurator $container): void {
     // is the application's (App\Repository\UserRepository: the site's own, else omnibase's under
     // that name), as every other service of the core that takes it. Public, as the repositories
     // themselves are handed out by getRepository(): kept when nothing of the container asks them.
-    foreach ([
-        'Base\Repository\Users' => 'App\Repository\UserRepository',
-        'Base\Repository\Threads' => 'Base\Repository\ThreadRepository',
-        'Base\Repository\Thread\Tags' => 'Base\Repository\Thread\TagRepository',
-        'Base\Repository\User\Notifications' => 'Base\Repository\User\NotificationRepository',
-        'Base\Repository\Layout\Settings' => 'Base\Repository\Layout\SettingRepository',
-    ] as $interface => $repository) {
+    // The list is Base\Repository\Aliases' (step R27), which omnibridge/laravel binds as well.
+    foreach (\Base\Repository\Aliases::INTERFACES as $interface => $repository) {
         $services->alias($interface, $repository)->public();
     }
 };

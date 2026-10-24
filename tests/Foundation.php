@@ -135,6 +135,9 @@
  * Icon, Enum, Texts}TwigExtension, which Symfony and Laravel register alike, and what they stand on -
  * Base\Service\Icons (|iconify's rule), Base\Service\Model\EnumNouns (|trans_enum's), Base\Routing\AdminRouteNames
  * (omnibase/admin's names of its routes) and Base\Twig\Variable\AdminLinks (app.admin.crudify() without the admin).
+ * +3 after step R27 of the audit (actions written once for every host): Base\Controller\Action\Notification\Latest
+ * (the bell's payload) and Base\Controller\Action\Widget\Page (a widget's page), whose #[Route] a host's router
+ * reads (the attribute is not loaded with the class), and Base\Repository\Aliases (the repositories by their interfaces).
  */
 
 return [
@@ -214,6 +217,8 @@ return [
     Base\Contract\Translations::class,
     Base\Contract\TwoFactorUser::class,
     Base\Contract\Urls::class,
+    Base\Controller\Action\Notification\Latest::class,
+    Base\Controller\Action\Widget\Page::class,
     Base\Controller\SignatureController::class,
     Base\DatabaseSubscriber\AttributeSubscriber::class,
     Base\DatabaseSubscriber\DemoAccountLockSubscriber::class,
@@ -596,6 +601,7 @@ return [
     Base\Notifier\Recipient\Recipient::class,
     Base\Notifier\Recipient\TimezoneRecipientInterface::class,
     Base\Notifier\Recipient\TimezoneRecipientTrait::class,
+    Base\Repository\Aliases::class,
     Base\Repository\Analytics\PageViewRepository::class,
     Base\Repository\Analytics\PageVisitRepository::class,
     Base\Repository\Analytics\VisitRepository::class,

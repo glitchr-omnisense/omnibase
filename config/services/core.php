@@ -485,6 +485,24 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('Base\Screen\ContextProvider', 'Base\Bridge\Symfony\SymfonyScreenContext')->public();
     $services->set('Base\Bridge\Symfony\ScreenResponder')->public()
         ->args([service('twig'), service('Base\Screen\ContextProvider'), '%base.screens.version%']);
+    // Actions written once for every host (audit "lesringostars face au master plan", R27): plain
+    // classes whose #[Route] the router reads (a site's src/Action; the core's src/Controller/Action, which the
+    // routes import of an omnibase site, @BaseBundle/Controller, reads) and
+    // whose result - a View, a Template, Json, a Shell, a File, or null for no such page - the
+    // ScreenResponder answers; `array $query` is the query string's values, as under Laravel.
+    $services->set('Base\Bridge\Symfony\ActionResults')
+        ->args([service('Base\Bridge\Symfony\ScreenResponder')])
+        ->tag('kernel.event_listener', ['event' => 'kernel.view']);
+    $services->set('Base\Bridge\Symfony\ActionArguments')
+        ->tag('controller.argument_value_resolver', ['priority' => 50]);
+    // The bell's payload (formerly NotificationController::Latest()).
+    $services->set('Base\Controller\Action\Notification\Latest')->public()
+        ->args([service('Omnibridge\Contract\Access'), service('Base\Repository\User\Notifications'), service('Base\Notifier\NotificationLinkerInterface')->nullOnInvalid()])
+        ->tag('controller.service_arguments');
+    // A widget's page (formerly WidgetController::Page()).
+    $services->set('Base\Controller\Action\Widget\Page')->public()
+        ->args([service('Base\Repository\Layout\Widget\PageRepository')])
+        ->tag('controller.service_arguments');
     $services->set('Base\Screen\Builder\Stories')->public()
         ->args([service('Base\Contract\Texts'), service('Base\Contract\Pictures')]); // "now": Runtime::clock(), the framework's unless one is set by hand
     // The account's screens (C5, its second part): the builder asks the security policy, the

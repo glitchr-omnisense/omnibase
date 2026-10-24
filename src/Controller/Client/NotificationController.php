@@ -73,24 +73,8 @@ class NotificationController extends AbstractController
         ]));
     }
 
-    /**
-     * The bell's payload: unread count + latest entries, for a tab that has
-     * been open a while (the server-rendered dropdown is only as fresh as the
-     * page). Cheap enough to poll on focus, not meant for a timer.
-     */
-    #[Route("/notifications/latest", name: "user_notifications_latest", methods: ["GET"])]
-    public function Latest(Request $request): JsonResponse
-    {
-        $user = $this->getUser();
-        if (!$user instanceof User) {
-            return new JsonResponse(["unread" => 0, "items" => []], 401);
-        }
-
-        $limit = min(20, max(1, $request->query->getInt("limit", 8)));
-        $items = array_map(fn (Notification $n) => $this->serialize($n), $this->notificationRepository->findVisibleFor($user, $limit));
-
-        return new JsonResponse(["unread" => $this->countUnread($user), "items" => $items]);
-    }
+    // The bell's payload (/notifications/latest) is an action written once for every host:
+    // Base\Controller\Action\Notification\Latest (audit "lesringostars face au master plan", R27).
 
     /**
      * Body: {token, id?, read?} - one notification, or every unread one when
