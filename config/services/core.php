@@ -398,10 +398,9 @@ return static function (ContainerConfigurator $container): void {
     // "omnibase agnostique", C4): what omnibase's framework-free code asks
     // through Base\Contract\Runtime, each bound to its interface's name (an
     // application rebinds one by aliasing that name). The host's contracts are
-    // omniscient/omnibridge's since A2 (Omnibridge\Contract\*): bound under
-    // that name, their former names (Base\Contract\Urls...,
-    // Omnibridge\Twig\Contract\Translations) aliasing it, so a service typed
-    // with either is the same one. The registry gets them
+    // omniscient/omnibridge's since A2 (Omnibridge\Contract\*), bound under
+    // that name (their former names, Base\Contract\Urls... and
+    // Omnibridge\Twig\Contract\*, are gone since omnibase 4's final pass). The registry gets them
     // from the `base.contracts` locator (ContractsPass), with the framework's
     // clock, event dispatcher and mailer, seeded in BaseBundle::boot().
     //
@@ -409,10 +408,9 @@ return static function (ContainerConfigurator $container): void {
     // (Omnibridge\Symfony\*) and so is their wiring: its config/services.php
     // binds Urls, Translations, Environment, Access, Sessions and Tokens, and
     // omnibase gives two of them its own router - addresses through
-    // advanced_router, the remember-me cookie's domain from it. Their former
-    // class names (Base\Bridge\Symfony\RouterUrls...) are aliases of the
-    // moved classes (src/Resources/Aliases.php) and their former service ids
-    // aliases of the new ones. omnibase's own adapters, over its own services
+    // advanced_router, the remember-me cookie's domain from it (their former
+    // names, Base\Bridge\Symfony\RouterUrls..., are gone since omnibase 4's
+    // final pass). omnibase's own adapters, over its own services
     // (Localizer, Flysystem, MediaService, its router's route names and icons,
     // the screens), stay Base\Bridge\Symfony.
     $container->import(\Omnibridge\Symfony\OmnibridgeBundle::SERVICES);
@@ -420,31 +418,6 @@ return static function (ContainerConfigurator $container): void {
         ->args([service('advanced_router'), service('assets.packages')->nullOnInvalid()]);
     $services->get('Omnibridge\Symfony\Contract\SecuritySessions')
         ->args([service('security.token_storage'), closure([service('advanced_router'), 'getDomain'])]);
-    foreach ([
-        'Base\Bridge\Symfony\RouterUrls' => 'Omnibridge\Symfony\RouterUrls',
-        'Base\Bridge\Symfony\TranslatorTranslations' => 'Omnibridge\Symfony\TranslatorTranslations',
-        'Base\Bridge\Symfony\KernelEnvironment' => 'Omnibridge\Symfony\Contract\KernelEnvironment',
-        'Base\Bridge\Symfony\SecurityAccess' => 'Omnibridge\Symfony\Contract\SecurityAccess',
-        'Base\Bridge\Symfony\SecuritySessions' => 'Omnibridge\Symfony\Contract\SecuritySessions',
-        'Base\Bridge\Symfony\CsrfTokens' => 'Omnibridge\Symfony\Contract\CsrfTokens',
-    ] as $former => $id) {
-        $services->alias($former, $id);
-    }
-    foreach ([
-        'Base\Contract\Urls' => 'Omnibridge\Contract\Urls',
-        'Omnibridge\Twig\Contract\Urls' => 'Omnibridge\Contract\Urls',
-        'Base\Contract\Environment' => 'Omnibridge\Contract\Environment',
-        'Base\Contract\Routes' => 'Omnibridge\Contract\Routes',
-        'Omnibridge\Twig\Contract\Translations' => 'Omnibridge\Contract\Translations',
-        'Base\Contract\Translations' => 'Omnibridge\Contract\Translations',
-        'Base\Contract\Access' => 'Omnibridge\Contract\Access',
-        'Base\Contract\Sessions' => 'Omnibridge\Contract\Sessions',
-        'Base\Contract\Locales' => 'Omnibridge\Contract\Locales',
-        'Base\Contract\Files' => 'Omnibridge\Contract\Files',
-        'Base\Contract\Tokens' => 'Omnibridge\Contract\Tokens',
-    ] as $former => $id) {
-        $services->alias($former, $id);
-    }
     $services->set('Base\Bridge\Symfony\RouterRoutes')
         ->args([service('advanced_router'), service('base.service.icon')->nullOnInvalid()]);
     $services->alias('Omnibridge\Contract\Routes', 'Base\Bridge\Symfony\RouterRoutes');

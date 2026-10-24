@@ -15,18 +15,18 @@
  * Returns what they answered.
  */
 
-use Base\Contract\Access;
+use Omnibridge\Contract\Access;
 use Base\Contract\Link;
-use Base\Contract\Locales;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
-use Base\Contract\Urls;
+use Omnibridge\Contract\Urls;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\ShortLink;
 use Base\Entity\Thread;
 use Base\Entity\ThreadIntl;
 use Base\Enum\ThreadState;
 use Base\Enum\WorkflowState;
-use Base\Exception\MissingContractException;
+use Omnibridge\Exception\MissingContractException;
 use Base\Service\Model\LocaleNormalizer;
 
 $answers = [];

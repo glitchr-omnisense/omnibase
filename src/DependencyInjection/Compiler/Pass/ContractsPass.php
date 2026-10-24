@@ -67,25 +67,13 @@ final class ContractsPass implements CompilerPassInterface
 
     /**
      * The former names of the contracts that moved to omniscient/omnibridge
-     * (A2), aliases of its interfaces until omnibase 4's final pass: listed in
-     * the locator too, the same service as the contract's own name. The
-     * registry asks by the own name first.
+     * (A2): none since omnibase 4's final pass, which removed them (the sites
+     * and bundles name Omnibridge\Contract\*). Kept for HostContractsPass's
+     * signature, empty.
      *
      * @var array<string, class-string>
      */
-    public const FORMER = [
-        'Base\\Contract\\Urls' => Urls::class,
-        'Omnibridge\\Twig\\Contract\\Urls' => Urls::class,
-        'Base\\Contract\\Translations' => Translations::class,
-        'Omnibridge\\Twig\\Contract\\Translations' => Translations::class,
-        'Base\\Contract\\Locales' => Locales::class,
-        'Base\\Contract\\Access' => Access::class,
-        'Base\\Contract\\Sessions' => Sessions::class,
-        'Base\\Contract\\Tokens' => Tokens::class,
-        'Base\\Contract\\Files' => Files::class,
-        'Base\\Contract\\Routes' => Routes::class,
-        'Base\\Contract\\Environment' => Environment::class,
-    ];
+    public const FORMER = [];
 
     /**
      * The contracts bound to another service than their interface's name:

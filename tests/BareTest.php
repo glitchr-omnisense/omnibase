@@ -290,7 +290,7 @@ final class BareTest extends TestCase
         ], $run['result']);
 
         $foundation = require __DIR__.'/Foundation.php';
-        foreach ([\Base\Contract\Runtime::class, \Base\Contract\Urls::class, \Base\Contract\Access::class, \Base\Contract\Locales::class, \Base\Contract\Files::class, \Base\Contract\SystemClock::class, \Base\Exception\MissingContractException::class] as $contract) {
+        foreach ([\Base\Contract\Runtime::class] as $contract) {
             self::assertContains($contract, $foundation, $contract.' is in the Foundation');
         }
     }

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service\Model;
 
-use Base\Contract\Environment;
+use Omnibridge\Contract\Environment;
 use Base\Service\Model\DevelopmentEnvironment;
 use PHPUnit\Framework\TestCase;
 

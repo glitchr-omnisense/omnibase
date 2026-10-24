@@ -5,7 +5,7 @@ namespace Tests\Base\Contract;
 use Omnibridge\Symfony\TranslatorTranslations;
 use Base\Contract\Nouns;
 use Base\Contract\Runtime;
-use Base\Contract\Translations;
+use Omnibridge\Contract\Translations;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
 use Base\Service\Model\EntityNouns;

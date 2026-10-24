@@ -21,9 +21,8 @@ here as `Base\Contract\*`: `Nouns`, `Media`, `Pictures`, `Texts`, the screens'
 omnibridge's registry (the same state) with omnibase's accessors beside it: `parameters()`,
 `nouns()`, `media()`, `pictures()`, `texts()`, `mailer()`. The former names
 (`Base\Contract\Urls`... and omnibridge/twig's `Omnibridge\Twig\Contract\Urls` and
-`Translations`) are aliases of the moved interfaces, declared with Composer's autoloader
-(`src/Resources/Aliases.php`): the same interface, one service under either name, until
-omnibase 4's final pass. New code names `Omnibridge\Contract\*`.
+`Translations`), aliases of the moved interfaces since A2, were removed at omnibase 4's final
+pass: name `Omnibridge\Contract\*`.
 
 | Contract | What it answers | Under Symfony |
 |---|---|---|

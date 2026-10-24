@@ -70,7 +70,7 @@ final class BaseServiceLazyTest extends KernelTestCase
     {
         $container = static::getContainer();
         $service = $container->get('base.service');
-        $environment = $container->get('Base\\Contract\\Environment');
+        $environment = $container->get('Omnibridge\\Contract\\Environment');
 
         self::assertSame($environment->isDebug(), $service->isDebug());
         self::assertSame($environment->secret(), $service->getSalt());

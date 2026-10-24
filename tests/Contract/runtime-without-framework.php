@@ -13,13 +13,13 @@
  * visitor's language...), answers through them. Returns what it answered.
  */
 
-use Base\Contract\Access;
-use Base\Contract\Files;
-use Base\Contract\Locales;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Files;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
-use Base\Contract\Urls;
-use Base\Exception\MissingContractException;
-use Omnibridge\Twig\Contract\Translations;
+use Omnibridge\Contract\Urls;
+use Omnibridge\Exception\MissingContractException;
+use Omnibridge\Contract\Translations;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;

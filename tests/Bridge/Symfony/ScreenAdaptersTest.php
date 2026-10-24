@@ -10,7 +10,7 @@ use Base\Bridge\Symfony\WysiwygTexts;
 use Base\Contract\Pictures;
 use Base\Contract\Runtime;
 use Base\Contract\Texts;
-use Base\Contract\Tokens;
+use Omnibridge\Contract\Tokens;
 use Base\Screen\Builder\Stories;
 use Base\Screen\ContextProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

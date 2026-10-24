@@ -147,6 +147,11 @@
  * DoctrineRepositories, DoctrineEntities), omnibase's storages over omnidrive (Base\Service\Storages, in place of
  * the deprecated FlysystemInterface) and where BaseTrait keeps what it resolves (Base\Service\Locator, no longer
  * BaseService).
+ * -11 at omnibase 4's final pass (a decision of the pass: the former names leave the core): Base\Contract\{Urls,
+ * Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment, SystemClock} and Base\Exception\
+ * MissingContractException, the aliases of omniscient/omnibridge's classes kept since step A2, are removed with
+ * src/Resources/Aliases.php (and the A1 aliases of omnibridge/symfony's adapters, which were never listed here):
+ * no site or bundle named them any more.
  */
 
 return [
@@ -204,30 +209,20 @@ return [
     Base\Cache\SimpleCacheInterface::class,
     Base\Console\Console::class,
     Base\Console\ConsoleInterface::class,
-    Base\Contract\Access::class,
-    Base\Contract\Environment::class,
-    Base\Contract\Files::class,
     Base\Contract\Framework::class,
     Base\Contract\Link::class,
-    Base\Contract\Locales::class,
     Base\Contract\Media::class,
     Base\Contract\MediaRouter::class,
     Base\Contract\Nouns::class,
     Base\Contract\PasskeyRecords::class,
     Base\Contract\PasskeyUsers::class,
     Base\Contract\Pictures::class,
-    Base\Contract\Routes::class,
     Base\Contract\Runtime::class,
     Base\Contract\SecurityUser::class,
     Base\Contract\SecurityUserLoader::class,
     Base\Contract\SecurityUserProvider::class,
-    Base\Contract\Sessions::class,
-    Base\Contract\SystemClock::class,
     Base\Contract\Texts::class,
-    Base\Contract\Tokens::class,
-    Base\Contract\Translations::class,
     Base\Contract\TwoFactorUser::class,
-    Base\Contract\Urls::class,
     Base\Controller\Action\Notification\Latest::class,
     Base\Controller\Action\Widget\Page::class,
     Base\Controller\SignatureController::class,
@@ -481,7 +476,6 @@ return [
     Base\Exception\InvalidPageException::class,
     Base\Exception\InvalidSizeException::class,
     Base\Exception\InvalidUuidException::class,
-    Base\Exception\MissingContractException::class,
     Base\Exception\MissingDiscriminatorMapException::class,
     Base\Exception\MissingDiscriminatorValueException::class,
     Base\Exception\MissingLocaleException::class,

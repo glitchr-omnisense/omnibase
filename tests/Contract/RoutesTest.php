@@ -7,7 +7,7 @@ use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\Semantic;
 use Base\Entity\Layout\Widget\Route;
-use Base\Exception\MissingContractException;
+use Omnibridge\Exception\MissingContractException;
 use Base\Service\BaseService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

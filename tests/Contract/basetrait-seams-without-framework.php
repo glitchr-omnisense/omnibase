@@ -29,17 +29,17 @@
  * Returns what they answered.
  */
 
-use Base\Contract\Access;
-use Base\Contract\Environment;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Environment;
 use Base\Contract\Link;
-use Base\Contract\Locales;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Media;
 use Base\Contract\Nouns;
-use Base\Contract\Routes;
+use Omnibridge\Contract\Routes;
 use Base\Contract\Runtime;
-use Base\Contract\Sessions;
-use Base\Contract\Translations;
-use Base\Contract\Urls;
+use Omnibridge\Contract\Sessions;
+use Omnibridge\Contract\Translations;
+use Omnibridge\Contract\Urls;
 use Base\Entity\Layout\Image;
 use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Layout\Semantic;
@@ -49,7 +49,7 @@ use Base\Entity\Layout\Widget;
 use Base\Entity\Thread;
 use Base\Entity\User;
 use Base\Entity\User\Token;
-use Base\Exception\MissingContractException;
+use Omnibridge\Exception\MissingContractException;
 use Base\Service\ArrayParameterBag;
 use Base\Service\BaseService;
 use Base\Service\HotParameters;
@@ -58,7 +58,7 @@ use Base\Service\Model\Duration;
 use Base\Service\Model\EntityNouns;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
-use Omnibridge\Twig\Contract\Translations as OmnibridgeTranslations;
+use Omnibridge\Contract\Translations as OmnibridgeTranslations;
 
 // The Base\ / App\ convention as the core resolves it without a kernel (User's states are App\Enum\UserState).
 ClassAliases::register();

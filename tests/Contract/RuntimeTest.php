@@ -2,15 +2,15 @@
 
 namespace Tests\Base\Contract;
 
-use Base\Contract\Access;
-use Base\Contract\Files;
-use Base\Contract\Locales;
+use Omnibridge\Contract\Access;
+use Omnibridge\Contract\Files;
+use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
-use Base\Contract\SystemClock;
-use Base\Contract\Urls;
-use Base\Exception\MissingContractException;
+use Omnibridge\SystemClock;
+use Omnibridge\Contract\Urls;
+use Omnibridge\Exception\MissingContractException;
 use Omnibridge\Runtime as HostRuntime;
-use Omnibridge\Twig\Contract\Translations;
+use Omnibridge\Contract\Translations;
 use PHPUnit\Framework\TestCase;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;

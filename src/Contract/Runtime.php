@@ -33,9 +33,7 @@ use Symfony\Component\Mailer\MailerInterface;
  * BaseBundle::boot() (Base\DependencyInjection\Compiler\Pass\ContractsPass);
  * under Laravel, omnibridge/laravel hands the application. A contract asked
  * and not filled throws MissingContractException; find() answers null
- * instead, for a caller that can do without. A contract's former name
- * (Base\Contract\Urls is Omnibridge\Contract\Urls, by alias) is the same
- * contract, the same service.
+ * instead, for a caller that can do without.
  */
 final class Runtime extends HostRuntime
 {
