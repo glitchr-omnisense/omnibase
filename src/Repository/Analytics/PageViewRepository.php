@@ -10,7 +10,7 @@ use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 /**
  * @extends ServiceEntityRepository<PageView>
  */
-class PageViewRepository extends ServiceEntityRepository
+class PageViewRepository extends ServiceEntityRepository implements PageViews
 {
     /**
      * Atomic increment, not a load-modify-flush cycle - two concurrent

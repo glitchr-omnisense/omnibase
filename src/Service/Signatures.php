@@ -45,7 +45,7 @@ class Signatures
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly FlysystemInterface $flysystem,
+        private readonly Storages $flysystem,
         private readonly ?Registry $registry = null,
         private readonly ?EventDispatcherInterface $dispatcher = null,
         private readonly ?LoggerInterface $logger = null,

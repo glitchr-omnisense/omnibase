@@ -9,7 +9,7 @@ use Base\Entity\Hours\ScopedWeek;
  * @method ScopedWeek|null find($id, $lockMode = null, $lockVersion = null)
  * @method ScopedWeek[]    findAll()
  */
-class ScopedWeekRepository extends ServiceEntityRepository
+class ScopedWeekRepository extends ServiceEntityRepository implements ScopedWeeks
 {
     public function ofScope(string $scope): ?ScopedWeek
     {

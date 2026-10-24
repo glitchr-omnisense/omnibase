@@ -12,7 +12,7 @@ use Base\Repository\ThreadRepository;
 use Base\Service\Collab\CollabRoomResolver;
 use Base\Service\Collab\CollabTicketFactory;
 use Base\Traits\BaseTrait;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\LinkableInterface;
 use Base\Service\ObfuscatorInterface;
@@ -57,9 +57,9 @@ class EditorController extends AbstractController
     protected Filesystem $filesystem;
 
     /**
-     * @var FlysystemInterface
+     * @var Storages
      */
-    protected FlysystemInterface $flysystem;
+    protected Storages $flysystem;
 
     /**
      * @var ParameterBagInterface
@@ -121,7 +121,7 @@ class EditorController extends AbstractController
      */
     protected CollabTicketFactory $ticketFactory;
 
-    public function __construct(ParameterBagInterface $parameterBag, SluggerInterface $slugger, MediaServiceInterface $mediaService, FlysystemInterface $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, TagRepository $tagRepository, CollabRoomResolver $roomResolver, CollabTicketFactory $ticketFactory, ?Profiler $profiler = null)
+    public function __construct(ParameterBagInterface $parameterBag, SluggerInterface $slugger, MediaServiceInterface $mediaService, Storages $flysystem, TranslatorInterface $translator, RequestStack $requestStack, PaginatorInterface $paginator, ObfuscatorInterface $obfuscator, UserRepository $userRepository, ThreadRepository $threadRepository, TagRepository $tagRepository, CollabRoomResolver $roomResolver, CollabTicketFactory $ticketFactory, ?Profiler $profiler = null)
     {
         $this->translator = $translator;
         $this->obfuscator = $obfuscator;

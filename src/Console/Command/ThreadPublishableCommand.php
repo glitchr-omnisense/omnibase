@@ -5,8 +5,8 @@ namespace Base\Console\Command;
 use Doctrine\DBAL\LockMode;
 
 use Base\Console\Command;
-use Base\Entity\Thread;
 use Base\Enum\ThreadState;
+use Base\Repository\Threads;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,6 +16,18 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'thread:publishable', aliases: [], description: '')]
 class ThreadPublishableCommand extends Command
 {
+    /** The threads (step R28: by their interface, where it asked the entity manager's repository). */
+    /** @var Threads<\Base\Entity\Thread> */
+    protected Threads $threads;
+
+    /** @param Threads<\Base\Entity\Thread> $threads */
+    public function setThreads(Threads $threads): self
+    {
+        $this->threads = $threads;
+
+        return $this;
+    }
+
     protected function configure(): void
     {
         $this->addOption('publish', null, InputOption::VALUE_NONE, 'Should I publish them ?');
@@ -25,8 +37,7 @@ class ThreadPublishableCommand extends Command
     {
         $actionPublish = $input->getOption('publish');
 
-        $threadRepository = $this->entityManager->getRepository(Thread::class);
-        $threads = $threadRepository->findByState(ThreadState::FUTURE)->getResult();
+        $threads = $this->threads->byStateUncached(ThreadState::FUTURE);
 
         $publishableThreads = array_filter(
             $threads,

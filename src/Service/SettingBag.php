@@ -4,13 +4,12 @@ namespace Base\Service;
 
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
-use Base\Repository\Layout\SettingRepository;
+use Base\Repository\Layout\Settings;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
-use Doctrine\ORM\Query;
 use Exception;
 use InvalidArgumentException;
 
@@ -48,9 +47,9 @@ class SettingBag implements SettingBagInterface
     protected LocalizerInterface $localizer;
 
     /**
-     * @var ?SettingRepository
+     * @var ?Settings
      */
-    protected ?SettingRepository $settingRepository = null;
+    protected ?Settings $settingRepository = null;
 
     protected ?string $environment;
 
@@ -102,7 +101,7 @@ class SettingBag implements SettingBagInterface
         return true;
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, SettingRepository $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, Settings $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
     {
         $this->parameterBag = $parameterBag;
         $this->entityManager = $entityManager;
@@ -435,17 +434,7 @@ class SettingBag implements SettingBagInterface
         }
 
         try {
-            $fn = $useCache ? "cache" : "find";
-            $fn .= $onlyLinkedBag ?
-                ($path ? "ByInsensitivePathStartingWithAndBagNotEmpty" : "ByBagNotEmpty") :
-                ($path ? "ByInsensitivePathStartingWith" : "All");
-
-            $args = $path ? [$path] : [];
-
-            $settings = $this->settingRepository->$fn(...$args);
-            if ($settings instanceof Query) {
-                $settings = $settings->getResult();
-            }
+            $settings = $this->settingRepository->under($path, $onlyLinkedBag, $useCache);
         } catch (EntityNotFoundException $e) {
             return $useCache ? $this->getRaw($path, false) : [];
         } // Cache fallback
@@ -691,7 +680,7 @@ class SettingBag implements SettingBagInterface
      */
     public function remove(string $path)
     {
-        $setting = $this->settingRepository->findOneByInsensitivePath($path);
+        $setting = $this->settingRepository->oneByInsensitivePath($path);
         if ($setting instanceof Setting) {
             unset($this->settingBag[$path]);
 

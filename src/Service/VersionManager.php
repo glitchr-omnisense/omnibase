@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\Database\Attribute\Versionable;
 use Base\Entity\Extension\Revision;
-use Base\Repository\Extension\RevisionRepository;
+use Base\Repository\Extension\Revisions;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -28,13 +28,15 @@ class VersionManager
 
     public function __construct(
         protected EntityManagerInterface $entityManager,
+        protected Revisions $revisions,
         protected int $maxRevisions = 5,
     ) {
     }
 
-    protected function repository(): RevisionRepository
+    /** The revisions by their interface (step R28), where it asked the entity manager's repository. */
+    protected function repository(): Revisions
     {
-        return $this->entityManager->getRepository(Revision::class);
+        return $this->revisions;
     }
 
     /**

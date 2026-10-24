@@ -3,9 +3,9 @@
 namespace Base\Service;
 
 use Base\Entity\Hours\SpecialDay;
-use Base\Repository\Hours\ScopedWeekRepository;
-use Base\Repository\Hours\SpecialDayRepository;
-use Base\Repository\Hours\WeekDayHoursRepository;
+use Base\Repository\Hours\ScopedWeeks;
+use Base\Repository\Hours\SpecialDays;
+use Base\Repository\Hours\WeekDays;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Service\ResetInterface;
 
@@ -42,12 +42,12 @@ class OpeningHours implements ResetInterface
      * @param array<int, array<array{0: string, 1: string}>> $defaultWeek ISO day => hours, until a week is saved
      */
     public function __construct(
-        protected readonly ?SpecialDayRepository $specialDays = null,
-        protected readonly ?WeekDayHoursRepository $weekDays = null,
+        protected readonly ?SpecialDays $specialDays = null,
+        protected readonly ?WeekDays $weekDays = null,
         #[Autowire('%base.opening_hours.timezone%')] string $timezone = 'Europe/Paris',
         #[Autowire('%base.opening_hours.week%')] protected readonly array $defaultWeek = [],
         #[Autowire('%base.opening_hours.cutoff%')] protected readonly ?string $cutoff = null,
-        protected readonly ?ScopedWeekRepository $scopedWeeks = null,
+        protected readonly ?ScopedWeeks $scopedWeeks = null,
     ) {
         $this->zone = new \DateTimeZone($timezone);
     }

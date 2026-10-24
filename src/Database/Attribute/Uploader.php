@@ -7,7 +7,7 @@ use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
-use Base\Service\BaseService;
+use Base\Service\Locator;
 use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -16,7 +16,6 @@ use Exception;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use League\Flysystem\FilesystemException;
-use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Uid\Uuid;
@@ -393,7 +392,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         if ($that->getFlysystem()->isRemote($that->getStorage())) {
-            $routed = BaseService::getMediaService()?->image($path, ["storage" => $that->getStorage()]);
+            $routed = Locator::getMediaService()?->image($path, ["storage" => $that->getStorage()]);
             if ($routed) {
                 return $routed;
             }
@@ -530,8 +529,9 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             return null;
         }
 
-        $operator = $that->getFlysystem()->getOperator($that->storage);
-        $adapter = $that->getFlysystem()->getAdapter($operator);
+        // The storage as omnidrive's drive (step R28): a local one hands its file, any other a temporary copy.
+        $drive = $that->getFlysystem()->getDrive($that->storage);
+        $local = $drive->capabilities()->local;
 
         $fieldValue = self::getFieldValue($entity, $fieldName);
         if (!$fieldValue) {
@@ -555,8 +555,8 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
                 continue;
             }
 
-            if ($adapter instanceof LocalFilesystemAdapter) {
-                if ($operator->fileExists($path)) {
+            if ($local) {
+                if ($drive->exists($path)) {
                     $fileList[] = self::file($that->getFlysystem()->prefixPath($path, $that->getStorage()));
                 }
 
@@ -564,7 +564,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             }
 
             // Copy file content in a tmp file
-            $index = spl_object_hash($adapter) . ":" . $uuidOrFile;
+            $index = $that->storage . ":" . $uuidOrFile;
             $fileList[] = self::materializeTemporaryFile(
                 $index,
                 fn () => $that->getFlysystem()->read($path, $that->getStorage())

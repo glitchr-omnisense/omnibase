@@ -2,7 +2,7 @@
 
 namespace Base\Security;
 
-use App\Repository\UserRepository;
+use Base\Repository\Users;
 use Base\Contract\PasskeyUsers;
 use Webauthn\PublicKeyCredentialUserEntity;
 
@@ -15,16 +15,16 @@ use Webauthn\PublicKeyCredentialUserEntity;
  */
 class WebauthnUserEntityRepository implements PasskeyUsers
 {
-    protected UserRepository $userRepository;
+    protected Users $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(Users $userRepository)
     {
         $this->userRepository = $userRepository;
     }
 
     public function findOneByUsername(string $username): ?PublicKeyCredentialUserEntity
     {
-        $user = $this->userRepository->findOneByUsername($username);
+        $user = $this->userRepository->oneByUsername($username, false);
         return $user ? $this->toUserEntity($user) : null;
     }
 

@@ -27,9 +27,9 @@ class FileService implements FileServiceInterface
     protected $obfuscator;
 
     /**
-     * @var FlysystemInterface
+     * @var Storages
      */
-    protected FlysystemInterface $flysystem;
+    protected Storages $flysystem;
 
     /**
      * The router as the media rule asks it (Base\Contract\MediaRouter): under
@@ -53,7 +53,7 @@ class FileService implements FileServiceInterface
     /** @var string     */
     protected string $localCache;
 
-    public function __construct(Environment $twig, MediaRouter $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag)
+    public function __construct(Environment $twig, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
     {
         $this->twig = $twig;
         $this->router = $router;

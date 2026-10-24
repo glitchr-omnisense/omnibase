@@ -10,7 +10,7 @@ use Base\Entity\Layout\Redirection;
  * @method Redirection|null find($id, $lockMode = null, $lockVersion = null)
  * @method Redirection[]    findAll()
  */
-class RedirectionRepository extends ServiceEntityRepository
+class RedirectionRepository extends ServiceEntityRepository implements Redirections
 {
     /**
      * The redirection for an address (Redirection::normalize()): the one

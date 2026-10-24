@@ -10,6 +10,39 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the core without direct Doctrine on lesringostars' path
+
+The classes an application's pages, sign-in and crontab reach (measured on lesringostars: the lines its
+suites ran, audit "lesringostars face au master plan", R28) ask their repositories by interfaces, Doctrine's
+repositories behind - the same finders, so the same SQL and the same result cache:
+- new interfaces (`Base\Repository\Aliases::INTERFACES`, aliased by Symfony, bound by omnibridge/laravel):
+  `ThreadTranslations` (`search()`, the site-wide search's query, formerly written in
+  `ThreadSearchController`), `Extension\{TrashBalls, Revisions}`, `Layout\{Widgets, Widget\Slots, ImageCrops,
+  Redirections, Semantics}`, `Thread\{Likes, Comments, Mentions}`, `User\{Connections, Passkeys, Tokens,
+  PushSubscriptions}`, `Analytics\{PageViews, Visits, PageVisits}`, `Hours\{ScopedWeeks, SpecialDays,
+  WeekDays}`; `Users`, `Threads` and `Layout\Settings` answer what their callers asked by name
+  (`oneByEmail()`, `oneById()`, `byIds()`, `byRoles()`, `byUsernameContaining()`, `activeWithin()`,
+  `byStateUncached()`, `oneBySlug($slug, false)`, `under()`, `oneByInsensitivePath()`);
+- `Base\Database\Repository\Repositories`: the entities of a class named at run time (`of()`, `byIds()`,
+  `oneById()`), `Base\Bridge\Doctrine\DoctrineRepositories` over the entity manager (a plain
+  `EntityRepository` behind `DoctrineEntities`) - `SelectType`, `MentionEnhancer`, `uploader:entities` and
+  the search's sort by hierarchy use it;
+- constructors: `ThreadSearchController(FormProxyInterface, ThreadTranslations, Repositories)`,
+  `UserProfileController(Users, ...)`, `UserSearchController(..., Users)`, `LoginFormAuthenticator(Referrer,
+  Users, ...)`, `WidgetProvider(Widgets, Slots)`, `TrashManager(EntityManager, TrashBalls)`,
+  `VersionManager(EntityManager, Revisions, int)`, `SelectType`'s second argument `Repositories`,
+  `InAppChannel(EntityManager, Users)`, `MentionEnhancer(Mentions, Users, Repositories, Obfuscator)`
+  (`mentions()`; `getRepository()` deprecated); `BaseNotifier::setUsers()`;
+- `Base\Service\Storages`: omnibase's named storages over omniscient/omnidrive (a drive by name, the public
+  paths), with no Flysystem type: what every service of the core type-hints in place of the deprecated
+  `FlysystemInterface`; `Base\Service\Flysystem` implements both. `Uploader` reads a stored file through
+  the storage's drive;
+- `Base\Service\Locator` keeps what `BaseTrait`'s static accessors resolve (framework-free);
+  `BaseService` extends it, so an accessor no longer loads the Symfony facade;
+- `Base\Bridge\PHPStan\EntityAccessorsExtension` (extension.neon, audit R21b): an `#[Alias]` accessor and
+  a translation's method called on its entity are known to PHPStan, with the signature of the method
+  they end in.
+
 ### Added: actions written once for every host
 
 A plain class whose `#[Route]` (symfony/routing's attribute, which a router reads and the class

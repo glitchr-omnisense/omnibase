@@ -2,23 +2,22 @@
 
 namespace Base\Service;
 
-use Base\BaseBundle;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
-use Doctrine\ORM\EntityManagerInterface;
+use Base\Repository\Layout\Widget\Slots;
+use Base\Repository\Layout\Widgets;
 
+/**
+ * The widgets and their slots by path. Through their interfaces (audit
+ * "lesringostars face au master plan", step R28), where it asked the entity
+ * manager for their repositories: the same finders, the result cache unless
+ * $useCache is false.
+ */
 class WidgetProvider implements WidgetProviderInterface
 {
-    protected $widgetRepository;
-    protected $widgetSlotRepository;
-
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(protected Widgets $widgets, protected Slots $slots)
     {
-        $this->widgetRepository = $entityManager->getRepository(Widget::class);
-        $this->widgetSlotRepository = $entityManager->getRepository(Slot::class);
     }
-
-    protected $widgets = [];
 
     public function get(string $widgetName, bool $useCache = true): ?Widget
     {
@@ -27,20 +26,17 @@ class WidgetProvider implements WidgetProviderInterface
 
     public function getWidget(string $widgetName, bool $useCache = true): ?Widget
     {
-        $fn = $useCache ? "cacheOneByPath" : "findOneByPath";
-        return $this->widgetRepository?->$fn($widgetName);
+        return $this->widgets->oneByPath($widgetName, $useCache);
     }
 
     public function all(bool $useCache = true): array
     {
-        $fn = $useCache ? "cacheAll" : "findAll";
-        return $this->widgetRepository ? $this->widgetRepository->$fn()->getResult() : [];
+        return $this->widgets->every($useCache);
     }
 
     public function allSlots(bool $useCache = true): array
     {
-        $fn = $useCache ? "cacheAll" : "findAll";
-        return array_transforms(fn($k, $s): array => [$s->getPath(), $s], $this->widgetSlotRepository->$fn()->getResult());
+        return array_transforms(fn($k, $s): array => [$s->getPath(), $s], $this->slots->every($useCache));
     }
 
     public function getSlot(string $widgetSlotName, bool $useCache = true): ?Slot
@@ -50,7 +46,6 @@ class WidgetProvider implements WidgetProviderInterface
 
     public function getWidgetSlot(string $path, bool $useCache = true): ?Slot
     {
-        $fn = $useCache ? "cacheOneByPath" : "findOneByPath";
-        return $this->widgetSlotRepository?->$fn($path);
+        return $this->slots->oneByPath($path, $useCache);
     }
 }

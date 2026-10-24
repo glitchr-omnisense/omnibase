@@ -5,7 +5,7 @@ namespace Base\Auth\Listener;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Notifier\Mail\SignInMails;
-use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\Connections;
 use Base\Security\ConnectionTracker;
 use Base\Service\SecurityPolicy;
 use Omniauth\Contract\State;
@@ -35,7 +35,7 @@ class WarnNewDevice
     public function __construct(
         protected readonly SecurityPolicy $securityPolicy,
         protected readonly ConnectionTracker $tracker,
-        protected readonly ConnectionRepository $connections,
+        protected readonly Connections $connections,
         protected readonly ?State $state = null,
         protected readonly ?\Closure $declined = null,
         protected readonly ?SignInMails $mails = null,

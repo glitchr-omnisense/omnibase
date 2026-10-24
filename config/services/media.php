@@ -210,7 +210,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             new Reference('App\Repository\Thread\MentionRepository'),
             new Reference('App\Repository\UserRepository'),
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Base\Database\Repository\Repositories'),
             new Reference('obfuscator'),
         ]);
 

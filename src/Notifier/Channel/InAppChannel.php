@@ -3,6 +3,7 @@
 namespace Base\Notifier\Channel;
 
 use App\Entity\User;
+use Base\Repository\Users;
 use Base\Entity\User\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mime\Address;
@@ -28,6 +29,7 @@ class InAppChannel implements ChannelInterface
 {
     public function __construct(
         protected readonly EntityManagerInterface $entityManager,
+        protected readonly Users $users,
     ) {
     }
 
@@ -76,6 +78,6 @@ class InAppChannel implements ChannelInterface
             return null;
         }
 
-        return $this->entityManager->getRepository(User::class)->findOneBy(["email" => $email]);
+        return $this->users->findOneBy(["email" => $email]);
     }
 }

@@ -11,6 +11,12 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Mention[]    findAll()
  * @method Mention[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class MentionRepository extends ServiceEntityRepository
+class MentionRepository extends ServiceEntityRepository implements Mentions
 {
+    /** Mentions (step R28): ThreadSubscriber's finder. */
+    public function byThread(\Base\Entity\Thread $thread): array
+    {
+        return $this->cacheByThread($thread)->getResult();
+    }
+
 }

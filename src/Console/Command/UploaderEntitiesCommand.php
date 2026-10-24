@@ -2,10 +2,11 @@
 
 namespace Base\Console\Command;
 
+use Base\Database\Repository\Repositories;
 use Base\Database\Attribute\Uploader;
 use Base\Attributes\AttributeReader;
 use Base\BaseBundle;
-use League\Flysystem\FileAttributes;
+use Omnidrive\Model\Entry;
 use Base\Console\Command;
 
 use League\Flysystem\FilesystemException;
@@ -17,6 +18,16 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'uploader:entities', aliases: [], description: '')]
 class UploaderEntitiesCommand extends Command
 {
+    /** The entities of a class named at run time (step R28: Base\Database\Repository\Repositories). */
+    protected Repositories $repositories;
+
+    public function setRepositories(Repositories $repositories): static
+    {
+        $this->repositories = $repositories;
+
+        return $this;
+    }
+
     protected ?string $entityName;
     protected ?string $property;
     protected ?string $uuid;
@@ -212,8 +223,7 @@ class UploaderEntitiesCommand extends Command
      */
     public function getEntries($class)
     {
-        $repository = $this->entityManager->getRepository($class);
-        $this->allEntries[$class] ??= $this->allEntries[$class] ?? $repository->findAll();
+        $this->allEntries[$class] ??= $this->repositories->of($class)->findAll();
 
         return $this->allEntries[$class];
     }
@@ -234,12 +244,13 @@ class UploaderEntitiesCommand extends Command
 
         $propertyFqcn = $class . "::" . $field;
         if (!array_key_exists($propertyFqcn, $this->fileList)) {
-            $this->fileList[$propertyFqcn] = array_values(array_filter(array_map(function ($f) use ($attribute) {
-                if (!$f instanceof FileAttributes) {
+            // The default storage's files under the class's folder, as omnidrive lists them (step R28).
+            $this->fileList[$propertyFqcn] = array_values(array_filter(array_map(function (Entry $f) use ($attribute) {
+                if (!$f->isFile()) {
                     return null;
                 }
-                return $attribute->getFlysystem()->getPublic($f->path(), $attribute->getStorage());
-            }, $filesystem->getOperator()->listContents($classPath)->toArray())));
+                return $attribute->getFlysystem()->getPublic($f->path, $attribute->getStorage());
+            }, iterator_to_array($filesystem->getDrive()->list($classPath), false))));
         }
 
         if ($this->uuid) {

@@ -3,13 +3,13 @@
 namespace Base\Notifier\Abstract;
 
 use Base\Entity\User;
+use Base\Repository\Users;
 use BadMethodCallException;
 use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\BaseService;
 use Base\Service\SettingBagInterface;
 use DateTime;
 use Doctrine\DBAL\Exception as DoctrineException;
@@ -181,6 +181,16 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         return $this->twig;
     }
 
+    /** The accounts by their interface (step R28): the administrators to notify. */
+    protected ?Users $users = null;
+
+    public function setUsers(Users $users): static
+    {
+        $this->users = $users;
+
+        return $this;
+    }
+
     public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
     {
         $this->twig = $twig;
@@ -295,8 +305,7 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
     protected function getAdminUsers()
     {
         try {
-            $userRepository = $this->entityManager->getRepository(User::class);
-            $adminUsers = $userRepository->cacheByRoles($this->adminRole)->getResult();
+            $adminUsers = $this->users?->byRoles($this->adminRole) ?? [];
         } catch (MappingException|NonCacheableEntity|BadMethodCallException|DoctrineException|DriverException|InvalidFieldNameException|TableNotFoundException $e) {
             $adminUsers = [];
         }

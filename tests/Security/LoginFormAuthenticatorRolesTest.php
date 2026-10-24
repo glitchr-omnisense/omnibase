@@ -43,14 +43,13 @@ class LoginFormAuthenticatorRolesTest extends KernelTestCase
         $router = $this->createMock(AdvancedRouterInterface::class);
         $router->method('redirect')->willReturn(new RedirectResponse('/after'));
 
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->method('getRepository')->willReturn($this->createMock('App\\Repository\\UserRepository'));
-        $entityManager->expects($this->once())->method('flush');
+        $users = $this->createMock(\Base\Repository\Users::class);
+        $users->expects($this->once())->method('flush');
 
         $request = Request::create('/login', 'POST');
         $request->setSession(new Session(new MockArraySessionStorage()));
 
-        $authenticator = new LoginFormAuthenticator($referrer, $entityManager, $router, $this->createMock(AuthorizationCheckerInterface::class));
+        $authenticator = new LoginFormAuthenticator($referrer, $users, $router, $this->createMock(AuthorizationCheckerInterface::class));
         $response = $authenticator->onAuthenticationSuccess($request, new UsernamePasswordToken($user, 'main', $user->getRoles()), 'main');
 
         $this->assertInstanceOf(RedirectResponse::class, $response);

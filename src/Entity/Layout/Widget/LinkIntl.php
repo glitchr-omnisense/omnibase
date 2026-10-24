@@ -11,10 +11,10 @@ class LinkIntl extends WidgetIntl
 {
     public function getTitle(): ?string
     {
-        /**
-         * @var Link $this
-         */
+        // Its own title, else its hyperlink's label. (Its icons came last before: an array where a string is
+        // returned, a TypeError - which PHPStan saw once the translations' accessors were known, step R21b.)
         $translatable = $this->getTranslatable();
-        return parent::getTitle() ?? $translatable->getHyperlink()->getLabel() ?? $translatable->__iconize();
+
+        return parent::getTitle() ?? ($translatable instanceof Link ? $translatable->getHyperlink()?->getLabel() : null);
     }
 }

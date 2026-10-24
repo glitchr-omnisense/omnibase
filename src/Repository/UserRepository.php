@@ -27,9 +27,48 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class UserRepository extends ServiceEntityRepository implements SecurityUserLoader, SecurityUserProvider, Users
 {
     /** Users (step R15): the account of a username, through the finder's cache. */
-    public function oneByUsername(string $username): ?\Base\Entity\User
+    public function oneByUsername(string $username, bool $cached = true): ?\Base\Entity\User
     {
-        return $this->cacheOneByUsername($username);
+        return $cached ? $this->cacheOneByUsername($username) : $this->findOneByUsername($username);
+    }
+
+    public function oneByEmail(?string $email): ?\Base\Entity\User
+    {
+        return $this->findOneByEmail($email);
+    }
+
+    public function byIds(array $ids): array
+    {
+        return $this->cacheById($ids)->getResult();
+    }
+
+    public function activeWithin(int $seconds, ?int $exceptId = null): array
+    {
+        return (null !== $exceptId ? $this->findByIdNotEqualToAndActiveAtYoungerThan($exceptId, $seconds) : $this->findByActiveAtYoungerThan($seconds))->getResult();
+    }
+
+    public function oneById(int $id): ?\Base\Entity\User
+    {
+        return $this->cacheOneById($id);
+    }
+
+    public function byRoles(array|string $roles): array
+    {
+        return $this->cacheByRoles($roles)->getResult();
+    }
+
+    public function byUsernameContaining(string $term, int $limit = 50): array
+    {
+        if (!$this->getClassMetadata()->hasField('username')) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('u')
+            ->where('LOWER(u.username) LIKE :term')
+            ->setParameter('term', '%' . addcslashes(mb_strtolower($term), '%_') . '%')
+            ->orderBy('u.username', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()->getResult();
     }
 
     public function supportsClass(string $class): bool

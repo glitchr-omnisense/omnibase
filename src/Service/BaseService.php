@@ -14,7 +14,6 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\DevelopmentEnvironment;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Traits\BaseTrait;
 
 use Symfony\Component\Form\FormInterface;
 
@@ -23,7 +22,6 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-use Base\Traits\BaseCommonTrait;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ManagerRegistry;
@@ -73,10 +71,8 @@ use function is_object;
  * methods read no property of the object: called on the ghost, they build
  * nothing.
  */
-class BaseService implements RuntimeExtensionInterface
+class BaseService extends Locator implements RuntimeExtensionInterface
 {
-    use BaseTrait;
-    use BaseCommonTrait;
 
     /**
      * @var KernelInterface
@@ -569,11 +565,6 @@ class BaseService implements RuntimeExtensionInterface
         return $this->getRouter()->isProfiler();
     }
 
-    public function isEntity(mixed $entityOrClassOrMetadata): bool
-    {
-        return $this->getClassMetadataManipulator()->isEntity($entityOrClassOrMetadata);
-    }
-
     /**
      *
      * Security container related methods
@@ -760,6 +751,6 @@ class BaseService implements RuntimeExtensionInterface
             $entity = $eventOrEntity->getObject();
         }
 
-        return $this->entityHydrator->hydrate($entity, $data);
+        return self::getEntityHydrator()->hydrate($entity, $data);
     }
 }

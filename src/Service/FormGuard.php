@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Contract\Runtime;
-use Base\Repository\Thread\CommentRepository;
+use Base\Repository\Thread\Comments;
 use Omnishield\Exception\InvalidKeyException;
 use Omnishield\Exception\ProviderException;
 use Omnishield\Model\Identity;
@@ -87,7 +87,7 @@ class FormGuard
         #[Autowire('%kernel.secret%')] #[\SensitiveParameter] protected readonly string $secret,
         #[Autowire('%base.guard%')] protected readonly array $config = [],
         protected readonly ?Registry $registry = null,
-        protected readonly ?CommentRepository $comments = null,
+        protected readonly ?Comments $comments = null,
         protected readonly ?string $defaultChallenge = null,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly bool $acceptUnreachableChallenge = false,

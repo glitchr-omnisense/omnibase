@@ -9,7 +9,7 @@ use Doctrine\DBAL\ArrayParameterType;
 /**
  * @extends ServiceEntityRepository<PageVisit>
  */
-class PageVisitRepository extends ServiceEntityRepository
+class PageVisitRepository extends ServiceEntityRepository implements PageVisits
 {
     /**
      * Insert-if-absent, bucketed to the hour - same contract as

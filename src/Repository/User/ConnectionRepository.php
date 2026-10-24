@@ -14,10 +14,16 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Connection[]    findAll()
  * @method Connection[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ConnectionRepository extends ServiceEntityRepository
+class ConnectionRepository extends ServiceEntityRepository implements Connections
 {
+    /** Connections (step R28): ConnectionTracker's finder, its arguments as it gave them. */
+    public function oneByUniqidAndUser(string $uniqid, \Base\Entity\User $user): ?\Base\Entity\User\Connection
+    {
+        return $this->findOneByUniqidAndUser($uniqid, ["user" => $user]);
+    }
+
     /** How many browsers the account was signed into from, counted by the database. */
-    public function countFor(User $user): int
+    public function countFor(\Base\Entity\User $user): int
     {
         return (int) $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')

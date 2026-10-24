@@ -25,7 +25,7 @@ use Base\Demo\DemoMode;
 use Base\DependencyInjection\Compiler\Pass\ContractsPass;
 use Base\DependencyInjection\Dumper\CliDumper;
 use Base\DependencyInjection\Dumper\HtmlDumper;
-use Base\Service\BaseService;
+use Base\Service\Locator;
 use Base\Traits\SingletonTrait;
 
 class BaseBundle extends AbstractBaseBundle
@@ -321,7 +321,7 @@ class BaseBundle extends AbstractBaseBundle
         // dependency graph — the locator only holds closures; each service is
         // instantiated on its first actual accessor call.
         if ($this->container->has('base.runtime')) {
-            BaseService::setRuntime($this->container->get('base.runtime'));
+            Locator::setRuntime($this->container->get('base.runtime'));
         }
         // The contracts of the Foundation (Base\Contract\Runtime), from the
         // locator ContractsPass builds: closures as well, nothing constructed
@@ -330,8 +330,8 @@ class BaseBundle extends AbstractBaseBundle
         if ($this->container->has(ContractsPass::SERVICE)) {
             Runtime::setContainer($this->container->get(ContractsPass::SERVICE));
         }
-        BaseService::setProjectDir($this->container->getParameter('kernel.project_dir'));
-        BaseService::setEnvironment($this->container->getParameter('kernel.environment'));
+        Locator::setProjectDir($this->container->getParameter('kernel.project_dir'));
+        Locator::setEnvironment($this->container->getParameter('kernel.environment'));
 
         // The demonstration refuses to start in debug or on the production
         // database (docs/20-architecture/demo.md): asked here, for a page as

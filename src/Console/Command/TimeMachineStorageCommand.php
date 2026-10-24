@@ -6,7 +6,7 @@ use BackupManager\Filesystems\Destination;
 use Base\Console\Command;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Service\FlysystemInterface;
+use Base\Service\Storages;
 use Base\Service\TimeMachineInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,7 +22,7 @@ class TimeMachineStorageCommand extends Command
      * @var TimeMachineInterface
      */
     protected $timeMachine;
-    private FlysystemInterface $flysystem;
+    private Storages $flysystem;
 
     public function __construct(
         LocalizerInterface     $localizer,
@@ -30,7 +30,7 @@ class TimeMachineStorageCommand extends Command
         EntityManagerInterface $entityManager,
         ParameterBagInterface  $parameterBag,
         TimeMachineInterface   $timeMachine,
-        FlysystemInterface     $flysystem
+        Storages     $flysystem
     )
     {
         parent::__construct($localizer, $translator, $entityManager, $parameterBag);

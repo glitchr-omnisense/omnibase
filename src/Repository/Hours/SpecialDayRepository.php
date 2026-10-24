@@ -9,7 +9,7 @@ use Base\Entity\Hours\SpecialDay;
  * @method SpecialDay|null find($id, $lockMode = null, $lockVersion = null)
  * @method SpecialDay[]    findAll()
  */
-class SpecialDayRepository extends ServiceEntityRepository
+class SpecialDayRepository extends ServiceEntityRepository implements SpecialDays
 {
     /**
      * @param string|null $scope the place's own; null: the whole site's

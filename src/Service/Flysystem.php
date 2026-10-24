@@ -36,7 +36,7 @@ use ReflectionException;
  * getOperator(), getAdapter(), getConnectionOptions() and the FilesystemOperator arguments - is
  * kept for one release, deprecated (FlysystemInterface).
  */
-class Flysystem implements FlysystemInterface
+class Flysystem implements FlysystemInterface, Storages
 {
     protected Drives $drives;
 

@@ -6,7 +6,7 @@ use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Security\UserTracker;
 use Base\Service\SecurityPolicy;
-use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\Connections;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
@@ -39,7 +39,7 @@ class NewDeviceSubscriber implements EventSubscriberInterface
     public function __construct(
         private SecurityPolicy $securityPolicy,
         private UserTracker $userTracker,
-        private ConnectionRepository $connectionRepository,
+        private Connections $connectionRepository,
     ) {
     }
 

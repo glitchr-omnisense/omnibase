@@ -2,13 +2,13 @@
 
 namespace Base\Controller\Client;
 
-use Base\Entity\ThreadIntl;
 use Base\Enum\ThreadState;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Base\Form\Type\ThreadSearchType;
-use Base\Repository\ThreadIntlRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use Base\Database\Repository\Repositories;
+use Base\Repository\Threads;
+use Base\Repository\ThreadTranslations;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,14 +16,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ThreadSearchController extends AbstractController
 {
     protected FormProxyInterface $formProxy;
-    protected EntityManagerInterface $entityManager;
-    protected ThreadIntlRepository $threadIntlRepository;
+    /** The translations searched and the threads of each class, by their interfaces (step R28), where it asked the entity manager. */
+    protected ThreadTranslations $translations;
+    protected Repositories $repositories;
 
-    public function __construct(FormProxyInterface $formProxy, EntityManagerInterface $entityManager)
+    public function __construct(FormProxyInterface $formProxy, ThreadTranslations $translations, Repositories $repositories)
     {
         $this->formProxy = $formProxy;
-        $this->entityManager = $entityManager;
-        $this->threadIntlRepository = $entityManager->getRepository(ThreadIntl::class);
+        $this->translations = $translations;
+        $this->repositories = $repositories;
     }
 
     #[Route(["en" => "/search", "fr" => "/rechercher"], name: "thread_search")]
@@ -59,8 +60,9 @@ class ThreadSearchController extends AbstractController
                     $threads = array_map(fn($t) => $t->getTranslatable(), $this->searchTranslations($data, $states));
 
                     usort($threads, function ($a, $b) {
-                        $aRepository = $this->entityManager->getRepository(get_class($a));
-                        $bRepository = $this->entityManager->getRepository(get_class($b));
+                        $aRepository = $this->repositories->of(get_class($a));
+                        $bRepository = $this->repositories->of(get_class($b));
+                        \assert($aRepository instanceof Threads && $bRepository instanceof Threads);
 
                         return $aRepository->getHierarchy() < $bRepository->getHierarchy() ? -1 : 1;
                     });
@@ -79,49 +81,16 @@ class ThreadSearchController extends AbstractController
 
     /**
      * Translations whose title, excerpt OR content matches the term, scoped
-     * by thread state and parent.
-     *
-     * Hand-written instead of a magic finder because the shape is
-     * "(a OR b OR c) AND scope" and the finder DSL has no parentheses: it
-     * applies one separator to every criterion it is handed, so asking for
-     * the three fields with "Or" would OR the state filter in with them and
-     * return every thread on the site. This query used to go through the
-     * DSL's Model clause, which is AND-only by design and since it began
-     * requiring a select object rather than an array made the page a 500 -
-     * and had it been given one, "the word appears in the title AND in the
-     * excerpt AND in the body" would have matched almost nothing.
+     * by thread state and parent: ThreadTranslations::search() (step R28),
+     * the query written here before - "(a OR b OR c) AND scope", which the
+     * finder DSL cannot say (it applies one separator to every criterion).
      */
     protected function searchTranslations(object $data, array $states): array
     {
-        $terms = array_filter(
+        return $this->translations->search(
             ["title" => $data->title, "excerpt" => $data->excerpt, "content" => $data->content],
-            fn($term) => is_string($term) && trim($term) !== ""
+            $states,
+            $data->parent_id ?: null,
         );
-
-        // An empty search matches nothing, rather than LIKE '%%' - i.e. the
-        // entire site - which is what wrapping an empty term used to build.
-        if (!$terms) {
-            return [];
-        }
-
-        $queryBuilder = $this->threadIntlRepository->createQueryBuilder("i")->join("i.translatable", "t");
-
-        $expr = [];
-        foreach ($terms as $field => $term) {
-            $expr[] = "LOWER(i." . $field . ") LIKE :term_" . $field;
-            $queryBuilder->setParameter("term_" . $field, "%" . mb_strtolower(trim($term)) . "%");
-        }
-
-        $queryBuilder->andWhere(implode(" OR ", $expr));
-
-        if ($states) {
-            $queryBuilder->andWhere("t.state IN (:states)")->setParameter("states", $states);
-        }
-
-        if ($data->parent_id) {
-            $queryBuilder->andWhere("t.parent = :parent")->setParameter("parent", $data->parent_id);
-        }
-
-        return $queryBuilder->getQuery()->getResult();
     }
 }

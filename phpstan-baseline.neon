@@ -3409,13 +3409,13 @@ parameters:
 			path: src/Controller/ShortLinkController.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/SitemapController.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/SitemapController.php
@@ -3451,13 +3451,13 @@ parameters:
 			path: src/Controller/SitemapController.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/UX/AutocompleteController.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/UX/AutocompleteController.php
@@ -3553,13 +3553,13 @@ parameters:
 			path: src/Controller/UX/DropzoneController.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/UX/EditorController.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/UX/EditorController.php
@@ -3721,13 +3721,13 @@ parameters:
 			path: src/Controller/UX/EditorController.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/UX/MediaController.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Controller/UX/MediaController.php
@@ -8230,13 +8230,13 @@ parameters:
 			path: src/Entity/Analytics/Visit.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Extension/Abstract/AbstractExtension.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Extension/Abstract/AbstractExtension.php
@@ -9208,13 +9208,13 @@ parameters:
 			path: src/Entity/Layout/AttributeIntl.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/Image.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/Image.php
@@ -9328,13 +9328,13 @@ parameters:
 			path: src/Entity/Layout/Image.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/ImageCrop.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/ImageCrop.php
@@ -9502,13 +9502,13 @@ parameters:
 			path: src/Entity/Layout/Semantic.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/Semantic.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/Semantic.php
@@ -9688,13 +9688,13 @@ parameters:
 			path: src/Entity/Layout/Semantic.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/SemanticIntl.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/SemanticIntl.php
@@ -9880,13 +9880,13 @@ parameters:
 			path: src/Entity/Layout/Setting.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/SettingIntl.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/SettingIntl.php
@@ -10096,13 +10096,13 @@ parameters:
 			path: src/Entity/Layout/ShortLink.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/ShortLinkIntl.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/ShortLinkIntl.php
@@ -10342,13 +10342,13 @@ parameters:
 			path: src/Entity/Layout/TooltipIntl.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/Widget.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Layout/Widget.php
@@ -10996,13 +10996,13 @@ parameters:
 			path: src/Entity/Layout/WidgetIntl.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Thread.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/Thread.php
@@ -12226,13 +12226,13 @@ parameters:
 			path: src/Entity/Thread/TaxonIntl.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/ThreadIntl.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/ThreadIntl.php
@@ -12406,13 +12406,13 @@ parameters:
 			path: src/Entity/User.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User.php
@@ -13054,13 +13054,13 @@ parameters:
 			path: src/Entity/User.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User/Address.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User/Address.php
@@ -13630,13 +13630,13 @@ parameters:
 			path: src/Entity/User/Identity.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User/Notification.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User/Notification.php
@@ -14338,13 +14338,13 @@ parameters:
 			path: src/Entity/User/Sanction.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User/Token.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Entity/User/Token.php
@@ -17014,13 +17014,13 @@ parameters:
 			path: src/Field/Type/AssociationFileType.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Field/Type/AssociationType.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Field/Type/AssociationType.php
@@ -17950,13 +17950,13 @@ parameters:
 			path: src/Form/FormFactory.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Form/FormProcessor.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Form/FormProcessor.php
@@ -25411,25 +25411,25 @@ parameters:
 			message: '#^Call to method create\(\) on an unknown class Base\\Traits\\EntityManager\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Call to method getConfiguration\(\) on an unknown class Base\\Traits\\EntityManager\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Call to method getConnection\(\) on an unknown class Base\\Traits\\EntityManager\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Call to method isOpen\(\) on an unknown class Base\\Traits\\EntityManager\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Class App\\Entity\\User not found\.$#'
@@ -25540,16 +25540,16 @@ parameters:
 			path: src/Service/BaseService.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:getParameterBag\(\) has parameter \$bag with no value type specified in iterable type array\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:getParameterBag\(\) has parameter \$bag with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:getParameterBag\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:getParameterBag\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Method Base\\Service\\BaseService\:\:getProfile\(\) has parameter \$response with no type specified\.$#'
@@ -25558,10 +25558,10 @@ parameters:
 			path: src/Service/BaseService.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:getRepository\(\) return type with generic interface Doctrine\\Persistence\\ObjectRepository does not specify its types\: T$#'
+			message: '#^Method Base\\Service\\Locator\:\:getRepository\(\) return type with generic interface Doctrine\\Persistence\\ObjectRepository does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Method Base\\Service\\BaseService\:\:getSalt\(\) return type has no value type specified in iterable type array\.$#'
@@ -25642,70 +25642,70 @@ parameters:
 			path: src/Service/BaseService.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setClassMetadataManipulator\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setClassMetadataManipulator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setDoctrine\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setDoctrine\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setEntityHydrator\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setEntityHydrator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setEnvironment\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setEnvironment\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setFirewallMap\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setFirewallMap\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setIconProvider\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setIconProvider\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setInstance\(\) has parameter \$instance with no type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setInstance\(\) has parameter \$instance with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setLocalizer\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setLocalizer\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setMediaService\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setMediaService\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setNotifier\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setNotifier\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setObfuscator\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setObfuscator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Method Base\\Service\\BaseService\:\:setParameter\(\) has no return type specified\.$#'
@@ -25720,64 +25720,64 @@ parameters:
 			path: src/Service/BaseService.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setParameterBag\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setParameterBag\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setProjectDir\(\) has parameter \$projectDir with no type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setProjectDir\(\) has parameter \$projectDir with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setRequestStack\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setRequestStack\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setRouter\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setRouter\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setSettingBag\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setSettingBag\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setSlugger\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setSlugger\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setTokenStorage\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setTokenStorage\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setTrading\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setTrading\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setTranslator\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setTranslator\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
-			message: '#^Method Base\\Service\\BaseService\:\:setTwig\(\) has no return type specified\.$#'
+			message: '#^Method Base\\Service\\Locator\:\:setTwig\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Method Base\\Service\\BaseService\:\:setUserIdentifier\(\) has no return type specified\.$#'
@@ -25801,13 +25801,13 @@ parameters:
 			message: '#^PHPDoc tag @var for variable \$entityManager contains unknown class Base\\Traits\\EntityManager\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^PHPDoc tag @var with type Base\\Traits\\EntityManager is not subtype of native type Doctrine\\Persistence\\ObjectManager\.$#'
 			identifier: varTag.nativeType
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Property Base\\Service\\BaseService\:\:\$authorizationChecker in isset\(\) is not nullable nor uninitialized\.$#'
@@ -25834,16 +25834,16 @@ parameters:
 			path: src/Service/BaseService.php
 
 		-
-			message: '#^Static property Base\\Service\\BaseService\:\:\$settings \(Base\\Service\\SettingBag\|null\) does not accept Base\\Service\\SettingBagInterface\.$#'
+			message: '#^Static property Base\\Service\\Locator\:\:\$settings \(Base\\Service\\SettingBag\|null\) does not accept Base\\Service\\SettingBagInterface\.$#'
 			identifier: assign.propertyType
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Unable to resolve the template type T in call to method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\)$#'
 			identifier: argument.templateType
 			count: 1
-			path: src/Service/BaseService.php
+			path: src/Service/Locator.php
 
 		-
 			message: '#^Variable \$_GET in isset\(\) always exists and is not nullable\.$#'
@@ -28432,13 +28432,13 @@ parameters:
 			path: src/Service/Model/Wysiwyg/LinkEnhancerInterface.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Service/Model/Wysiwyg/MediaEnhancer.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Service/Model/Wysiwyg/MediaEnhancer.php
@@ -32896,13 +32896,13 @@ parameters:
 			path: src/Validator/ConstraintValidator.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Validator/ConstraintValidator.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: src/Validator/ConstraintValidator.php
@@ -33772,13 +33772,13 @@ parameters:
 			path: tests/Database/Attribute/SlugifyPerTypeTest.php
 
 		-
-			message: '#^Access to protected property \$environment of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$environment of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: tests/Database/Attribute/VaultFailClosedTest.php
 
 		-
-			message: '#^Access to protected property \$projectDir of class Base\\Service\\BaseService\.$#'
+			message: '#^Access to protected property \$projectDir of class Base\\Service\\Locator\.$#'
 			identifier: staticProperty.protected
 			count: 1
 			path: tests/Database/Attribute/VaultFailClosedTest.php

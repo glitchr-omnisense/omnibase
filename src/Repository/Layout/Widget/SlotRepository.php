@@ -12,8 +12,14 @@ use Base\Repository\Layout\WidgetRepository;
  * @method Slot[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
  */
 
-class SlotRepository extends WidgetRepository
+class SlotRepository extends WidgetRepository implements Slots
 {
+    /** Slots (step R28): WidgetProvider's finders, the result cache unless $cached is false. */
+    public function oneByPath(string $path, bool $cached = true): ?Slot
+    {
+        return $cached ? $this->cacheOneByPath($path) : $this->findOneByPath($path);
+    }
+
     // Attempt to cache
     // public function findOneByPath(string $path)
     // {

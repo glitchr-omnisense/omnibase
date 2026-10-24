@@ -24,9 +24,9 @@ class ThreadRepository extends ServiceEntityRepository implements Threads
 {
     use HierarchifyTrait;
 
-    public function oneBySlug(string $slug): ?Thread
+    public function oneBySlug(string $slug, bool $cached = true): ?Thread
     {
-        return $this->cacheOneBySlug($slug);
+        return $cached ? $this->cacheOneBySlug($slug) : $this->findOneBySlug($slug);
     }
 
     public function oneBySlugAndState(?string $slug, array|string $states, array $orderBy = []): ?Thread
@@ -49,6 +49,12 @@ class ThreadRepository extends ServiceEntityRepository implements Threads
     public function byState(array|string $states, array $orderBy = []): array
     {
         return $this->cacheByState($states, [], $orderBy)->getResult();
+    }
+
+    /** @param list<string>|string $states */
+    public function byStateUncached(array|string $states): array
+    {
+        return $this->findByState($states)->getResult();
     }
 
     public function byStates(array $states): array

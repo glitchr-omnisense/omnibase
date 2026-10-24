@@ -11,7 +11,7 @@ use Base\Entity\User\PushSubscription;
  * @method PushSubscription[]    findAll()
  * @method PushSubscription[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PushSubscriptionRepository extends ServiceEntityRepository
+class PushSubscriptionRepository extends ServiceEntityRepository implements PushSubscriptions
 {
     /** Users who enabled push in at least one browser. */
     public function countDistinctUsers(): int

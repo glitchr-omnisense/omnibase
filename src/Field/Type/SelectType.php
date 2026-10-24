@@ -5,7 +5,7 @@ namespace Base\Field\Type;
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
-use Base\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\Repositories;
 use Base\Form\Common\NativeEnum;
 use Base\Form\FormFactory;
 use Base\Service\LocalizerInterface;
@@ -19,7 +19,6 @@ use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\InverseSideMapping;
 use Doctrine\ORM\Mapping\OwningSideMapping;
 use Doctrine\ORM\PersistentCollection;
@@ -70,8 +69,8 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var TranslatorInterface */
     protected TranslatorInterface $translator;
 
-    /** @var EntityManagerInterface */
-    protected EntityManagerInterface $entityManager;
+    /** The entities of the choices' class, by Base\Database\Repository\Repositories (step R28). */
+    protected Repositories $repositories;
 
     /** @var ObfuscatorInterface */
     protected ObfuscatorInterface $obfuscator;
@@ -99,7 +98,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public function __construct(
         FormFactory               $formFactory,
-        EntityManagerInterface    $entityManager,
+        Repositories              $repositories,
         TranslatorInterface       $translator,
         ClassMetadataManipulator  $classMetadataManipulator,
         CsrfTokenManagerInterface $csrfTokenManager,
@@ -117,7 +116,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->csrfTokenManager = $csrfTokenManager;
         $this->twig = $twig;
         $this->translator = $translator;
-        $this->entityManager = $entityManager;
+        $this->repositories = $repositories;
         $this->obfuscator = $obfuscator;
         $this->parameterBag = $parameterBag;
         $this->authorizationChecker = $authorizationChecker;
@@ -300,9 +299,9 @@ class SelectType extends AbstractType implements DataMapperInterface
     }
 
     /**
-     * The entities of these identifiers. omnibase's repositories answer
-     * cacheById(); a plain Doctrine repository (ServiceEntityRepository,
-     * EntityRepository) is asked through findBy() on the identifier.
+     * The entities of these identifiers, by Base\Database\Repository\Repositories
+     * (step R28): omnibase's repositories answer cacheById(), a plain Doctrine
+     * repository findBy() on the identifier, as here before.
      *
      * @return object[]
      */
@@ -316,14 +315,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             return [];
         }
 
-        $repository = $this->entityManager->getRepository($class);
-        if ($repository instanceof ServiceEntityRepository) {
-            return $repository->cacheById($ids, [])->getResult();
-        }
-
-        $identifier = $this->entityManager->getClassMetadata($class)->getSingleIdentifierFieldName();
-
-        return $repository->findBy([$identifier => $ids]);
+        return $this->repositories->byIds($class, $ids);
     }
 
     protected function findEntity(string $class, mixed $id): ?object
@@ -332,12 +324,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             return null;
         }
 
-        $repository = $this->entityManager->getRepository($class);
-        if ($repository instanceof ServiceEntityRepository) {
-            return $repository->cacheOneById($id);
-        }
-
-        return $repository->find($id);
+        return $this->repositories->oneById($class, $id);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

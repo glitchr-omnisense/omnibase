@@ -4,8 +4,8 @@ namespace Base\Controller\Api;
 
 use Base\Entity\Thread\Like;
 use Base\Enum\ThreadState;
-use Base\Repository\Thread\LikeRepository;
-use Base\Repository\ThreadRepository;
+use Base\Repository\Thread\Likes;
+use Base\Repository\Threads;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -32,16 +32,17 @@ class ThreadController extends AbstractController
     protected $entityManager;
 
     /**
-     * @var ThreadRepository 
+     * @var Threads<\Base\Entity\Thread>
      */
     protected $threadRepository;
 
     /**
-     * @var LikeRepository 
+     * @var Likes
      */
     protected $likeRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, TranslatorInterface $translator, ThreadRepository $threadRepository, LikeRepository $likeRepository)
+    /** @param Threads<\Base\Entity\Thread> $threadRepository */
+    public function __construct(EntityManagerInterface $entityManager, TranslatorInterface $translator, Threads $threadRepository, Likes $likeRepository)
     {
         $this->entityManager = $entityManager;  
         $this->translator = $translator;        
@@ -56,7 +57,7 @@ class ThreadController extends AbstractController
         if ($denied = $this->denied($request)) {
             return $denied;
         }
-        $thread = $this->threadRepository->cacheOneBySlug($slug);
+        $thread = $this->threadRepository->oneBySlug($slug);
         if (!$this->isGranted('ROLE_ADMIN')) {
 
             return JsonResponse::fromJsonString(json_encode([
@@ -82,7 +83,7 @@ class ThreadController extends AbstractController
         if ($denied = $this->denied($request)) {
             return $denied;
         }
-        $thread = $this->threadRepository->cacheOneBySlug($slug);
+        $thread = $this->threadRepository->oneBySlug($slug);
         if (!$this->isGranted('ROLE_ADMIN')) {
 
             return JsonResponse::fromJsonString(json_encode([
@@ -108,7 +109,7 @@ class ThreadController extends AbstractController
         if ($denied = $this->denied($request)) {
             return $denied;
         }
-        $thread = $this->threadRepository->cacheOneBySlug($slug);
+        $thread = $this->threadRepository->oneBySlug($slug);
         if (!$this->isGranted('ROLE_USER')) {
 
             return JsonResponse::fromJsonString(json_encode([
@@ -119,7 +120,9 @@ class ThreadController extends AbstractController
 
         if (!$thread) throw new NotFoundHttpException();
 
-        $thread->addFollower($this->getUser());
+        $user = $this->getUser();
+        \assert($user instanceof \Base\Entity\User);
+        $thread->addFollower($user);
         $this->entityManager->flush();
         
         return JsonResponse::fromJsonString(json_encode([
@@ -134,7 +137,7 @@ class ThreadController extends AbstractController
         if ($denied = $this->denied($request)) {
             return $denied;
         }
-        $thread = $this->threadRepository->cacheOneBySlug($slug);
+        $thread = $this->threadRepository->oneBySlug($slug);
         if (!$this->isGranted('ROLE_USER')) {
 
             return JsonResponse::fromJsonString(json_encode([
@@ -145,7 +148,9 @@ class ThreadController extends AbstractController
 
         if (!$thread) throw new NotFoundHttpException();
 
-        $thread->removeFollower($this->getUser());
+        $user = $this->getUser();
+        \assert($user instanceof \Base\Entity\User);
+        $thread->removeFollower($user);
         $this->entityManager->flush();
 
         return JsonResponse::fromJsonString(json_encode(["response" => "OK"]), 200);
@@ -158,7 +163,7 @@ class ThreadController extends AbstractController
         if ($denied = $this->denied($request)) {
             return $denied;
         }
-        $thread = $this->threadRepository->findOneBySlug($slug) ?? throw new NotFoundHttpException();
+        $thread = $this->threadRepository->oneBySlug($slug, false) ?? throw new NotFoundHttpException();
         $user = $this->getUser();
         if (!$user instanceof \App\Entity\User) {
 
@@ -173,7 +178,7 @@ class ThreadController extends AbstractController
         $this->entityManager->beginTransaction();
         try {
             $this->entityManager->lock($thread, LockMode::PESSIMISTIC_WRITE);
-            if (!$this->likeRepository->findOneByThreadAndUser($thread, $user)) {
+            if (!$this->likeRepository->oneByThreadAndUser($thread, $user)) {
                 $thread->addLike(new Like($user));
                 $this->entityManager->flush();
             }
@@ -200,7 +205,7 @@ class ThreadController extends AbstractController
         if ($denied = $this->denied($request)) {
             return $denied;
         }
-        $thread = $this->threadRepository->findOneBySlug($slug) ?? throw new NotFoundHttpException();
+        $thread = $this->threadRepository->oneBySlug($slug, false) ?? throw new NotFoundHttpException();
         $nlikes = count($thread->getLikes());
 
         if ($this->getUser() === null) {
@@ -210,7 +215,9 @@ class ThreadController extends AbstractController
             ]), 401);
         }
 
-        $like = $this->likeRepository->findOneByThreadAndUser($thread, $this->getUser());
+        $user = $this->getUser();
+        \assert($user instanceof \Base\Entity\User);
+        $like = $this->likeRepository->oneByThreadAndUser($thread, $user);
         if ($like) {
             $thread->removeLike($like);
         }
