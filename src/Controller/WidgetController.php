@@ -3,7 +3,6 @@
 namespace Base\Controller;
 
 use Base\Repository\Layout\Widget\AttachmentRepository;
-use Base\Repository\Layout\Widget\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,11 +14,9 @@ use Symfony\Component\Mime\FileinfoMimeTypeGuesser;
 class WidgetController extends AbstractController
 {
     private AttachmentRepository $attachmentRepository;
-    private PageRepository $pageRepository;
 
-    public function __construct(PageRepository $pageRepository, AttachmentRepository $attachmentRepository)
+    public function __construct(AttachmentRepository $attachmentRepository)
     {
-        $this->pageRepository = $pageRepository;
         $this->attachmentRepository = $attachmentRepository;
     }
 

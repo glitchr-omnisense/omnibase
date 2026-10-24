@@ -27,7 +27,9 @@ both hosts from one declaration (audit "lesringostars face au master plan", R27)
 - an invokable controller (`"Class"`, its `__invoke`) is read as a `"Class::method"` one by the
   `IconProvider`, the breadcrumb, `IsGrantedSubscriber` and `omnibase:icon:controllers`;
 - `Base\Repository\Aliases::INTERFACES`: the core's repositories by their interfaces, the one list
-  Symfony's container aliases and omnibridge/laravel binds.
+  Symfony's container aliases and omnibridge/laravel binds;
+- `Base\Screen\Redirect`: what an action hands back to send the client elsewhere (Location, 302 by
+  default), answered by `Negotiation` and both hosts' responders.
 
 ### Changed: omnibase's Twig extensions built on contracts, for any host
 

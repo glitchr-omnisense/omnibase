@@ -8,6 +8,7 @@ use Base\Screen\File;
 use Base\Screen\Fragments;
 use Base\Screen\Json;
 use Base\Screen\Negotiation;
+use Base\Screen\Redirect;
 use Base\Screen\Shell;
 use Base\Screen\Template;
 use Base\Screen\Visit;
@@ -106,6 +107,15 @@ final class NegotiationTest extends TestCase
 
         self::assertSame([__FILE__, ['Content-Type' => 'text/plain'], ''], [$answer->file, $answer->headers, $answer->body]);
         self::assertSame([], $this->negotiation()->answer(new File(__FILE__), new Visit())->headers, 'its type left to the host');
+    }
+
+    public function testARedirectSendsTheClientToItsAddress(): void
+    {
+        $answer = $this->negotiation()->answer(new Redirect('/japon/articles/le-fuji'), new Visit());
+
+        self::assertSame([302, ['Location' => '/japon/articles/le-fuji'], '', false], [$answer->status, $answer->headers, $answer->body, $answer->json]);
+        self::assertSame(301, $this->negotiation()->answer(new Redirect('/', 301), new Visit())->status);
+        self::assertSame([], $this->rendered, 'nothing rendered');
     }
 
     public function testAShellIsOmnibridgesProtocol(): void
