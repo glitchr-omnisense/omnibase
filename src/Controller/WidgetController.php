@@ -23,16 +23,8 @@ class WidgetController extends AbstractController
         $this->attachmentRepository = $attachmentRepository;
     }
 
-    #[Route("/page/{slug}", name: "widget_page")]
-    public function Page($slug): Response
-    {
-        $page = $this->pageRepository->findOneBySlug($slug);
-        if ($page === null) {
-            throw $this->createNotFoundException("Page requested doesn't exist.");
-        }
-
-        return $this->render("widget/page.html.twig", ["page" => $page]);
-    }
+    // A widget's page (/page/{slug}) is an action written once for every host:
+    // Base\Controller\Action\Widget\Page (audit "lesringostars face au master plan", R27).
 
     #[Route("/attachment/{slug}", name: "widget_attachment")]
     public function Attachment($slug): BinaryFileResponse

@@ -33,7 +33,8 @@ class IconControllersCommand extends Command
                 continue;
             }
 
-            list($class, $method) = explode("::", $controller);
+            // An invokable controller (an action, "Class") is its __invoke.
+            list($class, $method) = explode("::", $controller, 2) + [1 => "__invoke"];
 
             $instance = AttributeReader::getInstance();
 

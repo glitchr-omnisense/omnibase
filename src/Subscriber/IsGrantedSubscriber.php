@@ -43,7 +43,8 @@ class IsGrantedSubscriber implements EventSubscriberInterface
         $controller = $request->attributes->get("_controller");
         $array = is_array($controller) ? $controller : explode("::", $controller ?? "");
         $class = $array[0] ?? null;
-        $method = $array[1] ?? null;
+        // An invokable controller (an action, "Class") is its __invoke.
+        $method = $array[1] ?? "__invoke";
 
         if (!class_exists($class)) {
             return;

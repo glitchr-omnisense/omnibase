@@ -10,6 +10,25 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: actions written once for every host
+
+A plain class whose `#[Route]` (symfony/routing's attribute, which a router reads and the class
+does not load) declares its route, and whose `__invoke` returns a result of omnibase's (a `View`, a
+`Template`, `Json`, a `Shell`, a `File`, or null for no such page) - the routes and the answers of
+both hosts from one declaration (audit "lesringostars face au master plan", R27):
+- `Base\Bridge\Symfony\ActionResults` (`kernel.view`): Symfony's router reads the action's route, the
+  `ScreenResponder` answers its result, null from an action declared to return one is a 404;
+  `ActionArguments` gives `array $query` the query string's values, as omnibridge/laravel does;
+- the bell's payload (`/notifications/latest`) is `Base\Controller\Action\Notification\Latest`
+  (formerly `NotificationController::Latest()`), a widget's page (`/page/{slug}`)
+  `Base\Controller\Action\Widget\Page` (formerly `WidgetController::Page()`): same names, same
+  answers; under `src/Controller`, so the routes import of every omnibase site
+  (`@BaseBundle/Controller`) reads them;
+- an invokable controller (`"Class"`, its `__invoke`) is read as a `"Class::method"` one by the
+  `IconProvider`, the breadcrumb, `IsGrantedSubscriber` and `omnibase:icon:controllers`;
+- `Base\Repository\Aliases::INTERFACES`: the core's repositories by their interfaces, the one list
+  Symfony's container aliases and omnibridge/laravel binds.
+
 ### Changed: omnibase's Twig extensions built on contracts, for any host
 
 What a page asks of omnibase's Twig no longer needs Symfony (audit "lesringostars face au master plan",

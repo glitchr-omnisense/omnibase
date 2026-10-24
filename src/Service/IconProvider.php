@@ -59,10 +59,8 @@ class IconProvider extends AbstractLocalCache
                     return [];
                 }
 
-                $parts = explode("::", $controller);
-                if (count($parts) !== 2) {
-                    return [];
-                }
+                // An invokable controller (an action, "Class") is its __invoke.
+                $parts = explode("::", $controller, 2) + [1 => "__invoke"];
 
                 list($class, $method) = $parts;
                 if (!class_exists($class)) {
