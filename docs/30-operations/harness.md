@@ -25,8 +25,12 @@ docker compose -f compose.yml -f compose.checkouts.yml up                       
 `../marketplace`...) over the installed packages: what is edited is what runs,
 no rebuild needed. Without it, the plugins are the Packagist ones.
 
-`omnibase/blog` and `omnibase/classroom` are not installed by the image; the
-overlay mounts their checkouts too (`test blog`, `test classroom`). Their tests'
+`omnibase/blog`, `omnibase/classroom`, `omnibase/agenda`, `omnibase/scholar`,
+`omnibase/press` and `omnibase/consulting` are not installed by the image; the
+overlay mounts their checkouts too (`test blog`, `test classroom`, `test agenda`,
+`test scholar`, `test press`, `test consulting`), and omniscient/omnischolar's
+(`OMNISCHOLAR`, `../../../omnischolar` by default), whose classes the scholar's
+tests' bootstrap registers. Their tests'
 bootstrap registers their classes (and the `omnibase/*` bundles they require,
 read beside them), and the demo's `config/bundles.php` and
 `config/routes/plugins.php` - mounted as checked out, with `demo.sh` - register

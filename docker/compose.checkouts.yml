@@ -19,6 +19,12 @@ services:
       - ${OMNIBASE_PLUGINS:-../..}/blog:/srv/demo/vendor/omnibase/blog
       - ${OMNIBASE_PLUGINS:-../..}/classroom:/srv/demo/vendor/omnibase/classroom
       - ${OMNIBASE_PLUGINS:-../..}/agenda:/srv/demo/vendor/omnibase/agenda
+      - ${OMNIBASE_PLUGINS:-../..}/scholar:/srv/demo/vendor/omnibase/scholar
+      - ${OMNIBASE_PLUGINS:-../..}/press:/srv/demo/vendor/omnibase/press
+      - ${OMNIBASE_PLUGINS:-../..}/consulting:/srv/demo/vendor/omnibase/consulting
+      # omniscient/omnischolar, which the image does not install: the scholar's tests' bootstrap
+      # registers its classes from here (OMNISCHOLAR: the family's workspace, ../../../omnischolar).
+      - ${OMNISCHOLAR:-../../../omnischolar}/core:/srv/demo/vendor/omniscient/omnischolar:ro
       # omnibridge/react, which the image does not install: the core's ScreenResponderTest
       # speaks its protocol when it finds the checkout here (OMNIBRIDGE: ../../../omnibridge).
       - ${OMNIBRIDGE:-../../../omnibridge}/react:/srv/omnibridge/react:ro
