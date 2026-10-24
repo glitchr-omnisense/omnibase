@@ -69,6 +69,10 @@ jobs:
       # Omnibridge\Runtime): without it the mount is an empty folder and the suite stops at the first class.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-studio/omnibridge, path: omnibridge/core}
+      # omnibridge/twig, which compose.checkouts.yml mounts over the image's since R27 (52d93478): without
+      # it the mount is an empty folder, and the autoloader's files (src/Contract/Urls.php) are not there.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-studio/omnibridge-twig, path: omnibridge/twig}
 
       - name: Build the harness
         run: DOCKER_BUILDKIT=1 docker build -f core/docker/Dockerfile -t omniscient/omnibase-harness --secret id=composer_auth,env=COMPOSER_AUTH core
