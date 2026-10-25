@@ -26,7 +26,7 @@
 {%- set color = (color|default('black')) == 'white' ? 'white' : 'black' -%}
 <link rel="stylesheet" href="{{ asset('bundles/base/css/credits.css') }}">
 <div class="ga-credits ga-credits--{{ color }}{{ outline|default(false) ? ' ga-credits--outline' }}{{ mirror|default(false) ? ' ga-credits--mirror' }}{{ rule|default(false) ? ' ga-credits--rule' }}">
-    {%- if detail|default(true) %}
+    {%- if detail is not defined or detail %}
     <p class="ga-credits-detail">
         {%- block credits_detail -%}
         <span class="ga-credits-line">{{ app.request.httpHost|default('')|upper }} <span class="ga-credits-time">[{{ app.site.execution_time|default(0)|number_format(2) }}s]</span></span>
