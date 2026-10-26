@@ -130,7 +130,7 @@ final class AuthKit
      */
     public static function missing(): ?string
     {
-        foreach (['omniscient/omniauth' => \Omniauth\Omniauth::class, 'omniauth/webauthn' => \Omniauth\WebAuthn\PasskeyMethod::class, 'omniauth/otp' => \Omniauth\Otp\TotpMethod::class, 'omniscient/omniauth (Omniauth\\OAuth\\)' => \Omniauth\OAuth\OAuthMethod::class] as $package => $class) {
+        foreach (['omnisense/omniauth' => \Omniauth\Omniauth::class, 'omniauth/webauthn' => \Omniauth\WebAuthn\PasskeyMethod::class, 'omniauth/otp' => \Omniauth\Otp\TotpMethod::class, 'omnisense/omniauth (Omniauth\\OAuth\\)' => \Omniauth\OAuth\OAuthMethod::class] as $package => $class) {
             if (!class_exists($class)) {
                 return $package.' is not installed (the core suggests it).';
             }

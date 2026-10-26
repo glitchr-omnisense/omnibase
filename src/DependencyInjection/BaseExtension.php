@@ -87,7 +87,7 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
     public function prepend(ContainerBuilder $builder): void
     {
-        // Where this package is, wherever Composer put it (vendor/omniscient/omnibase
+        // Where this package is, wherever Composer put it (vendor/omnisense/omnibase
         // since its rename from glitchr/omnibase, a path repository, a checkout):
         // what an application's configuration names instead of a vendor path -
         // wikidoc's roots ('%base.package_dir%/docs'), git's repositories.

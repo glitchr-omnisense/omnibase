@@ -8,7 +8,7 @@ use Omnibridge\Runtime as HostRuntime;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The host's contracts moved to omniscient/omnibridge (plan "omnibase
+ * The host's contracts moved to omnisense/omnibridge (plan "omnibase
  * agnostique", A2) and the Symfony adapters to omnibridge/symfony (A1) kept
  * their former names as aliases until omnibase 4's final pass, which removed
  * them once no site and no bundle named them: none of those names is declared

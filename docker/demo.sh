@@ -33,13 +33,13 @@ case "${1:-serve}" in
     console) shift; exec php bin/console "$@" ;;
     bare)
         shift
-        php vendor/omniscient/omnibase/docker/bin/bare --install
-        exec php vendor/omniscient/omnibase/docker/bin/bare "$@" ;;
+        php vendor/omnisense/omnibase/docker/bin/bare --install
+        exec php vendor/omnisense/omnibase/docker/bin/bare "$@" ;;
     test)
         shift
         case "${1:-}" in
             # The core's own: its BareTest measures the Foundation on var/bare/vendor, made here.
-            ""|-*) suite=vendor/omniscient/omnibase; php "$suite/docker/bin/bare" --install ;;
+            ""|-*) suite=vendor/omnisense/omnibase; php "$suite/docker/bin/bare" --install ;;
             *) suite="vendor/omnibase/$1"; shift ;;
         esac
         # The test environment (.env then .env.test, see tests/harness.php),

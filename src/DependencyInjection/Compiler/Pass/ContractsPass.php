@@ -26,7 +26,7 @@ use Symfony\Component\Mailer\MailerInterface;
 /**
  * The locator Base\Contract\Runtime reaches the contracts of the Foundation
  * through (plan "omnibase agnostique", C4), handed to it by
- * BaseBundle::boot() - omniscient/omnibridge's registry since A2, the host's
+ * BaseBundle::boot() - omnisense/omnibridge's registry since A2, the host's
  * contracts (Omnibridge\Contract\*) with omnibase's own (Nouns, Media,
  * Pictures, Texts, the parameters) and the mailer: each contract by its
  * interface's name, the service the container binds to that name -
@@ -66,7 +66,7 @@ final class ContractsPass implements CompilerPassInterface
     ];
 
     /**
-     * The former names of the contracts that moved to omniscient/omnibridge
+     * The former names of the contracts that moved to omnisense/omnibridge
      * (A2): none since omnibase 4's final pass, which removed them (the sites
      * and bundles name Omnibridge\Contract\*). Kept for HostContractsPass's
      * signature, empty.

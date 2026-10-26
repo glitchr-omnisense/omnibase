@@ -634,7 +634,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                         ->defaultValue(true)
                         ->end()
                     ->scalarNode('default_path')
-                        ->info('Default twig path: the templates/ of this package, wherever Composer installed it (vendor/omniscient/omnibase, a path repository, a checkout)')
+                        ->info('Default twig path: the templates/ of this package, wherever Composer installed it (vendor/omnisense/omnibase, a path repository, a checkout)')
                         ->defaultValue(\dirname(__DIR__, 2).'/templates')
                         ->end()
                     ->arrayNode('form_themes')

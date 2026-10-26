@@ -13,7 +13,7 @@ It is where the bundles' suites run: there is no PHP on the host.
 
 ```sh
 cd docker
-docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test              # omniscient/omnibase's suite
+docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test              # omnisense/omnibase's suite
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test admin        # a plugin's: admin, marketplace, forge...
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase test forge --filter License
 docker compose -f compose.yml -f compose.checkouts.yml run --rm omnibase check             # container and templates linted
@@ -28,7 +28,7 @@ no rebuild needed. Without it, the plugins are the Packagist ones.
 `omnibase/blog`, `omnibase/classroom`, `omnibase/agenda`, `omnibase/scholar`,
 `omnibase/press` and `omnibase/consulting` are not installed by the image; the
 overlay mounts their checkouts too (`test blog`, `test classroom`, `test agenda`,
-`test scholar`, `test press`, `test consulting`), and omniscient/omnischolar's
+`test scholar`, `test press`, `test consulting`), and omnisense/omnischolar's
 (`OMNISCHOLAR`, `../../../omnischolar` by default), whose classes the scholar's
 tests' bootstrap registers. Their tests'
 bootstrap registers their classes (and the `omnibase/*` bundles they require,
@@ -90,7 +90,7 @@ docker compose run --rm omnibase bare 'Base\Entity\User'    # the classes named
 docker compose run --rm omnibase bare --all --each         # every class of src/, each in a process of its own: those that can join
 docker compose run --rm omnibase bare --json               # the whole report
 docker compose run --rm omnibase bare --names              # informative: the classes of the Foundation that name the framework
-docker compose run --rm omnibase bare vendor/omniscient/omnibase/tests/Contract/runtime-without-framework.php   # a script, with the autoloader alone
+docker compose run --rm omnibase bare vendor/omnisense/omnibase/tests/Contract/runtime-without-framework.php   # a script, with the autoloader alone
 ```
 
 **Where the framework is not installed** (plan "omnibase agnostique", C7c): the
@@ -124,7 +124,7 @@ contracts of the Foundation used without the framework (see
 plan "omnibase agnostique" and in CHANGELOG.md. On 2026-10-17 it held 599 of
 the 895 classes of `src/`; 691 of 908 after step C4; 694 of 911 after steps C3e and C3f; 718 of 921 after step C6 (the Doctrine mapping's bridge, and the services of omnibase's own caches, `AbstractLocalCacheInterface` no longer extending HttpKernel's `WarmableInterface`). The `bare` command is `demo.sh`'s: an image built
 before it has the script only, `docker compose run --rm omnibase php
-vendor/omniscient/omnibase/docker/bin/bare`.
+vendor/omnisense/omnibase/docker/bin/bare`.
 
 ### The names report: `bare --names`
 

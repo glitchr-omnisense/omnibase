@@ -26,7 +26,7 @@ use ReflectionException;
 
 /**
  * omnibase's storages, by name ("local.cache", "local.uploads", "s3.private"...), read and written
- * through omniscient/omnidrive (plan "omnidrive", 2026-10-23): each storage is an Omnidrive\Drive
+ * through omnisense/omnidrive (plan "omnidrive", 2026-10-23): each storage is an Omnidrive\Drive
  * of the Omnidrive\Drives the host gives - under Symfony the storages of flysystem-bundle's
  * configuration (the services tagged flysystem.storage), or omnibase's local ones without the bundle
  * (FlysystemStoragesPass); under Laravel its disks (omnibridge/laravel). A PSR-11 container of

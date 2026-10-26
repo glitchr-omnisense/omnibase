@@ -10,6 +10,14 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the package is omnisense/omnibase
+
+Omniscient is now Omnisense (2026-10-26): the package is `omnisense/omnibase`, installed in
+`vendor/omnisense/omnibase`, its repository `glitchr-omnisense/omnibase`; it requires
+`omnisense/omnibridge` and `omnisense/omnidrive` (the families' cores took the same vendor). A
+`replace` keeps `omniscient/omnibase` resolving, beside `glitchr/omnibase`: an application renames
+its require (and any path it wrote under `vendor/omniscient/omnibase`) at its next update.
+
 ### Removed: the former names of A1 and A2
 
 Removed at omnibase 4's final pass, once no site and no bundle under the workspace named them (the last

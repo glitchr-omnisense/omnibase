@@ -6,7 +6,7 @@ order: 47
 # Documents signed: `Base\Service\Signatures`
 
 A document sent to be signed - a lease, a quote, a surety - for **any entity** of the application,
-through [glitchr/omnisign](https://github.com/glitchr-studio/omnisign) (Yousign, DocuSign, a DocuSeal
+through [glitchr/omnisign](https://github.com/glitchr-omnisense/omnisign) (Yousign, DocuSign, a DocuSeal
 instance of one's own): signed by the provider's e-mail or in the site's own page, followed until
 it is over, and once completed the signed document and its evidence kept in the site's **private
 storage**.
@@ -40,7 +40,7 @@ $signatures->of($quote);                               // the envelopes about th
 - `POST /signatures/{gateway}/webhook` answers 404.
 
 With it: `composer require glitchr/omnisign omnisign/docuseal` (or `omnisign/yousign`,
-`omnisign/docusign`; not on Packagist yet: the `vcs` repositories of `omniscient/omnibase`'s
+`omnisign/docusign`; not on Packagist yet: the `vcs` repositories of `omnisense/omnibase`'s
 `composer.json`), register `Omnisign\Bridge\Symfony\OmnisignBundle`, configure a gateway, then
 `make:migration` and `doctrine:migrations:migrate` for the table:
 

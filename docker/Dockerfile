@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# omniscient/omnibase with every omnibase/* plugin, as one runnable Symfony
+# omnisense/omnibase with every omnibase/* plugin, as one runnable Symfony
 # application: this checkout installed as the bundle, the plugins from
 # Packagist (their development branches), a SQLite database, a demo page
 # that seeds members, a shop and signs you in - then the shop (/boutiques),
@@ -67,7 +67,7 @@ ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelm
 # ships through glitchr/omnibus (two carriers here): the sibling families,
 # from Packagist, their development branches - the marketplace follows
 # omnitrade's 1.x (its catalogue: Model\Product, Stock, Registry::options()).
-# The sign-in's family, omniscient/omniauth (identity providers included) and
+# The sign-in's family, omnisense/omniauth (identity providers included) and
 # its two method packages (webauthn, otp), likewise: the core suggests them, its Base\Auth\ stores and
 # their tests (tests/Auth) need them.
 # A layer cached from an older build keeps an older 1.x: `docker compose
@@ -75,14 +75,14 @@ ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelm
 ARG OMNI_REFRESH=0
 # --mount: the same token, when given.
 RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families as of ${OMNI_REFRESH}" \
-    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omniscient/omnibase": "4.x-dev"}}}' \
+    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omnisense/omnibase": "4.x-dev"}}}' \
     # Since 4.0 the core requires its Foundation alone (Doctrine, Twig, standalone components):
     # a Symfony application adds omnibridge/symfony (the framework) and the bundles its
     # config/bundles.php registers - here every one the core suggests (app/config/bundles.php).
-    && composer require "omniscient/omnibase:4.x-dev as 4.0.x-dev" "omnibridge/symfony:1.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
+    && composer require "omnisense/omnibase:4.x-dev as 4.0.x-dev" "omnibridge/symfony:1.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
         $BUNDLES \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
-        "omniscient/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \
+        "omnisense/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \
         omnipay/stripe symfony/translation symfony/messenger symfony/lock \
         dompdf/dompdf horstoeko/zugferd --no-interaction --no-progress --no-scripts \
     # The guard of the forms (Base\Service\FormGuard): glitchr/omnishield and three of its gateways,

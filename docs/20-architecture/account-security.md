@@ -89,7 +89,7 @@ other than `demo`, is as described here.
 
 ## Under omniauth (`Base\Auth\`)
 
-With `omniscient/omniauth` installed (the core suggests it, its identity
+With `omnisense/omniauth` installed (the core suggests it, its identity
 providers included, and its method packages `omniauth/webauthn` and
 `omniauth/otp` - formerly `omniauth/passkey` and `omniauth/totp`; Google is
 `omniauth/google`), `Base\Auth\` fills its

@@ -9,7 +9,7 @@
  *     import '@glitchr/flowjs/navigation';   // only the modules the site uses,
  *     // among '@glitchr/flowjs/sticky', '/stops', '/navigation'; a module that
  *     // is not imported is not started (its global is not there)
- *     import Base from '../vendor/omniscient/omnibase/assets/boot.js';
+ *     import Base from '../vendor/omnisense/omnibase/assets/boot.js';
  *
  *     Base.boot({
  *         nest: ['/admin*'],                        // opens as a floating panel over the page

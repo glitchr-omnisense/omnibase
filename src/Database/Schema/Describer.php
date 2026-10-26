@@ -26,7 +26,7 @@ use Omnibridge\Schema\Description;
  * order columns, the translations, the extensions, the targets resolved
  * (audit "lesringostars face au master plan", R14).
  *
- *     $description = Describer::describe([$vendor.'/omniscient/omnibase/src/Entity', $projectDir.'/src/Entity'], ['project_dir' => $projectDir]);
+ *     $description = Describer::describe([$vendor.'/omnisense/omnibase/src/Entity', $projectDir.'/src/Entity'], ['project_dir' => $projectDir]);
  *
  * Options: project_dir (its src/Enum, as Mapping::register()), enumerations
  * (more folders of enumerations), types (by name, a bundle's), resolve_target_entities

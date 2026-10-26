@@ -10,10 +10,10 @@ object) asks of the application it runs in, by an interface, never by a
 Symfony service (plan "omnibase agnostique", step C4). Each is reached through
 one registry, `Base\Contract\Runtime`, which the framework fills at boot.
 
-**The host's contracts are omniscient/omnibridge's** (plan "omnibase agnostique", A2).
+**The host's contracts are omnisense/omnibridge's** (plan "omnibase agnostique", A2).
 What any host answers - addresses, translations, languages, access, sessions, tokens,
 stored files, routes, environment - lives in the omnibridge family's core,
-[omniscient/omnibridge](https://github.com/glitchr-studio/omnibridge), as
+[omnisense/omnibridge](https://github.com/glitchr-omnisense/omnibridge), as
 `Omnibridge\Contract\*`, with the registry itself (`Omnibridge\Runtime`, its
 `MissingContractException` and `SystemClock`). What describes omnibase's own models stays
 here as `Base\Contract\*`: `Nouns`, `Media`, `Pictures`, `Texts`, the screens'

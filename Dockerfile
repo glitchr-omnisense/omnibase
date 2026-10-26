@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Standalone, runnable demo of omniscient/omnibase — a bare Symfony skeleton
+# Standalone, runnable demo of omnisense/omnibase — a bare Symfony skeleton
 # (no theme, no app code) with the bundle installed from this very checkout,
 # a SQLite database, and one flat page touring a few bundle features:
 # the App\ <-> Base\ namespace mirroring, the shipped entity layer, the
@@ -62,7 +62,7 @@ COPY . /srv/base-bundle
 RUN composer config repositories.base-bundle '{"type": "path", "url": "/srv/base-bundle", "options": {"symlink": false}}' \
     # Since 4.0 the core requires its Foundation alone: the framework comes with omnibridge/symfony,
     # and the bundles example/app/config/bundles.php registers are the application's to require.
-    && composer require "omniscient/omnibase:*@dev" "omnibridge/symfony:1.x-dev" \
+    && composer require "omnisense/omnibase:*@dev" "omnibridge/symfony:1.x-dev" \
         scheb/2fa league/flysystem-bundle "glitchr/well-known:1.0.*-dev" nelmio/security-bundle nelmio/cors-bundle \
         hwi/oauth-bundle symfony/webpack-encore-bundle "glitchr/ux-google:1.0.*-dev" api-platform/symfony \
         api-platform/doctrine-orm symfony/ux-twig-component --no-interaction --no-progress --no-scripts \
