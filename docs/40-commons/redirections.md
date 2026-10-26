@@ -59,5 +59,5 @@ address to the new one; 302 for a detour that will not last), `enabled`,
 `hits` and `lastHitAt` (counted at each redirection, in UTC): the back office
 shows which old addresses are still visited, and which can go.
 
-A site that updates `omniscient/omnibase` gets the table on its next migration.
+A site that updates `omnisense/omnibase` gets the table on its next migration.
 Until then nothing is redirected and nothing fails.

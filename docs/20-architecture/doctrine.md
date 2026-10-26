@@ -26,7 +26,7 @@ use Base\Bridge\Doctrine\Mapping;
 
 $connection = DriverManager::getConnection(['driver' => 'pdo_mysql', 'host' => ..., 'dbname' => ...]);
 $entityManager = EntityManagers::create($connection, [
-    $vendor.'/omniscient/omnibase/src/Entity',
+    $vendor.'/omnisense/omnibase/src/Entity',
     $projectDir.'/src/Entity',
     // a bundle's src/Entity...
 ], configure: Mapping::configure(...));   // the repository factory, before the entity manager exists

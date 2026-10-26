@@ -12,7 +12,7 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * The host application (the harness, or the application whose suite this runs in) without
- * the bundles omniscient/omnibase only suggests since 4.0 (plan "omnibase agnostique", C7) -
+ * the bundles omnisense/omnibase only suggests since 4.0 (plan "omnibase agnostique", C7) -
  * all of them since C7b: scheb/2fa (Base\Entity\User declares its interfaces through
  * Base\Contract\TwoFactorUser, by the package, not the bundle) and league/flysystem-bundle
  * (Base\Service\Flysystem no longer extends its LazyFactory; omnibase's local storages

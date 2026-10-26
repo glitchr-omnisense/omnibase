@@ -12,7 +12,7 @@ use Symfony\Component\Mailer\MailerInterface;
  * attribute, a value object asks Runtime::urls(), ::access(), ::nouns()...
  * instead of the services Base\Traits\BaseTrait hands out.
  *
- * Since A2, omniscient/omnibridge's registry (Omnibridge\Runtime: the same
+ * Since A2, omnisense/omnibridge's registry (Omnibridge\Runtime: the same
  * state, the same container, filled once at boot by the host) with
  * omnibase's own contracts beside the host's. From omnibridge, generic to any
  * host: Urls (path, url, asset), Translations (trans, ICU, exists()), Locales,

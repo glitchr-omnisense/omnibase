@@ -398,7 +398,7 @@ return static function (ContainerConfigurator $container): void {
     // "omnibase agnostique", C4): what omnibase's framework-free code asks
     // through Base\Contract\Runtime, each bound to its interface's name (an
     // application rebinds one by aliasing that name). The host's contracts are
-    // omniscient/omnibridge's since A2 (Omnibridge\Contract\*), bound under
+    // omnisense/omnibridge's since A2 (Omnibridge\Contract\*), bound under
     // that name (their former names, Base\Contract\Urls... and
     // Omnibridge\Twig\Contract\*, are gone since omnibase 4's final pass). The registry gets them
     // from the `base.contracts` locator (ContractsPass), with the framework's

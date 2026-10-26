@@ -6,9 +6,9 @@ domain code. The `Base\` namespace deliberately mirrors the host apps' `App\`
 structure — a host class can usually extend or decorate its `Base\` counterpart
 one-to-one.
 
-Published as `omniscient/omnibase` (formerly `glitchr/omnibase`, which this package replaces: a
+Published as `omnisense/omnibase` (formerly `glitchr/omnibase`, which this package replaces: a
 `composer.json` that still requires the old name keeps resolving to it, and never installs both).
-Composer now installs it in `vendor/omniscient/omnibase`; nothing in the package depends on that
+Composer now installs it in `vendor/omnisense/omnibase`; nothing in the package depends on that
 path (its templates, documentation and scripts are found from its own directory), but an
 application that names the old path in its configuration has to follow - see CHANGELOG.
 
@@ -37,7 +37,7 @@ The suites run there in the test environment on a fresh SQLite database: see
 
 ## Installation
 
-The package is resolved from Packagist (repository: https://github.com/glitchr-studio/omnibase).
+The package is resolved from Packagist (repository: https://github.com/glitchr-omnisense/omnibase).
 
 **Symfony** (4.0, branch `4.x`): the core and the framework packages, which `omnibridge/symfony`
 carries (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, MonologBundle, Form...),
@@ -45,7 +45,7 @@ then the bundles your `config/bundles.php` registers - the core suggests them, a
 all of them:
 
 ```bash
-composer require omniscient/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
+composer require omnisense/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
 composer require scheb/2fa league/flysystem-bundle hwi/oauth-bundle web-auth/webauthn-symfony-bundle \
     api-platform/symfony api-platform/doctrine-orm symfony/webpack-encore-bundle symfony/ux-twig-component \
     glitchr/ux-google glitchr/well-known nelmio/cors-bundle nelmio/security-bundle
@@ -56,7 +56,7 @@ declares Security's and scheb/2fa's interfaces where they are installed (`Base\C
 `TwoFactorUser`), and `Base\Service\Flysystem` is the core's own class, on omnibase's local storages
 without league/flysystem-bundle. An application coming from 3.x adds `omnibridge/symfony` and
 the bundles it did not require itself, and updates those alone. The 3.x branch
-(`omniscient/omnibase:3.0.*-dev`) still requires the framework itself. See
+(`omnisense/omnibase:3.0.*-dev`) still requires the framework itself. See
 [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
 **Laravel**: later, with `omnibridge/laravel`, which fills the core's contracts with Laravel's
@@ -117,7 +117,7 @@ Service definitions live in `config/`:
 
 ## Development
 
-The bundle is developed inside a host app's `vendor/omniscient/omnibase`
+The bundle is developed inside a host app's `vendor/omnisense/omnibase`
 checkout (composer VCS install keeps `.git`) and pushed from there.
 
 ```bash

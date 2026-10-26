@@ -308,7 +308,7 @@ return static function (ContainerConfigurator $container): void {
                 new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),
             ]);
 
-    // The storages by name, as omniscient/omnidrive's drives (Omnidrive\Drives, which omnibridge/symfony
+    // The storages by name, as omnisense/omnidrive's drives (Omnidrive\Drives, which omnibridge/symfony
     // registers over the services tagged flysystem.storage): those league/flysystem-bundle tags from the
     // application's configuration, or omnibase's local ones without it (FlysystemStoragesPass).
     $services->set('Base\Service\Flysystem')

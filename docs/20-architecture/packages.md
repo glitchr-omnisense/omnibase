@@ -5,7 +5,7 @@ order: 21
 
 # What the core requires (4.0)
 
-Since 4.0 (branch `4.x`, plan "omnibase agnostique", step C7) `omniscient/omnibase`
+Since 4.0 (branch `4.x`, plan "omnibase agnostique", step C7) `omnisense/omnibase`
 requires its **Foundation** alone: what `tests/Foundation.php` loads, and what it stands on.
 The framework is no longer a requirement of the core: a Symfony application adds it,
 a Laravel application does not.
@@ -34,7 +34,7 @@ major is taken up when it comes, not maintained beside the old one.
 ## A Symfony application
 
 ```bash
-composer require omniscient/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
+composer require omnisense/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
 ```
 
 then the bundles its `config/bundles.php` registers, for an application made on omnibase's

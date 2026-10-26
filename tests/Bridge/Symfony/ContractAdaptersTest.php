@@ -79,7 +79,7 @@ final class ContractAdaptersTest extends KernelTestCase
     }
 
     /**
-     * The host's contracts are omniscient/omnibridge's since A2: the container
+     * The host's contracts are omnisense/omnibridge's since A2: the container
      * binds each under its own name (Omnibridge\Contract\*) and its former names
      * alias it - the same object autowired by either, in the locator under
      * either, and what the registry answers.

@@ -14,7 +14,7 @@ is described once, outside any ORM, and Doctrine reads it.
 
 ## Where it lives, and why
 
-- **omniscient/omnibridge, `Omnibridge\Schema`** (framework-free, ORM-free): the
+- **omnisense/omnibridge, `Omnibridge\Schema`** (framework-free, ORM-free): the
   generic part. `Schema\Declaration` reads what the entity classes declare from
   their attributes by reflection, without instantiating them - the attributes
   are `Doctrine\ORM\Mapping`'s, the vocabulary every omnibase entity is written
@@ -63,7 +63,7 @@ built from - and they are those its attribute driver built, to the property
 ```php
 use Base\Database\Schema\Describer;
 
-$description = Describer::describe([$vendor.'/omniscient/omnibase/src/Entity', $projectDir.'/src/Entity'], ['project_dir' => $projectDir]);
+$description = Describer::describe([$vendor.'/omnisense/omnibase/src/Entity', $projectDir.'/src/Entity'], ['project_dir' => $projectDir]);
 $description->table('thread')->column('slug');                    // string(255), not null
 $description->entity(Base\Entity\Thread::class)->relation('tags'); // many_to_many, join table thread_tags
 file_put_contents('var/schema.json', $description->toJson());
@@ -108,6 +108,6 @@ maps from it:
 - **the tables themselves** (`Description::$tables`) for migrations or a schema
   check, with the same names, types, indexes and foreign keys as Doctrine's.
 
-Nothing of it needs Doctrine installed: omniscient/omnibridge requires PHP and
+Nothing of it needs Doctrine installed: omnisense/omnibridge requires PHP and
 three PSR interfaces, and its `BareTest` proves the Schema loads with nothing
 else. The Eloquent bridge itself is a later step; this one gives it what to read.

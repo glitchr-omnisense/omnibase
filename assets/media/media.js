@@ -1,5 +1,5 @@
 /*
- * media:play - one thing sounds at a time (omniscient/omnibase, no dependency).
+ * media:play - one thing sounds at a time (omnisense/omnibase, no dependency).
  *
  * The contract, for every player of a page - the audio bar, a video player,
  * a third-party embed, a plain <audio> or <video>:
@@ -26,7 +26,7 @@
  *     MediaPlay.current      the player that sounded last, or null
  *
  * As a script: <script src="{{ asset('bundles/base/js/media.js') }}" defer></script>
- * Bundled:     import '../vendor/omniscient/omnibase/assets/media/media.js';   (window.MediaPlay)
+ * Bundled:     import '../vendor/omnisense/omnibase/assets/media/media.js';   (window.MediaPlay)
  */
 (function () {
     'use strict';

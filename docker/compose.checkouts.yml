@@ -4,7 +4,7 @@
 services:
   omnibase:
     volumes:
-      - ..:/srv/demo/vendor/omniscient/omnibase
+      - ..:/srv/demo/vendor/omnisense/omnibase
       - ${OMNIBASE_PLUGINS:-../..}/admin:/srv/demo/vendor/omnibase/admin
       - ${OMNIBASE_PLUGINS:-../..}/marketplace:/srv/demo/vendor/omnibase/marketplace
       - ${OMNIBASE_PLUGINS:-../..}/forge:/srv/demo/vendor/omnibase/forge
@@ -22,18 +22,18 @@ services:
       - ${OMNIBASE_PLUGINS:-../..}/scholar:/srv/demo/vendor/omnibase/scholar
       - ${OMNIBASE_PLUGINS:-../..}/press:/srv/demo/vendor/omnibase/press
       - ${OMNIBASE_PLUGINS:-../..}/consulting:/srv/demo/vendor/omnibase/consulting
-      # omniscient/omnischolar, which the image does not install: the scholar's tests' bootstrap
+      # omnisense/omnischolar, which the image does not install: the scholar's tests' bootstrap
       # registers its classes from here (OMNISCHOLAR: the family's workspace, ../../../omnischolar).
-      - ${OMNISCHOLAR:-../../../omnischolar}/core:/srv/demo/vendor/omniscient/omnischolar:ro
+      - ${OMNISCHOLAR:-../../../omnischolar}/core:/srv/demo/vendor/omnisense/omnischolar:ro
       # omnibridge/react, which the image does not install: the core's ScreenResponderTest
       # speaks its protocol when it finds the checkout here (OMNIBRIDGE: ../../../omnibridge).
       - ${OMNIBRIDGE:-../../../omnibridge}/react:/srv/omnibridge/react:ro
       # omnibridge/doctrine as checked out over the image's (cf6b3b9): the hand-built entity manager's
       # test passes it Mapping::configure() (its configure:, from 4d2436d).
       - ${OMNIBRIDGE:-../../../omnibridge}/doctrine:/srv/demo/vendor/omnibridge/doctrine:ro
-      # omniscient/omnibridge as checked out over the image's (audit R14): Omnibridge\Schema, which
+      # omnisense/omnibridge as checked out over the image's (audit R14): Omnibridge\Schema, which
       # the Doctrine checkout above and the core's Base\Database\Schema read.
-      - ${OMNIBRIDGE:-../../../omnibridge}/core:/srv/demo/vendor/omniscient/omnibridge:ro
+      - ${OMNIBRIDGE:-../../../omnibridge}/core:/srv/demo/vendor/omnisense/omnibridge:ro
       # omnibridge/twig as checked out over the image's (audit R24): its HelperExtension (|at,
       # |emoji_only), which the core's Twig extensions leave to it (FrameworkFreeExtensionsTest).
       - ${OMNIBRIDGE:-../../../omnibridge}/twig:/srv/demo/vendor/omnibridge/twig:ro

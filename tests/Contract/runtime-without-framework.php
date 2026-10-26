@@ -126,7 +126,7 @@ $services = [
             return (string) (MessageFormatter::formatMessage(str_replace('-', '_', $locale), $message, $parameters) ?: $message);
         }
 
-        // omnibridge/twig's former Translations is omniscient/omnibridge's since A2, which asks exists() too.
+        // omnibridge/twig's former Translations is omnisense/omnibridge's since A2, which asks exists() too.
         public function exists(string $id, ?string $domain = null, ?string $locale = null): bool
         {
             return isset($this->catalogue[$locale ?? $this->locales->getLocale()][$id]);

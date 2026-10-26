@@ -19,7 +19,7 @@ player of a fixed height across the width, SoundCloud's, has no ratio). Known pr
 are read from the address alone (`known: true`): YouTube (as
 youtube-nocookie.com), Vimeo, Canva, Padlet, LearningApps, Genially, Google
 Slides. Any other address is asked to its site through the `embed/embed`
-library (oEmbed, Open Graph, a requirement of omniscient/omnibase), cached a day per address, and only the iframe's address is
+library (oEmbed, Open Graph, a requirement of omnisense/omnibase), cached a day per address, and only the iframe's address is
 kept. `embed_url(link, false)` never asks.
 
 # Contact form

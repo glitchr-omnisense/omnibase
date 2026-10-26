@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Tests\Base\DependencyInjection\Fixtures\WithoutSuggestedBundlesKernel;
 
 /**
- * omniscient/omnibase 4.0 requires its Foundation alone (plan "omnibase agnostique", C7):
+ * omnisense/omnibase 4.0 requires its Foundation alone (plan "omnibase agnostique", C7):
  * the framework comes with omnibridge/symfony, the bundles it works with are suggested.
  * composer.json says so, and a Symfony application without the suggested bundles the core
  * can do without still compiles its container and answers its pages.
@@ -154,7 +154,7 @@ class SuggestedBundlesTest extends KernelTestCase
     }
 
     /**
-     * Its storages are omniscient/omnidrive's drives (plan "omnidrive"): given as Omnidrive\Drives,
+     * Its storages are omnisense/omnidrive's drives (plan "omnidrive"): given as Omnidrive\Drives,
      * read and written through them, the Flysystem operator behind each still reachable (deprecated).
      */
     public function testFlysystemReadsItsStoragesThroughOmnidrive(): void

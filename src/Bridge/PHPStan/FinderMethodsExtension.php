@@ -18,7 +18,7 @@ use PHPStan\Reflection\MethodsClassReflectionExtension;
  * an undefined method.
  *
  * Registered by extension.neon at the core's root, which the core's phpstan.neon
- * includes and an application's may (vendor/omniscient/omnibase/extension.neon).
+ * includes and an application's may (vendor/omnisense/omnibase/extension.neon).
  * Loaded by PHPStan alone, never at run time.
  */
 final class FinderMethodsExtension implements MethodsClassReflectionExtension

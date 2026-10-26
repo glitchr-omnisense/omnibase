@@ -18,7 +18,7 @@ use Twig\TwigFunction;
  * `git fetch && git reset --hard`, so HEAD always changes on a real
  * deploy and never otherwise.
  *
- * ALSO folds in vendor/{glitchr,omniscient,omnibase}/*'s own git HEADs, not just the app's -
+ * ALSO folds in vendor/{glitchr,omnisense,omnibase}/*'s own git HEADs, not just the app's -
  * on this project, those aren't standard immutable Composer installs,
  * they're live git checkouts iterated on directly (see e.g. the
  * base-bundle-admin/base-bundle dev workflow), so a change committed
@@ -54,11 +54,11 @@ final class DeployVersionExtension extends AbstractExtension
 
         $heads = [$this->readGitHead($this->projectDir)];
 
-        // glitchr/*, omniscient/* (this package, omniscient/omnibase since
+        // glitchr/*, omnisense/* (this package, omnisense/omnibase since
         // its rename from glitchr/omnibase, and the families' cores) and
         // omnibase/* (its bundles): the vendors whose checkouts are iterated
         // on in place.
-        foreach (['glitchr', 'omniscient', 'omnibase'] as $vendor) {
+        foreach (['glitchr', 'omnisense', 'omnibase'] as $vendor) {
             foreach (glob($this->projectDir . '/vendor/' . $vendor . '/*', GLOB_ONLYDIR) ?: [] as $packageDir) {
                 $heads[] = $this->readGitHead($packageDir);
             }

@@ -85,7 +85,7 @@
  * ArrayParameterBag and the Symfony ParameterBag read through; Base\Service\HotParameters, the settings stored
  * in the database laid over any parameters, HotParameterBag's logic; Base\Service\SettingBag, on psr/cache since
  * its cache warmer moved to Base\Bridge\Symfony\SettingBagWarmer).
- * 781 after step A2, unchanged: the host's contracts moved to omniscient/omnibridge (Omnibridge\Contract\*, with
+ * 781 after step A2, unchanged: the host's contracts moved to omnisense/omnibridge (Omnibridge\Contract\*, with
  * Omnibridge\Runtime, SystemClock and MissingContractException); their former names listed here - Base\Contract\
  * {Urls, Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment, SystemClock} and Base\Exception\
  * MissingContractException - are aliases declared with the autoloader (src/Resources/Aliases.php) and load the
@@ -126,7 +126,7 @@
  * the password in a demonstration).
  * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  * 826 after step R14 of the audit "lesringostars face au master plan" (+8: Base\Database\Schema\, omnibase's
- * rules on the description built without any ORM - Omnibridge\Schema of omniscient/omnibridge -: the
+ * rules on the description built without any ORM - Omnibridge\Schema of omnisense/omnibridge -: the
  * discriminators, the translations, the vaults, the order columns, the extensions, the targets resolved,
  * and the Describer that builds an application's description from its entities' folders).
  * 832 after step R15 (+6: the repositories behind interfaces - Base\Database\Repository\Entities, what every
@@ -149,7 +149,7 @@
  * BaseService).
  * -11 at omnibase 4's final pass (a decision of the pass: the former names leave the core): Base\Contract\{Urls,
  * Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment, SystemClock} and Base\Exception\
- * MissingContractException, the aliases of omniscient/omnibridge's classes kept since step A2, are removed with
+ * MissingContractException, the aliases of omnisense/omnibridge's classes kept since step A2, are removed with
  * src/Resources/Aliases.php (and the A1 aliases of omnibridge/symfony's adapters, which were never listed here):
  * no site or bundle named them any more.
  */

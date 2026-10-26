@@ -2,7 +2,7 @@
 
 /*
  * omniauth on omnibase's tables (plan "omniauth", §2.2, steps AU4 and AU7):
- * where omniscient/omniauth is installed (it is only suggested), each of its
+ * where omnisense/omniauth is installed (it is only suggested), each of its
  * stores bound by its contract's name to Base\Auth\'s - the accounts, the
  * passwords, the sign-in links, the e-mailed codes, the backup codes, the
  * trusted devices' version, the identities at providers, the TOTP secrets

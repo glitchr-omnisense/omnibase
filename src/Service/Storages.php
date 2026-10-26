@@ -6,7 +6,7 @@ use Omnidrive\Drive;
 use Omnidrive\Drives;
 
 /**
- * omnibase's named storages over omniscient/omnidrive (audit "lesringostars
+ * omnibase's named storages over omnisense/omnidrive (audit "lesringostars
  * face au master plan", step R28): what the core asks of them - a drive by
  * its name (getDrive(), omnidrive's Drive: read, write, list, public address,
  * local path...), and omnibase's rule of the public paths (getPublic(),

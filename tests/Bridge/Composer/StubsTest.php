@@ -39,7 +39,7 @@ final class StubsTest extends TestCase
     {
         $stubs = [];
         foreach (self::providers() as $provider) {
-            $context = new StubContext($projectDir, $projectDir.'/vendor', self::root(), 'omniscient/omnibase');
+            $context = new StubContext($projectDir, $projectDir.'/vendor', self::root(), 'omnisense/omnibase');
             $stubs[$provider->getName()] = iterator_to_array($provider->generate($context));
         }
 

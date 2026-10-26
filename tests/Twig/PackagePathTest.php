@@ -8,8 +8,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * The package is omniscient/omnibase since its rename from glitchr/omnibase:
- * Composer installs it in vendor/omniscient/omnibase, and an application that
+ * The package is omnisense/omnibase since its rename from glitchr/omnibase:
+ * Composer installs it in vendor/omnisense/omnibase, and an application that
  * still names vendor/glitchr/omnibase/templates as base.twig.default_path
  * (most sites' base.yaml did) keeps its pages - a path that is not there is
  * the package's own templates. The default needs no vendor path at all.
