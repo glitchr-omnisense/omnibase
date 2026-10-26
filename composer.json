@@ -1,5 +1,5 @@
 {
-    "name": "omniscient/omnibase",
+    "name": "omnisense/omnibase",
     "type": "symfony-bundle",
     "description": "Base helper integration for Symfony",
     "keywords": [
@@ -7,7 +7,7 @@
         "base",
         "helper"
     ],
-    "homepage": "https://github.com/glitchr-studio/omnibase",
+    "homepage": "https://github.com/glitchr-omnisense/omnibase",
     "license": "MIT",
     "authors": [
         {
@@ -31,32 +31,32 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/glitchr-studio/omnishield.git",
+            "url": "https://github.com/glitchr-omnisense/omnishield.git",
             "no-api": true
         },
         {
             "type": "vcs",
-            "url": "https://github.com/glitchr-studio/omnishield-akismet.git",
+            "url": "https://github.com/glitchr-omnisense/omnishield-akismet.git",
             "no-api": true
         },
         {
             "type": "vcs",
-            "url": "https://github.com/glitchr-studio/omnishield-altcha.git",
+            "url": "https://github.com/glitchr-omnisense/omnishield-altcha.git",
             "no-api": true
         },
         {
             "type": "vcs",
-            "url": "https://github.com/glitchr-studio/omnishield-disposable.git",
+            "url": "https://github.com/glitchr-omnisense/omnishield-disposable.git",
             "no-api": true
         },
         {
             "type": "vcs",
-            "url": "https://github.com/glitchr-studio/omnisign.git",
+            "url": "https://github.com/glitchr-omnisense/omnisign.git",
             "no-api": true
         },
         {
             "type": "vcs",
-            "url": "https://github.com/glitchr-studio/omnisign-docuseal.git",
+            "url": "https://github.com/glitchr-omnisense/omnisign-docuseal.git",
             "no-api": true
         }
     ],
@@ -129,17 +129,18 @@
         "twig/twig": "^3.0"
     },
     "replace": {
+        "omniscient/omnibase": "self.version",
         "glitchr/omnibase": "self.version"
     },
     "suggest": {
         "doctrine/doctrine-fixtures-bundle": "demo:reset reloads the fixtures (the demo environment)",
         "dompdf/dompdf": "Base\\Response\\PdfResponse: an HTML page answered as a PDF (^3.0)",
         "symfony/lock": "demo:reset runs under a lock (the demo environment)",
-        "omniscient/omnishield": "Base\\Service\\FormGuard's captcha, address lists and content classifier (the option `guard` of a form, Akismet behind SpamChecker): register Omnishield\\Bridge\\Symfony\\OmnishieldBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-studio/omnishield",
+        "omnisense/omnishield": "Base\\Service\\FormGuard's captcha, address lists and content classifier (the option `guard` of a form, Akismet behind SpamChecker): register Omnishield\\Bridge\\Symfony\\OmnishieldBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-omnisense/omnishield",
         "omnishield/altcha": "ALTCHA, the default captcha of FormGuard: a proof of work served and checked by the site, no third party, no cookie, no consent",
         "omnishield/akismet": "Akismet behind Base\\Service\\SpamChecker (base.guard.classifier)",
         "omnishield/disposable": "Disposable e-mail domains refused at sign-up (base.guard.reputation)",
-        "omniscient/omnisign": "Base\\Service\\Signatures: documents signed for any entity (Base\\Entity\\Signature\\Envelope, mapped only with it), the signed file and its evidence kept in the private storage; register Omnisign\\Bridge\\Symfony\\OmnisignBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-studio/omnisign",
+        "omnisense/omnisign": "Base\\Service\\Signatures: documents signed for any entity (Base\\Entity\\Signature\\Envelope, mapped only with it), the signed file and its evidence kept in the private storage; register Omnisign\\Bridge\\Symfony\\OmnisignBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-omnisense/omnisign",
         "omnisign/docuseal": "A DocuSeal instance of one's own: nothing leaves for a third party (omnisign/yousign, omnisign/docusign for the providers)"
     },
     "require-dev": {
@@ -155,11 +156,11 @@
         "symfony/stopwatch": "^6.0|^7.0|^8.0",
         "symfony/var-dumper": "^6.0|^7.0|^8.0",
         "symfony/web-profiler-bundle": "^6.0|^7.0|^8.0",
-        "omniscient/omnishield": "1.x-dev",
+        "omnisense/omnishield": "1.x-dev",
         "omnishield/akismet": "1.x-dev",
         "omnishield/altcha": "1.x-dev",
         "omnishield/disposable": "1.x-dev",
-        "omniscient/omnisign": "1.x-dev",
+        "omnisense/omnisign": "1.x-dev",
         "omnisign/docuseal": "1.x-dev"
     },
     "minimum-stability": "dev",
