@@ -23,7 +23,8 @@ The bundle is organised around a few long-lived pieces:
   [The Doctrine mapping](doctrine.md).
 - **Settings** — a compiled snapshot of configuration, read through
   `SettingBag`.
-- **Admin** — a from-scratch administration bundle (`base-bundle-admin`).
+- **Admin** — the back office is a package of its own, `omnibase/admin`
+  (formerly `base-bundle-admin`), with its own manual.
 - **Account security** — what the administrator sets, and a second factor
   required of some roles: [Account security](account-security.md).
 - **The demo environment** — `APP_ENV=demo`: declared demonstration
