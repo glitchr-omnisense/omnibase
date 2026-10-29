@@ -633,6 +633,14 @@ return static function (ContainerConfigurator $container): void {
         'Base\Console\Command\TimeMachineSnapshotRestoreCommand',
         'Base\Console\Command\MailTrapCommand',
         'Base\Console\Command\TrashPurgeCommand',
+        // The developer's lookups: which entities complete what, the enums' icons, the
+        // time machine's storages, the translation keys of entities, enums and CRUD pages.
+        'Base\Console\Command\AutocompleteEntitiesCommand',
+        'Base\Console\Command\IconEnumsCommand',
+        'Base\Console\Command\TimeMachineStorageCommand',
+        'Base\Console\Command\TranslationCrudCommand',
+        'Base\Console\Command\TranslationEntitiesCommand',
+        'Base\Console\Command\TranslationEnumsCommand',
     ];
 
     foreach ($commandServices as $command) {
@@ -646,7 +654,10 @@ return static function (ContainerConfigurator $container): void {
         if ($command === 'Base\Console\Command\NotifierMailTestCommand') {
             $definition->args([service('base.notifier'), service('App\Repository\UserRepository')]);
         }
-        if (str_contains($command, 'TimeMachineSnapshot')) {
+        if ($command === 'Base\Console\Command\AutocompleteEntitiesCommand') {
+            $definition->args([service('base.database.metadata_manipulator')]);
+        }
+        if (str_contains($command, 'TimeMachineSnapshot') || $command === 'Base\Console\Command\TimeMachineStorageCommand') {
             $definition->args([service('time_machine'), service('flysystem')]);
         }
         if ($command === 'Base\Console\Command\ThreadPublishableCommand') {

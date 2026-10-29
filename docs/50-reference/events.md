@@ -26,12 +26,12 @@ the core's harness, the core's alone (the plugins' listeners left out).
 | `user.kickout` | `UserEvent` | `UserEventDispatcher` | A user becomes kicked out |
 | `user.locked` | `UserEvent` | `UserEventDispatcher` | A user becomes locked |
 | `user.banned` | `UserEvent` | `UserEventDispatcher` | A user becomes banned |
+| `user.newcomer` | `UserEvent` | `UserEventDispatcher` | A user becomes a newcomer again (`isNewcomer()` was false, is true; a new account is one from its `user.register`) |
 | `user.ghost` | `UserEvent` | `UserEventDispatcher` | A user stops being a ghost (`isGhost()` was true, is false) |
 | `sitemap.build` | `Base\Event\SitemapEvent` | `SitemapController` (`/sitemap.{extension}`) | Once the routes carrying a `Sitemap` attribute are registered |
 | `base.signature.signed` | `Base\Event\SignatureEvent` | `Base\Service\Signatures` | A signer of an envelope signed (the gateway's answer applied) |
 | `base.signature.completed`, `.declined`, `.expired`, `.canceled` | `SignatureEvent` | `Base\Service\Signatures` | An envelope reached that state |
 
-`UserEvent::NEWCOMER` (`user.newcomer`) is declared and dispatched by nothing.
 The constants are the names to listen to: `ThreadEvent::PUBLISHABLE`,
 `UserEvent::APPROVAL`, `SitemapEvent::BUILD`, `SignatureEvent::COMPLETED`...
 
@@ -179,7 +179,9 @@ at -1024: `noindex` on every response; `MessageEvent` at 1024: no e-mail leaves)
 `DemoBackOfficeSubscriber` (`CheckPassportEvent` at 128, `kernel.request` at 4)
 and the Doctrine listener `DemoAccountLockSubscriber` (`preFlush`): see
 [The demo environment](../20-architecture/demo.md). `IntegritySubscriber`, in the
-same directory, is registered by no configuration.
+same directory, is registered by no configuration, on purpose: it would open a session on every
+main request, run `bin/console cache:clear` inside the request on a Doctrine `TypeError`, and
+sign the user out when its checks fail.
 
 ### The console, the mailer and Messenger
 

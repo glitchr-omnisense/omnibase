@@ -6,8 +6,10 @@ use App\Entity\User;
 use Base\EntityDispatcher\AbstractEvent;
 
 /**
- * The order.placed event is dispatched each time an order is created
- * in the system.
+ * The user.* events: UserEventDispatcher dispatches user.register when an account is
+ * persisted, and each other one when an update puts the account in that state (approved,
+ * verified, enabled, disabled, kicked out, locked, newcomer, banned; user.ghost when it stops
+ * being a ghost).
  */
 class UserEvent extends AbstractEvent
 {

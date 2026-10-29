@@ -78,11 +78,8 @@ types"). The block prefix is the name of its block in the form theme
 | `EditorType` | `HiddenType` | `editor` | `placeholder`, `collab_autosave`, `collab_live` (Editor.js; its uploads in `base.twig.editor.storage`) |
 | `WysiwygType` | `HiddenType` | `wysiwyg` | `theme`, `placeholder`, `height`, `modules` |
 
-> [!WARNING]
-> Known defect: `EditorType` and `WysiwygType` report two more options, named `0` and `1`: their
-> `configureOptions()` writes `'empty_data', null,` (a comma where `=>` is meant), so the option
-> resolver declares option `0` with the value `'empty_data'` and option `1` with `null`, and
-> `empty_data` keeps `HiddenType`'s default.
+`EditorType` and `WysiwygType` default `empty_data` to `null`: an empty submission is `null`, not
+`HiddenType`'s `""`.
 
 ## Form types (`Base\Form\Type`)
 

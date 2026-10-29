@@ -239,9 +239,10 @@ class DoctrineDatabaseImportCommand extends Command
 
             case "csv":
             case "txt":
-                $rawData = $this->serializer->decode(file_get_contents2($path), 'csv');
+                // One sheet, named after the file: the rows are read as a spreadsheet's are.
+                $rawData = [pathinfo((string) parse_url($path, \PHP_URL_PATH), \PATHINFO_FILENAME) ?: 'csv' => $this->serializer->decode(file_get_contents2($path), 'csv')];
+                break;
 
-            // no break
             default:
                 throw new Exception("File extension couldn't be determine.. Please use \"--extension\" option.");
         }

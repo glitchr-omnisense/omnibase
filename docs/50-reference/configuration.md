@@ -57,23 +57,15 @@ base:
 The four `use_custom` flags and the two `parameter_bag` flags default to `null`
 (off): a site that leaves them out runs without omnibase's router, Twig loader,
 attribute reader and Doctrine features, without the settings stored in the
-database, and without those settings laid over the parameters. (The harness's
-file still says that the bag reads every parameter as `null` without
-`use_hot_bag`: that was `HotParameterBag`'s logic before `HotParameters`, which
-reads the configuration whether the overlay is on or not.) The storages are Flysystem storages of the site's own
+database, and without those settings laid over the parameters (`HotParameters`
+reads the configuration whether the overlay is on or not). The storages are Flysystem storages of the site's own
 (`config/packages/flysystem.yaml`).
 
 ## Dumping the tree
-
-> [!WARNING]
-> Known defect: `bin/console config:dump-reference base` (and `debug:config base`) fails with
-> "The extension with alias "base" does not have its getConfiguration() method setup.":
-> `BaseExtension` does not override `getConfiguration()`, and Symfony's default looks for a
-> class named `Configuration`, where omnibase's is `BaseConfiguration`.
-
-Symfony's reference dumper reads the class itself. The tree below was dumped in
-the core's harness with this script (the image's vendor, the core mounted over
-its copy):
+`bin/console config:dump-reference base` dumps it, and `debug:config base` the site's values
+(`BaseExtension::getConfiguration()`). The tree below was dumped in the core's harness with
+Symfony's reference dumper, from this script (the image's vendor, the core mounted over its
+copy):
 
 ```php
 <?php
@@ -92,6 +84,12 @@ docker run --rm --network none \
 ```
 
 ## The full tree, with its defaults
+
+The options read by nothing are deprecated (`excluded_fields`, `share`,
+`access_restriction.redirect_on_deny`, `site.maintenance.exception`, `uploader.warmup`,
+`files.storage`, `images.autorotate`, `images.disable_profiler`, `images.warmup`,
+`images.formats`, `extension.logging_default_expiry`): a site that sets one gets Symfony's
+deprecation notice, and they go at the next major.
 
 `twig.default_path` is the package's own `templates/` wherever Composer put it:
 `/srv/demo/vendor/omnisense/omnibase/templates` is the harness's.
@@ -639,11 +637,11 @@ base:
 |---|---|---|---|
 | `use_custom` | bool | `null` | omnibase's Doctrine features: `BaseBundle::boot()` registers its types over DBAL's (the UTC `datetime`, see [Time and time zones](../20-architecture/time.md)); `cache:clear` reports it. |
 | `fallback_warning` | bool | `true` | `cache:clear` warns when the entity manager's metadata factory is not omnibase's `ClassMetadataFactory`. |
-| `excluded_fields` | list of strings | `[id, locale, translatable]` | Not read at this commit: the translation fields take their own `excluded_fields` option (`TranslationType`, `TranslationField`). |
+| `excluded_fields` | list of strings | `[id, locale, translatable]` | Deprecated, read by nothing: the translation fields take their own `excluded_fields` option (`TranslationType`, `TranslationField`). |
 
 ## `share`
 
-A list of `{id, url}`. Not read at this commit: the sharing buttons come from the
+A list of `{id, url}`. Deprecated, read by nothing: the sharing buttons come from the
 adapters tagged `base.service.sharing` (`Base\Service\Model\Sharing\SharingAdapterInterface`).
 
 ## `user`
@@ -672,7 +670,7 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 | `firewalls` | list of strings | `[main]` | The firewalls the exceptions below apply to; a request under another firewall is never restricted by them. |
 | `route_exceptions` | list of regular expressions | `['/^(?:locale_\|ux_\|user_\|security_)/']` | Route names that no restriction stops and that the referrer never remembers (the sign-in pages, the language switch, the UX endpoints). |
 | `exceptions` | list of `{locale, env, host, path, domain, subdomain, scheme}` | `[]` | Addresses let through during a maintenance or before the launch (`EXCEPTION_ACCESS`): the entry for the current locale (then its language, the default locale, its language, then the entry without a locale) is matched; `env` and `locale` are compared, the others are regular expressions on the parts of the address. |
-| `redirect_on_deny` | string | `null` | Not read at this commit: the redirection on a refusal is the setting `base.settings.access_restriction.redirect_on_deny` (back office). |
+| `redirect_on_deny` | string | `null` | Deprecated, read by nothing: the redirection on a refusal is the setting `base.settings.access_restriction.redirect_on_deny` (back office). |
 
 ## `site`
 
@@ -680,7 +678,7 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 |---|---|---|---|
 | `index` | string (route) | `app_index` | The home page's route: `AdvancedRouter::getRouteIndex()`, where redirections without a target go (the demonstration's sign-in, the end of a pending approval). |
 | `maintenance.redirect_on_deny` | string (route) | `security_maintenance` | The route a visitor is sent to during a maintenance (`MaintenanceProvider`): the core's maintenance page, `security_maintenance` (`/m`), or a route of the site's. Once the maintenance is over, a visitor on that page is sent to `site.index`. |
-| `maintenance.exception` | map of `code` | `[]` | Not read at this commit. |
+| `maintenance.exception` | map of `code` | `[]` | Deprecated, read by nothing. |
 | `maintenance.lockpath` | string (path) | `%kernel.project_dir%/public/maintenance.lock` | The lock file whose presence puts the site under maintenance (its first line the downtime, its second the uptime), beside the setting `base.settings.maintenance`. |
 
 ## `router`
@@ -753,8 +751,8 @@ The backups (`Base\Service\TimeMachine`, [Backups](../30-operations/backups.md))
 |---|---|---|---|
 | `uploader.storage` | string (Flysystem storage) | `null` | The storage an `#[Uploader]` property writes to when it names none. |
 | `uploader.formats` | list of `{class, property, width, height}` | `[]` | The sizes `uploader:images` warms up. |
-| `uploader.warmup` | bool | `true` | Not read at this commit. |
-| `files.storage` | string | `null` | Not read at this commit. |
+| `uploader.warmup` | bool | `true` | Deprecated, read by nothing. |
+| `files.storage` | string | `null` | Deprecated, read by nothing. |
 
 ## `images`
 
@@ -769,7 +767,7 @@ Read by `Base\Service\MediaService`.
 | `debug` | bool | `false` | The debug variant of the image routes. |
 | `no_image` | list of `{extension, path}` | `[]` | The picture served instead of a missing file, per extension. |
 | `fallback` | bool | `false` | Serve `no_image` for a missing file; on, a missing `no_image.<extension>` is an error. |
-| `autorotate`, `disable_profiler`, `warmup`, `formats` | | see the tree | Not read at this commit (the bitmap filters rotate by their own `autorotate` option, true by default). |
+| `autorotate`, `disable_profiler`, `warmup`, `formats` | | see the tree | Deprecated, read by nothing (the bitmap filters rotate by their own `autorotate` option, true by default). |
 
 ## `paginator`
 
@@ -847,7 +845,7 @@ refuse a negative value, `download_links.ttl` one below 1.
 |---|---|---|---|
 | `max_revisions` | int | `5` | Revisions kept per versioned entity (`VersionableSubscriber`). |
 | `empty_trash` | string (relative date, or a number of days) | `'+7 days'` | How long a trashed entity is kept before `trash:purge` may destroy it (`TrasheableSubscriber`, `TrashManager`). |
-| `logging_default_expiry` | int | `180` | Not read at this commit. |
+| `logging_default_expiry` | int | `180` | Deprecated, read by nothing. |
 
 ## `screens`
 

@@ -16,6 +16,7 @@ use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Service\Model\Obfuscator\CompressionInterface;
 use Base\Twig\Renderer\TagRendererInterface;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -28,6 +29,15 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
 class BaseExtension extends AbstractBaseExtension implements PrependExtensionInterface
 {
+    /**
+     * The tree of base:, for config:dump-reference and debug:config: Symfony looks for a class
+     * named Configuration beside the extension, the core's is BaseConfiguration.
+     */
+    public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
+    {
+        return new BaseConfiguration();
+    }
+
     /**
      * {@inheritdoc}
      */

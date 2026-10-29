@@ -69,7 +69,7 @@ class EditorType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'empty_data', null,
+            'empty_data' => null,
             'placeholder' => $this->translator->trans("@fields.editor.placeholder"),
             "webpack_entry" => "form.editor",
 

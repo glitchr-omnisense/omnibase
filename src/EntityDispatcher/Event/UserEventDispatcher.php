@@ -52,6 +52,10 @@ class UserEventDispatcher extends AbstractEventDispatcher
             $this->addEvent(UserEvent::BANNED, $user);
         }
 
+        if ($user->isNewcomer() && !$oldUser->isNewcomer()) {
+            $this->addEvent(UserEvent::NEWCOMER, $user);
+        }
+
         if (!$user->isGhost() && $oldUser->isGhost()) {
             $this->addEvent(UserEvent::GHOST, $user);
         }
