@@ -10,6 +10,28 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the user.* events have their listener again
+
+`Base\EntitySubscriber\UserSubscriber` was registered by no configuration since the back office
+left the core (80088b2d): a registration asked no verification, an approval was not confirmed, an
+account closed was not said goodbye to. It is registered (config/services/core.php), and its calls
+are those of the notifier (`sendUserWelcomeBack($user)` had no such method without its token, and
+each notification went out twice); it reads the token storage's token only when there is one (a
+command, a worker), and revokes an approval request at the next flush (revoked inside the flush
+that raised the event, the token was written with no user: `userToken.user_id` is NOT NULL). See
+docs/50-reference/events.md. Test: tests/Subscriber/UserSubscriberTest.php.
+
+### Fixed: `user:notifications` runs
+
+Every run stopped on "Undefined property $baseService"; its finders were given a group-by where
+they take an order; `base.user.notifications.expiry` was null unless configured, and its default
+`+30d` read "d" as a time zone (now `+30 days`). `--expiry` sets the age for one run and
+`--clear-all` erases every read notification, whatever its age.
+
+### Removed: `user:notifications`' `--impersonator`, `--event`, `--pretty`, `--statusCode`
+
+Declared and read by nothing (the options of another command).
+
 ### Changed: the package is omnisense/omnibase
 
 Omniscient is now Omnisense (2026-10-26): the package is `omnisense/omnibase`, installed in

@@ -22,7 +22,7 @@ options (`-h`, `-q`, `-v`, `-e`, `--no-debug`...) left out.
 | `cache:clear` | Symfony's `cache:clear`, decorated: checks around it, a lock, a second clear |
 | `cache:clear:sessions` | Deletes the session files of `var/sessions` |
 | `user:create` | Creates an account, verified and approved, with a temporary password |
-| `user:notifications` | Counts, shows and erases notifications (broken, see below) |
+| `user:notifications` | Counts, shows and erases the notifications read |
 | `notifier:mail:test` | Sends the test e-mail |
 | `app:notifier` | Lists the notifications the `Notifier` can send |
 | `base:mailer:trap` | Holds outgoing mail, then purges or releases it |
@@ -143,28 +143,23 @@ Usage:
   user:notifications [options]
 
 Options:
-      --user=USER                    Should I consider them with a specific user ?
-      --impersonator[=IMPERSONATOR]  Should I consider them with a specific impersonator user ?
-      --event[=EVENT]                Should I consider a specific event ?
-      --expiry[=EXPIRY]              Should I consider a specific expiry value ?
-      --pretty[=PRETTY]              Should I consider a specific pretty value ?
-      --statusCode[=STATUSCODE]      Should I consider a specific status code ?
-      --show                         Should I show them ?
-      --clear                        Should I clear them ?
-      --clear-all                    Should I clear them all?
+      --user=USER      The account (its identifier); every account without it
+      --expiry=EXPIRY  The age past which a read notification is erased ("+30 days"); base.user.notifications.expiry without it
+      --show           List them
+      --clear          Erase the read ones older than the expiry
+      --clear-all      Erase every read one, whatever its age
 ```
 
-Meant to count every notification (the user's with `--user`), those read, and
-those read and older than `base.user.notifications.expiry`; `--show` lists them,
-`--clear` erases the read ones past the expiry. `--impersonator`, `--event`,
-`--expiry`, `--pretty`, `--statusCode` and `--clear-all` are declared and not
-read.
+Counts every notification (the account's with `--user`), those read, and those
+read and older than the expiry (`--expiry`, else `base.user.notifications.expiry`,
+`+30 days`); `--show` lists them, `--clear` erases the read ones past the expiry,
+`--clear-all` every read one. An unread notification is never erased.
 
-> [!WARNING]
-> Known defect: the command reads the expiry through `$this->baseService`, a property
-> `Base\Console\Command` does not have (src/Console/Command/UserNotificationCommand.php:45):
-> every run stops on "Warning: Undefined property:
-> Base\Console\Command\UserNotificationCommand::$baseService", before it counts anything.
+```
+$ bin/console user:notifications --user=anne@example.org --clear
+3 notification(s) found, 1 notification(s) are marked as read, 1 notification(s) older than +30 days
+These notifications are now erased..
+```
 
 ## `notifier:mail:test`
 

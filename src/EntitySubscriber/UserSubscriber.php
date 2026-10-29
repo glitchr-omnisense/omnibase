@@ -2,122 +2,125 @@
 
 namespace Base\EntitySubscriber;
 
-use App\Entity\User;
-
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityDispatcher\Event\UserEvent;
-use Base\Notifier\NotifierInterface;
-use Base\Routing\AdvancedRouterInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-
+use Base\Notifier\Notifier;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-class UserSubscriber implements EventSubscriberInterface
+/**
+ * What an account's owner is told when the account changes (UserEventDispatcher raises the
+ * events): a registration asks to verify the address, an approval is confirmed, an account its
+ * owner closes is said goodbye to, one reopened welcomed back. Each notification goes out with
+ * its importance, through the site's channel policy (framework.notifier.channel_policy).
+ *
+ * The owner is told only of what they did themselves, or of what happened with nobody signed
+ * in (a command, a worker): an administrator closing someone's account sends nothing.
+ */
+class UserSubscriber implements EventSubscriberInterface, ResetInterface
 {
-    /**
-     * @var AdvancedRouterInterface
-     */
-    protected $router;
+    /** The verification link's lifetime and the delay before another can be asked, as SecurityController's. */
+    public const VERIFY_EMAIL_EXPIRY = 24 * 3600;
+    public const VERIFY_EMAIL_THROTTLE = 3600;
+
+    /** @var list<Token> the approval requests to revoke at the next flush */
+    private array $revoke = [];
+
+    public function __construct(
+        protected Notifier $notifier,
+        protected TokenStorageInterface $tokenStorage,
+    ) {
+    }
 
     /**
-     * @var TokenStorage
+     * The events come from inside a flush (UserEventDispatcher, postPersist/postUpdate): a token
+     * revoked there leaves its user, but its orphan removal is forgotten when the flush ends
+     * (postFlush included), and the next flush wrote the token with no user (userToken.user_id
+     * is NOT NULL). Revoked as the next flush begins (the response's, EntityDispatcherFlushSubscriber),
+     * it is removed by it.
      */
-    protected $tokenStorage;
-
-    /**
-     * @var NotifierInterface
-     */
-    protected $notifier;
-
-    public function __construct(NotifierInterface $notifier, TokenStorageInterface $tokenStorage, AdvancedRouterInterface $router)
+    public function preFlush(): void
     {
-        $this->router = $router;
-        $this->tokenStorage = $tokenStorage;
-        $this->notifier = $notifier;
+        $revoke = $this->revoke;
+        $this->revoke = [];
+        foreach ($revoke as $token) {
+            $token->revoke();
+        }
+    }
+
+    public function reset(): void
+    {
+        $this->revoke = [];
     }
 
     public static function getSubscribedEvents(): array
     {
-        return
-            [
-                UserEvent::REGISTER => ['onRegistration'],
-                UserEvent::APPROVAL => ['onApproval'],
-                UserEvent::VERIFIED => ['onVerification'],
-                UserEvent::ENABLED => ['onEnabling'],
-                UserEvent::DISABLED => ['onDisabling'],
-                UserEvent::KICKED => ['onKickout']
-            ];
+        return [
+            UserEvent::REGISTER => ['onRegistration'],
+            UserEvent::APPROVAL => ['onApproval'],
+            UserEvent::ENABLED => ['onEnabling'],
+            UserEvent::DISABLED => ['onDisabling'],
+        ];
     }
 
-    public function onEnabling(UserEvent $event)
+    /** Whether someone other than $user is signed in. */
+    private function byAnotherUser(object $user): bool
+    {
+        $signedIn = $this->tokenStorage->getToken()?->getUser();
+
+        return null !== $signedIn && $signedIn !== $user;
+    }
+
+    public function onRegistration(UserEvent $event): void
     {
         $user = $event->getUser();
-        if ($this->tokenStorage->getToken()->getUser() !== $user) {
-            return;
-        } // Only notify when user requests itself
-
-
-        $notification = $this->notifier->sendUserWelcomeBack($user);
-        if ($this->tokenStorage->getToken()->getUser() === $user) {
-            $notification->send("success");
-        }
-    }
-
-    public function onDisabling(UserEvent $event)
-    {
-        $user = $event->getUser();
-        if ($this->tokenStorage->getToken()->getUser() !== $user) {
-            return;
-        } // Only notify when user requests itself
-
-        $notification = $this->notifier->sendUserAccountGoodbye($user);
-        $notification->send("success");
-    }
-
-    public function onKickout(UserEvent $event)
-    {
-    }
-
-    public function onVerification(UserEvent $event)
-    {
-    }
-
-    public function onRegistration(UserEvent $event)
-    {
-        $token = $this->tokenStorage->getToken();
-
-        $user = $event->getUser();
-        if ($token && $token->getUser() !== $user) {
-            return;
-        } // Only notify when user requests itself
-
-        if ($user->isVerified()) { // Social account connection
-            $notification = new Notification("verifyEmail.success");
-            $notification->setUser($user);
-            $notification->send("success");
-        } else {
-            /**
-             * @var User\Token $verifyEmailToken
-             */
-            $verifyEmailToken = new Token('verify-email', 3600);
-            $user->addToken($verifyEmailToken);
-
-            $notification = $this->notifier->sendVerificationEmail($user, $verifyEmailToken);
-            $notification->send("success");
+        if ($this->byAnotherUser($user) || $user->isVerified()) {
+            return; // made by someone else (user:create mails its own), or nothing to verify (a social account)
         }
 
-        $this->router->redirectToRoute("user_profile");
+        $token = new Token('verify-email', self::VERIFY_EMAIL_EXPIRY, self::VERIFY_EMAIL_THROTTLE);
+        $user->addToken($token);
+
+        $this->notifier->verificationEmail($user, $token)->send('success');
     }
 
-    public function onApproval(UserEvent $event)
+    public function onApproval(UserEvent $event): void
     {
         $user = $event->getUser();
 
-        $adminApprovalToken = $user->getValidToken("admin-approval");
-        if ($adminApprovalToken) {
-            $adminApprovalToken->revoke();
-            $notification = $this->notifier->sendUserApprovalConfirmation($user);
+        // Only an account that waited for an administrator (its "admin-approval" request).
+        $request = $user->getValidToken('admin-approval');
+        if (!$request) {
+            return;
         }
+
+        $this->revoke[] = $request;
+        $this->notifier->userApprovalConfirmation($user)->send('success');
+    }
+
+    public function onEnabling(UserEvent $event): void
+    {
+        $user = $event->getUser();
+        if ($this->byAnotherUser($user)) {
+            return;
+        }
+
+        // The e-mail with the link came first (UserChecker, on a sign-in to a closed account):
+        // the account reopened, its owner is told so.
+        $notification = new Notification('accountWelcomeBack.success', [$user]);
+        $notification->setUser($user);
+        $notification->send('success');
+    }
+
+    public function onDisabling(UserEvent $event): void
+    {
+        $user = $event->getUser();
+        if ($this->byAnotherUser($user)) {
+            return;
+        }
+
+        $this->notifier->userAccountGoodbye($user)->send('success');
     }
 }
