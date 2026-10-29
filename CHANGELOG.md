@@ -10,6 +10,16 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: `str_shorten()` counts characters (2026-10-30)
+
+- `str_shorten()` (src/Resources/Functions.php) measures the text in characters (`mb_strlen`), as it
+  cuts it (`mb_substr`), and finds a sentence's full stop in characters too (`mb_strrpos`,
+  `mb_strpos`, for `SHORTEN_BACK_SHRINK` and `SHORTEN_BACK_EXTEND`): a multibyte text was cut short,
+  and at the front or in the middle the cut started past its end (41 `é` to 10 at the front gave
+  `[..]` alone). The fix omnibridge/twig's `|str_shorten` had (a38d3ca).
+
+Test: tests/FunctionsTest.php (`testStrShortenCountsCharactersNotBytes`).
+
 ### Fixed: the low defects the manual found (2026-10-29)
 
 - `config:dump-reference base` and `debug:config base` dump the tree: `BaseExtension::getConfiguration()`

@@ -1576,13 +1576,14 @@ namespace {
                 return "";
             }
 
-            $nChr = strlen($haystack);
+            // Characters, not bytes: mb_substr() cuts in characters (as omnibridge/twig's |str_shorten).
+            $nChr = mb_strlen($haystack);
 
             if ($nChr == 0) {
                 return "";
             }
 
-            if ($nChr > $length + strlen($separator)) {
+            if ($nChr > $length + mb_strlen($separator)) {
                 switch ($position) {
                     case SHORTEN_FRONT:
                         // Keep the LAST $length chars: start at $nChr - $length.
@@ -1596,7 +1597,7 @@ namespace {
                     case SHORTEN_BACK_SHRINK:
                     case SHORTEN_BACK_EXTEND:
                         if ($position == SHORTEN_BACK_SHRINK) {
-                            $pos = strrpos(mb_substr($haystack, 0, $length), ".");
+                            $pos = mb_strrpos(mb_substr($haystack, 0, $length), ".");
                             if ($pos === false) {
                                 return "";
                             }
@@ -1605,7 +1606,7 @@ namespace {
                         }
 
                         if ($position == SHORTEN_BACK_EXTEND) {
-                            $pos = strpos(mb_substr($haystack, $length), ".");
+                            $pos = mb_strpos(mb_substr($haystack, $length), ".");
                             if ($pos !== false) {
                                 $length += $pos + 1;
                             }
