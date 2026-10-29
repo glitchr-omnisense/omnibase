@@ -165,6 +165,23 @@ class FunctionsTest extends TestCase
         $this->assertStringContainsString('amet', $out);
     }
 
+    /**
+     * Measured and cut in characters, as omnibridge/twig's |str_shorten: a text of multibyte
+     * characters is cut where a text of ASCII is (strlen() counted bytes, mb_substr() cuts
+     * characters: 41 "é" to 10 at the front gave the separator alone).
+     */
+    public function testStrShortenCountsCharactersNotBytes(): void
+    {
+        $e = str_repeat('é', 41);
+        $this->assertSame('[..] '.str_repeat('é', 10), str_shorten($e, 10, SHORTEN_FRONT));
+        $this->assertSame(str_repeat('é', 10).' [..]', str_shorten($e, 10, SHORTEN_BACK));
+        $this->assertSame(str_repeat('é', 5).' [..] '.str_repeat('é', 5), str_shorten($e, 10, SHORTEN_MIDDLE));
+        $this->assertSame('Été à Kyōto', str_shorten('Été à Kyōto', 10), 'eleven characters, within 10 and the separator: as it is');
+        $this->assertSame('Été. Où [..]', str_shorten('Été. Où es-tu ? Là-bas, très loin.', 7, SHORTEN_BACK));
+        $this->assertSame('Été. [..]', str_shorten('Été. Où es-tu ? Là-bas, très loin.', 7, SHORTEN_BACK_SHRINK));
+        $this->assertSame('Été. Où es-tu ? Là-bas, très loin. [..]', str_shorten('Été. Où es-tu ? Là-bas, très loin. Fin', 7, SHORTEN_BACK_EXTEND));
+    }
+
     /** array_unique on a list-of-arrays (SORT_STRING) collapsed everything to one. */
     public function testGetPermutationsWithoutDuplicatesKeepsDistinctTuples(): void
     {
