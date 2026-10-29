@@ -130,7 +130,7 @@ trait CacheClearTrait
         ;
         $table->render();
 
-        if ($useCustomRouter === true && $this->parameterBag->get("base.router.use_fallback") === true) {
+        if ($useCustomRouter === true && $this->parameterBag->get("base.router.use_fallbacks") === true) {
             if ($this->parameterBag->get("base.router.fallback_warning") && !$this->router->getHostFallback()) {
                 $io->warning("No host fallback configured in `base.yaml`" . PHP_EOL . "(configure 'base.router.fallbacks' to remove this message or disable `base.router.fallback_warning` warning).");
             }

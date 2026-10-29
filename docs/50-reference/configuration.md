@@ -198,7 +198,7 @@ base:
         maintenance:
 
             # Maintenance redirection
-            redirect_on_deny:     maintenance
+            redirect_on_deny:     security_maintenance
             exception:
 
                 # Prototype
@@ -656,14 +656,8 @@ adapters tagged `base.service.sharing` (`Base\Service\Model\Sharing\SharingAdapt
 | `active_delay` | int (seconds) | `60` | `User::isActive()`: active within that many seconds of its last activity (`activeAt`). |
 | `online_delay` | int (seconds) | `300` | `User::isOnline()`, the same with this delay. |
 | `notifications.expiry` | string (relative date) | `+30 days` | The age past which `user:notifications --clear` erases read notifications (`--expiry` sets another for one run). |
-| `register.autoapprove` | bool | `false` | Meant to approve a new account without an administrator. |
+| `register.autoapprove` | bool | `false` | A new account is approved without an administrator (`SecurityController::Register`, and `SecuritySubscriber` for an account still waiting). Off, an account that is not approved is sent to `security_pendingForApproval` until an administrator approves it. |
 | `register.notify_admins` | bool | `false` | The administrators (`notifier.admin_role`) are sent an approval request when a verified account registers (`SecurityController::Register`). |
-
-> [!WARNING]
-> Known defect: `SecuritySubscriber` (src/Subscriber/SecuritySubscriber.php:341) reads
-> `base.user.autoapprove`, which the configuration does not declare, where the option is
-> `base.user.register.autoapprove`: the option has no effect, and an account that is not
-> approved is sent to `security_pendingForApproval` unless an administrator approves it.
 
 ## `access_restriction`
 
@@ -685,18 +679,9 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 | Option | Type | Default | Effect |
 |---|---|---|---|
 | `index` | string (route) | `app_index` | The home page's route: `AdvancedRouter::getRouteIndex()`, where redirections without a target go (the demonstration's sign-in, the end of a pending approval). |
-| `maintenance.redirect_on_deny` | string (route) | `maintenance` | The route a visitor is sent to during a maintenance (`MaintenanceProvider`; `security_maintenance` only when the option is set to `null`). The core's maintenance page is `security_maintenance` (`/m`): a site without a route named `maintenance` sets this option to `security_maintenance` or to a route of its own. |
+| `maintenance.redirect_on_deny` | string (route) | `security_maintenance` | The route a visitor is sent to during a maintenance (`MaintenanceProvider`): the core's maintenance page, `security_maintenance` (`/m`), or a route of the site's. Once the maintenance is over, a visitor on that page is sent to `site.index`. |
 | `maintenance.exception` | map of `code` | `[]` | Not read at this commit. |
-| `maintenance.lockpath` | string (path) | `%kernel.project_dir%/public/maintenance.lock` | Meant to be the lock file whose presence puts the site under maintenance (its first line the downtime, its second the uptime). |
-
-> [!WARNING]
-> Known defect: `MaintenanceProvider` (src/Service/MaintenanceProvider.php:53) reads
-> `base.maintenance.lockpath`, where the option is `base.site.maintenance.lockpath`: the lock
-> file is never read, and the site is under maintenance only through the setting
-> `base.settings.maintenance` (with `base.settings.maintenance.downtime` and `.uptime`).
-> `Launcher` and `MaintenanceProvider` also read `base.site.homepage`, which is not declared
-> (the option is `base.site.index`): the redirection they make away from the maintenance or
-> launch page gets a `null` route.
+| `maintenance.lockpath` | string (path) | `%kernel.project_dir%/public/maintenance.lock` | The lock file whose presence puts the site under maintenance (its first line the downtime, its second the uptime), beside the setting `base.settings.maintenance`. |
 
 ## `router`
 
@@ -732,16 +717,11 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 |---|---|---|---|
 | `mailer` | bool | `true` | The notifier sends e-mail (when symfony/mailer's `Mailer` exists). |
 | `technical_loopback` | bool | `true` | **On by default**: every e-mail goes to the technical recipient instead of its addressee (`Notifier::isTest()` is true for every recipient). Turn it off in production. |
-| `technical_recipient.email` | string | `null` | The technical address: the sender of the e-mails, and the loopback's addressee. Unset: `postmaster@<the site's domain>`. |
+| `technical_recipient.email` | string | `null` | The technical address: the sender of the e-mails, the loopback's addressee, and the error page's support address when the setting `mail` gives none. Unset: `postmaster@<the site's domain>`. |
 | `technical_recipient.phone` | string | `null` | The technical recipient's phone number. |
 | `admin_role` | string (role) | `ROLE_EDITOR` | Who receives the administrators' notifications (`Notifier::getAdminRecipients()`: the users holding that role). |
 | `test_recipients` | list of regular expressions | `['@localhost$']` | With the kernel in debug, an e-mail to an address matching one goes to the technical recipient; `User::isTester()` reads the same list. |
 | `options` | list of `{channel, markAsRead}` | `[]` | Handed to the notifier as they are (`BaseNotifier::getOptions()`). |
-
-> [!WARNING]
-> Known defect: `templates/exception.html.twig:33` reads `base.notifier.technical_support`,
-> which is not declared: the error page's support address comes from the setting
-> `setting_bag.mail` alone.
 
 ## `spam`
 
