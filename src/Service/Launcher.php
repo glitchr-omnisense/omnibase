@@ -110,7 +110,7 @@ class Launcher implements LauncherInterface
         }
 
         if ($this->isLaunched()) {
-            $homepageRoute = $this->parameterBag->get("base.site.homepage");
+            $homepageRoute = $this->parameterBag->get("base.site.index");
             if ($event && $redirectOnDeny == $this->router->getRouteName()) {
                 $event->setResponse($this->router->redirect($homepageRoute));
             }

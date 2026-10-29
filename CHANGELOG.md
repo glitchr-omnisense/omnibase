@@ -21,6 +21,19 @@ command, a worker), and revokes an approval request at the next flush (revoked i
 that raised the event, the token was written with no user: `userToken.user_id` is NOT NULL). See
 docs/50-reference/events.md. Test: tests/Subscriber/UserSubscriberTest.php.
 
+### Fixed: the options read under their declared names
+
+`base.user.register.autoapprove` approves a new account (SecuritySubscriber read
+`base.user.autoapprove`, and the `register` node had no defaults when a site configured nothing
+under it); `base.site.maintenance.lockpath`'s lock file puts the site under maintenance
+(MaintenanceProvider read `base.maintenance.lockpath`); the maintenance and launch pages send a
+visitor back to `base.site.index` (they read `base.site.homepage`: a null route);
+`site.maintenance.redirect_on_deny` defaults to `security_maintenance`, the core's page (the route
+`maintenance` it named does not exist); the error page's support address falls back on
+`notifier.technical_recipient.email` (it read `base.notifier.technical_support`); cache:clear's
+fallback warnings read `base.router.use_fallbacks`. Test: tests/DependencyInjection/ParametersReadAreDeclaredTest.php
+(every `base.*` key read in src/ and templates/ is declared; five left, read with a fallback, listed there).
+
 ### Fixed: `user:notifications` runs
 
 Every run stopped on "Undefined property $baseService"; its finders were given a group-by where

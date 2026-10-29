@@ -338,7 +338,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
                 $user->approve();
                 $this->userRepository->flush(false);
-            } elseif ($this->parameterBag->get("base.user.autoapprove")) {
+            } elseif ($this->parameterBag->get("base.user.register.autoapprove")) {
                 $user->approve();
                 $this->userRepository->flush(false);
             } elseif ($this->router->isSecured()) {

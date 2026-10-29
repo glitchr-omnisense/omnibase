@@ -50,7 +50,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         if ($this->lockPath) {
             return $this;
         }
-        $this->lockPath = $this->parameterBag->get("base.maintenance.lockpath");
+        $this->lockPath = $this->parameterBag->get("base.site.maintenance.lockpath");
 
         $uptime = null;
         $downtime = null;
@@ -134,7 +134,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
 
         $redirectOnDeny = $this->parameterBag->get("base.site.maintenance.redirect_on_deny") ?? "security_maintenance";
         if (!$this->isUnderMaintenance()) {
-            $homepageRoute = $this->parameterBag->get("base.site.homepage");
+            $homepageRoute = $this->parameterBag->get("base.site.index");
             if ($event && $redirectOnDeny == $this->router->getRouteName()) {
                 $event->setResponse($this->router->redirect($homepageRoute));
             }
