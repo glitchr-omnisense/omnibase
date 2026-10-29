@@ -44,11 +44,16 @@ options (`-h`, `-q`, `-v`, `-e`, `--no-debug`...) left out.
 | `doctrine:array:upgrade` | Converts DBAL 3's serialized `array` columns to JSON (MySQL) |
 | `demo:reset` | Reloads the demonstration ([The demo environment](../20-architecture/demo.md)) |
 
-Classes of `src/Console/Command/` that no configuration registers, so that
-`bin/console` does not know them: `AutocompleteEntitiesCommand`
-(`autocomplete:entities`), `IconControllersCommand`, `IconCrudCommand`,
-`IconEnumsCommand`, `TimeMachineStorageCommand`, `TranslationCrudCommand`,
-`TranslationEntitiesCommand`, `TranslationEnumsCommand`.
+The developer's lookups, each listing what it names without changing anything:
+
+| Command | What it lists |
+|---|---|
+| `autocomplete:entities` | The entities that complete (`AutocompleteInterface`), or one's rows (`--entity`, `--id`) with their autocompletion |
+| `icon:enums` | The icons of the values of omnibase's enums (`--enum`) |
+| `timemachine:storage` | The storages the time machine can back up to |
+| `translation:crud` | The CRUD pages' titles in each locale (`--crud`, `--action`, `--suffix`, `--locale`) |
+| `translation:entities` | The entities' names in each locale (`--entity`, `--suffix`, `--locale`) |
+| `translation:enums` | The enums' and their values' names in each locale (`--enum`, `--suffix`, `--locale`) |
 
 ## `cache:clear`
 
@@ -448,19 +453,14 @@ Options:
       --on-the-fly                 Import right after each single entity got hydrated
 ```
 
-Reads a workbook (`xls`, `xlsx`, `xlsm`, or `xml`, from the file's MIME type or
-`--extension`; the path is asked when not given), lets you choose its sheets
+Reads a workbook (`xls`, `xlsx`, `xlsm`, or `xml`), or a `csv` or `txt` file as one sheet named
+after the file (from the file's MIME type or `--extension`; the path is asked when not given), lets you choose its sheets
 (or takes `--spreadsheet`), and imports each sheet as entities of the class its
 first column's heading names. The second line of a sheet is a comment line,
 skipped. A heading is a property path; `name:unique` makes the column a key
 (a row already in the database is not imported again), `tags:explode(,)` splits
 a cell into a list, `parent[title]` finds an associated entity by one of its
 fields. The notifier is disabled unless `--notify`.
-
-> [!WARNING]
-> Known defect: a `csv` or `txt` file always fails with "File extension couldn't be determine..
-> Please use "--extension" option.": its `case` decodes it and falls through to the `default`
-> that throws (src/Console/Command/DoctrineDatabaseImportCommand.php, the `// no break`).
 
 ## `doctrine:schema:charset`
 

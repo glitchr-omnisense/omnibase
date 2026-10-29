@@ -372,18 +372,7 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function color_name(string $hex)
     {
-        $color = hex2rgb($hex);
-
-        $closestNames = array_transforms(
-            fn($hex, $name): array => [$name, distance($color, hex2rgb($hex))],
-            Colors::getNames()
-        );
-
-        asort($closestNames);
-
-        $closestNames = array_keys($closestNames);
-
-        return begin($closestNames);
+        return Colors::getName($hex); // the nearest CSS colour name
     }
 
     /**

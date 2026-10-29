@@ -30,7 +30,7 @@ final class MathTwigExtension extends AbstractExtension
         return count($value, $mode);
     }
 
-    public function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): int
+    public function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float
     {
         return round($num, $precision, $mode);
     }

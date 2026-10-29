@@ -150,17 +150,9 @@ left out). Where two extensions give the same name, the one registered last wins
 | `str_shorten(length = 100, position, separator = ' [..] ')`, `mb_ucwords`, `url_decode`, `basename`, `intval`, `strval`, `addslashes`, `ceil`, `floor`, `sign` | filters | Strings and numbers (`sign`: `+` or `-`) |
 | `uniq`, `pad(length, value)`, `array_flatten`, `head`, `tail`, `third`, `fourth`, `fifth`, `closest(position)`, `pickup(n)`, `transforms(arrow)` | filters | Arrays: unique values, padded, flattened, first element, the rest, the 3rd/4th/5th, the element at a position (or the nearest end), `n` random entries, a closure applied |
 | `distance(other)`, `greater_than(seconds)`, `instanceof(class)`, `nargs`, `stringify`, `preg_split(pattern)` | filters | The distance between two vectors; whether a date is older than that; `is_instanceof()`; a closure's number of parameters; any value as a string; `preg_split()` |
-| `color_name` | filter | Meant to name a colour (`#ff0000`) |
+| `color_name` | filter | The nearest CSS named colour of a `#RRGGBB` code (`'#ff0001'` is `red`), the same in every locale (`Base\Service\Model\Color\Intl\Colors`: CSS's names, symfony/intl ships none) |
 
-> [!WARNING]
-> Known defect: `round()` (src/Twig/Extension/MathTwigExtension.php:35) declares an `int` return,
-> so the precision is lost: `{{ round(3.14159, 2) }}` prints `3`, with PHP's deprecation
-> "Implicit conversion from float 3.14 to int loses precision". Use Twig's `|round(2)` filter.
-
-> [!WARNING]
-> Known defect: `|color_name` reads a `colors` resource bundle that symfony/intl does not ship
-> (`Base\Service\Model\Color\Intl\Colors::getNames()`): every call throws
-> `MissingResourceException` ("Couldn't read the indices [Names] for the locale ...").
+`round(number, precision = 0, mode)` keeps its decimals: `{{ round(3.14159, 2) }}` is `3.14`.
 
 ## In the harness
 

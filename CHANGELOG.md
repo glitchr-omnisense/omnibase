@@ -10,6 +10,44 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the low defects the manual found (2026-10-29)
+
+- `config:dump-reference base` and `debug:config base` dump the tree: `BaseExtension::getConfiguration()`
+  returns `BaseConfiguration` (Symfony looked for a class named `Configuration`).
+- `doctrine:database:import` reads a `csv` or `txt` file as one sheet named after the file; its
+  case fell through into the one that threw "File extension couldn't be determine..".
+- `user.newcomer` is dispatched when an update makes an account a newcomer again, as the other
+  `user.*` events are; it was dispatched by nothing.
+- Twig's `round()` keeps its decimals (`round(3.14159, 2)` is 3.14; it was declared `: int`).
+- `|color_name` names a colour, the nearest CSS named colour: `Colors` read a `colors` resource
+  bundle symfony/intl does not ship, a `MissingResourceException` on every call. It now holds
+  CSS's names (the same in every locale).
+- `EditorType` and `WysiwygType` default `empty_data` to `null` (written `'empty_data', null,`
+  they declared options `0` and `1`).
+- `autocomplete:entities`, `icon:enums`, `timemachine:storage`, `translation:crud`,
+  `translation:entities` and `translation:enums` are registered; `icon:enums` and
+  `translation:enums` skip the native PHP enums and the enum groups they failed on.
+- The harness's `base.yaml` comment says what `use_hot_bag` and `use_setting_bag` do.
+
+Tests: tests/DependencyInjection/ConfigurationReferenceTest.php, tests/Console/RegisteredCommandsTest.php,
+tests/Console/DoctrineDatabaseImportCsvTest.php, tests/EntityDispatcher/UserNewcomerEventTest.php,
+tests/Twig/MathAndColourFunctionsTest.php, tests/Field/EmptyDataTest.php.
+
+### Deprecated: the options read by nothing
+
+`database.excluded_fields`, `share`, `access_restriction.redirect_on_deny`,
+`site.maintenance.exception`, `uploader.warmup`, `files.storage`, `images.autorotate`,
+`images.disable_profiler`, `images.warmup`, `images.formats` and
+`extension.logging_default_expiry` were declared and read by no code. They are deprecated, not
+removed (the configuration tree is public API, and every site's `base.yaml` sets most of them):
+a site that sets one gets Symfony's deprecation notice; they go at the next major.
+
+### Removed: two broken commands
+
+`icon:controllers` (it read a router `Base\Console\Command` has not) and `icon:crud` (it asked a
+class name whether it was a CRUD controller, and looked for the CRUD controllers where the core no
+longer keeps them); neither was registered.
+
 ### Fixed: the user.* events have their listener again
 
 `Base\EntitySubscriber\UserSubscriber` was registered by no configuration since the back office

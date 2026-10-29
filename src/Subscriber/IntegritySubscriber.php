@@ -33,6 +33,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Process\Process;
 use TypeError;
 
+/**
+ * Registered by no configuration, on purpose: as written it would open a session on every main
+ * request, run `bin/console cache:clear` inside a web request on a Doctrine TypeError, and sign
+ * the user out (and clear the remember-me cookie) whenever one of its checks fails. A site that
+ * wants these checks registers it itself, knowing that.
+ */
 class IntegritySubscriber implements EventSubscriberInterface
 {
     public const int DEFAULT_PRIORITY = 7;

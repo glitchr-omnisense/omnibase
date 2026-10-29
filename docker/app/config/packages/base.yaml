@@ -1,6 +1,8 @@
-# The smallest base config a host needs. The parameter_bag flags are not
-# optional: with use_hot_bag unset, the decorated parameter bag resolves
-# every lookup - even a plain container parameter - to null.
+# The smallest base config a host needs. use_hot_bag lays the settings stored
+# in the database (the back office's) over the configuration; without it the
+# parameters are read from the configuration alone (HotParameters).
+# use_setting_bag reads the settings from the database at all: off, the
+# setting bag is empty.
 base:
     parameter_bag:
         use_hot_bag: true

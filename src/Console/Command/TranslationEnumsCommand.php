@@ -54,6 +54,14 @@ class TranslationEnumsCommand extends Command
             if (!str_starts_with($enum, $enumRestriction)) {
                 continue;
             }
+            if (!is_subclass_of($enum, \Base\Database\Type\EnumType::class)) {
+                continue; // a native PHP enum (CommentState...): no permitted values to list
+            }
+            try {
+                $enum::getPermittedValues(false);
+            } catch (\Exception) {
+                continue; // a group of enums (SystemOfUnits\...), no value of its own
+            }
 
             $space = "";
             $trans = "";
