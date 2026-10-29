@@ -96,13 +96,18 @@ thread's state becomes `FUTURE`) and `thread.publishable` (its state becomes
 `PUBLISH`; each author is e-mailed `thread.published`, each member mentioned who
 is not an author `thread.mentioned`).
 
-> [!WARNING]
-> Known defect: `Base\EntitySubscriber\UserSubscriber` - the welcome back on `user.enabled`, the
-> goodbye on `user.disabled`, the verification e-mail on `user.register`, the approval's
-> confirmation on `user.approval` - is registered by no configuration since the back office
-> left the core (commit 80088b2d removed `config/services/admin.php`, which declared it): the
-> `user.*` events are dispatched with no listener of the core. `SecurityController` sends the
-> e-mails of its own pages (registration, verification) itself.
+`Base\EntitySubscriber\UserSubscriber` tells an account's owner what happened to
+it, each notification sent with the importance `success` through the site's channel
+policy (`framework.notifier.channel_policy`), and only for what the owner did, or
+what happened with nobody signed in (a command, a worker) - an administrator closing
+someone's account sends nothing:
+
+| Event | What is sent |
+|---|---|
+| `user.register` | an account whose address is not verified gets a `verify-email` token (24 hours, another one an hour later at the earliest) and `Notifier::verificationEmail()`; a verified one (`user:create`, a social account) nothing |
+| `user.approval` | an account that waited for an administrator (a valid `admin-approval` token) gets `Notifier::userApprovalConfirmation()`; its request is revoked at the next flush |
+| `user.enabled` | the notice `accountWelcomeBack.success` (the e-mail with the link came first, from `UserChecker`) |
+| `user.disabled` | `Notifier::userAccountGoodbye()` |
 
 ### `SitemapEvent`
 

@@ -302,6 +302,16 @@ return static function (ContainerConfigurator $container): void {
         ->autowire()
         ->autoconfigure();
 
+    // The user.* events' listener (UserEventDispatcher raises them): the verification asked at
+    // a registration, the approval confirmed, the goodbye of an account closed by its owner, the
+    // welcome back of one reopened; preFlush revokes an approval request out of the flush that
+    // raised the event (UserSubscriber::preFlush()). Registered in config/services/admin.php
+    // until the back office left the core (80088b2d), by nothing since: none of these was sent.
+    $services->set('Base\EntitySubscriber\UserSubscriber')
+        ->autowire()
+        ->autoconfigure()
+        ->tag('doctrine.event_listener', ['event' => 'preFlush']);
+
     // Notifier
     $services->alias('App\Notifier\Notifier', 'Base\Notifier\Notifier');
     $services->alias('Base\Notifier\NotifierInterface', 'Base\Notifier\Notifier');

@@ -2353,12 +2353,6 @@ parameters:
 			path: src/Console/Command/UserCreateCommand.php
 
 		-
-			message: '#^Access to an undefined property Base\\Console\\Command\\UserNotificationCommand\:\:\$baseService\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Console/Command/UserNotificationCommand.php
-
-		-
 			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\\Entity\\User\>\:\:loadUserByIdentifier\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2383,7 +2377,7 @@ parameters:
 			path: src/Console/Command/UserNotificationCommand.php
 
 		-
-			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<Base\\Entity\\User\\Notification\>\:\:findByUserAndByIsRead\(\)\.$#'
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<Base\\Entity\\User\\Notification\>\:\:findByUserAndIsRead\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Console/Command/UserNotificationCommand.php

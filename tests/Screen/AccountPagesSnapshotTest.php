@@ -444,6 +444,7 @@ final class AccountPagesSnapshotTest extends KernelTestCase
         $user->setEmail($handle.'@example.org');
         $user->setPlainPassword('test-'.$handle.'-password');
         $user->setRoles($roles);
+        $user->verify(); // its address known: no verification asked (UserSubscriber), no notice in its list
         $this->em()->persist($user);
         $this->em()->flush();
         $this->created[] = [$class, $user->getId()];

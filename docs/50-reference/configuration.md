@@ -139,7 +139,7 @@ base:
         notifications:
 
             # Time before erasing data if read
-            expiry:               +30d
+            expiry:               '+30 days'
         register:
 
             # Administrator check required
@@ -655,7 +655,7 @@ adapters tagged `base.service.sharing` (`Base\Service\Model\Sharing\SharingAdapt
 | `identifier` | string | `email` | The `User` property an account is identified by (`BaseService::getUserIdentifier()`, the access-token handler, `SecurityController`). |
 | `active_delay` | int (seconds) | `60` | `User::isActive()`: active within that many seconds of its last activity (`activeAt`). |
 | `online_delay` | int (seconds) | `300` | `User::isOnline()`, the same with this delay. |
-| `notifications.expiry` | string (relative date) | `+30d` | The age past which `user:notifications --clear` erases read notifications. |
+| `notifications.expiry` | string (relative date) | `+30 days` | The age past which `user:notifications --clear` erases read notifications (`--expiry` sets another for one run). |
 | `register.autoapprove` | bool | `false` | Meant to approve a new account without an administrator. |
 | `register.notify_admins` | bool | `false` | The administrators (`notifier.admin_role`) are sent an approval request when a verified account registers (`SecurityController::Register`). |
 
