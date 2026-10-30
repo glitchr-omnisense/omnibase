@@ -52,15 +52,18 @@ final class UserNotificationCommandTest extends KernelTestCase
     public function testItCountsAnAccountsNotifications(): void
     {
         $user = $this->createUser();
-        $this->notification($user, true, '-60 days');
-        $this->notification($user, false, '-1 day');
+        $old = $this->notification($user, true, '-60 days');
+        $recent = $this->notification($user, false, '-1 day');
         $this->entityManager()->flush();
+        // And the notices the registration sent, written on that flush: a host sends them read
+        // (lesringostars' browser+ channel) or unread, never older than +30 days.
+        $sent = array_filter($this->entityManager()->getRepository(Notification::class)->findBy(['user' => $user]), fn (Notification $notification) => !\in_array($notification, [$old, $recent], true));
+        $sentRead = \count(array_filter($sent, fn (Notification $notification) => $notification->isRead()));
 
         $tester = $this->command(['--user' => $user->getUserIdentifier()]);
 
         $this->assertSame(Command::SUCCESS, $tester->getStatusCode());
-        // (and the verification notice the registration sent, unread)
-        $this->assertMatchesRegularExpression('/3 notification\(s\) found, 1 notification\(s\) are marked as read, 1 notification\(s\) older than \+30 days/', $tester->getDisplay());
+        $this->assertMatchesRegularExpression(\sprintf('/%d notification\(s\) found, %d notification\(s\) are marked as read, 1 notification\(s\) older than \+30 days/', \count($sent) + 2, $sentRead + 1), $tester->getDisplay());
     }
 
     public function testClearErasesTheReadOnesPastTheExpiry(): void
