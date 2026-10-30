@@ -212,7 +212,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                         ->defaultValue(null)
                         ->end()
 
-                    ->booleanNode('ip_access')
+                    ->booleanNode('ip_access')->setDeprecated('omnisense/omnibase', '4.0', 'The "%node%" option at "%path%" has no effect (RouterSubscriber reads it only once isGranted(\'VALIDATE_IP\') holds, which no voter of the core decides); remove it from the configuration.')
                         ->info('Allow accessing by')
                         ->defaultValue(false)
                     ->end()

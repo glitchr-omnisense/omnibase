@@ -686,7 +686,7 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 | Option | Type | Default | Effect |
 |---|---|---|---|
 | `use_custom` | bool | `null` | `AdvancedRouter`'s own generation and matching (`AdvancedUrlGenerator`, `AdvancedUrlMatcher`: the routes by locale and host); off, routes are generated and matched as Symfony's router does. |
-| `ip_access` | bool | `false` | Whether a site reached by its IP address is served as it is. |
+| `ip_access` | bool | `false` | Deprecated, no effect (see the note below). |
 | `use_fallbacks` | bool | `false` | Whether `host_fallbacks` is used at all: off, `AdvancedRouter::getFallbackParameters()` gives none and addresses are built from the request's host. |
 | `fallback_warning` | bool | `true` | `cache:clear` warns when no host fallback is configured. |
 | `host_fallbacks` | list | see the tree | One entry per locale (and environment): `subdomain`, `machine`, `domain`, `port` (lists, the first one is the canonical one), `base_dir`, `reduction` (whether a non-canonical host is reduced to the canonical one). `AdvancedRouter` builds absolute URLs from it and `CookieDomain` the cookies' domain. |
@@ -694,7 +694,9 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 > [!NOTE]
 > `RouterSubscriber` applies the IP-address rule only when `isGranted('VALIDATE_IP', $route)`
 > is true; no voter of the core decides `VALIDATE_IP` (only `PermissionVoter` could, for a
-> user holding that permission tag), so `ip_access` has no effect at this commit.
+> user holding that permission tag), so `ip_access` has no effect. It is deprecated rather than
+> wired: wired, its default (`false`) would redirect every request that reaches a site by its IP
+> address, health checks included.
 
 ## `translator`
 

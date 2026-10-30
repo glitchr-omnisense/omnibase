@@ -52,6 +52,11 @@ tests/Twig/MathAndColourFunctionsTest.php, tests/Field/EmptyDataTest.php.
 removed (the configuration tree is public API, and every site's `base.yaml` sets most of them):
 a site that sets one gets Symfony's deprecation notice; they go at the next major.
 
+`router.ip_access` is deprecated too (2026-10-30): `RouterSubscriber` reads it only once
+`isGranted('VALIDATE_IP', $route)` holds, which no voter of the core decides, so it had no effect.
+Wiring it would have made its default, `false`, redirect every request reaching a site by its IP
+address, health checks included. The sites no longer set it.
+
 ### Removed: two broken commands
 
 `icon:controllers` (it read a router `Base\Console\Command` has not) and `icon:crud` (it asked a
