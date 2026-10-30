@@ -30,6 +30,8 @@ final class ConfigurationReferenceTest extends KernelTestCase
         'base.images.warmup',
         'base.images.formats',
         'base.extension.logging_default_expiry',
+        // Read by RouterSubscriber only once isGranted('VALIDATE_IP') holds, which no voter of the core decides.
+        'base.router.ip_access',
     ];
 
     public function testTheReferenceAndTheConfigurationAreDumped(): void
