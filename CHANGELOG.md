@@ -10,6 +10,11 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: a DateField reads as a day (2026-10-31)
+
+`DateField` renders through `crud/field/date` (omnibase/admin), 05/12/2026, where the text template
+showed the resolver's default `Y-m-d H:i` (2026-12-05 00:00).
+
 ### Fixed: a signed-in member's language before the remembered one (2026-10-31)
 
 - `LocalizerSubscriber` reads a signed-in member's own language before the `LANG` cookie (the

@@ -14,7 +14,7 @@ class DateField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel($label)
-            ->setTemplateName('crud/field/text')
+            ->setTemplateName('crud/field/date')
             ->setFormType(DateType::class)
             ->setFormTypeOption('widget', 'single_text')
             ->addCssClass('field-date')
