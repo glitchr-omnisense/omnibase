@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
@@ -141,16 +142,34 @@ class LocalizerSubscriber implements EventSubscriberInterface
 
     /**
      * The language of a page: its address (a route of one language,
-     * "/en/..." or "/datenschutz"), else the visitor's own choice or the
-     * language their last page was shown in (the LANG cookie, which the
-     * response keeps up to date), else a signed-in member's, else - on a
-     * first visit only - the browser's (Accept-Language), else the site's.
+     * "/en/..." or "/datenschutz"), else a signed-in member's own (but while
+     * impersonating), else the visitor's own choice or the language their
+     * last page was shown in (the LANG cookie, which the response keeps up
+     * to date), else - on a first visit only - the browser's
+     * (Accept-Language), else the site's (choose()).
      *
      * The browser's language used to be read on every page from the
      * USER/INFO cookie, which the site's script writes after the first one:
      * a visitor who arrived on a French page, or chose French, was moved to
      * their browser's language from the second page on.
      */
+    /**
+     * The order a page's language is decided in: its address; then, for a
+     * signed-in member, their own language - which their choice of language
+     * updates - before the one their last page was shown in (LANG: a first
+     * visit before signing in, in their browser's language, set it and kept
+     * a member whose language is French in English); while impersonating,
+     * the impersonator's choice (LANG), which does not change the member's;
+     * then the browser's, on a first visit; then the site's.
+     */
+    public static function choose(?string $address, ?string $remembered, ?string $member, bool $impersonating, ?string $browser, string $site): string
+    {
+        return $address
+            ?? ($impersonating ? ($remembered ?? $member) : ($member ?? $remembered))
+            ?? $browser
+            ?? $site;
+    }
+
     public function onKernelRequest(RequestEvent $event)
     {
         if (!$event->isMainRequest()) {
@@ -164,29 +183,34 @@ class LocalizerSubscriber implements EventSubscriberInterface
             $this->localizer->markAsChanged();
         }
 
-        $locale = $_locale ?? $this->available($request->cookies->get(self::__LANG_IDENTIFIER__));
+        $remembered = $this->available($request->cookies->get(self::__LANG_IDENTIFIER__));
 
-        $user = $this->tokenStorage->getToken()?->getUser();
-        if ($user instanceof BaseUser) {
-            $locale ??= $this->available($user->getLocale());
-        }
+        $token = $this->tokenStorage->getToken();
+        $user = $token?->getUser();
+        $member = $user instanceof BaseUser ? $this->available($user->getLocale()) : null;
 
         // Symfony's Request::create() puts "en-us,en;q=0.5" on every request it makes
         // that says nothing (a test client's, a sub-request's): no word from a browser.
-        if ($locale === null && $request->headers->has("Accept-Language") && self::REQUEST_DEFAULT_LANGUAGE !== $request->headers->get("Accept-Language")) {
-            $preferred = $request->getPreferredLanguage($this->languages());
-            $locale = $this->available($preferred);
+        $browser = null;
+        if ($request->headers->has("Accept-Language") && self::REQUEST_DEFAULT_LANGUAGE !== $request->headers->get("Accept-Language")) {
+            $browser = $this->available($request->getPreferredLanguage($this->languages()));
         }
 
         // The site's own language - not the translator's current one, which in a
         // long-lived worker is still the previous request's.
-        $locale ??= $this->localizer::getDefaultLocale() ?? $this->localizer->getLocale();
+        $locale = self::choose($_locale, $remembered, $member, $token instanceof SwitchUserToken, $browser, $this->localizer::getDefaultLocale() ?? $this->localizer->getLocale());
 
         // Normalize locale
         $locale = $this->localizer::normalizeLocale($locale);
 
         // Set new locale
         $this->localizer->setLocale($locale, $request);
+        // And intl's, which formats numbers, amounts and dates (NumberFormatter, IntlDateFormatter
+        // without a locale of their own): Symfony's LocaleSwitcher set it from the request's locale
+        // before this one decided it, and in a long-lived worker it is the previous request's.
+        if (class_exists(\Locale::class)) {
+            \Locale::setDefault(str_replace("-", "_", $locale));
+        }
         $this->localizer->markAsLate();
         $request->attributes->set(self::DISPLAYED_LOCALE, $locale);
 
