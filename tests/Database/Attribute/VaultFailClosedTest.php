@@ -63,6 +63,53 @@ class VaultFailClosedTest extends TestCase
         $vault->prePersist($this->createStub(\Doctrine\Persistence\Event\LifecycleEventArgs::class), new ClassMetadata($entity::class), $entity);
     }
 
+    /** The site's parameters, base.vault.allow_plaintext set to $value. */
+    private function bag(mixed $value): \Base\Service\ParameterBagInterface
+    {
+        $bag = $this->createStub(\Base\Service\ParameterBagInterface::class);
+        $bag->method('get')->willReturnCallback(fn (string $key = '') => 'base.vault.allow_plaintext' === $key ? $value : null);
+
+        return $bag;
+    }
+
+    /**
+     * The site's parameter, as Vault reads it - not a stand-in: allowsPlaintext() asked
+     * AbstractAttribute::getParameterBag() for the key, which takes none and gave the bag,
+     * and (bool) of an object is true, so every secured field went in clear.
+     */
+    public function testClearTextIsAllowedOnlyWhenTheSiteSaysTrue(): void
+    {
+        $previous = \Base\Attributes\AttributeReader::hasInstance() ? \Base\Attributes\AttributeReader::getInstance(false) : null;
+        $reader = (new \ReflectionClass(\Base\Attributes\AttributeReader::class))->newInstanceWithoutConstructor();
+        $property = new \ReflectionProperty(\Base\Attributes\AttributeReader::class, 'parameterBag');
+
+        try {
+            \Base\Attributes\AttributeReader::setInstance($reader);
+            foreach ([[false, false], [true, true], [null, false], ['1', false]] as [$value, $allowed]) {
+                $property->setValue($reader, $this->bag($value));
+                $this->assertSame($allowed, (new Vault('vault', ['value']))->allowsPlaintext(), var_export($value, true));
+            }
+
+            // And so, without a key pair and with the default (false), the real thing refuses.
+            $property->setValue($reader, $this->bag(false));
+            $vault = new class('vault', ['value']) extends Vault {
+                public function getKeyPath(?string $vault = null): string
+                {
+                    return '/nowhere/'.$vault.'.decrypt.private.php';
+                }
+
+                public function loadKeys(?string $vault = null): array
+                {
+                    throw new VaultKeyNotFoundException((string) $vault, '/nowhere');
+                }
+            };
+            $this->expectException(VaultKeyNotFoundException::class);
+            $this->persist($vault, $this->secret('sk_live_123'));
+        } finally {
+            \Base\Attributes\AttributeReader::setInstance($previous);
+        }
+    }
+
     public function testWithoutAKeyPairTheValueIsRefused(): void
     {
         $secret = $this->secret('sk_live_123');

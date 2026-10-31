@@ -124,7 +124,10 @@ class Vault extends AbstractAttribute
     public function allowsPlaintext(): bool
     {
         try {
-            return (bool) $this->getParameterBag('base.vault.allow_plaintext');
+            // AbstractAttribute::getParameterBag() takes no key: it returns the bag, which
+            // (bool) read as true - every secured field went in clear without a key pair.
+            // Strictly true, so that anything else than the site's own "true" fails closed.
+            return true === $this->getParameterBag()->get('base.vault.allow_plaintext');
         } catch (\Throwable) {
             return false;
         }
