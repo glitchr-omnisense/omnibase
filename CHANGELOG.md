@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: a signed-in member's language before the remembered one (2026-10-31)
+
+- `LocalizerSubscriber` reads a signed-in member's own language before the `LANG` cookie (the
+  impersonator's choice first while impersonating): a member whose language is French, arriving on
+  the sign-in page with an English browser, had `LANG` set to English by that first page and was
+  kept in English after signing in, back office included. The order is `LocalizerSubscriber::choose()`.
+- Intl's default locale (`\Locale::setDefault()`) follows the page's language: Symfony's
+  `LocaleSwitcher` set it from the request's locale before the subscriber decided it (and in a
+  worker it was the previous request's), so amounts formatted without a locale came out in another
+  language than the page (`€7,704.99` on a French page).
+
+Test: tests/Subscriber/PageLanguageOrderTest.php. docs/40-commons/pages-and-texts.md (A page's language).
+
 ### Fixed: `str_shorten()` counts characters (2026-10-30)
 
 - `str_shorten()` (src/Resources/Functions.php) measures the text in characters (`mb_strlen`), as it

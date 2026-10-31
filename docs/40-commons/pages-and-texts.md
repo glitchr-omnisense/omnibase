@@ -134,3 +134,21 @@ A block's text keeps the editor's inline HTML (bold, links, marks, mentions);
 tags outside that list, `on…` attributes and `javascript:` addresses are
 removed. In PHP: `EditorJsRenderer::render($json)` gives the HTML of a
 document (an e-mail, a feed, a search index).
+
+## A page's language
+
+`Base\Subscriber\LocalizerSubscriber` decides it on each main request, in this order
+(`LocalizerSubscriber::choose()`):
+
+1. the page's address, when its route has one language (`/en/...`, `app_legal.de`);
+2. a signed-in member's own language (`User::getLocale()`, which a choice of language through
+   `/locale/{_locale}` updates) - but while impersonating, the impersonator's choice (`LANG`) first;
+3. the language the visitor's last page was shown in, or the one they chose (the `LANG` cookie,
+   which each response keeps up to date);
+4. on a first visit, the browser's (`Accept-Language`, among the site's languages);
+5. the site's (`framework.default_locale`).
+
+The request's, the translator's and the router's locale follow, and so does intl's default
+(`\Locale::setDefault()`), which `NumberFormatter` and `IntlDateFormatter` use when they are given
+no locale: an amount or a date prints in the page's language.
+
