@@ -2,11 +2,13 @@
 
 namespace Base\Console;
 
+use Base\Database\UnitOfWorks;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,8 +30,12 @@ class Command extends SymfonyCommand
     protected TranslatorInterface $translator;
     /**
      * @var EntityManagerInterface
+     *
+     * @deprecated since step F2d of the plan "omnibase agnostic", ask $unitOfWork (and UnitOfWorks::repositories()); removed at 6.0
      */
     protected $entityManager;
+    /** The unit of work over the entity manager given (plan "omnibase agnostic", step F2d). */
+    protected UnitOfWork $unitOfWork;
     /**
      * @var ParameterBagInterface
      */
@@ -44,6 +50,7 @@ class Command extends SymfonyCommand
         $this->localizer = $localizer;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($entityManager);
         $this->parameterBag = $parameterBag;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();

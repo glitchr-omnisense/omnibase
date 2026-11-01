@@ -3,9 +3,11 @@
 namespace Base\Security;
 
 use App\Entity\User;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
@@ -13,14 +15,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserChecker implements UserCheckerInterface
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
+    protected UnitOfWork $unitOfWork;
 
-    public function __construct(EntityManagerInterface $entityManager, protected ?\Base\Notifier\Notifier $notifier = null)
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
+    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork, protected ?\Base\Notifier\Notifier $notifier = null)
     {
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     public function checkPreAuth(UserInterface $user): void
@@ -72,7 +72,7 @@ class UserChecker implements UserCheckerInterface
             }
             $notification->send("email");
 
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
             throw new CustomUserMessageAccountStatusException("@notifications.login.disabled", ["importance" => "warning"]);
         }
     }

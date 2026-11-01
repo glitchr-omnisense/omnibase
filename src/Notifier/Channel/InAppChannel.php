@@ -3,9 +3,11 @@
 namespace Base\Notifier\Channel;
 
 use App\Entity\User;
+use Base\Database\UnitOfWorks;
 use Base\Repository\Users;
 use Base\Entity\User\Notification;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Notifier\Channel\ChannelInterface;
 use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
@@ -27,10 +29,14 @@ use Symfony\Component\Notifier\Recipient\RecipientInterface;
  */
 class InAppChannel implements ChannelInterface
 {
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected readonly Users $users,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /**
@@ -62,8 +68,8 @@ class InAppChannel implements ChannelInterface
         $row->setIsRead(false);
         $row->setSentAt(new \DateTime());
 
-        $this->entityManager->persist($row);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($row);
+        $this->unitOfWork->flush();
     }
 
     public function userOf(RecipientInterface $recipient): ?User

@@ -3,12 +3,14 @@
 namespace Base\Service\Push;
 
 use App\Entity\User;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User\PushSubscription;
 use Base\Repository\User\PushSubscriptions;
 use Doctrine\ORM\EntityManagerInterface;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\VAPID;
 use Minishlink\WebPush\WebPush;
+use Omnibridge\Persistence\UnitOfWork;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,14 +28,18 @@ class WebPushService
 {
     protected ?WebPush $client = null;
 
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected readonly PushSubscriptions $repository,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly ?string $publicKey = null,
         protected readonly ?string $privateKey = null,
         protected readonly ?string $subject = null,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     public function isConfigured(): bool
@@ -87,8 +93,8 @@ class WebPushService
             ->setUserAgent($userAgent)
             ->touch();
 
-        $this->entityManager->persist($row);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($row);
+        $this->unitOfWork->flush();
 
         return $row;
     }
@@ -100,8 +106,8 @@ class WebPushService
             return false;
         }
 
-        $this->entityManager->remove($row);
-        $this->entityManager->flush();
+        $this->unitOfWork->remove($row);
+        $this->unitOfWork->flush();
         return true;
     }
 
@@ -146,12 +152,12 @@ class WebPushService
             }
 
             if ($report->isSubscriptionExpired() && $row) {
-                $this->entityManager->remove($row);
+                $this->unitOfWork->remove($row);
             }
             $this->logger?->warning("Web push rejected: " . $report->getReason(), ["endpoint" => $endpoint]);
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $accepted;
     }
 

@@ -62,7 +62,8 @@ return static function (ContainerConfigurator $container): void {
         return;
     }
     $services = $container->services();
-    $entityManager = service('doctrine.orm.entity_manager');
+    // The unit of work, Doctrine's under Symfony (plan "omnibase agnostic", step F2d).
+    $unitOfWork = service(\Omnibridge\Persistence\UnitOfWork::class);
 
     $stores = [
         UserAccounts::class => Accounts::class,
@@ -78,7 +79,7 @@ return static function (ContainerConfigurator $container): void {
         $stores[UserPasskeys::class] = Passkeys::class;
     }
     foreach ($stores as $class => $contract) {
-        $services->set($class)->args([$entityManager]);
+        $services->set($class)->args([$unitOfWork]);
         $services->alias($contract, $class);
     }
 
@@ -99,7 +100,7 @@ return static function (ContainerConfigurator $container): void {
 
     // The listeners of omniauth's events. TrackConnections before WarnNewDevice, which looks for the connection a sign-in made.
     $services->set(TrackConnections::class)
-        ->args([service(UserTracker::class), $entityManager, service(Accounts::class)])
+        ->args([service(UserTracker::class), $unitOfWork, service(Accounts::class)])
         ->tag('kernel.event_listener', ['event' => SignedIn::class, 'method' => 'onSignedIn', 'priority' => 16])
         ->tag('kernel.event_listener', ['event' => SignInFailed::class, 'method' => 'onSignInFailed']);
     $services->set('Base\Auth\Listener\WarnNewDevice')
@@ -107,10 +108,10 @@ return static function (ContainerConfigurator $container): void {
         ->args([service(SecurityPolicy::class), service(UserTracker::class), service(ConnectionRepository::class), service('request_stack'), service('Omniauth\Contract\State')->nullOnInvalid()])
         ->tag('kernel.event_listener', ['event' => SignedIn::class, 'method' => 'onSignedIn', 'priority' => 8]);
     $services->set(UpdateAccount::class)
-        ->args([$entityManager])
+        ->args([$unitOfWork])
         ->tag('kernel.event_listener', ['event' => SignedIn::class, 'method' => 'onSignedIn']);
     $services->set(WelcomeBack::class)
-        ->args([$entityManager, service('Base\Notifier\Notifier')])
+        ->args([$unitOfWork, service('Base\Notifier\Notifier')])
         ->tag('kernel.event_listener', ['event' => AccountRefused::class, 'method' => 'onAccountRefused']);
     $services->set('Base\Auth\Listener\GuardSignIn')
         ->factory([AuthListeners::class, 'guardSignIn'])

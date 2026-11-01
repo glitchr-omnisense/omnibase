@@ -165,6 +165,7 @@
  * since then: on var/bare/vendor, where it is not installed, the classes of src/Twig that extend Twig's are
  * reported optional by bare (not loaded, not failures) and kept here, measured where Twig is installed.
  * 893 after step F2c (+4: the entity's shape - EntityShape, EntityShapes, DescriptionShapes - and OrderColumnBackend).
+ * 898 after step F2d (+5: Base\Database\UnitOfWorks, the backends RowLocks, ConditionalUpdates and EntityCache, the Identities interface).
  */
 
 return [
@@ -273,6 +274,9 @@ return [
     Base\Database\Attribute\Uploader::class,
     Base\Database\Attribute\Vault::class,
     Base\Database\Attribute\Versionable::class,
+    Base\Database\Backend\ConditionalUpdates::class,
+    Base\Database\Backend\EntityCache::class,
+    Base\Database\Backend\RowLocks::class,
     Base\Database\Common\Collections\OrderedArrayCollection::class,
     Base\Database\Entity\AggregateHydrator\PopulableInterface::class,
     Base\Database\Entity\AggregateHydrator\SerializableInterface::class,
@@ -342,6 +346,7 @@ return [
     Base\Database\Type\Utc::class,
     Base\Database\Type\UtcDateTimeImmutableType::class,
     Base\Database\Type\UtcDateTimeType::class,
+    Base\Database\UnitOfWorks::class,
     Base\Database\Walker\CountWalker::class,
     Base\Database\Walker\GroupByWalker::class,
     Base\Database\Walker\MysqlWalker::class,
@@ -732,6 +737,7 @@ return [
     Base\Repository\User\ConnectionRepository::class,
     Base\Repository\User\Connections::class,
     Base\Repository\User\GroupRepository::class,
+    Base\Repository\User\Identities::class,
     Base\Repository\User\IdentityRepository::class,
     Base\Repository\User\NotificationRepository::class,
     Base\Repository\User\Notifications::class,

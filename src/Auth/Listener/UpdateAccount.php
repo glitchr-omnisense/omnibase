@@ -3,9 +3,11 @@
 namespace Base\Auth\Listener;
 
 use App\Enum\UserRole;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Event\SignedIn;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The account brought up to date at its sign-in, what
@@ -16,8 +18,12 @@ use Omniauth\Event\SignedIn;
  */
 class UpdateAccount
 {
-    public function __construct(protected readonly EntityManagerInterface $entityManager)
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
+    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork)
     {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     public function onSignedIn(SignedIn $event): void
@@ -35,7 +41,7 @@ class UpdateAccount
         $user->setLocale();
         $user->kick(false);
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     /** @return array<class-string, string> omniauth's events and the method of this class each calls */

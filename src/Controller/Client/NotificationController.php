@@ -10,7 +10,7 @@ use Base\Notifier\NotificationLinkerInterface;
 use Base\Repository\User\Notifications;
 use Base\Screen\View;
 use Base\Service\Push\WebPushService;
-use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,13 +31,16 @@ class NotificationController extends AbstractController
 {
     public const CSRF = "notifications";
 
+    protected readonly UnitOfWork $unitOfWork;
+
     public function __construct(
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork $unitOfWork,
         protected readonly Notifications $notificationRepository,
         protected readonly WebPushService $webPush,
         protected readonly CsrfTokenManagerInterface $csrfTokenManager,
         protected readonly ?NotificationLinkerInterface $linker = null,
     ) {
+        $this->unitOfWork = $unitOfWork;
     }
 
     /**

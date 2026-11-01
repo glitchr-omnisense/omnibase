@@ -6,14 +6,15 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Contract\Runtime;
 use Base\Database\Repository\ServiceEntityRepository;
 
+use Base\Database\UnitOfWorks;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Autocomplete;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\PaginatorInterface;
 use Base\Service\TradingInterface;
 use Base\Traits\BaseTrait;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,10 +39,7 @@ class AutocompleteController extends AbstractController
      * @var ObfuscatorInterface
      */
     protected ObfuscatorInterface $obfuscator;
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
+    protected UnitOfWork $unitOfWork;
     /**
      * @var ClassMetadataManipulator
      */
@@ -71,12 +69,12 @@ class AutocompleteController extends AbstractController
      */
     protected ?ManagerRegistry $doctrine;
 
-    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null, ?ManagerRegistry $doctrine = null)
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, UnitOfWork $unitOfWork, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null, ?ManagerRegistry $doctrine = null)
     {
         $this->doctrine = $doctrine;
         $this->requestStack = $requestStack;
         $this->obfuscator = $obfuscator;
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = $unitOfWork;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->tradingMarket = $tradingMarket;
         $this->paginator = $paginator;
@@ -227,7 +225,7 @@ class AutocompleteController extends AbstractController
      */
     protected function repository(string $class): ServiceEntityRepository
     {
-        $repository = $this->entityManager->getRepository($class);
+        $repository = UnitOfWorks::repositories($this->unitOfWork)->of($class);
         if ($repository instanceof ServiceEntityRepository) {
             return $repository;
         }

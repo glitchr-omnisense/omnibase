@@ -3,7 +3,7 @@
 namespace Base\Auth;
 
 use Base\Entity\User\Passkey;
-use Base\Repository\User\PasskeyRepository;
+use Base\Repository\User\Passkeys as PasskeyRepository;
 use Omniauth\WebAuthn\Contract\Passkeys;
 use Omniauth\WebAuthn\PasskeyRecord;
 
@@ -21,12 +21,7 @@ class UserPasskeys extends UserStore implements Passkeys
 {
     public function of(object $account): iterable
     {
-        $passkeys = $this->repository()->createQueryBuilder('passkey')
-            ->where('passkey.user = :user')
-            ->setParameter('user', $this->user($account))
-            ->orderBy('passkey.id')
-            ->getQuery()
-            ->getResult();
+        $passkeys = $this->repository()->findBy(['user' => $this->user($account)], ['id' => 'ASC']);
 
         return array_map(self::record(...), $passkeys);
     }
@@ -49,7 +44,7 @@ class UserPasskeys extends UserStore implements Passkeys
         $passkey->setUser($user);
         $passkey->setLabel(null === $label ? null : mb_substr($label, 0, 100));
 
-        $this->entityManager->persist($passkey);
+        $this->unitOfWork->persist($passkey);
         $this->save();
     }
 
@@ -116,6 +111,8 @@ class UserPasskeys extends UserStore implements Passkeys
 
     private function repository(): PasskeyRepository
     {
-        return $this->entityManager->getRepository(Passkey::class);
+        $repository = $this->entities(Passkey::class);
+
+        return $repository instanceof PasskeyRepository ? $repository : throw new \LogicException(\sprintf('The passkeys\' repository is a %s, not a %s.', get_debug_type($repository), PasskeyRepository::class));
     }
 }

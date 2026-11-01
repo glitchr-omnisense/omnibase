@@ -2,6 +2,8 @@
 
 namespace Base\Auth;
 
+use Base\Database\Attribute\Backend\Backends;
+use Base\Database\Backend\ConditionalUpdates;
 use Base\Entity\User\Token;
 use Omniauth\Contract\LinkTokens;
 use Omniauth\Contract\PlainLinkTokens;
@@ -36,7 +38,7 @@ class UserLinkTokens extends UserStore implements LinkTokens, PlainLinkTokens
         $token->markAsLogginable();
         $user->addToken($token);
 
-        $this->entityManager->persist($token);
+        $this->unitOfWork->persist($token);
         $this->save();
     }
 
@@ -52,7 +54,7 @@ class UserLinkTokens extends UserStore implements LinkTokens, PlainLinkTokens
 
     private function take(string $value, \DateTimeImmutable $now): ?object
     {
-        $token = $this->entityManager->getRepository(Token::class)->findOneBy(['name' => self::NAME, 'value' => $value, 'isLogginable' => true]);
+        $token = $this->entities(Token::class)->findOneBy(['name' => self::NAME, 'value' => $value, 'isLogginable' => true]);
         if (!$token instanceof Token || $token->isRevoked()) {
             return null;
         }
@@ -62,14 +64,12 @@ class UserLinkTokens extends UserStore implements LinkTokens, PlainLinkTokens
             return null;
         }
 
-        $claimed = $this->entityManager->createQuery('UPDATE '.$this->entityManager->getClassMetadata($token::class)->getName().' t SET t.isRevoked = true WHERE t.id = :id AND t.isRevoked = false')
-            ->setParameter('id', $token->getId())
-            ->execute();
-        if (1 !== $claimed) {
+        // One statement, so that of two requests claiming the link at once one wins.
+        if (!Backends::of($this->unitOfWork, ConditionalUpdates::class)->compareAndSet($token, 'isRevoked', false, true)) {
             return null;
         }
         $token->markAsRevoked();
-        $this->entityManager->remove($token);
+        $this->unitOfWork->remove($token);
         $this->save();
 
         return $user;

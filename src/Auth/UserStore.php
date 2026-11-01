@@ -2,15 +2,19 @@
 
 namespace Base\Auth;
 
+use Base\Database\Repository\Entities;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * What omniauth's stores over omnibase's tables share (plan "omniauth",
- * §2.2, step AU4): Doctrine's entity manager - Symfony's, or the one a
- * Laravel host builds by hand on the same mapping -, the accounts as
- * omnibase's users, and a write kept at once (a method that returns has
- * written: a link issued is in the table before its e-mail leaves).
+ * §2.2, step AU4): the unit of work (plan "omnibase agnostic", step F2d:
+ * omnisense/omnibridge's contract - Doctrine's under Symfony, or over the
+ * entity manager a Laravel host builds by hand on the same mapping -), the
+ * repositories through it, the accounts as omnibase's users, and a write kept
+ * at once (a method that returns has written: a link issued is in the table
+ * before its e-mail leaves).
  *
  * Nothing of a framework: the Base\Auth\ classes load with omniauth, Doctrine
  * and the core alone (BareTest). The core only suggests omniauth; nothing here
@@ -18,8 +22,26 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 abstract class UserStore
 {
-    public function __construct(protected readonly EntityManagerInterface $entityManager)
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|\Doctrine\ORM\EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
+    public function __construct(UnitOfWork|\Doctrine\ORM\EntityManagerInterface $unitOfWork)
     {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+    }
+
+    /**
+     * The repository of that entity class, as the unit of work's persistence keeps it.
+     *
+     * @template T of object
+     *
+     * @param class-string<T> $class
+     *
+     * @return Entities<T>
+     */
+    protected function entities(string $class): Entities
+    {
+        return UnitOfWorks::repositories($this->unitOfWork)->of($class);
     }
 
     /**
@@ -32,16 +54,16 @@ abstract class UserStore
         if (!$account instanceof User) {
             throw new \InvalidArgumentException(\sprintf('omnibase\'s stores hold %s accounts, not %s.', User::class, $account::class));
         }
-        if (null === $account->getId() || $this->entityManager->contains($account)) {
+        if (null === $account->getId() || $this->unitOfWork->contains($account)) {
             return $account;
         }
-        $managed = $this->entityManager->find($account::class, $account->getId());
+        $managed = $this->entities($account::class)->find($account->getId());
 
         return $managed instanceof User ? $managed : $account;
     }
 
     protected function save(): void
     {
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 }

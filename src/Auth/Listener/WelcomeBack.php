@@ -3,6 +3,7 @@
 namespace Base\Auth\Listener;
 
 use Base\Auth\UserAccounts;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
@@ -10,6 +11,7 @@ use Base\Notifier\Mail\SignInMails;
 use Base\Notifier\Notifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Event\AccountRefused;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * A disabled account that proved who it is: the "welcome back" e-mail, with
@@ -21,15 +23,19 @@ class WelcomeBack
 {
     public const LIFETIME = 3600;
 
+    protected readonly UnitOfWork $unitOfWork;
+
     /**
+     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
      * @param Notifier|null    $notifier its welcome-back e-mail (Notifier::userWelcomeBack()); without it, the same e-mail, bare
      * @param SignInMails|null $mails    the e-mail written and sent without Symfony's Notifier (a host without it: omnibridge/laravel)
      */
     public function __construct(
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected readonly ?Notifier $notifier = null,
         protected readonly ?SignInMails $mails = null,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     public function onAccountRefused(AccountRefused $event): void
@@ -51,7 +57,7 @@ class WelcomeBack
             $notification->send('email');
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     private static function bare(User $user, Token $token): Notification

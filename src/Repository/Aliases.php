@@ -34,6 +34,8 @@ final class Aliases
         Thread\Mentions::class => Thread\MentionRepository::class,
         User\Connections::class => User\ConnectionRepository::class,
         User\Passkeys::class => User\PasskeyRepository::class,
+        // Step F2d: what Base\Auth\UserIdentities asked getRepository() for.
+        User\Identities::class => User\IdentityRepository::class,
         User\Tokens::class => User\TokenRepository::class,
         User\PushSubscriptions::class => User\PushSubscriptionRepository::class,
         Analytics\PageViews::class => Analytics\PageViewRepository::class,

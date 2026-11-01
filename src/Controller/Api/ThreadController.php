@@ -2,10 +2,13 @@
 
 namespace Base\Controller\Api;
 
+use Base\Database\Attribute\Backend\Backends;
+use Base\Database\Backend\RowLocks;
 use Base\Entity\Thread\Like;
 use Base\Enum\ThreadState;
 use Base\Repository\Thread\Likes;
 use Base\Repository\Threads;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -14,8 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\TranslatorInterface;
-use Doctrine\DBAL\LockMode;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 #[Route("/api", name: "api_")]
@@ -25,11 +26,7 @@ class ThreadController extends AbstractController
      * @var TranslatorInterface
      */
     protected $translator;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
+    protected UnitOfWork $unitOfWork;
 
     /**
      * @var Threads<\Base\Entity\Thread>
@@ -42,9 +39,9 @@ class ThreadController extends AbstractController
     protected $likeRepository;
 
     /** @param Threads<\Base\Entity\Thread> $threadRepository */
-    public function __construct(EntityManagerInterface $entityManager, TranslatorInterface $translator, Threads $threadRepository, Likes $likeRepository)
+    public function __construct(UnitOfWork $unitOfWork, TranslatorInterface $translator, Threads $threadRepository, Likes $likeRepository)
     {
-        $this->entityManager = $entityManager;  
+        $this->unitOfWork = $unitOfWork;  
         $this->translator = $translator;        
 
         $this->threadRepository = $threadRepository;
@@ -69,7 +66,7 @@ class ThreadController extends AbstractController
         if (!$thread) throw new NotFoundHttpException();
 
         $thread->setState(ThreadState::PUBLISH);
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
@@ -95,7 +92,7 @@ class ThreadController extends AbstractController
         if (!$thread) throw new NotFoundHttpException();
 
         $thread->setState(ThreadState::SECRET);
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
@@ -123,7 +120,7 @@ class ThreadController extends AbstractController
         $user = $this->getUser();
         \assert($user instanceof \Base\Entity\User);
         $thread->addFollower($user);
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         
         return JsonResponse::fromJsonString(json_encode([
             "code"    => 200,
@@ -151,7 +148,7 @@ class ThreadController extends AbstractController
         $user = $this->getUser();
         \assert($user instanceof \Base\Entity\User);
         $thread->removeFollower($user);
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         return JsonResponse::fromJsonString(json_encode(["response" => "OK"]), 200);
     }
@@ -175,19 +172,12 @@ class ThreadController extends AbstractController
 
         // The thread's row locked while its likes are looked at: a double
         // click, two tabs, made two Like rows (and Unlike removed one).
-        $this->entityManager->beginTransaction();
-        try {
-            $this->entityManager->lock($thread, LockMode::PESSIMISTIC_WRITE);
+        Backends::of($this->unitOfWork, RowLocks::class)->locked($thread, function () use ($thread, $user): void {
             if (!$this->likeRepository->oneByThreadAndUser($thread, $user)) {
                 $thread->addLike(new Like($user));
-                $this->entityManager->flush();
+                $this->unitOfWork->flush();
             }
-            $this->entityManager->commit();
-        } catch (\Throwable $e) {
-            $this->entityManager->rollback();
-
-            throw $e;
-        }
+        });
 
         $nlikes = count($thread->getLikes());
 
@@ -223,7 +213,7 @@ class ThreadController extends AbstractController
         }
 
         $nlikes = count($thread->getLikes());
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         $this->addFlash("info", $this->translator->trans("@controllers.thread.unlike"));
 

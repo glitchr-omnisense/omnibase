@@ -2,9 +2,11 @@
 
 namespace Base\Service;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\Signature\Envelope;
 use Base\Event\SignatureEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 use Omnisign\Exception\InvalidNotificationException;
 use Omnisign\GatewayInterface;
 use Omnisign\Model\Document;
@@ -43,8 +45,11 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class Signatures
 {
+    private readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         private readonly Storages $flysystem,
         private readonly ?Registry $registry = null,
         private readonly ?EventDispatcherInterface $dispatcher = null,
@@ -53,6 +58,7 @@ class Signatures
         #[Autowire('%base.signatures.storage%')] private readonly ?string $storage = null,
         #[Autowire('%base.uploader.storage%')] private readonly ?string $uploads = null,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /** The gateway envelopes go through by default: base.signatures.gateway, or the only one configured. */
@@ -81,8 +87,8 @@ class Signatures
         $envelope = new Envelope($class, $id, $request->title, $name);
         $sent = $this->provider($envelope)->send($this->provider($envelope)->create($request));
         $this->apply($envelope, $sent, $request);
-        $this->entityManager->persist($envelope);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($envelope);
+        $this->unitOfWork->flush();
 
         return $envelope;
     }
@@ -100,7 +106,7 @@ class Signatures
             return $envelope;
         }
         $this->apply($envelope, $this->provider($envelope)->fetch($this->request($envelope)));
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         return $envelope;
     }
@@ -113,7 +119,7 @@ class Signatures
     public function cancel(Envelope $envelope, ?string $reason = null): Envelope
     {
         $this->apply($envelope, $this->provider($envelope)->cancel($this->request($envelope), $reason));
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         return $envelope;
     }
@@ -136,7 +142,7 @@ class Signatures
         } catch (InvalidNotificationException) {
             return false;
         }
-        $envelope = null === $notification->reference ? null : $this->entityManager->getRepository(Envelope::class)->findOneBy(['gateway' => $gateway, 'reference' => $notification->reference]);
+        $envelope = null === $notification->reference ? null : UnitOfWorks::repositories($this->unitOfWork)->of(Envelope::class)->findOneBy(['gateway' => $gateway, 'reference' => $notification->reference]);
         if (null === $envelope) {
             return null;
         }
@@ -152,7 +158,7 @@ class Signatures
     {
         [$class, $id] = $this->identify($subject);
 
-        return $this->entityManager->getRepository(Envelope::class)->findBy(['subjectClass' => $class, 'subjectId' => $id], ['id' => 'DESC']);
+        return UnitOfWorks::repositories($this->unitOfWork)->of(Envelope::class)->findBy(['subjectClass' => $class, 'subjectId' => $id], ['id' => 'DESC']);
     }
 
     /** The signed document, once completed and kept; null before. */
@@ -170,7 +176,7 @@ class Signatures
     /** The entity the envelope is about, when it still exists. */
     public function subject(Envelope $envelope): ?object
     {
-        return class_exists($envelope->getSubjectClass()) ? $this->entityManager->find($envelope->getSubjectClass(), $envelope->getSubjectId()) : null;
+        return class_exists($envelope->getSubjectClass()) ? UnitOfWorks::repositories($this->unitOfWork)->of($envelope->getSubjectClass())->find($envelope->getSubjectId()) : null;
     }
 
     private function provider(Envelope $envelope): GatewayInterface
@@ -249,13 +255,13 @@ class Signatures
     /** @return array{string, string} the entity's class (Doctrine's name) and id */
     private function identify(object $subject): array
     {
-        $metadata = $this->entityManager->getClassMetadata($subject::class);
-        $ids = $metadata->getIdentifierValues($subject);
+        $id = $this->unitOfWork->identifier($subject);
+        $ids = null === $id ? [] : (array) $id;
         if ([] === $ids) {
             throw new \LogicException(sprintf('A %s without an id cannot be signed for: flush it first.', $subject::class));
         }
 
-        return [$metadata->getName(), implode('-', array_map('strval', $ids))];
+        return [$this->unitOfWork->className($subject), implode('-', array_map('strval', $ids))];
     }
 
     /**

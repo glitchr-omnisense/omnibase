@@ -2,10 +2,12 @@
 
 namespace Base\Security;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Connection;
 use Base\Repository\User\Connections;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The browsers an account signs in from: a userConnection row per browser
@@ -26,18 +28,16 @@ class ConnectionTracker
      */
     protected $connectionRepository;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
+    protected UnitOfWork $unitOfWork;
 
     /**
      * @param (\Closure(): string)|null  $uniqid the browser's PHPUSERID (made and kept by the host when it has none)
      * @param (\Closure(): ?string)|null $host   the host the request reached
+     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
      */
-    public function __construct(EntityManagerInterface $entityManager, Connections $connectionRepository, private readonly ?\Closure $uniqid = null, private readonly ?\Closure $host = null)
+    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork, Connections $connectionRepository, private readonly ?\Closure $uniqid = null, private readonly ?\Closure $host = null)
     {
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
         $this->connectionRepository = $connectionRepository;
     }
 
@@ -64,8 +64,8 @@ class ConnectionTracker
         $connection = new Connection($this->getUniqid(), $user);
         $this->describe($connection, $user);
 
-        $this->entityManager->persist($connection);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($connection);
+        $this->unitOfWork->flush();
 
         return $connection;
     }
@@ -91,7 +91,7 @@ class ConnectionTracker
         $before = $this->fingerprint($connection);
         $this->describe($connection, $user);
         if ($this->fingerprint($connection) !== $before) {
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
         }
     }
 

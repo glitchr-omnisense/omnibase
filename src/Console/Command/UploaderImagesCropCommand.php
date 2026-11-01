@@ -6,6 +6,7 @@ use Base\Database\Attribute\Uploader;
 use Base\Attributes\AttributeReader;
 use Base\BaseBundle;
 use Base\Console\Command;
+use Base\Database\UnitOfWorks;
 use Base\Entity\Layout\Image;
 use Base\Entity\Layout\ImageCrop;
 use Base\Imagine\Filter\Basic\CropFilter;
@@ -26,7 +27,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
     protected $maxDefinition;
     protected $normalize;
 
-    private \Doctrine\ORM\EntityRepository $imageCropRepository;
+    private \Base\Database\Repository\Entities $imageCropRepository;
 
     protected function configure(): void
     {
@@ -81,7 +82,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             $this->baseEntities = null;
         }
 
-        $this->imageCropRepository = $this->entityManager->getRepository(ImageCrop::class);
+        $this->imageCropRepository = UnitOfWorks::repositories($this->unitOfWork)->of(ImageCrop::class);
 
         if ($this->normalize) {
             $output->section()->writeln("\n <info>Looking for \"" . ImageCrop::class . "\"</info> to normalize..");
@@ -126,7 +127,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     $height = $imageCrop->getHeight();
                     $imageCrop->setHeight0($height / $naturalHeight);
 
-                    $this->entityManager->flush($imageCrop);
+                    $this->unitOfWork->flush();
                     $iProcessAndNormalized++;
                 }
 
@@ -167,7 +168,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
         if ($this->warmup) {
 
-            $repository = $this->entityManager->getRepository($class);
+            $repository = UnitOfWorks::repositories($this->unitOfWork)->of($class);
             $images = $repository->findAll();
             $N = count($images);
 

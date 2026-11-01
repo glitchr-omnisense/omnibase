@@ -2,9 +2,10 @@
 
 namespace Base\Console\Command;
 
-use Doctrine\DBAL\LockMode;
 
 use Base\Console\Command;
+use Base\Database\Attribute\Backend\Backends;
+use Base\Database\Backend\RowLocks;
 use Base\Enum\ThreadState;
 use Base\Repository\Threads;
 
@@ -50,20 +51,13 @@ class ThreadPublishableCommand extends Command
                     // Its row locked and read again: two runs at once (the
                     // cron, an admin's edit) both published it, and its
                     // authors and mentioned members were mailed twice.
-                    $this->entityManager->beginTransaction();
-                    try {
-                        $this->entityManager->lock($thread, LockMode::PESSIMISTIC_WRITE);
-                        $this->entityManager->refresh($thread);
+                    Backends::of($this->unitOfWork, RowLocks::class)->locked($thread, function () use ($thread): void {
+                        $this->unitOfWork->refresh($thread);
                         if ($thread->isPublishable()) {
                             $thread->poke();
-                            $this->entityManager->flush();
+                            $this->unitOfWork->flush();
                         }
-                        $this->entityManager->commit();
-                    } catch (\Throwable $e) {
-                        $this->entityManager->rollback();
-
-                        throw $e;
-                    }
+                    });
                 }
 
                 return true;

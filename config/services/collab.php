@@ -29,7 +29,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\Collab\CollabRoomResolver')
         ->public(true)
         ->args([
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Omnibridge\Persistence\UnitOfWork'),
         ]);
 
     // This code sets an empty-string default for each parameter. With

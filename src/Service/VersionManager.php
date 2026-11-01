@@ -3,9 +3,11 @@
 namespace Base\Service;
 
 use Base\Database\Attribute\Versionable;
+use Base\Database\UnitOfWorks;
 use Base\Entity\Extension\Revision;
 use Base\Repository\Extension\Revisions;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * Reads back what VersionableSubscriber wrote.
@@ -26,11 +28,15 @@ class VersionManager
     /** @var array<string, Revision[]> */
     protected array $memo = [];
 
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        protected EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected Revisions $revisions,
         protected int $maxRevisions = 5,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /** The revisions by their interface (step R28), where it asked the entity manager's repository. */
@@ -52,7 +58,7 @@ class VersionManager
             return [];
         }
 
-        $className = $this->entityManager->getClassMetadata($target::class)->getName();
+        $className = $this->unitOfWork->className($target);
         $key = $className . "#" . $target->getId();
 
         return $this->memo[$key] ??= $this->repository()->history($className, $target->getId(), $this->maxRevisions);

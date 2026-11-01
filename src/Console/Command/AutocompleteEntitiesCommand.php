@@ -4,6 +4,7 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 
+use Base\Database\UnitOfWorks;
 use Exception;
 use ReflectionClass;
 use Symfony\Component\Console\Input\InputInterface;
@@ -61,7 +62,7 @@ class AutocompleteEntitiesCommand extends Command
                 throw new Exception("Entity \"$entityClass\" doesn't implement " . AutocompleteInterface::class);
             }
 
-            $repository = $this->entityManager->getRepository($entityClass);
+            $repository = UnitOfWorks::repositories($this->unitOfWork)->of($entityClass);
             $entities = $entityId ? $repository->findBy(["id" => $entityId]) : $repository->findAll();
             if (empty($entities)) {
                 if ($entityId) {

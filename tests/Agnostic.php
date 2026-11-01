@@ -39,6 +39,7 @@
  * longer declares Twig's RuntimeExtensionInterface). src/Twig stays out, but for its Twig-free classes listed
  * since F0 (the variables, the tag renderers, AdminLinks): it is optional, loaded with Twig only.
  * 681 after step F2c (+4: the entity's shape - EntityShape, EntityShapes, DescriptionShapes - and OrderColumnBackend).
+ * 686 after step F2d (+5: Base\Database\UnitOfWorks - the unit of work from what a service was given, its repositories and shapes -, the backends Base\Database\Backend\{RowLocks, ConditionalUpdates, EntityCache} and Base\Repository\User\Identities).
  */
 
 return [
@@ -126,6 +127,9 @@ return [
     Base\Database\Attribute\Uploader::class,
     Base\Database\Attribute\Vault::class,
     Base\Database\Attribute\Versionable::class,
+    Base\Database\Backend\ConditionalUpdates::class,
+    Base\Database\Backend\EntityCache::class,
+    Base\Database\Backend\RowLocks::class,
     Base\Database\Common\Collections\OrderedArrayCollection::class,
     Base\Database\Entity\AggregateHydrator\PopulableInterface::class,
     Base\Database\Entity\AggregateHydrator\SerializableInterface::class,
@@ -176,6 +180,7 @@ return [
     Base\Database\Type\Enumerations::class,
     Base\Database\Type\SetType::class,
     Base\Database\Type\Utc::class,
+    Base\Database\UnitOfWorks::class,
     Base\Demo\DemoAccount::class,
     Base\Demo\DemoAccountFactory::class,
     Base\Demo\DemoAccountProviderInterface::class,
@@ -484,6 +489,7 @@ return [
     Base\Repository\Thread\Tags::class,
     Base\Repository\Threads::class,
     Base\Repository\User\Connections::class,
+    Base\Repository\User\Identities::class,
     Base\Repository\User\Notifications::class,
     Base\Repository\User\Passkeys::class,
     Base\Repository\User\PushSubscriptions::class,

@@ -2,12 +2,14 @@
 
 namespace Base\Auth\Listener;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Security\ConnectionTracker;
 use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Contract\Accounts;
 use Omniauth\Event\SignedIn;
 use Omniauth\Event\SignInFailed;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The browsers an account signs in from (userConnection rows, through
@@ -21,11 +23,15 @@ use Omniauth\Event\SignInFailed;
  */
 class TrackConnections
 {
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
         protected readonly ConnectionTracker $tracker,
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected readonly ?Accounts $accounts = null,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     public function onSignedIn(SignedIn $event): void
@@ -34,7 +40,7 @@ class TrackConnections
             return;
         }
         $this->tracker->getCurrentConnection($event->account)?->markAsSucceeded();
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     public function onSignInFailed(SignInFailed $event): void
@@ -44,7 +50,7 @@ class TrackConnections
             return;
         }
         $this->tracker->getCurrentConnection($account)?->markAsFailed();
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     /** @return array<class-string, string> omniauth's events and the method of this class each calls */

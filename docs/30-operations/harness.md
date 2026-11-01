@@ -193,7 +193,9 @@ installed (`OMNIBASE_AUTOLOAD`, this run's) nothing is optional.
 `tests/View/helpers-without-twig.php` runs the neutral view helpers (`Base\View\*`)
 there under `--strict` (`testTheViewHelpersWorkWithoutTwig`). After step F4: 677 of
 the Foundation's 889 classes (+16 helpers, and `Base\Service\BaseService`, which no
-longer declares Twig's `RuntimeExtensionInterface`).
+longer declares Twig's `RuntimeExtensionInterface`). After step F2c: 681 of 893; after step
+F2d: 686 of 898 (`Base\Database\UnitOfWorks`, the backends `RowLocks`, `ConditionalUpdates`,
+`EntityCache`, the `Identities` interface).
 
 ## doctrine/orm as released
 
