@@ -78,6 +78,16 @@ final class UnitOfWorksTest extends KernelTestCase
         }
     }
 
+    /** Laravel's container resolves no union type: the repositories' constructor takes the entity manager alone. */
+    public function testTheRepositoriesAreAutowiredByAnyContainer(): void
+    {
+        $parameters = (new \ReflectionMethod(\Base\Bridge\Doctrine\DoctrineRepositories::class, '__construct'))->getParameters();
+
+        self::assertCount(1, $parameters);
+        self::assertInstanceOf(\ReflectionNamedType::class, $parameters[0]->getType());
+        self::assertSame(EntityManagerInterface::class, $parameters[0]->getType()->getName());
+    }
+
     public function testARowLockedThenAFieldComparedAndSet(): void
     {
         self::bootKernel();

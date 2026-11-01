@@ -19,12 +19,12 @@ final class DoctrineRepositories implements Repositories
     /** @var array<class-string, Entities<object>> */
     private array $adapters = [];
 
-    private readonly EntityManagerInterface $entityManager;
-
-    /** @param DoctrineUnitOfWork|EntityManagerInterface $entityManager the unit of work's (Backends builds it from one, step F2d), or the entity manager */
-    public function __construct(DoctrineUnitOfWork|EntityManagerInterface $entityManager)
+    /**
+     * The entity manager alone, so that a container autowires it (Laravel's resolves no union type);
+     * Backends builds it from a DoctrineUnitOfWork's (DoctrineBehaviours, step F2d).
+     */
+    public function __construct(private readonly EntityManagerInterface $entityManager)
     {
-        $this->entityManager = $entityManager instanceof DoctrineUnitOfWork ? $entityManager->entityManager() : $entityManager;
     }
 
     public function of(string $class): Entities

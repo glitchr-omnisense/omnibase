@@ -10,6 +10,13 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: `DoctrineRepositories` autowired by Laravel again (2026-11-02)
+
+- Step F2d had typed its constructor `DoctrineUnitOfWork|EntityManagerInterface`; Laravel's container resolves
+  no union type, so omnibridge/laravel could not make `Repositories` (lesringostars-laravel's
+  RepositoryInterfacesTest). It takes the entity manager alone again; `DoctrineBehaviours::register()` builds it
+  from a unit of work's entity manager for `Backends`. `UnitOfWorksTest::testTheRepositoriesAreAutowiredByAnyContainer`.
+
 ### Changed: the trash and vault filters as scopes, the paginator on Pages (2026-11-01)
 
 Plan "omnibase agnostic", step F2e. See docs/20-architecture/doctrine.md (The scopes and the pages).
