@@ -2,42 +2,25 @@
 
 namespace Base\Database\Type;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\SQLitePlatform;
-
+/**
+ * An enumeration whose field holds a set of its values (UserRole: an account's roles), kept as
+ * those values joined by commas (a MySQL SET). A plain PHP class (plan "omnibase agnostic", step
+ * F2a): Base\Bridge\Doctrine\EnumTypeAdapter maps it on Doctrine.
+ */
 abstract class SetType extends EnumType
 {
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    /** The values joined by commas, those of the enumeration only. */
+    public static function toDatabaseValue(mixed $value): mixed
     {
-        if ($platform instanceof SQLitePlatform) {
-            return $platform->getClobTypeDeclarationSQL($column);
-        }
-
-        return static::declaration($this->getPermittedValues(), $platform, 'SET');
+        $values = array_filter($value, fn($v) => in_array($v, static::getPermittedValues()));
+        return implode(",", $values);
     }
 
-    /**
-     * @param $value
-     * @param AbstractPlatform $platform
-     * @return mixed
-     * @throws \Exception
-     */
-    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
+    /** @return list<string> the values read back, those of the enumeration only */
+    public static function toPHPValue(mixed $value): mixed
     {
         $values = $value !== null ? explode(",", $value) : [];
-        return array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
-    }
-
-    /**
-     * @param $value
-     * @param AbstractPlatform $platform
-     * @return mixed
-     * @throws \Exception
-     */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
-    {
-        $values = array_filter($value, fn($v) => in_array($v, $this->getPermittedValues()));
-        return implode(",", $values);
+        return array_filter($values, fn($v) => in_array($v, static::getPermittedValues()));
     }
 
     // @todo: Put this function in @ordercolumn

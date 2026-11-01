@@ -5,6 +5,7 @@ namespace Base\Bridge\Doctrine;
 use Base\Database\Type\ArrayType;
 use Base\Database\Type\DateTimeTypeUTC;
 use Base\Database\Type\EnumType;
+use Base\Database\Type\Enumerations;
 use Base\Database\Type\Passkey;
 use Base\Database\Type\UtcDateTimeImmutableType;
 use Base\Database\Type\UtcDateTimeType;
@@ -24,7 +25,10 @@ use Doctrine\DBAL\Types\Type;
  *   Base\Entity\User\Passkey (plan "omniauth", AU1: those of
  *   web-auth/webauthn-symfony-bundle, without it);
  * - every enumeration (Base\Database\Type\EnumType, SetType) of the folders
- *   given, under its getStaticName(), when no type has that name yet;
+ *   given, under its getStaticName(), when no type has that name yet: an
+ *   EnumTypeAdapter of it (the enumerations are plain PHP classes since step
+ *   F2a of the plan "omnibase agnostic"), known to
+ *   Base\Database\Type\Enumerations by that name;
  * - the types given by name (a bundle's enumerations), replacing a type of
  *   the same name, as DoctrineBundle registers its configured types.
  */
@@ -52,14 +56,14 @@ final class Types
         ];
     }
 
-    /** @return array<string, class-string<Type>> the enumerations the folders hold, by their names */
+    /** @return array<string, class-string<EnumType>> the enumerations the folders hold, by their names */
     public static function enumerations(array $directories): array
     {
         $types = [];
         foreach ($directories as $directory) {
             foreach (ClassFinder::classes($directory) as $className) {
                 // A plain PHP enum (Base\Enum\Allergen, CommentState) is no Doctrine type.
-                if (!class_exists($className) || !is_subclass_of($className, Type::class) || !method_exists($className, 'getStaticName')) {
+                if (!class_exists($className) || !is_subclass_of($className, EnumType::class) || (new \ReflectionClass($className))->isAbstract()) {
                     continue;
                 }
 
@@ -76,14 +80,43 @@ final class Types
      */
     public static function register(array $types = [], array $enumerationDirectories = []): void
     {
+        $enumerations = [];
         foreach (self::core() + $types as $name => $className) {
+            // A bundle's enumerations given by name (doctrine.dbal.types of before) replace a type as a type does.
+            if (is_subclass_of($className, EnumType::class)) {
+                $enumerations[$name] = $className;
+                continue;
+            }
             Type::hasType($name) ? Type::overrideType($name, $className) : Type::addType($name, $className);
         }
+        self::registerEnumerations($enumerations, true);
 
-        foreach (self::enumerations($enumerationDirectories) as $name => $className) {
-            if (!Type::hasType($name)) {
-                Type::addType($name, $className);
+        self::registerEnumerations(self::enumerations($enumerationDirectories));
+    }
+
+    /**
+     * Each enumeration as an EnumTypeAdapter under its name, and in Base\Database\Type\Enumerations.
+     *
+     * @param array<string, class-string<EnumType>> $enumerations by name
+     * @param bool $override replace a type of that name (else a name taken is left as it is)
+     */
+    public static function registerEnumerations(array $enumerations, bool $override = false): void
+    {
+        $registry = Type::getTypeRegistry();
+        foreach ($enumerations as $name => $className) {
+            if ($registry->has($name)) {
+                $current = $registry->get($name);
+                if (!$override || ($current instanceof EnumTypeAdapter && $current->enumeration() === $className)) {
+                    if ($current instanceof EnumTypeAdapter) {
+                        Enumerations::register($name, $current->enumeration());
+                    }
+                    continue;
+                }
+                $registry->override($name, new EnumTypeAdapter($className));
+            } else {
+                $registry->register($name, new EnumTypeAdapter($className));
             }
+            Enumerations::register($name, $className);
         }
     }
 

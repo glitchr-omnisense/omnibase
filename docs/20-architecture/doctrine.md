@@ -62,6 +62,28 @@ attributes answer without them), `IntlSubscriber` no localizer, and the
 parameters are those given (`Base\Service\ArrayParameterBag`). Symfony's
 doctrine-bridge types (`uuid`, `ulid`, `date_point`...) are Symfony's alone.
 
+## The enumerations
+
+An enumeration of omnibase (`Base\Database\Type\EnumType`, `SetType`: `ThreadState`, `UserRole`,
+an application's or a bundle's) is a plain PHP class since step F2a of the plan "omnibase agnostic":
+its constants are its values, `toDatabaseValue()` and `toPHPValue()` its conversions (a SetType's
+values joined by commas). On Doctrine each is a `Base\Bridge\Doctrine\EnumTypeAdapter` registered
+under its `getStaticName()` (`thread_state`, `user_role`): an `ENUM(...)` column, `SET(...)` for a
+SetType, a CLOB on SQLite. `Base\Database\Type\Enumerations::classOf('user_role')` gives the
+enumeration of a type's name, whatever persistence registered it.
+
+- Under Symfony an enumeration is still listed in DoctrineBundle's `doctrine.dbal.types` (the core's
+  and the application's by `BaseExtension`, a bundle's by its own prepend: omnibase/marketplace);
+  `EnumerationTypesPass` takes them out of it (DoctrineBundle instantiates each type's class) and
+  gives them to `Base\Bridge\Doctrine\EnumerationsMiddleware`, which registers the adapters when
+  the connection is made, before any metadata is read - the moment DoctrineBundle registered them.
+  The parameter `base.database.enumerations` lists them by name.
+- By hand, `Types::register()` registers them (the folders' enumerations, and those given by name).
+- `ClassMetadataManipulator::getDoctrineType()` answers an enumeration's column with an instance of
+  the enumeration, as the type was before, so `instanceof EnumType` and its static methods answer as
+  they did; `MetadataSnapshot` writes an enumeration's type by the enumeration's class, so the
+  recorded metadata is unchanged.
+
 ## The discriminator maps
 
 A root entity that declares an inheritance and no `#[DiscriminatorMap]` gets

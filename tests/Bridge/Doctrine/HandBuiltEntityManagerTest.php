@@ -177,6 +177,8 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
         foreach ($container->hasParameter('doctrine.dbal.connection_factory.types') ? $container->getParameter('doctrine.dbal.connection_factory.types') : [] as $name => $type) {
             $types[$name] = $type['class'];
         }
+        // The enumerations, which DoctrineBundle's types no longer list since step F2a (EnumerationTypesPass).
+        $types += $container->hasParameter('base.database.enumerations') ? $container->getParameter('base.database.enumerations') : [];
         $types = array_filter($types, fn ($className) => !str_starts_with($className, 'Symfony\\'));
 
         $targets = [];

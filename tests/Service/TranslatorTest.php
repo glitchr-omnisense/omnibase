@@ -356,8 +356,9 @@ class TranslatorTest extends TestCase
     {
         $translator = $this->makeTranslator();
 
-        $this->assertSame('quadrant.enum_type.type', $translator->parseClass(Quadrant::class, Translator::PARSE_EXTENDS));
-        $this->assertSame('quadrant8.quadrant.enum_type.type', $translator->parseClass(Quadrant8::class, Translator::PARSE_EXTENDS));
+        // Doctrine's Type no longer ends the chain: the enumerations are plain PHP classes since step F2a.
+        $this->assertSame('quadrant.enum_type', $translator->parseClass(Quadrant::class, Translator::PARSE_EXTENDS));
+        $this->assertSame('quadrant8.quadrant.enum_type', $translator->parseClass(Quadrant8::class, Translator::PARSE_EXTENDS));
     }
 
     public function testTransEnumTranslatesAPermittedValue(): void

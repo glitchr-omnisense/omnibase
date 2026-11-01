@@ -54,9 +54,9 @@ final class EnumTwigExtension extends AbstractExtension
     /**
      * @param string|list<string>|null $class
      *
-     * @return Type|list<Type|null>|null
+     * @return EnumType|Type|list<EnumType|Type|null>|null an enumeration (an instance of it, as the type was until step F2a), another type, or each of a list
      */
-    public function enum(null|string|array $class): null|Type|array
+    public function enum(null|string|array $class): null|EnumType|Type|array
     {
         if (\is_array($class)) {
             return array_map(fn($c) => $this->enum($c), $class);
@@ -64,6 +64,11 @@ final class EnumTwigExtension extends AbstractExtension
 
         if (class_exists($class) && is_instanceof($class, EnumType::class)) {
             return new $class();
+        }
+
+        // A column's type by its name: its enumeration (an EnumTypeAdapter of it since step F2a), else the type.
+        if (null !== ($enumeration = \Base\Database\Type\Enumerations::classOf($class))) {
+            return new $enumeration();
         }
 
         return Type::hasType($class) ? Type::getType($class) : null;

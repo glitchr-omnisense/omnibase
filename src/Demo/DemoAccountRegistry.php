@@ -2,7 +2,6 @@
 
 namespace Base\Demo;
 
-use Doctrine\DBAL\Types\Type;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
@@ -99,10 +98,11 @@ class DemoAccountRegistry
     public function missingRoles(?array $roles = null): array
     {
         if (null === $roles) {
-            if (!class_exists(Type::class) || !Type::hasType('user_role')) {
+            $userRole = \Base\Database\Type\Enumerations::classOf('user_role');
+            if (null === $userRole) {
                 return [];
             }
-            $roles = Type::getType('user_role')::getPermittedValues();
+            $roles = $userRole::getPermittedValues();
         }
 
         $offered = $this->offered();
