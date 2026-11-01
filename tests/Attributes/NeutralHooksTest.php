@@ -4,11 +4,14 @@ namespace Tests\Base\Attributes;
 
 use Base\Attributes\AbstractAttribute;
 use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Base\Database\Attribute\Alias;
+use Base\Database\Attribute\Associate;
 use Base\Database\Attribute\Blameable;
 use Base\Database\Attribute\Cache;
 use Base\Database\Attribute\Countify;
 use Base\Database\Attribute\GenerateUuid;
 use Base\Database\Attribute\Hashify;
+use Base\Database\Attribute\OrderColumn;
 use Base\Database\Attribute\Randomize;
 use Base\Database\Attribute\Slugify;
 use Base\Database\Attribute\Timestamp;
@@ -56,6 +59,8 @@ final class NeutralHooksTest extends KernelTestCase
             GenerateUuid::class => ['onOnFlush'],
             Vault::class => ['onPreFlush', 'onPrePersist', 'onPreUpdate', 'onPostFlush', 'onPostLoad'], Slugify::class => ['onOnFlush'],
             Cache::class => ['onPrePersist', 'onPreUpdate', 'onPreRemove'], Uploader::class => ['onPreFlush', 'onOnFlush', 'onPreUpdate', 'onPostRemove'],
+            Alias::class => ['onPostLoad', 'onPrePersist', 'onPreUpdate'], OrderColumn::class => ['onPrePersist', 'onPreUpdate', 'onPostLoad'],
+            Associate::class => ['onPrePersist', 'onPreUpdate', 'onPostPersist', 'onPostUpdate', 'onPostLoad'],
         ];
         foreach ($moved as $class => $hooks) {
             foreach ($hooks as $hook) {

@@ -27,6 +27,8 @@ use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\ObjectRepository;
 use Omnibridge\Persistence\Lifecycle;
 use Base\Database\Attribute\Backend\Backends;
+use Base\Database\Mapping\EntityShape;
+use Base\Database\Mapping\EntityShapes;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -555,5 +557,14 @@ abstract class AbstractAttribute implements AttributeInterface
     protected function backend(Lifecycle\EntityEvent|Lifecycle\FlushEvent $event, string $behaviour): object
     {
         return Backends::of($event->unitOfWork, $behaviour);
+    }
+
+    /**
+     * The entity's shape - fields, associations, identifier, root - as the persistence of the event's
+     * unit of work maps it (plan "omnibase agnostic", step F2c), in place of Doctrine's ClassMetadata.
+     */
+    protected function shape(Lifecycle\EntityEvent|Lifecycle\FlushEvent $event, string|object $class): EntityShape
+    {
+        return $this->backend($event, EntityShapes::class)->shape($class);
     }
 }

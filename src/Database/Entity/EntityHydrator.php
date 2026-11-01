@@ -182,10 +182,10 @@ class EntityHydrator implements EntityHydratorInterface
     public function fromProxy(Proxy $proxy)
     {
         $entity = str_strip(get_class($proxy), "Proxies\\__CG__\\");
-        $classMetadata = $this->entityManager->getClassMetadata($entity);
+        $identifier = $this->classMetadataManipulator->getShapes()->shape($entity)->identifier();
 
         $this->entityManager->detach($proxy);
-        return $this->entityManager->find($entity, $this->getPropertyValue($proxy, begin($classMetadata->identifier)));
+        return $this->entityManager->find($entity, $this->getPropertyValue($proxy, begin($identifier)));
     }
 
     public function toArray(object|array $objectOrArray, bool $deepcast = false): array
@@ -307,18 +307,19 @@ class EntityHydrator implements EntityHydratorInterface
     protected function setDefaults(object $entity, int $aggregateModel)
     {
         $reflEntity = new ReflectionObject($entity);
-        $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
+        // The entity's shape (plan "omnibase agnostic", step F2c): its fields and associations as mapped.
+        $shape = $this->classMetadataManipulator->getShapes()->shape($entity);
 
         //
         // Set default values for fields
-        foreach ($classMetadata->fieldMappings as $fieldName => $fieldMapping) {
+        foreach ($shape->fieldNames() as $fieldName) {
             if ($this->getPropertyValue($entity, $fieldName) !== null) {
                 continue;
             } // Only if null
 
             //
             // Default values for the specific array cases
-            $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldMapping->type);
+            $doctrineType = $this->classMetadataManipulator->getDoctrineType($shape->fieldType($fieldName));
             if (is_instanceof($doctrineType, JsonType::class) || is_instanceof($doctrineType, SetType::class)) {
                 $this->setPropertyValue($entity, $fieldName, [], $reflEntity);
             }
@@ -354,12 +355,12 @@ class EntityHydrator implements EntityHydratorInterface
 
         //
         // Set default values for associations
-        foreach ($classMetadata->associationMappings as $fieldName => $associationMapping) {
+        foreach ($shape->associationNames() as $fieldName) {
             if ($this->getPropertyValue($entity, $fieldName) !== null) {
                 continue;
             }
 
-            if ($this->classMetadataManipulator->isToManySide($entity, $fieldName)) {
+            if ($shape->isToMany($fieldName)) {
                 $this->setPropertyValue($entity, $fieldName, new ArrayCollection(), $reflEntity);
             }
         }
@@ -740,9 +741,8 @@ class EntityHydrator implements EntityHydratorInterface
         $entity = $this->classMetadataManipulator->isEntity($eventOrEntity) ? $eventOrEntity : $eventOrEntity->getObject();
         $entityIdentifiers = [];
 
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata($entity);
-        foreach($classMetadata->getIdentifier() as $id) {
-            $entityIdentifiers[$id] = $classMetadata->getFieldValue($entity, $id);
+        foreach ($this->classMetadataManipulator->getShapes()->shape($entity)->identifier() as $id) {
+            $entityIdentifiers[$id] = self::reflectProperty($entity, $id)->getValue($entity);
         }
 
         $originalEntityData = array_merge(
@@ -757,5 +757,18 @@ class EntityHydrator implements EntityHydratorInterface
         }
 
         return $originalEntityData;
+    }
+
+    /** The property where it is declared (a parent's private one included), as the mapping reflects it. */
+    private static function reflectProperty(object $entity, string $property): \ReflectionProperty
+    {
+        for ($declarer = get_class($entity); false !== $declarer; $declarer = get_parent_class($declarer)) {
+            $reflClass = new \ReflectionClass($declarer);
+            if ($reflClass->hasProperty($property) && $reflClass->getProperty($property)->getDeclaringClass()->getName() === $declarer) {
+                return $reflClass->getProperty($property);
+            }
+        }
+
+        return new \ReflectionProperty($entity, $property);
     }
 }

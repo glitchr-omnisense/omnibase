@@ -5,16 +5,17 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionInlineInterface;
-use Base\Database\Common\Collections\OrderedArrayCollection;
+use Base\Database\Attribute\Backend\OrderColumnBackend;
+use Base\Database\Mapping\EntityShape;
+use Base\Database\Type\Enumerations;
 use Base\Database\Type\SetType;
 
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Omnibridge\Persistence\Lifecycle;
 use Exception;
 use Doctrine\DBAL\Types\StringType;
-use Doctrine\ORM\PersistentCollection;
 use ReflectionProperty;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -27,7 +28,6 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
     public ?string $orderBy;
     public string $type;
 
-    private static ?ReflectionProperty $collection = null;
     public function __construct(?string $orderBy = null, string $type = self::ASC)
     {  
         $this->orderBy = $orderBy;
@@ -108,85 +108,117 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
             }
         }
     }
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /**
+     * The ordered property's kind, on the entity's shape (plan "omnibase agnostic", step F2c): a to-many
+     * association, or a set enumeration's column (the set itself, which gives its ordering keys); null
+     * for anything else.
+     *
+     * @return array{0: bool, 1: ?SetType}|null [to many, the set]
+     */
+    protected function orderedKind(EntityShape $shape, ?string $property): ?array
     {
-        // For associations/set, orderBy is mandatory and must be JSON or string
-        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $property);
-        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-        $isSet    = is_instanceof($doctrineType, SetType::class);
-        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $property);
-        if (!$isSet && !$isToMany) {
-            return;
+        if (null === $property) {
+            return null;
         }
 
-        $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
-        $reflProp = new ReflectionProperty($classMetadata->name, $property);
-        $reflProp->setAccessible(true);
-        if (!$reflProp->isInitialized($entity)) {
-            return; // skip if the property is not initialized
-        }
+        $enumeration = Enumerations::classOf($shape->fieldType($property));
+        $set = null !== $enumeration && is_subclass_of($enumeration, SetType::class) ? new $enumeration() : null;
+        $isToMany = $shape->isToMany($property);
 
-        // An element persisted in the same flush has no id yet: it cannot be
-        // positioned by id, and a null in the list broke every later read
-        // (array_flip in OrderedArrayCollection::reorder). Left out, it
-        // simply comes last - where it was added anyway.
-        if($isToMany) $orderBy = array_values(array_filter($reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray(), fn($id) => $id !== null));
-        else $orderBy = array_keys($doctrineType->getOrderingKeys($reflProp->getValue($entity)));
-
-        $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
-        object_hydrate($entity, [$this->orderBy => json_encode($orderBy)]);
+        return $set || $isToMany ? [$isToMany, $set] : null;
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    /**
+     * The stored order written from the property's current order (the ids of a to-many association,
+     * the keys of a set), or null when the property is not ordered or not initialised.
+     */
+    protected function positions(Lifecycle\EntityEvent $event, ?string $property): ?array
     {
-        // For associations/set, orderBy is mandatory and must be JSON or string
-        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $property);
-        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-        $isSet    = is_instanceof($doctrineType, SetType::class);
-        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $property);
-        if (!$isSet && !$isToMany) {
-            return;
+        $entity = $event->entity;
+        $shape = $this->shape($event, $entity);
+        $kind = $this->orderedKind($shape, $property);
+        if (!$kind) {
+            return null;
         }
+        [$isToMany, $set] = $kind;
 
         $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
-        $reflProp = new ReflectionProperty($classMetadata->name, $property);
-        $reflProp->setAccessible(true);
+        $reflProp = self::reflect($shape->className(), $property);
         if (!$reflProp->isInitialized($entity)) {
-            return; // skip if the property is not initialized
+            return null; // skip if the property is not initialized
         }
 
         // An element persisted in the same flush has no id yet: it cannot be
         // positioned by id, and a null in the list broke every later read
         // (array_flip in OrderedArrayCollection::reorder). Left out, it
         // simply comes last - where it was added anyway.
-        if($isToMany) $orderBy = array_values(array_filter($reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray(), fn($id) => $id !== null));
-        else $orderBy = array_keys($doctrineType->getOrderingKeys($reflProp->getValue($entity)));
+        if ($isToMany) {
+            return array_values(array_filter($reflProp->getValue($entity)->map(fn($o) => $o->getId())->toArray(), fn($id) => $id !== null));
+        }
+
+        return array_keys($set->getOrderingKeys($reflProp->getValue($entity)));
+    }
+
+    /** The property where it is declared, a parent's private one included (as Doctrine's metadata reflects it). */
+    private static function reflect(string $class, string $property): ReflectionProperty
+    {
+        for ($declarer = $class; false !== $declarer; $declarer = get_parent_class($declarer)) {
+            $reflClass = new \ReflectionClass($declarer);
+            if ($reflClass->hasProperty($property)) {
+                return $reflClass->getProperty($property);
+            }
+        }
+
+        return new ReflectionProperty($class, $property); // throws: no such property
+    }
+
+    /** The neutral hook (plan "omnibase agnostic", step F2c): the stored order written before the insertion. */
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
+    {
+        $orderBy = $this->positions($event, $property);
+        if (null === $orderBy) {
+            return;
+        }
+
+        $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
+        object_hydrate($event->entity, [$this->orderBy => json_encode($orderBy)]);
+    }
+
+    /** The neutral hook (plan "omnibase agnostic", step F2c): the stored order written before the update. */
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
+    {
+        $orderBy = $this->positions($event, $property);
+        if (null === $orderBy) {
+            return;
+        }
 
         if(\is_identity($orderBy)) $orderBy = []; // avoid serializing large arrays of integers
 
         $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
-        object_hydrate($entity, [$this->orderBy => json_encode($orderBy)]);
+        object_hydrate($event->entity, [$this->orderBy => json_encode($orderBy)]);
 
-        $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        $event->recompute();
     }
 
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    /**
+     * The neutral hook (plan "omnibase agnostic", step F2c): the property sorted by its stored order - a
+     * lazy association by the persistence when it can (OrderColumnBackend), the rest at once.
+     */
+    public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
     {
-         // For associations/set, orderBy is mandatory and must be JSON or string
-        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $property);
-        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-        $isSet    = is_instanceof($doctrineType, SetType::class);
-        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $property);
-        if (!$isSet && !$isToMany) {
+        $entity = $event->entity;
+        $shape = $this->shape($event, $entity);
+        if (!$this->orderedKind($shape, $property)) {
             return;
         }
 
         $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
-        try { $entityValue = $classMetadata->getFieldValue($entity, $property) ?? []; }
-        catch (Exception $e) { return; }
-        
-        $reflProp = new ReflectionProperty($classMetadata->name, $this->orderBy);
-        $reflProp->setAccessible(true);
+        try {
+            $entityValue = self::reflect($shape->className(), $property)->getValue($entity) ?? [];
+        }
+        catch (\Throwable $e) { return; }
+
+        $reflProp = self::reflect($shape->className(), $this->orderBy);
 
         $orderingValue = $reflProp->getValue($entity);
         try {
@@ -203,32 +235,14 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
             // fallback on parse error
             $orderBy = [];
         }
-        
+
         $orderBy = $this->type == "DESC" ? array_reverse($orderBy) : $orderBy;
-        if ($entityValue instanceof PersistentCollection && $entityValue->getOwner() === $entity) {
-
-            // The collection is not loaded here: what it wraps is swapped for
-            // an OrderedArrayCollection holding the stored positions, which
-            // Doctrine fills when the collection is first read (one query,
-            // as for any lazy association) and which sorts itself on the
-            // first read after that load (OrderedArrayCollection::loadedBy()).
-            // It was loaded here, for every ordered association of every
-            // entity loaded, read or not (28 on the home of lesringostars).
-            // An association already loaded (fetch-joined, or refreshed)
-            // keeps its entries, sorted by the positions read now.
-            $ordered = new OrderedArrayCollection($entityValue->unwrap()->toArray(), $orderBy);
-            $ordered->loadedBy($entityValue);
-
-            self::$collection ??= new ReflectionProperty(PersistentCollection::class, "collection");
-            self::$collection->setValue($entityValue, $ordered);
-
-        } else {
+        if (!$this->backend($event, OrderColumnBackend::class)->orderLazily($entity, $entityValue, $orderBy)) {
 
             $entityValue = array_values(usort_key($entityValue, $orderBy));
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $propertyAccessor->setValue($entity, $property, $entityValue);
             object_hydrate($entity, [$this->orderBy => json_encode([])]);
         }
-
     }
 }

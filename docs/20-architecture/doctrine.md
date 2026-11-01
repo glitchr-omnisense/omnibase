@@ -111,6 +111,7 @@ event carries, or an `UnsupportedBehaviourException` when the persistence has no
 | `VaultBackend` | an entity written again though its change set is empty (a secured field's new plain value) | `scheduleForUpdate()` |
 | `SlugifyBackend` | the flush's pending writes in order; a unique index on the slug's column alone | scheduled insertions then updates; the schema manager |
 | `CacheBackend` | what the cache between requests keeps of an entity or an association dropped | the second-level cache's evictions |
+| `OrderColumnBackend` | a lazy to-many association keeps its stored positions until read (step F2c) | the PersistentCollection's inner collection swapped |
 
 `AttributeSubscriber` registers Doctrine's (`DoctrineBehaviours::register()`) when it is made, under
 Symfony and in `Base\Bridge\Doctrine\Mapping` alike. `#[Uploader]` needs none: the unit of work's
@@ -118,6 +119,19 @@ contract covers it (`contains()`, `isNew()`, `recompute()`). The mapping hooks
 (`loadClassMetadata()`: `#[Cache]`'s regions, `#[Vault]`'s unique constraints) stay Doctrine's. At step
 F3 the Doctrine implementations move to omnibridge/doctrine as they are; omnibridge/eloquent brings its
 own at F7 (a persistence without a second-level cache implements `CacheBackend` as nothing to do).
+
+### The entity's shape
+
+A behaviour reads the entity's mapping through `$this->shape($event, $entity)`, a
+`Base\Database\Mapping\EntityShape` (one `Omnibridge\Schema\Entity` of the Description: fields and
+types, associations and their kind and side, identifier, root, discriminator), never Doctrine's
+`ClassMetadata`. The shapes come from the persistence (`EntityShapes`, registered in `Backends` like the
+behaviours' parts: `DoctrineShapes` on Doctrine, each class's metadata written by
+`MetadataDescription`) or from a Description (`DescriptionShapes`). `#[Alias]`, `#[Associate]` and
+`#[OrderColumn]` read it; `ClassMetadataManipulator` answers the association kinds and sides from it
+for an entity or a class (a `ClassMetadata` being built is read as it stands), and `EntityHydrator` its
+defaults and identifiers. `OrderColumnBackend` keeps a lazy collection's positions until it is read
+(Doctrine's PersistentCollection); without it the property is sorted when loaded.
 
 ### The lifecycle listeners: logic and Doctrine wiring
 
