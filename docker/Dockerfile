@@ -70,6 +70,8 @@ ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelm
 # The sign-in's family, omnisense/omniauth (identity providers included) and
 # its two method packages (webauthn, otp), likewise: the core suggests them, its Base\Auth\ stores and
 # their tests (tests/Auth) need them.
+# The TimeMachine (timemachine:* commands), glitchr/backup-manager: a suggestion of the core
+# since 4.0, required here as a site using it requires it.
 # A layer cached from an older build keeps an older 1.x: `docker compose
 # build --build-arg OMNI_REFRESH=$(date +%s)` refetches it.
 ARG OMNI_REFRESH=0
@@ -83,7 +85,7 @@ RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families a
         $BUNDLES \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
         "omnisense/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \
-        omnipay/stripe symfony/translation symfony/messenger symfony/lock \
+        omnipay/stripe symfony/translation symfony/messenger symfony/lock "glitchr/backup-manager:4.0.*-dev" \
         dompdf/dompdf horstoeko/zugferd --no-interaction --no-progress --no-scripts \
     # The guard of the forms (Base\Service\FormGuard): glitchr/omnishield and three of its gateways,
     # from their repositories - not on Packagist yet; cloned over https (no-api: no GitHub token here).

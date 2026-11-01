@@ -9,6 +9,17 @@ order: 40
 its uploaded data and a database dump) and transfers it to one or more
 configured storages.
 
+The TimeMachine needs **glitchr/backup-manager**, which the core suggests and
+no longer requires (since 2026-11-01): `Base\Service\TimeMachine` extends its
+Manager. A site that backs up requires it at its root:
+
+```bash
+composer require glitchr/backup-manager:4.0.*-dev
+```
+
+Without it, neither the `time_machine` service nor the `timemachine:*` commands
+are registered, and `base.time_machine` is read by nothing.
+
 ```bash
 php bin/console timemachine:snapshot:backup sftp.glitchr --batch --database default
 ```
@@ -24,7 +35,9 @@ itself. On a typical application `vendor/` and `node_modules/` alone account
 for roughly three quarters of the tree, and none of it is data you could not
 reproduce with `composer install` and `yarn`.
 
-The default exclusion list is `Base\Service\TimeMachine::DEFAULT_EXCLUDES`:
+The default exclusion list is `Base\Service\TimeMachineInterface::DEFAULT_EXCLUDES`
+(`TimeMachine::DEFAULT_EXCLUDES` as well, its implementation's; the interface loads without
+glitchr/backup-manager):
 
 ```
 ./vendor  ./node_modules  ./var/cache  ./var/log  ./var/coverage  ./var/phpunit  ./.git

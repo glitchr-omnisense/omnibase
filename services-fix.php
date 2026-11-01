@@ -12,8 +12,11 @@ return static function (ContainerConfigurator $container): void {
 
     // Backup Manager — only a DI-parent template for Base\Service\TimeMachine;
     // its 3-arg constructor is never wired directly, so keep it abstract.
-    $services->set('Backup\Manager\Manager')
-        ->abstract();
+    // glitchr/backup-manager is a suggestion since 4.0 (config/services/core.php).
+    if (class_exists(\Backup\Manager\Manager::class)) {
+        $services->set('Backup\Manager\Manager')
+            ->abstract();
+    }
 
     // Notifier fix
     $services->alias('Symfony\Component\Notifier\Channel\ChannelPolicyInterface', 'notifier.channel_policy');

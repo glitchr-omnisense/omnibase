@@ -14,7 +14,18 @@ a Laravel application does not.
 |---|---|---|
 | **The Foundation** | PHP 8.4 and its extensions (exif, igbinary, imagick); Doctrine (orm, dbal, collections, persistence, event-manager, common) and its DQL functions; Twig and its extras (cache, cssinliner, inky, intl); the standalone Symfony components (asset, cache, error-handler, event-dispatcher, expression-language, filesystem, finder, http-client, intl, mailer, mime, notifier, options-resolver, password-hasher, process, property-access, serializer, string, translation, uid, validator, var-dumper, workflow, yaml, the contracts); the PSRs (cache, clock, container, event-dispatcher, log, simple-cache); league/flysystem; web-auth/webauthn-lib (`Base\Entity\User\Passkey`); omnibridge/doctrine and omnibridge/twig; the libraries (imagine, embed, qr-code, spreadsheets, barcodes...) | `require` of the core |
 | **The framework** | FrameworkBundle, DoctrineBundle, SecurityBundle (security-core, -http, -csrf), TwigBundle and twig-bridge, MonologBundle, twig/extra-bundle, Config, DependencyInjection, HttpKernel, HttpFoundation, Routing, Form, Console, Messenger, Dotenv, doctrine-bridge | **omnibridge/symfony**, which a Symfony application requires beside the core |
+| **The libraries the core works with** | glitchr/backup-manager (the TimeMachine: `Base\Service\TimeMachine` extends its Manager, and the `timemachine:*` commands; registered only where it is installed, since 2026-11-01) | `suggest` of the core; the application requires it when it backs up through the TimeMachine |
 | **The bundles the core works with** | scheb/2fa, league/flysystem-bundle, hwi/oauth-bundle, web-auth/webauthn-symfony-bundle, api-platform/symfony and doctrine-orm, symfony/webpack-encore-bundle, symfony/ux-twig-component, glitchr/ux-google, glitchr/well-known, nelmio/cors-bundle, nelmio/security-bundle | `suggest` of the core; the application requires the ones its `config/bundles.php` registers |
+
+**omnibridge/doctrine and omnibridge/twig stay required**: the core does not load without them.
+`Base\Database\Type\UtcDateTimeType`, `UtcDateTimeImmutableType` and `DateTimeTypeUTC` extend
+omnibridge/doctrine's types and `Base\Database\Type\Utc` reads its zone (the types registered at
+every boot, `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()`);
+`Base\Database\Mapping\NamingStrategy` extends its `NamingStrategy`;
+`Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass` and `Base\Bridge\Doctrine\Mapping`
+wrap every entity manager's driver in its `DeclarationDriver`. `config/services/twig.php` registers
+omnibridge/twig's `HelperExtension`, and `Base\Twig\Extension\FunctionTwigExtension` calls it
+(`join_if_exists`, `less_than`). Leaving them to the application is the agnostic core's step.
 
 `symfony/console` is still installed with the core alone: doctrine/orm 3 requires it. Nothing
 of the Foundation loads it, which is what `bare` checks: "free of Symfony" reads *nothing of

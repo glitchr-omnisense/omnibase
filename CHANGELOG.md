@@ -10,6 +10,28 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: glitchr/backup-manager is a suggestion (2026-11-01)
+
+- **glitchr/backup-manager** moves from `require` to `suggest`: it serves the TimeMachine alone
+  (`Base\Service\TimeMachine` extends its Manager, and the commands `timemachine:snapshot`,
+  `:snapshot:backup`, `:snapshot:restore` and `timemachine:storage`). They are registered only where
+  `Backup\Manager\Manager` exists (`config/services/core.php`, the aliases `time_machine` and
+  `TimeMachineInterface` in `services-public.php`, the abstract parent in `services-fix.php`); without
+  the package, nothing of them is in the container and `base.time_machine` is read by nothing.
+- `DEFAULT_EXCLUDES` is `Base\Service\TimeMachineInterface`'s: `BaseConfiguration` reads it there, so
+  building the configuration no longer loads the TimeMachine (a fatal error without its parent class).
+  `TimeMachine::DEFAULT_EXCLUDES` still answers, inherited.
+- **A site that backs up through the TimeMachine requires `glitchr/backup-manager:4.0.*-dev` at its
+  root** (docs/10-getting-started.md, docs/30-operations/backups.md). The core keeps it in
+  `require-dev` and in `extra.omnibase.bare` (var/bare installs it beside the core, the Foundation
+  keeps `Base\Service\TimeMachine`); the harness's application requires it.
+- omnibridge/doctrine and omnibridge/twig stay required: the core's column types, naming strategy and
+  mapping driver extend omnibridge/doctrine's, its Twig helpers call omnibridge/twig's
+  `HelperExtension` (docs/20-architecture/packages.md lists the classes).
+
+Test: tests/Service/TimeMachineOptionalTest.php (the service files and the configuration loaded in a
+process whose autoloader finds no `Backup\` class).
+
 ### Fixed: a DateField reads as a day (2026-10-31)
 
 `DateField` renders through `crud/field/date` (omnibase/admin), 05/12/2026, where the text template

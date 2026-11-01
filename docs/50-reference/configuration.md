@@ -731,7 +731,8 @@ Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
 
 ## `time_machine`
 
-The backups (`Base\Service\TimeMachine`, [Backups](../30-operations/backups.md)).
+The backups (`Base\Service\TimeMachine`, [Backups](../30-operations/backups.md)): read only
+where glitchr/backup-manager is installed, a suggestion of the core.
 
 | Option | Type | Default | Effect |
 |---|---|---|---|

@@ -32,6 +32,9 @@ final class RegisteredCommandsTest extends KernelTestCase
         if (!class_exists('App\\Kernel')) {
             self::markTestSkipped('Requires the host application kernel (the omnibase harness).');
         }
+        if (str_starts_with($name, 'timemachine:') && !class_exists('Backup\\Manager\\Manager')) {
+            self::markTestSkipped('The TimeMachine needs glitchr/backup-manager, a suggestion of the core.');
+        }
         self::bootKernel();
         $tester = new CommandTester((new Application(static::$kernel))->find($name));
         self::assertSame(Command::SUCCESS, $tester->execute($arguments, ['capture_stderr_separately' => true]), $tester->getDisplay());

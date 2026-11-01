@@ -17,6 +17,9 @@ What `composer.json` requires:
 | Symfony's standalone components | 6, 7 or 8 (cache, mailer, notifier, serializer, translation, validator, workflow...) |
 | omnisense/omnibridge, omnisense/omnidrive, omnibridge/composer, omnibridge/doctrine, omnibridge/twig | 1.x |
 
+glitchr/backup-manager (the TimeMachine, the backups) is suggested, not required:
+see below.
+
 The framework itself is not required by the core (since 4.0, see
 [What the core requires](20-architecture/packages.md)): under Symfony it comes with
 **omnibridge/symfony** (FrameworkBundle, SecurityBundle, TwigBundle,
@@ -33,6 +36,21 @@ composer require omnisense/omnibase omnibridge/symfony
 
 `omnibridge/composer` is a Composer plugin (it applies the core's patch to
 symfony/process): Composer asks before it runs one, hence the first line.
+omnibridge/doctrine and omnibridge/twig come with the core (it requires them:
+its column types, naming strategy and mapping driver extend omnibridge/doctrine's,
+its Twig helpers are omnibridge/twig's); a site may require them at its root
+as well, the sites do.
+
+The backups ([Backups](30-operations/backups.md), the `timemachine:*` commands)
+need **glitchr/backup-manager**, a suggestion of the core since 4.0: a site that
+backs up through the TimeMachine requires it at its root.
+
+```bash
+composer require glitchr/backup-manager:4.0.*-dev
+```
+
+Without it the TimeMachine and its commands are not registered, and
+`base.time_machine` is read by nothing.
 
 Register the bundle in `config/bundles.php`, after the bundles it works with:
 

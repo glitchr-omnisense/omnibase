@@ -152,6 +152,9 @@
  * MissingContractException, the aliases of omnisense/omnibridge's classes kept since step A2, are removed with
  * src/Resources/Aliases.php (and the A1 aliases of omnibridge/symfony's adapters, which were never listed here):
  * no site or bundle named them any more.
+ * Base\Service\TimeMachine stays when glitchr/backup-manager, whose Manager it extends, leaves the core's requirements
+ * for its suggestions (2026-11-01): var/bare installs it beside the core (extra.omnibase.bare), like omniauth for
+ * Base\Auth\; its DEFAULT_EXCLUDES are TimeMachineInterface's, which loads without it.
  */
 
 return [

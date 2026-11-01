@@ -628,20 +628,29 @@ return static function (ContainerConfigurator $container): void {
         'Base\Console\Command\ThreadPublishableCommand',
         'Base\Console\Command\EntityDiscriminatorCommand',
         'Base\Console\Command\NotifierMailTestCommand',
-        'Base\Console\Command\TimeMachineSnapshotCommand',
-        'Base\Console\Command\TimeMachineSnapshotBackupCommand',
-        'Base\Console\Command\TimeMachineSnapshotRestoreCommand',
         'Base\Console\Command\MailTrapCommand',
         'Base\Console\Command\TrashPurgeCommand',
-        // The developer's lookups: which entities complete what, the enums' icons, the
-        // time machine's storages, the translation keys of entities, enums and CRUD pages.
+        // The developer's lookups: which entities complete what, the enums' icons,
+        // the translation keys of entities, enums and CRUD pages.
         'Base\Console\Command\AutocompleteEntitiesCommand',
         'Base\Console\Command\IconEnumsCommand',
-        'Base\Console\Command\TimeMachineStorageCommand',
         'Base\Console\Command\TranslationCrudCommand',
         'Base\Console\Command\TranslationEntitiesCommand',
         'Base\Console\Command\TranslationEnumsCommand',
     ];
+
+    // The TimeMachine (the backups) and its commands, only where glitchr/backup-manager is
+    // installed, a suggestion since 4.0: Base\Service\TimeMachine extends its Manager, and a
+    // definition of a class whose parent is missing would fail the container.
+    $timeMachine = class_exists(\Backup\Manager\Manager::class);
+    if ($timeMachine) {
+        array_push($commandServices,
+            'Base\Console\Command\TimeMachineSnapshotCommand',
+            'Base\Console\Command\TimeMachineSnapshotBackupCommand',
+            'Base\Console\Command\TimeMachineSnapshotRestoreCommand',
+            'Base\Console\Command\TimeMachineStorageCommand',
+        );
+    }
 
     foreach ($commandServices as $command) {
         $definition = $services->set($command)
@@ -680,11 +689,14 @@ return static function (ContainerConfigurator $container): void {
         }
     }
 
-    // TimeMachine service
-    $services->set('Base\Service\TimeMachine')
-        ->parent('Backup\Manager\Manager')
-        ->public(true)
-        ->args([service('flysystem'), service('doctrine'), service('parameter_bag')]);
+    // TimeMachine service (glitchr/backup-manager, above; its aliases in services-public.php,
+    // its parent template in services-fix.php, under the same condition).
+    if ($timeMachine) {
+        $services->set('Base\Service\TimeMachine')
+            ->parent('Backup\Manager\Manager')
+            ->public(true)
+            ->args([service('flysystem'), service('doctrine'), service('parameter_bag')]);
+    }
 
     // Console commands
     $services->set('Base\Console\Command\UserNotificationCommand')
