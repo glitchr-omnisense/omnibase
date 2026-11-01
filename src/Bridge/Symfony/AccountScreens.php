@@ -8,9 +8,6 @@ use Base\Screen\Account\NotificationsPage;
 use Base\Screen\Account\ProfilePage;
 use Base\Screen\Account\SettingsPage;
 use Base\Screen\Builder\Accounts;
-use Base\Twig\Extension\PictureTwigExtension;
-use Base\Twig\Extension\NotificationTwigExtension;
-use Base\Twig\Extension\OAuthTwigExtension;
 use Omnibridge\Contract\Access;
 use Twig\Environment;
 use Twig\Extension\CoreExtension;
@@ -20,13 +17,16 @@ use Twig\Extension\CoreExtension;
  * the framework-free builder (Base\Screen\Builder\Accounts) cannot know, asked
  * where the templates of before asked it - the viewer and their roles (the
  * Access contract: `app.user`, `is_granted`), an avatar's thumbnail
- * (`|thumbnail`, PictureTwigExtension), the providers one may link
- * (`oauth_available()`), web push and the back-office address of a
- * notification (`push_available()`, `push_vapid_key()`, NotificationTwigExtension),
- * Twig's time zone (the days of the notifications' groups) -, handed to the
- * builder. What the account's controllers and the Twig function
- * `account_profile()` (a host page's) call; a Twig runtime, so that it may
- * read Twig's extensions without a circular service.
+ * (`|thumbnail`), the providers one may link (`oauth_available()`), web push
+ * and the back-office address of a notification (`push_available()`,
+ * `push_vapid_key()`, `notification_admin_url()`), Twig's time zone (the days
+ * of the notifications' groups) -, handed to the builder. What the account's
+ * controllers and the Twig function `account_profile()` (a host page's) call;
+ * a Twig runtime, so that it may read Twig's functions and filters without a
+ * circular service. It asks them by their names, as a template does, not by
+ * the classes of omnibase's Twig extensions (plan "omnibase agnostic", F4:
+ * nothing outside src/Twig names Base\Twig\); a function no extension
+ * registered answers as it did when its extension was missing.
  */
 class AccountScreens
 {
@@ -52,10 +52,10 @@ class AccountScreens
     /** @param iterable<\Base\Entity\User\Connection> $sessions */
     public function settings(?User $user, iterable $sessions = []): SettingsPage
     {
-        $oauth = $this->extension(OAuthTwigExtension::class);
+        $oauth = $this->function('oauth_available');
         $available = [];
         foreach (array_keys(Accounts::PROVIDERS) as $name) {
-            $available[$name] = (bool) $oauth?->isAvailable($name);
+            $available[$name] = null !== $oauth && (bool) $oauth($name);
         }
 
         return $this->accounts->settings($user, $sessions, $available);
@@ -64,16 +64,18 @@ class AccountScreens
     /** @param iterable<Notification> $notifications */
     public function notifications(iterable $notifications, int $unread, bool $unreadOnly = false): NotificationsPage
     {
-        $bell = $this->extension(NotificationTwigExtension::class);
-        $push = (bool) $bell?->pushAvailable();
+        $available = $this->function('push_available');
+        $key = $this->function('push_vapid_key');
+        $adminUrl = $this->function('notification_admin_url');
+        $push = null !== $available && (bool) $available();
 
         return $this->accounts->notifications(
             $notifications,
             $unread,
             $unreadOnly,
             $push,
-            $push ? $bell->pushKey() : null,
-            $bell ? static fn (Notification $notification): ?string => $bell->adminUrl($notification) : null,
+            $push && null !== $key ? $key() : null,
+            null !== $adminUrl ? static fn (Notification $notification): ?string => $adminUrl($notification) : null,
             $this->twig->getExtension(CoreExtension::class)->getTimezone(),
         );
     }
@@ -84,20 +86,17 @@ class AccountScreens
         if (!$user->getAvatar()) {
             return null;
         }
-        $thumbnail = $this->extension(PictureTwigExtension::class)?->thumbnail([], $user->getAvatar(), self::AVATAR, self::AVATAR);
+        $filter = $this->twig->getFilter('thumbnail');
+        $thumbnail = null !== $filter ? ($filter->getCallable())([], $user->getAvatar(), self::AVATAR, self::AVATAR) : null;
 
         return \is_string($thumbnail) ? $thumbnail : '';
     }
 
-    /**
-     * @template T of object
-     *
-     * @param class-string<T> $class
-     *
-     * @return T|null
-     */
-    private function extension(string $class): ?object
+    /** A Twig function by its name, as a template calls it; null when no extension registered it. */
+    private function function(string $name): ?callable
     {
-        return $this->twig->hasExtension($class) ? $this->twig->getExtension($class) : null;
+        $function = $this->twig->getFunction($name);
+
+        return null !== $function ? $function->getCallable() : null;
     }
 }

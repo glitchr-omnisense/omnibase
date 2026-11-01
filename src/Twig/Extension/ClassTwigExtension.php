@@ -4,6 +4,7 @@ namespace Base\Twig\Extension;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Formats;
 
 /**
  * @author Marco Meyer <marco.meyerconde@gmail.com>
@@ -33,8 +34,6 @@ final class ClassTwigExtension extends AbstractExtension
      */
     public function getShortClass($object)
     {
-        $formattedClassName = explode('\\', get_class($object));
-
-        return lcfirst(end($formattedClassName));
+        return Formats::shortClass($object);
     }
 }

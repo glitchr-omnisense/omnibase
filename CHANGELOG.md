@@ -29,7 +29,57 @@ Plan "omnibase agnostic", step F2c. See docs/20-architecture/doctrine.md.
   and the other kinds), `isOwningSide()` and `isInverseSide()` read the shape for an entity or a class,
   the metadata as it stands for a `ClassMetadata` (the mapping hooks give one while it is built).
   `EntityHydrator`'s defaults, `fromProxy()` and `getOriginalEntityData()` read the shape.
-- Agnostic core 660 -> 664, Foundation 873 -> 877.
+- Agnostic core 677 -> 681, Foundation 889 -> 893 (on step F4's counts).
+
+### Changed: Twig is optional, over neutral view helpers (2026-11-01)
+
+Plan "omnibase agnostic", step F4. Marco: the core's Twig extensions are there when Twig is used
+and take nothing away when it is not; the view engine is the application's choice.
+
+- **twig/twig, twig/cache-extra, cssinliner-extra, inky-extra, intl-extra and omnibridge/twig move
+  from `require` to `suggest`.** A Twig application requires them (omnibridge/symfony and
+  omnibridge/laravel require twig/twig and omnibridge/twig; the extras are the application's:
+  the core's e-mail frame uses inky and the CSS inliner, its breakpoints and widgets `{% cache %}`).
+- **Neutral view helpers, `Base\View\*`**, no Twig type: `Formats`, `Captions`, `Dates`, `Money`,
+  `Pagination`, `Links`, `Enums`, `Menus`, `Bell`, `Pictures`, `Commons`, `Wysiwyg`, `Demo`,
+  `DeployVersion`, `Widgets`, and the `AssetPaths` contract. The logic of the Twig functions and
+  filters moved there; each extension of `src/Twig` is a thin wrapper over them, under the same
+  names and constructors, so no template and no host changes (omnibridge/laravel builds them as
+  before). `Dates` and `Money` format with PHP's intl as twig/intl-extra did (ViewHelpersTest
+  compares them), so FunctionTwigExtension and TradingTwigExtension no longer need intl-extra.
+  `config/services/view.php` registers `Commons` and `Wysiwyg`, which the screens' Pictures and
+  Texts contracts (`Base\Bridge\Symfony\MediaPictures`, `WysiwygTexts`) now stand on, without Twig.
+- **The Twig layer is registered only where Twig is installed**: `config/services/twig.php` returns
+  first without it, and holds every service of the layer (DemoTwigExtension, LocalBusinessTwigExtension,
+  CommonsTwigExtension, AccountScreens and the three host classes below came from demo.php,
+  local-business.php, commons.php, core.php and form.php); services-decoration.php (the environment,
+  its loader, its app variable), services-public.php (the `twig.*` aliases) and services-fix.php
+  (Symfony's AssetExtension) register their Twig part under the same condition; the tag renderers'
+  autoconfiguration left BaseExtension for it; BaseExtension merges the form themes only where
+  TwigBundle set `twig.form.resources`. twig.php also lost its copies of database.php's and
+  form.php's services (NamingStrategy, EntityHydrator, ClassMetadataManipulator, AttributeReader,
+  the voters, the validators...): identical, but loaded last they won over the files that own them.
+- **Nothing outside `src/Twig` names `Base\Twig\`** but the layer's three Symfony host classes
+  (`Base\Subscriber\TwigSubscriber`, `Base\Cache\Warmer\WebpackCacheWarmer`,
+  `Base\Form\Extension\FormTypeWebpackExtension`, for omnibridge/symfony at F5c):
+  `AccountScreens` asks Twig's functions and filters by their names (|thumbnail,
+  oauth_available(), push_available()...) instead of the extensions' classes; the form types,
+  `RescueController` and `WysiwygEnhancer` type Twig's `Environment`, `ImageType` asks
+  `Base\View\AssetPaths` for its thumbnail's path; `TagRendererPass` names the environment by its
+  service id; `Base\Service\BaseService` no longer declares Twig's `RuntimeExtensionInterface`
+  (no Twig function was answered by it). Guard: `tests/View/TwigIsOptionalTest.php`.
+- **bare**: on `var/bare/vendor`, which has no Twig any more, a class of `src/Twig` that cannot
+  load for want of Twig's is reported `"optional": "twig/twig"`, not as a failure; every other class
+  is measured as before (`BareTest::testTwigIsOptional`), and the helpers run there under `--strict`
+  (`testTheViewHelpersWorkWithoutTwig`, tests/View/helpers-without-twig.php). Foundation 873 -> 889,
+  agnostic core 660 -> 677.
+- `MediaService` and `FileService` take Twig's environment as optional (`?Environment`): the file
+  and image rules need none, only the media tags (audio(), video(), imagify(), lightbox()), which
+  refuse aloud without it; tests/Service/media-without-framework.php builds MediaService with none.
+- Still Twig-bound (F5a, services on contracts): the services that render a template of the core
+  through Twig's environment (the media tags above, the notifier and its mails, Sitemapper,
+  QrSheet, the sharing adapters, ScreenResponder) take it in their constructors; they load without
+  Twig, and are to render through `Omnibridge\Contract\Views`.
 
 ### Added: the behaviours' persistence parts, the listeners' logic apart (2026-11-01)
 

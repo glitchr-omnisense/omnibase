@@ -2,13 +2,12 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\Locator;
-
 use Base\Service\EditorEnhancerInterface;
 use Base\Service\WysiwygEnhancerInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Wysiwyg;
 
 final class HtmlTwigExtension extends AbstractExtension
 {
@@ -22,64 +21,33 @@ final class HtmlTwigExtension extends AbstractExtension
         $this->htmlTagRenderer = $htmlTagRenderer;
         $this->wysiwygEnhancer = $wysiwygEnhancer;
         $this->editorEnhancer = $editorEnhancer;
+        $this->wysiwyg = new Wysiwyg($wysiwygEnhancer, $editorEnhancer);
+    }
+
+    private readonly Wysiwyg $wysiwyg;
+
+    /** The neutral pipeline behind |wysiwyg (the screens' Texts contract: Base\Bridge\Symfony\WysiwygTexts). */
+    public function wysiwyg(): Wysiwyg
+    {
+        return $this->wysiwyg;
     }
 
     /**
-     * The pipeline of `|wysiwyg` (TextsTwigExtension, through the Texts
+     * The pipeline of `|wysiwyg` (Base\View\Wysiwyg; TextsTwigExtension, through the Texts
      * contract: Base\Bridge\Symfony\WysiwygTexts under Symfony).
      *
      * @param string|null $htmlOrJson
      * @param array $options
-     * @param int|null $maxLevel
      * @return string
      */
     public function renderWysiwyg(?string $htmlOrJson, array $options = [])
     {
-        if ($this->editorEnhancer->supports($htmlOrJson)) {
-            $enhancer = $this->editorEnhancer;
-        } elseif ($this->wysiwygEnhancer->supports($htmlOrJson)) {
-            $enhancer = $this->wysiwygEnhancer;
-        } else {
-            throw new \RuntimeException('Unsupported wysiwyg input');
-        }
-        
-        $htmlOrJson = $enhancer->enhanceMentions($htmlOrJson);
-        $htmlOrJson = $enhancer->enhanceLinks($htmlOrJson);
-
-        $applySemantics = array_pop_key('semantics', $options) ?? false;
-        if ($applySemantics) {
-            $htmlOrJson = $enhancer->enhanceSemantics($htmlOrJson);
-        }
-
-        $mediaConfig = array_pop_key('media', $options) ?? true;
-        if ($mediaConfig) {
-            
-            $mediaConfig = is_array($mediaConfig) ? $mediaConfig : [];
-            $mediaConfig["storage"] ??= Locator::getParameterBag("base.twig.editor.storage");
-
-            $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson, $mediaConfig);
-        }
-
-        $maxHeadings = array_pop_key('headings', $options) ?? 0;
-        if ($maxHeadings) {
-
-            $htmlOrJson = $enhancer->enhanceHeadings($htmlOrJson, $maxHeadings === true ? null : $maxHeadings);
-        }
-
-        return $enhancer->render($htmlOrJson, ['attr' => $options['row_attr'] ?? [], 'hydrate' => $options['hydrate'] ?? true]);
+        return $this->wysiwyg->render($htmlOrJson, $options);
     }
 
     public function getTableOfContents(?string $htmlOrJson, ?int $maxLevel = null): array
     {
-        if ($this->editorEnhancer->supports($htmlOrJson)) {
-            $enhancer = $this->editorEnhancer;
-        } elseif ($this->wysiwygEnhancer->supports($htmlOrJson)) {
-            $enhancer = $this->wysiwygEnhancer;
-        } else {
-            throw new \RuntimeException('Unsupported wysiwyg input');
-        }
-
-        return $enhancer->getTableOfContents($htmlOrJson, $maxLevel);
+        return $this->wysiwyg->toc($htmlOrJson, $maxLevel);
     }
 
     public function getFunctions(): array

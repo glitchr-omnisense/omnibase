@@ -37,7 +37,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractActionAdapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 
-use Base\Twig\Environment;
+use Twig\Environment;
 use Doctrine\ORM\Mapping\InverseSideMapping;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Traversable;

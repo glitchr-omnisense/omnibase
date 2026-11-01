@@ -108,7 +108,6 @@ return static function (ContainerConfigurator $container): void {
     $subscribers = [
         'Base\Subscriber\RouterSubscriber' => ['security.authorization_checker', 'advanced_router', 'parameter_bag'],
         'Base\Subscriber\ProfilerSubscriber' => ['advanced_router'],
-        'Base\Subscriber\TwigSubscriber' => ['twig.html_renderer', 'twig.webpack_renderer', 'security.authorization_checker', 'parameter_bag', 'advanced_router'],
         'Base\Subscriber\HotParameterBagSubscriber' => ['parameter_bag', 'setting_bag'],
         'Base\Subscriber\AnalyticsSubscriber' => ['security.token_storage', 'advanced_router', 'translator', 'twig', 'App\Repository\UserRepository', '?ga.service'],
         'Base\Subscriber\PageViewSubscriber' => ['Base\Service\Analytics', 'Symfony\Bundle\SecurityBundle\Security', '$excludedPrefixes' => ['/admin', '/_', '/api']],
@@ -350,7 +349,6 @@ return static function (ContainerConfigurator $container): void {
         'Base\Cache\Warmer\IconCacheWarmer' => ['base.service.icon', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\LocalizerCacheWarmer' => ['localizer', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\ThemizerCacheWarmer' => ['themizer', '$cacheDir' => '%kernel.cache_dir%'],
-        'Base\Cache\Warmer\WebpackCacheWarmer' => ['parameter_bag', 'twig.webpack_renderer', '?webpack_encore.entrypoint_lookup[_default]', '$cacheDir' => '%kernel.cache_dir%', '$publicDir' => '%kernel.project_dir%/public'],
         'Base\Cache\Warmer\AttributeCacheWarmer' => ['base.attribute_reader', '$cacheDir' => '%kernel.cache_dir%'],
         'Base\Cache\Warmer\MetadataCacheWarmer' => ['base.database.metadata_manipulator', 'base.attribute_reader', '$cacheDir' => '%kernel.cache_dir%'],
     ];
@@ -442,13 +440,13 @@ return static function (ContainerConfigurator $container): void {
         ->args([service('flysystem'), service('base.service.image')->nullOnInvalid()]);
     $services->alias('Omnibridge\Contract\Files', 'Base\Bridge\Symfony\FlysystemFiles');
     $services->set('Base\Bridge\Symfony\MediaPictures')
-        ->args([service('Base\Twig\Extension\CommonsTwigExtension')]);
+        ->args([service('Base\View\Commons')]);
     $services->alias('Base\Contract\Pictures', 'Base\Bridge\Symfony\MediaPictures');
     $services->set('Base\Bridge\Symfony\ServiceMedia')
         ->args([service('base.service.image')]);
     $services->alias('Base\Contract\Media', 'Base\Bridge\Symfony\ServiceMedia');
     $services->set('Base\Bridge\Symfony\WysiwygTexts')
-        ->args([service('Base\Twig\Extension\HtmlTwigExtension'), service('editor_enhancer')]);
+        ->args([service('Base\View\Wysiwyg'), service('editor_enhancer')]);
     $services->alias('Base\Contract\Texts', 'Base\Bridge\Symfony\WysiwygTexts');
 
     // The screens (plan "omnibase agnostique", C5): a controller hands a
@@ -510,13 +508,11 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Screen\Builder\Stories')->public()
         ->args([service('Base\Contract\Texts'), service('Base\Contract\Pictures')]); // "now": Runtime::clock(), the framework's unless one is set by hand
     // The account's screens (C5, its second part): the builder asks the security policy, the
-    // Urls and Tokens contracts; AccountScreens, a Twig runtime (it reads Twig's extensions:
-    // |thumbnail, oauth_available(), push_available()...), hands it what only Symfony knows.
+    // Urls and Tokens contracts; AccountScreens, a Twig runtime (it reads Twig's functions:
+    // |thumbnail, oauth_available(), push_available()...), hands it what only Symfony knows -
+    // registered with the Twig layer (config/services/twig.php).
     $services->set('Base\Screen\Builder\Accounts')->public()
         ->args([service('Base\Service\SecurityPolicy'), service('Omnibridge\Contract\Urls'), service('Omnibridge\Contract\Tokens')]); // "now": Runtime::clock()
-    $services->set('Base\Bridge\Symfony\AccountScreens')->public()
-        ->args([service('Base\Screen\Builder\Accounts'), service('twig'), service('Omnibridge\Contract\Access')->nullOnInvalid()])
-        ->tag('twig.runtime');
 
     // BaseService: a lazy facade (plan "omnibase agnostique", C9). Lazy, it is a ghost
     // of the class until one of its methods reads a property: injecting it builds

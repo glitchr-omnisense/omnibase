@@ -5,6 +5,7 @@ namespace Base\Twig\Extension;
 use Base\Service\Model\LinkableInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use Base\View\Links;
 
 /**
  * Links in a template: `|urlify` (a link to an address or to a linkable
@@ -21,8 +22,11 @@ final class LinkTwigExtension extends AbstractExtension
     /**
      * @param (\Closure(mixed $urlOrPath): bool)|null $current whether an address is the page's own; none is without it
      */
+    private readonly Links $links;
+
     public function __construct(private readonly ?\Closure $current = null)
     {
+        $this->links = new Links($current);
     }
 
     public function getFilters(): array
@@ -41,22 +45,7 @@ final class LinkTwigExtension extends AbstractExtension
      */
     public function urlify(LinkableInterface|string|null $urlOrPath, ?string $label = null, array $attributes = [])
     {
-        $url = $urlOrPath;
-        $label = $label ?? $urlOrPath;
-        if ($urlOrPath instanceof LinkableInterface) {
-            $url = $urlOrPath->__toLink();
-            $label = $label ?? $urlOrPath->__toString();
-        }
-
-        if (null !== $this->current && ($this->current)($urlOrPath)) {
-            $attributes['class'] = trim(($attributes['class'] ?? '') . ' highlight');
-        }
-
-        if (!$url) {
-            return '';
-        }
-
-        return "<a href='" . $url . "' " . html_attributes($attributes) . '>' . $label . '</a>';
+        return $this->links->urlify($urlOrPath, $label, $attributes);
     }
 
     /**
@@ -65,15 +54,6 @@ final class LinkTwigExtension extends AbstractExtension
      */
     public function linkify(mixed $urlOrLinkableObject)
     {
-        $url = $urlOrLinkableObject;
-        if (is_object($urlOrLinkableObject)) {
-
-            if (!$urlOrLinkableObject instanceof LinkableInterface)
-                throw new \LogicException("Object \"".get_class($urlOrLinkableObject)."\" received doesn't implement \"".LinkableInterface::class."\"");
-
-            $url = $urlOrLinkableObject->__toLink();
-        }
-
-        return is_object($url) ? null : (is_string($url) ? $url : null);
+        return $this->links->linkify($urlOrLinkableObject);
     }
 }

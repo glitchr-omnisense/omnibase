@@ -44,33 +44,37 @@ return static function (ContainerConfigurator $container): void {
             '%base.translator.politeness%',
         ]);
 
-    // Twig AppVariable
-    $services->set('Base\Twig\AppVariable')
-        ->decorate('twig.app_variable')
-        ->public(true)
-        ->tag('twig.runtime')
-        ->args([
-            new Reference('.inner'),
-            new Reference('twig.random_variable'),
-            new Reference('twig.site_variable'),
-            new Reference('twig.email_variable'),
-            new Reference('twig.admin_variable'),
-            new Reference('setting_bag'),
-            new Reference('parameter_bag'),
-            new Reference('referrer'),
-            new Reference('twig'),
-            new Reference('localizer'),
-            new Reference('themizer'),
-        ]);
+    // Twig: omnibase's app variable and loader, with Twig only, a suggestion of the core
+    // (config/services/twig.php).
+    if (class_exists(\Twig\Environment::class)) {
+        // Twig AppVariable
+        $services->set('Base\Twig\AppVariable')
+            ->decorate('twig.app_variable')
+            ->public(true)
+            ->tag('twig.runtime')
+            ->args([
+                new Reference('.inner'),
+                new Reference('twig.random_variable'),
+                new Reference('twig.site_variable'),
+                new Reference('twig.email_variable'),
+                new Reference('twig.admin_variable'),
+                new Reference('setting_bag'),
+                new Reference('parameter_bag'),
+                new Reference('referrer'),
+                new Reference('twig'),
+                new Reference('localizer'),
+                new Reference('themizer'),
+            ]);
 
-    // Twig Loader
-    $services->set('Base\Twig\Loader\FilesystemLoader')
-        ->decorate('twig.loader.native_filesystem')
-        ->args([
-            new Reference('.inner'),
-            new Reference('parameter_bag'),
-            '%kernel.project_dir%',
-        ]);
+        // Twig Loader
+        $services->set('Base\Twig\Loader\FilesystemLoader')
+            ->decorate('twig.loader.native_filesystem')
+            ->args([
+                new Reference('.inner'),
+                new Reference('parameter_bag'),
+                '%kernel.project_dir%',
+            ]);
+    }
 
     // Form services
     $services->alias('Base\Form\FormFactoryInterface', 'Base\Form\FormFactory');
@@ -98,16 +102,18 @@ return static function (ContainerConfigurator $container): void {
             new Reference('request_stack', ContainerInterface::NULL_ON_INVALID_REFERENCE),
         ]);
 
-    // Twig Environment
-    $services->set('Base\Twig\Environment')
-        ->parent('twig')
-        ->decorate('twig')
-        ->args([
-            new Reference('request_stack'),
-            new Reference('localizer'),
-            new Reference('advanced_router'),
-            new Reference('parameter_bag'),
-        ]);
+    // Twig Environment: with Twig only (config/services/twig.php)
+    if (class_exists(\Twig\Environment::class)) {
+        $services->set('Base\Twig\Environment')
+            ->parent('twig')
+            ->decorate('twig')
+            ->args([
+                new Reference('request_stack'),
+                new Reference('localizer'),
+                new Reference('advanced_router'),
+                new Reference('parameter_bag'),
+            ]);
+    }
 
     // API Platform: an App\ override replaces the Base\ resource it extends.
     // Between the attribute/class-name collectors (priority 0) and the cache

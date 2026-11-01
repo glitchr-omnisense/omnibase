@@ -32,9 +32,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Twig\Environment;
 
-//https://symfony.com/doc/current/templating/twig_extension.html
-use Twig\Extension\RuntimeExtensionInterface;
-
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -70,8 +67,12 @@ use function is_object;
  * (Access), and BaseTrait's getParameterBag() and getEnvironment(). Those
  * methods read no property of the object: called on the ghost, they build
  * nothing.
+ *
+ * It no longer declares Twig's RuntimeExtensionInterface (plan "omnibase
+ * agnostic", F4: Twig is a suggestion of the core): no Twig function was ever
+ * answered by it, and the marker made the class unloadable without Twig.
  */
-class BaseService extends Locator implements RuntimeExtensionInterface
+class BaseService extends Locator
 {
 
     /**

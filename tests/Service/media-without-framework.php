@@ -10,7 +10,9 @@
  * MediaService is built by hand, as a host without Symfony builds it: a plain
  * router over Base\Service\ImageRoute::ROUTES (Base\Contract\MediaRouter),
  * the Obfuscator on a folder, omnibase's Flysystem over a PSR-11 container of
- * two local storages, the parameters in an ArrayParameterBag, Imagine. Then a
+ * two local storages, the parameters in an ArrayParameterBag, Imagine, and no
+ * view engine (Twig is optional since step F4 of the plan "omnibase agnostic":
+ * the image rule needs none, only the media tags do). Then a
  * thumbnail's address is made, read back, and its file made in the local
  * cache, as ImageRoute does before it sends it (sending it is HttpFoundation's,
  * the host's). Returns what it found.
@@ -125,7 +127,7 @@ $obfuscator->addCompression(new NullCompression());
 
 $router = new BareMediaRouter();
 $media = new MediaService(
-    new Twig\Environment(new Twig\Loader\ArrayLoader()),
+    null, // no view engine: Twig is not installed beside the core alone
     $router,
     $obfuscator,
     new Flysystem($storages),

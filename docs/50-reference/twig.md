@@ -11,6 +11,51 @@ left out). Where two extensions give the same name, the one registered last wins
 `get_class` is PHP's (`ClassTwigExtension`), `count` and `round` are
 `MathTwigExtension`'s, `trans` is omnibase's translator's.
 
+## Optional, over neutral helpers
+
+Twig is the application's choice, not the core's (plan "omnibase agnostic", step F4).
+`twig/twig`, its extras and omnibridge/twig are suggestions of the core: where Twig is
+installed, `config/services/twig.php` registers everything on this page (and
+services-public.php, services-decoration.php, services-fix.php their Twig part); where it
+is not, nothing of `src/Twig` is registered or loaded, and the rest of the core loads and
+works the same (`BareTest::testTwigIsOptional()`, on the vendor without Twig). No class
+outside `src/Twig` names `Base\Twig\` but the three Symfony host classes of the layer
+(`TwigSubscriber`, `WebpackCacheWarmer`, `FormTypeWebpackExtension`, which leave for
+omnibridge/symfony at F5c): `tests/View/TwigIsOptionalTest.php` is the guard.
+
+The logic of the functions and filters is in neutral helpers, `Base\View\*`, which name
+no Twig type; each extension is a thin wrapper over them, under the same names, so no
+template changes. A Blade view (omnibridge/laravel) or a React page's props call the same
+helpers:
+
+| Helper | What it gives | The Twig names over it |
+|---|---|---|
+| `Formats` (static) | highlight, mailto, mailparse, truncate, pickup, colour names, `preg_split`, pad, short class names, static calls and properties, property paths | `highlight`, `mailto`, `mailparse_email`, `mailparse_name`, `pickup`, `color_name`, `preg_split`, `pad`, `transforms`, `nargs`, `instanceof`, `is_linkable`, `method_exists`, `static_call`, `static_property`, `property_accessor`, `greater_than`, `get_short_class` |
+| `Captions` | a controller's title and excerpt, a value as text | `title()`, `excerpt()`, `stringify` |
+| `Dates` | a moment as a pattern says it, by PHP's intl as twig/intl-extra formats it | `datetime` (in Twig's time zone) |
+| `Money` | an amount in the visitor's currency, by PHP's intl as twig/intl-extra formats it | `format_currency`, `apply_currency_rate` |
+| `Pagination` | a pagination's links, and what its template is given | `paginator()`, `paginator_*()` |
+| `Links` | a link to an address or a linkable record, a record's address | `urlify`, `linkify` |
+| `Enums` | an enumeration by class or type name, its colours, a value's words | `enum()`, `colorify`, `trans_enum`, `trans_enumExists` |
+| `Menus` | the language, theme (modes, filters, widths), time zone and country menus as data | `render_locale()`, `render_theme_*()`, `render_timezone()` (Twig renders the dropdowns) |
+| `Bell` | the unread count, the latest notifications, the token, push | `notifications_*()`, `push_available()`, `push_vapid_key()`, `notification_admin_url()` |
+| `Pictures` | a stored picture's address, crop and thumbnails in a view's context (an e-mail's) | `image()`, `crop`, `thumbnail*` |
+| `Commons` | embeds, QR codes, opening hours, a stored picture's URL (the screens' Pictures contract) | `embed_url()`, `qr_code()`, `opening_hours()`, `picture` |
+| `Wysiwyg` | a stored text rendered, its headings (the screens' Texts contract) | `wysiwyg`, `wysiwyg_toc` (through `HtmlTwigExtension`) |
+| `Demo` | the demonstration's mode and accounts | `demo_mode()`, `demo_accounts()` |
+| `DeployVersion` | the deploy's version | `deploy_version()` |
+| `Widgets` | a slot's widget, its template and options | `render_slot()` (Twig renders it) |
+| `AssetPaths` (contract) | an asset's path as the page links it | omnibase's `Base\Twig\Environment` answers it |
+
+Twig-only by nature, as they are Twig: what renders a template the core ships (`crudify`,
+`htmlify`, `countdown`, `progress`, `clipboard()`, `render_breadcrumb()`, `share`), what reads
+Twig's loader or environment (`embed`, `inline_css_email`, `call_user_func_if_exists()`), the
+Symfony form's (`form_proxy()`, `form_view()`), the tag renderers' (`html_entry_*()`,
+`encore_entry_*()`), the globals (`app`, `security_policy`) and the variables. The services that
+already were the logic (the translator's `trans*`, the Localizer's and the Themizer's filters,
+`iconify`, `semantify`, `local_business()`, `analytics_*()`, the Texts contract) are called
+directly by their extensions, as before.
+
 ## Globals
 
 | Global | Value |
