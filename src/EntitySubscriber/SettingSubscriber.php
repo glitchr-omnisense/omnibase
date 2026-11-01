@@ -2,9 +2,10 @@
 
 namespace Base\EntitySubscriber;
 
-use Base\Entity\Layout\Setting;
-use Base\Entity\Layout\SettingIntl;
+use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Base\Database\Lifecycle\SettingsInvalidation;
 use Base\Service\SettingBagInterface;
+use Omnibridge\Persistence\Lifecycle;
 use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\ORM\Event\PostRemoveEventArgs;
 use Doctrine\ORM\Event\PostUpdateEventArgs;
@@ -34,25 +35,26 @@ class SettingSubscriber
     {
     }
 
+    /** The logic, on the neutral events (plan "omnibase agnostic", step F2b); this class is its Doctrine wiring. */
+    protected function invalidation(): SettingsInvalidation
+    {
+        return $this->invalidation ??= new SettingsInvalidation($this->settingBag);
+    }
+
+    private ?SettingsInvalidation $invalidation = null;
+
     public function postPersist(PostPersistEventArgs $args): void
     {
-        $this->invalidateIfRelevant($args->getObject());
+        $this->invalidation()->onPostPersist(new Lifecycle\PostPersist($args->getObject(), new DoctrineUnitOfWork($args->getObjectManager())));
     }
 
     public function postUpdate(PostUpdateEventArgs $args): void
     {
-        $this->invalidateIfRelevant($args->getObject());
+        $this->invalidation()->onPostUpdate(new Lifecycle\PostUpdate($args->getObject(), new DoctrineUnitOfWork($args->getObjectManager())));
     }
 
     public function postRemove(PostRemoveEventArgs $args): void
     {
-        $this->invalidateIfRelevant($args->getObject());
-    }
-
-    private function invalidateIfRelevant(object $entity): void
-    {
-        if ($entity instanceof Setting || $entity instanceof SettingIntl) {
-            ($this->settingBag)()->clearAll();
-        }
+        $this->invalidation()->onPostRemove(new Lifecycle\PostRemove($args->getObject(), new DoctrineUnitOfWork($args->getObjectManager())));
     }
 }

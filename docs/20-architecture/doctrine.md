@@ -94,7 +94,48 @@ events, which carry the entity and the unit of work (`Base\Bridge\Doctrine\Doctr
 Doctrine). `AttributeSubscriber` relays Doctrine's events: the neutral hook first, then the
 Doctrine-typed hook of before (`prePersist(LifecycleEventArgs, ClassMetadata, $entity, ?string)`),
 kept for the applications' and bundles' attributes that override it. Another persistence dispatches
-the neutral events alone.
+the neutral events alone. Only the fields a neutral `PreUpdate` hook gave a new value
+(`setNewValue()`) are passed on to Doctrine's update; a hook that changes the entity and calls
+`recompute()` keeps what Doctrine's change set says.
+
+### The persistence's part of a behaviour
+
+What only a given persistence can do is asked of a small interface of
+`Base\Database\Attribute\Backend`, one per behaviour, implemented once per persistence and
+registered for its unit of work class with `Backends::register()`; a behaviour asks
+`$this->backend($event, VaultBackend::class)` and gets the implementation for the unit of work its
+event carries, or an `UnsupportedBehaviourException` when the persistence has none.
+
+| Interface | What it does | Doctrine (`Base\Bridge\Doctrine\Behaviour`) |
+|---|---|---|
+| `VaultBackend` | an entity written again though its change set is empty (a secured field's new plain value) | `scheduleForUpdate()` |
+| `SlugifyBackend` | the flush's pending writes in order; a unique index on the slug's column alone | scheduled insertions then updates; the schema manager |
+| `CacheBackend` | what the cache between requests keeps of an entity or an association dropped | the second-level cache's evictions |
+
+`AttributeSubscriber` registers Doctrine's (`DoctrineBehaviours::register()`) when it is made, under
+Symfony and in `Base\Bridge\Doctrine\Mapping` alike. `#[Uploader]` needs none: the unit of work's
+contract covers it (`contains()`, `isNew()`, `recompute()`). The mapping hooks
+(`loadClassMetadata()`: `#[Cache]`'s regions, `#[Vault]`'s unique constraints) stay Doctrine's. At step
+F3 the Doctrine implementations move to omnibridge/doctrine as they are; omnibridge/eloquent brings its
+own at F7 (a persistence without a second-level cache implements `CacheBackend` as nothing to do).
+
+### The lifecycle listeners: logic and Doctrine wiring
+
+The listeners that record something keep their logic in `Base\Database\Lifecycle`, on no
+persistence, and their Doctrine part in their former class, which keeps its name and its wiring:
+
+| Logic (core) | Doctrine wiring | What the wiring keeps |
+|---|---|---|
+| `SettingsInvalidation` (neutral `PostPersist`/`PostUpdate`/`PostRemove`) | `EntitySubscriber\SettingSubscriber` | the relay |
+| `TrashRecorder` (purge or trashing, the trash entry) | `EntitySubscriber\TrasheableSubscriber` | the deletion cancelled, the stamp's extra update, the cascade rescued, the second-level cache evicted |
+| `RevisionRecorder` (the diff, the values' form, the revision, no repeat) | `EntitySubscriber\VersionableSubscriber` | the updated entities and dirty collections, the revision in the running flush, the trim |
+
+The others are Doctrine's by nature and move as they are at F3: `IntlSubscriber` (the translations'
+mapping and discriminators, orphan removal), `ExtensionSubscriber` (extension rows written inside the
+flush), `InverseCollectionCacheSubscriber` (the second-level cache), `TrackingPolicySubscriber` (the
+mapping), `AttributeSubscriber` itself (the relay, the mapping and query hooks). `DemoAccountLockSubscriber`
+reads the request and the session (step F5a); `ConnectionSubscriber`, `UserSubscriber` and
+`ThreadSubscriber` listen to Symfony's events (F5c).
 
 ## The discriminator maps
 

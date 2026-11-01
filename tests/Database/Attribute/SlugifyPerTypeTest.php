@@ -2,6 +2,8 @@
 
 namespace Tests\Base\Database\Attribute;
 
+use Base\Bridge\Doctrine\Behaviour\DoctrineSlugifyBackend;
+use Base\Bridge\Doctrine\DoctrineUnitOfWork;
 use Base\Database\Attribute\Slugify;
 use Base\Entity\Thread\Taxon;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -72,8 +74,11 @@ class SlugifyPerTypeTest extends KernelTestCase
         self::bootKernel();
         $connection = static::getContainer()->get('doctrine')->getConnection();
         $slugify = new Slugify(reference: 'translations.label', perType: true);
+        // The index is asked of the persistence's SlugifyBackend, which onOnFlush() gives the attribute.
+        $backend = new DoctrineSlugifyBackend(new DoctrineUnitOfWork(static::getContainer()->get('doctrine')->getManager()));
+        (new \ReflectionProperty(Slugify::class, 'backend'))->setValue($slugify, $backend);
         $asked = new \ReflectionMethod(Slugify::class, 'columnIsStillUniqueAlone');
-        $memo = new \ReflectionProperty(Slugify::class, 'uniqueAlone');
+        $memo = new \ReflectionProperty(DoctrineSlugifyBackend::class, 'uniqueAlone');
 
         $memo->setValue(null, []);
         $this->assertFalse($asked->invoke($slugify, new Taxon(), 'slug'), 'the schema of today: unique on (class, slug)');

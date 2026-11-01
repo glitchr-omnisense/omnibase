@@ -7,10 +7,9 @@ use Base\Attributes\AttributeReader;
 use Base\Database\Traits\VaultTrait;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
-use Doctrine\ORM\Event\PostFlushEventArgs;
-use Doctrine\ORM\Event\PreFlushEventArgs;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Base\Database\Attribute\Backend\VaultBackend;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Omnibridge\Persistence\Lifecycle;
 use Base\Exception\VaultKeyNotFoundException;
 use Exception;
 
@@ -233,10 +232,13 @@ class Vault extends AbstractAttribute
         }
     }
 
-    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    /**
+     * The neutral hook (plan "omnibase agnostic", step F2b): a secured field given a new plain value is
+     * written again, through the persistence's VaultBackend (the field holds the sealed value it read
+     * when the plain one equals it, so the persistence would see no change to write).
+     */
+    public function onPreFlush(Lifecycle\PreFlush $event, object $entity, ?string $property = null): void
     {
-        $vault = $entity->getVault();
-
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($this->fields as $field) {
             if (!$entity->isSecured()) {
@@ -257,29 +259,28 @@ class Vault extends AbstractAttribute
                     continue;
                 }
 
-                $this->getEntityManager()->getUnitOfWork()->scheduleForUpdate($entity);
+                $this->backend($event, VaultBackend::class)->scheduleUpdate($entity);
             }
         }
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    /** The neutral hook (plan "omnibase agnostic", step F2b): the secured fields sealed before the update. */
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
-        $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->sealFields($event->entity);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    /** The neutral hook (plan "omnibase agnostic", step F2b): the secured fields sealed before the insertion. */
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
-        $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->sealFields($event->entity);
     }
 
     /**
-     * @param $event
-     * @param ClassMetadata $classMetadata
-     * @param mixed $entity
-     * @param string|null $property
-     * @return void
+     * Each secured field of the entity sealed in its vault, the sealed and the plain value kept in its
+     * vault bag (formerly preLifecycleEvent(), which took Doctrine's event and metadata it did not read).
      */
-    public function preLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null): void
+    public function sealFields(object $entity): void
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
@@ -305,24 +306,23 @@ class Vault extends AbstractAttribute
         }
     }
 
-    public function postFlush(PostFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /** The neutral hook (plan "omnibase agnostic", step F2b): the secured fields revealed after the flush. */
+    public function onPostFlush(Lifecycle\PostFlush $event, object $entity, ?string $property = null): void
     {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->revealFields($entity);
     }
 
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /** The neutral hook (plan "omnibase agnostic", step F2b): the secured fields revealed once read. */
+    public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
     {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->revealFields($event->entity);
     }
 
     /**
-     * @param $event
-     * @param ClassMetadata $classMetadata
-     * @param mixed $entity
-     * @param string|null $property
-     * @return void
+     * Each sealed field of the entity revealed, the sealed and the plain value kept in its vault bag
+     * (formerly postLifecycleEvent(), which took Doctrine's event and metadata it did not read).
      */
-    public function postLifecycleEvent($event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function revealFields(object $entity): void
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);

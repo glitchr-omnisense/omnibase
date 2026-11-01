@@ -9,18 +9,15 @@ use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
 use Base\Service\Locator;
 use Base\Validator\Constraints\File as ConstraintsFile;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Omnibridge\Persistence\Lifecycle;
 use Exception;
 
 
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Uid\Uuid;
 
-use Doctrine\ORM\Event\PreFlushEventArgs;
 
 use function is_file;
 
@@ -138,13 +135,18 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
     protected array $ancestorEntity = [];
 
-    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /**
+     * The neutral hook (plan "omnibase agnostic", step F2b): a new entity reached by cascade gets its files
+     * stored now; an entity updated keeps what it was, for preUpdate.
+     */
+    public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
     {
-        if (!$event->getObjectManager()->contains($entity)) {
+        $unitOfWork = $event->unitOfWork;
+        if (!$unitOfWork->contains($entity)) {
             return;
         }
 
-        if (array_key_exists(spl_object_id($entity), $this->getUnitOfWork()->getScheduledEntityInsertions())) {
+        if ($unitOfWork->isNew($entity)) {
             // A new entity reached by cascade (a product's images, a review's
             // pictures) is scheduled after preFlush, where uploads happen: its
             // files are still File instances here. Store them now, or the row
@@ -152,7 +154,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             $value = self::getFieldValue($entity, $property);
             $pending = array_filter(is_array($value) ? $value : [$value], fn ($file) => $file instanceof \SplFileInfo);
             if ($pending && $this->uploadFiles($entity, null, $property)) {
-                $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+                $unitOfWork->recompute($entity);
             }
 
             return;
@@ -753,15 +755,13 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
-     * @param string|null $property
-     * @return void
+     * The neutral hook (plan "omnibase agnostic", step F2b): the files given to the entity stored before
+     * the flush computes its changes; on a failure, those already stored deleted and the field emptied.
+     *
      * @throws InvalidMimeTypeException
      * @throws InvalidSizeException
      */
-    public function preFlush(PreFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null): void
+    public function onPreFlush(Lifecycle\PreFlush $event, object $entity, ?string $property = null): void
     {
         try {
             $this->uploadFiles($entity, null, $property);
@@ -774,15 +774,14 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
-     * @param string|null $property
-     * @return void
+     * The neutral hook (plan "omnibase agnostic", step F2b): the new files stored and the replaced ones
+     * deleted; on a failure, the field keeps its former files. The entity's changes computed again.
+     *
      * @throws Exception
      */
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $oldEntity = $this->getOldEntity($entity);
         try {
             if ($this->uploadFiles($entity, $oldEntity, $property)) {
@@ -795,18 +794,12 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             self::setFieldValue($entity, $property, $old);
         }
 
-        $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        $event->recompute();
     }
 
-    /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
-     * @param string|null $property
-     * @return void
-     */
-    public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    /** The neutral hook (plan "omnibase agnostic", step F2b): the files of a removed entity deleted. */
+    public function onPostRemove(Lifecycle\PostRemove $event, ?string $property = null): void
     {
-        $this->deleteFiles(null, $entity, $property);
+        $this->deleteFiles(null, $event->entity, $property);
     }
 }

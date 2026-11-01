@@ -4,16 +4,13 @@ namespace Base\EntitySubscriber;
 
 use Base\Database\Attribute\Versionable;
 use Base\Entity\Extension\Revision;
-use Base\Enum\EntityAction;
-use BackedEnum;
+use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Base\Database\Lifecycle\RevisionRecorder;
 use DateTime;
-use DateTimeInterface;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\PersistentCollection;
-use Throwable;
 
 /**
  * Records what changed, for every property carrying `#[Versionable]`.
@@ -50,22 +47,22 @@ class VersionableSubscriber
     protected array $pending = [];
 
     /**
-     * Fingerprint of the last diff written per entity, so a repeat is not
-     * recorded twice.
+     * What a revision records, on no persistence (plan "omnibase agnostic", step F2b): the diff, the
+     * values' comparable form, the revision entry, and the fingerprint of the last diff written per
+     * entity, so a repeat is not recorded twice. This class is its Doctrine part.
      *
-     * Base\EntityDispatcher\AbstractEventDispatcher::postUpdate() calls
-     * flush() again from inside executeUpdates(). On that nested flush the
-     * collection is STILL in getScheduledCollectionUpdates() with its snapshot
-     * not yet retaken, so an unchanged to-many association reads as changed a
-     * second time and produced a byte-identical revision - two rows, one edit,
-     * and two of the five slots max_revisions allows (seen live: ids 130/131).
-     *
-     * Compared against the PREVIOUS diff only, not the whole history: A→B then
-     * B→A then A→B in one request is three real edits and stays three.
-     *
-     * @var array<string, string>
+     * Why the repeat: Base\EntityDispatcher\AbstractEventDispatcher::postUpdate() calls flush() again
+     * from inside executeUpdates(). On that nested flush the collection is STILL in
+     * getScheduledCollectionUpdates() with its snapshot not yet retaken, so an unchanged to-many
+     * association read as changed a second time and produced a byte-identical revision - two rows, one
+     * edit, and two of the five slots max_revisions allows (seen live: ids 130/131).
      */
-    protected array $lastDiff = [];
+    protected ?RevisionRecorder $recorder = null;
+
+    protected function recorder(): RevisionRecorder
+    {
+        return $this->recorder ??= new RevisionRecorder(new DoctrineUnitOfWork($this->entityManager));
+    }
 
     public function __construct(
         protected EntityManagerInterface $entityManager,
@@ -113,18 +110,10 @@ class VersionableSubscriber
         foreach ($diffs as [$target, $diff]) {
             $className = $entityManager->getClassMetadata(get_class($target))->getName();
 
-            $fingerprint = md5(json_encode($diff) ?: "");
-            $key = $className . "#" . $target->getId();
-            if (($this->lastDiff[$key] ?? null) === $fingerprint) {
+            $revision = $this->recorder()->revision($className, $target, $diff);
+            if (null === $revision) {
                 continue;
             }
-            $this->lastDiff[$key] = $fingerprint;
-
-            $revision = new Revision();
-            $revision->setEntityClass($className);
-            $revision->setEntityId($target);
-            $revision->setAction(EntityAction::UPDATE);
-            $revision->setEntityData($diff);
 
             $entityManager->persist($revision);
 
@@ -182,6 +171,9 @@ class VersionableSubscriber
     }
 
     /**
+     * The entity's changes and its dirty to-many collections, as Doctrine tracks them, given to
+     * RevisionRecorder::diff().
+     *
      * @param array<string, Versionable> $versioned
      * @return array<string, array{0: mixed, 1: mixed}>
      */
@@ -190,26 +182,14 @@ class VersionableSubscriber
         $changeSet = $unitOfWork->getEntityChangeSet($entity);
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
 
-        $diff = [];
-        foreach ($versioned as $property => $versionable) {
+        // To-many associations never appear in an entity change set -
+        // Doctrine tracks them as collection updates instead, and by the
+        // time onFlush runs the snapshot still holds what was loaded.
+        $collections = [];
+        foreach ($versioned as $property => $_) {
             if (array_key_exists($property, $changeSet)) {
-                [$old, $new] = $changeSet[$property];
-                $old = $this->normalize($old);
-                $new = $this->normalize($new);
-
-                // Equality is judged on the comparable form so that a field
-                // whose serialisation carries a save timestamp does not read
-                // as edited; what gets stored is still the real value.
-                if ($versionable->comparable($old) !== $versionable->comparable($new)) {
-                    $diff[$prefix . $property] = [$old, $new];
-                }
-
                 continue;
             }
-
-            // To-many associations never appear in an entity change set -
-            // Doctrine tracks them as collection updates instead, and by the
-            // time onFlush runs the snapshot still holds what was loaded.
             if (!$classMetadata->hasAssociation($property) || !$classMetadata->isCollectionValuedAssociation($property)) {
                 continue;
             }
@@ -219,55 +199,15 @@ class VersionableSubscriber
                 continue;
             }
 
-            $old = $this->normalize($collection->getSnapshot());
-            $new = $this->normalize($collection->toArray());
-
-            if ($old !== $new) {
-                $diff[$prefix . $property] = [$old, $new];
-            }
+            $collections[$property] = [$collection->getSnapshot(), $collection->toArray()];
         }
 
-        return $diff;
+        return $this->recorder()->diff($versioned, $changeSet, $collections, $prefix);
     }
 
+    /** RevisionRecorder::normalize(), kept for this class's subclasses. */
     protected function normalize(mixed $value): mixed
     {
-        if ($value === null || is_scalar($value)) {
-            return $value;
-        }
-
-        if ($value instanceof DateTimeInterface) {
-            return $value->format(DATE_ATOM);
-        }
-
-        if ($value instanceof BackedEnum) {
-            return $value->value;
-        }
-
-        if ($value instanceof Collection) {
-            $value = $value->toArray();
-        }
-
-        if (is_array($value)) {
-            return array_values(array_map(fn($item) => $this->normalize($item), $value));
-        }
-
-        if (is_object($value)) {
-            try {
-                if ($this->entityManager->contains($value)) {
-                    $id = $this->entityManager->getClassMetadata(get_class($value))->getIdentifierValues($value);
-                    return [
-                        "id" => count($id) === 1 ? reset($id) : $id,
-                        "label" => method_exists($value, "__toString") ? trim((string) $value) : null,
-                    ];
-                }
-
-                return method_exists($value, "__toString") ? trim((string) $value) : null;
-            } catch (Throwable) {
-                return null;
-            }
-        }
-
-        return null;
+        return $this->recorder()->normalize($value);
     }
 }

@@ -4,7 +4,7 @@ namespace Base\EntitySubscriber;
 
 use Base\Database\Attribute\Trasheable;
 use Base\Entity\Extension\TrashBall;
-use Base\Enum\EntityAction;
+use Base\Database\Lifecycle\TrashRecorder;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,7 +12,6 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\UnitOfWork;
-use Throwable;
 
 /**
  * Turns `$em->remove()` into a soft delete for every entity carrying
@@ -61,27 +60,23 @@ class TrasheableSubscriber
     /** @var array<int, array{0: string, 1: mixed}> class + id of what this flush trashed */
     protected array $evictions = [];
 
+    /** What a soft delete is, on no persistence (plan "omnibase agnostic", step F2b): this class is its Doctrine part. */
+    protected TrashRecorder $recorder;
+
+    /** base.extension.empty_trash as new DateTime() reads it (the recorder's, kept for subclasses). */
     protected string $emptyTrash;
 
     /** @param string|int $emptyTrash base.extension.empty_trash: a relative date ("+7 days"), or a number of days */
     public function __construct(string|int $emptyTrash = "+7 days")
     {
-        $this->emptyTrash = self::expiry($emptyTrash);
+        $this->recorder = new TrashRecorder($emptyTrash);
+        $this->emptyTrash = TrashRecorder::expiry($emptyTrash);
     }
 
-    /**
-     * An expiry as new DateTime() reads it: a bare number of days ("5", 5)
-     * becomes "+5 days", anything else is kept (a relative date, "+1 month").
-     * The configuration's default was 5 once, and new DateTime("5") throws.
-     */
+    /** TrashRecorder::expiry(), kept under this name for its callers. */
     public static function expiry(string|int|null $value, string $default = "+7 days"): string
     {
-        $value = trim((string) $value);
-        if ('' === $value) {
-            return $default;
-        }
-
-        return ctype_digit($value) ? '+'.$value.' days' : $value;
+        return TrashRecorder::expiry($value, $default);
     }
 
     public function onFlush(OnFlushEventArgs $event): void
@@ -106,7 +101,7 @@ class TrasheableSubscriber
             $oldValue = $reflProperty->getValue($entity);
 
             // Already in the trash: this remove() is the purge, let it through.
-            if ($oldValue instanceof DateTimeInterface) {
+            if ($this->recorder->isPurge($oldValue)) {
                 continue;
             }
 
@@ -254,7 +249,8 @@ class TrasheableSubscriber
     }
 
     /**
-     * Record the trash entry that the trash listing and the purge read from.
+     * Record the trash entry that the trash listing and the purge read from (TrashRecorder::entry()),
+     * inserted in the running flush.
      */
     protected function trash(
         EntityManagerInterface $entityManager,
@@ -264,26 +260,7 @@ class TrasheableSubscriber
         Trasheable $trasheable,
         DateTime $deletedAt,
     ): void {
-        $trashBall = new TrashBall();
-        $trashBall->setEntityClass($classMetadata->getName());
-        $trashBall->setEntityId($entity);
-        $trashBall->setAction(EntityAction::DELETE);
-        $trashBall->setPermanentAfter(new DateTime(null !== $trasheable->expiry ? self::expiry($trasheable->expiry) : $this->emptyTrash));
-
-        // The label is snapshotted rather than resolved at display time: the
-        // trash has to stay readable even for an entity whose __toString()
-        // depends on translations or on a parent that has since gone.
-        $label = null;
-        try {
-            $label = method_exists($entity, "__toString") ? trim((string) $entity) : null;
-        } catch (Throwable) {
-            $label = null;
-        }
-
-        $trashBall->setEntityData(array_filter([
-            "label" => $label ?: null,
-            "deletedAt" => $deletedAt->format(DATE_ATOM),
-        ]));
+        $trashBall = $this->recorder->entry($entity, $classMetadata->getName(), $trasheable, $deletedAt);
 
         $entityManager->persist($trashBall);
 
