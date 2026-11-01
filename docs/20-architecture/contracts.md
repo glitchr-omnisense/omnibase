@@ -141,9 +141,11 @@ repositories for Doctrine's, `Runtime::access()` / `::sessions()` / `::routes()`
 security and request ones, `Omnibridge\Contract\Views` for Twig). They are removed with the
 former names at 6.0, after the sites have moved (step S). The core's host code - BaseService,
 the validators, `EditorController`, `Notification`'s mails until they render through Views
-(F5a), marketplace's `__autocomplete()` - asks the same services of
-`Base\Bridge\Symfony\FrameworkLocator`, without the deprecation; it moves with the host code
-(Doctrine's part at F3, Symfony's at F5c).
+(F5a) - asks the same services of `Base\Bridge\Symfony\FrameworkLocator`, without the
+deprecation; it moves with the host code (Doctrine's part at F3, Symfony's at F5c). The bundles,
+which still accept the core 3.x, call no FrameworkLocator: their entities link through `Link::to()`
+(in 3.x too), and marketplace's `Product` and `Review::__autocomplete()` keep the deprecated
+`getTwig()` until Views has a Symfony adapter (F5a).
 
 **The deprecation path, for an application** (step S):
 
