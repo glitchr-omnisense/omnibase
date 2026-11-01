@@ -49,7 +49,11 @@ final class TimeMachineOptionalTest extends TestCase
     /** @return array{manager: bool, time_machine_loaded: bool, excludes: list<string>, services: array<string, bool>} */
     private static function withoutBackupManager(): array
     {
-        $autoload = \dirname((new \ReflectionClass(ClassLoader::class))->getFileName(), 2).'/autoload.php';
+        // The autoloader that loads the core: a site's PHPUnit may come with Composer's ClassLoader of its own
+        // (symfony/phpunit-bridge's bin/.phpunit), registered too, which knows nothing of Base\.
+        $vendors = array_keys(array_filter(ClassLoader::getRegisteredLoaders(), static fn (ClassLoader $loader) => false !== $loader->findFile(BaseConfiguration::class)));
+        self::assertNotEmpty($vendors, 'No registered Composer autoloader loads the core.');
+        $autoload = $vendors[0].'/autoload.php';
         $code = 'const CONFIG = '.var_export(\dirname(__DIR__, 2).'/config', true).'; const SERVICES = '.var_export(self::SERVICES, true).';'
             .'$composer = require '.var_export($autoload, true).'; $composer->unregister();'
             .'spl_autoload_register(static function (string $class) use ($composer): void { if (!str_starts_with($class, "Backup\\\\")) { $composer->loadClass($class); } }, true, true);'
