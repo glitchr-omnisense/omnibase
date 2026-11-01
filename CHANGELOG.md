@@ -10,6 +10,13 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: `#[Cache(associations: "MANY_TO_MANY")]` caches the many-to-many associations (2026-11-01)
+
+- `Cache::MANY_TO_MANY` was the string `"ONE_TO_ONE"`: `associations: "MANY_TO_MANY"` cached no association,
+  `associations: Cache::MANY_TO_MANY` the one-to-one ones. It is `"MANY_TO_MANY"`. No entity of the core, its
+  bundles, lesringostars or its twin uses it (they all say `"ALL"`), so no cache region changes and the metadata
+  snapshot is identical. `tests/Database/Attribute/CacheAssociationsTest`.
+
 ### Fixed: a dead copy of ExtensionSubscriber removed (2026-11-01)
 
 - `src/EntitySubscriber/HookExtensionSubscriber.php` declared a second `Base\EntitySubscriber\ExtensionSubscriber`,
