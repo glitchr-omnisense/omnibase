@@ -8,6 +8,7 @@ use Imagine\Image\ImageInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Base\View\Pictures;
 
 /**
  * What a template shows of a stored file through omnibase's media rule
@@ -31,13 +32,14 @@ use Twig\TwigFunction;
  */
 final class PictureTwigExtension extends AbstractExtension
 {
-    private const EMAIL = 'Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail';
-
     private FileService $files;
+
+    private readonly Pictures $pictures;
 
     public function __construct(private readonly MediaService $media, ?FileService $files = null)
     {
         $this->files = $files ?? $media;
+        $this->pictures = new Pictures($media);
     }
 
     public function getFunctions(): array
@@ -81,33 +83,29 @@ final class PictureTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param array<string, mixed>              $context the template's
+     * @param array<string, mixed>                $context the template's
      * @param array<array-key, mixed>|string|null $path    a path, or several
-     * @param array<string, mixed>              $config
-     * @param array<array-key, mixed>           $filters
+     * @param array<string, mixed>                $config
+     * @param array<array-key, mixed>             $filters
      *
      * @return array<array-key, mixed>|string|null
      */
     public function image(array $context, array|string|null $path, array $config = [], array $filters = []): array|string|null
     {
-        $config['local_cache'] ??= true;
-
-        return $this->media->image($path, self::config($context, $config), $filters);
+        return $this->pictures->image($path, $config, $filters, $context);
     }
 
     /**
-     * @param array<string, mixed>              $context the template's
+     * @param array<string, mixed>                $context the template's
      * @param array<array-key, mixed>|string|null $path    a path, or several
-     * @param array<string, mixed>              $config
-     * @param array<array-key, mixed>           $filters
+     * @param array<string, mixed>                $config
+     * @param array<array-key, mixed>             $filters
      *
      * @return array<array-key, mixed>|string|null
      */
     public function imageCrop(array $context, array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = 'leftop', array $config = [], array $filters = []): array|string|null
     {
-        $config['local_cache'] ??= true;
-
-        return $this->media->crop($path, $x, $y, $width, $height, $position, self::config($context, $config), $filters);
+        return $this->pictures->crop($path, $x, $y, $width, $height, $position, $config, $filters, $context);
     }
 
     /**
@@ -163,38 +161,15 @@ final class PictureTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param array<string, mixed>              $context the template's
+     * @param array<string, mixed>                $context the template's
      * @param array<array-key, mixed>|string|null $path    a path, or several
-     * @param array<string, mixed>              $config
-     * @param array<array-key, mixed>           $filters
+     * @param array<string, mixed>                $config
+     * @param array<array-key, mixed>             $filters
      *
      * @return array<array-key, mixed>|string|null
      */
     public function thumbnail(array $context, array|string|null $path, ?int $width = null, ?int $height = null, array $config = [], array $filters = []): array|string|null
     {
-        return $this->media->thumbnail($path, $width, $height, self::config($context, $config), $filters);
-    }
-
-    /**
-     * A context's warmup handed on; in an e-mail, made at once and never as WebP.
-     *
-     * @param array<string, mixed> $context
-     * @param array<string, mixed> $config
-     *
-     * @return array<string, mixed>
-     */
-    private static function config(array $context, array $config): array
-    {
-        if (array_key_exists('warmup', $context)) {
-            $config['warmup'] = $context['warmup'];
-        }
-
-        $email = $context['email'] ?? null;
-        if (is_a($email, self::EMAIL)) {
-            $config['warmup'] = true;
-            $config['webp'] = false;
-        }
-
-        return $config;
+        return $this->pictures->thumbnail($path, $width, $height, $config, $filters, $context);
     }
 }

@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\TranslatorInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Base\Routing\AdminUrlGeneratorInterface;
 use Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;

@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Service\TranslatorInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Routing\AdminUrlGeneratorInterface;

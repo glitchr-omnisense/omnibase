@@ -2,15 +2,13 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Database\Type\EnumType;
 use Base\Service\Model\ColorizeInterface;
-use Base\Service\Model\EnumNouns;
 use Base\Service\TranslatorInterface;
-use Doctrine\DBAL\Types\Type;
 use Omnibridge\Contract\Translations;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Base\View\Enums;
 
 /**
  * omnibase's enumerations in a template: `enum()` (an enumeration by its
@@ -28,11 +26,11 @@ use Twig\TwigFunction;
  */
 final class EnumTwigExtension extends AbstractExtension
 {
-    private EnumNouns $nouns;
+    private readonly Enums $enums;
 
     public function __construct(Translations $translations)
     {
-        $this->nouns = new EnumNouns($translations);
+        $this->enums = new Enums($translations);
     }
 
     public function getFunctions(): array
@@ -54,24 +52,11 @@ final class EnumTwigExtension extends AbstractExtension
     /**
      * @param string|list<string>|null $class
      *
-     * @return EnumType|Type|list<EnumType|Type|null>|null an enumeration (an instance of it, as the type was until step F2a), another type, or each of a list
+     * @return mixed an enumeration (an instance of it, as the type was until step F2a), another type, or each of a list (Base\View\Enums)
      */
-    public function enum(null|string|array $class): null|EnumType|Type|array
+    public function enum(null|string|array $class): mixed
     {
-        if (\is_array($class)) {
-            return array_map(fn($c) => $this->enum($c), $class);
-        }
-
-        if (class_exists($class) && is_instanceof($class, EnumType::class)) {
-            return new $class();
-        }
-
-        // A column's type by its name: its enumeration (an EnumTypeAdapter of it since step F2a), else the type.
-        if (null !== ($enumeration = \Base\Database\Type\Enumerations::classOf($class))) {
-            return new $enumeration();
-        }
-
-        return Type::hasType($class) ? Type::getType($class) : null;
+        return $this->enums->enum($class);
     }
 
     /**
@@ -81,35 +66,18 @@ final class EnumTwigExtension extends AbstractExtension
      */
     public function colorify(null|string|array|ColorizeInterface $color, ?string $entry = null): null|string|array
     {
-        if (!$color) {
-            return $color;
-        }
-
-        if ($color instanceof ColorizeInterface) {
-            $color = $color->__colorize() ?? $color->__colorizeStatic();
-            return $color[$entry] ?? $color ?? null;
-        }
-
-        if (\is_array($color)) {
-
-            $color = array_filter(array_map(fn($i) => $this->colorify($i), $color));
-            if ($color) {
-                return array_merge(...$color);
-            }
-        }
-
-        return null;
+        return $this->enums->colorify($color, $entry);
     }
 
     /** @param string|list<string>|null $options */
     public function transEnum(?string $value, string $class, null|string|array $options = TranslatorInterface::NOUN_SINGULAR): ?string
     {
-        return $this->nouns->value($value, $class, $options);
+        return $this->enums->transEnum($value, $class, $options);
     }
 
     /** @param string|list<string> $options */
     public function transEnumExists(string $value, string $class, string|array $options = TranslatorInterface::NOUN_SINGULAR): bool
     {
-        return $this->nouns->exists($value, $class, $options);
+        return $this->enums->transEnumExists($value, $class, $options);
     }
 }

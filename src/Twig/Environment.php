@@ -7,6 +7,7 @@ use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Base\Twig\Renderer\TagRendererInterface;
+use Base\View\AssetPaths;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment as TwigEnvironment;
 use Twig\Error\LoaderError;
@@ -14,7 +15,12 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Loader\LoaderInterface;
 
-class Environment extends TwigEnvironment
+/**
+ * omnibase's Twig environment: Twig's, with the page's globals as parameters, the tag renderers
+ * (TagRendererPass) and an asset's path as the page links it (Base\View\AssetPaths, through the
+ * HTML renderer).
+ */
+class Environment extends TwigEnvironment implements AssetPaths
 {
     protected RequestStack $requestStack;
 

@@ -4,6 +4,7 @@ namespace Base\Twig\Extension;
 
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\DeployVersion;
 
 /**
  * A value that changes on every real deploy and stays stable otherwise -
@@ -32,11 +33,12 @@ use Twig\TwigFunction;
  */
 final class DeployVersionExtension extends AbstractExtension
 {
-    private ?string $version = null;
+    private readonly DeployVersion $version;
 
     public function __construct(
         private readonly string $projectDir,
     ) {
+        $this->version = new DeployVersion($projectDir);
     }
 
     public function getFunctions(): array
@@ -48,43 +50,6 @@ final class DeployVersionExtension extends AbstractExtension
 
     public function getVersion(): string
     {
-        if (null !== $this->version) {
-            return $this->version;
-        }
-
-        $heads = [$this->readGitHead($this->projectDir)];
-
-        // glitchr/*, omnisense/* (this package, omnisense/omnibase since
-        // its rename from glitchr/omnibase, and the families' cores) and
-        // omnibase/* (its bundles): the vendors whose checkouts are iterated
-        // on in place.
-        foreach (['glitchr', 'omnisense', 'omnibase'] as $vendor) {
-            foreach (glob($this->projectDir . '/vendor/' . $vendor . '/*', GLOB_ONLYDIR) ?: [] as $packageDir) {
-                $heads[] = $this->readGitHead($packageDir);
-            }
-        }
-
-        $heads = array_filter($heads, static fn (?string $head): bool => null !== $head);
-        if ([] === $heads) {
-            return $this->version = 'dev';
-        }
-
-        return $this->version = substr(md5(implode('|', $heads)), 0, 8);
-    }
-
-    private function readGitHead(string $dir): ?string
-    {
-        $headFile = $dir . '/.git/HEAD';
-        if (!is_file($headFile)) {
-            return null;
-        }
-
-        $head = trim((string) file_get_contents($headFile));
-        if (str_starts_with($head, 'ref: ')) {
-            $refFile = $dir . '/.git/' . substr($head, 5);
-            $head = is_file($refFile) ? trim((string) file_get_contents($refFile)) : $head;
-        }
-
-        return '' !== $head ? $head : null;
+        return $this->version->version();
     }
 }

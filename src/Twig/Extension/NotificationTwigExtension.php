@@ -2,7 +2,6 @@
 
 namespace Base\Twig\Extension;
 
-use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Notifier\NotificationLinkerInterface;
 use Base\Repository\User\Notifications;
@@ -11,6 +10,7 @@ use Omnibridge\Contract\Access;
 use Omnibridge\Contract\Tokens;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Bell;
 
 /**
  * What a toolbar needs to draw the bell: the unread count (the red dot), the
@@ -34,7 +34,10 @@ class NotificationTwigExtension extends AbstractExtension
         protected readonly Tokens $tokens,
         protected readonly ?NotificationLinkerInterface $linker = null,
     ) {
+        $this->bell = new Bell($access, $repository, $webPush, $tokens, $linker);
     }
+
+    private readonly Bell $bell;
 
     public function getFunctions(): array
     {
@@ -50,41 +53,33 @@ class NotificationTwigExtension extends AbstractExtension
 
     public function unread(): int
     {
-        $user = $this->access->getUser();
-        if (!$user instanceof User) {
-            return 0;
-        }
-        return $this->repository->countUnreadFor($user);
+        return $this->bell->unread();
     }
 
     /** @return Notification[] */
     public function latest(int $limit = 8): array
     {
-        $user = $this->access->getUser();
-        if (!$user instanceof User) {
-            return [];
-        }
-        return $this->repository->findVisibleFor($user, $limit);
+        return $this->bell->latest($limit);
     }
 
     public function token(): string
     {
-        return $this->tokens->csrf("notifications");
+        return $this->bell->token();
     }
 
     public function pushKey(): string
     {
-        return (string) $this->webPush?->getPublicKey();
+        return $this->bell->pushKey();
     }
 
     /** The back-office page of what a notification is about, or null. */
     public function adminUrl(Notification $notification): ?string
     {
-        return $this->linker?->adminUrl($notification);
+        return $this->bell->adminUrl($notification);
     }
 
     public function pushAvailable(): bool
     {
-        return (bool) $this->webPush?->isConfigured() && $this->access->getUser() instanceof User;
+        return $this->bell->pushAvailable();
     }
 }

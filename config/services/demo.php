@@ -30,8 +30,7 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
     $services->set('Base\Demo\DemoGuard')->public()
         ->arg('$doctrine', service('doctrine')->nullOnInvalid());
 
-    $services->set('Base\Twig\Extension\DemoTwigExtension')
-        ->tag('twig.extension');
+    // demo_mode() and demo_accounts() in a template: with the Twig layer (config/services/twig.php).
 
     // Registered everywhere, so that it can say why it refuses outside `demo`.
     $services->set('Base\Console\Command\DemoResetCommand')

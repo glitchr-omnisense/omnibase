@@ -7,14 +7,18 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Pagination;
 
 final class PaginatorTwigExtension extends AbstractExtension
 {
     protected TranslatorInterface $translator;
 
+    private readonly Pagination $pagination;
+
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
+        $this->pagination = new Pagination($translator);
     }
 
     /**
@@ -30,184 +34,90 @@ final class PaginatorTwigExtension extends AbstractExtension
         return [
             new TwigFunction('paginator', [$this, 'getSlidingControl'], ['needs_environment' => true, 'is_safe' => ['all']]),
             new TwigFunction('paginator_slidingcontrol', [$this, 'getSlidingControl'], ['needs_environment' => true, 'is_safe' => ['all']]),
-
             new TwigFunction('paginator_rewind', [$this, 'getRewind'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_first', [$this, 'getFirst'], ['is_safe' => ['all']]),
-
             new TwigFunction('paginator_firstOnes', [$this, 'getFirstOnes'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_firstSeparator', [$this, 'getFirstSeparator'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_previousOnes', [$this, 'getPreviousOnes'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_previous', [$this, 'getPrevious'], ['is_safe' => ['all']]),
-
             new TwigFunction('paginator_current', [$this, 'getCurrent'], ['is_safe' => ['all']]),
-
             new TwigFunction('paginator_next', [$this, 'getNext'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_nextOnes', [$this, 'getNextOnes'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_lastSeparator', [$this, 'getLastSeparator'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_lastOnes', [$this, 'getLastOnes'], ['is_safe' => ['all']]),
-
             new TwigFunction('paginator_last', [$this, 'getLast'], ['is_safe' => ['all']]),
             new TwigFunction('paginator_fastforward', [$this, 'getFastForward'], ['is_safe' => ['all']]),
         ];
     }
 
+    /** The pagination's template, rendered with what Base\View\Pagination gives it. */
     public function getSlidingControl(Environment $twig, PaginationInterface $pagination, string $name, array $parameters = []): ?string
     {
-        return $twig->render($pagination->getTemplate(), [
-            'pagination' => $pagination,
-            'path' => $name,
-            'path_parameters' => $parameters,
-            'rewind' => '«',
-            'fastforward' => '»',
-            'separator' => '...',
-        ]);
+        return $twig->render($pagination->getTemplate(), $this->pagination->slidingControl($pagination, $name, $parameters));
     }
 
     public function getRewind(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
-        if ($pagination->getPage() <= 1) {
-            return '';
-        }
-
-        $label = $label ?? $this->translator->trans('messages.paginator.rewind');
-
-        return "<a href='" . $pagination->getPath($name, 1, $parameters) . "'>" . $label . '</a>';
+        return $this->pagination->rewind($pagination, $name, $parameters, $label);
     }
 
     public function getFirst(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
-        if ($pagination->getPage() <= 1) {
-            return '';
-        }
-
-        $label = $label ?? $this->translator->trans('messages.paginator.first');
-
-        return "<a href='" . $pagination->getPath($name, 1, $parameters) . "'>" . $label . '</a>';
+        return $this->pagination->first($pagination, $name, $parameters, $label);
     }
 
     public function getFirstSeparator(PaginationInterface $pagination, string $separator): ?string
     {
-        if ($pagination->getPage() - $pagination->getPageRange() > 1) {
-            return $separator;
-        }
-
-        return null;
+        return $this->pagination->firstSeparator($pagination, $separator);
     }
 
     public function getFirstOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
     {
-        if ($pagination->getPage() <= 1) {
-            return [];
-        }
-
-        $array = [];
-        for ($i = 1, $N = min($pagination->getPageRange(), $pagination->getPage() - 1); $i <= $N; ++$i) {
-            // The page number is the label when the caller gives none: trans()
-            // takes a string, so a null label was a TypeError - and the `??` it
-            // was written with never fired, since trans() returns a string.
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
-        }
-
-        return $array;
+        return $this->pagination->firstOnes($pagination, $name, $parameters, $label);
     }
 
     public function getPreviousOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
     {
-        if ($pagination->getPage() <= 1) {
-            return [];
-        }
-
-        $array = [];
-        for ($i = max(1, $pagination->getPage() - $pagination->getPageRange()), $N = $pagination->getPage(); $i < $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
-        }
-
-        return $array;
+        return $this->pagination->previousOnes($pagination, $name, $parameters, $label);
     }
 
     public function getPrevious(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
-        if ($pagination->getPage() <= 1) {
-            return '';
-        }
-
-        $label = $label ?? $this->translator->trans('messages.paginator.previous', [$pagination->getPage() - 1]);
-
-        return "<a href='" . $pagination->getPath($name, $pagination->getPage() - 1, $parameters) . "'>" . $label . '</a>';
+        return $this->pagination->previous($pagination, $name, $parameters, $label);
     }
 
     public function getCurrent(PaginationInterface $pagination, ?string $label = null): ?string
     {
-        return $label ?? $this->translator->trans('messages.paginator.current', [$pagination->getPage(), $pagination->getTotalPages()]);
+        return $this->pagination->current($pagination, $label);
     }
 
     public function getNext(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
-        if ($pagination->getPage() >= $pagination->getTotalPages()) {
-            return '';
-        }
-
-        $label = $label ?? $this->translator->trans('messages.paginator.next', [$pagination->getPage() + 1]);
-
-        return "<a href='" . $pagination->getPath($name, $pagination->getPage() + 1, $parameters) . "'>" . $label . '</a>';
+        return $this->pagination->next($pagination, $name, $parameters, $label);
     }
 
     public function getNextOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
     {
-        if ($pagination->getPage() >= $pagination->getTotalPages()) {
-            return [];
-        }
-
-        $array = [];
-        for ($i = $pagination->getPage() + 1, $N = min($pagination->getTotalPages(), $pagination->getPage() + $pagination->getPageRange()) + 1; $i < $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
-        }
-
-        return $array;
+        return $this->pagination->nextOnes($pagination, $name, $parameters, $label);
     }
 
     public function getLast(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
-        if ($pagination->getPage() >= $pagination->getTotalPages()) {
-            return '';
-        }
-
-        $label = $label ?? $this->translator->trans('messages.paginator.last');
-
-        return "<a href='" . $pagination->getPath($name, $pagination->getTotalPages(), $parameters) . "'>" . $label . '</a>';
+        return $this->pagination->last($pagination, $name, $parameters, $label);
     }
 
     public function getLastOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
     {
-        if ($pagination->getPage() >= $pagination->getTotalPages()) {
-            return [];
-        }
-
-        $array = [];
-        for ($i = max($pagination->getPage() + 1, $pagination->getTotalPages() - $pagination->getPageRange()), $N = $pagination->getTotalPages(); $i <= $N; ++$i) {
-            $array[] = "<a href='" . $pagination->getPath($name, $i, $parameters) . "'>" . ($label ? $this->translator->trans($label, [$i]) : $i) . '</a>';
-        }
-
-        return $array;
+        return $this->pagination->lastOnes($pagination, $name, $parameters, $label);
     }
 
     public function getLastSeparator(PaginationInterface $pagination, string $separator): ?string
     {
-        if ($pagination->getPage() + $pagination->getPageRange() <= $pagination->getTotalPages() - 1) {
-            return $separator;
-        }
-
-        return null;
+        return $this->pagination->lastSeparator($pagination, $separator);
     }
 
     public function getFastForward(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
-        if ($pagination->getPage() >= $pagination->getTotalPages()) {
-            return '';
-        }
-
-        $label = $label ?? $this->translator->trans('messages.paginator.fastforward', [$pagination->getTotalPages()]);
-
-        return "<a href='" . $pagination->getPath($name, $pagination->getTotalPages(), $parameters) . "'>" . $label . '</a>';
+        return $this->pagination->fastForward($pagination, $name, $parameters, $label);
     }
 }
