@@ -140,6 +140,27 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The finder language is read without Doctrine (plan "omnibase agnostic", 2026-11-01, step F1):
+     * Base\Database\Repository\Finder\Parser, on an entity described by its fields, parses a finder
+     * of the core's under bare --strict, nothing of Doctrine, Twig nor the framework loaded.
+     */
+    public function testTheFinderLanguageIsReadWithoutDoctrine(): void
+    {
+        $script = __DIR__.'/Database/Repository/Finder/parse-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame([
+            'method' => '__findBy',
+            'criterions' => [['id:0', 5, ['NotEqualTo']], ['activeAt:0', 300, ['YoungerThan']]],
+            'doctrine loaded' => [],
+        ], $run['result']);
+    }
+
+    /**
      * The check is not blind: the same report, for the bundle and the users' repository, names the
      * framework and who asked for it. Where Security is installed (this run's vendor) the users'
      * repository declares its interfaces (Security's user provider, doctrine-bridge's user loader)

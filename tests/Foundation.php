@@ -155,6 +155,8 @@
  * Base\Service\TimeMachine stays when glitchr/backup-manager, whose Manager it extends, leaves the core's requirements
  * for its suggestions (2026-11-01): var/bare installs it beside the core (extra.omnibase.bare), like omniauth for
  * Base\Auth\; its DEFAULT_EXCLUDES are TimeMachineInterface's, which loads without it.
+ * 864 after step F1 of the plan "omnibase agnostic" (2026-11-01, +4: the finder language without Doctrine -
+ * Base\Database\Repository\Finder\{Parser, Query, Criterion, Subject}).
  */
 
 return [
@@ -294,6 +296,10 @@ return [
     Base\Database\Mapping\NamingStrategy::class,
     Base\Database\Middleware\PlatformMiddleware::class,
     Base\Database\Repository\Entities::class,
+    Base\Database\Repository\Finder\Criterion::class,
+    Base\Database\Repository\Finder\Parser::class,
+    Base\Database\Repository\Finder\Query::class,
+    Base\Database\Repository\Finder\Subject::class,
     Base\Database\Repository\Repositories::class,
     Base\Database\Repository\ServiceEntityParser::class,
     Base\Database\Repository\ServiceEntityRepository::class,

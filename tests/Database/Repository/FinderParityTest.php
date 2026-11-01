@@ -1,0 +1,238 @@
+<?php
+
+namespace Tests\Base\Database\Repository;
+
+use Base\Database\Repository\ServiceEntityParser;
+use Base\Database\Repository\ServiceEntityRepository;
+use Base\Entity\Layout\ImageCrop;
+use Base\Entity\Thread;
+use Base\Entity\User;
+use Base\Entity\User\Notification;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+/**
+ * The finder language, before and after its parser left Doctrine (plan "omnibase agnostic",
+ * 2026-11-01, step F1): the same method names give the same parse and the same query.
+ *
+ * For each finder call of the scenarios (the shapes the core and lesringostars call, and one of
+ * each word of the language), two things are compared with finder-parity.json, recorded on the
+ * code of before F1 (FINDER_PARITY_RECORD=1):
+ *
+ * - **the parse**: the internal method the name leads to, its arguments, the criteria and their
+ *   options, the separator, the column, cacheable and eagerly - read from the parser of before by
+ *   reflection, from Base\Database\Repository\Finder\Parser's Query after;
+ * - **the query**, where the finder hands one back (find...By, findAll, Last, AtMost, Previous,
+ *   Next, Randomly): its DQL, its parameters, its first and maximum results; where it runs it
+ *   (findOne, count, cacheOne...), what it gave on the harness's database, or the exception.
+ *
+ * lesringostars' own FinderParityTest compares results on the site's data.
+ */
+final class FinderParityTest extends KernelTestCase
+{
+    private const FIXTURE = __DIR__.'/finder-parity.json';
+
+    /** The fixed moment of the scenarios that compare with one. */
+    private const AT = '2026-05-01T12:00:00+00:00';
+
+    /** @return list<array{string, string, list<mixed>}> entity, method, arguments */
+    private static function scenarios(): array
+    {
+        $at = new \DateTimeImmutable(self::AT);
+
+        return [
+            // Equality, the separators, the plain calls.
+            [Thread::class, 'findBySlug', ['a-slug']],
+            [Thread::class, 'findOneBySlug', ['a-slug']],
+            [Thread::class, 'cacheOneBySlug', ['a-slug']],
+            [Thread::class, 'findByState', ['publish']],
+            [Thread::class, 'findByStateAndSlug', ['publish', 'a-slug']],
+            [Thread::class, 'findBySlugOrState', ['a-slug', 'publish']],
+            [Thread::class, 'findBy', [['state' => 'publish'], ['id' => 'DESC'], 5, 10]],
+            [Thread::class, 'findAll', []],
+            [Thread::class, 'cacheAll', [['id' => 'DESC']]],
+            [Thread::class, 'findByStateAndTags', [['publish', 'draft'], [1, 2]]],
+            [Thread::class, 'cacheBy', [['state' => 'publish']]],
+            // Comparisons, dates, strings.
+            [Thread::class, 'findBySlugNotEqualTo', ['a-slug']],
+            [Thread::class, 'findByIdGreaterThan', [5]],
+            [Thread::class, 'findByIdLowerEqualTo', [5]],
+            [Thread::class, 'findByPublishedAtOlderThan', ['-1 year']],
+            [Thread::class, 'findByPublishedAtYoungerEqualTo', ['-1 day']],
+            [Thread::class, 'findByPublishedAtIsOver', []],
+            [Thread::class, 'findByPublishedAtIsNotOver', []],
+            [Thread::class, 'findByPublishedAtGreaterThan', [$at]],
+            [Thread::class, 'findByParentNull', []],
+            [Thread::class, 'findByParentNotNull', []],
+            [Thread::class, 'findBySlugEmpty', []],
+            [Thread::class, 'findBySlugStartingWith', ['a-']],
+            [Thread::class, 'findBySlugEndingWith', ['-slug']],
+            [Thread::class, 'findBySlugNotStartingWith', ['a-']],
+            [Thread::class, 'findByInsensitiveSlug', ['A-Slug']],
+            [Thread::class, 'findByPartialSlug', ['slug']],
+            [Thread::class, 'findByStateAndBut', ['publish', 5]],
+            [Thread::class, 'findByStateAndInstanceOf', ['publish', Thread::class]],
+            [Thread::class, 'findByStateAndClassOf', ['publish', Thread::class]],
+            [Thread::class, 'cacheByInstanceOf', [[Thread::class], [], [], null, null, ['id']]],
+            // The specials.
+            [Thread::class, 'findAtMost3ByState', ['publish']],
+            [Thread::class, 'findLast2ByState', ['publish']],
+            [Thread::class, 'findLastOneByState', ['publish']],
+            [Thread::class, 'findPreviousByState', [['id' => 5], 'publish']],
+            [Thread::class, 'findNext2ByState', [['id' => 5], 'publish']],
+            [Thread::class, 'cachePreviousOneByClassOfAndState', [['id' => 5], Thread::class, 'publish']],
+            [Thread::class, 'cacheNextOneByClassOfAndState', [['publishedAt' => $at], Thread::class, 'publish']],
+            [Thread::class, 'findRandomlyByState', ['publish']],
+            // The core's own calls (ThreadRepository, UserRepository, ImageCropRepository...).
+            [Thread::class, 'cacheOneBySlugWithRouteAndState', [['slug' => 'a-slug'], 'slug', ['publish'], [], ['publishedAt' => 'DESC']]],
+            [Thread::class, 'cacheByParentAndStateAndPublishedAtWithin', [null, ['publish'], '1 week', [], ['publishedAt' => 'DESC']]],
+            [Thread::class, 'cacheOneByStateAndSlugStartingWith', [['publish'], 'a-']],
+            [Thread::class, 'countByState', ['publish']],
+            [Thread::class, 'countByStateAndPublishedAtYoungerThan', ['publish', '-1 month']],
+            [Thread::class, 'distinctCountByState', ['publish']],
+            [Thread::class, 'countForParentByState', ['publish']],
+            [Thread::class, 'lengthOfTagsByState', ['publish']],
+            [User::class, 'findByIdNotEqualToAndActiveAtYoungerThan', [5, 300]],
+            [User::class, 'findByActiveAtYoungerThan', [300]],
+            [User::class, 'cacheByRoles', [['ROLE_ADMIN']]],
+            [User::class, 'findOneByEmail', ['someone@example.org']],
+            [User::class, 'cacheOneByEmail', ['someone@example.org']],
+            [User::class, 'findByIdOrEmail', [5, 'someone@example.org']],
+            [Notification::class, 'findByIsReadAndSentAtOlderThan', [true, '-1 month']],
+            [Notification::class, 'findByUserAndIsRead', [5, false]],
+            [ImageCrop::class, 'cacheOneByRatio0ClosestTo', [1.5, ['image.source' => 'a.jpg'], [], [], ['ratio0' => 'e.width0/e.height0']]],
+            [ImageCrop::class, 'findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo', [1.5, 300, 200, ['image.source' => 'a.jpg'], [], [], ['ratio0' => 'e.width0/e.height0']]],
+        ];
+    }
+
+    public function testTheSameNamesGiveTheSameParseAndQuery(): void
+    {
+        self::bootKernel();
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = static::getContainer()->get('doctrine')->getManager();
+
+        $observed = [];
+        foreach (self::scenarios() as [$entity, $method, $arguments]) {
+            $repository = $entityManager->getRepository($entity);
+            self::assertInstanceOf(ServiceEntityRepository::class, $repository, $entity);
+            $key = $entity.'::'.$method.'#'.md5(serialize(self::normalise($arguments)));
+            $observed[$key] = ['parse' => self::parse($repository, $method, $arguments), 'query' => self::call($repository, $method, $arguments)];
+        }
+
+        if (getenv('FINDER_PARITY_RECORD')) {
+            file_put_contents(self::FIXTURE, json_encode($observed, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_UNESCAPED_UNICODE)."\n");
+            self::markTestSkipped('Recorded '.\count($observed).' finder calls in '.basename(self::FIXTURE).'.');
+        }
+
+        $recorded = json_decode((string) file_get_contents(self::FIXTURE), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertSame(array_keys($recorded), array_keys($observed), 'the same scenarios');
+        foreach ($recorded as $key => $before) {
+            self::assertSame($before['parse'], $observed[$key]['parse'], $key.': the same parse');
+            self::assertSame($before['query'], $observed[$key]['query'], $key.': the same query or result');
+        }
+    }
+
+    /**
+     * What the name parses to: since F1 Finder\Parser's Query (ServiceEntityParser::read()); before,
+     * the parser's own state after its __parse(), read by reflection (the column reset first: the
+     * parser of before kept the previous call's).
+     *
+     * @param list<mixed> $arguments
+     *
+     * @return array<string, mixed>
+     */
+    private static function parse(ServiceEntityRepository $repository, string $method, array $arguments): array
+    {
+        /** @var ServiceEntityParser $parser */
+        $parser = (new \ReflectionProperty(ServiceEntityRepository::class, 'serviceParser'))->getValue($repository);
+
+        try {
+            if (method_exists($parser, 'read')) {
+                $query = $parser->read($method, $arguments);
+                $parse = ['method' => $query->method, 'arguments' => $query->arguments, 'criteria' => $query->criteria, 'options' => $query->options, 'separator' => $query->separator, 'column' => $query->column, 'cacheable' => $query->cacheable, 'eagerly' => $query->eagerly];
+            } else {
+                $property = static fn (string $name) => new \ReflectionProperty(ServiceEntityParser::class, $name);
+                $property('column')->setValue($parser, null);
+                try {
+                    [$fn, $args] = (new \ReflectionMethod(ServiceEntityParser::class, '__parse'))->invoke($parser, $method, $arguments);
+                    $parse = ['method' => $fn, 'arguments' => $args];
+                    foreach (['criteria' => 'criteria', 'options' => 'options', 'separator' => 'operator', 'column' => 'column', 'cacheable' => 'cacheable', 'eagerly' => 'eagerly'] as $name => $field) {
+                        $parse[$name] = $property($field)->getValue($parser);
+                    }
+                } finally {
+                    $property('criteria')->setValue($parser, []);
+                    $property('options')->setValue($parser, []);
+                    $property('operator')->setValue($parser, null);
+                    $property('cacheable')->setValue($parser, false);
+                    $property('eagerly')->setValue($parser, false);
+                }
+            }
+        } catch (\Throwable $e) {
+            return ['exception' => $e::class, 'message' => self::message($e)];
+        }
+
+        return self::normalise($parse);
+    }
+
+    /**
+     * The finder called: its Query (DQL, parameters, first and maximum results) where it hands one
+     * back, else what it gave or threw.
+     *
+     * @param list<mixed> $arguments
+     *
+     * @return array<string, mixed>
+     */
+    private static function call(ServiceEntityRepository $repository, string $method, array $arguments): array
+    {
+        try {
+            $result = $repository->{$method}(...$arguments);
+        } catch (\Throwable $e) {
+            return ['exception' => $e::class, 'message' => self::message($e)];
+        }
+
+        if ($result instanceof Query) {
+            $parameters = [];
+            foreach ($result->getParameters() as $parameter) {
+                $value = $parameter->getValue();
+                // A bound the finder computes from now (YoungerThan, OlderThan, Within...) is kept as its
+                // distance from now, to five minutes: the fixture was recorded at another moment.
+                $parameters[$parameter->getName()] = $value instanceof \DateTimeInterface && $value->format(\DATE_ATOM) !== self::AT
+                    ? ['@from_now' => 300 * (int) round(($value->getTimestamp() - time()) / 300)]
+                    : self::normalise($value);
+            }
+            ksort($parameters);
+
+            return ['dql' => $result->getDQL(), 'parameters' => $parameters, 'first' => $result->getFirstResult(), 'max' => $result->getMaxResults()];
+        }
+
+        return ['result' => self::normalise($result)];
+    }
+
+    /** An exception's message without where it was raised (the line moved with the parser). */
+    private static function message(\Throwable $e): string
+    {
+        return (string) preg_replace('~, called in \S+ on line \d+~', '', $e->getMessage());
+    }
+
+    private static function normalise(mixed $value): mixed
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return ['@datetime' => $value->format(\DATE_ATOM)];
+        }
+        if ($value instanceof \BackedEnum) {
+            return ['@enum' => $value::class, 'value' => $value->value];
+        }
+        if (\is_object($value)) {
+            return ['@object' => $value::class] + (method_exists($value, 'getId') ? ['id' => $value->getId()] : []);
+        }
+        if (\is_array($value)) {
+            return array_map(self::normalise(...), $value);
+        }
+        if (\is_float($value)) {
+            return ['@float' => var_export($value, true)];
+        }
+
+        return $value;
+    }
+}

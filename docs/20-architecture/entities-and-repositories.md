@@ -56,6 +56,68 @@ same interfaces over the same tables (the structure: [schema.md](schema.md)).
 The finder language (`cacheOneBySlug()`...) stays the repositories' own: an
 application calls the interface's methods, never the finder through it.
 
+## The finder language, read without Doctrine
+
+A finder's name - `findOneByEmailAndUsername()`, `cacheOneByStateAndSlugStartingWith()`,
+`countByStateAndPublishedAtYoungerThan()`, `cachePreviousOneByClassOfAndState()`,
+`lengthOfTagsByState()` - is read by `Base\Database\Repository\Finder\Parser`,
+which knows nothing of an ORM (plan "omnibase agnostic", 2026-11-01, step F1).
+Its `parse($method, $arguments)` gives a `Finder\Query`, the language's neutral
+form:
+
+- `method` and `arguments`: the internal request the name leads to
+  (`__findBy`, `__findOneBy`, `__findLastBy`, `__findAtMostBy`,
+  `__findPreviousBy`, `__findNextBy`, `__findRandomlyBy`, `__findAll`,
+  `__countBy`, `__distinctCountBy`, `__lengthOfBy`...) and its arguments - the
+  criteria first (those the name declares, `"field:index" => value`, merged into
+  the array given, then the specials' numbers and keys as `"special:..."`), then
+  the order, the limit, the offset, the grouping, the selected expressions;
+- `criteria` and `options`: the criteria the name declares and their words
+  (`EqualTo`, `NotEqualTo`, `GreaterThan`, `LowerThan`, `YoungerThan`,
+  `OlderThan`, `Within`, `IsOver`, `StartingWith`, `Null`, `Empty`, `True`,
+  `Insensitive`, `Partial`, `ClosestTo`, `InstanceOf`, `ClassOf`, `MemberOf`...);
+  `criterions()` gives them as `Finder\Criterion` objects (field, index, value,
+  options), `extras()` the specials' numbers and keys;
+- `separator` (`And` or `Or`), `column` (`countFor<Column>By`,
+  `lengthOf<Column>By`), `cacheable`, `eagerly`, `request` (find, count,
+  lengthOf) and `special` (One, All, Randomly, AtMost, Last, LastOne, Previous,
+  PreviousOne, Next, NextOne).
+
+What the parser asks of the entity is a `Finder\Subject`: its class, its fields
+(a field whose name holds a word of the language is refused), whether it has a
+field or association, a Query-by-Example's criteria. A host's request given to a
+`...WithRoute` finder is turned into route parameters by the resolver the parser
+is given (`Request` and `KernelEvent` under Symfony).
+
+A persistence compiles the Query into its own queries. On Doctrine it is
+`ServiceEntityParser`: the Subject of its entity, `read()` (the parse alone) and
+`execute()` (the DQL, the joins, the date bounds, the DQL functions, the caches,
+the eager loading); `parse()` does both, as `ServiceEntityRepository::__call()`
+asks. The compiler moves to omnibridge/doctrine at step F3, and
+omnibridge/eloquent compiles the same Query into Illuminate's query builder at
+F7: the language is one, whatever the backend.
+
+The parse is the one of before F1, word for word:
+`tests/Database/Repository/FinderParityTest` compares, for 57 finder calls (the
+core's own shapes and one of each word), the parse and the query (DQL,
+parameters, first and maximum results, or what a running finder gave or threw)
+with `finder-parity.json`, recorded on the code of before
+(`FINDER_PARITY_RECORD=1`). lesringostars' `FinderParityTest` compares the
+results on the site's data. `tests/Database/Repository/Finder/ParserTest` reads
+each word on an entity known by its fields alone, and
+`BareTest::testTheFinderLanguageIsReadWithoutDoctrine` parses under
+`bare --strict`.
+
+Seen while recording, kept as they were (the parity is the proof, the fixes come
+apart): `LowerEqualTo` and `GreaterEqualTo` call `Expr::le()` and `Expr::ge()`,
+which Doctrine does not have (`lte()`, `gte()`); `lengthOf<Association>By` builds
+an invalid DQL; a `DateTimeImmutable` bound on a mutable `datetime` field is
+refused by the type; `ImageCropRepository`'s two finders pass their selected
+expressions where `__findOneBy()` takes its offset (a TypeError); the negative
+words tested after their positive one are misread - `NotStartingWith`,
+`NotEndingWith`, `NotInstanceOf`, `NotClassOf`, `NotMemberOf`
+(`findBySlugNotStartingWith()` reads a field `slugNot` starting with the value).
+
 ## Translations
 
 An entity using `TranslatableTrait` reads and writes its translated fields

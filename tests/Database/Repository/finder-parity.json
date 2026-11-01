@@ -1,0 +1,1837 @@
+{
+    "Base\\Entity\\Thread::findBySlug#28cf5983e5e233502f36ac4c18dd89b0": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "a-slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-slug"
+            },
+            "options": {
+                "slug:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug = :slug_0",
+            "parameters": {
+                "slug_0": "a-slug"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findOneBySlug#28cf5983e5e233502f36ac4c18dd89b0": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "slug:0": "a-slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-slug"
+            },
+            "options": {
+                "slug:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheOneBySlug#28cf5983e5e233502f36ac4c18dd89b0": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "slug:0": "a-slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-slug"
+            },
+            "options": {
+                "slug:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\Thread::findByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0",
+            "parameters": {
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByStateAndSlug#39b1d354ffee79c3fb46142ee003be96": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "slug:0": "a-slug"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish",
+                "slug:0": "a-slug"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "slug:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0 AND e.slug = :slug_0",
+            "parameters": {
+                "slug_0": "a-slug",
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBySlugOrState#d771566c5359dd3fb7f6701b18991aa5": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "a-slug",
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-slug",
+                "state:0": "publish"
+            },
+            "options": {
+                "slug:0": [
+                    "EqualTo"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "Or",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug = :slug_0 OR e.state = :state_0",
+            "parameters": {
+                "slug_0": "a-slug",
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBy#1d74791aef1723a89d4f68482798bef3": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state": "publish"
+                },
+                {
+                    "id": "DESC"
+                },
+                5,
+                10
+            ],
+            "criteria": [],
+            "options": [],
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": []
+        }
+    },
+    "Base\\Entity\\Thread::findAll#40cd750bba9870f18aada2478b24840a": {
+        "parse": {
+            "method": "__findAll",
+            "arguments": [
+                []
+            ],
+            "criteria": [],
+            "options": [],
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": []
+        }
+    },
+    "Base\\Entity\\Thread::cacheAll#a0c2cf63efa1f46c6228529ef82a2c1d": {
+        "parse": {
+            "method": "__findAll",
+            "arguments": [
+                {
+                    "id": "DESC"
+                }
+            ],
+            "criteria": [],
+            "options": [],
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e ORDER BY e.id DESC",
+            "parameters": [],
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByStateAndTags#ea5a2f7379bf0864cdc780117f4e9099": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state:0": [
+                        "publish",
+                        "draft"
+                    ],
+                    "tags:0": [
+                        1,
+                        2
+                    ]
+                }
+            ],
+            "criteria": {
+                "state:0": [
+                    "publish",
+                    "draft"
+                ],
+                "tags:0": [
+                    1,
+                    2
+                ]
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "tags:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e LEFT JOIN e.tags e_tags WHERE e.state IN(:state_0) AND e_tags IN(:e_tags_0)",
+            "parameters": {
+                "e_tags_0": [
+                    1,
+                    2
+                ],
+                "state_0": [
+                    "publish",
+                    "draft"
+                ]
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheBy#8d6c84c0a55032550a0d098d4c6b6e8a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state": "publish"
+                }
+            ],
+            "criteria": [],
+            "options": [],
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state",
+            "parameters": {
+                "state": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBySlugNotEqualTo#28cf5983e5e233502f36ac4c18dd89b0": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "a-slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-slug"
+            },
+            "options": {
+                "slug:0": [
+                    "NotEqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug <> :slug_0",
+            "parameters": {
+                "slug_0": "a-slug"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByIdGreaterThan#c9059feef497c200e69cb9956a81f005": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "id:0": 5
+                }
+            ],
+            "criteria": {
+                "id:0": 5
+            },
+            "options": {
+                "id:0": [
+                    "GreaterThan"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.id > :id_0",
+            "parameters": {
+                "id_0": 5
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByIdLowerEqualTo#c9059feef497c200e69cb9956a81f005": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "id:0": 5
+                }
+            ],
+            "criteria": {
+                "id:0": 5
+            },
+            "options": {
+                "id:0": [
+                    "LowerEqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "exception": "Error",
+            "message": "Call to undefined method Doctrine\\ORM\\Query\\Expr::le()"
+        }
+    },
+    "Base\\Entity\\Thread::findByPublishedAtOlderThan#3ec6d836f5b4453a76eb32876bd2516f": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "publishedAt:0": "-1 year"
+                }
+            ],
+            "criteria": {
+                "publishedAt:0": "-1 year"
+            },
+            "options": {
+                "publishedAt:0": [
+                    "OlderThan"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.publishedAt < :publishedAt_0",
+            "parameters": {
+                "publishedAt_0": {
+                    "@from_now": 31536000
+                }
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByPublishedAtYoungerEqualTo#5ac77012d2bc93637dcdbb0740ca4986": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "publishedAt:0": "-1 day"
+                }
+            ],
+            "criteria": {
+                "publishedAt:0": "-1 day"
+            },
+            "options": {
+                "publishedAt:0": [
+                    "YoungerEqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "exception": "Error",
+            "message": "Call to undefined method Doctrine\\ORM\\Query\\Expr::ge()"
+        }
+    },
+    "Base\\Entity\\Thread::findByPublishedAtIsOver#40cd750bba9870f18aada2478b24840a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "publishedAt:0": "CURDATE()"
+                }
+            ],
+            "criteria": {
+                "publishedAt:0": "CURDATE()"
+            },
+            "options": {
+                "publishedAt:0": [
+                    "IsOver"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.publishedAt < :publishedAt_0",
+            "parameters": {
+                "publishedAt_0": {
+                    "@from_now": 0
+                }
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByPublishedAtIsNotOver#40cd750bba9870f18aada2478b24840a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "publishedAt:0": "CURDATE()"
+                }
+            ],
+            "criteria": {
+                "publishedAt:0": "CURDATE()"
+            },
+            "options": {
+                "publishedAt:0": [
+                    "IsNotOver"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.publishedAt > :publishedAt_0",
+            "parameters": {
+                "publishedAt_0": {
+                    "@from_now": 0
+                }
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByPublishedAtGreaterThan#e686ac7c88b1cde4a40241f75cb9e0a1": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "publishedAt:0": {
+                        "@datetime": "2026-05-01T12:00:00+00:00"
+                    }
+                }
+            ],
+            "criteria": {
+                "publishedAt:0": {
+                    "@datetime": "2026-05-01T12:00:00+00:00"
+                }
+            },
+            "options": {
+                "publishedAt:0": [
+                    "GreaterThan"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.publishedAt > :publishedAt_0",
+            "parameters": {
+                "publishedAt_0": {
+                    "@datetime": "2026-05-01T12:00:00+00:00"
+                }
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByParentNull#40cd750bba9870f18aada2478b24840a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "parent:0": null
+                }
+            ],
+            "criteria": {
+                "parent:0": null
+            },
+            "options": {
+                "parent:0": [
+                    "Null"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e LEFT JOIN e.parent e_parent WHERE e_parent IS NULL",
+            "parameters": {
+                "e_parent_0": null
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByParentNotNull#40cd750bba9870f18aada2478b24840a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "parent:0": null
+                }
+            ],
+            "criteria": {
+                "parent:0": null
+            },
+            "options": {
+                "parent:0": [
+                    "NotNull"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e LEFT JOIN e.parent e_parent WHERE e_parent IS NOT NULL",
+            "parameters": {
+                "e_parent_0": null
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBySlugEmpty#40cd750bba9870f18aada2478b24840a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": ""
+                }
+            ],
+            "criteria": {
+                "slug:0": ""
+            },
+            "options": {
+                "slug:0": [
+                    "Empty"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug IS NULL OR e.slug = ''",
+            "parameters": [],
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBySlugStartingWith#edebc762c549e0db2f7621ed86792e48": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "a-"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-"
+            },
+            "options": {
+                "slug:0": [
+                    "StartingWith"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0",
+            "parameters": {
+                "slug_0": "a-%"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBySlugEndingWith#f1900ab9a286c922043c00ce0b78bb1f": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "-slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "-slug"
+            },
+            "options": {
+                "slug:0": [
+                    "EndingWith"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0",
+            "parameters": {
+                "slug_0": "%-slug"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findBySlugNotStartingWith#edebc762c549e0db2f7621ed86792e48": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slugNot:0": "a-"
+                }
+            ],
+            "criteria": {
+                "slugNot:0": "a-"
+            },
+            "options": {
+                "slugNot:0": [
+                    "StartingWith"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE slugNot LIKE :slugNot_0",
+            "parameters": {
+                "slugNot_0": "a-%"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByInsensitiveSlug#a096bea66e11d85ffb285f890ac1270f": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "A-Slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "A-Slug"
+            },
+            "options": {
+                "slug:0": [
+                    "Insensitive",
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE LOWER(e.slug) = :slug_0",
+            "parameters": {
+                "slug_0": "A-Slug"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByPartialSlug#1ea7bad482ad74a1c00ef0b8717b4f2a": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "slug:0": "slug"
+                }
+            ],
+            "criteria": {
+                "slug:0": "slug"
+            },
+            "options": {
+                "slug:0": [
+                    "Partial",
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0",
+            "parameters": {
+                "slug_0": "slug"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByStateAndBut#1fd831d8e7b96a324b11f3868a7b6c75": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "id:0": 5
+                }
+            ],
+            "criteria": {
+                "state:0": "publish",
+                "id:0": 5
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "id:0": [
+                    "NotEqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0 AND e.id <> :id_0",
+            "parameters": {
+                "id_0": 5,
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByStateAndInstanceOf#569f5f014cda52d8554346d2adef6b5b": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "instanceOf:0": "Base\\Entity\\Thread"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish",
+                "instanceOf:0": "Base\\Entity\\Thread"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "instanceOf:0": [
+                    "InstanceOf"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0 AND e INSTANCE OF Base\\Entity\\Thread",
+            "parameters": {
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findByStateAndClassOf#569f5f014cda52d8554346d2adef6b5b": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "classOf:0": "Base\\Entity\\Thread"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish",
+                "classOf:0": "Base\\Entity\\Thread"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "classOf:0": [
+                    "ClassOf"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0 AND (e INSTANCE OF Base\\Entity\\Thread AND NOT(e INSTANCE OF Base\\Marketplace\\Entity\\Product) AND NOT(e INSTANCE OF Base\\Marketplace\\Entity\\Store) AND NOT(e INSTANCE OF Base\\Marketplace\\Entity\\Review) AND NOT(e INSTANCE OF Base\\Marketplace\\Entity\\Product\\Variant) AND NOT(e INSTANCE OF Base\\Marketplace\\Entity\\Brand) AND NOT(e INSTANCE OF Base\\Forge\\Entity\\Product\\HourPack) AND NOT(e INSTANCE OF Base\\Forge\\Entity\\Product\\LicenseOffer) AND NOT(e INSTANCE OF Base\\Forge\\Entity\\Project) AND NOT(e INSTANCE OF Base\\Forge\\Entity\\Software) AND NOT(e INSTANCE OF Base\\Forum\\Entity\\Topic))",
+            "parameters": {
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheByInstanceOf#3cdac32f40010cd2e896e528a9f6e50c": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "instanceOf:0": [
+                        "Base\\Entity\\Thread"
+                    ]
+                },
+                [],
+                null,
+                null,
+                [
+                    "id"
+                ]
+            ],
+            "criteria": {
+                "instanceOf:0": [
+                    "Base\\Entity\\Thread"
+                ]
+            },
+            "options": {
+                "instanceOf:0": [
+                    "InstanceOf"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e AS entity FROM Base\\Entity\\Thread e WHERE e INSTANCE OF Base\\Entity\\Thread GROUP BY e.id",
+            "parameters": [],
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::findAtMost3ByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__findAtMostBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "special:atMost": "3"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0",
+            "parameters": {
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": 3
+        }
+    },
+    "Base\\Entity\\Thread::findLast2ByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__findLastBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "special:last": "2"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0 ORDER BY e.id DESC",
+            "parameters": {
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": 2
+        }
+    },
+    "Base\\Entity\\Thread::findLastOneByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__findLastOneBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\Thread::findPreviousByState#d9e5cc5d14d84ae179d807c71cff82c1": {
+        "parse": {
+            "method": "__findPreviousBy",
+            "arguments": [
+                {
+                    "id:0": 5,
+                    "state:0": "publish",
+                    "special:prevKeys": [
+                        "id"
+                    ]
+                }
+            ],
+            "criteria": {
+                "id:0": 5,
+                "state:0": "publish"
+            },
+            "options": {
+                "id:0": [
+                    "LowerThan"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.id < :id_0 AND e.state = :state_0 ORDER BY e.id DESC",
+            "parameters": {
+                "id_0": 5,
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": 1
+        }
+    },
+    "Base\\Entity\\Thread::findNext2ByState#d9e5cc5d14d84ae179d807c71cff82c1": {
+        "parse": {
+            "method": "__findNextBy",
+            "arguments": [
+                {
+                    "id:0": 5,
+                    "state:0": "publish",
+                    "special:next": "2",
+                    "special:nextKeys": [
+                        "id"
+                    ]
+                }
+            ],
+            "criteria": {
+                "id:0": 5,
+                "state:0": "publish"
+            },
+            "options": {
+                "id:0": [
+                    "GreaterThan"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.id > :id_0 AND e.state = :state_0 ORDER BY e.id ASC",
+            "parameters": {
+                "id_0": 5,
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": 2
+        }
+    },
+    "Base\\Entity\\Thread::cachePreviousOneByClassOfAndState#9c503bcbfa8e00ec2955de30a0f42aa9": {
+        "parse": {
+            "method": "__findPreviousOneBy",
+            "arguments": [
+                {
+                    "id:0": 5,
+                    "classOf:0": "Base\\Entity\\Thread",
+                    "state:0": "publish",
+                    "special:prevKeys": [
+                        "id"
+                    ]
+                }
+            ],
+            "criteria": {
+                "id:0": 5,
+                "classOf:0": "Base\\Entity\\Thread",
+                "state:0": "publish"
+            },
+            "options": {
+                "id:0": [
+                    "LowerThan"
+                ],
+                "classOf:0": [
+                    "ClassOf"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheNextOneByClassOfAndState#255a43fc1bc61d306f2e9322fac089fd": {
+        "parse": {
+            "method": "__findNextOneBy",
+            "arguments": [
+                {
+                    "publishedAt:0": {
+                        "@datetime": "2026-05-01T12:00:00+00:00"
+                    },
+                    "classOf:0": "Base\\Entity\\Thread",
+                    "state:0": "publish",
+                    "special:nextKeys": [
+                        "publishedAt"
+                    ]
+                }
+            ],
+            "criteria": {
+                "publishedAt:0": {
+                    "@datetime": "2026-05-01T12:00:00+00:00"
+                },
+                "classOf:0": "Base\\Entity\\Thread",
+                "state:0": "publish"
+            },
+            "options": {
+                "publishedAt:0": [
+                    "GreaterThan"
+                ],
+                "classOf:0": [
+                    "ClassOf"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "exception": "Doctrine\\DBAL\\Types\\Exception\\InvalidType",
+            "message": "Could not convert PHP value of type DateTimeImmutable to type Base\\Database\\Type\\DateTimeTypeUTC. Expected one of the following types: null, DateTime."
+        }
+    },
+    "Base\\Entity\\Thread::findRandomlyByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__findRandomlyBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.state = :state_0 ORDER BY RAND() ASC",
+            "parameters": {
+                "state_0": "publish"
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheOneBySlugWithRouteAndState#0ff7ea87954019b21c3b8e5310c6a91d": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "slug:0": "a-slug",
+                    "state:0": [
+                        "publish"
+                    ]
+                },
+                {
+                    "publishedAt": "DESC"
+                }
+            ],
+            "criteria": {
+                "slug:0": "a-slug",
+                "state:0": [
+                    "publish"
+                ]
+            },
+            "options": {
+                "slug:0": [
+                    "EqualTo"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheByParentAndStateAndPublishedAtWithin#7d059f004d3bad0458d9367e09df683b": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "parent:0": null,
+                    "state:0": [
+                        "publish"
+                    ],
+                    "publishedAt:0": "1 week"
+                },
+                {
+                    "publishedAt": "DESC"
+                }
+            ],
+            "criteria": {
+                "parent:0": null,
+                "state:0": [
+                    "publish"
+                ],
+                "publishedAt:0": "1 week"
+            },
+            "options": {
+                "parent:0": [
+                    "EqualTo"
+                ],
+                "state:0": [
+                    "EqualTo"
+                ],
+                "publishedAt:0": [
+                    "Within"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\Thread e LEFT JOIN e.parent e_parent WHERE e_parent = :e_parent_0 AND e.state IN(:state_0) AND e.publishedAt < :publishedAt_0 ORDER BY e.publishedAt DESC",
+            "parameters": {
+                "e_parent_0": null,
+                "publishedAt_0": {
+                    "@from_now": 604800
+                },
+                "state_0": [
+                    "publish"
+                ]
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Thread::cacheOneByStateAndSlugStartingWith#f4cd417001b6661818cf42bb1920c0a1": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "state:0": [
+                        "publish"
+                    ],
+                    "slug:0": "a-"
+                }
+            ],
+            "criteria": {
+                "state:0": [
+                    "publish"
+                ],
+                "slug:0": "a-"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "slug:0": [
+                    "StartingWith"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\Thread::countByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__countBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": "",
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": 0
+        }
+    },
+    "Base\\Entity\\Thread::countByStateAndPublishedAtYoungerThan#187117ba2d5a13d88fae9bc0c6c1e581": {
+        "parse": {
+            "method": "__countBy",
+            "arguments": [
+                {
+                    "state:0": "publish",
+                    "publishedAt:0": "-1 month"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish",
+                "publishedAt:0": "-1 month"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ],
+                "publishedAt:0": [
+                    "YoungerThan"
+                ]
+            },
+            "separator": "And",
+            "column": "",
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": 0
+        }
+    },
+    "Base\\Entity\\Thread::distinctCountByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__distinctCountBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": "",
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": 0
+        }
+    },
+    "Base\\Entity\\Thread::countForParentByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__countBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": "parent",
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": 0
+        }
+    },
+    "Base\\Entity\\Thread::lengthOfTagsByState#fce6742b852573381f938d7305c41931": {
+        "parse": {
+            "method": "__lengthOfBy",
+            "arguments": [
+                {
+                    "state:0": "publish"
+                }
+            ],
+            "criteria": {
+                "state:0": "publish"
+            },
+            "options": {
+                "state:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": "tags",
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "exception": "Doctrine\\ORM\\Query\\QueryException",
+            "message": "[Syntax Error] line 0, col 17: Error: Expected '.' or '(', got 'e_tags'"
+        }
+    },
+    "Base\\Entity\\User::findByIdNotEqualToAndActiveAtYoungerThan#ffa87d842a056f574f5517809e9962c6": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "id:0": 5,
+                    "activeAt:0": 300
+                }
+            ],
+            "criteria": {
+                "id:0": 5,
+                "activeAt:0": 300
+            },
+            "options": {
+                "id:0": [
+                    "NotEqualTo"
+                ],
+                "activeAt:0": [
+                    "YoungerThan"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.id <> :id_0 AND e.activeAt > :activeAt_0",
+            "parameters": {
+                "activeAt_0": {
+                    "@from_now": -300
+                },
+                "id_0": 5
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\User::findByActiveAtYoungerThan#01e33d7ea375ec94641bb5ebd7950ebd": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "activeAt:0": 300
+                }
+            ],
+            "criteria": {
+                "activeAt:0": 300
+            },
+            "options": {
+                "activeAt:0": [
+                    "YoungerThan"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.activeAt > :activeAt_0",
+            "parameters": {
+                "activeAt_0": {
+                    "@from_now": -300
+                }
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\User::cacheByRoles#c136300424dbfc957bbef0cc96e53ac2": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "roles:0": [
+                        "ROLE_ADMIN"
+                    ]
+                }
+            ],
+            "criteria": {
+                "roles:0": [
+                    "ROLE_ADMIN"
+                ]
+            },
+            "options": {
+                "roles:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.roles IN(:roles_0)",
+            "parameters": {
+                "roles_0": [
+                    "ROLE_ADMIN"
+                ]
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\User::findOneByEmail#94299a8c4d7cc250afcb47be51f7224d": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "email:0": "someone@example.org"
+                }
+            ],
+            "criteria": {
+                "email:0": "someone@example.org"
+            },
+            "options": {
+                "email:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\User::cacheOneByEmail#94299a8c4d7cc250afcb47be51f7224d": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "email:0": "someone@example.org"
+                }
+            ],
+            "criteria": {
+                "email:0": "someone@example.org"
+            },
+            "options": {
+                "email:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "result": null
+        }
+    },
+    "Base\\Entity\\User::findByIdOrEmail#43450b39227fbde7f7517b63b7b333c2": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "id:0": 5,
+                    "email:0": "someone@example.org"
+                }
+            ],
+            "criteria": {
+                "id:0": 5,
+                "email:0": "someone@example.org"
+            },
+            "options": {
+                "id:0": [
+                    "EqualTo"
+                ],
+                "email:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "Or",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.id = :id_0 OR e.email = :email_0",
+            "parameters": {
+                "email_0": "someone@example.org",
+                "id_0": 5
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\User\\Notification::findByIsReadAndSentAtOlderThan#e38d49db0be953b2c2254e42d2f69ddb": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "isRead:0": true,
+                    "sentAt:0": "-1 month"
+                }
+            ],
+            "criteria": {
+                "isRead:0": true,
+                "sentAt:0": "-1 month"
+            },
+            "options": {
+                "isRead:0": [
+                    "EqualTo"
+                ],
+                "sentAt:0": [
+                    "OlderThan"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\User\\Notification e WHERE e.isRead = :isRead_0 AND e.sentAt < :sentAt_0",
+            "parameters": {
+                "isRead_0": true,
+                "sentAt_0": {
+                    "@from_now": 2592000
+                }
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\User\\Notification::findByUserAndIsRead#00724caba433ecf6f202687376274aa7": {
+        "parse": {
+            "method": "__findBy",
+            "arguments": [
+                {
+                    "user:0": 5,
+                    "isRead:0": false
+                }
+            ],
+            "criteria": {
+                "user:0": 5,
+                "isRead:0": false
+            },
+            "options": {
+                "user:0": [
+                    "EqualTo"
+                ],
+                "isRead:0": [
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "dql": "SELECT e FROM Base\\Entity\\User\\Notification e LEFT JOIN e.user e_user WHERE e_user = :e_user_0 AND e.isRead = :isRead_0",
+            "parameters": {
+                "e_user_0": 5,
+                "isRead_0": false
+            },
+            "first": 0,
+            "max": null
+        }
+    },
+    "Base\\Entity\\Layout\\ImageCrop::cacheOneByRatio0ClosestTo#453e01ed966a5c0d9c63c85d82089323": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "image.source": "a.jpg",
+                    "ratio0:0": {
+                        "@float": "1.5"
+                    }
+                },
+                [],
+                [],
+                {
+                    "ratio0": "e.width0/e.height0"
+                }
+            ],
+            "criteria": {
+                "ratio0:0": {
+                    "@float": "1.5"
+                }
+            },
+            "options": {
+                "ratio0:0": [
+                    "ClosestTo",
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "exception": "TypeError",
+            "message": "Base\\Database\\Repository\\ServiceEntityParser::__findOneBy(): Argument #3 ($offset) must be of type ?int, array given"
+        }
+    },
+    "Base\\Entity\\Layout\\ImageCrop::findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo#b641c2c974e7ae1b479ea2bb27759e4b": {
+        "parse": {
+            "method": "__findOneBy",
+            "arguments": [
+                {
+                    "image.source": "a.jpg",
+                    "ratio0:0": {
+                        "@float": "1.5"
+                    },
+                    "width0:0": 300,
+                    "height0:0": 200
+                },
+                [],
+                [],
+                {
+                    "ratio0": "e.width0/e.height0"
+                }
+            ],
+            "criteria": {
+                "ratio0:0": {
+                    "@float": "1.5"
+                },
+                "width0:0": 300,
+                "height0:0": 200
+            },
+            "options": {
+                "ratio0:0": [
+                    "ClosestTo",
+                    "EqualTo"
+                ],
+                "width0:0": [
+                    "ClosestTo",
+                    "EqualTo"
+                ],
+                "height0:0": [
+                    "ClosestTo",
+                    "EqualTo"
+                ]
+            },
+            "separator": "And",
+            "column": null,
+            "cacheable": false,
+            "eagerly": false
+        },
+        "query": {
+            "exception": "TypeError",
+            "message": "Base\\Database\\Repository\\ServiceEntityParser::__findOneBy(): Argument #3 ($offset) must be of type ?int, array given"
+        }
+    }
+}
