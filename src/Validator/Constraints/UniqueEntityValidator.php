@@ -2,6 +2,7 @@
 
 namespace Base\Validator\Constraints;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Validator\ConstraintEntity;
 use Countable;
 use Iterator;
@@ -26,7 +27,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         $entity = $value;
         parent::validate($entity, $constraint);
 
-        $em = $constraint->em ?? $this->getEntityManager($constraint->entityClass ?? get_class($entity));
+        $em = $constraint->em ?? FrameworkLocator::objectManager($constraint->entityClass ?? get_class($entity));
         if (!$em) {
             throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
         }

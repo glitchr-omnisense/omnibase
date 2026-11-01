@@ -45,7 +45,7 @@ final class Wysiwyg
         $mediaConfig = array_pop_key('media', $options) ?? true;
         if ($mediaConfig) {
             $mediaConfig = \is_array($mediaConfig) ? $mediaConfig : [];
-            $mediaConfig['storage'] ??= $this->storage ?? Locator::getParameterBag('base.twig.editor.storage');
+            $mediaConfig['storage'] ??= $this->storage ?? Locator::findParameterBag()?->get('base.twig.editor.storage');
             $htmlOrJson = $enhancer->enhanceMedia($htmlOrJson, $mediaConfig);
         }
 

@@ -24,7 +24,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
     public function __construct()
     {
-        $this->translator = $this->getTranslator();
+        $this->translator = $this->findTranslator();
         $this->constraintClass = preg_replace('/Validator$/', '', get_called_class());
     }
 

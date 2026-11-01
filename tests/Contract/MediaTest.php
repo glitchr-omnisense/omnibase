@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Contract;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Bridge\Symfony\ServiceMedia;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
@@ -148,7 +149,7 @@ final class MediaTest extends KernelTestCase
             ], $filters),
         ]);
 
-        return BaseService::getRouter()->generate($routeName, $routeParameters, $referenceType);
+        return FrameworkLocator::router()->generate($routeName, $routeParameters, $referenceType);
     }
 
     /** ImageCrop::__toLink() before C4b, as it was (BaseTrait's MediaService). */

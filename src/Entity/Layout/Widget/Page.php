@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Widget;
 
+use Base\Contract\Link;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Attribute\DiscriminatorEntry;
@@ -36,7 +37,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     {
         $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
 
-        return $this->getRouter()->generate("widget_page", $routeParameters, $referenceType);
+        return Link::to("widget_page", $routeParameters, $referenceType);
     }
     /**
      * @return string

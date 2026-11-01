@@ -20,7 +20,8 @@ use PHPUnit\Framework\TestCase;
  * ClassMetadataFactory, EntityHydrator), ServiceEntityRepository, the Doctrine
  * listeners (src/DatabaseSubscriber, src/EntitySubscriber), the commands of
  * Doctrine's own (DoctrineDatabaseImportCommand, DoctrineArrayUpgradeCommand,
- * DoctrineSchemaCharsetCommand), BaseTrait (step F2f), the validators and
+ * DoctrineSchemaCharsetCommand), Base\Bridge\Symfony\FrameworkLocator (BaseTrait's
+ * framework services since step F2f), the validators and
  * CropperType (the form layer, F5b), AbstractEventDispatcher and BaseNotifier
  * (F5a), DemoAccountFactory (Doctrine's fixtures).
  */

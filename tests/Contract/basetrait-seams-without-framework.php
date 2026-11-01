@@ -26,6 +26,8 @@
  *   isGranted() (C9) - on a BaseService never constructed; HotParameters, the
  *   settings laid over the parameters (C9).
  * - the Sessions and Locales contracts: User's logout() and its locale.
+ * - BaseTrait with no host (F2f): a service it hands out throws
+ *   MissingContractException, its find...() form answers null.
  * Returns what they answered.
  */
 
@@ -64,6 +66,23 @@ use Omnibridge\Contract\Translations as OmnibridgeTranslations;
 ClassAliases::register();
 
 $answers = [];
+
+// BaseTrait names contracts only (step F2f): with no host, a service it hands out is said aloud
+// (MissingContractException) instead of a null that fails further on, and its find...() form
+// answers null for a caller that does without.
+$missing = static function (callable $ask): string {
+    try {
+        $ask();
+
+        return 'answered';
+    } catch (MissingContractException) {
+        return 'MissingContractException';
+    }
+};
+$answers['basetrait, no translator'] = $missing(static fn () => User::getTranslator());
+$answers['basetrait, no translator, optional'] = User::findTranslator();
+$answers['basetrait, no parameters'] = $missing(static fn () => BaseService::getParameterBag('base.user.active_delay'));
+$answers['basetrait, no parameters, optional'] = BaseService::findParameterBag();
 
 // The catalogues of a host: domain => key => text, ICU's {0} replaced plainly.
 $translations = new class implements Translations {

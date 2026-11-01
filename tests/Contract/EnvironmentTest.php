@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Contract;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Omnibridge\Symfony\Contract\KernelEnvironment;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\SettingIntl;
@@ -38,8 +39,8 @@ final class EnvironmentTest extends KernelTestCase
         self::assertSame($kernel->getEnvironment(), Runtime::environment()->name());
         self::assertSame(BaseService::getEnvironment(), Runtime::environment()->name());
         self::assertSame($kernel->isDebug(), Runtime::environment()->isDebug());
-        self::assertSame(BaseService::getService()->isDebug(), Runtime::environment()->isDebug());
-        self::assertSame(BaseService::getService()->getSalt(), Runtime::environment()->secret());
+        self::assertSame(FrameworkLocator::service()->isDebug(), Runtime::environment()->isDebug());
+        self::assertSame(FrameworkLocator::service()->getSalt(), Runtime::environment()->secret());
         self::assertNotSame('', Runtime::environment()->secret());
     }
 
@@ -59,12 +60,12 @@ final class EnvironmentTest extends KernelTestCase
         self::assertSame(BaseService::getParameterBag()->get('base.user.online_delay'), $userClass::getOnlineDelay());
 
         // isTester(): debug, then an address among the test recipients (the old code, as it was).
-        $recipients = BaseService::getService()->getParameterBag('base.notifier.test_recipients');
+        $recipients = FrameworkLocator::service()->getParameterBag('base.notifier.test_recipients');
         foreach (array_merge(['tester@example.org', 'someone@lesringostars.test'], array_map(fn ($r) => str_replace(['\\', '.*', '^', '$'], ['', 'x', '', ''], $r).'', $recipients)) as $email) {
             $user = (new \ReflectionClass($userClass))->newInstanceWithoutConstructor();
             $user->setEmail($email);
             $before = false;
-            if (BaseService::getService()->isDebug()) {
+            if (FrameworkLocator::service()->isDebug()) {
                 foreach ($recipients as $testRecipient) {
                     if (preg_match('/'.$testRecipient.'/', $user->getEmail())) {
                         $before = true;
@@ -76,9 +77,9 @@ final class EnvironmentTest extends KernelTestCase
         }
 
         $token = new Token('c4b-environment', 3600);
-        self::assertSame(BaseService::getService()->getParameterBag('base.user.token_default_throttling'), (new \ReflectionProperty(Token::class, 'throttle'))->getValue($token));
+        self::assertSame(FrameworkLocator::service()->getParameterBag('base.user.token_default_throttling'), (new \ReflectionProperty(Token::class, 'throttle'))->getValue($token));
         $hashIds = (new \ReflectionProperty(Token::class, 'hashIds'))->getValue($token);
-        self::assertSame((new Hashids(BaseService::getService()->getSalt()))->encodeHex('c4b0'), $hashIds->encodeHex('c4b0'), 'salted with the secret');
+        self::assertSame((new Hashids(FrameworkLocator::service()->getSalt()))->encodeHex('c4b0'), $hashIds->encodeHex('c4b0'), 'salted with the secret');
         self::assertSame(42, (new \ReflectionProperty(Token::class, 'throttle'))->getValue(new Token('c4b-throttled', 3600, 42)));
 
         $setting = new SettingIntl();

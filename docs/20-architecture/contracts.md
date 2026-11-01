@@ -96,10 +96,9 @@ What changed in C9:
 | `BaseService::getSecret()`, `getSalt()` | `Runtime::environment()->secret()` | `kernel.secret` |
 | `BaseService::isGranted()` | `Runtime::access()->isGranted()` | the authorization checker |
 
-  The other accessors hand out the framework's services, typed as they always were
-  (`getRouter()`, `getTranslator()`, `getLocalizer()`, `getTwig()`, `getTrading()`,
-  `getDoctrine()`, `getTokenStorage()`...): no contract has their type, so they stay on the
-  lazy `base.runtime` locator, one service built on its first call.
+  The other accessors stay on the lazy `base.runtime` locator, one service built on its first
+  call; since F2f (below) they name contracts only, and the framework's services they handed
+  out are deprecated.
 
 **The bundles' uses** (for step C8, which moves them to the contracts; nothing changed in the
 bundles): no bundle injects BaseService or calls `getService()`. Fourteen entities use
@@ -111,6 +110,56 @@ BaseTrait - marketplace's `Order` (`getTrading()` x8, `getTranslator()` x3, `get
 (`getRouter()`); and, calling none of its accessors, marketplace's `Sales\Discount`, `Fee`,
 `Sales\Attribute\Action\FixedAmountAdapter`, forum's `Post`, mailbox's `Conversation`,
 classroom's `Entitlement` and `Resource`.
+
+## BaseTrait on contracts only (step F2f)
+
+`Base\Traits\BaseTrait` names contracts only: each type its accessors take or answer is an
+interface of omnisense/omnibridge or `Base\Contract\`, or a class of the agnostic core
+(`tests/Agnostic.php`) - never a class of Symfony, Doctrine or Twig
+(`tests/Traits/BaseTraitContractsTest`). Each service comes in two forms:
+
+| Form | Answers | For |
+|---|---|---|
+| `getX()` | the service, or `Omnibridge\Exception\MissingContractException` when the host has none | a caller that needs it - it used to fail further on, on a call on null |
+| `findX()` | the service, or null | a caller that does without: an optional service, a host that does not answer it |
+
+The services: `AttributeReader`, `SettingBag`, `EntityHydratorInterface`, `MediaService`,
+`Obfuscator`, `IconProvider`, `LocalizerInterface`, `BaseNotifierInterface`,
+`TranslatorInterface`, `TradingInterface`, `ParameterBagInterface` (`getParameterBag($key)`
+still answers null for a key the parameters do not have: only a host without parameters
+throws). `isEntity()` answers a bool, and throws without the class metadata manipulator
+(no persistence) instead of answering null. `getEnvironment()`, `getProjectDir()` and the
+directories are unchanged.
+
+**The framework's accessors are deprecated** - `getRouter()`, `getTwig()`, `getDoctrine()`,
+`getObjectManager()`, `getEntityManager()`, `getRepository()`, `getClassMetadataManipulator()`,
+`getTokenStorage()`, `getRequestStack()`, `getFirewallMap()`, `getSlugger()`, `getService()`.
+They moved to `Base\Traits\FrameworkAccessorsTrait`, which BaseTrait still uses: same types,
+same null where the host has no such service, and an `E_USER_DEPRECATED` on each call naming
+what to call instead (`Link::to()` for `getRouter()->generate()`, the unit of work and the
+repositories for Doctrine's, `Runtime::access()` / `::sessions()` / `::routes()` for the
+security and request ones, `Omnibridge\Contract\Views` for Twig). They are removed with the
+former names at 6.0, after the sites have moved (step S). The core's host code - BaseService,
+the validators, `EditorController`, `Notification`'s mails until they render through Views
+(F5a), marketplace's `__autocomplete()` - asks the same services of
+`Base\Bridge\Symfony\FrameworkLocator`, without the deprecation; it moves with the host code
+(Doctrine's part at F3, Symfony's at F5c).
+
+**The deprecation path, for an application** (step S):
+
+- `getX()` of a contract that it tests for null (`?->`, `if (!...)`, `?? `): `findX()`;
+- `getX()` it calls straight on: nothing to change, its type is no longer nullable;
+- a framework accessor: what its deprecation names (or `FrameworkLocator` in host code).
+
+What was measured when F2f was made (core, the omnibase/* bundles, omnibridge/*,
+lesringostars and lesringostars-laravel; 116 calls in 39 files, plus one static call on an
+entity class): 63 calls on the contracts' accessors, of which 4 do without the service
+(Uploader's `getMediaService()?->`, Notification's notifier check, `AbstractExtension`'s
+`isEntity()`, lesringostars' `Notification::getTranslator()` with `?->`) and 3 test a missing
+parameter key (marketplace); 53 calls on the framework's accessors - 31 `getRouter()` (20 of
+them `->generate()` in an entity's `__toLink()`, now `Link::to()`; the other 11 in BaseService), 6 `getTwig()`, 8
+`getRequestStack()`, 3 `getDoctrine()`, 3 `getEntityManager()`, 2 `getTokenStorage()`. No
+omnibridge package and nothing in lesringostars-laravel calls them.
 
 ## The parameters and the settings over them (step C9)
 

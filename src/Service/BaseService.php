@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Route;
 use App\Entity\User;
 use Omnibridge\Contract\Access;
 use Omnibridge\Contract\Environment as EnvironmentContract;
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Contract\Runtime;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\DevelopmentEnvironment;
@@ -184,7 +185,7 @@ class BaseService extends Locator
 
     public function getRouteIndex(): string
     {
-        return $this->getRouter()->getRouteIndex();
+        return FrameworkLocator::router()->getRouteIndex();
     }
 
     /**
@@ -320,7 +321,7 @@ class BaseService extends Locator
      */
     public function removeSession($name)
     {
-        return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->remove($name) : null;
+        return (FrameworkLocator::requestStack() && FrameworkLocator::requestStack()->getSession()->has($name)) ? FrameworkLocator::requestStack()->getSession()->remove($name) : null;
     }
 
     /**
@@ -330,9 +331,9 @@ class BaseService extends Locator
     public function getSession($name = null)
     {
         if (!$name) {
-            return $this->getRequestStack()->getSession();
+            return FrameworkLocator::requestStack()->getSession();
         }
-        return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->get($name) : null;
+        return (FrameworkLocator::requestStack() && FrameworkLocator::requestStack()->getSession()->has($name)) ? FrameworkLocator::requestStack()->getSession()->get($name) : null;
     }
 
     /**
@@ -405,12 +406,12 @@ class BaseService extends Locator
 
     public function getAsset(string $url): string
     {
-        return $this->getTwig()->getAsset($url);
+        return FrameworkLocator::twig()->getAsset($url);
     }
 
     public function getRequest(): ?Request
     {
-        return $this->getRouter()->getRequest();
+        return FrameworkLocator::router()->getRequest();
     }
 
     public function getCurrentRequest(): ?Request
@@ -420,27 +421,27 @@ class BaseService extends Locator
 
     public function getRoute(?string $url): ?Route
     {
-        return $this->getRouter()->getRoute($url);
+        return FrameworkLocator::router()->getRoute($url);
     }
 
     public function getCurrentRoute(): ?Route
     {
-        return $this->getRouter()->getRoute();
+        return FrameworkLocator::router()->getRoute();
     }
 
     public function getRouteName(?string $url): ?string
     {
-        return $this->getRouter()->getRouteName($url);
+        return FrameworkLocator::router()->getRouteName($url);
     }
 
     public function getCurrentRouteName(): ?string
     {
-        return $this->getRouter()->getRouteName();
+        return FrameworkLocator::router()->getRouteName();
     }
 
     public function generateUrl(string $routeName, array $routeParameters = []): string
     {
-        return $this->getRouter()->generate($routeName, $routeParameters);
+        return FrameworkLocator::router()->generate($routeName, $routeParameters);
     }
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
@@ -448,7 +449,7 @@ class BaseService extends Locator
         if (filter_var($urlOrRoute, FILTER_VALIDATE_URL) || str_contains($urlOrRoute, "/")) {
             return new RedirectResponse($urlOrRoute);
         }
-        return new RedirectResponse($this->getRouter()->generate($urlOrRoute, $routeParameters), $state, $headers);
+        return new RedirectResponse(FrameworkLocator::router()->generate($urlOrRoute, $routeParameters), $state, $headers);
     }
 
     public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): ?RedirectResponse
@@ -483,7 +484,7 @@ class BaseService extends Locator
             unset($headers["callback"]);
         }
 
-        $url = $this->getRouter()->generate($routeName, $routeParameters) ?? $routeName;
+        $url = FrameworkLocator::router()->generate($routeName, $routeParameters) ?? $routeName;
         $routeName = $this->getRouteName($url);
         if (!$routeName) {
             throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
@@ -555,7 +556,7 @@ class BaseService extends Locator
      */
     public function isAdmin()
     {
-        return $this->getRouter()->isAdmin();
+        return FrameworkLocator::router()->isAdmin();
     }
 
     /**
@@ -563,7 +564,7 @@ class BaseService extends Locator
      */
     public function isProfiler()
     {
-        return $this->getRouter()->isProfiler();
+        return FrameworkLocator::router()->isProfiler();
     }
 
     /**
@@ -627,11 +628,11 @@ class BaseService extends Locator
      */
     public function getToken()
     {
-        if ($this->getTokenStorage() === null) {
+        if (FrameworkLocator::tokenStorage() === null) {
             throw new Exception("No token storage found in BaseService. Did you overloaded self::__construct ?");
         }
 
-        return $this->getTokenStorage()->getToken();
+        return FrameworkLocator::tokenStorage()->getToken();
     }
 
     /**
@@ -714,7 +715,7 @@ class BaseService extends Locator
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         $entity = $eventOrEntity->getObject();
-        $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
+        $originalEntityData = FrameworkLocator::entityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
 
         if ($eventOrEntity instanceof PreUpdateEventArgs) {
             $event = $eventOrEntity;
