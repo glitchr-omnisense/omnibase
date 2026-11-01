@@ -35,8 +35,7 @@ final class DoctrineBehaviours
         CacheBackend::class => DoctrineCacheBackend::class,
         OrderColumnBackend::class => DoctrineOrderColumnBackend::class,
         EntityShapes::class => DoctrineShapes::class,
-        // Step F2d: what the core's services ask of a unit of work beyond its contract.
-        Repositories::class => DoctrineRepositories::class,
+        // Step F2d: what the core's services ask of a unit of work beyond its contract (and the repositories, below).
         RowLocks::class => DoctrineRowLocks::class,
         ConditionalUpdates::class => DoctrineConditionalUpdates::class,
         EntityCache::class => DoctrineEntityCache::class,
@@ -53,6 +52,8 @@ final class DoctrineBehaviours
         foreach (self::BACKENDS as $behaviour => $backend) {
             Backends::register(DoctrineUnitOfWork::class, $behaviour, $backend);
         }
+        // The repositories over the unit of work's entity manager (step F2d): DoctrineRepositories takes the entity manager alone.
+        Backends::register(DoctrineUnitOfWork::class, Repositories::class, static fn (DoctrineUnitOfWork $unitOfWork) => new DoctrineRepositories($unitOfWork->entityManager()));
     }
 
     /** Registers them unless done: a DoctrineUnitOfWork made before the relay (a service's, at the top of a request) finds them. */
