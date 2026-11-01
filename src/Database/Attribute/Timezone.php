@@ -2,6 +2,7 @@
 
 namespace Base\Database\Attribute;
 
+use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 
@@ -58,14 +59,12 @@ class Timezone extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
-     * @return void
      */
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         if (!in_array("create", $this->context)) {
             return;
         }
@@ -73,14 +72,12 @@ class Timezone extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
-     * @return void
      */
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         if (!in_array("update", $this->context)) {
             return;
         }

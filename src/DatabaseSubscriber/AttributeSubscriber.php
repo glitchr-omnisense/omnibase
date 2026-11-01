@@ -14,6 +14,9 @@ use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Persistence\Lifecycle;
 
 class AttributeSubscriber
 {
@@ -343,6 +346,7 @@ class AttributeSubscriber
 
     public function preFlush(PreFlushEventArgs $event)
     {
+        $neutral = null;
         $uow = $event->getObjectManager()->getUnitOfWork();
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $this->entityInsertionBuffer[] = $entity;
@@ -383,6 +387,7 @@ class AttributeSubscriber
                         continue;
                     }
 
+                    $attribute->onPreFlush($neutral ??= new Lifecycle\PreFlush($this->unitOfWork()), $entity, $property);
                     $attribute->preFlush($event, $classMetadata, $entity, $property);
                 }
             }
@@ -401,6 +406,7 @@ class AttributeSubscriber
                     continue;
                 }
 
+                $attribute->onPreFlush($neutral ??= new Lifecycle\PreFlush($this->unitOfWork()), $entity);
                 $attribute->preFlush($event, $classMetadata, $entity);
                 $this->entityCandidateBuffer[] = $entity;
             }
@@ -414,6 +420,7 @@ class AttributeSubscriber
 
     public function onFlush(OnFlushEventArgs $event)
     {
+        $neutral = null;
         $uow = $event->getObjectManager()->getUnitOfWork();
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             $this->entityInsertionBuffer[] = $entity;
@@ -454,6 +461,7 @@ class AttributeSubscriber
                         continue;
                     }
 
+                    $attribute->onOnFlush($neutral ??= new Lifecycle\OnFlush($this->unitOfWork()), $entity, $property);
                     $attribute->onFlush($event, $classMetadata, $entity, $property);
                 }
             }
@@ -472,6 +480,7 @@ class AttributeSubscriber
                     continue;
                 }
 
+                $attribute->onOnFlush($neutral ??= new Lifecycle\OnFlush($this->unitOfWork()), $entity);
                 $attribute->onFlush($event, $classMetadata, $entity);
             }
         }
@@ -479,6 +488,7 @@ class AttributeSubscriber
 
     public function postFlush(PostFlushEventArgs $event)
     {
+        $neutral = null;
         $uow = $event->getObjectManager()->getUnitOfWork();
 
         $entities = array_merge($this->entityCandidateBuffer, $this->entityInsertionBuffer, $this->entityUpdateBuffer, $this->entityDeletionBuffer);
@@ -510,6 +520,7 @@ class AttributeSubscriber
                         continue;
                     }
 
+                    $attribute->onPostFlush($neutral ??= new Lifecycle\PostFlush($this->unitOfWork()), $entity, $property);
                     $attribute->postFlush($event, $classMetadata, $entity, $property);
                 }
             }
@@ -528,6 +539,7 @@ class AttributeSubscriber
                     continue;
                 }
 
+                $attribute->onPostFlush($neutral ??= new Lifecycle\PostFlush($this->unitOfWork()), $entity);
                 $attribute->postFlush($event, $classMetadata, $entity);
             }
         }
@@ -547,6 +559,8 @@ class AttributeSubscriber
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
     {
         $entity = $event->getObject();
+        $neutral = $this->neutralEvent($event, $eventName, $entity);
+        $neutralHook = 'on'.ucfirst($eventName);
 
         $className = get_class($entity);
         $classMetadata = $this->entityManager->getClassMetadata($className);
@@ -569,6 +583,7 @@ class AttributeSubscriber
                     continue;
                 }
 
+                $attribute->{$neutralHook}($neutral, $property);
                 $attribute->{$eventName}($event, $classMetadata, $entity, $property);
             }
         }
@@ -587,8 +602,40 @@ class AttributeSubscriber
                 continue;
             }
 
+            $attribute->{$neutralHook}($neutral);
             $attribute->{$eventName}($event, $classMetadata, $entity);
         }
+
+        // A new value a neutral PreUpdate hook gave a changed field goes to Doctrine's update.
+        if ($neutral instanceof Lifecycle\PreUpdate && $event instanceof PreUpdateEventArgs) {
+            foreach ($neutral->changes() as $field => [, $after]) {
+                if ($event->hasChangedField($field) && $event->getNewValue($field) !== $after) {
+                    $event->setNewValue($field, $after);
+                }
+            }
+        }
+    }
+
+    /** The unit of work the neutral events carry: the entity manager's, through omnisense/omnibridge's contract. */
+    protected function unitOfWork(): DoctrineUnitOfWork
+    {
+        return $this->unitOfWork ??= new DoctrineUnitOfWork($this->entityManager);
+    }
+
+    protected ?DoctrineUnitOfWork $unitOfWork = null;
+
+    /** Doctrine's lifecycle event as omnisense/omnibridge's (plan "omnibase agnostic", step F2b). */
+    protected function neutralEvent(LifecycleEventArgs $event, string $eventName, object $entity): Lifecycle\EntityEvent
+    {
+        return match ($eventName) {
+            'prePersist' => new Lifecycle\PrePersist($entity, $this->unitOfWork()),
+            'preUpdate' => new Lifecycle\PreUpdate($entity, $this->unitOfWork(), $event instanceof PreUpdateEventArgs ? $event->getEntityChangeSet() : $this->unitOfWork()->changes($entity)),
+            'preRemove' => new Lifecycle\PreRemove($entity, $this->unitOfWork()),
+            'postLoad' => new Lifecycle\PostLoad($entity, $this->unitOfWork()),
+            'postPersist' => new Lifecycle\PostPersist($entity, $this->unitOfWork()),
+            'postUpdate' => new Lifecycle\PostUpdate($entity, $this->unitOfWork()),
+            'postRemove' => new Lifecycle\PostRemove($entity, $this->unitOfWork()),
+        };
     }
 
     public function prePersist(LifecycleEventArgs $event)

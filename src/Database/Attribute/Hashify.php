@@ -2,6 +2,7 @@
 
 namespace Base\Database\Attribute;
 
+use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
@@ -204,14 +205,12 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
-     * @return void
      */
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $value = $this->getHashedMessage($entity);
         if ($value) {
             $this->setFieldValue($entity, $property, $value);
@@ -219,14 +218,12 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
-     * @return void
      */
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $value = $this->getHashedMessage($entity);
         if ($value) {
             $this->setFieldValue($entity, $property, $value);
@@ -234,28 +231,26 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
      * @return void
      * @throws Exception
      */
-    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPostPersist(Lifecycle\PostPersist $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $this->erasePlainMessage($entity);
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
      * @return void
      * @throws Exception
      */
-    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPostUpdate(Lifecycle\PostUpdate $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $this->erasePlainMessage($entity);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Base\Database\Attribute;
 
+use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
@@ -86,19 +87,17 @@ class GenerateUuid extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param OnFlushEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the flush's unit of work.
      * @param string|null $property
      * @return void
      * @throws Exception
      */
-    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
     {
         if ($this->getFieldValue($entity, $property) === null) {
             $this->setFieldValue($entity, $property, $this->getUuid($entity));
-            if ($this->getUnitOfWork()->getEntityChangeSet($entity)) {
-                $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+            if ($event->unitOfWork->changes($entity)) {
+                $event->unitOfWork->recompute($entity);
             }
         }
     }

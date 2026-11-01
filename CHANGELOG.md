@@ -10,6 +10,28 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the behaviours' neutral hooks (2026-11-01)
+
+Plan "omnibase agnostic", step F2b (first part).
+
+- `AbstractAttribute` has ten neutral hooks - `onPrePersist()`, `onPreUpdate()`, `onPreRemove()`,
+  `onPostLoad()`, `onPostPersist()`, `onPostUpdate()`, `onPostRemove()` with the entity's event,
+  `onPreFlush()`, `onOnFlush()`, `onPostFlush()` with the flush's event and the entity - taking
+  omnisense/omnibridge's `Omnibridge\Persistence\Lifecycle\*` events (the entity, its unit of work,
+  `recompute()`), no ORM type.
+- `AttributeSubscriber` relays Doctrine's events to them: the neutral hook first, then the
+  Doctrine-typed one, which the attributes of the applications and bundles may still override
+  (deprecated, removed at 6.0); a new value a neutral `PreUpdate` gives a changed field goes to
+  Doctrine's update.
+- `Base\Bridge\Doctrine\DoctrineUnitOfWork`: omnibridge's `UnitOfWork` over the entity manager, the
+  first of the persistence contracts' Doctrine adapters.
+- Timestamp, Timezone, Blameable, Countify, Hashify, Randomize and GenerateUuid answer the neutral
+  hooks; Alias, Associate, Cache, OrderColumn, Slugify, Uploader and Vault reach Doctrine's metadata
+  and unit of work inside their hooks and follow with step F2c (the entity's shape).
+
+Test: `tests/Attributes/NeutralHooksTest` (the hooks' events, the moved behaviours, the unit of work
+over Doctrine).
+
 ### Changed: the enumerations are plain PHP classes (2026-11-01)
 
 Plan "omnibase agnostic", step F2a.
