@@ -8,7 +8,7 @@ use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
 use Base\Service\Model\Wysiwyg\LinkEnhancerInterface;
 use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {

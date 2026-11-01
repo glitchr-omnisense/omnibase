@@ -9,7 +9,7 @@ use Base\Form\Type\SecurityLoginType;
 use Base\Service\ReferrerInterface;
 use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

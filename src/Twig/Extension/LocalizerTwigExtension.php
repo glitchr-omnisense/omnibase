@@ -8,6 +8,7 @@ use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Base\View\Menus;
 
 /**
  * omnibase's locale filters and its timezone, country and currency menus, on
@@ -18,9 +19,12 @@ final class LocalizerTwigExtension extends AbstractExtension
 {
     protected LocalizerInterface $localizer;
 
+    private readonly Menus $menus;
+
     public function __construct(LocalizerInterface $localizer)
     {
         $this->localizer = $localizer;
+        $this->menus = new Menus(localizer: $localizer);
     }
 
     /**
@@ -55,18 +59,12 @@ final class LocalizerTwigExtension extends AbstractExtension
 
     public function renderCountry(Environment $twig, array $options = [], string $template = '@Base/localizer/country_dropdown.html.twig'): ?string
     {
-        return $twig->render($template, array_merge($options, [
-            'available_countries' => $this->localizer->getAvailableLocaleCountries(),
-            'current_country' => $this->localizer->getLocaleCountry(),
-        ]));
+        return $twig->render($template, array_merge($options, $this->menus->country()));
     }
 
     public function renderTimezone(Environment $twig, array $options = [], string $template = '@Base/localizer/timezone_dropdown.html.twig'): ?string
     {
-        return $twig->render($template, array_merge($options, [
-            'available_timezones' => $this->localizer->getAvailableTimezones(),
-            'current_timezone' => $this->localizer->getTimezone(),
-        ]));
+        return $twig->render($template, array_merge($options, $this->menus->timezone()));
     }
 
     public function renderCurrency(Environment $twig, array $options = [], string $template = '@Base/localizer/currency_dropdown.html.twig'): ?string

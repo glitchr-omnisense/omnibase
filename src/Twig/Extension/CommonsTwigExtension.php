@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Base\View\Commons;
 
 /**
  * The shared bricks, in a template (docs/40-commons):
@@ -32,14 +33,23 @@ class CommonsTwigExtension extends AbstractExtension
         protected readonly ?MediaService $media = null,
         #[Autowire('%kernel.project_dir%/public')] protected readonly string $publicDir = '',
     ) {
+        $this->commons = new Commons($embeds, $qr, $hours, null === $packages ? null : static fn (string $path): string => $packages->getUrl($path), $media, $publicDir);
+    }
+
+    private readonly Commons $commons;
+
+    /** The neutral helper behind this extension (the screens' Pictures contract: Base\Bridge\Symfony\MediaPictures). */
+    public function commons(): Commons
+    {
+        return $this->commons;
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('embed_url', fn (?string $url, bool $remote = true): ?array => $this->embeds->resolve($url, $remote)),
-            new TwigFunction('qr_code', fn (string $data, int $size = 600): string => $this->qr->dataUri($data, $size)),
-            new TwigFunction('opening_hours', fn (string|object|null $scope = null): OpeningHours => null === $scope ? $this->hours : $this->hours->for($scope)),
+            new TwigFunction('embed_url', $this->commons->embedUrl(...)),
+            new TwigFunction('qr_code', $this->commons->qrCode(...)),
+            new TwigFunction('opening_hours', $this->commons->openingHours(...)),
         ];
     }
 
@@ -50,21 +60,9 @@ class CommonsTwigExtension extends AbstractExtension
         ];
     }
 
-    /** A stored picture to its URL (moved here from the apps' App\Twig\ImageExtension). */
+    /** A stored picture to its URL (Base\View\Commons; moved here from the apps' App\Twig\ImageExtension). */
     public function picture(?string $image, ?int $width = null, ?int $height = null): ?string
     {
-        if (null === $image || '' === $image) {
-            return null;
-        }
-        if ('' !== $this->publicDir && str_starts_with($image, $this->publicDir.'/')) {
-            $thumbnail = $this->media?->thumbnail($image, $width, $height);
-
-            return \is_string($thumbnail) ? $thumbnail : substr($image, \strlen($this->publicDir));
-        }
-        if (str_starts_with($image, '/') || preg_match('#^https?://#', $image)) {
-            return $image;
-        }
-
-        return $this->packages ? $this->packages->getUrl('assets/'.$image) : '/assets/'.$image;
+        return $this->commons->picture($image, $width, $height);
     }
 }

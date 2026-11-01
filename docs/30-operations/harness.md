@@ -183,6 +183,18 @@ keeps the others out, most often: Twig's `AbstractExtension`, doctrine/orm's
 `EntityRepository` (the 81 repositories), the console, DBAL's `Type` (the 20
 enums, through `EnumType`), the validator, the event dispatcher.
 
+**Twig is optional** (step F4): twig/twig, its extras and omnibridge/twig are
+suggestions of the core, so `var/bare/vendor` has no Twig. There `bare` reports a
+class of `src/Twig` that cannot load for want of a class of Twig's (an extension,
+the environment, the loader) as `"optional": "twig/twig"` - not a failure -; the
+Twig-free classes of `src/Twig` and every other class are measured as before, and
+none may need Twig (`BareTest::testTwigIsOptional`). On a vendor where Twig is
+installed (`OMNIBASE_AUTOLOAD`, this run's) nothing is optional.
+`tests/View/helpers-without-twig.php` runs the neutral view helpers (`Base\View\*`)
+there under `--strict` (`testTheViewHelpersWorkWithoutTwig`). After step F4: 669 of
+the Foundation's 881 classes (+16 helpers, and `Base\Service\BaseService`, which no
+longer declares Twig's `RuntimeExtensionInterface`).
+
 ## doctrine/orm as released
 
 Since 4.0 the image's doctrine/orm is as released: glitchr/base-plugin, which

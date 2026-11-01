@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\AutovalidateInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use Symfony\Component\Form\AbstractType;

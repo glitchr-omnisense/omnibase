@@ -3,8 +3,12 @@
 namespace Base\DependencyInjection\Compiler\Pass;
 
 use Base\DependencyInjection\Compiler\AbstractPass;
-use Base\Twig\Environment;
 
+/**
+ * The tag renderers (twig.tag_renderer: the HTML and Webpack renderers) handed to omnibase's Twig
+ * environment. Nothing to do without Twig (plan "omnibase agnostic", F4): its service, named here
+ * by its id, is defined only where Twig is installed (config/services/twig.php).
+ */
 class TagRendererPass extends AbstractPass
 {
     public function serviceInterface(): ?string 
@@ -19,7 +23,7 @@ class TagRendererPass extends AbstractPass
 
     public function classFqcn(): string
     {
-        return Environment::class;
+        return 'Base\Twig\Environment';
     }
 
     public function addMethod(): string

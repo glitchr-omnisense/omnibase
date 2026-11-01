@@ -15,7 +15,6 @@ use Base\Service\Model\Currency\CurrencyApiInterface;
 use Base\Service\Model\IconProvider\AbstractIconAdapter;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Service\Model\Obfuscator\CompressionInterface;
-use Base\Twig\Renderer\TagRendererInterface;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
@@ -58,11 +57,14 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
         $this->setConfiguration($container, $config, $configuration->getTreeBuilder()->getRootNode()->getNode()->getName());
 
-        // Override and merge form_themes.. to add some features..
-        $container->setParameter('twig.form.resources', array_merge(
-            $config['twig']['form_themes'],
-            $container->getParameter('twig.form.resources')
-        ));
+        // Override and merge form_themes.. to add some features.. Where TwigBundle is registered: Twig is
+        // optional in the core (plan "omnibase agnostic", F4), and so are its form themes.
+        if ($container->hasParameter('twig.form.resources')) {
+            $container->setParameter('twig.form.resources', array_merge(
+                $config['twig']['form_themes'],
+                $container->getParameter('twig.form.resources')
+            ));
+        }
 
         $container->registerForAutoconfiguration(AbstractIconAdapter::class)->addTag('base.service.icon');
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
@@ -72,7 +74,6 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         $container->registerForAutoconfiguration(AbstractLocalCacheInterface::class)->addTag('base.simple_cache');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('currency.api');
         $container->registerForAutoconfiguration(CompressionInterface::class)->addTag('obfuscator.compressor');
-        $container->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
         $container->registerForAutoconfiguration(WorkflowInterface::class)->addTag('workflow');
         // The demonstration accounts a bundle or the application declares (docs/20-architecture/demo.md).
         $container->registerForAutoconfiguration(DemoAccountProviderInterface::class)->addTag('base.demo_account_provider');

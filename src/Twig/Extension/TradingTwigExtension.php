@@ -3,28 +3,24 @@
 namespace Base\Twig\Extension;
 
 use Base\Service\TradingInterface;
-use Twig\Error\RuntimeError;
 use Twig\Extension\AbstractExtension;
-use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use Base\View\Money;
 
 final class TradingTwigExtension extends AbstractExtension
 {
-    /**
-     * @var IntlExtension
-     */
-    protected $intlExtension;
-
     /**
      * @var TradingInterface
      */
     protected $tradingMarket;
 
+    private readonly Money $money;
+
     public function __construct(TradingInterface $tradingMarket)
     {
         $this->tradingMarket = $tradingMarket;
-        $this->intlExtension = new IntlExtension();
+        $this->money = new Money($tradingMarket);
     }
 
     public function getFilters(): array
@@ -44,49 +40,15 @@ final class TradingTwigExtension extends AbstractExtension
             ];
     }
 
-    /**
-     * @param $amount
-     * @param string $currency
-     * @param array $attrs
-     * @param string|null $locale
-     * @return string
-     * @throws RuntimeError
-     */
+    /** An amount in the currency the visitor reads (Base\View\Money). */
     public function formatCurrency($amount, string $currency, array $attrs = [], ?string $locale = null): string
     {
-        $rate = 1.00;
-        $applyRate = array_pop_key('use_rate', $attrs) ?? true;
-        $scalingFactor = array_pop_key('scale', $attrs) ?? 100;
-
-        if ($applyRate) {
-            $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
-            $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();
-
-            if (null !== $rate) {
-                $currency = $targetCurrency;
-            } else {
-                $rate = 1.0;
-            }
-        }
-
-        return $this->intlExtension->formatCurrency($amount * $rate / $scalingFactor, $currency, $attrs, $locale);
+        return $this->money->formatCurrency($amount, $currency, $attrs, $locale);
     }
 
-    /**
-     * @param $amount
-     * @param string $currency
-     * @param array $attrs
-     * @param string|null $locale
-     * @return float|null
-     */
+    /** An amount converted to the currency the visitor reads, null without a rate (Base\View\Money). */
     public function applyCurrencyRate($amount, string $currency, array $attrs = [], ?string $locale = null): ?float
     {
-        $targetCurrency = $this->tradingMarket->getRenderedCurrency() ?? $currency;
-        $rate = $this->tradingMarket->getFallback($currency, $targetCurrency)?->getValue();
-        if (null === $rate) {
-            return null;
-        }
-
-        return $amount * $rate;
+        return $this->money->applyCurrencyRate($amount, $currency);
     }
 }

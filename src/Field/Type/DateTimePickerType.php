@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Twig\Environment;
+use Twig\Environment;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;

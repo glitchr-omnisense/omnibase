@@ -19,6 +19,5 @@ return static function (ContainerConfigurator $container): void {
         ->arg('$settings', service('setting_bag')->nullOnInvalid())
         ->arg('$requests', service('request_stack')->nullOnInvalid());
 
-    $services->set('Base\Twig\Extension\LocalBusinessTwigExtension')
-        ->tag('twig.extension');
+    // local_business() and local_business_jsonld() in a template: with the Twig layer (config/services/twig.php).
 };

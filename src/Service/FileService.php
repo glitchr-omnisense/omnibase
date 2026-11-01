@@ -42,7 +42,7 @@ class FileService implements FileServiceInterface
     /**
      * @var Environment
      */
-    protected Environment $twig;
+    protected ?Environment $twig;
 
     /** * @var string */
     protected string $projectDir;
@@ -53,7 +53,7 @@ class FileService implements FileServiceInterface
     /** @var string     */
     protected string $localCache;
 
-    public function __construct(Environment $twig, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
+    public function __construct(?Environment $twig, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
     {
         $this->twig = $twig;
         $this->router = $router;
@@ -440,5 +440,17 @@ class FileService implements FileServiceInterface
         }
 
         return $response;
+    }
+
+    /**
+     * The view engine the media tags are rendered with (audio(), video(), imagify(), lightbox()).
+     * Optional since step F4 of the plan "omnibase agnostic" (Twig is a suggestion of the core): the
+     * file and image rules - addresses, thumbnails, the stored files - need none.
+     *
+     * @throws \LogicException when the service was built without one
+     */
+    protected function views(): Environment
+    {
+        return $this->twig ?? throw new \LogicException(static::class.' renders its media tags with Twig, and was built without it.');
     }
 }

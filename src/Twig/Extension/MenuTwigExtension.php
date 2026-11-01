@@ -7,6 +7,7 @@ use Omnibridge\Contract\Locales;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Menus;
 
 /**
  * The visitor's menus of a page: its language, `render_locale()` (the host's
@@ -25,10 +26,13 @@ use Twig\TwigFunction;
  */
 final class MenuTwigExtension extends AbstractExtension
 {
+    private readonly Menus $menus;
+
     public function __construct(
         private readonly Locales $locales,
         private readonly ThemizerInterface $themizer,
     ) {
+        $this->menus = new Menus($locales, $themizer);
     }
 
     public function getFunctions(): array
@@ -43,33 +47,21 @@ final class MenuTwigExtension extends AbstractExtension
 
     public function renderLocale(Environment $twig, array $options = [], string $template = '@Base/localizer/locale_dropdown.html.twig'): ?string
     {
-        return $twig->render($template, array_merge($options, [
-            'available_locales' => $this->locales->getAvailableLocales(),
-            'current_locale' => $this->locales->getLocale(),
-        ]));
+        return $twig->render($template, array_merge($options, $this->menus->locale()));
     }
 
     public function renderModes(Environment $twig, array $options = [], string $template = '@Base/themizer/dropdown.html.twig'): ?string
     {
-        return $twig->render($template, array_merge($options, [
-            'available_theme_modes' => $this->themizer->getAvailableModes(),
-            'current_theme_mode' => $this->themizer->getMode(),
-        ]));
+        return $twig->render($template, array_merge($options, $this->menus->modes()));
     }
 
     public function renderFilters(Environment $twig, array $options = [], string $template = '@Base/themizer/filters/dropdown.html.twig'): ?string
     {
-        return $twig->render($template, array_merge($options, [
-            'available_theme_filters' => $this->themizer->getAvailableFilters(),
-            'current_theme_filter' => $this->themizer->getFilter(),
-        ]));
+        return $twig->render($template, array_merge($options, $this->menus->filters()));
     }
 
     public function renderWidths(Environment $twig, array $options = [], string $template = '@Base/themizer/widths/dropdown.html.twig'): ?string
     {
-        return $twig->render($template, array_merge($options, [
-            'available_theme_widths' => $this->themizer->getAvailableWidths(),
-            'current_theme_width' => $this->themizer->getWidth(),
-        ]));
+        return $twig->render($template, array_merge($options, $this->menus->widths()));
     }
 }

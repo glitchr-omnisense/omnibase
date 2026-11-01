@@ -65,10 +65,6 @@ return static function (ContainerConfigurator $container): void {
         ->arg('$cache', service('cache.app')->nullOnInvalid())
         ->arg('$logger', service('logger')->nullOnInvalid());
 
-    $services->set('Base\Twig\Extension\CommonsTwigExtension')
-        ->arg('$media', service('Base\Service\MediaService')->nullOnInvalid())
-        ->tag('twig.extension');
-
     // The texts rewritten in the back office, between omnibase's translator
     // (Base\Service\Translator, priority 0) and Symfony's. The shared Redis
     // pool when the application has one (web, worker and cron agree).
