@@ -2,12 +2,17 @@
 
 namespace Base\Database\Filter;
 
-use Base\Attributes\AttributeReader;
-use Base\Database\Attribute\Vault;
+use Base\Database\Scope\VaultScope;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 use InvalidArgumentException;
 
+/**
+ * Hides the rows of another environment's vault: Doctrine's compilation of
+ * Base\Database\Scope\VaultScope (plan "omnibase agnostic", step F2e), the vault
+ * field => [null, the environment] it gives written as SQL (an environment holding
+ * a % compared with LIKE). Moves to omnibridge/doctrine at step F3.
+ */
 class VaultFilter extends SQLFilter
 {
     protected $environment;
@@ -38,8 +43,8 @@ class VaultFilter extends SQLFilter
      */
     public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
-        $vaultAttribute = AttributeReader::getInstance()->getClassAttributes($targetEntity->getName(), Vault::class);
-        if (count($vaultAttribute) < 1) {
+        $scope = new VaultScope();
+        if (!$scope->appliesTo($targetEntity->getName())) {
             return "";
         }
 
@@ -47,10 +52,15 @@ class VaultFilter extends SQLFilter
             throw new InvalidArgumentException("No environment defined in \"" . self::class . "\" while setting up " . $targetEntity->getName());
         }
 
-        $vaultFieldName = end($vaultAttribute)->vault;
-        $operator = str_contains($this->environment, "%") ? "LIKE" : "=";
-        if ($targetEntity->hasField($vaultFieldName)) {
-            return $targetTableAlias . "." . $vaultFieldName . " IS NULL OR " . $targetTableAlias . "." . $vaultFieldName . " $operator '" . $this->environment . "'";
+        foreach ($scope->criteria($targetEntity->getName(), ["environment" => $this->environment]) as $vaultFieldName => $values) {
+            if (!$targetEntity->hasField($vaultFieldName)) {
+                return "";
+            }
+            // VaultScope gives the vault field => [null, the environment]: IS NULL, or equal.
+            $environment = (string) end($values);
+            $operator = str_contains($environment, "%") ? "LIKE" : "=";
+
+            return $targetTableAlias . "." . $vaultFieldName . " IS NULL OR " . $targetTableAlias . "." . $vaultFieldName . " $operator '" . $environment . "'";
         }
 
         return "";

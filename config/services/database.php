@@ -89,6 +89,9 @@ return static function (ContainerConfigurator $container): void {
     // What a constructor that still accepts the entity manager (deprecated, until 6.0) is autowired with:
     // Symfony names a union type's service by its sorted members.
     $services->alias('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork', \Base\Bridge\Doctrine\DoctrineUnitOfWork::class);
+    // The persistence installed, its scopes (trash, vault) as Doctrine's filters (step F2e).
+    $services->set(\Base\Bridge\Doctrine\DoctrineBackend::class)->args([service(\Base\Bridge\Doctrine\DoctrineUnitOfWork::class)]);
+    $services->alias(\Omnibridge\Persistence\Backend::class, \Base\Bridge\Doctrine\DoctrineBackend::class)->public();
     foreach (\Base\Repository\Aliases::INTERFACES as $interface => $repository) {
         $services->alias($interface, $repository)->public();
     }

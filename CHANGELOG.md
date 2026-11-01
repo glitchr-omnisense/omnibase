@@ -10,6 +10,32 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the trash and vault filters as scopes, the paginator on Pages (2026-11-01)
+
+Plan "omnibase agnostic", step F2e. See docs/20-architecture/doctrine.md (The scopes and the pages).
+
+- `Base\Database\Scope\TrashScope` ("trash": a `#[Trasheable]` entity's deletion field => null) and
+  `VaultScope` ("vault": a `#[Vault]` entity's vault field => null or the environment) answer
+  omnisense/omnibridge's `Scope`. Doctrine's SQL filters compile them, names and SQL unchanged
+  (`TrashFilter`, `VaultFilter`: the metadata snapshot's filter constraints are identical).
+- `Base\Bridge\Doctrine\DoctrineBackend` answers omnibridge's `Backend`: the scopes enabled and disabled by
+  name (Doctrine's `trash_filter` and `vault_filter`), what it supports, its unit of work; the Symfony
+  service `Omnibridge\Persistence\Backend`, and in `Backends` for `DoctrineUnitOfWork`.
+- `TrashManager` on the unit of work: `withTrash()` disables the trash scope through the Backend, the
+  entity read through its repository, the deletion field cleared by reflection, the extension rows of a
+  destroyed entity deleted through `Base\Database\Backend\BulkDeletes` (`DoctrineBulkDeletes`: a DQL DELETE),
+  the second-level cache through `EntityCache`. Its constructor accepts the entity manager, deprecated.
+- `Base\Service\Model\Pages` (count, slice): what `Pagination` pages besides an array. A Doctrine `Query` is
+  adapted to `Base\Bridge\Doctrine\QueryPages` (by name, `Pagination::ADAPTERS`), which does what Pagination
+  did with it (the GroupBy and Translatable walkers, Doctrine's Paginator, the count by CountWalker).
+  `Paginator::paginate()` takes `array|Pages|Query`. `Pagination::get()` gives the Pages for a query,
+  `isQuery()` says whether the rows are Pages, `getQuery()` the page's query when the Pages have one;
+  `getCountQuery()` is deprecated (`QueryPages::countQuery()`).
+- Tests: `tests/Database/ScopesTest` (the scopes' criteria, the filters' SQL from them, the Backend and
+  `withTrash()`, a Pagination over any Pages, a Doctrine query paged as before). `UnitOfWorkPathTest` covers
+  `TrashManager`.
+- Agnostic core 686 -> 690, Foundation 898 -> 902.
+
 ### Changed: the core's services on the unit of work (2026-11-01)
 
 Plan "omnibase agnostic", step F2d. See docs/20-architecture/doctrine.md (The core's services on the unit of work).

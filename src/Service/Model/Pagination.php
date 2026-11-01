@@ -2,12 +2,8 @@
 
 namespace Base\Service\Model;
 
-use Base\Database\Walker\CountWalker;
-use Base\Database\Walker\GroupByWalker;
-use Base\Database\Walker\TranslatableWalker;
 use Base\Exception\InvalidPageException;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use Symfony\Component\Routing\RouterInterface;
 use Countable;
 use Iterator;
@@ -32,15 +28,20 @@ class Pagination implements PaginationInterface, Iterator, Countable
     protected string $template = "@Base/paginator/sliding.html.twig";
     protected ?string $parameterName;
 
-    public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
+    /**
+     * A query is paged by what runs it (step F2e): Pages, which a Doctrine Query is adapted to
+     * (Base\Bridge\Doctrine\QueryPages, by name: nothing of Doctrine is loaded here).
+     */
+    public const ADAPTERS = [
+        'Doctrine\ORM\Query' => 'Base\Bridge\Doctrine\QueryPages',
+    ];
+
+    /** @param array|Pages|Query $arrayOrQuery the rows: an array, or a query's Pages (a Doctrine Query is adapted) */
+    public function __construct(array|Pages|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
-        if ($arrayOrQuery instanceof Query) {
-            $query = $this->clone($arrayOrQuery, false);
-            $query->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [GroupByWalker::class]);
-            $query->setHint(GroupByWalker::HINT_GROUP_ARRAY, ["id"]);
-            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
-            $this->paginator = new DoctrinePaginator($query);
-            $this->totalCount = $this->getCountQuery($arrayOrQuery, false)->getSingleScalarResult();
+        if (!is_array($arrayOrQuery)) {
+            $this->paginator = self::pages($arrayOrQuery);
+            $this->totalCount = $this->paginator->count();
         } else {
             $this->paginator = $arrayOrQuery;
             $this->totalCount = count_leaves($this->paginator);
@@ -51,36 +52,27 @@ class Pagination implements PaginationInterface, Iterator, Countable
         $this->router = $router;
     }
 
-    public function getCountQuery(Query $query, bool $bHint = true): Query
+    /** The rows of a query as Pages: Pages as they are, a backend's query through its adapter. */
+    public static function pages(object $query): Pages
     {
-        $clone = $this->clone($query, $bHint);
+        if ($query instanceof Pages) {
+            return $query;
+        }
+        foreach (self::ADAPTERS as $class => $adapter) {
+            if ($query instanceof $class) {
+                return new $adapter($query);
+            }
+        }
 
-        $clone->setCacheable(false);
-        $clone->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [CountWalker::class]);
-        $clone->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
-        // $clone->setFirstResult(null)->setMaxResults(null);
-
-        return $clone;
+        throw new UnexpectedValueException(sprintf('No pages for a %s (%s).', get_debug_type($query), implode(', ', array_keys(self::ADAPTERS))));
     }
 
-    protected static function clone(Query $query, bool $bHint = true): Query
+    /**
+     * @deprecated since step F2e of the plan "omnibase agnostic": Base\Bridge\Doctrine\QueryPages::countQuery()
+     */
+    public function getCountQuery(Query $query, bool $bHint = true): Query
     {
-        /* @var $countQuery Query */
-        $clone = clone $query;
-
-        foreach ($query->getParameters() as $parameter) {
-            $clone->setParameter($parameter->getName(), $parameter->getValue());
-        }
-
-        if (!$bHint) {
-            return $clone;
-        }
-
-        foreach ($query->getHints() as $hint => $class) {
-            $clone->setHint($hint, $class);
-        }
-
-        return $clone;
+        return self::ADAPTERS[Query::class]::countQuery($query, $bHint);
     }
 
     public function rewind(): void
@@ -135,24 +127,27 @@ class Pagination implements PaginationInterface, Iterator, Countable
     }
 
     /**
-     * @return array|Query|DoctrinePaginator|mixed|null
+     * @return array|Pages the rows: the array, or the query's Pages
      */
     public function get()
     {
         return $this->paginator;
     }
 
+    /** The page's query, when the Pages are a query's that gives it (Doctrine's QueryPages). */
     public function getQuery(): ?Query
     {
-        return $this->isQuery() ? $this->paginator->getQuery()->setFirstResult($this->pageSize * ($this->page - 1))->setMaxResults($this->pageSize) : null;
+        return $this->isQuery() && method_exists($this->paginator, 'query') ? $this->paginator->query($this->pageSize * ($this->page - 1), $this->pageSize) : null;
     }
 
     /**
+     * Whether the rows are a query's Pages (else an array).
+     *
      * @return bool
      */
     public function isQuery()
     {
-        return $this->paginator instanceof DoctrinePaginator;
+        return $this->paginator instanceof Pages;
     }
 
     /**
@@ -331,7 +326,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
         }
 
         if ($this->isQuery()) {
-            return $this->lastResult = $this->getQuery()->getResult();
+            return $this->lastResult = $this->paginator->slice($this->pageSize * ($this->page - 1), $this->pageSize);
         }
 
         return $this->lastResult = array_slice_recursive($this->get(), $this->pageSize * ($this->page - 1), $this->pageSize, true /*Always preserve keys*/);

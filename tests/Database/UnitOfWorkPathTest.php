@@ -57,6 +57,7 @@ final class UnitOfWorkPathTest extends TestCase
         'Service/Model/Wysiwyg/HeadingEnhancer.php',
         'Service/Push/WebPushService.php',
         'Service/SettingBag.php',
+        'Service/TrashManager.php',
         'Service/Signatures.php',
         'Service/VersionManager.php',
     ];

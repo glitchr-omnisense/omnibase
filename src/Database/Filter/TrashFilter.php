@@ -2,12 +2,15 @@
 
 namespace Base\Database\Filter;
 
-use Base\Database\Attribute\Trasheable;
+use Base\Database\Scope\TrashScope;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 
 /**
- * Hides soft-deleted rows from every read that goes through the ORM.
+ * Hides soft-deleted rows from every read that goes through the ORM: Doctrine's
+ * compilation of Base\Database\Scope\TrashScope (plan "omnibase agnostic", step
+ * F2e), the deletion field => null it gives written as SQL. Moves to
+ * omnibridge/doctrine at step F3.
  *
  * Registered as "trash_filter" by DoctrineConfigurationPass and enabled in
  * BaseBundle::boot(). Disable it (`$em->getFilters()->disable("trash_filter")`)
@@ -45,16 +48,20 @@ class TrashFilter extends SQLFilter
             return "";
         }
 
-        $trasheable = Trasheable::resolve($targetEntity->getName());
-        if (!$trasheable) {
+        $scope = new TrashScope();
+        if (!$scope->appliesTo($targetEntity->getName())) {
             return "";
         }
 
-        $fieldName = $trasheable->deletedAt;
-        if (!$targetEntity->hasField($fieldName)) {
-            return "";
+        $constraints = [];
+        foreach ($scope->criteria($targetEntity->getName()) as $fieldName => $value) {
+            if (!$targetEntity->hasField($fieldName)) {
+                return "";
+            }
+            // TrashScope gives the deletion field => null: IS NULL.
+            $constraints[] = $targetTableAlias . "." . $targetEntity->getColumnName($fieldName) . " IS NULL";
         }
 
-        return $targetTableAlias . "." . $targetEntity->getColumnName($fieldName) . " IS NULL";
+        return implode(" AND ", $constraints);
     }
 }
