@@ -66,9 +66,8 @@ final class SchemaManagerTest extends TestCase
     private static function type(string $class): Type
     {
         $name = strtolower(substr($class, strrpos($class, '\\') + 1));
-        if (!Type::hasType($name)) {
-            Type::addType($name, $class);
-        }
+        // An enumeration is registered as an EnumTypeAdapter of it (plan "omnibase agnostic", step F2a).
+        \Base\Bridge\Doctrine\Types::registerEnumerations([$name => $class]);
 
         return Type::getType($name);
     }

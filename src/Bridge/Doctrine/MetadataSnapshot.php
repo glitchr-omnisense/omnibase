@@ -51,7 +51,8 @@ final class MetadataSnapshot
 
         $types = [];
         foreach (Type::getTypeRegistry()->getMap() as $name => $type) {
-            $types[$name] = $type::class;
+            // An enumeration by its own class (an EnumTypeAdapter of it since step F2a, the class itself before).
+            $types[$name] = $type instanceof EnumTypeAdapter ? $type->enumeration() : $type::class;
         }
         ksort($types);
 

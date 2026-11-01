@@ -160,11 +160,10 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
 
         foreach ($classList as $className) {
 
-            if (!is_subclass_of($className, Type::class)) {
-                continue;
-            }
-
-            if (!method_exists($className, "getStaticName")) {
+            // An enumeration (no Doctrine type since step F2a of the plan "omnibase agnostic"): listed
+            // here as before, EnumerationTypesPass hands it to EnumerationsMiddleware, which registers an
+            // EnumTypeAdapter of it when the connection is made.
+            if (!is_subclass_of($className, \Base\Database\Type\EnumType::class) || (new \ReflectionClass($className))->isAbstract()) {
                 continue;
             }
 

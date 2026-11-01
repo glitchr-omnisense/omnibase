@@ -2,12 +2,17 @@
 
 namespace Tests\Base\Database\Type;
 
+use Base\Bridge\Doctrine\EnumTypeAdapter;
+use Base\Database\Type\EnumType;
 use Base\Enum\ThreadState;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Its conversions and SQL declaration through Base\Bridge\Doctrine\EnumTypeAdapter, the enumeration's
+ * Doctrine type since step F2a.
+ *
  * Exercised through a real concrete subclass (ThreadState) rather than a
  * throwaway fixture: this is EnumType's actual contract as every subclass
  * in the bundle uses it, and ThreadState conveniently already implements
@@ -75,7 +80,7 @@ class EnumTypeTest extends TestCase
 
     public function testConvertToDatabaseValueAcceptsAPermittedValue(): void
     {
-        $enum = new ThreadState();
+        $enum = new EnumTypeAdapter(ThreadState::class);
 
         $this->assertSame(
             ThreadState::PUBLISH,
@@ -85,14 +90,14 @@ class EnumTypeTest extends TestCase
 
     public function testConvertToDatabaseValueAcceptsNull(): void
     {
-        $enum = new ThreadState();
+        $enum = new EnumTypeAdapter(ThreadState::class);
 
         $this->assertNull($enum->convertToDatabaseValue(null, new SQLitePlatform()));
     }
 
     public function testConvertToDatabaseValueRejectsUnknownValue(): void
     {
-        $enum = new ThreadState();
+        $enum = new EnumTypeAdapter(ThreadState::class);
 
         $this->expectException(InvalidArgumentException::class);
         $enum->convertToDatabaseValue('not-a-real-state', new SQLitePlatform());
@@ -100,7 +105,7 @@ class EnumTypeTest extends TestCase
 
     public function testConvertToDatabaseValueRejectsArrays(): void
     {
-        $enum = new ThreadState();
+        $enum = new EnumTypeAdapter(ThreadState::class);
 
         $this->expectException(InvalidArgumentException::class);
         $enum->convertToDatabaseValue([ThreadState::PUBLISH], new SQLitePlatform());
@@ -108,15 +113,30 @@ class EnumTypeTest extends TestCase
 
     public function testConvertToPHPValueIsAPassthrough(): void
     {
-        $enum = new ThreadState();
+        $enum = new EnumTypeAdapter(ThreadState::class);
 
         $this->assertSame(ThreadState::PUBLISH, $enum->convertToPHPValue(ThreadState::PUBLISH, new SQLitePlatform()));
+    }
+
+    /**
+     * The enumeration is a plain PHP class (plan "omnibase agnostic", step F2a): no Doctrine type in its
+     * ancestry; its own toDatabaseValue() and toPHPValue() are what the adapter converts with.
+     */
+    public function testTheEnumerationIsNoDoctrineType(): void
+    {
+        $this->assertSame([EnumType::class], array_values(class_parents(ThreadState::class)));
+        $this->assertSame(ThreadState::PUBLISH, ThreadState::toDatabaseValue(ThreadState::PUBLISH));
+        $this->assertSame(ThreadState::PUBLISH, ThreadState::toPHPValue(ThreadState::PUBLISH));
+        $this->assertSame(ThreadState::class, (new EnumTypeAdapter(ThreadState::class))->enumeration());
+
+        $this->expectException(\InvalidArgumentException::class);
+        new EnumTypeAdapter(\stdClass::class);
     }
 
     /** SQLite's text column, CLOB: what a TEXT column is read back as, so a schema compares unchanged (C6b). */
     public function testSqlDeclarationIsPlainTextOnSqlite(): void
     {
-        $enum = new ThreadState();
+        $enum = new EnumTypeAdapter(ThreadState::class);
 
         $this->assertSame('CLOB', $enum->getSQLDeclaration([], new SQLitePlatform()));
     }

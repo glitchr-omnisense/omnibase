@@ -6,16 +6,22 @@ use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\SelectInterface;
 use Base\Service\TranslatorInterface;
-use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Exception;
 use Generator;
 use InvalidArgumentException;
 use ReflectionClass;
 use UnexpectedValueException;
 
-abstract class EnumType extends Type implements SelectInterface
+/**
+ * An enumeration of omnibase: its values are its constants (UserRole::ADMIN = "ROLE_ADMIN"), with
+ * their icons, colours and texts, grouped by the "_" of their values. A plain PHP class, no type
+ * of an ORM (plan "omnibase agnostic", step F2a): a persistence maps a column named by
+ * getStaticName() to it - on Doctrine Base\Bridge\Doctrine\EnumTypeAdapter, registered under that
+ * name for each enumeration (Base\Bridge\Doctrine\Types), with the values converted by
+ * toDatabaseValue() and toPHPValue(). Base\Database\Type\Enumerations knows them by name. Until
+ * F2a it was Doctrine's Type itself.
+ */
+abstract class EnumType implements SelectInterface
 {
     protected static array $icons = [];
 
@@ -148,7 +154,7 @@ abstract class EnumType extends Type implements SelectInterface
             sort($values);
         }
 
-        if (!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values) {
+        if (!in_array($refl->getName(), [EnumType::class, SetType::class]) && !$values) {
             throw new Exception("\"" . get_called_class() . "\" is empty");
         }
 
@@ -215,61 +221,34 @@ abstract class EnumType extends Type implements SelectInterface
         $fnPermittedValues = $preserve_groups ? "getPermittedValuesByGroup" : "getPermittedValues";
 
         $values = [$refl->getName() => $refl->getName()::$fnPermittedValues(false, $preserve_keys)];
-        while (($refl = $refl->getParentClass()) && !in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class) {
+        while (($refl = $refl->getParentClass()) && !in_array($refl->getName(), [EnumType::class, SetType::class])) {
             $values[$refl->getName()] = $refl->getName()::$fnPermittedValues(false, $preserve_keys);
         }
 
         return $values;
     }
 
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    /**
+     * A value as the database keeps it: the value itself, refused when it is none of the
+     * enumeration's (or a list, which an enumeration is not).
+     *
+     * @throws InvalidArgumentException
+     */
+    public static function toDatabaseValue(mixed $value): mixed
     {
-        // SQLite has neither: a CLOB, which is what SQLite's TEXT is read back as (a TEXT column was
-        // found changed by every comparison).
-        if ($platform instanceof SQLitePlatform) {
-            return $platform->getClobTypeDeclarationSQL($column);
+        if (is_array($value)) {
+            throw new InvalidArgumentException("Enum type \"" . static::class . "\" is not expecting an array \"['" . (implode("', '", $value)) . "'] received.");
+        }
+        if ($value !== null && !in_array($value, static::getPermittedValues())) {
+            throw new InvalidArgumentException("Invalid '" . $value . "' value. (Expected values are: " . implode(", ", static::getPermittedValues()) . ")");
         }
 
-        return static::declaration($this->getPermittedValues(), $platform, 'ENUM');
-    }
-
-    /**
-     * ENUM('A', 'B') or SET('A', 'B'): written as DBAL writes an ENUM column's declaration, so that
-     * the column read back from the database (DBAL's EnumType, or MySQLSetType for a SET) compares
-     * equal while its values are the enumeration's.
-     *
-     * @param list<string> $values
-     */
-    public static function declaration(array $values, AbstractPlatform $platform, string $keyword = 'SET'): string
-    {
-        return $keyword . "(" . implode(", ", array_map($platform->quoteStringLiteral(...), array_values($values))) . ")";
-    }
-
-    /**
-     * @param $value
-     * @param AbstractPlatform $platform
-     * @return mixed
-     */
-    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
-    {
         return $value;
     }
 
-    /**
-     * @param $value
-     * @param AbstractPlatform $platform
-     * @return mixed
-     * @throws Exception
-     */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
+    /** A value read from the database, as the entity holds it. */
+    public static function toPHPValue(mixed $value): mixed
     {
-        if (is_array($value)) {
-            throw new InvalidArgumentException("Enum type \"" . get_class($this) . "\" is not expecting an array \"['" . (implode("', '", $value)) . "'] received.");
-        }
-        if ($value !== null && !in_array($value, $this->getPermittedValues())) {
-            throw new InvalidArgumentException("Invalid '" . (is_array($value) ? implode(", ", $value) : $value) . "' value. (Expected values are: " . implode(", ", $this->getPermittedValues()) . ")");
-        }
-
         return $value;
     }
 }

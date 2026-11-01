@@ -157,6 +157,7 @@
  * Base\Auth\; its DEFAULT_EXCLUDES are TimeMachineInterface's, which loads without it.
  * 864 after step F1 of the plan "omnibase agnostic" (2026-11-01, +4: the finder language without Doctrine -
  * Base\Database\Repository\Finder\{Parser, Query, Criterion, Subject}).
+ * 865 after step F2a (+1: Base\Database\Type\Enumerations, the enumerations by the name of their type).
  */
 
 return [
@@ -314,6 +315,7 @@ return [
     Base\Database\Type\ArrayType::class,
     Base\Database\Type\DateTimeTypeUTC::class,
     Base\Database\Type\EnumType::class,
+    Base\Database\Type\Enumerations::class,
     Base\Database\Type\MySQLSetType::class,
     Base\Database\Type\Passkey\Aaguid::class,
     Base\Database\Type\Passkey\Base64::class,

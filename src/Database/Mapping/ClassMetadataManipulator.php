@@ -4,6 +4,7 @@ namespace Base\Database\Mapping;
 
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Bridge\Doctrine\EnumTypeAdapter;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Field\Type\DateTimePickerType;
@@ -233,6 +234,13 @@ class ClassMetadataManipulator extends AbstractLocalCache
         } catch (Exception $e) {
             // throw new LogicException("Have you modified an entity (or an enum), or imported a new database ? Please doom the cache if so. Also make sure to use custom db features from base component", $e->getCode(), $e);
             return null;
+        }
+
+        // An enumeration's column: the enumeration itself (UserRole, a SetType), as the type was until
+        // step F2a, so that `instanceof EnumType`, its class and its static methods answer as before.
+        if ($doctrineType instanceof EnumTypeAdapter) {
+            $enumeration = $doctrineType->enumeration();
+            return new $enumeration();
         }
 
         return $doctrineType;

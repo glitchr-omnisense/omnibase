@@ -24,7 +24,7 @@ final class MySQLSetType extends Type
             return $platform->getClobTypeDeclarationSQL($column);
         }
 
-        return SetType::declaration($column['values'] ?? [], $platform);
+        return \Base\Bridge\Doctrine\EnumTypeAdapter::declaration($column['values'] ?? [], $platform);
     }
 
     /** @return list<string> */

@@ -2,10 +2,10 @@
 
 namespace Base\Service\Model;
 
+use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
-use Doctrine\DBAL\Types\Type;
 use Omnibridge\Contract\Translations;
 
 /**
@@ -41,8 +41,8 @@ class EnumNouns
     {
         if (class_exists($class)) {
             $declaringClass = $class;
-        } elseif (Type::hasType($class)) {
-            $declaringClass = get_class(Type::getType($class));
+        } elseif (null !== ($enumeration = \Base\Database\Type\Enumerations::classOf($class))) {
+            $declaringClass = $enumeration;
         } else {
             return $value;
         }
@@ -106,15 +106,16 @@ class EnumNouns
 
     /**
      * The key of a value: the class that declares it (the type's, or a
-     * parent of it up to Doctrine's Type) and its parents in snake case,
-     * less the abstract types at the end, then the value
-     * ("thread_state.published").
+     * parent of it up to omnibase's EnumType or SetType) and its parents in
+     * snake case, less the abstract types at the end (enum_type, set_type;
+     * Doctrine's type too, which the enumerations extended until step F2a),
+     * then the value ("thread_state.published").
      */
     private function key(?string $value, string $class, string $declaringClass): string
     {
         while ((count(array_filter($declaringClass::getPermittedValues(false), fn ($c) => $c === $value)) == 0)) {
             $parent = get_parent_class($declaringClass);
-            if (false === $parent || $parent === Type::class) {
+            if (false === $parent || \in_array($parent, [EnumType::class, SetType::class, 'Doctrine\\DBAL\\Types\\Type'], true)) {
                 $declaringClass = $class;
                 break;
             }
@@ -122,8 +123,11 @@ class EnumNouns
         }
 
         $value = $value ? "." . $value : "";
-        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
-        $key = implode(".", array_slice(explode(".", self::extends($declaringClass)), 0, $offset));
+        $segments = explode(".", self::extends($declaringClass));
+        while (\count($segments) > 1 && \in_array(end($segments), ['type', 'enum_type', 'set_type'], true)) {
+            array_pop($segments);
+        }
+        $key = implode(".", $segments);
 
         return $key ? $key . $value : "";
     }

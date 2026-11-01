@@ -3,7 +3,7 @@
 namespace Tests\Base;
 
 use Base\BaseBundle;
-use Base\Database\Type\EnumType;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Enum\UserRole;
 use Base\Twig\Extension\FunctionTwigExtension;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
@@ -118,25 +118,29 @@ final class BareTest extends TestCase
     }
 
     /**
-     * --strict is not blind, and is stricter than the Foundation's guard: an enum's parent, EnumType,
-     * is a DBAL type - Doctrine is allowed by the guard (D2), refused by --strict, which names the type
-     * and the class of the core that asked for it (until step F2a makes the enums plain value sets);
-     * a Twig extension of the core is refused for Twig's AbstractExtension.
+     * --strict is not blind, and is stricter than the Foundation's guard: omnibase's repository is
+     * doctrine/orm's EntityRepository - Doctrine is allowed by the guard (D2), refused by --strict,
+     * which names the class and the class of the core that asked for it (until step F3 moves the
+     * Doctrine repositories to omnibridge/doctrine); a Twig extension of the core is refused for Twig's
+     * AbstractExtension. An enumeration was the first example until step F2a made it a plain class.
      */
     public function testTheStrictCheckNamesDoctrineAndTwig(): void
     {
-        [$status, $report] = self::bare([UserRole::class]);
+        [$status, $report] = self::bare([ServiceEntityRepository::class]);
         self::assertSame(0, $status, 'the Foundation\'s guard allows Doctrine');
 
-        [$status, $report] = self::bare(['--strict', UserRole::class, FunctionTwigExtension::class]);
+        [$status, $report] = self::bare(['--strict', ServiceEntityRepository::class, FunctionTwigExtension::class, UserRole::class]);
         self::assertSame(1, $status);
-        $enum = $report['classes'][UserRole::class];
-        self::assertNull($enum['error']);
-        self::assertSame(EnumType::class, $enum['framework']['Doctrine\\DBAL\\Types\\Type'] ?? null);
-        self::assertNotEmpty(preg_grep('~/doctrine/dbal/~', $enum['framework_files']));
+        $repository = $report['classes'][ServiceEntityRepository::class];
+        self::assertNull($repository['error']);
+        self::assertSame(ServiceEntityRepository::class, $repository['framework']['Doctrine\\ORM\\EntityRepository'] ?? null);
+        self::assertNotEmpty(preg_grep('~/doctrine/orm/~', $repository['framework_files']));
         $extension = $report['classes'][FunctionTwigExtension::class];
         self::assertSame(FunctionTwigExtension::class, $extension['framework']['Twig\\Extension\\AbstractExtension'] ?? null);
         self::assertNotEmpty(preg_grep('~/twig/twig/~', $extension['framework_files']));
+        // Since step F2a an enumeration loads nothing of Doctrine.
+        self::assertSame([], $report['classes'][UserRole::class]['framework']);
+        self::assertSame([], $report['classes'][UserRole::class]['framework_files']);
     }
 
     /**

@@ -10,6 +10,31 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the enumerations are plain PHP classes (2026-11-01)
+
+Plan "omnibase agnostic", step F2a.
+
+- `Base\Database\Type\EnumType` and `SetType` no longer extend Doctrine's `Type`: same names, same
+  static API (`getPermittedValues()`, icons, colours, `getText()`, `getStaticName()`...), and their
+  conversions as `toDatabaseValue()` and `toPHPValue()`. The 20 enumerations of the core and those of
+  the applications and bundles change nothing (none overrode a DBAL method).
+- On Doctrine an enumeration is a `Base\Bridge\Doctrine\EnumTypeAdapter` of it, registered under its
+  name by `Types::register()`, and under Symfony by `Base\Bridge\Doctrine\EnumerationsMiddleware` when
+  the connection is made: `EnumerationTypesPass` takes the enumerations out of DoctrineBundle's
+  `doctrine.dbal.types`, where `BaseExtension` and the bundles still list them. `EnumType::declaration()`
+  is `EnumTypeAdapter::declaration()`.
+- `Base\Database\Type\Enumerations` knows them by name: `DemoAccountRegistry`, `EnumNouns` and
+  `enum()` (Twig) ask it in place of DBAL's registry; `getDoctrineType()` answers an enumeration's
+  column with an instance of the enumeration, as before.
+- The translation key of a value is unchanged (`thread_state.publish`): `EnumNouns` leaves the
+  abstract classes out of the chain whatever they are. `Translator::parseClass(PARSE_EXTENDS)` ends
+  at `enum_type`, no longer `enum_type.type`.
+- The Foundation 864 -> 865, the agnostic core 629 -> 652 (the enumerations load without Doctrine).
+
+Tests: `EnumTypeTest` (the conversions through the adapter, the enumeration no Doctrine type),
+`SchemaManagerTest` (the columns through the adapters), `BareTest` (an enumeration under
+`--strict`), `HandBuiltEntityManagerTest` (Symfony's metadata and types as recorded before).
+
 ### Fixed: the finder language's words do what they say (2026-11-01)
 
 Before step F2 of the plan "omnibase agnostic": the defects seen while the parser left Doctrine (F1).

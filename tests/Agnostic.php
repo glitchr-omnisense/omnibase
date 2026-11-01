@@ -32,6 +32,8 @@
  * that passed --strict, measured on the core 4.x e156cfaf.
  * 629 after step F1 (+4: the finder language's Parser, Query, Criterion and
  * Subject, which read a finder's name without Doctrine).
+ * 652 after step F2a (+23: the enumerations - Base\Database\Type\EnumType, SetType, the
+ * core's twenty Base\Enum\* - no longer Doctrine types, and Base\Database\Type\Enumerations).
  */
 
 return [
@@ -154,6 +156,9 @@ return [
     Base\Database\Schema\TargetRule::class,
     Base\Database\Schema\TranslationRule::class,
     Base\Database\Schema\VaultRule::class,
+    Base\Database\Type\EnumType::class,
+    Base\Database\Type\Enumerations::class,
+    Base\Database\Type\SetType::class,
     Base\Database\Type\Utc::class,
     Base\Demo\DemoAccount::class,
     Base\Demo\DemoAccountFactory::class,
@@ -282,6 +287,26 @@ return [
     Base\Entity\User\Token::class,
     Base\Enum\Allergen::class,
     Base\Enum\CommentState::class,
+    Base\Enum\ConnectionState::class,
+    Base\Enum\EntityAction::class,
+    Base\Enum\LogLevel::class,
+    Base\Enum\Operation::class,
+    Base\Enum\Quadrant\Quadrant::class,
+    Base\Enum\Quadrant\Quadrant16::class,
+    Base\Enum\Quadrant\Quadrant32::class,
+    Base\Enum\Quadrant\Quadrant8::class,
+    Base\Enum\SpamApi::class,
+    Base\Enum\SpamScore::class,
+    Base\Enum\SystemOfUnits\BritishImperialUnits::class,
+    Base\Enum\SystemOfUnits\StandardBaseUnits::class,
+    Base\Enum\SystemOfUnits\StandardUnits::class,
+    Base\Enum\SystemOfUnits\UnitedStatesCustomaryUnits::class,
+    Base\Enum\ThreadState::class,
+    Base\Enum\UploadState::class,
+    Base\Enum\UserGender::class,
+    Base\Enum\UserRole::class,
+    Base\Enum\UserState::class,
+    Base\Enum\WorkflowState::class,
     Base\Event\SignatureEvent::class,
     Base\Event\SitemapEvent::class,
     Base\Exception\DemoRefusedException::class,
