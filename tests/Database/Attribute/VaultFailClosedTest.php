@@ -5,7 +5,8 @@ namespace Tests\Base\Database\Attribute;
 use Base\Database\Attribute\Vault;
 use Base\Database\Entity\Extension\VaultTrait;
 use Base\Exception\VaultKeyNotFoundException;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Omnibridge\Persistence\Lifecycle;
+use Omnibridge\Persistence\UnitOfWork;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -60,7 +61,7 @@ class VaultFailClosedTest extends TestCase
 
     private function persist(Vault $vault, object $entity): void
     {
-        $vault->prePersist($this->createStub(\Doctrine\Persistence\Event\LifecycleEventArgs::class), new ClassMetadata($entity::class), $entity);
+        $vault->onPrePersist(new Lifecycle\PrePersist($entity, $this->createStub(UnitOfWork::class)));
     }
 
     /** The site's parameters, base.vault.allow_plaintext set to $value. */
@@ -161,7 +162,7 @@ class VaultFailClosedTest extends TestCase
         $this->assertStringNotContainsString('sk_live_123', $secret->value);
         $this->assertTrue($vault->canSeal('prod'));
 
-        $vault->postLoad($this->createStub(\Doctrine\Persistence\Event\LifecycleEventArgs::class), new ClassMetadata($secret::class), $secret);
+        $vault->onPostLoad(new Lifecycle\PostLoad($secret, $this->createStub(UnitOfWork::class)));
         $this->assertSame('sk_live_123', $secret->value);
     }
 
@@ -174,7 +175,7 @@ class VaultFailClosedTest extends TestCase
         // A row written when the vault had no key: read as it is once the pair exists, sealed at its next save.
         $vault = $this->vault(sodium_crypto_box_keypair());
         $legacy = $this->secret('sk_test_legacy');
-        $vault->postLoad($this->createStub(\Doctrine\Persistence\Event\LifecycleEventArgs::class), new ClassMetadata($legacy::class), $legacy);
+        $vault->onPostLoad(new Lifecycle\PostLoad($legacy, $this->createStub(UnitOfWork::class)));
 
         $this->assertSame('sk_test_legacy', $legacy->value);
     }

@@ -26,6 +26,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\ObjectRepository;
 use Omnibridge\Persistence\Lifecycle;
+use Base\Database\Attribute\Backend\Backends;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -538,5 +539,21 @@ abstract class AbstractAttribute implements AttributeInterface
 
     public function onPostFlush(Lifecycle\PostFlush $event, object $entity, ?string $property = null): void
     {
+    }
+
+    /**
+     * The persistence's part of a behaviour, for the unit of work the event carries (plan "omnibase
+     * agnostic", step F2b): a VaultBackend, SlugifyBackend, CacheBackend... of
+     * Base\Database\Attribute\Backend, refused aloud when the persistence installed has none.
+     *
+     * @template T of object
+     *
+     * @param class-string<T> $behaviour
+     *
+     * @return T
+     */
+    protected function backend(Lifecycle\EntityEvent|Lifecycle\FlushEvent $event, string $behaviour): object
+    {
+        return Backends::of($event->unitOfWork, $behaviour);
     }
 }

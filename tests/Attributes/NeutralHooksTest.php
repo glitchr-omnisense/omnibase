@@ -5,12 +5,16 @@ namespace Tests\Base\Attributes;
 use Base\Attributes\AbstractAttribute;
 use Base\Bridge\Doctrine\DoctrineUnitOfWork;
 use Base\Database\Attribute\Blameable;
+use Base\Database\Attribute\Cache;
 use Base\Database\Attribute\Countify;
 use Base\Database\Attribute\GenerateUuid;
 use Base\Database\Attribute\Hashify;
 use Base\Database\Attribute\Randomize;
+use Base\Database\Attribute\Slugify;
 use Base\Database\Attribute\Timestamp;
 use Base\Database\Attribute\Timezone;
+use Base\Database\Attribute\Uploader;
+use Base\Database\Attribute\Vault;
 use Base\Entity\Layout\TextOverride;
 use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\Lifecycle;
@@ -50,12 +54,14 @@ final class NeutralHooksTest extends KernelTestCase
             Blameable::class => ['onPrePersist', 'onPreUpdate'], Countify::class => ['onPostLoad', 'onPrePersist', 'onPreUpdate'],
             Hashify::class => ['onPrePersist', 'onPreUpdate', 'onPostPersist', 'onPostUpdate'], Randomize::class => ['onOnFlush'],
             GenerateUuid::class => ['onOnFlush'],
+            Vault::class => ['onPreFlush', 'onPrePersist', 'onPreUpdate', 'onPostFlush', 'onPostLoad'], Slugify::class => ['onOnFlush'],
+            Cache::class => ['onPrePersist', 'onPreUpdate', 'onPreRemove'], Uploader::class => ['onPreFlush', 'onOnFlush', 'onPreUpdate', 'onPostRemove'],
         ];
         foreach ($moved as $class => $hooks) {
             foreach ($hooks as $hook) {
                 self::assertSame($class, (new \ReflectionMethod($class, $hook))->getDeclaringClass()->getName(), $class.'::'.$hook);
             }
-            foreach (['prePersist', 'preUpdate', 'postLoad', 'postPersist', 'postUpdate', 'onFlush'] as $doctrineHook) {
+            foreach (['prePersist', 'preUpdate', 'preRemove', 'postLoad', 'postPersist', 'postUpdate', 'postRemove', 'preFlush', 'onFlush', 'postFlush'] as $doctrineHook) {
                 self::assertSame(AbstractAttribute::class, (new \ReflectionMethod($class, $doctrineHook))->getDeclaringClass()->getName(), $class.'::'.$doctrineHook);
             }
         }

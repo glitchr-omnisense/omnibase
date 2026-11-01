@@ -10,6 +10,27 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the behaviours' persistence parts, the listeners' logic apart (2026-11-01)
+
+Plan "omnibase agnostic", step F2b (second part). See docs/20-architecture/doctrine.md.
+
+- `#[Vault]`, `#[Slugify]`, `#[Cache]` and `#[Uploader]` answer the neutral hooks; their Doctrine-typed
+  hooks are gone (none was overridden in the bundles nor the sites). What only a persistence can do is
+  asked of `Base\Database\Attribute\Backend\{VaultBackend, SlugifyBackend, CacheBackend}`, registered
+  per unit of work class in `Backends` (`UnsupportedBehaviourException` when the persistence has none);
+  Doctrine's are `Base\Bridge\Doctrine\Behaviour\*`, registered by `AttributeSubscriber`.
+- `Vault::preLifecycleEvent()` and `postLifecycleEvent()` are `sealFields($entity)` and
+  `revealFields($entity)`; `Cache::payload()` is `CacheBackend::evict()`; Slugify's schema check and its
+  memo are `DoctrineSlugifyBackend`'s. `#[Cache]` numbers the association types itself
+  (`FLAG_ONE_TO_ONE`...: Doctrine's values), so the attribute is made without Doctrine.
+- The PreUpdate relay passes on only the fields a neutral hook gave a new value: it compared every
+  field with the change set of when the event was made, so a hook's `recompute()` (Uploader) or a
+  Doctrine-typed hook's change would have been put back.
+- `Base\Database\Lifecycle\{SettingsInvalidation, TrashRecorder, RevisionRecorder}`: the logic of
+  SettingSubscriber, TrasheableSubscriber and VersionableSubscriber, which keep their names, their
+  wiring and their Doctrine part (`TrasheableSubscriber::expiry()` is `TrashRecorder::expiry()`).
+- Agnostic core 652 -> 660, Foundation 865 -> 873.
+
 ### Added: the behaviours' neutral hooks (2026-11-01)
 
 Plan "omnibase agnostic", step F2b (first part).

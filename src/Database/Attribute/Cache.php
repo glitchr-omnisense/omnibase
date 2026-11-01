@@ -6,8 +6,8 @@ use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Persistence\Event\LifecycleEventArgs as BaseLifecycleEventArgs;
-use Symfony\Component\PropertyAccess\PropertyAccess;
+use Base\Database\Attribute\Backend\CacheBackend;
+use Omnibridge\Persistence\Lifecycle;
 
 /**
  * Caching to an entity or a collection.
@@ -39,6 +39,15 @@ class Cache extends AbstractAttribute implements ExtensionOptionInterface
     public const ONE_TO_MANY = "ONE_TO_MANY";
     public const MANY_TO_MANY = "ONE_TO_ONE";
 
+    /**
+     * The association types as Doctrine's ClassMetadata numbers them (ONE_TO_ONE = 1, MANY_TO_ONE = 2,
+     * ONE_TO_MANY = 4, MANY_TO_MANY = 8), so that the attribute is made without Doctrine loaded.
+     */
+    public const FLAG_ONE_TO_ONE = 1;
+    public const FLAG_MANY_TO_ONE = 2;
+    public const FLAG_ONE_TO_MANY = 4;
+    public const FLAG_MANY_TO_MANY = 8;
+
     public const TO_ONE = "TO_ONE";
     public const TO_MANY = "TO_MANY";
     public const ALL = "ALL";
@@ -51,25 +60,25 @@ class Cache extends AbstractAttribute implements ExtensionOptionInterface
 
         switch ($associations) {
             case self::ONE_TO_ONE:
-                $this->associations = ClassMetadata::ONE_TO_ONE;
+                $this->associations = self::FLAG_ONE_TO_ONE;
                 break;
             case self::MANY_TO_ONE:
-                $this->associations = ClassMetadata::MANY_TO_ONE;
+                $this->associations = self::FLAG_MANY_TO_ONE;
                 break;
             case self::ONE_TO_MANY:
-                $this->associations = ClassMetadata::ONE_TO_MANY;
+                $this->associations = self::FLAG_ONE_TO_MANY;
                 break;
             case self::MANY_TO_MANY:
-                $this->associations = ClassMetadata::MANY_TO_MANY;
+                $this->associations = self::FLAG_MANY_TO_MANY;
                 break;
             case self::TO_MANY:
-                $this->associations = ClassMetadata::ONE_TO_MANY + ClassMetadata::MANY_TO_MANY;
+                $this->associations = self::FLAG_ONE_TO_MANY + self::FLAG_MANY_TO_MANY;
                 break;
             case self::TO_ONE:
-                $this->associations = ClassMetadata::ONE_TO_ONE + ClassMetadata::MANY_TO_ONE;
+                $this->associations = self::FLAG_ONE_TO_ONE + self::FLAG_MANY_TO_ONE;
                 break;
             case self::ALL:
-                $this->associations = ClassMetadata::ONE_TO_ONE + ClassMetadata::MANY_TO_ONE + ClassMetadata::ONE_TO_MANY + ClassMetadata::MANY_TO_MANY;
+                $this->associations = self::FLAG_ONE_TO_ONE + self::FLAG_MANY_TO_ONE + self::FLAG_ONE_TO_MANY + self::FLAG_MANY_TO_MANY;
                 break;
 
             default:
@@ -160,53 +169,23 @@ class Cache extends AbstractAttribute implements ExtensionOptionInterface
         }
     }
 
-    public function payload(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $target, ?string $targetValue = null)
+    /**
+     * The neutral hooks (plan "omnibase agnostic", step F2b): what the persistence's cache keeps of the
+     * entity, or of the property's association, dropped through its CacheBackend (Doctrine's
+     * second-level cache; nothing for a persistence without one).
+     */
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
-        if ($targetValue) {
-
-            $cache = $this->getEntityManager()->getCache();
-            if (!$cache) {
-                return;
-            }
-
-            if (!$this->getClassMetadataManipulator()->hasAssociation($target, $targetValue)) {
-                return;
-            }
-
-            if ($this->getClassMetadataManipulator()->isToManySide($target, $targetValue)) {
-                $cache->evictCollection($classMetadata->getName(), $targetValue, $target->getId());
-                return;
-            }
-
-            $cache->evictEntity($classMetadata->getName(), $target->getId());
-            return;
-        }
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        foreach ($classMetadata->associationMappings as $property => $associationMapping) {
-
-            $isTargetEntityCached = !empty($this->getAttributeReader()->getClassAttributes($associationMapping["targetEntity"], self::class));
-            if (!$isTargetEntityCached) {
-                continue;
-            }
-
-            $propertyAccessor->getValue($target, $property); // readout value
-            $this->payload($event, $classMetadata, $target, $property);
-        }
+        $this->backend($event, CacheBackend::class)->evict($this, $event->entity, $property);
     }
 
-    public function prePersist(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
-        $this->payload($event, $classMetadata, $entity, $property);
+        $this->backend($event, CacheBackend::class)->evict($this, $event->entity, $property);
     }
 
-    public function preUpdate(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPreRemove(Lifecycle\PreRemove $event, ?string $property = null): void
     {
-        $this->payload($event, $classMetadata, $entity, $property);
-    }
-
-    public function preRemove(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $this->payload($event, $classMetadata, $entity, $property);
+        $this->backend($event, CacheBackend::class)->evict($this, $event->entity, $property);
     }
 }

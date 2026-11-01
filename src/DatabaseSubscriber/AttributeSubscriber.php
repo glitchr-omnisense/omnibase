@@ -16,6 +16,7 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Base\Bridge\Doctrine\Behaviour\DoctrineBehaviours;
 use Omnibridge\Persistence\Lifecycle;
 
 class AttributeSubscriber
@@ -40,6 +41,10 @@ class AttributeSubscriber
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->attributeReader = $attributeReader;
+
+        // The behaviours' parts on Doctrine (#[Vault]'s forced update, #[Slugify]'s pending writes, #[Cache]'s
+        // second-level cache), asked by the neutral hooks this relay dispatches.
+        DoctrineBehaviours::register();
     }
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $event)
@@ -561,6 +566,7 @@ class AttributeSubscriber
         $entity = $event->getObject();
         $neutral = $this->neutralEvent($event, $eventName, $entity);
         $neutralHook = 'on'.ucfirst($eventName);
+        $changes = $neutral instanceof Lifecycle\PreUpdate ? $neutral->changes() : [];
 
         $className = get_class($entity);
         $classMetadata = $this->entityManager->getClassMetadata($className);
@@ -606,10 +612,12 @@ class AttributeSubscriber
             $attribute->{$eventName}($event, $classMetadata, $entity);
         }
 
-        // A new value a neutral PreUpdate hook gave a changed field goes to Doctrine's update.
+        // A new value a neutral PreUpdate hook gave a changed field (setNewValue()) goes to Doctrine's update.
+        // Only those: a field whose new value a hook did not touch keeps what Doctrine's change set says now,
+        // which a hook's recompute() or a Doctrine-typed hook may have changed since the event was made.
         if ($neutral instanceof Lifecycle\PreUpdate && $event instanceof PreUpdateEventArgs) {
             foreach ($neutral->changes() as $field => [, $after]) {
-                if ($event->hasChangedField($field) && $event->getNewValue($field) !== $after) {
+                if (($changes[$field][1] ?? null) !== $after && $event->hasChangedField($field)) {
                     $event->setNewValue($field, $after);
                 }
             }

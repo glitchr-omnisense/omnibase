@@ -5,8 +5,8 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Base\Database\Attribute\Backend\SlugifyBackend;
+use Omnibridge\Persistence\Lifecycle;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 
@@ -69,7 +69,11 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param $event
+     * The slugs the entities written before this one in the running flush take (first in, first out),
+     * so that two of the same flush do not get the same one. $event is the neutral flush event (plan
+     * "omnibase agnostic", step F2b): the persistence's SlugifyBackend knows the pending writes.
+     *
+     * @param Lifecycle\FlushEvent $event
      * @param $entity
      * @param $property
      * @return array
@@ -77,15 +81,7 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
      */
     public function getInvalidSlugs($event, $entity, $property)
     {
-        $uow = $event->getObjectManager()->getUnitOfWork();
-
-        $candidateEntities = [];
-        foreach ($uow->getScheduledEntityInsertions() as $entity2) {
-            $candidateEntities[] = $entity2;
-        }
-        foreach ($uow->getScheduledEntityUpdates() as $entity2) {
-            $candidateEntities[] = $entity2;
-        }
+        $candidateEntities = $this->backend($event, SlugifyBackend::class)->pendingWrites();
 
         $invalidSlugs = [];
         foreach ($candidateEntities as $entity2) {
@@ -215,39 +211,23 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
         return $same;
     }
 
-    /** @var array<string, bool> */
-    protected static array $uniqueAlone = [];
+    /**
+     * The persistence's part of the running flush (plan "omnibase agnostic", step F2b), set by
+     * onOnFlush() for the slugs it computes.
+     */
+    protected ?SlugifyBackend $backend = null;
 
     /**
      * Whether the database still holds the unique index of before on the
      * column alone: an application that has not run its migration yet keeps
      * slugs unique for all types (a second "desserts" would be refused by
-     * that index), and gets them per type once the index is gone. Asked once
-     * per process and table.
+     * that index), and gets them per type once the index is gone. Asked of
+     * the persistence's SlugifyBackend, once per process and table; false
+     * outside a flush.
      */
     protected function columnIsStillUniqueAlone(object $entity, string $property): bool
     {
-        try {
-            $classMetadata = $this->getClassMetadata(property_declarer($entity, $property));
-            $table = $classMetadata->getTableName();
-            $column = $classMetadata->getColumnName($property);
-            $key = $table . "." . $column;
-            if (array_key_exists($key, self::$uniqueAlone)) {
-                return self::$uniqueAlone[$key];
-            }
-
-            self::$uniqueAlone[$key] = false;
-            $schemaManager = $this->getEntityManager()->getConnection()->createSchemaManager();
-            foreach ($schemaManager->listTableIndexes($table) as $index) {
-                if ($index->isUnique() && !$index->isPrimary() && array_map('strtolower', $index->getUnquotedColumns()) === [strtolower($column)]) {
-                    self::$uniqueAlone[$key] = true;
-                }
-            }
-
-            return self::$uniqueAlone[$key];
-        } catch (\Throwable) {
-            return false;
-        }
+        return $this->backend?->uniqueAlone(property_declarer($entity, $property), $property) ?? false;
     }
 
     protected function typeOf(object $entity): string
@@ -267,17 +247,14 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param OnFlushEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
-     * @param string|null $property
-     * @return void
+     * The neutral hook (plan "omnibase agnostic", step F2b): the slug computed while the flush runs, the
+     * entity's changes computed again when it has some.
+     *
      * @throws \Exception
      */
-    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
     {
-        $propertyDeclarer = property_declarer($entity, $property);
-        $classMetadata = $this->getClassMetadata($propertyDeclarer);
+        $this->backend = $this->backend($event, SlugifyBackend::class);
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
         if ($this->sync) {
@@ -302,8 +279,8 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         $this->setFieldValue($entity, $property, $slug);
-        if ($this->getUnitOfWork()->getEntityChangeSet($entity)) {
-            $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        if ($event->unitOfWork->changes($entity)) {
+            $event->unitOfWork->recompute($entity);
         }
     }
 }
