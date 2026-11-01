@@ -108,15 +108,14 @@ each word on an entity known by its fields alone, and
 `BareTest::testTheFinderLanguageIsReadWithoutDoctrine` parses under
 `bare --strict`.
 
-Seen while recording, kept as they were (the parity is the proof, the fixes come
-apart): `LowerEqualTo` and `GreaterEqualTo` call `Expr::le()` and `Expr::ge()`,
-which Doctrine does not have (`lte()`, `gte()`); `lengthOf<Association>By` builds
-an invalid DQL; a `DateTimeImmutable` bound on a mutable `datetime` field is
-refused by the type; `ImageCropRepository`'s two finders pass their selected
-expressions where `__findOneBy()` takes its offset (a TypeError); the negative
-words tested after their positive one are misread - `NotStartingWith`,
-`NotEndingWith`, `NotInstanceOf`, `NotClassOf`, `NotMemberOf`
-(`findBySlugNotStartingWith()` reads a field `slugNot` starting with the value).
+Each word does what its name says (fixed before step F2,
+`tests/Database/Repository/FinderDefectsTest`): `LowerEqualTo`, `GreaterEqualTo`, `OlderEqualTo`
+and `YoungerEqualTo` compare with `<=` and `>=`; a negative word is read before the positive one it
+ends with (`NotStartingWith`, `NotEndingWith`, `NotInstanceOf`, `NotClassOf`, `NotMemberOf`), and
+`NotClassOf` is `ClassOf`'s opposite (anything but that class exactly); `lengthOf<Collection>By`
+gives each entity's number of members (`SIZE()`), `lengthOf<Field>By` its length (`LENGTH()`); a
+`DateTimeImmutable` compared with a field of a mutable type is bound as the same moment; `Null` and
+`NotNull` bind no parameter.
 
 ## Translations
 

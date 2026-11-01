@@ -23,12 +23,13 @@ class ImageCropRepository extends ServiceEntityRepository implements ImageCrops
 
     public function oneClosestToRatio(float|int $ratio0, string $source): ?ImageCrop
     {
-        return $this->cacheOneByRatio0ClosestTo($ratio0, ["image.source" => $source], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+        // The criteria, the order, the offset, the grouping, then the selected ratio (it was given as the offset).
+        return $this->cacheOneByRatio0ClosestTo($ratio0, ["image.source" => $source], [], null, [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
     }
 
     public function oneClosestToRatioAndSize(float|int $ratio0, float|int $width0, float|int $height0, string $source): ?ImageCrop
     {
-        return $this->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $source], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+        return $this->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $source], [], null, [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
     }
 
     public function __construct(ManagerRegistry $registry)

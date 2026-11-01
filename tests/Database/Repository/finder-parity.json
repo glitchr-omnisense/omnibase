@@ -404,8 +404,12 @@
             "eagerly": false
         },
         "query": {
-            "exception": "Error",
-            "message": "Call to undefined method Doctrine\\ORM\\Query\\Expr::le()"
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.id <= :id_0",
+            "parameters": {
+                "id_0": 5
+            },
+            "first": 0,
+            "max": null
         }
     },
     "Base\\Entity\\Thread::findByPublishedAtOlderThan#3ec6d836f5b4453a76eb32876bd2516f": {
@@ -462,8 +466,14 @@
             "eagerly": false
         },
         "query": {
-            "exception": "Error",
-            "message": "Call to undefined method Doctrine\\ORM\\Query\\Expr::ge()"
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.publishedAt >= :publishedAt_0",
+            "parameters": {
+                "publishedAt_0": {
+                    "@from_now": 86400
+                }
+            },
+            "first": 0,
+            "max": null
         }
     },
     "Base\\Entity\\Thread::findByPublishedAtIsOver#40cd750bba9870f18aada2478b24840a": {
@@ -589,9 +599,7 @@
         },
         "query": {
             "dql": "SELECT e FROM Base\\Entity\\Thread e LEFT JOIN e.parent e_parent WHERE e_parent IS NULL",
-            "parameters": {
-                "e_parent_0": null
-            },
+            "parameters": [],
             "first": 0,
             "max": null
         }
@@ -619,9 +627,7 @@
         },
         "query": {
             "dql": "SELECT e FROM Base\\Entity\\Thread e LEFT JOIN e.parent e_parent WHERE e_parent IS NOT NULL",
-            "parameters": {
-                "e_parent_0": null
-            },
+            "parameters": [],
             "first": 0,
             "max": null
         }
@@ -719,15 +725,15 @@
             "method": "__findBy",
             "arguments": [
                 {
-                    "slugNot:0": "a-"
+                    "slug:0": "a-"
                 }
             ],
             "criteria": {
-                "slugNot:0": "a-"
+                "slug:0": "a-"
             },
             "options": {
-                "slugNot:0": [
-                    "StartingWith"
+                "slug:0": [
+                    "NotStartingWith"
                 ]
             },
             "separator": "And",
@@ -736,9 +742,9 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE slugNot LIKE :slugNot_0",
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug NOT LIKE :slug_0",
             "parameters": {
-                "slugNot_0": "a-%"
+                "slug_0": "a-%"
             },
             "first": 0,
             "max": null
@@ -1193,8 +1199,7 @@
             "eagerly": false
         },
         "query": {
-            "exception": "Doctrine\\DBAL\\Types\\Exception\\InvalidType",
-            "message": "Could not convert PHP value of type DateTimeImmutable to type Base\\Database\\Type\\DateTimeTypeUTC. Expected one of the following types: null, DateTime."
+            "result": null
         }
     },
     "Base\\Entity\\Thread::findRandomlyByState#fce6742b852573381f938d7305c41931": {
@@ -1478,8 +1483,7 @@
             "eagerly": false
         },
         "query": {
-            "exception": "Doctrine\\ORM\\Query\\QueryException",
-            "message": "[Syntax Error] line 0, col 17: Error: Expected '.' or '(', got 'e_tags'"
+            "result": []
         }
     },
     "Base\\Entity\\User::findByIdNotEqualToAndActiveAtYoungerThan#ffa87d842a056f574f5517809e9962c6": {

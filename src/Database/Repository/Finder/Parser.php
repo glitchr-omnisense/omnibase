@@ -601,28 +601,29 @@ final class Parser
                     $option = self::OPTION_FARESTTO;
                 } elseif (str_ends_with($by, self::OPTION_BUT)) {
                     $option = self::OPTION_BUT;
+                } elseif (str_ends_with($by, self::OPTION_NOT_INSTANCEOF)) { // a negative word before its positive one, which it ends with
+                    $option = self::OPTION_NOT_INSTANCEOF;
                 } elseif (str_ends_with($by, self::OPTION_INSTANCEOF)) {
                     $option = self::OPTION_INSTANCEOF;
-                } elseif (str_ends_with($by, self::OPTION_NOT_INSTANCEOF)) {
-                    $option = self::OPTION_NOT_INSTANCEOF;
-                } elseif (str_ends_with($by, self::OPTION_CLASSOF)) {
-                    $option = self::OPTION_CLASSOF;
                 } elseif (str_ends_with($by, self::OPTION_NOT_CLASSOF)) {
                     $option = self::OPTION_NOT_CLASSOF;
-                } elseif (str_ends_with($by, self::OPTION_MEMBEROF)) {
-                    $option = self::OPTION_MEMBEROF;
+                } elseif (str_ends_with($by, self::OPTION_CLASSOF)) {
+                    $option = self::OPTION_CLASSOF;
                 } elseif (str_ends_with($by, self::OPTION_NOT_MEMBEROF)) {
                     $option = self::OPTION_NOT_MEMBEROF;
+                } elseif (str_ends_with($by, self::OPTION_MEMBEROF)) {
+                    $option = self::OPTION_MEMBEROF;
                 } elseif ($this->isSelectClause($by)) {
                     $option = self::OPTION_MODEL;
-                } elseif (str_ends_with($by, self::OPTION_STARTING_WITH)) {
-                    $option = self::OPTION_STARTING_WITH;
-                } elseif (str_ends_with($by, self::OPTION_ENDING_WITH)) {
-                    $option = self::OPTION_ENDING_WITH;
+                // A negative word before its positive one, which it ends with ("NotStartingWith").
                 } elseif (str_ends_with($by, self::OPTION_NOT_STARTING_WITH)) {
                     $option = self::OPTION_NOT_STARTING_WITH;
                 } elseif (str_ends_with($by, self::OPTION_NOT_ENDING_WITH)) {
                     $option = self::OPTION_NOT_ENDING_WITH;
+                } elseif (str_ends_with($by, self::OPTION_STARTING_WITH)) {
+                    $option = self::OPTION_STARTING_WITH;
+                } elseif (str_ends_with($by, self::OPTION_ENDING_WITH)) {
+                    $option = self::OPTION_ENDING_WITH;
                 } elseif (str_ends_with($by, self::OPTION_OVER)) {
                     $option = self::OPTION_OVER;
                 } elseif (str_ends_with($by, self::OPTION_NOT_OVER)) {

@@ -10,6 +10,31 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the finder language's words do what they say (2026-11-01)
+
+Before step F2 of the plan "omnibase agnostic": the defects seen while the parser left Doctrine (F1).
+
+- `LowerEqualTo`, `GreaterEqualTo`, `OlderEqualTo` and `YoungerEqualTo` compare with `<=` and `>=`:
+  they called `Expr::le()` and `Expr::ge()`, which Doctrine does not have (an Error).
+- A negative word is read as itself: `NotStartingWith`, `NotEndingWith`, `NotInstanceOf`,
+  `NotClassOf` and `NotMemberOf` were read as their positive word, which they end with
+  (`findBySlugNotStartingWith()` compared a field `slugNot`). `NotClassOf` builds `ClassOf`'s
+  opposite (it built the same query), `NotMemberOf` is negated.
+- `lengthOf<Collection>By` selects the collection's number of members (`SIZE()`): it built
+  `LENGTH()` of a joined alias, an invalid DQL.
+- A `DateTimeImmutable` compared with a field of a mutable type (datetime, date, time) is bound as the
+  `DateTime` of the same moment: the type refused it (`findNextOneBy(['publishedAt' => $immutable])`).
+- `Null` and `NotNull` bind no parameter: `findBy...AndParentNull` with an order raised "Too many
+  parameters" (lesringostars).
+- `ImageCropRepository::oneClosestToRatio()` and `oneClosestToRatioAndSize()` give the ratio as the
+  selected expression: they gave it as `__findOneBy()`'s offset (a TypeError).
+
+`finder-parity.json` recorded again for the seven calls these fixes change, and only them:
+`findByIdLowerEqualTo`, `findByPublishedAtYoungerEqualTo` (a query where an Error was),
+`findByParentNull`, `findByParentNotNull` (no parameter), `findBySlugNotStartingWith` (the parse and
+the query), `cacheNextOneByClassOfAndState` (a result where the type refused), `lengthOfTagsByState`
+(a result where the DQL was invalid). Test: `tests/Database/Repository/FinderDefectsTest`.
+
 ### Added: the finder language read without Doctrine (2026-11-01)
 
 Plan "omnibase agnostic", step F1 (the finder language is Marco's invention, kept whole in the core).
