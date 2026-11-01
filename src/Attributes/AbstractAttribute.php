@@ -25,6 +25,7 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\ObjectRepository;
+use Omnibridge\Persistence\Lifecycle;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -486,6 +487,56 @@ abstract class AbstractAttribute implements AttributeInterface
     }
 
     public function postRemove(BaseLifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+    }
+
+    /*
+     * The neutral hooks (plan "omnibase agnostic", step F2b): the same moments as the hooks above, with
+     * omnisense/omnibridge's lifecycle events - the entity and its unit of work, no ORM type - in place of
+     * Doctrine's arguments. A persistence dispatches them (Base\DatabaseSubscriber\AttributeSubscriber
+     * relays Doctrine's: the neutral hook first, then the Doctrine-typed one, kept for the attributes of
+     * the applications and bundles that override it, deprecated). An attribute of the core answers here;
+     * an entity's property hook receives its property, a class hook null.
+     */
+
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
+    {
+    }
+
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
+    {
+    }
+
+    public function onPreRemove(Lifecycle\PreRemove $event, ?string $property = null): void
+    {
+    }
+
+    public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
+    {
+    }
+
+    public function onPostPersist(Lifecycle\PostPersist $event, ?string $property = null): void
+    {
+    }
+
+    public function onPostUpdate(Lifecycle\PostUpdate $event, ?string $property = null): void
+    {
+    }
+
+    public function onPostRemove(Lifecycle\PostRemove $event, ?string $property = null): void
+    {
+    }
+
+    /** A flush's moments, for one entity it writes (insertions, updates, deletions). */
+    public function onPreFlush(Lifecycle\PreFlush $event, object $entity, ?string $property = null): void
+    {
+    }
+
+    public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
+    {
+    }
+
+    public function onPostFlush(Lifecycle\PostFlush $event, object $entity, ?string $property = null): void
     {
     }
 }

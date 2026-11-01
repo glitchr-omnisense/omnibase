@@ -84,6 +84,18 @@ enumeration of a type's name, whatever persistence registered it.
   they did; `MetadataSnapshot` writes an enumeration's type by the enumeration's class, so the
   recorded metadata is unchanged.
 
+## The behaviours' hooks
+
+omnibase's behaviours (`#[Timestamp]`, `#[Slugify]`, `#[Uploader]`...: `Base\Attributes\AbstractAttribute`)
+answer the moments of an entity's life. Since step F2b of the plan "omnibase agnostic" they have
+neutral hooks (`onPrePersist(Lifecycle\PrePersist $event, ?string $property)`, ...,
+`onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property)`) taking omnisense/omnibridge's
+events, which carry the entity and the unit of work (`Base\Bridge\Doctrine\DoctrineUnitOfWork` on
+Doctrine). `AttributeSubscriber` relays Doctrine's events: the neutral hook first, then the
+Doctrine-typed hook of before (`prePersist(LifecycleEventArgs, ClassMetadata, $entity, ?string)`),
+kept for the applications' and bundles' attributes that override it. Another persistence dispatches
+the neutral events alone.
+
 ## The discriminator maps
 
 A root entity that declares an inheritance and no `#[DiscriminatorMap]` gets

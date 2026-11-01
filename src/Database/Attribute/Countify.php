@@ -2,6 +2,7 @@
 
 namespace Base\Database\Attribute;
 
+use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
@@ -106,15 +107,14 @@ class Countify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
      * @return void
      * @throws Exception
      */
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $nWords = $this->getFieldValue($entity, $property);
         if ($nWords) {
             return;
@@ -125,29 +125,27 @@ class Countify extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
      * @return void
      * @throws Exception
      */
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $count = $this->getCount($entity) ?? 0;
         $this->setFieldValue($entity, $property, $count);
     }
 
     /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
+     * The neutral hook (plan "omnibase agnostic", step F2b): the entity and its unit of work.
      * @param string|null $property
      * @return void
      * @throws Exception
      */
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
+        $entity = $event->entity;
         $count = $this->getCount($entity) ?? 0;
         $this->setFieldValue($entity, $property, $count);
     }
