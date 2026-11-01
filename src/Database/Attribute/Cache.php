@@ -37,7 +37,7 @@ class Cache extends AbstractAttribute implements ExtensionOptionInterface
     public const ONE_TO_ONE = "ONE_TO_ONE";
     public const MANY_TO_ONE = "MANY_TO_ONE";
     public const ONE_TO_MANY = "ONE_TO_MANY";
-    public const MANY_TO_MANY = "ONE_TO_ONE";
+    public const MANY_TO_MANY = "MANY_TO_MANY";
 
     /**
      * The association types as Doctrine's ClassMetadata numbers them (ONE_TO_ONE = 1, MANY_TO_ONE = 2,
