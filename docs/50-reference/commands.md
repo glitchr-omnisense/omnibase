@@ -318,6 +318,9 @@ Options:
       --database[=DATABASE]  Which database do you want to backup?
 ```
 
+Registered only where glitchr/backup-manager is installed, a suggestion of the
+core ([Backups](../30-operations/backups.md)).
+
 The prefix's default is the kernel's environment (`dev` in the harness).
 `:backup` adds `--id`, `--batch` (no confirmation asked) and `--userlog` (the
 user configuration included); `:restore` adds `--id`.

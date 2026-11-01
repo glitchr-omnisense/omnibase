@@ -78,7 +78,6 @@
         "endroid/qr-code": "^6.0",
         "enshrined/svg-sanitize": "^1.0",
         "florianv/swap": "^4.0",
-        "glitchr/backup-manager": "4.0.*-dev",
         "hashids/hashids": "^5.0",
         "imagine/imagine": "^1.2",
         "jaybizzle/crawler-detect": "^1.2",
@@ -164,12 +163,14 @@
         "omniauth/webauthn": "Passkeys through omniauth: Base\\Auth\\UserPasskeys, the userPasskey table as omniauth/webauthn's records (formerly omniauth/passkey) (1.x-dev)",
         "omniauth/otp": "Authenticator applications through omniauth, on user.secret (Base\\Auth\\UserTotpSecrets), sealed at rest when omniauth.yaml sets totp.secret_key (formerly omniauth/totp) (1.x-dev)",
         "omniauth/google": "Google sign-in through omniauth, linked by its subject in userIdentity (Base\\Auth\\UserIdentities; Base\\Auth\\PolicyLinking: never by the address an account with a second factor or an administration role); the providers' mechanics are omnisense/omniauth's own (1.x-dev)",
+        "glitchr/backup-manager": "The TimeMachine, the backups of the database and the application to the storages (Base\\Service\\TimeMachine, which extends its Manager, and the commands timemachine:snapshot, timemachine:snapshot:backup, timemachine:snapshot:restore and timemachine:storage); without it, neither the service nor the commands are registered, and base.time_machine is read by nothing (4.0.*-dev)",
         "omnisense/omnimap": "Maps through omnimap (config/packages/omnimap.yaml): BaseBundle registers omnibridge/symfony's OmnimapExtension where both are installed - the providers, the map cache, omnimap() in Twig, the cache's routes (1.x-dev)"
     },
     "require-dev": {
         "api-platform/symfony": "^4.0",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "doctrine/doctrine-migrations-bundle": "^3.0",
+        "glitchr/backup-manager": "4.0.*-dev",
         "glitchr/ux-google": "1.0.*-dev",
         "hwi/oauth-bundle": "^2.1",
         "league/flysystem-bundle": "^3.1",
@@ -235,6 +236,7 @@
         },
         "omnibase": {
             "bare": {
+                "glitchr/backup-manager": "4.0.*-dev",
                 "omnisense/omniauth": "1.x-dev",
                 "omniauth/webauthn": "1.x-dev",
                 "omniauth/otp": "1.x-dev"

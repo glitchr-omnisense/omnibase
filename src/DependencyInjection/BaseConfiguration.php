@@ -4,7 +4,7 @@ namespace Base\DependencyInjection;
 
 use Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter;
 use Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter;
-use Base\Service\TimeMachine;
+use Base\Service\TimeMachineInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Uid\Uuid;
 
@@ -364,7 +364,7 @@ class BaseConfiguration extends AbstractBaseConfiguration
                     ->arrayNode('excludes')
                         ->info('Paths left out of the application tarball')
                         ->scalarPrototype()->end()
-                        ->defaultValue(TimeMachine::DEFAULT_EXCLUDES)
+                        ->defaultValue(TimeMachineInterface::DEFAULT_EXCLUDES)
                         ->end()
                 ->end()
             ->end()

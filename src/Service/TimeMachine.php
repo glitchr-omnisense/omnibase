@@ -80,22 +80,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         return ($this->snapshotDir ?: $this->cacheDir) . "/timemachine";
     }
 
-    /**
-     * Paths left out of the application tarball. Defaults to dependency and
-     * build output that `composer install` / `yarn` / a cache warmup rebuild
-     * from scratch - keeping them would multiply the snapshot size (and the
-     * free space it needs) for no restorable data.
-     */
-    public const DEFAULT_EXCLUDES = [
-        "./vendor",
-        "./node_modules",
-        "./var/cache",
-        "./var/log",
-        "./var/coverage",
-        "./var/phpunit",
-        "./.git",
-    ];
-
+    // DEFAULT_EXCLUDES: TimeMachineInterface's, which loads without glitchr/backup-manager.
     protected array $excludes = self::DEFAULT_EXCLUDES;
 
     public function getExcludes(): array

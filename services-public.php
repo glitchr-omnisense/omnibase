@@ -48,9 +48,11 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('base.service.image', 'Base\Service\MediaService');
     $services->alias('Base\Service\MediaServiceInterface', 'base.service.image');
 
-    // TimeMachine
-    $services->alias('time_machine', 'Base\Service\TimeMachine');
-    $services->alias('Base\Service\TimeMachineInterface', 'time_machine');
+    // TimeMachine: only where glitchr/backup-manager is installed (config/services/core.php)
+    if (class_exists(\Backup\Manager\Manager::class)) {
+        $services->alias('time_machine', 'Base\Service\TimeMachine');
+        $services->alias('Base\Service\TimeMachineInterface', 'time_machine');
+    }
 
     // Cache / Spam / File / Obfuscator
     $services->alias('simple_cache', 'Base\Cache\SimpleCache');
