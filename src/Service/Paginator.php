@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Base\Service\Model\Pages;
 use Base\Service\Model\Pagination;
 use Doctrine\ORM\Query;
 
@@ -25,7 +26,8 @@ class Paginator implements PaginatorInterface
         $this->parameterBag = $parameterBag;
     }
 
-    public function paginate(array|Query $query, int $page = 1, int $pageSize = 0, int $pageRange = 0): ?Pagination
+    /** @param array|Pages|Query $query the rows: an array, a query's Pages, a Doctrine Query (adapted, step F2e) */
+    public function paginate(array|Pages|Query $query, int $page = 1, int $pageSize = 0, int $pageRange = 0): ?Pagination
     {
         $pageSize = ($pageSize < 1 ? $this->parameterBag->get("base.paginator.page_size") : $pageSize);
         $pageRange = ($pageRange < 1 ? $this->parameterBag->get("base.paginator.page_range") : $pageRange);

@@ -40,6 +40,7 @@
  * since F0 (the variables, the tag renderers, AdminLinks): it is optional, loaded with Twig only.
  * 681 after step F2c (+4: the entity's shape - EntityShape, EntityShapes, DescriptionShapes - and OrderColumnBackend).
  * 686 after step F2d (+5: Base\Database\UnitOfWorks - the unit of work from what a service was given, its repositories and shapes -, the backends Base\Database\Backend\{RowLocks, ConditionalUpdates, EntityCache} and Base\Repository\User\Identities).
+ * 690 after step F2e (+4: Base\Database\Scope\{TrashScope, VaultScope} - the trash and vault filters as scopes -, Base\Database\Backend\BulkDeletes and Base\Service\Model\Pages, what the paginator pages).
  */
 
 return [
@@ -127,6 +128,7 @@ return [
     Base\Database\Attribute\Uploader::class,
     Base\Database\Attribute\Vault::class,
     Base\Database\Attribute\Versionable::class,
+    Base\Database\Backend\BulkDeletes::class,
     Base\Database\Backend\ConditionalUpdates::class,
     Base\Database\Backend\EntityCache::class,
     Base\Database\Backend\RowLocks::class,
@@ -176,6 +178,8 @@ return [
     Base\Database\Schema\TargetRule::class,
     Base\Database\Schema\TranslationRule::class,
     Base\Database\Schema\VaultRule::class,
+    Base\Database\Scope\TrashScope::class,
+    Base\Database\Scope\VaultScope::class,
     Base\Database\Type\EnumType::class,
     Base\Database\Type\Enumerations::class,
     Base\Database\Type\SetType::class,
@@ -626,6 +630,7 @@ return [
     Base\Service\Model\Obfuscator\Compression\HashidsCompression::class,
     Base\Service\Model\Obfuscator\Compression\NullCompression::class,
     Base\Service\Model\Obfuscator\Compression\ZlibCompression::class,
+    Base\Service\Model\Pages::class,
     Base\Service\Model\Pagination::class,
     Base\Service\Model\PaginationInterface::class,
     Base\Service\Model\SaltInterface::class,

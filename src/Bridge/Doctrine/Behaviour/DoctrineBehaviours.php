@@ -11,10 +11,13 @@ use Base\Database\Attribute\Backend\SlugifyBackend;
 use Base\Database\Attribute\Backend\VaultBackend;
 use Base\Database\Mapping\EntityShapes;
 use Base\Bridge\Doctrine\DoctrineRepositories;
+use Base\Bridge\Doctrine\DoctrineBackend;
+use Base\Database\Backend\BulkDeletes;
 use Base\Database\Backend\ConditionalUpdates;
 use Base\Database\Backend\EntityCache;
 use Base\Database\Backend\RowLocks;
 use Base\Database\Repository\Repositories;
+use Omnibridge\Persistence\Backend;
 
 /**
  * The behaviours' parts on Doctrine, the entities' shapes (step F2c), the repositories and what the
@@ -37,6 +40,9 @@ final class DoctrineBehaviours
         RowLocks::class => DoctrineRowLocks::class,
         ConditionalUpdates::class => DoctrineConditionalUpdates::class,
         EntityCache::class => DoctrineEntityCache::class,
+        // Step F2e: the scopes (trash, vault) as Doctrine's filters, and deletes by criteria.
+        Backend::class => DoctrineBackend::class,
+        BulkDeletes::class => DoctrineBulkDeletes::class,
     ];
 
     private static bool $registered = false;

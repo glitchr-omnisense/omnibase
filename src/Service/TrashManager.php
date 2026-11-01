@@ -2,13 +2,20 @@
 
 namespace Base\Service;
 
+use Base\Database\Attribute\Backend\Backends;
 use Base\Database\Attribute\Trasheable;
+use Base\Database\Backend\BulkDeletes;
+use Base\Database\Backend\EntityCache;
+use Base\Database\Scope\TrashScope;
+use Base\Database\UnitOfWorks;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Entity\Extension\TrashBall;
 use Base\Repository\Extension\TrashBalls;
 use Closure;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\Backend;
+use Omnibridge\Persistence\UnitOfWork;
 use Throwable;
 
 /**
@@ -25,10 +32,14 @@ class TrashManager
 {
     public const FILTER = "trash_filter";
 
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        protected EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected TrashBalls $trashBalls,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /** The trash by its interface (step R28), where it asked the entity manager's repository. */
@@ -52,18 +63,19 @@ class TrashManager
      */
     public function withTrash(Closure $callable): mixed
     {
-        $filters = $this->entityManager->getFilters();
-        $wasEnabled = $filters->isEnabled(self::FILTER);
+        // The trash scope (step F2e: Doctrine's filter "trash_filter" behind the persistence's Backend).
+        $backend = Backends::of($this->unitOfWork, Backend::class);
+        $wasEnabled = $backend->isScopeEnabled(TrashScope::NAME);
 
         if ($wasEnabled) {
-            $filters->disable(self::FILTER);
+            $backend->disableScope(TrashScope::NAME);
         }
 
         try {
             return $callable();
         } finally {
-            if ($wasEnabled && !$filters->isEnabled(self::FILTER)) {
-                $filters->enable(self::FILTER);
+            if ($wasEnabled && !$backend->isScopeEnabled(TrashScope::NAME)) {
+                $backend->enableScope(TrashScope::NAME);
             }
         }
     }
@@ -97,7 +109,7 @@ class TrashManager
 
         return $this->withTrash(function () use ($entityClass, $entityId) {
             try {
-                return $this->entityManager->find($entityClass, $entityId);
+                return UnitOfWorks::repositories($this->unitOfWork)->of($entityClass)->find($entityId);
             } catch (Throwable) {
                 return null;
             }
@@ -116,18 +128,17 @@ class TrashManager
         if ($entity === null || !Trasheable::has($entity::class)) {
             // Nothing to restore: drop the dangling entry rather than leave the
             // trash listing pointing at something that cannot be brought back.
-            $this->entityManager->remove($trashBall);
-            $this->entityManager->flush();
+            $this->unitOfWork->remove($trashBall);
+            $this->unitOfWork->flush();
 
             return false;
         }
 
         $trasheable = Trasheable::resolve($entity::class);
-        $classMetadata = $this->entityManager->getClassMetadata($entity::class);
-        $classMetadata->getReflectionProperty($trasheable->deletedAt)->setValue($entity, null);
+        self::property($entity, $trasheable->deletedAt)->setValue($entity, null);
 
-        $this->entityManager->remove($trashBall);
-        $this->entityManager->flush();
+        $this->unitOfWork->remove($trashBall);
+        $this->unitOfWork->flush();
 
         $this->evict($entity);
 
@@ -148,18 +159,16 @@ class TrashManager
         $entity = $this->entity($trashBall);
 
         if ($entity !== null) {
-            $this->entityManager->remove($entity);
+            $this->unitOfWork->remove($entity);
         }
 
-        $this->entityManager->remove($trashBall);
-        $this->entityManager->flush();
+        $this->unitOfWork->remove($trashBall);
+        $this->unitOfWork->flush();
 
         // Revisions and any other extension rows kept for this entity: they
         // describe something that no longer exists.
         if ($entityClass && $entityId) {
-            $this->entityManager->createQuery(
-                "DELETE FROM " . AbstractExtension::class . " e WHERE e.entityClass = :class AND e.entityId = :id"
-            )->setParameters(["class" => $entityClass, "id" => $entityId])->execute();
+            Backends::of($this->unitOfWork, BulkDeletes::class)->deleteWhere(AbstractExtension::class, ["entityClass" => $entityClass, "entityId" => $entityId]);
         }
 
         return $entity !== null;
@@ -182,16 +191,26 @@ class TrashManager
 
     protected function evict(object $entity): void
     {
-        $cache = $this->entityManager->getCache();
-        if (!$cache) {
+        $cache = Backends::of($this->unitOfWork, EntityCache::class);
+        if (!$cache->enabled()) {
             return;
         }
 
-        $classMetadata = $this->entityManager->getClassMetadata($entity::class);
-        $id = $classMetadata->getIdentifierValues($entity);
-
-        if (count($id) === 1) {
-            $cache->evictEntity($classMetadata->rootEntityName, reset($id));
+        $id = $this->unitOfWork->identifier($entity);
+        if (null !== $id && !is_array($id)) {
+            $cache->evict(UnitOfWorks::shapes($this->unitOfWork)->shape($entity)->rootClass(), $id);
         }
+    }
+
+    /** The entity's property where its class or a parent declares it (Doctrine's reflection property before, step F2e). */
+    private static function property(object $entity, string $name): \ReflectionProperty
+    {
+        for ($class = new \ReflectionClass($entity); false !== $class; $class = $class->getParentClass()) {
+            if ($class->hasProperty($name) && $class->getProperty($name)->getDeclaringClass()->getName() === $class->getName()) {
+                return $class->getProperty($name);
+            }
+        }
+
+        throw new \LogicException(sprintf('%s has no property %s.', $entity::class, $name));
     }
 }

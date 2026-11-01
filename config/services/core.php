@@ -270,7 +270,7 @@ return static function (ContainerConfigurator $container): void {
     // command are its only callers and both fetch it by id.
     $services->set('Base\Service\TrashManager')
         ->public()
-        ->args([service('doctrine.orm.entity_manager'), service(\Base\Repository\Extension\TrashBalls::class)]);
+        ->args([service('Omnibridge\Persistence\UnitOfWork'), service(\Base\Repository\Extension\TrashBalls::class)]);
     $services->alias('trash_manager', 'Base\Service\TrashManager')->public();
 
     // Reads the modification history back - for the per-field badge in form

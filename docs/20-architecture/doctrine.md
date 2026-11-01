@@ -172,6 +172,22 @@ validators and `CropperType` (the form layer, F5b), `AbstractEventDispatcher` an
 by the applications' commands, beside its `$unitOfWork`), `BaseTrait` (F2f). `tests/Database/UnitOfWorkPathTest`
 keeps the converted files off the entity manager.
 
+### The scopes and the pages
+
+Step F2e. The trash and the vault are scopes (omnisense/omnibridge's `Scope`):
+`Base\Database\Scope\TrashScope` keeps a `#[Trasheable]` entity while its deletion field is null,
+`VaultScope` a `#[Vault]` entity whose vault field is null or names the environment it was enabled with.
+Doctrine compiles them as its SQL filters `trash_filter` and `vault_filter` (`TrashFilter`, `VaultFilter`,
+same SQL as before); `Base\Bridge\Doctrine\DoctrineBackend` (omnibridge's `Backend`, the service
+`Omnibridge\Persistence\Backend` and in `Backends`) enables and disables them by the scope's name.
+`TrashManager::withTrash()` asks the Backend; the extension rows of a destroyed entity go through
+`Base\Database\Backend\BulkDeletes`.
+
+`Pagination` pages an array, or `Base\Service\Model\Pages` (a count and a slice). A Doctrine `Query` is
+adapted to `Base\Bridge\Doctrine\QueryPages`, which keeps what Pagination did with it: the rows grouped by
+id through Doctrine's Paginator, the translations joined, the total counted on a clone by CountWalker.
+Both move to omnibridge/doctrine at F3; an Eloquent backend brings its own Backend and Pages at F7.
+
 ### The lifecycle listeners: logic and Doctrine wiring
 
 The listeners that record something keep their logic in `Base\Database\Lifecycle`, on no
