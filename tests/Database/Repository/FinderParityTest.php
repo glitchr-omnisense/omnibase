@@ -127,7 +127,14 @@ final class FinderParityTest extends KernelTestCase
 
         $recorded = json_decode((string) file_get_contents(self::FIXTURE), true, 512, \JSON_THROW_ON_ERROR);
         self::assertSame(array_keys($recorded), array_keys($observed), 'the same scenarios');
+        // What a running finder gave depends on the rows: compared on the harness's database, where the
+        // fixture was recorded; in an application's suite (this package in its vendor/), on its own data,
+        // the parse and the query are compared, not the rows (the application compares its own).
+        $harness = false !== getenv('HARNESS_SUITE_BOOTSTRAP');
         foreach ($recorded as $key => $before) {
+            if (!$harness && \array_key_exists('result', $before['query'])) {
+                $before['query'] = $observed[$key]['query'] = ['result' => 'not compared: the application\'s rows'];
+            }
             self::assertSame($before['parse'], $observed[$key]['parse'], $key.': the same parse');
             self::assertSame($before['query'], $observed[$key]['query'], $key.': the same query or result');
         }
