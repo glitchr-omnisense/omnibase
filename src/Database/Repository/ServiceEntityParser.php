@@ -571,6 +571,22 @@ class ServiceEntityParser implements Subject
         return $type;
     }
 
+    /**
+     * The value a date or time criterion is bound with: a DateTimeImmutable on a field of a mutable
+     * type (datetime, date, time) as the DateTime of the same moment, which the mutable type converts
+     * (it refused the immutable one: findNextOneBy(['publishedAt' => $immutable]) threw).
+     */
+    protected function boundValueOf(string $fieldHead, mixed $fieldValue): mixed
+    {
+        if (!$fieldValue instanceof \DateTimeImmutable || !$this->classMetadata->hasField($fieldHead)) {
+            return $fieldValue;
+        }
+
+        $type = $this->classMetadata->getTypeOfField($fieldHead);
+
+        return \is_string($type) && str_ends_with($type, '_immutable') ? $fieldValue : DateTime::createFromImmutable($fieldValue);
+    }
+
     protected function buildQueryExpr(QueryBuilder $queryBuilder, $field, $fieldValue)
     {
         $fieldID = str_replace(".", "_", implode("_", $field));
@@ -871,14 +887,15 @@ class ServiceEntityParser implements Subject
 
                     } else {
 
-                        if ($reverseAssert) {
+                        // NotClassOf: anything but that class exactly (its subclasses included); with ^, that class exactly.
+                        if (!$reverseAssert) {
 
                             $queryPart = [$queryBuilder->expr()->not($queryBuilder->expr()->isInstanceOf($tableColumn, $realValue))];
                             foreach ($childClass as $child) {
                                 $queryPart[] = $queryBuilder->expr()->isInstanceOf($tableColumn, $child);
                             }
 
-                            $classOf[] = $queryBuilder->expr()->orX(...$queryPart);
+                            $notClassOf[] = $queryBuilder->expr()->orX(...$queryPart);
                         } else {
                             $queryPart = [$queryBuilder->expr()->isInstanceOf($tableColumn, $realValue)];
                             foreach ($childClass as $child) {
@@ -917,7 +934,7 @@ class ServiceEntityParser implements Subject
                     if ($isMemberOf) {
                         $memberOf[] = $queryBuilder->expr()->isMemberOf($tableColumn, $realValue);
                     } else {
-                        $notMemberOf[] = $queryBuilder->expr()->isMemberOf($tableColumn, $realValue);
+                        $notMemberOf[] = $queryBuilder->expr()->not($queryBuilder->expr()->isMemberOf($tableColumn, $realValue));
                     }
                 }
             }
@@ -954,8 +971,9 @@ class ServiceEntityParser implements Subject
 
                         $this->leftJoin($queryBuilder, self::ALIAS_ENTITY . "." . $fieldHead);
 
-                        if(!$isEmpty && !$isNotEmpty && !$isBool) {
-                            $queryBuilder->setParameter($fieldID, $fieldValue, $this->dateTypeOf($fieldHead, $fieldValue));
+                        // Null, NotNull, Empty, NotEmpty and the booleans compare with no parameter of their own.
+                        if (!$isEmpty && !$isNotEmpty && !$isBool && !$isNull && !$isNotNull) {
+                            $queryBuilder->setParameter($fieldID, $this->boundValueOf($fieldHead, $fieldValue), $this->dateTypeOf($fieldHead, $fieldValue));
                         }
                     } else {
 
@@ -974,8 +992,8 @@ class ServiceEntityParser implements Subject
                     $queryBuilder->setParameter($fieldID, $fieldValue);
                 }
 
-            } elseif (!$isEmpty && !$isNotEmpty && !$isBool) {
-                $queryBuilder->setParameter($fieldID, $fieldValue, $this->dateTypeOf($fieldHead, $fieldValue));
+            } elseif (!$isEmpty && !$isNotEmpty && !$isBool && !$isNull && !$isNotNull) {
+                $queryBuilder->setParameter($fieldID, $this->boundValueOf($fieldHead, $fieldValue), $this->dateTypeOf($fieldHead, $fieldValue));
             }
             
             if ($isInsensitive) {
@@ -1042,7 +1060,7 @@ class ServiceEntityParser implements Subject
                     throw new Exception("Invalid operator for field \"$fieldName\": " . $tableOperator);
                 }
 
-                return $queryBuilder->expr()->$fnExpr($tableColumn, ":$fieldID");
+                return $queryBuilder->expr()->$fnExpr($tableColumn);
             
             } elseif ($isEmpty || $isNotEmpty) {
 
@@ -1086,15 +1104,15 @@ class ServiceEntityParser implements Subject
                 } elseif ($tableOperator == self::OPTION_GREATER) {
                     $fnExpr = "gt";
                 } elseif ($tableOperator == self::OPTION_GREATER_EQUAL) {
-                    $fnExpr = "ge";
+                    $fnExpr = "gte";
                 } elseif ($tableOperator == self::OPTION_LOWER) {
                     $fnExpr = "lt";
                 } elseif ($tableOperator == self::OPTION_LOWER_EQUAL) {
-                    $fnExpr = "le";
+                    $fnExpr = "lte";
                 } elseif ($tableOperator == self::OPTION_YOUNGER) {
                     $fnExpr = "gt";
                 } elseif ($tableOperator == self::OPTION_YOUNGER_EQUAL) {
-                    $fnExpr = "ge";
+                    $fnExpr = "gte";
                 } elseif ($tableOperator == self::OPTION_OVER) {
                     $fnExpr = "lt";
                 } elseif ($tableOperator == self::OPTION_NOT_OVER) {
@@ -1102,7 +1120,7 @@ class ServiceEntityParser implements Subject
                 } elseif ($tableOperator == self::OPTION_OLDER) {
                     $fnExpr = "lt";
                 } elseif ($tableOperator == self::OPTION_OLDER_EQUAL) {
-                    $fnExpr = "le";
+                    $fnExpr = "lte";
                 } elseif ($tableOperator == self::OPTION_WITHIN) {
                     $fnExpr = "lt";
                 } else {
@@ -1425,20 +1443,16 @@ class ServiceEntityParser implements Subject
     {
         $column = $this->getAlias($this->getColumn());
 
-        $e_column = $column;
-        if ($this->classMetadata->hasAssociation($column)) {
-            $e_column = self::ALIAS_ENTITY . "_" . $column;
-        } elseif ($this->classMetadata->hasField($column)) {
-            $e_column = self::ALIAS_ENTITY . "." . $column;
-        }
-
         $queryBuilder = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? $selectAs ?? [], $selectAs ?? []);
 
-        if ($this->classMetadata->hasAssociation($column)) {
-            $this->leftJoin($queryBuilder, $column);
+        // A field's length is LENGTH() of its value; a collection's is its number of members, SIZE()
+        // (lengthOfTagsBy...: LENGTH() of the joined alias was no DQL).
+        if ($this->classMetadata->hasAssociation($column) && $this->classMetadata->isCollectionValuedAssociation($column)) {
+            $queryBuilder->addSelect("SIZE(" . self::ALIAS_ENTITY . "." . $column . ") as length");
+        } else {
+            $e_column = $this->classMetadata->hasField($column) ? self::ALIAS_ENTITY . "." . $column : $column;
+            $queryBuilder->addSelect("LENGTH(" . $e_column . ") as length");
         }
-
-        $queryBuilder->addSelect("LENGTH(" . $e_column . ") as length");
 
         return $queryBuilder->getQuery();
     }
