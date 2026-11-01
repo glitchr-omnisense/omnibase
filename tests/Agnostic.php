@@ -30,6 +30,8 @@
  *
  * Sorted. 625 classes on 2026-11-01 (step F0), of the Foundation's 860: those
  * that passed --strict, measured on the core 4.x e156cfaf.
+ * 629 after step F1 (+4: the finder language's Parser, Query, Criterion and
+ * Subject, which read a finder's name without Doctrine).
  */
 
 return [
@@ -138,6 +140,10 @@ return [
     Base\Database\Mapping\ClassMetadataCompletor::class,
     Base\Database\Mapping\ClassMetadataManipulator::class,
     Base\Database\Repository\Entities::class,
+    Base\Database\Repository\Finder\Criterion::class,
+    Base\Database\Repository\Finder\Parser::class,
+    Base\Database\Repository\Finder\Query::class,
+    Base\Database\Repository\Finder\Subject::class,
     Base\Database\Repository\Repositories::class,
     Base\Database\Repository\ServiceEntityParser::class,
     Base\Database\Schema\Attributes::class,

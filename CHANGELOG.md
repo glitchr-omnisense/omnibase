@@ -10,6 +10,61 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the finder language read without Doctrine (2026-11-01)
+
+Plan "omnibase agnostic", step F1 (the finder language is Marco's invention, kept whole in the core).
+
+- **`Base\Database\Repository\Finder\Parser`** reads a finder's name and arguments -
+  `findOneByEmailAndUsername()`, `cacheOneByStateAndSlugStartingWith()`,
+  `countByStateAndPublishedAtYoungerThan()`, `cachePreviousOneByClassOfAndState()`,
+  `lengthOfTagsByState()`, every word and special of the language - into a **`Finder\Query`**, its
+  neutral form: the internal request and its arguments, the criteria and their options, the
+  separator, the column, cache, Eagerly, the request and the special; `criterions()` gives them as
+  `Finder\Criterion` objects, `extras()` the specials' numbers and keys. What it asks of the entity
+  is a `Finder\Subject` (class, fields, a field or association, a Query-by-Example's criteria); a
+  host's request for `...WithRoute` goes through the resolver it is given.
+- **`ServiceEntityParser` is the Doctrine compiler of that Query**: its entity's Subject, `read()`
+  parses, `execute()` compiles and runs, `parse()` does both as before. Its constants are the
+  Parser's, same names. `$eagerly` takes the associations' list an `...Eagerly...` finder always gave
+  it, which its `bool` type refused. It moves to omnibridge/doctrine at step F3; omnibridge/eloquent
+  compiles the same Query at F7.
+- **The parse is the one of before, word for word**: `tests/Database/Repository/FinderParityTest`
+  compares, for 57 finder calls (the core's own shapes and one of each word), the parse and the
+  query (DQL, parameters, first and maximum results, or what a running finder gave or threw) with
+  `finder-parity.json`, recorded on the code of before (`FINDER_PARITY_RECORD=1`).
+- Seen while recording, kept as they were for the parity (docs/20-architecture/entities-and-repositories.md):
+  `LowerEqualTo`/`GreaterEqualTo` call `Expr::le()`/`ge()`, which Doctrine lacks;
+  `lengthOf<Association>By` builds an invalid DQL; a `DateTimeImmutable` bound on a mutable
+  `datetime` field is refused; `ImageCropRepository`'s two finders pass their selected expressions as
+  `__findOneBy()`'s offset; `NotStartingWith`, `NotEndingWith`, `NotInstanceOf`, `NotClassOf` and
+  `NotMemberOf` are misread as their positive word.
+- Foundation 860 -> 864, agnostic core 625 -> 629.
+- **picqer/php-barcode-generator** leaves the requirements: nothing in the core used it.
+
+Tests: `FinderParityTest`, `tests/Database/Repository/Finder/ParserTest` (each word on an entity known
+by its fields alone), `BareTest::testTheFinderLanguageIsReadWithoutDoctrine` (parsed under
+`bare --strict`, nothing of Doctrine loaded).
+
+### Added: `bare --strict`, the guard of the agnostic core (2026-11-01)
+
+Plan "omnibase agnostic", step F0: the core is to impose neither Doctrine, nor Twig, nor Symfony
+beyond the standalone components kept.
+
+- `docker/bin/bare --strict` loads classes as `bare` does, on the vendor without the framework,
+  against a wider set: the framework, every Doctrine package but doctrine/collections (and
+  doctrine/deprecations), Twig, omnibridge/doctrine, twig, symfony and laravel, Laravel
+  (`Illuminate\`), and every Symfony component outside string, uid, intl, translation, mime,
+  mailer, notifier (not its transports), property-access, options-resolver, yaml, password-hasher,
+  filesystem, finder, serializer, the contracts and the polyfills. `--strict` also applies to
+  `--all`, `--each` and `--names`.
+- Without classes it loads `tests/Agnostic.php`: the 625 classes of the Foundation's 860 that pass,
+  none of `src/Bridge/`; the list only grows (a class leaves it by a decision written in the plan and
+  here, its move to a bridge being one).
+
+Tests: `BareTest::testTheAgnosticCoreLoadsWithoutDoctrineNorTwig`,
+`testTheAgnosticCoreIsSortedAndWithinTheFoundation`, `testTheStrictCheckNamesDoctrineAndTwig`. Docs:
+`docs/30-operations/harness.md` (The agnostic core: `bare --strict`).
+
 ### Changed: glitchr/backup-manager is a suggestion (2026-11-01)
 
 - **glitchr/backup-manager** moves from `require` to `suggest`: it serves the TimeMachine alone
@@ -956,7 +1011,6 @@ which doctrine/orm 3 requires and nothing of the Foundation loads.
   them again seals them.
 
 ### Added
-- **`bare --strict` and `tests/Agnostic.php`, the guard of the agnostic core** (plan "omnibase agnostic", 2026-11-01, step F0: the core is to impose neither Doctrine, nor Twig, nor Symfony beyond the standalone components kept). `docker/bin/bare --strict` loads classes as `bare` does, on the vendor without the framework, against a wider set: the framework, every Doctrine package but doctrine/collections (and doctrine/deprecations), Twig, omnibridge/doctrine, twig, symfony and laravel, Laravel (`Illuminate\`), and every Symfony component outside string, uid, intl, translation, mime, mailer, notifier (not its transports), property-access, options-resolver, yaml, password-hasher, filesystem, finder, serializer, the contracts and the polyfills. Without classes it loads `tests/Agnostic.php`: the 625 classes of the Foundation's 860 that pass, none of `src/Bridge/`; the list only grows (a class leaves it by a decision written in the plan and here, its move to a bridge being one). `--strict` also applies to `--all`, `--each` and `--names`. Nothing else changes: no class, no requirement. Tests: `BareTest::testTheAgnosticCoreLoadsWithoutDoctrineNorTwig`, `testTheAgnosticCoreIsSortedAndWithinTheFoundation`, `testTheStrictCheckNamesDoctrineAndTwig` (`Base\Enum\UserRole` passes the Foundation's guard and is refused by `--strict` for DBAL's `Type`, asked by `EnumType`; `FunctionTwigExtension` for Twig's `AbstractExtension`). Docs: `docs/30-operations/harness.md` (The agnostic core: `bare --strict`).
 - **The account's pages are screens** (plan "omnibase agnostique", step C5, the account's part): a member's profile (`/profile/{id}`), the settings (`/settings`) and the notifications (`/notifications`) hand their template and a view model to `ScreenResponder` - `Base\Screen\Account\ProfilePage` (`Member`: number, name, avatar's address at 128 px or the application's own `avatarHtml`, roles, online, active, registered and last seen, threads and likes counted; the five latest published threads as `Link`s, now dated by `publishedAt` where a page shows it; `AccountSummary` - second factor, passkeys counted, provider, language, time zone, null where unavailable - for its owner or an administrator only; `editUrl`, `settingsUrl`, `logoutUrl`), `SettingsPage` (`TwoFactor`, `Passkey`, `Provider`, `Session`, the small forms as `Action`s - an address and the token of its intent -, `language`, `timezone`) and `NotificationsPage` (each `Notification` the bell's item and its `group` - today, yesterday, week, earlier - by the screen's clock in Twig's time zone; the token, the requests' addresses, push). Built by `Base\Screen\Builder\Accounts` (framework-free: the entities, the security policy, the Urls and Tokens contracts, the clock) through `Base\Bridge\Symfony\AccountScreens` (a Twig runtime: the viewer, `|thumbnail`, `oauth_available()`, web push, the back-office linker, Twig's time zone). The core's three templates read `screen` (and `frame.links.logout`) alone; a template a site overrides gets the variables of before as well (`ScreenResponder::legacy()`, deprecated, gone in 4.0); a host page rendering `@Base/client/user/profile_show.html.twig` with the user alone gets the model from `account_profile(user)`. The settings and the notifications are `Confidential`: `private, no-store`, `Vary: Cookie`. The forms (profile edit, sign-in, sign-up, passwords, two-factor setup), the enrolment prompt and the security flow stay Symfony's (D3). Foundation 744 -> 758. Tests: `AccountPagesSnapshotTest` (the ten pages byte for byte as recorded before, and their props: a visitor's carry what the visitor's page shows, the owner's the summary, each action the token of its intent, the groups by a fixed clock, no cache for tokens), `BareTest::testTheAccountScreensAreBuiltWithoutTheFramework`, `ScreenModelsTest`.
 - **The Tokens contract, `Base\Contract\Tokens`** (plan "omnibase agnostique", step C5; decision D4: `csrf_token` enters the view contract): `csrf($intent)`, the token a form carries for an intent, what a screen's actions send back and their controllers check; `Runtime::tokens()`, in the `base.contracts` locator. Under Symfony `Base\Bridge\Symfony\CsrfTokens` (the CSRF token manager: Twig's `csrf_token()`). docs/20-architecture/contracts.md says that Laravel has one session token for every intent: an action pointing at a Symfony route, rendered by Laravel, would carry a token Symfony refuses (nothing does that today). Foundation 741 -> 743. Test: `ScreenAdaptersTest::testTokensAreTheFormsTokens`.
 - **The screens: a page as a template and a view model** (plan "omnibase agnostique", step C5, the core's side; rule 13). `Base\Screen\*`, framework-free `readonly` view models whose `toArray()` are a front end's props and whose public properties Twig reads: `Frame` (locale, `Site`, links, `Viewer`, theme, a site's own fields in `extra` - refused when they would override the frame's own, `RESERVED` -, and the host, not a prop), `Author`, `Tag`, `Link`, `StoryText`, `Card`, `Story`, `Comment`, `Reply`, `Discussion`; the names and order of lesringostars' `App\Screen\{Frame, BlogPage, StoryPage, StoryText}`, the additions agreed with the pilot after them (a card's `likes`, `likeUrl`, `comments` null where nothing is counted, never 0; `recent` computed by the builder's clock, so no template compares a moment; a comment and a reply named by an id or a uuid, at least one; the comments of a page in a `Discussion`, which the visitors' book and a host's page show too). `Base\Screen\View` (template, screen, React component, status), `Base\Screen\ContextProvider` (the frame, the viewer, the flashes of a request). `Base\Screen\Builder\Stories` makes cards, stories, links, tags and comments of a `Thread` and its `Base\Entity\Thread\Comment`s with two new contracts, `Base\Contract\Pictures` (`|picture`) and `Base\Contract\Texts` (`|wysiwyg`, `|wysiwyg_toc`), and `Runtime::clock()`. Under Symfony: `Base\Bridge\Symfony\MediaPictures` and `WysiwygTexts` (the filters' own answers, in the `base.contracts` locator, `Runtime::pictures()`, `Runtime::texts()`), `SymfonyScreenContext` (the request's locale and host, the host's `site` Twig global or omnibase's settings, the links whose routes exist, the Access contract's user, the Themizer's scheme, `app.flashes()`; service `Base\Screen\ContextProvider`, a site decorates it), `ScreenResponder` (Twig with `frame` and `screen`, plus a site's variables of before; omnibridge/react's protocol when it is installed - `X-Omnibridge`, the View's component, the frame's and the screen's props, `base.screens.version` (new, null), 409 for another version -, else a request asking `application/json` alone gets the props; `Vary` on what chose; a JSON answer carrying a viewer `private` and varying on `Cookie`). Foundation 718 -> 741; the names report: 136 of 741 name the framework themselves (`SymfonyScreenContext`, `ScreenResponder` join), 427 with the chains. Tests: `tests/Screen/ScreenModelsTest`, `tests/Bridge/Symfony/ScreenResponderTest` (the protocol's answers when omnibridge/react is beside the core or mounted by the harness's checkouts overlay at `/srv/omnibridge/react`), `ScreenAdaptersTest` (the context, the flashes taken once, Pictures and Texts equal to `|picture` and `|wysiwyg`), `BareTest::testTheScreensAreBuiltWithoutTheFramework`. Docs: `docs/20-architecture/contracts.md` (The screens).
