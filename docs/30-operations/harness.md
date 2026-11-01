@@ -147,6 +147,42 @@ AttributeReader and the ClassMetadataManipulator - form types in a method -, the
 Localizer, the Themizer, `WebpackTagRenderer`), 422 themselves or through a
 `Base\` name.
 
+### The agnostic core: `bare --strict`
+
+The Foundation allows Doctrine, Twig and the standalone Symfony components
+(decisions D1, D2, D4 of 2026-10-17). Since 2026-11-01 the goal is wider: the
+core imposes neither Doctrine, nor Twig, nor Symfony beyond the components
+kept (plan "omnibase agnostic", step F0). `bare --strict` measures that goal
+the same way, by loading, on the same vendor without the framework; it refuses,
+besides the framework:
+
+- every Doctrine package but doctrine/collections (and doctrine/deprecations,
+  which it reads): the ORM, DBAL, persistence, the event manager, common;
+- Twig and its extras;
+- the bridges to a host or a persistence: omnibridge/doctrine, twig, symfony
+  and laravel; Laravel itself (`Illuminate\`);
+- every Symfony component outside the kept ones - string, uid, intl,
+  translation, mime, mailer, notifier (not its transports), property-access,
+  options-resolver, yaml, password-hasher, filesystem, finder, serializer,
+  the contracts and the polyfills -: validator, cache, event-dispatcher,
+  http-client (HTTP is a contract only), process, workflow, var-dumper,
+  error-handler, asset, expression-language, css-selector, property-info...
+
+Its list is `tests/Agnostic.php`: the classes of the Foundation that pass, none
+of `src/Bridge/` (the adapters, which move to the omnibridge/* packages). It
+only grows, as the steps of the plan put the core's code on contracts; a class
+leaves it only by a decision written in the plan and in CHANGELOG.md (its move
+to a bridge is one). `BareTest::testTheAgnosticCoreLoadsWithoutDoctrineNorTwig`
+is its guard, `testTheStrictCheckNamesDoctrineAndTwig` shows it is not blind
+(an enum's DBAL parent and a Twig extension are named). `--strict` combines
+with the other options: `bare --strict --all --each` says which classes of
+`src/` pass, `bare --strict --names` names the wider set.
+
+On 2026-11-01 (core 4.x e156cfaf): 625 of the Foundation's 860 classes. What
+keeps the others out, most often: Twig's `AbstractExtension`, doctrine/orm's
+`EntityRepository` (the 81 repositories), the console, DBAL's `Type` (the 20
+enums, through `EnumType`), the validator, the event dispatcher.
+
 ## doctrine/orm as released
 
 Since 4.0 the image's doctrine/orm is as released: glitchr/base-plugin, which

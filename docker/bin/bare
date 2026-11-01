@@ -15,6 +15,7 @@
  *   docker compose run --rm omnibase bare --names               # informative: the classes of the Foundation that name the framework
  *   docker compose run --rm omnibase bare path/to/script.php    # a script run with the autoloader alone (what it returns is in --json)
  *   docker compose run --rm omnibase bare --install             # makes (or refreshes) the vendor without the framework, then exits
+ *   docker compose run --rm omnibase bare --strict              # the agnostic core (tests/Agnostic.php): nor Doctrine, nor Twig either
  *
  * Where the framework is absent (plan "omnibase agnostique", C7c): the classes
  * are loaded with the autoloader of var/bare/vendor, the core installed alone
@@ -58,6 +59,22 @@
  * mailer, notifier, cache, workflow, event-dispatcher, options-resolver,
  * property-access, http-client, the contracts...), Doctrine (storage: ORM,
  * DBAL, collections, persistence) and Twig (the view).
+ *
+ * --strict measures against a wider set, the goal of the plan "omnibase
+ * agnostic" of 2026-11-01 (step F0): the core imposes neither Doctrine, nor
+ * Twig, nor Symfony beyond the standalone components Marco keeps. Besides the
+ * framework above: every Doctrine package but doctrine/collections (and
+ * doctrine/deprecations, which it reads), Twig, the bridges to a host or a
+ * persistence (omnibridge/doctrine, twig, symfony, laravel), Laravel
+ * (Illuminate\), and every Symfony component outside the kept list (string,
+ * uid, intl, translation, mime, mailer, notifier without its transports,
+ * property-access, options-resolver, yaml, password-hasher, filesystem,
+ * finder, serializer; the contracts and the polyfills): validator, cache,
+ * event-dispatcher, http-client (HTTP is a contract only), process,
+ * workflow, var-dumper, error-handler, asset, expression-language,
+ * css-selector, property-info... Its list is tests/Agnostic.php, which only
+ * grows as tests/Foundation.php does; --strict applies to --all, --each,
+ * --names and the classes named as well.
  */
 
 // A notice or a deprecation goes to the error output, not into the report.
@@ -65,15 +82,22 @@ ini_set('display_errors', 'stderr');
 
 // A namespace segment ending in Bundle is a bundle's - except symfony/intl's resource readers
 // (Symfony\Component\Intl\Data\Bundle\...), a standalone component's (plan, C3e).
-const FRAMEWORK = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
-const FRAMEWORK_FILES = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
+const FRAMEWORK_DEFAULT = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
+const FRAMEWORK_FILES_DEFAULT = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
+// --strict: nor Doctrine (collections and the deprecations it reads aside), nor Twig, nor a bridge to a host or a
+// persistence, nor Laravel, nor a Symfony component outside the kept list (plan "omnibase agnostic", 2026-11-01, F0).
+const KEPT_COMPONENTS = 'String|Uid|Intl|Translation|Mime|Mailer|Notifier|PropertyAccess|OptionsResolver|Yaml|PasswordHasher|Filesystem|Finder|Serializer';
+const KEPT_PACKAGES = 'string|uid|intl|translation|mime|mailer|notifier|property-access|options-resolver|yaml|password-hasher|filesystem|finder|serializer|polyfill-[a-z0-9-]+|[a-z-]+-contracts';
+const FRAMEWORK_STRICT = '~^(?:Doctrine\\\\(?!Common\\\\Collections\\\\|Deprecations\\\\)|Twig\\\\|Omnibridge\\\\(?:Doctrine|Twig|Symfony|Laravel)\\\\|Illuminate\\\\|Symfony\\\\Component\\\\(?!(?:'.KEPT_COMPONENTS.')\\\\)|Symfony\\\\Component\\\\Notifier\\\\Bridge\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
+const FRAMEWORK_FILES_STRICT = '~/vendor/(?:doctrine/(?!collections/|deprecations/)[a-z0-9_.-]+|twig/[a-z0-9_.-]+|omnibridge/(?:doctrine|twig|symfony|laravel)|laravel/[a-z0-9_.-]+|illuminate/[a-z0-9_.-]+|symfony/(?!(?:'.KEPT_PACKAGES.')/)[a-z0-9_.-]+|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
 
-$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false, 'install' => false];
+$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false, 'install' => false, 'strict' => false];
 $classes = [];
 foreach (array_slice($argv, 1) as $argument) {
     if (in_array($argument, ['-h', '--help'], true)) {
         echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Foundation (tests/Foundation.php), loaded with Composer's autoloader alone.\n";
         echo "bare --names [--all] [--json] [class...]: informative, not a guard: which of those classes name the framework in their use lines or code, themselves or through the Base\\ classes they name.\n";
+        echo "bare --strict [...]: the same against a wider set - nor Doctrine (collections aside), nor Twig, nor a host's bridge, nor a Symfony component outside the kept list; without classes, the agnostic core (tests/Agnostic.php).\n";
         echo "bare --install: makes var/bare/vendor, the core installed alone by composer install --no-dev, where the classes are then loaded (again when composer.json changed).\n";
         exit(0);
     }
@@ -83,6 +107,10 @@ foreach (array_slice($argv, 1) as $argument) {
         $classes[] = ltrim($argument, '\\');
     }
 }
+
+define('STRICT', $options['strict']);
+define('FRAMEWORK', STRICT ? FRAMEWORK_STRICT : FRAMEWORK_DEFAULT);
+define('FRAMEWORK_FILES', STRICT ? FRAMEWORK_FILES_STRICT : FRAMEWORK_FILES_DEFAULT);
 
 $core = dirname(__DIR__, 2);
 if ($options['install']) {
@@ -106,7 +134,7 @@ if ($options['all']) {
         }
     }
 } elseif (!$classes) {
-    $classes = require $core.'/tests/Foundation.php';
+    $classes = require $core.(STRICT ? '/tests/Agnostic.php' : '/tests/Foundation.php');
 }
 $classes = array_values(array_unique($classes));
 sort($classes);
@@ -124,7 +152,7 @@ if ($options['json']) {
     exit($failed || $report['baseline']['symbols'] ? 1 : 0);
 }
 
-printf("The core in bare PHP: %d classes loaded with %s alone, no kernel, no container.\n\n", count($classes), $autoload);
+printf("The core in bare PHP%s: %d classes loaded with %s alone, no kernel, no container.\n\n", STRICT ? ' (strict: nor Doctrine, nor Twig, nor the components left out)' : '', count($classes), $autoload);
 foreach ([...$report['baseline']['symbols'], ...$report['baseline']['files']] as $loaded) {
     printf("  the autoloader itself, before any class: %s\n", $loaded);
 }
@@ -140,7 +168,7 @@ foreach ($failed as $class => $result) {
         printf("    %s\n", $file);
     }
 }
-printf("\n%d without the framework, %d with it or not loaded.\n", count($classes) - count($failed), count($failed));
+printf("\n%d without %s, %d with it or not loaded.\n", count($classes) - count($failed), STRICT ? 'Doctrine, Twig and the framework' : 'the framework', count($failed));
 exit($failed || $report['baseline']['symbols'] ? 1 : 0);
 
 /**
@@ -272,7 +300,7 @@ function each_apart(array $classes, string $autoload): array
             $class = array_shift($queue);
             // Files, not pipes: a report bigger than a pipe's buffer would block the process.
             $outputs = [tempnam(sys_get_temp_dir(), 'bare'), tempnam(sys_get_temp_dir(), 'bare')];
-            $process = proc_open([PHP_BINARY, __FILE__, '--json', $class], [1 => ['file', $outputs[0], 'w'], 2 => ['file', $outputs[1], 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
+            $process = proc_open([PHP_BINARY, __FILE__, '--json', ...(STRICT ? ['--strict'] : []), $class], [1 => ['file', $outputs[0], 'w'], 2 => ['file', $outputs[1], 'w']], $pipes, null, ['OMNIBASE_AUTOLOAD' => $autoload] + getenv());
             $running[$class] = [$process, $outputs];
         }
         foreach ($running as $class => [$process, $outputs]) {

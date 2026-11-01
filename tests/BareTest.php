@@ -3,6 +3,9 @@
 namespace Tests\Base;
 
 use Base\BaseBundle;
+use Base\Database\Type\EnumType;
+use Base\Enum\UserRole;
+use Base\Twig\Extension\FunctionTwigExtension;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Repository\UserRepository;
 use PHPUnit\Framework\TestCase;
@@ -70,6 +73,70 @@ final class BareTest extends TestCase
         foreach ($foundation as $class) {
             self::assertFileExists(__DIR__.'/../src/'.str_replace('\\', '/', substr($class, \strlen('Base\\'))).'.php', $class);
         }
+    }
+
+    /**
+     * The agnostic core (plan "omnibase agnostic", 2026-11-01, F0): the classes of tests/Agnostic.php
+     * load, on the vendor without the framework, with nothing of Doctrine (collections aside), Twig,
+     * a host's bridge, the framework, nor a Symfony component outside the kept ones (bare --strict).
+     */
+    public function testTheAgnosticCoreLoadsWithoutDoctrineNorTwig(): void
+    {
+        [$status, $report] = self::bare(['--strict']);
+
+        $agnostic = require __DIR__.'/Agnostic.php';
+        self::assertSame($agnostic, array_keys($report['classes']), 'every class of the agnostic core was loaded');
+        self::assertSame([], $report['baseline']['symbols'], 'the autoloader alone loads no class of the wider set');
+
+        $failures = [];
+        foreach ($report['classes'] as $class => $result) {
+            if (null !== $result['error']) {
+                $failures[] = $class.' does not load: '.$result['error'];
+            }
+            foreach ($result['framework'] as $symbol => $askedBy) {
+                $failures[] = $class.' loads '.$symbol.(null === $askedBy || $askedBy === $class ? '' : ', asked by '.$askedBy);
+            }
+            foreach ($result['framework_files'] as $file) {
+                $failures[] = $class.' loads the file '.$file;
+            }
+        }
+        self::assertSame([], $failures, "a class of the agnostic core loads Doctrine, Twig or the framework:\n".implode("\n", $failures));
+        self::assertSame(0, $status);
+    }
+
+    /** The agnostic core is sorted, each class once, all of them in the Foundation and none an adapter of src/Bridge/. */
+    public function testTheAgnosticCoreIsSortedAndWithinTheFoundation(): void
+    {
+        $agnostic = require __DIR__.'/Agnostic.php';
+        $sorted = $agnostic;
+        sort($sorted);
+
+        self::assertSame($sorted, $agnostic, 'sorted');
+        self::assertSame(array_values(array_unique($agnostic)), $agnostic, 'each class once');
+        self::assertSame([], array_values(array_diff($agnostic, require __DIR__.'/Foundation.php')), 'every class of the agnostic core is in the Foundation');
+        self::assertSame([], array_values(array_filter($agnostic, static fn (string $class) => str_starts_with($class, 'Base\\Bridge\\'))), 'no adapter of src/Bridge/');
+    }
+
+    /**
+     * --strict is not blind, and is stricter than the Foundation's guard: an enum's parent, EnumType,
+     * is a DBAL type - Doctrine is allowed by the guard (D2), refused by --strict, which names the type
+     * and the class of the core that asked for it (until step F2a makes the enums plain value sets);
+     * a Twig extension of the core is refused for Twig's AbstractExtension.
+     */
+    public function testTheStrictCheckNamesDoctrineAndTwig(): void
+    {
+        [$status, $report] = self::bare([UserRole::class]);
+        self::assertSame(0, $status, 'the Foundation\'s guard allows Doctrine');
+
+        [$status, $report] = self::bare(['--strict', UserRole::class, FunctionTwigExtension::class]);
+        self::assertSame(1, $status);
+        $enum = $report['classes'][UserRole::class];
+        self::assertNull($enum['error']);
+        self::assertSame(EnumType::class, $enum['framework']['Doctrine\\DBAL\\Types\\Type'] ?? null);
+        self::assertNotEmpty(preg_grep('~/doctrine/dbal/~', $enum['framework_files']));
+        $extension = $report['classes'][FunctionTwigExtension::class];
+        self::assertSame(FunctionTwigExtension::class, $extension['framework']['Twig\\Extension\\AbstractExtension'] ?? null);
+        self::assertNotEmpty(preg_grep('~/twig/twig/~', $extension['framework_files']));
     }
 
     /**
