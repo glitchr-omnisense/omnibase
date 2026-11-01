@@ -5,7 +5,7 @@ namespace Base\Field\Type;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Enum\Quadrant\Quadrant8;
 
-use Base\Twig\Environment;
+use Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;

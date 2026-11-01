@@ -158,6 +158,11 @@
  * 864 after step F1 of the plan "omnibase agnostic" (2026-11-01, +4: the finder language without Doctrine -
  * Base\Database\Repository\Finder\{Parser, Query, Criterion, Subject}).
  * 865 after step F2a (+1: Base\Database\Type\Enumerations, the enumerations by the name of their type).
+ * 881 after step F4 (+16: the neutral view helpers Base\View\* - Formats, Captions, Dates, Money, Pagination,
+ * Links, Enums, Menus, Bell, Pictures, Commons, Wysiwyg, Demo, DeployVersion, Widgets and the AssetPaths contract -,
+ * the logic of omnibase's Twig functions and filters for every view technology). Twig is a suggestion of the core
+ * since then: on var/bare/vendor, where it is not installed, the classes of src/Twig that extend Twig's are
+ * reported optional by bare (not loaded, not failures) and kept here, measured where Twig is installed.
  */
 
 return [
@@ -1034,4 +1039,20 @@ return [
     Base\Validator\Constraints\StringCaseEntityValidator::class,
     Base\Validator\Constraints\UniqueEntity::class,
     Base\Validator\Constraints\UniqueEntityValidator::class,
+    Base\View\AssetPaths::class,
+    Base\View\Bell::class,
+    Base\View\Captions::class,
+    Base\View\Commons::class,
+    Base\View\Dates::class,
+    Base\View\Demo::class,
+    Base\View\DeployVersion::class,
+    Base\View\Enums::class,
+    Base\View\Formats::class,
+    Base\View\Links::class,
+    Base\View\Menus::class,
+    Base\View\Money::class,
+    Base\View\Pagination::class,
+    Base\View\Pictures::class,
+    Base\View\Widgets::class,
+    Base\View\Wysiwyg::class,
 ];

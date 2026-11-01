@@ -60,6 +60,14 @@
  * property-access, http-client, the contracts...), Doctrine (storage: ORM,
  * DBAL, collections, persistence) and Twig (the view).
  *
+ * Twig is optional in the core (plan "omnibase agnostic", F4): twig/twig is a
+ * suggestion, so var/bare/vendor has no Twig, and a class of src/Twig that
+ * cannot load for want of a class of Twig's (an extension, the environment)
+ * is reported there as optional - "optional": "twig/twig", not a failure. The
+ * other classes of src/Twig, and every class outside it, are loaded as
+ * before: none may need Twig to load. On a vendor where Twig is installed
+ * (OMNIBASE_AUTOLOAD, an application's) they are loaded and measured as well.
+ *
  * --strict measures against a wider set, the goal of the plan "omnibase
  * agnostic" of 2026-11-01 (step F0): the core imposes neither Doctrine, nor
  * Twig, nor Symfony beyond the standalone components Marco keeps. Besides the
@@ -156,6 +164,10 @@ printf("The core in bare PHP%s: %d classes loaded with %s alone, no kernel, no c
 foreach ([...$report['baseline']['symbols'], ...$report['baseline']['files']] as $loaded) {
     printf("  the autoloader itself, before any class: %s\n", $loaded);
 }
+$optional = array_keys(array_filter($report['classes'], static fn (array $class) => isset($class['optional'])));
+if ($optional) {
+    printf("  %d classes of src/Twig not loaded for want of Twig's: twig/twig is not installed (Twig is optional in the core).\n", count($optional));
+}
 foreach ($failed as $class => $result) {
     printf("✗ %s\n", $class);
     if (null !== $result['error']) {
@@ -249,6 +261,12 @@ function load_here(array $classes, string $autoload): array
         }
     }, true, true);
 
+    // omnibase's Twig layer is optional (plan "omnibase agnostic", F4): where twig/twig is not installed
+    // (var/bare/vendor since then), a class of src/Twig that cannot load for want of Twig's (an
+    // extension, the environment, the loader) is reported as optional, not as a failure. The others of
+    // src/Twig, and every class outside it, are measured as before: none may need Twig to load.
+    $twig = twig_installed($autoload);
+
     $report = [];
     foreach ($classes as $class) {
         [$symbols, $files] = [counts(), count(get_included_files())];
@@ -276,10 +294,29 @@ function load_here(array $classes, string $autoload): array
         }
         ksort($framework);
         ksort($boundary);
+        if (!$twig && null !== $error && str_starts_with($class, 'Base\\Twig\\') && preg_match('~^Error: (?:Class|Interface|Trait) "Twig\\\\[^"]+" not found~', $error)) {
+            $report[$class] = ['error' => null, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary, 'optional' => 'twig/twig'];
+            continue;
+        }
         $report[$class] = ['error' => $error, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary] + (null === $result ? [] : ['result' => $result]);
     }
 
     return ['baseline' => $baseline, 'classes' => $report];
+}
+
+/**
+ * Whether twig/twig is installed beside the autoloader measured: Composer's list of the installed
+ * packages read, nothing loaded.
+ */
+function twig_installed(string $autoload): bool
+{
+    $installed = dirname($autoload).'/composer/installed.php';
+    if (!is_file($installed)) {
+        return true; // not a Composer 2 vendor: as before, the classes are loaded
+    }
+    $packages = (static fn (string $file) => require $file)($installed);
+
+    return isset($packages['versions']['twig/twig']);
 }
 
 /**

@@ -40,9 +40,11 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('base.service.icon', 'Base\Service\IconProvider');
     $services->alias('base.service.sharing', 'Base\Service\Sharing');
 
-    // Twig renderers
-    $services->alias('twig.html_renderer', 'Base\Twig\Renderer\Adapter\HtmlTagRenderer');
-    $services->alias('twig.webpack_renderer', 'Base\Twig\Renderer\Adapter\WebpackTagRenderer');
+    // Twig renderers: with Twig only, a suggestion of the core (config/services/twig.php)
+    if (class_exists(\Twig\Environment::class)) {
+        $services->alias('twig.html_renderer', 'Base\Twig\Renderer\Adapter\HtmlTagRenderer');
+        $services->alias('twig.webpack_renderer', 'Base\Twig\Renderer\Adapter\WebpackTagRenderer');
+    }
 
     // Media
     $services->alias('base.service.image', 'Base\Service\MediaService');
@@ -139,12 +141,14 @@ return static function (ContainerConfigurator $container): void {
 
     $services->alias('base.entity_extension', 'Base\Database\Entity\EntityExtension');
 
-    // Twig Variables / Loader
-    $services->alias('twig.loader.filesystem', 'Base\Twig\Loader\FilesystemLoader');
-    $services->alias('twig.random_variable', 'Base\Twig\Variable\RandomVariable');
-    $services->alias('twig.site_variable', 'Base\Twig\Variable\SiteVariable');
-    $services->alias('twig.email_variable', 'Base\Twig\Variable\EmailVariable');
-    $services->alias('twig.admin_variable', 'Base\Twig\Variable\AdminVariable');
+    // Twig Variables / Loader: with Twig only (config/services/twig.php)
+    if (class_exists(\Twig\Environment::class)) {
+        $services->alias('twig.loader.filesystem', 'Base\Twig\Loader\FilesystemLoader');
+        $services->alias('twig.random_variable', 'Base\Twig\Variable\RandomVariable');
+        $services->alias('twig.site_variable', 'Base\Twig\Variable\SiteVariable');
+        $services->alias('twig.email_variable', 'Base\Twig\Variable\EmailVariable');
+        $services->alias('twig.admin_variable', 'Base\Twig\Variable\AdminVariable');
+    }
 
     // Form
     $services->alias('form.proxy', 'Base\Form\FormProxy');

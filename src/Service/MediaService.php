@@ -79,7 +79,7 @@ class MediaService extends FileService implements MediaServiceInterface
     protected array $mountStorages = [];
 
     public function __construct(
-        Environment             $twig,
+        ?Environment            $twig,
         MediaRouter             $router,
         ObfuscatorInterface     $obfuscator,
         Storages                $flysystem,
@@ -185,7 +185,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $sources = $this->audio($path);
         $sources = is_array($sources) ? $sources : [$sources];
 
-        return $this->twig->render("@Base/media/audio.html.twig", [
+        return $this->views()->render("@Base/media/audio.html.twig", [
             "sources" => $sources,
             "attr" => $attributes,
         ]);
@@ -200,7 +200,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $sources = $this->video($path);
         $sources = is_array($sources) ? $sources : [$sources];
 
-        return $this->twig->render("@Base/media/video.html.twig", [
+        return $this->views()->render("@Base/media/video.html.twig", [
             "sources" => $sources,
             "attr" => $attributes,
         ]);
@@ -278,7 +278,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]) . " " . $src[0] . "w " . $src[1] . "h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "") . "," . $srcset, ",");
 
-        return $this->twig->render("@Base/media/image.html.twig", [
+        return $this->views()->render("@Base/media/image.html.twig", [
             "path" => is_url($path) ? $path : $this->image($path),
             "attr" => $attributes,
             "lazyload" => $lazyload,
@@ -470,7 +470,7 @@ class MediaService extends FileService implements MediaServiceInterface
         $srcset = implode(", ", array_map(fn($src) => $this->thumbnail($path, $src[0], $src[1]) . " " . $src[0] . "w " . $src[1] . "h", $srcset));
         $attributes[$lazyload ? "data-srcset" : "srcset"] = str_strip(($attributes["srcset"] ?? $attributes["data-srcset"] ?? "") . "," . $srcset, ",");
 
-        return $this->twig->render("@Base/media/image-lightbox.html.twig", [
+        return $this->views()->render("@Base/media/image-lightbox.html.twig", [
             "path" => is_url($path) ? $path : $this->image($path),
             "attr" => $attributes,
             "attr_lightbox" => $lightboxAttributes,

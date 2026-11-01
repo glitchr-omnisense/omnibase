@@ -122,25 +122,80 @@ final class BareTest extends TestCase
      * doctrine/orm's EntityRepository - Doctrine is allowed by the guard (D2), refused by --strict,
      * which names the class and the class of the core that asked for it (until step F3 moves the
      * Doctrine repositories to omnibridge/doctrine); a Twig extension of the core is refused for Twig's
-     * AbstractExtension. An enumeration was the first example until step F2a made it a plain class.
+     * AbstractExtension where Twig is installed (this run's vendor: since step F4 the vendor without the
+     * framework has no Twig, see testTwigIsOptional()). An enumeration was the first example until
+     * step F2a made it a plain class.
      */
     public function testTheStrictCheckNamesDoctrineAndTwig(): void
     {
         [$status, $report] = self::bare([ServiceEntityRepository::class]);
         self::assertSame(0, $status, 'the Foundation\'s guard allows Doctrine');
 
-        [$status, $report] = self::bare(['--strict', ServiceEntityRepository::class, FunctionTwigExtension::class, UserRole::class]);
+        [$status, $report] = self::bare(['--strict', ServiceEntityRepository::class, UserRole::class]);
         self::assertSame(1, $status);
         $repository = $report['classes'][ServiceEntityRepository::class];
         self::assertNull($repository['error']);
         self::assertSame(ServiceEntityRepository::class, $repository['framework']['Doctrine\\ORM\\EntityRepository'] ?? null);
         self::assertNotEmpty(preg_grep('~/doctrine/orm/~', $repository['framework_files']));
-        $extension = $report['classes'][FunctionTwigExtension::class];
-        self::assertSame(FunctionTwigExtension::class, $extension['framework']['Twig\\Extension\\AbstractExtension'] ?? null);
-        self::assertNotEmpty(preg_grep('~/twig/twig/~', $extension['framework_files']));
         // Since step F2a an enumeration loads nothing of Doctrine.
         self::assertSame([], $report['classes'][UserRole::class]['framework']);
         self::assertSame([], $report['classes'][UserRole::class]['framework_files']);
+
+        [$status, $report] = self::bare(['--strict', FunctionTwigExtension::class], self::withTheFramework());
+        self::assertSame(1, $status);
+        $extension = $report['classes'][FunctionTwigExtension::class];
+        self::assertNull($extension['error']);
+        self::assertSame(FunctionTwigExtension::class, $extension['framework']['Twig\\Extension\\AbstractExtension'] ?? null);
+        self::assertNotEmpty(preg_grep('~/twig/twig/~', $extension['framework_files']));
+    }
+
+    /**
+     * Twig is optional in the core (plan "omnibase agnostic", step F4; Marco: the core's Twig
+     * extensions are there when Twig is used and take nothing away when it is not). twig/twig is a
+     * suggestion, so the vendor without the framework has no Twig: there the classes of src/Twig that
+     * extend Twig's (the extensions, the environment, the loader), and only classes of src/Twig, are
+     * reported optional - not failures -; the Twig-free ones of src/Twig (the variables, the tag
+     * renderers, AdminLinks, in the agnostic core since F0) and every other class of the Foundation
+     * load without Twig (testTheFoundationLoadsWithNoClassNorFileOfTheFramework). Where Twig is
+     * installed (this run's vendor) none is optional.
+     */
+    public function testTwigIsOptional(): void
+    {
+        $autoload = self::withoutTheFramework();
+        $installed = require \dirname($autoload).'/composer/installed.php';
+        self::assertArrayNotHasKey('twig/twig', $installed['versions'], 'twig/twig is not installed with the core alone');
+        self::assertArrayNotHasKey('omnibridge/twig', $installed['versions']);
+
+        [, $report] = self::bare([]);
+        $foundation = require __DIR__.'/Foundation.php';
+        $twig = array_values(array_filter($foundation, static fn (string $class): bool => str_starts_with($class, 'Base\\Twig\\')));
+        $optional = array_keys(array_filter($report['classes'], static fn (array $class): bool => 'twig/twig' === ($class['optional'] ?? null)));
+        self::assertContains(\Base\Twig\Extension\FunctionTwigExtension::class, $optional);
+        self::assertContains(\Base\Twig\Environment::class, $optional);
+        self::assertSame([], array_values(array_diff($optional, $twig)), 'only classes of src/Twig are optional');
+        $agnostic = require __DIR__.'/Agnostic.php';
+        self::assertSame([], array_values(array_intersect($optional, $agnostic)), 'the Twig-free classes of src/Twig load without Twig');
+
+        [, $report] = self::bare($twig, self::withTheFramework());
+        self::assertSame([], array_keys(array_filter($report['classes'], static fn (array $class): bool => isset($class['optional']))), 'with Twig installed, nothing is optional');
+    }
+
+    /**
+     * The neutral view helpers work where Twig is not installed (plan "omnibase agnostic", step F4):
+     * Base\View\Formats, Captions, Dates, Money, Pagination, Links, Enums, Menus, Widgets, Wysiwyg,
+     * DeployVersion, run by a script under bare --strict on the vendor without Twig, give what the Twig
+     * functions and filters gave, nothing of Twig, Doctrine nor the framework loaded.
+     */
+    public function testTheViewHelpersWorkWithoutTwig(): void
+    {
+        $script = __DIR__.'/View/helpers-without-twig.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame(require __DIR__.'/View/helpers-without-twig.expected.php', $run['result']);
     }
 
     /**
@@ -211,7 +266,7 @@ final class BareTest extends TestCase
         $names = array_column($installed['packages'] ?? $installed, 'name');
 
         self::assertContains('doctrine/orm', $names);
-        self::assertContains('twig/twig', $names);
+        self::assertNotContains('twig/twig', $names, 'Twig is a suggestion of the core since step F4');
         self::assertSame([], array_values(preg_grep('~^(?:omnibridge/symfony|symfony/(?:framework-bundle|dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|(?!composer/ca-bundle$)[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/.+|hwi/.+|scheb/.+|nelmio/.+|web-auth/webauthn-symfony-bundle)$~', $names)), 'no package of the framework is installed');
         // The map read, not the autoloader required: it is not to be registered in this process.
         $psr4 = require \dirname($autoload).'/composer/autoload_psr4.php';

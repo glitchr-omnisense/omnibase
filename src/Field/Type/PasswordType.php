@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Service\Model\AutovalidateInterface;
 
-use Base\Twig\Environment;
+use Twig\Environment;
 use Base\Validator\Constraints\Password;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;

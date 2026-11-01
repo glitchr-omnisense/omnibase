@@ -36,13 +36,6 @@ return static function (ContainerConfigurator $container): void {
             new Reference('translator', ContainerInterface::NULL_ON_INVALID_REFERENCE),
         ]);
 
-    $services->set('Base\Form\Extension\FormTypeWebpackExtension')
-        ->tag('form.type_extension')
-        ->args([
-            new Reference('form.proxy'),
-            new Reference('twig.webpack_renderer')
-        ]);
-
     $services->set('Base\Form\Extension\FormTypeCollectionExtension')
         ->tag('form.type_extension')
         ->args([new Reference('base.database.metadata_manipulator')]);

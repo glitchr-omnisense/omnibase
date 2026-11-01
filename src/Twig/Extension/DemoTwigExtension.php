@@ -8,6 +8,7 @@ use Base\Demo\DemoAccountRegistry;
 use Base\Demo\DemoMode;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Demo;
 
 /**
  * The demonstration in a template (docs/20-architecture/demo.md):
@@ -29,42 +30,26 @@ class DemoTwigExtension extends AbstractExtension
         private readonly ?DemoAccountRegistry $registry = null,
         private readonly ?DemoAccountFactory $factory = null,
     ) {
+        $this->demo = new Demo($mode, $registry, $factory);
     }
+
+    private readonly Demo $demo;
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('demo_mode', $this->mode->isActive(...)),
+            new TwigFunction('demo_mode', $this->demo->active(...)),
             new TwigFunction('demo_accounts', $this->accounts(...)),
         ];
     }
 
     /**
-     * The declared accounts that exist and may be signed in as - none
-     * outside `demo`, and never one that opens the back office
-     * (base.demo.admin_roles; the super-administrator's roles reach them).
+     * The declared accounts a visitor may sign in as (Base\View\Demo).
      *
      * @return DemoAccount[]
      */
     public function accounts(): array
     {
-        if (!$this->mode->isActive() || null === $this->registry || null === $this->factory) {
-            return [];
-        }
-
-        $accounts = [];
-        foreach ($this->registry->offered() as $identifier => $account) {
-            try {
-                $user = $this->factory->find($identifier);
-            } catch (\Throwable) {
-                return []; // no database yet: the page still answers
-            }
-            // Declared as a plain account, promoted since (in the back office): not offered either.
-            if ($user && !$this->registry->isSuperAdmin($user) && !$this->registry->isAdministrator($user)) {
-                $accounts[] = $account;
-            }
-        }
-
-        return $accounts;
+        return $this->demo->accounts();
     }
 }

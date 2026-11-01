@@ -53,8 +53,13 @@ class SuggestedBundlesTest extends KernelTestCase
 
         $this->assertSame([], array_values(array_intersect(self::NOT_REQUIRED, array_keys($composer['require']))));
         $this->assertArrayNotHasKey('omnibridge/symfony', $composer['require'], 'a Laravel application would receive Symfony');
-        foreach (['symfony/var-dumper', 'symfony/error-handler', 'web-auth/webauthn-lib', 'doctrine/common', 'omnibridge/doctrine', 'omnibridge/twig', 'doctrine/orm', 'twig/twig'] as $foundation) {
+        foreach (['symfony/var-dumper', 'symfony/error-handler', 'web-auth/webauthn-lib', 'doctrine/common', 'omnibridge/doctrine', 'doctrine/orm'] as $foundation) {
             $this->assertArrayHasKey($foundation, $composer['require'], $foundation.' is loaded by the Foundation');
+        }
+        // The view engine is the application's choice (plan "omnibase agnostic", step F4): Twig is suggested.
+        foreach (['omnibridge/twig', 'twig/twig'] as $view) {
+            $this->assertArrayNotHasKey($view, $composer['require'], $view.' is not required');
+            $this->assertArrayHasKey($view, $composer['suggest'], $view.' is suggested');
         }
         foreach (['scheb/2fa', 'league/flysystem-bundle'] as $package) {
             $this->assertStringNotContainsString('de facto', $composer['suggest'][$package], $package.' is no longer required de facto (C7b)');

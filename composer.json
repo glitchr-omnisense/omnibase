@@ -85,7 +85,6 @@
         "league/flysystem-ftp": "^3.0",
         "omnibridge/composer": "1.x-dev",
         "omnibridge/doctrine": "1.x-dev",
-        "omnibridge/twig": "1.x-dev",
         "omnisense/omnibridge": "1.x-dev",
         "omnisense/omnidrive": "1.x-dev",
         "phpoffice/phpspreadsheet": "^1.23|^2.0",
@@ -124,11 +123,6 @@
         "symfony/var-dumper": "^6.0|^7.0|^8.0",
         "symfony/workflow": "^6.0|^7.0|^8.0",
         "symfony/yaml": "^6.0|^7.0|^8.0",
-        "twig/cache-extra": "^3.0",
-        "twig/cssinliner-extra": "^3.0",
-        "twig/inky-extra": "^3.0",
-        "twig/intl-extra": "^3.0",
-        "twig/twig": "^3.0",
         "web-auth/webauthn-lib": "^5.3"
     },
     "replace": {
@@ -163,7 +157,13 @@
         "omniauth/otp": "Authenticator applications through omniauth, on user.secret (Base\\Auth\\UserTotpSecrets), sealed at rest when omniauth.yaml sets totp.secret_key (formerly omniauth/totp) (1.x-dev)",
         "omniauth/google": "Google sign-in through omniauth, linked by its subject in userIdentity (Base\\Auth\\UserIdentities; Base\\Auth\\PolicyLinking: never by the address an account with a second factor or an administration role); the providers' mechanics are omnisense/omniauth's own (1.x-dev)",
         "glitchr/backup-manager": "The TimeMachine, the backups of the database and the application to the storages (Base\\Service\\TimeMachine, which extends its Manager, and the commands timemachine:snapshot, timemachine:snapshot:backup, timemachine:snapshot:restore and timemachine:storage); without it, neither the service nor the commands are registered, and base.time_machine is read by nothing (4.0.*-dev)",
-        "omnisense/omnimap": "Maps through omnimap (config/packages/omnimap.yaml): BaseBundle registers omnibridge/symfony's OmnimapExtension where both are installed - the providers, the map cache, omnimap() in Twig, the cache's routes (1.x-dev)"
+        "omnisense/omnimap": "Maps through omnimap (config/packages/omnimap.yaml): BaseBundle registers omnibridge/symfony's OmnimapExtension where both are installed - the providers, the map cache, omnimap() in Twig, the cache's routes (1.x-dev)",
+        "twig/twig": "Twig as the application's view engine (since step F4 of the plan \"omnibase agnostic\": the view engine is the application's choice). Installed, omnibase's Twig layer is registered - its environment, loader, variables and the extensions of src/Twig (|thumbnail, |wysiwyg, render_locale()...), thin wrappers over the neutral helpers Base\\View\\*, which need no Twig and serve Blade and React as well -, and the core's templates (@Base/...) can be rendered; without it nothing of src/Twig is registered or loaded (^3.0)",
+        "omnibridge/twig": "Twig's generic helpers beside omnibase's (|at, |emoji_only, html_attributes()...: Omnibridge\\Twig\\HelperExtension, registered with the Twig layer); omnibridge/symfony and omnibridge/laravel require it (1.x-dev)",
+        "twig/intl-extra": "Twig's format_date(), format_number()... in a Twig application's templates; omnibase's |datetime and |format_currency no longer need it (Base\\View\\Dates, Money) (^3.0)",
+        "twig/inky-extra": "inky_to_html in the core's e-mail frame (@Base/notifier/email.html.twig) (^3.0)",
+        "twig/cssinliner-extra": "inline_css in the core's e-mail frame, and |inline_css_email (MailTwigExtension) (^3.0)",
+        "twig/cache-extra": "{% cache %} in the core's breakpoints and widget templates (@Base/breakpoints.css.twig, @Base/widget/*) (^3.0)"
     },
     "require-dev": {
         "api-platform/symfony": "^4.0",

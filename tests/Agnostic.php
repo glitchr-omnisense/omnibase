@@ -34,6 +34,9 @@
  * Subject, which read a finder's name without Doctrine).
  * 652 after step F2a (+23: the enumerations - Base\Database\Type\EnumType, SetType, the
  * core's twenty Base\Enum\* - no longer Doctrine types, and Base\Database\Type\Enumerations).
+ * 669 after step F4 (+17: the neutral view helpers Base\View\*, and Base\Service\BaseService, which no
+ * longer declares Twig's RuntimeExtensionInterface). src/Twig stays out, but for its Twig-free classes listed
+ * since F0 (the variables, the tag renderers, AdminLinks): it is optional, loaded with Twig only.
  */
 
 return [
@@ -535,6 +538,7 @@ return [
     Base\Service\Analytics::class,
     Base\Service\Analytics\UserAgentClassifier::class,
     Base\Service\ArrayParameterBag::class,
+    Base\Service\BaseService::class,
     Base\Service\Breadgrinder::class,
     Base\Service\BreadgrinderInterface::class,
     Base\Service\Calendar\CalendarEntry::class,
@@ -697,4 +701,20 @@ return [
     Base\Twig\Variable\EmailVariable::class,
     Base\Twig\Variable\RandomVariable::class,
     Base\Twig\Variable\SiteVariable::class,
+    Base\View\AssetPaths::class,
+    Base\View\Bell::class,
+    Base\View\Captions::class,
+    Base\View\Commons::class,
+    Base\View\Dates::class,
+    Base\View\Demo::class,
+    Base\View\DeployVersion::class,
+    Base\View\Enums::class,
+    Base\View\Formats::class,
+    Base\View\Links::class,
+    Base\View\Menus::class,
+    Base\View\Money::class,
+    Base\View\Pagination::class,
+    Base\View\Pictures::class,
+    Base\View\Widgets::class,
+    Base\View\Wysiwyg::class,
 ];

@@ -7,6 +7,7 @@ use Base\Service\WidgetProviderInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Base\View\Widgets;
 
 /**
  * @author Marco Meyer <marco.meyerconde@gmail.com>
@@ -21,7 +22,10 @@ final class WidgetTwigExtension extends AbstractExtension
     public function __construct(WidgetProviderInterface $widgetProvider)
     {
         $this->widgetProvider = $widgetProvider;
+        $this->widgets = new Widgets($widgetProvider);
     }
+
+    private readonly Widgets $widgets;
 
     /**
      * @return string
@@ -40,34 +44,11 @@ final class WidgetTwigExtension extends AbstractExtension
         ];
     }
 
+    /** The widget a slot holds, rendered with what Base\View\Widgets gives it; nothing for an empty slot. */
     public function render_slot(Environment $twig, string $slot, array $options = [], ?string $template = null): string
     {
-        $widgetSlot = $this->widgetProvider->getSlot($slot);
-        if (!$widgetSlot) {
-            return '';
-        }
+        $widget = $this->widgets->slot($slot, $options, $template);
 
-        $widget = $widgetSlot->getWidget();
-        if (!$widget) {
-            return '';
-        }
-
-        $options['widget'] = $widget;
-
-        $template ??= $widget->getTemplate();
-        $entityClass = camel2snake(class_name($widget), '-');
-        $templateClass = camel2snake(str_strip(basename($template), '', '.html.twig'), '-');
-
-        $options['row_attr'] = $options['row_attr'] ?? [];
-        $options['row_attr']['class'] = $options['row_attr']['class'] ?? '';
-        $options['row_attr']['class'] .= ' widget-' . $entityClass;
-        $options['row_attr']['class'] .= ($templateClass != $entityClass) ? ' widget-' . $templateClass : '';
-
-        $options['attr'] = $options['attr'] ?? [];
-        $options['attr']['class'] = $options['attr']['class'] ?? '';
-
-        $options['label'] = $options['label'] ?? $widget->getTitle();
-
-        return $twig->render($template, $options);
+        return null === $widget ? '' : $twig->render($widget['template'], $widget['options']);
     }
 }

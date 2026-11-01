@@ -21,10 +21,12 @@ return static function (ContainerConfigurator $container): void {
     // Notifier fix
     $services->alias('Symfony\Component\Notifier\Channel\ChannelPolicyInterface', 'notifier.channel_policy');
 
-    // Twig fix
-    $services->set('Symfony\Bridge\Twig\Extension\AssetExtension')
-        ->tag('twig.runtime')
-        ->args([new Reference('assets.packages')]);
+    // Twig fix: with Twig only, a suggestion of the core (config/services/twig.php)
+    if (class_exists(\Twig\Environment::class)) {
+        $services->set('Symfony\Bridge\Twig\Extension\AssetExtension')
+            ->tag('twig.runtime')
+            ->args([new Reference('assets.packages')]);
+    }
 
     // Doctrine fix
     $services->alias('Doctrine\Bundle\DoctrineBundle\ConnectionFactory', 'doctrine.dbal.connection_factory');

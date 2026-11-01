@@ -4,31 +4,24 @@ namespace Base\Twig\Extension;
 
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Admin\Router\AdminRouteRegistry;
-use Base\Database\Type\EnumType;
 use Base\Service\IconProvider;
 use Base\Service\MediaService;
-use Base\Service\Model\Color\Intl\Colors;
-use Base\Service\Model\ColorizeInterface;
 use Base\Service\Model\HtmlizeInterface;
-use Base\Service\Model\LinkableInterface;
 use Base\Service\TranslatorInterface;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Type;
+use Base\View\Captions;
+use Base\View\Dates;
+use Base\View\Formats;
 use Base\Admin\Config\Crud;
 use Base\Routing\AdminUrlGeneratorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
-use Symfony\Component\Notifier\Recipient\Recipient;
-use Symfony\Component\Notifier\Recipient\RecipientInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\CoreExtension;
-use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
@@ -48,8 +41,6 @@ final class FunctionTwigExtension extends AbstractExtension
 
     protected IconProvider $iconProvider;
 
-    protected IntlExtension $intlExtension;
-
     protected MimeTypes $mimeTypes;
 
     protected AssetExtension $assetExtension;
@@ -60,16 +51,21 @@ final class FunctionTwigExtension extends AbstractExtension
 
     protected Environment $twig;
 
+    private readonly Captions $captions;
+
+    private readonly Dates $dates;
+
     public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, Environment $twig, AdminUrlGeneratorInterface $adminUrlGenerator, string $projectDir, private readonly ?AdminRouteRegistry $routeRegistry = null)
     {
         $this->translator = $translator;
         $this->assetExtension = $assetExtension;
         $this->projectDir = $projectDir;
         $this->mimeTypes = new MimeTypes();
-        $this->intlExtension = new IntlExtension();
 
         $this->twig = $twig;
         $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->captions = new Captions($translator);
+        $this->dates = new Dates($translator);
     }
 
     public function getFunctions(): array
@@ -201,14 +197,12 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function mailparseEmail(string|EmailRecipientInterface $recipient): ?string
     {
-        $mailparse = mailparse($recipient instanceof EmailRecipientInterface ? $recipient->getEmail() : $recipient);
-        return first(array_keys($mailparse));
+        return Formats::mailparseEmail($recipient);
     }
 
-    public function mailparseName(string|RecipientInterface $recipient): ?string
+    public function mailparseName(string|EmailRecipientInterface $recipient): ?string
     {
-        $mailparse = mailparse($recipient instanceof EmailRecipientInterface ? $recipient->getEmail() : $recipient);
-        return first($mailparse);
+        return Formats::mailparseName($recipient);
     }
 
     public function htmlify(?HtmlizeInterface $object, array $options = [], ...$args): ?string
@@ -247,7 +241,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function is_linkable(mixed $value): bool
     {
-        return $value instanceof LinkableInterface;
+        return Formats::isLinkable($value);
     }
 
     /**
@@ -263,7 +257,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function nargs(callable $fn): int
     {
-        return (new \ReflectionFunction($fn))->getNumberOfParameters();
+        return Formats::nargs($fn);
     }
 
     /**
@@ -293,7 +287,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function pad(array $array = [], int $length = 0, mixed $value = null): array
     {
-        return array_pad($array, $length, $value);
+        return Formats::pad($array, $length, $value);
     }
 
     /**
@@ -303,66 +297,20 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function transforms(array $array = [], $arrow = null)
     {
-        return $arrow instanceof \Closure ? $arrow($array) : $array;
+        return Formats::transforms($array, $arrow);
     }
 
     /**
-     * @param $class
-     * @param $propertyName
-     * @return mixed
      * @throws \Exception
      */
     public function static_property($class, $propertyName)
     {
-        if (\is_object($class)) {
-            $class = get_class($class);
-        }
-        if (!class_exists($class)) {
-            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid class");
-        }
-        if (!property_exists($class, $propertyName)) {
-            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid property");
-        }
-
-        return $class::$$propertyName;
+        return Formats::staticProperty($class, $propertyName);
     }
 
     public function property_accessor(mixed $object, array|string $propertyName, bool $enableMagicCall = false): mixed
     {
-        if (null == $object) {
-            return null;
-        }
-
-        // Shape property path
-        $propertyPath = \is_string($propertyName) ? explode('.', $propertyName) : $propertyName;
-        if (!$propertyPath) {
-            return $object;
-        }
-
-        // Special case for array
-        if ($object instanceof Collection) {
-            $object = $object->toArray();
-        }
-        if (\is_array($object)) {
-            $id = array_unshift($object);
-            $object = $object[$id] ?? null;
-        }
-
-        // Extract head
-        $propertyName = first($propertyPath);
-        $propertyAccessorBuilder = PropertyAccess::createPropertyAccessorBuilder();
-        if ($enableMagicCall) {
-            $propertyAccessorBuilder->enableMagicCall();
-        }
-
-        $propertyAccessor = $propertyAccessorBuilder->getPropertyAccessor();
-        if (!$propertyAccessor->isReadable($object, $propertyName)) {
-            return null;
-        }
-
-        $object = $propertyAccessor->getValue($object, $propertyName);
-
-        return $this->property_accessor($object, tail($propertyPath)); // Recursive processing
+        return Formats::propertyAccessor($object, $propertyName, $enableMagicCall);
     }
 
     /**
@@ -372,7 +320,7 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function color_name(string $hex)
     {
-        return Colors::getName($hex); // the nearest CSS colour name
+        return Formats::colorName($hex); // the nearest CSS colour name
     }
 
     /**
@@ -401,24 +349,20 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function method_exists($object, $method)
     {
-        return $object && method_exists($object, $method);
+        return Formats::methodExists($object, $method);
     }
 
     /**
-     * @param string $subject
-     * @param string $pattern
-     * @param int $limit
-     * @param int $flags
      * @return array|false|string[]
      */
     public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0)
     {
-        return preg_split($pattern, $subject, $limit, $flags);
+        return Formats::pregSplit($subject, $pattern, $limit, $flags);
     }
 
     public function instanceof(mixed $object, string $class): bool
     {
-        return is_instanceof($object, $class);
+        return Formats::instanceOf($object, $class);
     }
 
     /**
@@ -432,25 +376,11 @@ final class FunctionTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param $class
-     * @param $method
-     * @param ...$args
-     * @return mixed
      * @throws \Exception
      */
     public function static_call($class, $method, ...$args)
     {
-        if (\is_object($class)) {
-            $class = get_class($class);
-        }
-        if (!class_exists($class)) {
-            throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
-        }
-        if (!method_exists($class, $method)) {
-            throw new \Exception("Cannot call static method $method on \"$class\": invalid method");
-        }
-
-        return forward_static_call_array([$class, $method], $args);
+        return Formats::staticCall($class, $method, ...$args);
     }
 
     public function render_stylesheet(string $href, array $attributes = [], bool $keepIfNotFound = true): string
@@ -481,59 +411,22 @@ final class FunctionTwigExtension extends AbstractExtension
     }
 
     /**
-     * A moment as a pattern says it, lowered. A string in ISO 8601 (a screen's
-     * moment, Base\Screen\Shape::moment(): 2026-04-10T18:05:00+00:00) is that
-     * moment, printed as the DateTime it came from was; any other string is
-     * given back lowered (a word: "présent"); nothing gives the pattern.
+     * A moment as a pattern says it, lowered (Base\View\Dates, in Twig's time zone).
      *
      * @param Environment $env
      * @param \DateTime|\DateInterval|int|string|null $datetime
      * @param array|string $pattern
-     * @param string|null $dateFormat
-     * @param string|null $timeFormat
-     * @param $timezone
-     * @param string $calendar
-     * @param string|null $locale
      * @return array|string
-     * @throws RuntimeError
      */
     public function datetime(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array|string $pattern = 'YYYY-MM-dd HH:mm:ss', ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', ?string $locale = null): array|string
     {
-        if (null === $locale) {
-            $locale = $this->translator->getLocale();
-        }
-        if (\is_array($pattern)) {
-            $array = [];
-            foreach ($pattern as $p) {
-                $array[] = $this->datetime($env, $datetime, $p, $dateFormat, $timeFormat, $timezone, $calendar, $locale);
-            }
-
-            return $array;
-        }
-
-        if (null == $datetime) {
-            return $pattern;
-        }
-        if ($datetime instanceof \DateTime) {
-            $datetime = $datetime->getTimestamp();
-        }
-        if ($datetime instanceof \DateInterval) {
-            $datetime = time() + (int)$datetime->format('s');
-        }
-        if (\is_string($datetime) && self::isMoment($datetime)) {
-            $datetime = (new \DateTimeImmutable($datetime))->getTimestamp();
-        }
-        if (\is_string($datetime)) {
-            return mb_strtolower($datetime);
-        }
-
-        return mb_strtolower($this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale));
+        return $this->dates->datetime($datetime, $pattern, $dateFormat, $timeFormat, $timezone, $calendar, $locale, $env->getExtension(CoreExtension::class)->getTimezone());
     }
 
-    /** Whether a string is a moment in ISO 8601: a date, a time, and a zone or not. */
+    /** Whether a string is a moment in ISO 8601: a date, a time, and a zone or not (Base\View\Dates). */
     public static function isMoment(string $value): bool
     {
-        return 1 === preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/', $value);
+        return Dates::isMoment($value);
     }
 
     /**
@@ -543,16 +436,7 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function pickup(?array $array, int $i)
     {
-        if (null === $array) {
-            return null;
-        }
-
-        $keys = array_rand($array, min(\count($array), $i)) ?? [];
-        if (!\is_array($keys)) {
-            $keys = [$keys];
-        }
-
-        return array_filter($array, fn($k) => in_array($k, $keys), ARRAY_FILTER_USE_KEY);
+        return Formats::pickup($array, $i);
     }
 
     public function countdown(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array $parameters = []): string
@@ -585,16 +469,12 @@ final class FunctionTwigExtension extends AbstractExtension
 
     public function title(string $name, array $parameters = [], ?string $domain = 'controllers', ?string $locale = null): string
     {
-        $ret = $this->translator->trans($name . '.title', $parameters, $domain, $locale);
-
-        return $ret == $name . '.title' ? '@' . $domain . '.' . $ret : $ret;
+        return $this->captions->title($name, $parameters, $domain, $locale);
     }
 
     public function excerpt(string $name, array $parameters = [], ?string $domain = 'controllers', ?string $locale = null): string
     {
-        $ret = $this->translator->trans($name . '.excerpt', $parameters, $domain, $locale);
-
-        return $ret == $name . '.excerpt' ? '@' . $domain . '.' . $ret : $ret;
+        return $this->captions->excerpt($name, $parameters, $domain, $locale);
     }
 
     /**
@@ -609,158 +489,32 @@ final class FunctionTwigExtension extends AbstractExtension
     }
 
     /**
-     * @param $date
-     * @param int $diff
-     * @return bool
      * @throws \Exception
      */
     public function greater_than($date, int $diff): bool
     {
-        if (\is_string($date)) {
-            $date = new \DateTime($date);
-        }
-        if ($date instanceof \DateTime) {
-            $date = $date->getTimestamp();
-        }
-        if ($diff instanceof \DateTime) {
-            $diff = $diff->getTimestamp() - time();
-        }
-
-        $deltaTime = time() - $date;
-
-        return $deltaTime > $diff;
+        return Formats::greaterThan($date, $diff);
     }
 
-    /**
-     * @param $string
-     * @param $maxLength
-     * @param $replacement
-     * @param $truncAtSpace
-     * @return string
-     */
     public function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false): string
     {
-        $maxLength -= strlen($replacement);
-        $length = strlen($string);
-
-        if ($length <= $maxLength) {
-            return $string;
-        }
-
-        if ($truncAtSpace && ($space_position = strrpos($string, ' ', $maxLength - $length))) {
-            $maxLength = $space_position;
-        }
-
-        return substr_replace($string, $replacement, $maxLength) . '..';
+        return Formats::truncate($string, $maxLength, $replacement, (bool) $truncAtSpace);
     }
 
     /**
      * @param string|null $content
      * @param string|array $pattern
      * @param $gateLength Number of words before and after
-     * @return array|string|string[]|null
+     * @return string|null
      */
     public function highlight(?string $content, string|array $pattern, $gateLength = -1)
     {
-        if(!$pattern || !$content) return $content;
-
-        if(is_string($pattern)) $pattern = preg_quote(str_strip_accents(strip_tags($pattern)));
-        else $pattern = implode("|", array_map(fn($p) => preg_quote(str_strip_accents(strip_tags($p))), $pattern));
-        
-        $highlightContent = '';
-        if ($gateLength < 0) {
-
-            $highlightContent = preg_replace_callback(
-                '/([^ ]*)(' . $pattern . ')([^ ]*)/im',
-                function ($matches) {
-                    if (empty($matches[2])) {
-                        return $matches[0];
-                    }
-
-                    return '<mark class="markdown-word">' .
-                        $matches[1] .
-                        '<mark class="markdown-pattern">' . $matches[2] . '</mark>' .
-                        $matches[3] .
-                        '</mark>';
-                },
-                $content
-            );
-
-        } elseif (preg_match_all('/((?:[^ ]+ ){0,' . $gateLength . '})([^ ]*)(' . $pattern . ')([^ ]*)((?: [^ ]+){0,' . $gateLength . '})/im', $content, $matches)) {
-        
-            $priorPatternGate = $matches[1][0] ?? '';
-            $priorPattern = $matches[2][0] ?? '';
-            $pattern = $matches[3][0] ?? ''; // (Case insensitive)
-            $afterPattern = $matches[4][0] ?? '';
-            $afterPatternGate = $matches[5][0] ?? '';
-
-            $sentence = $priorPatternGate . $priorPattern . $pattern . $afterPattern . $afterPatternGate;
-
-            if (!str_starts_with($content, $sentence)) {
-                $highlightContent .= '[..] ';
-            }
-
-            $highlightContent .= "<mark class='markdown-gate'>";
-            $highlightContent .= $priorPatternGate;
-            $highlightContent .= "<mark class='markdown-word'>";
-            $highlightContent .= $priorPattern;
-            $highlightContent .= "<mark class='markdown-pattern'>";
-            $highlightContent .= $pattern;
-            $highlightContent .= '</mark>';
-            $highlightContent .= $afterPattern;
-            $highlightContent .= '</mark>';
-            $highlightContent .= $afterPatternGate;
-            $highlightContent .= '</mark>';
-
-            if (!str_ends_with($content, $sentence)) {
-                $highlightContent .= ' [..]';
-            }
-        }
-
-        return empty($highlightContent) ? null : $highlightContent;
+        return Formats::highlight($content, $pattern, (int) $gateLength);
     }
 
-    /**
-     * @param $value
-     * @return string
-     */
     public function stringify($value): string
     {
-        if (null === $value) {
-            return '';
-        }
-
-        if (\is_string($value)) {
-            return $value;
-        }
-
-        if (is_numeric($value)) {
-            return (string)$value;
-        }
-
-        if (\is_bool($value)) {
-            return $value ? 'true' : 'false';
-        }
-
-        if (\is_array($value)) {
-            return sprintf('Array (%d items)', \count($value));
-        }
-
-        if (\is_object($value)) {
-            if (is_stringeable($value)) {
-                return (string)$value;
-            }
-
-            if (method_exists($value, 'getId')) {
-                return sprintf('%s #%s', $this->translator->transEntity(get_class($value)), $value->getId());
-            } elseif (method_exists($value, 'getUuid')) {
-                return sprintf('%s #%s', $this->translator->transEntity(get_class($value)), $value->getUuid());
-            }
-
-            return sprintf('%s #%s', $this->translator->transEntity(get_class($value)), substr(md5(spl_object_hash($value)), 0, 7));
-        }
-
-        return '';
+        return $this->captions->stringify($value);
     }
 
     /**
@@ -770,6 +524,6 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     public function mailto(string $address, string $label)
     {
-        return "<a href='mailto:" . $address . "'>" . $label . '</a>';
+        return Formats::mailto($address, $label);
     }
 }
