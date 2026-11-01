@@ -10,6 +10,13 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: a dead copy of ExtensionSubscriber removed (2026-11-01)
+
+- `src/EntitySubscriber/HookExtensionSubscriber.php` declared a second `Base\EntitySubscriber\ExtensionSubscriber`,
+  an older copy (it named `AbstractMetadata`, which no longer exists) that nothing loaded nor referenced: removed,
+  with its phpstan baseline entries. `tests/SourceFilesTest` checks each file of src/ declares the class its path
+  names.
+
 ### Added: the entity's shape (2026-11-01)
 
 Plan "omnibase agnostic", step F2c. See docs/20-architecture/doctrine.md.
