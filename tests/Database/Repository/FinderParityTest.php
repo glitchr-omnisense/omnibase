@@ -127,13 +127,14 @@ final class FinderParityTest extends KernelTestCase
 
         $recorded = json_decode((string) file_get_contents(self::FIXTURE), true, 512, \JSON_THROW_ON_ERROR);
         self::assertSame(array_keys($recorded), array_keys($observed), 'the same scenarios');
-        // What a running finder gave depends on the rows: compared on the harness's database, where the
-        // fixture was recorded; in an application's suite (this package in its vendor/), on its own data,
-        // the parse and the query are compared, not the rows (the application compares its own).
+        // The query depends on the mapping (ClassOf lists the entity's subclasses) and a running finder's
+        // result on the rows: both are compared on the harness, where the fixture was recorded. In an
+        // application's suite (this package in its vendor/: its own entities and data) the parse alone
+        // is compared, and the application compares its own results (lesringostars' FinderParityTest).
         $harness = false !== getenv('HARNESS_SUITE_BOOTSTRAP');
         foreach ($recorded as $key => $before) {
-            if (!$harness && \array_key_exists('result', $before['query'])) {
-                $before['query'] = $observed[$key]['query'] = ['result' => 'not compared: the application\'s rows'];
+            if (!$harness) {
+                $before['query'] = $observed[$key]['query'] = 'not compared: the application\'s mapping and rows';
             }
             self::assertSame($before['parse'], $observed[$key]['parse'], $key.': the same parse');
             self::assertSame($before['query'], $observed[$key]['query'], $key.': the same query or result');
