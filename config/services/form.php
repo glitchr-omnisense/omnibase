@@ -99,11 +99,11 @@ return static function (ContainerConfigurator $container): void {
     // Web Push to the browsers that opted in. See each channel's docblock.
     $services->set('Base\Notifier\Channel\InAppChannel')
         ->tag('notifier.channel', ['channel' => 'inapp'])
-        ->args([new Reference('doctrine.orm.entity_manager'), new Reference('Base\Repository\Users')]);
+        ->args([new Reference('Omnibridge\Persistence\UnitOfWork'), new Reference('Base\Repository\Users')]);
 
     $services->set('Base\Service\Push\WebPushService')->public()
         ->args([
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Omnibridge\Persistence\UnitOfWork'),
             new Reference('Base\Repository\User\PushSubscriptionRepository'),
             new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             '%env(default::VAPID_PUBLIC_KEY)%',
@@ -146,7 +146,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('Base\Security\UserTracker')
         ->args([
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Omnibridge\Persistence\UnitOfWork'),
             new Reference('request_stack'),
             new Reference('advanced_router'),
             new Reference('Base\Repository\User\ConnectionRepository')
@@ -160,7 +160,7 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     $services->set('Base\Security\UserChecker')
-        ->args([new Reference('doctrine.orm.entity_manager'), new Reference('Base\Notifier\Notifier', ContainerInterface::NULL_ON_INVALID_REFERENCE)]);
+        ->args([new Reference('Omnibridge\Persistence\UnitOfWork'), new Reference('Base\Notifier\Notifier', ContainerInterface::NULL_ON_INVALID_REFERENCE)]);
 
     // hwi/oauth-bundle is a suggestion since 4.0: the provider is OAuth-aware when it is there.
     $services->set('Base\Security\UserProvider', interface_exists('HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface') ? 'Base\Security\OAuthUserProvider' : 'Base\Security\UserProvider')

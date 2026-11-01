@@ -3,8 +3,8 @@
 namespace Base\Controller\UX;
 
 use Base\Contract\Runtime;
-use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,13 +17,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class AutovalidateController extends AbstractController
 {
     private TranslatorInterface $translator;
-    private EntityManagerInterface $entityManager;
+    private UnitOfWork $unitOfWork;
     private Hashids $hashIds;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager)
+    public function __construct(TranslatorInterface $translator, UnitOfWork $unitOfWork)
     {
         $this->hashIds = new Hashids(Runtime::environment()->secret());
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = $unitOfWork;
         $this->translator = $translator;
     }
 

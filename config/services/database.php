@@ -81,6 +81,14 @@ return static function (ContainerConfigurator $container): void {
     // themselves are handed out by getRepository(): kept when nothing of the container asks them.
     // The list is Base\Repository\Aliases' (step R27), which omnibridge/laravel binds as well.
     $services->set(\Base\Bridge\Doctrine\DoctrineRepositories::class)->args([service('doctrine.orm.entity_manager')]);
+
+    // The unit of work the core's services take in place of the entity manager (plan "omnibase agnostic",
+    // step F2d): omnisense/omnibridge's contract, Doctrine's adapter behind it (omnibridge/doctrine's at F3).
+    $services->set(\Base\Bridge\Doctrine\DoctrineUnitOfWork::class)->args([service('doctrine.orm.entity_manager')]);
+    $services->alias(\Omnibridge\Persistence\UnitOfWork::class, \Base\Bridge\Doctrine\DoctrineUnitOfWork::class)->public();
+    // What a constructor that still accepts the entity manager (deprecated, until 6.0) is autowired with:
+    // Symfony names a union type's service by its sorted members.
+    $services->alias('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork', \Base\Bridge\Doctrine\DoctrineUnitOfWork::class);
     foreach (\Base\Repository\Aliases::INTERFACES as $interface => $repository) {
         $services->alias($interface, $repository)->public();
     }

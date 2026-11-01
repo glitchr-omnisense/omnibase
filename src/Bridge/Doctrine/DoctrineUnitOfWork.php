@@ -2,6 +2,7 @@
 
 namespace Base\Bridge\Doctrine;
 
+use Base\Bridge\Doctrine\Behaviour\DoctrineBehaviours;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\UnitOfWork as DoctrineUnitOfWorkState;
 use Omnibridge\Persistence\UnitOfWork;
@@ -15,6 +16,8 @@ final class DoctrineUnitOfWork implements UnitOfWork
 {
     public function __construct(private readonly EntityManagerInterface $entityManager)
     {
+        // Its backends (repositories, shapes, the behaviours' parts) are there for any unit of work made.
+        DoctrineBehaviours::ensureRegistered();
     }
 
     public function entityManager(): EntityManagerInterface

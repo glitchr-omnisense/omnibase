@@ -14,4 +14,6 @@ use Base\Entity\User\Passkey;
  */
 interface Passkeys extends Entities
 {
+    /** The passkey of that credential id (its raw bytes), as Base\Auth\UserPasskeys asks it (step F2d). */
+    public function findOneByCredential(string $publicKeyCredentialId): ?Passkey;
 }

@@ -49,7 +49,7 @@ return static function (ContainerConfigurator $container): void {
         ->call('setContainer', [new Reference('Psr\Container\ContainerInterface')])
         ->args([
             new Reference('base.notifier'),
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Omnibridge\Persistence\UnitOfWork'),
             new Reference('Base\Repository\User\TokenRepository'),
             new Reference('App\Repository\UserRepository'),
             new Reference('advanced_router'),
@@ -231,7 +231,7 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->tag('twig.runtime')
         ->args([
-            new Reference('doctrine.orm.entity_manager'),
+            new Reference('Omnibridge\Persistence\UnitOfWork'),
             new Reference('slugger'),
         ]);
 

@@ -7,7 +7,7 @@ use Base\Service\ReferrerInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
 use Base\Subscriber\LocalizerSubscriber;
-use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,15 +25,15 @@ class LocalizerController extends AbstractController
     protected AdvancedRouterInterface $router;
     protected ReferrerInterface $referrer;
     protected TranslatorInterface $translator;
-    protected EntityManagerInterface $entityManager;
+    protected UnitOfWork $unitOfWork;
 
-    public function __construct(LocalizerInterface $localizer, EntityManagerInterface $entityManager, AdvancedRouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
+    public function __construct(LocalizerInterface $localizer, UnitOfWork $unitOfWork, AdvancedRouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
     {
         $this->localizer = $localizer;
         $this->router = $router;
         $this->referrer = $referrer;
         $this->translator = $translator;
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = $unitOfWork;
     }
 
     /**
@@ -62,7 +62,7 @@ class LocalizerController extends AbstractController
         $locale = $this->localizer->getLocale($_locale);
         if (!$this->isGranted("IS_IMPERSONATOR")) {
             $this->getUser()?->setLocale($locale);
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
         }
 
         $this->addFlash("info", $this->translator->trans("@controllers.locale_changeto.action", [$this->localizer->getLocaleLangName($_locale)]));
@@ -111,7 +111,7 @@ class LocalizerController extends AbstractController
             setcookie('_locale', $_locale);
             if (!$this->isGranted("IS_IMPERSONATOR")) {
                 $this->getUser()?->setLocale($this->localizer->getLocale($_locale));
-                $this->entityManager->flush();
+                $this->unitOfWork->flush();
             }
 
             $this->addFlash("info", $this->translator->trans("@controllers.locale_changeto.action", [$this->localizer->getLocaleLangName($_locale)]));

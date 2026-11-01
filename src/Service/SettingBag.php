@@ -2,9 +2,13 @@
 
 namespace Base\Service;
 
+use Base\Database\Attribute\Backend\Backends;
+use Base\Database\Backend\EntityCache;
+use Base\Database\UnitOfWorks;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Repository\Layout\Settings;
+use Omnibridge\Persistence\UnitOfWork;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
@@ -21,10 +25,7 @@ use InvalidArgumentException;
  */
 class SettingBag implements SettingBagInterface
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
+    protected UnitOfWork $unitOfWork;
 
     /**
      * @var CacheItemInterface|null
@@ -101,10 +102,17 @@ class SettingBag implements SettingBagInterface
         return true;
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, EntityManagerInterface $entityManager, Settings $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
+    /** The persistence's cache of entities between requests (Doctrine's second-level cache), evicted when a setting is written. */
+    protected function entityCache(): EntityCache
+    {
+        return Backends::of($this->unitOfWork, EntityCache::class);
+    }
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
+    public function __construct(ParameterBagInterface $parameterBag, UnitOfWork|EntityManagerInterface $unitOfWork, Settings $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
     {
         $this->parameterBag = $parameterBag;
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
         $this->settingRepository = $settingRepository;
 
         $this->cache = $cache;
@@ -452,7 +460,7 @@ class SettingBag implements SettingBagInterface
 
         if (!$setting instanceof Setting) {
             $setting = new Setting($path, null, $locale);
-            $this->entityManager->persist($setting);
+            $this->unitOfWork->persist($setting);
         }
 
         return $setting;
@@ -593,18 +601,18 @@ class SettingBag implements SettingBagInterface
         // corrupted by a bad save: the old value kept coming back.
         if (null === $value && null !== $translation->getId()) {
             $setting->removeTranslation($translation);
-            $this->entityManager->remove($translation);
+            $this->unitOfWork->remove($translation);
         }
 
         $this->clear($path, $locale);
 
-        if ($this->entityManager->getCache()) {
-            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        if ($this->entityCache()->enabled()) {
+            $this->entityCache()->evict(get_class($setting), $setting->getId());
             foreach($setting->getTranslations() as $translation)
-                $this->entityManager->getCache()->evictEntity(get_class($setting)::getTranslationEntityClass(), $translation->getId());
+                $this->entityCache()->evict(get_class($setting)::getTranslationEntityClass(), $translation->getId());
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this;
     }
 
@@ -619,11 +627,11 @@ class SettingBag implements SettingBagInterface
     {
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
-        if ($this->entityManager->getCache()) {
-            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        if ($this->entityCache()->enabled()) {
+            $this->entityCache()->evict(get_class($setting), $setting->getId());
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this;
     }
 
@@ -638,11 +646,11 @@ class SettingBag implements SettingBagInterface
     {
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
-        if ($this->entityManager->getCache()) {
-            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        if ($this->entityCache()->enabled()) {
+            $this->entityCache()->evict(get_class($setting), $setting->getId());
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this;
     }
 
@@ -655,11 +663,11 @@ class SettingBag implements SettingBagInterface
     {
         $setting = $this->generateRaw($path);
         $setting->setBag($parameterName);
-        if ($this->entityManager->getCache()) {
-            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        if ($this->entityCache()->enabled()) {
+            $this->entityCache()->evict(get_class($setting), $setting->getId());
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this;
     }
 
@@ -684,8 +692,8 @@ class SettingBag implements SettingBagInterface
         if ($setting instanceof Setting) {
             unset($this->settingBag[$path]);
 
-            $this->entityManager->remove($setting);
-            $this->entityManager->flush();
+            $this->unitOfWork->remove($setting);
+            $this->unitOfWork->flush();
         }
 
         return $this;
@@ -719,7 +727,7 @@ class SettingBag implements SettingBagInterface
         $setting = $this->generateRaw($path);
         $setting->setLocked($flag);
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this;
     }
 
@@ -750,11 +758,11 @@ class SettingBag implements SettingBagInterface
     {
         $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
-        if ($this->entityManager->getCache()) {
-            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+        if ($this->entityCache()->enabled()) {
+            $this->entityCache()->evict(get_class($setting), $setting->getId());
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this;
     }
 }

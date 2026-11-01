@@ -4,6 +4,7 @@ namespace Base\Controller;
 
 use App\Entity\User;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\User\Notification;
 use Base\Form\FormProxyInterface;
 use Base\Notifier\NotifierInterface;
@@ -16,6 +17,7 @@ use App\Form\Type\SecurityRegistrationType;
 use App\Form\Type\SecurityLoginType;
 use Base\Attributes\Attribute\IsGranted;
 
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,7 +50,6 @@ use Base\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
 class SecurityController extends AbstractController
@@ -83,10 +84,7 @@ class SecurityController extends AbstractController
      */
     protected ParameterBagInterface $parameterBag;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
+    protected UnitOfWork $unitOfWork;
 
     /**
      * @var Users
@@ -100,7 +98,7 @@ class SecurityController extends AbstractController
 
     public function __construct(
         NotifierInterface       $notifier,
-        EntityManagerInterface  $entityManager,
+        UnitOfWork $unitOfWork,
         Tokens                  $tokenRepository,
         Users                   $userRepository,
         AdvancedRouterInterface $router,
@@ -116,7 +114,7 @@ class SecurityController extends AbstractController
         $this->parameterBag = $parameterBag;
         $this->notifier = $notifier;
 
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = $unitOfWork;
         $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
     }
@@ -228,7 +226,7 @@ class SecurityController extends AbstractController
 
             // Remove expired tokens
             $user->removeExpiredTokens();
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
         }
 
         $returnUrl = $referrer->getUrl() ?? $this->router->getUrlIndex();
@@ -289,7 +287,7 @@ class SecurityController extends AbstractController
                         $loginToken->markAsLogginable();
                         $loginToken->setUser($user);
 
-                        $this->entityManager->flush();
+                        $this->unitOfWork->flush();
 
                         // By e-mail alone. It was sent to the browser too, twice ("a link has been sent
                         // to your address"), for an address that has an account and for no other.
@@ -346,8 +344,8 @@ class SecurityController extends AbstractController
                     $this->notifier->sendUserApprovalRequest($newUser);
                 }
 
-                $this->entityManager->persist($newUser);
-                $this->entityManager->flush();
+                $this->unitOfWork->persist($newUser);
+                $this->unitOfWork->flush();
 
                 $rememberMeBadge = new RememberMeBadge();
                 $rememberMeBadge->enable();
@@ -405,7 +403,7 @@ class SecurityController extends AbstractController
         if (!method_exists($user, "setUsername") || !method_exists($user, "getUsername")) {
             return;
         }
-        if (!$this->entityManager->getClassMetadata($user::class)->hasField("username") || trim((string) $user->getUsername()) !== "") {
+        if (!UnitOfWorks::shapes($this->unitOfWork)->shape($user)->hasField("username") || trim((string) $user->getUsername()) !== "") {
             return;
         }
 
@@ -452,7 +450,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
 
         return $this->redirectToRoute('user_profile');
     }
@@ -500,7 +498,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this->redirectToRoute('user_profile');
     }
 
@@ -529,7 +527,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
         return $this->redirectToRoute('user_profile');
     }
 
@@ -555,7 +553,7 @@ class SecurityController extends AbstractController
             $user->disable();
             $user->logout();
 
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
             return $this->redirectToRoute($this->router->getRouteIndex());
         }
     }
@@ -576,7 +574,7 @@ class SecurityController extends AbstractController
             $user->enable();
             $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
 
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
             return $authenticateUser;
         } else {
             if ($welcomeBackToken) {
@@ -586,7 +584,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountWelcomeBack.invalidToken");
             $notification->send("danger");
 
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
         }
 
         return $this->redirectToRoute($this->router->getRouteIndex());
@@ -638,7 +636,7 @@ class SecurityController extends AbstractController
                 }
             }
 
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
             $notification->send("success");
         }
 
@@ -691,7 +689,7 @@ class SecurityController extends AbstractController
 
                 $notification = new Notification("resetPassword.success");
 
-                $this->entityManager->flush();
+                $this->unitOfWork->flush();
 
                 $rememberMeBadge = new RememberMeBadge();
                 $rememberMeBadge->enable();
@@ -729,7 +727,7 @@ class SecurityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $changePasswordToken->revoke();
             $user->setPlainPassword($form->get('plainPassword')->getData());
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
 
             // A new password ends the session signed with the old one: signed in again, at once.
             $rememberMeBadge = new RememberMeBadge();

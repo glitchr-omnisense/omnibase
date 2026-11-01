@@ -4,6 +4,7 @@ namespace Base\Console\Command;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User\Notification;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,8 +40,8 @@ class UserNotificationCommand extends Command
         $actionShow = $input->getOption('show');
         $actionClearAll = $input->getOption('clear-all');
 
-        $notificationRepository = $this->entityManager->getRepository(Notification::class);
-        $userRepository = $this->entityManager->getRepository(User::class);
+        $notificationRepository = UnitOfWorks::repositories($this->unitOfWork)->of(Notification::class);
+        $userRepository = UnitOfWorks::repositories($this->unitOfWork)->of(User::class);
         if (!$userRepository instanceof UserRepository) {
             throw new \LogicException(sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
         }
@@ -86,9 +87,9 @@ class UserNotificationCommand extends Command
             // The expired read ones only - it erased every notification,
             // unread included - and one flush for all.
             foreach ($notifications_toErase as $notification) {
-                $this->entityManager->remove($notification);
+                $this->unitOfWork->remove($notification);
             }
-            $this->entityManager->flush();
+            $this->unitOfWork->flush();
         }
 
         return Command::SUCCESS;

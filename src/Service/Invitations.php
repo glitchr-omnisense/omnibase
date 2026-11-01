@@ -2,9 +2,11 @@
 
 namespace Base\Service;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Invitation;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * Invitation by token: nobody signs up, someone is invited. The token is
@@ -20,10 +22,14 @@ class Invitations
 {
     public const TOKEN_BYTES = 24;
 
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         protected readonly string $userClass = 'App\Entity\User',
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /** A new token: 48 hexadecimal characters. */
@@ -45,8 +51,8 @@ class Invitations
     /** Saved, its token's hash only. */
     public function save(Invitation $invitation): Invitation
     {
-        $this->entityManager->persist($invitation);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($invitation);
+        $this->unitOfWork->flush();
 
         return $invitation;
     }
@@ -62,7 +68,7 @@ class Invitations
      */
     public function findOpen(string $class, string $token): ?Invitation
     {
-        $invitation = $this->entityManager->getRepository($class)->findOneBy(['tokenHash' => self::hash($token)]);
+        $invitation = UnitOfWorks::repositories($this->unitOfWork)->of($class)->findOneBy(['tokenHash' => self::hash($token)]);
 
         return $invitation?->isOpen() ? $invitation : null;
     }
@@ -71,7 +77,7 @@ class Invitations
     public function markAccepted(Invitation $invitation): void
     {
         $invitation->accept();
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     /** A new account for an invitation's e-mail, verified: the link proved the address. */
@@ -89,8 +95,8 @@ class Invitations
         if (method_exists($user, 'approve')) {
             $user->approve(true);
         }
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($user);
+        $this->unitOfWork->flush();
 
         return $user;
     }
@@ -98,6 +104,6 @@ class Invitations
     /** The account that already has the invitation's e-mail, if any. */
     public function existingUser(Invitation $invitation): ?User
     {
-        return $this->entityManager->getRepository($this->userClass)->findOneBy(['email' => $invitation->getEmail()]);
+        return UnitOfWorks::repositories($this->unitOfWork)->of($this->userClass)->findOneBy(['email' => $invitation->getEmail()]);
     }
 }

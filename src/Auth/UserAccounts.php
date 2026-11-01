@@ -3,6 +3,7 @@
 namespace Base\Auth;
 
 use App\Entity\User as AppUser;
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Security\LoginRestrictionInterface;
 use Omniauth\Contract\Accounts;
@@ -40,10 +41,10 @@ class UserAccounts extends UserStore implements Accounts
         if ('' === $identifier) {
             return null;
         }
-        $repository = $this->entityManager->getRepository(AppUser::class);
+        $repository = $this->entities(AppUser::class);
         $user = $repository->findOneBy(['email' => mb_strtolower($identifier)]);
         $field = AppUser::getUserIdentifierField();
-        if (null === $user && 'email' !== $field && $this->entityManager->getClassMetadata(AppUser::class)->hasField($field)) {
+        if (null === $user && 'email' !== $field && UnitOfWorks::shapes($this->unitOfWork)->shape(AppUser::class)->hasField($field)) {
             $user = $repository->findOneBy([$field => $identifier]);
         }
 
@@ -55,7 +56,7 @@ class UserAccounts extends UserStore implements Accounts
         if (!ctype_digit($handle)) {
             return null;
         }
-        $user = $this->entityManager->find(AppUser::class, (int) $handle);
+        $user = $this->entities(AppUser::class)->find((int) $handle);
 
         return $user instanceof User ? $user : null;
     }

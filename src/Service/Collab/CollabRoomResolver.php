@@ -2,7 +2,9 @@
 
 namespace Base\Service\Collab;
 
+use Base\Database\UnitOfWorks;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * This class supplies room-key logic and version-hash logic for the
@@ -13,11 +15,12 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class CollabRoomResolver
 {
-    protected EntityManagerInterface $entityManager;
+    protected readonly UnitOfWork $unitOfWork;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
+    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork)
     {
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /**
@@ -58,7 +61,7 @@ class CollabRoomResolver
             return null;
         }
 
-        if ($this->entityManager->getMetadataFactory()->isTransient(get_class($data))) {
+        if (!UnitOfWorks::shapes($this->unitOfWork)->has($data)) {
             return null;
         }
 

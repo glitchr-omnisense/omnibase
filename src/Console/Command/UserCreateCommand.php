@@ -3,11 +3,13 @@
 namespace Base\Console\Command;
 
 use App\Entity\User;
+use Base\Database\UnitOfWorks;
 use Base\Notifier\NotifierInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Entity\User\Token;
 use Base\Enum\UserRole;
 use Base\Subscriber\PasswordChangeSubscriber;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -27,10 +29,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'user:create', description: 'An account, its password to change at the first sign-in')]
 class UserCreateCommand extends Command
 {
+    private readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
         private readonly NotifierInterface $notifier,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
         parent::__construct();
     }
 
@@ -51,7 +57,7 @@ class UserCreateCommand extends Command
         $username = (string) $input->getArgument('username');
         $email = (string) $input->getArgument('email');
 
-        $users = $this->entityManager->getRepository(User::class);
+        $users = UnitOfWorks::repositories($this->unitOfWork)->of(User::class);
         if ($users->findOneBy(['email' => $email]) || (property_exists(User::class, 'username') && $users->findOneBy(['username' => $username]))) {
             $io->error(sprintf('An account already has the username "%s" or the address %s.', $username, $email));
 
@@ -91,8 +97,8 @@ class UserCreateCommand extends Command
             (new Token(PasswordChangeSubscriber::TOKEN))->setUser($user);
         }
 
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->unitOfWork->persist($user);
+        $this->unitOfWork->flush();
 
         // Its owner told: username, temporary password, the way in (Notifier::accountCreated).
         if (!$input->getOption('no-email')) {

@@ -2,11 +2,13 @@
 
 namespace Base\Service;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Group;
 use Base\Repository\User\GroupRepository;
 use Base\Repository\User\PermissionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The one service that turns a score into an actual capability.
@@ -31,11 +33,15 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class GroupManager
 {
+    protected readonly UnitOfWork $unitOfWork;
+
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
         protected readonly GroupRepository $groupRepository,
         protected readonly PermissionRepository $permissionRepository,
-        protected readonly EntityManagerInterface $entityManager,
+        UnitOfWork|EntityManagerInterface $unitOfWork,
     ) {
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
     }
 
     /**

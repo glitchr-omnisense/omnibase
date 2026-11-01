@@ -64,16 +64,16 @@ return static function (ContainerConfigurator $container): void {
         'Base\Controller\MainController' => ['setting_bag'],
         'Base\Controller\ProfilerController' => ['base.notifier', 'App\Repository\UserRepository'],
         'Base\Controller\Client\ContactController' => ['form.proxy', 'base.notifier'],
-        'Base\Controller\LocalizerController' => ['localizer', 'doctrine.orm.entity_manager', 'advanced_router', 'referrer', 'translator'],
+        'Base\Controller\LocalizerController' => ['localizer', 'Omnibridge\Persistence\UnitOfWork', 'advanced_router', 'referrer', 'translator'],
         'Base\Controller\UX\MediaController' => ['request_stack', 'flysystem', 'base.service.image', 'Base\Repository\Layout\ImageCropRepository'],
-        'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'doctrine.orm.entity_manager', 'Base\Service\Paginator', 'Base\Database\Mapping\ClassMetadataManipulator', 'base.service.image'],
+        'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'Omnibridge\Persistence\UnitOfWork', 'Base\Service\Paginator', 'Base\Database\Mapping\ClassMetadataManipulator', 'base.service.image'],
         'Base\Controller\WidgetController' => ['Base\Repository\Layout\Widget\AttachmentRepository'],
         'Base\Controller\ShortLinkController' => ['advanced_router', 'Base\Repository\Layout\ShortLinkRepository'],
         // The like/follow/publish API. Was silently unregistered (constructor
         // arguments, no service): every /api/thread/{slug}/like answered 500
         // in production - "the like doesn't work".
-        'Base\Controller\Api\ThreadController' => ['doctrine.orm.entity_manager', 'translator', 'Base\Repository\ThreadRepository', 'Base\Repository\Thread\LikeRepository'],
-        'Base\Controller\Client\NotificationController' => ['doctrine.orm.entity_manager', 'Base\Repository\User\NotificationRepository', 'Base\Service\Push\WebPushService', 'security.csrf.token_manager', 'Base\Notifier\NotificationLinkerInterface'],
+        'Base\Controller\Api\ThreadController' => ['Omnibridge\Persistence\UnitOfWork', 'translator', 'Base\Repository\ThreadRepository', 'Base\Repository\Thread\LikeRepository'],
+        'Base\Controller\Client\NotificationController' => ['Omnibridge\Persistence\UnitOfWork', 'Base\Repository\User\NotificationRepository', 'Base\Service\Push\WebPushService', 'security.csrf.token_manager', 'Base\Notifier\NotificationLinkerInterface'],
     ];
 
     foreach ($controllers as $id => $args) {
@@ -179,7 +179,7 @@ return static function (ContainerConfigurator $container): void {
         ->tag('twig.runtime')
         ->args([
             service('parameter_bag'),
-            service('doctrine.orm.entity_manager'),
+            service('Omnibridge\Persistence\UnitOfWork'),
             service('Base\Repository\Layout\SettingRepository'),
             service('localizer'),
             service('cache.adapter'),
@@ -277,7 +277,7 @@ return static function (ContainerConfigurator $container): void {
     // labels and for the entity-level history page.
     $services->set('Base\Service\VersionManager')
         ->public()
-        ->args([service('doctrine.orm.entity_manager'), service(\Base\Repository\Extension\Revisions::class), '%base.extension.max_revisions%']);
+        ->args([service('Omnibridge\Persistence\UnitOfWork'), service(\Base\Repository\Extension\Revisions::class), '%base.extension.max_revisions%']);
     $services->alias('version_manager', 'Base\Service\VersionManager')->public();
 
     // ...and the subscriber that HANDLES those events, which is the same bug

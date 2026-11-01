@@ -2,6 +2,8 @@
 
 namespace Tests\Base\Field;
 
+use Base\Database\Attribute\Backend\Backends;
+use Base\Database\Mapping\EntityShapes;
 use Base\Field\Type\EditorType;
 use Base\Form\Extension\FormTypeCollabExtension;
 use Base\Routing\AdvancedRouterInterface;
@@ -12,8 +14,7 @@ use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Omnibridge\Persistence\UnitOfWork;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -35,11 +36,12 @@ class EditorTypeCollabRelayTest extends TestCase
 {
     private function factory(CollabTicketFactory $tickets): FormFactoryInterface
     {
-        $metadata = $this->createMock(ClassMetadataFactory::class);
-        $metadata->method('isTransient')->willReturn(false);
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->method('getMetadataFactory')->willReturn($metadata);
-        $rooms = new CollabRoomResolver($entityManager);
+        // Every object an entity (step F2d: the entities' shapes of the unit of work, not Doctrine's metadata factory).
+        $unitOfWork = $this->createMock(UnitOfWork::class);
+        $shapes = $this->createMock(EntityShapes::class);
+        $shapes->method('has')->willReturn(true);
+        Backends::register($unitOfWork::class, EntityShapes::class, static fn () => $shapes);
+        $rooms = new CollabRoomResolver($unitOfWork);
 
         $router = $this->createMock(AdvancedRouterInterface::class);
         $router->method('generate')->willReturnCallback(static fn (string $name) => '/route/'.$name);

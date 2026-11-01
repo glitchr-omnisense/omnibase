@@ -10,6 +10,42 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the core's services on the unit of work (2026-11-01)
+
+Plan "omnibase agnostic", step F2d. See docs/20-architecture/doctrine.md (The core's services on the unit of work).
+
+- **The services take omnisense/omnibridge's `UnitOfWork`** where they took Doctrine's entity manager, and
+  ask it nothing of the ORM: omniauth's stores (`Base\Auth\UserStore` and its subclasses), the sign-in
+  listeners (`TrackConnections`, `UpdateAccount`, `WelcomeBack`), `ConnectionTracker`, `UserTracker`,
+  `UserChecker`, `InAppChannel`, `Invitations`, `WebPushService`, `Signatures`, `VersionManager`,
+  `CollabRoomResolver`, `SettingBag`, `GroupManager`, `HeadingEnhancer`; the controllers
+  `SecurityController`, `LocalizerController`, `Api\ThreadController`, `Client\NotificationController`,
+  `UX\AutocompleteController`, `UX\AutovalidateController` (typed `UnitOfWork`); the commands
+  `user:create`, `user:notifications`, `autocomplete:entities`, `icon:entities`, `uploader:images:crop`,
+  `thread:publishable`. Their protected `$entityManager` is `$unitOfWork`.
+- **The entity manager is still accepted**, deprecated, as the other half of a union
+  (`UnitOfWork|EntityManagerInterface`, until 6.0): `Base\Database\UnitOfWorks::of()` adapts it
+  (`UnitOfWorks::ADAPTERS`; `register()` for another persistence). omnibridge/laravel, the bundles and the
+  tests construct them unchanged. `Base\Console\Command` keeps its `$entityManager` (deprecated) beside a
+  new `$unitOfWork`.
+- `UnitOfWorks::repositories()` and `UnitOfWorks::shapes()`: the repositories (`Repositories`, now
+  registered in `Backends` for `DoctrineUnitOfWork`) and the entities' shapes of a unit of work.
+- What only a persistence does: `Base\Database\Backend\{RowLocks, ConditionalUpdates, EntityCache}`, in
+  `Backends`; Doctrine's `Base\Bridge\Doctrine\Behaviour\{DoctrineRowLocks, DoctrineConditionalUpdates,
+  DoctrineEntityCache}` (to omnibridge/doctrine at F3). A `DoctrineUnitOfWork` registers Doctrine's
+  backends when it is made (`DoctrineBehaviours::ensureRegistered()`).
+- Symfony: the service `Omnibridge\Persistence\UnitOfWork` (`DoctrineUnitOfWork` over the entity manager),
+  the union `Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork` aliased to it; the
+  converted services' definitions pass it.
+- `Base\Repository\User\Identities` (IdentityRepository's finders, aliased); `Passkeys::findOneByCredential()`.
+  `UserPasskeys::of()` reads `findBy(['user' => ...], ['id' => 'ASC'])` where it built the same query.
+- `CollabRoomResolver::resolveEntity()` asks the shapes whether the object is an entity (Doctrine's
+  `isTransient()` before).
+- Tests: `tests/Database/UnitOfWorksTest` (the adaptation, the container's unit of work, the repositories
+  and shapes through it, a row locked and a field compared and set on SQLite), `tests/Database/UnitOfWorkPathTest`
+  (the converted files ask the entity manager nothing, name it only in the union).
+- Agnostic core 681 -> 686, Foundation 893 -> 898 (`UnitOfWorks`, the three backends, `Identities`).
+
 ### Fixed: `#[Cache(associations: "MANY_TO_MANY")]` caches the many-to-many associations (2026-11-01)
 
 - `Cache::MANY_TO_MANY` was the string `"ONE_TO_ONE"`: `associations: "MANY_TO_MANY"` cached no association,

@@ -3,7 +3,7 @@
 namespace Base\Auth;
 
 use Base\Entity\User\Identity;
-use Base\Repository\User\IdentityRepository;
+use Base\Repository\User\Identities as IdentityRepository;
 use Omniauth\Contract\Identities;
 
 /**
@@ -33,7 +33,7 @@ class UserIdentities extends UserStore implements Identities
 
             return;
         }
-        $this->entityManager->persist(new Identity($user, $provider, $subject, $email, $emailVerified));
+        $this->unitOfWork->persist(new Identity($user, $provider, $subject, $email, $emailVerified));
         $this->save();
     }
 
@@ -42,7 +42,7 @@ class UserIdentities extends UserStore implements Identities
         $removed = false;
         foreach ($this->repository()->findOfUser($this->user($account)) as $identity) {
             if ($identity->getProvider() === $provider) {
-                $this->entityManager->remove($identity);
+                $this->unitOfWork->remove($identity);
                 $removed = true;
             }
         }
@@ -73,6 +73,8 @@ class UserIdentities extends UserStore implements Identities
 
     private function repository(): IdentityRepository
     {
-        return $this->entityManager->getRepository(Identity::class);
+        $repository = $this->entities(Identity::class);
+
+        return $repository instanceof IdentityRepository ? $repository : throw new \LogicException(\sprintf('The identities\' repository is a %s, not a %s.', get_debug_type($repository), IdentityRepository::class));
     }
 }

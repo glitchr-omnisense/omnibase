@@ -14,7 +14,7 @@ use Base\Entity\User\Identity;
  * @method Identity[]    findAll()
  * @method Identity[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class IdentityRepository extends ServiceEntityRepository
+class IdentityRepository extends ServiceEntityRepository implements Identities
 {
     public function findOneBySubject(string $provider, string $subject): ?Identity
     {

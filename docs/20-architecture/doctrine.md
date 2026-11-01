@@ -133,6 +133,45 @@ for an entity or a class (a `ClassMetadata` being built is read as it stands), a
 defaults and identifiers. `OrderColumnBackend` keeps a lazy collection's positions until it is read
 (Doctrine's PersistentCollection); without it the property is sorted when loaded.
 
+### The core's services on the unit of work
+
+Plan "omnibase agnostic", step F2d. The core's services, listeners, stores, controllers and commands
+take omnisense/omnibridge's `UnitOfWork` where they took Doctrine's entity manager, and ask it nothing
+of the ORM:
+
+- writing: `persist()`, `remove()`, `flush()`, `refresh()`, `contains()`; an entity's identifier and
+  class: `identifier()`, `className()`;
+- reading: their repository by its interface (`Base\Repository\*`, a new `User\Identities`, the
+  `Passkeys` finder `findOneByCredential()`), or `UnitOfWorks::repositories($unitOfWork)->of($class)`
+  for a class named at run time (`Base\Database\Repository\Repositories`);
+- an entity's fields: `UnitOfWorks::shapes($unitOfWork)` (the entity's shape, above);
+- what only a persistence does, a small interface of `Base\Database\Backend` registered in `Backends`
+  like the behaviours' parts:
+
+| Interface | What it does | Who asks | Doctrine (`Base\Bridge\Doctrine\Behaviour`) |
+|---|---|---|---|
+| `RowLocks` | a row locked for writing while some work runs, in a transaction | the like (`Api\ThreadController`), `thread:publishable` | `DoctrineRowLocks`: a pessimistic write lock |
+| `ConditionalUpdates` | one field written only if it still holds a value, in one statement | the sign-in link claimed once (`Auth\UserLinkTokens`) | `DoctrineConditionalUpdates`: a DQL UPDATE |
+| `EntityCache` | the cache of entities between requests evicted | `SettingBag` | `DoctrineEntityCache`: the second-level cache |
+
+`Base\Database\UnitOfWorks::of()` gives the unit of work for what a service was handed: the unit of work
+itself, or a persistence's manager adapted once (`UnitOfWorks::ADAPTERS`, Doctrine's entity manager to
+`DoctrineUnitOfWork`; another persistence registers its own). The services' constructors still accept
+the entity manager, as the deprecated other half of a union (`UnitOfWork|EntityManagerInterface`, until
+6.0): omnibridge/laravel, the bundles' wiring and the tests hand it to them. Under Symfony the
+container's `Omnibridge\Persistence\UnitOfWork` is `DoctrineUnitOfWork` over the entity manager, and
+the union is aliased to it, so that an autowired constructor gets the same instance. A
+`DoctrineUnitOfWork` registers Doctrine's backends when it is made (`DoctrineBehaviours::ensureRegistered()`),
+before any Doctrine event.
+
+What keeps the entity manager, on purpose: the mapping (`ClassMetadataManipulator`,
+`ClassMetadataFactory`, `EntityHydrator`), `ServiceEntityRepository`, the Doctrine listeners, the
+Doctrine commands (`doctrine:database:import`, `doctrine:array:upgrade`, the schema's charset), the
+validators and `CropperType` (the form layer, F5b), `AbstractEventDispatcher` and `BaseNotifier` (F5a),
+`DemoAccountFactory` (Doctrine's fixtures), `Base\Console\Command` (its deprecated `$entityManager`, read
+by the applications' commands, beside its `$unitOfWork`), `BaseTrait` (F2f). `tests/Database/UnitOfWorkPathTest`
+keeps the converted files off the entity manager.
+
 ### The lifecycle listeners: logic and Doctrine wiring
 
 The listeners that record something keep their logic in `Base\Database\Lifecycle`, on no
