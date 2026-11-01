@@ -191,8 +191,8 @@ Twig-free classes of `src/Twig` and every other class are measured as before, an
 none may need Twig (`BareTest::testTwigIsOptional`). On a vendor where Twig is
 installed (`OMNIBASE_AUTOLOAD`, this run's) nothing is optional.
 `tests/View/helpers-without-twig.php` runs the neutral view helpers (`Base\View\*`)
-there under `--strict` (`testTheViewHelpersWorkWithoutTwig`). After step F4: 669 of
-the Foundation's 881 classes (+16 helpers, and `Base\Service\BaseService`, which no
+there under `--strict` (`testTheViewHelpersWorkWithoutTwig`). After step F4: 677 of
+the Foundation's 889 classes (+16 helpers, and `Base\Service\BaseService`, which no
 longer declares Twig's `RuntimeExtensionInterface`).
 
 ## doctrine/orm as released

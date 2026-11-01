@@ -34,7 +34,8 @@
  * Subject, which read a finder's name without Doctrine).
  * 652 after step F2a (+23: the enumerations - Base\Database\Type\EnumType, SetType, the
  * core's twenty Base\Enum\* - no longer Doctrine types, and Base\Database\Type\Enumerations).
- * 669 after step F4 (+17: the neutral view helpers Base\View\*, and Base\Service\BaseService, which no
+ * 660 after step F2b (+8: the listeners' logic and the behaviours' backends, see CHANGELOG.md).
+ * 677 after step F4 (+17: the neutral view helpers Base\View\*, and Base\Service\BaseService, which no
  * longer declares Twig's RuntimeExtensionInterface). src/Twig stays out, but for its Twig-free classes listed
  * since F0 (the variables, the tag renderers, AdminLinks): it is optional, loaded with Twig only.
  */
