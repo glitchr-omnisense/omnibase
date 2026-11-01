@@ -78,10 +78,13 @@ final class CorePathTest extends TestCase
     ];
 
     /** Where a ->getRepository() stays: the attribute reader is the mapping attributes' (Doctrine's side). */
-    private const GET_REPOSITORY_LEFT = ['Attributes/AttributeReader.php', 'Traits/BaseTrait.php'];
+    private const GET_REPOSITORY_LEFT = ['Attributes/AttributeReader.php'];
 
-    /** Where the name BaseService stays: BaseTrait::getService() hands the facade itself out. */
-    private const BASE_SERVICE_LEFT = ['Traits/BaseTrait.php'];
+    /**
+     * Where the name BaseService stays: nowhere on the path since step F2f - BaseTrait names
+     * contracts only, its deprecated getService() is Base\Traits\FrameworkAccessorsTrait's.
+     */
+    private const BASE_SERVICE_LEFT = [];
 
     public function testThePathAsksNoRepositoryOfTheEntityManager(): void
     {

@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Service;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Service\BaseService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,7 +42,7 @@ final class BaseServiceLazyTest extends KernelTestCase
 
         self::assertIsFloat($service->getExecutionTime());
         self::assertFalse((new \ReflectionClass($service))->isUninitializedLazyObject($service));
-        self::assertSame($service, BaseService::getService(), 'the instance it records is the object handed out');
+        self::assertSame($service, FrameworkLocator::service(), 'the instance it records is the object handed out');
     }
 
     /** @return iterable<string, array{string}> */

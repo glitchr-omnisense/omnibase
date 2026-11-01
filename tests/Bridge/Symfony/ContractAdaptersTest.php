@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Bridge\Symfony;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Bridge\Symfony\FlysystemFiles;
 use Base\Bridge\Symfony\LocalizerLocales;
 use Omnibridge\Symfony\RouterUrls;
@@ -186,7 +187,7 @@ final class ContractAdaptersTest extends KernelTestCase
                 foreach ([null, $thread] as $subject) {
                     $label = $attribute.($subject ? ' on a Thread' : '').($user ? ', signed in' : ', nobody');
                     self::assertSame($container->get('security.authorization_checker')->isGranted($attribute, $subject), $access->isGranted($attribute, $subject), $label);
-                    self::assertSame(BaseService::getService()->isGranted($attribute, $subject), $access->isGranted($attribute, $subject), $label.', BaseService');
+                    self::assertSame(FrameworkLocator::service()->isGranted($attribute, $subject), $access->isGranted($attribute, $subject), $label.', BaseService');
                 }
                 self::assertSame($access->isGranted($attribute) ? 'yes' : 'no', $this->render("{{ is_granted('$attribute') ? 'yes' : 'no' }}"), $attribute.', Twig\'s is_granted()');
             }

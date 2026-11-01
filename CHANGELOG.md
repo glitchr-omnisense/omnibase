@@ -10,6 +10,29 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: BaseTrait names contracts only (2026-11-02)
+
+Plan "omnibase agnostic", step F2f. See docs/20-architecture/contracts.md (BaseTrait on contracts only).
+
+- Each accessor of a contract comes in two forms: `getX()` answers the service or throws
+  `Omnibridge\Exception\MissingContractException` (it answered null), `findX()` answers it or null:
+  `AttributeReader`, `SettingBag`, `EntityHydratorInterface` (was `EntityHydrator`), `MediaService`, `Obfuscator`,
+  `IconProvider`, `LocalizerInterface`, `BaseNotifierInterface`, `TranslatorInterface`, `TradingInterface`,
+  `ParameterBagInterface`. `isEntity()` answers a bool, and throws without persistence.
+- **Deprecated**: the framework's accessors (`getRouter()`, `getTwig()`, `getDoctrine()`, `getObjectManager()`,
+  `getEntityManager()`, `getRepository()`, `getClassMetadataManipulator()`, `getTokenStorage()`,
+  `getRequestStack()`, `getFirewallMap()`, `getSlugger()`, `getService()`), moved to
+  `Base\Traits\FrameworkAccessorsTrait` (still used by BaseTrait, same types and nulls, an `E_USER_DEPRECATED`
+  per call naming the replacement); removed at 6.0. The core's host code reads them from
+  `Base\Bridge\Symfony\FrameworkLocator`.
+- The core's callers: `Widget\Attachment` and `Widget\Page` link through `Link::to()`; Uploader, Wysiwyg and
+  ConstraintValidator use the `find` forms; BaseService, the validators, EditorController and Notification's Twig
+  go through FrameworkLocator; UniqueEntityValidator asks the manager of the entity's class (it passed the class
+  as `$reopen`). The omnibase/* bundles' entities link through `Link::to()` too.
+- Tests: `tests/Traits/BaseTraitContractsTest` (BaseTrait names no framework class, each type a contract, the
+  get/find pairs, the deprecated accessors called nowhere in src/), `tests/Traits/BaseTraitMissingContractTest`,
+  BareTest's seams without the framework.
+
 ### Fixed: `DoctrineRepositories` autowired by Laravel again (2026-11-02)
 
 - Step F2d had typed its constructor `DoctrineUnitOfWork|EntityManagerInterface`; Laravel's container resolves

@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Contract;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\Semantic;
@@ -144,14 +145,14 @@ final class EntityGettersTest extends KernelTestCase
             $label = $user ? 'an administrator' : 'nobody';
 
             foreach ($threads as $state => $thread) {
-                $before = BaseService::getService()->isGranted('ROLE_ADMIN') || ($thread->isApproved() && $thread->isPublished() && !$thread->isSecret());
+                $before = FrameworkLocator::service()->isGranted('ROLE_ADMIN') || ($thread->isApproved() && $thread->isPublished() && !$thread->isSecret());
                 self::assertSame($before, $thread->isVisible(), $state.', '.$label);
                 $seen[$label][$state] = $thread->isVisible();
             }
 
             foreach (['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPERADMIN', 'IS_AUTHENTICATED'] as $role) {
                 self::assertSame($checker->isGranted($role, $member), $member->isGranted($role), $role.', '.$label);
-                self::assertSame(BaseService::getService()->isGranted($role, $member), $member->isGranted($role), $role.', '.$label.', BaseService');
+                self::assertSame(FrameworkLocator::service()->isGranted($role, $member), $member->isGranted($role), $role.', '.$label.', BaseService');
             }
         }
 

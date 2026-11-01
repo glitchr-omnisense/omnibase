@@ -394,7 +394,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         if ($that->getFlysystem()->isRemote($that->getStorage())) {
-            $routed = Locator::getMediaService()?->image($path, ["storage" => $that->getStorage()]);
+            $routed = Locator::findMediaService()?->image($path, ["storage" => $that->getStorage()]);
             if ($routed) {
                 return $routed;
             }

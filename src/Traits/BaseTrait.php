@@ -3,32 +3,20 @@
 namespace Base\Traits;
 
 use Base\Attributes\AttributeReader;
-use Omnibridge\Contract\Environment as EnvironmentContract;
 use Base\Contract\Runtime;
-use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\Entity\EntityHydrator;
+use Base\Database\Entity\EntityHydratorInterface;
+use Base\Notifier\Abstract\BaseNotifierInterface;
+use Base\Service\IconProvider;
+use Base\Service\LocalizerInterface;
+use Base\Service\Locator;
+use Base\Service\MediaService;
 use Base\Service\Obfuscator;
 use Base\Service\ParameterBagInterface;
-use Base\Service\TradingInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Base\Notifier\Abstract\BaseNotifierInterface;
-use Base\Routing\AdvancedRouterInterface;
-use Base\Service\BaseService;
-use Base\Service\Locator;
 use Base\Service\SettingBag;
-use Base\Service\IconProvider;
-use Base\Service\MediaService;
-use Base\Service\LocalizerInterface;
+use Base\Service\TradingInterface;
 use Base\Service\TranslatorInterface;
-use Symfony\Component\Security\Http\FirewallMapInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
-use Twig\Environment;
-use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\ObjectManager;
-use Doctrine\Persistence\ObjectRepository;
-
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Omnibridge\Contract\Environment as EnvironmentContract;
+use Omnibridge\Exception\MissingContractException;
 
 /**
  * Static service accessors usable from anywhere (entities, attributes,
@@ -40,85 +28,65 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * (Base\Contract\Runtime and its interfaces) in the core and the bundles, which
  * add no new use of it (docs/20-architecture/contracts.md).
  *
- * An accessor whose answer a contract gives asks the contract first, so it
+ * **Contracts only** (plan "omnibase agnostic", step F2f): every accessor here
+ * names a contract - an interface of omnisense/omnibridge or Base\Contract, or
+ * a class of the agnostic core (tests/Agnostic.php) -, never a class of
+ * Symfony, Doctrine or Twig (tests/Traits/BaseTraitContractsTest.php). Each
+ * service comes in two forms:
+ * - getX() answers it, or throws Omnibridge\Exception\MissingContractException
+ *   when the host has none: for a caller that needs it, which used to fail
+ *   further on a call on null;
+ * - findX() answers it or null: for a caller that does without (an optional
+ *   service, a command without a request, a host that does not answer it).
+ *
+ * The framework's services it handed out before (the router, Twig, Doctrine's
+ * registry and entity manager, the request stack, the token storage, the
+ * firewall map, the slugger, the BaseService facade) are in
+ * Base\Traits\FrameworkAccessorsTrait, which this trait still uses: deprecated,
+ * typed and nullable as they were, removed at 6.0. The core's host code asks
+ * them of Base\Bridge\Symfony\FrameworkLocator.
+ *
+ * An accessor whose answer a contract gives asks the registry first, so it
  * answers wherever the registry is filled, Symfony or not: getParameterBag()
- * (Runtime::parameters()), getEnvironment() (Runtime::environment()->name()).
- * The others hand out the framework's services, typed as they always were;
- * they are resolved one at a time, lazily, through the `base.runtime`
+ * (Runtime::parameters()), getEnvironment() (Runtime::environment()->name()),
+ * getMediaService() (omnibridge/laravel binds omnibase's MediaService). The
+ * others are resolved one at a time, lazily, through the `base.runtime`
  * ServiceLocator seeded in BaseBundle::boot() (BaseCommonTrait::runtimeGet()),
  * or pre-filled when BaseService is built - which nothing does any more on a
  * page's path (BaseService is a lazy service, C9). What they resolve is kept on
- * Base\Service\Locator, framework-free (step R28): BaseService, which kept it
- * before and extends it, is no longer loaded by an accessor.
+ * Base\Service\Locator, framework-free (step R28).
  */
 trait BaseTrait
 {
-    public static function getAttributeReader(): ?AttributeReader
+    use FrameworkAccessorsTrait;
+
+    public static function findAttributeReader(): ?AttributeReader
     {
         return AttributeReader::getInstance();
     }
 
-    public static function getService(): ?BaseService
+    public static function getAttributeReader(): AttributeReader
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('instance', 'base.service') : Locator::getService();
+        return self::findAttributeReader() ?? throw MissingContractException::for(AttributeReader::class);
     }
 
-    public static function getSettingBag(): ?SettingBag
+    public static function findSettingBag(): ?SettingBag
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('settings', 'setting_bag') : Locator::getSettingBag();
+        return (self::class === Locator::class) ? Locator::runtimeGet('settings', 'setting_bag') : Locator::findSettingBag();
     }
 
-    public static function getDoctrine(): ?ManagerRegistry
+    public static function getSettingBag(): SettingBag
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('doctrine', 'doctrine') : Locator::getDoctrine();
+        return self::findSettingBag() ?? throw MissingContractException::for(SettingBag::class);
     }
 
-    public static function getObjectManager(mixed $entity): ?ObjectManager
+    /** Whether the persistence maps it as an entity (an object, a class, a metadata). */
+    public static function isEntity(mixed $entityOrClassOrMetadata): bool
     {
-        return (self::class === Locator::class) ? Locator::getDoctrine()?->getManagerForClass(is_object($entity) ? get_class($entity) : $entity) : Locator::getObjectManager($entity);
-    }
+        $manipulator = Locator::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator')
+            ?? throw MissingContractException::for('Base\Database\Mapping\ClassMetadataManipulator');
 
-    public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
-    {
-        if (self::class !== Locator::class) {
-            return Locator::getEntityManager();
-        }
-
-        $doctrine = Locator::getDoctrine();
-        if (!$doctrine) {
-            return null;
-        }
-
-        /**
-         * @var EntityManager $entityManager
-         */
-        $entityManager = $doctrine->getManager($doctrine->getDefaultManagerName());
-
-        if (!$entityManager) {
-            return null;
-        }
-        if (!$entityManager->isOpen()) {
-            if (!$reopen) {
-                return null;
-            }
-            $entityManager = $entityManager->create(
-                $entityManager->getConnection(),
-                $entityManager->getConfiguration()
-            );
-        }
-
-        return $entityManager;
-    }
-
-    public static function getRepository(mixed $object = null): ?ObjectRepository
-    {
-        $object ??= static::class;
-        return Locator::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object);
-    }
-
-    public static function isEntity(mixed $entityOrClassOrMetadata): ?bool
-    {
-        return Locator::getClassMetadataManipulator()?->isEntity($entityOrClassOrMetadata);
+        return $manipulator->isEntity($entityOrClassOrMetadata);
     }
 
     public static function getProjectDir(): string
@@ -171,27 +139,17 @@ trait BaseTrait
         return Locator::getProjectDir() . "/fixtures";
     }
 
-    public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
+    public static function findEntityHydrator(): ?EntityHydratorInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator') : Locator::getClassMetadataManipulator();
+        return (self::class === Locator::class) ? Locator::runtimeGet('entityHydrator', 'base.database.entity_hydrator') : Locator::findEntityHydrator();
     }
 
-    public static function getTokenStorage(): ?TokenStorageInterface
+    public static function getEntityHydrator(): EntityHydratorInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('tokenStorage', 'security.token_storage') : Locator::getTokenStorage();
+        return self::findEntityHydrator() ?? throw MissingContractException::for(EntityHydratorInterface::class);
     }
 
-    public static function getRequestStack(): ?RequestStack
-    {
-        return (self::class === Locator::class) ? Locator::runtimeGet('requestStack', 'request_stack') : Locator::getRequestStack();
-    }
-
-    public static function getEntityHydrator(): ?EntityHydrator
-    {
-        return (self::class === Locator::class) ? Locator::runtimeGet('entityHydrator', 'base.database.entity_hydrator') : Locator::getEntityHydrator();
-    }
-
-    public static function getMediaService(): ?MediaService
+    public static function findMediaService(): ?MediaService
     {
         // The host's when the registry has it (audit R7: omnibridge/laravel binds omnibase's
         // MediaService with its media on), else the container's, as before.
@@ -200,71 +158,94 @@ trait BaseTrait
             return $mediaService;
         }
 
-        return (self::class === Locator::class) ? Locator::runtimeGet('mediaService', 'base.service.image') : Locator::getMediaService();
+        return (self::class === Locator::class) ? Locator::runtimeGet('mediaService', 'base.service.image') : Locator::findMediaService();
     }
 
-    public static function getObfuscator(): ?Obfuscator
+    public static function getMediaService(): MediaService
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('obfuscator', 'obfuscator') : Locator::getObfuscator();
+        return self::findMediaService() ?? throw MissingContractException::for(MediaService::class);
     }
 
-    public static function getIconProvider(): ?IconProvider
+    public static function findObfuscator(): ?Obfuscator
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('iconProvider', 'base.service.icon') : Locator::getIconProvider();
+        return (self::class === Locator::class) ? Locator::runtimeGet('obfuscator', 'obfuscator') : Locator::findObfuscator();
     }
 
-    public static function getLocalizer(): ?LocalizerInterface
+    public static function getObfuscator(): Obfuscator
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('localizer', 'localizer') : Locator::getLocalizer();
+        return self::findObfuscator() ?? throw MissingContractException::for(Obfuscator::class);
     }
 
-    public static function getRouter(): ?AdvancedRouterInterface
+    public static function findIconProvider(): ?IconProvider
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('router', 'advanced_router') : Locator::getRouter();
+        return (self::class === Locator::class) ? Locator::runtimeGet('iconProvider', 'base.service.icon') : Locator::findIconProvider();
     }
 
-    public static function getFirewallMap(): ?FirewallMapInterface
+    public static function getIconProvider(): IconProvider
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('firewallMap', 'security.firewall.map') : Locator::getFirewallMap();
+        return self::findIconProvider() ?? throw MissingContractException::for(IconProvider::class);
     }
 
-    public static function getTwig(): ?Environment
+    public static function findLocalizer(): ?LocalizerInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('twig', 'twig') : Locator::getTwig();
+        return (self::class === Locator::class) ? Locator::runtimeGet('localizer', 'localizer') : Locator::findLocalizer();
     }
 
-    public static function getNotifier(): ?BaseNotifierInterface
+    public static function getLocalizer(): LocalizerInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('notifier', 'base.notifier') : Locator::getNotifier();
+        return self::findLocalizer() ?? throw MissingContractException::for(LocalizerInterface::class);
     }
 
-    public static function getTranslator(): ?TranslatorInterface
+    public static function findNotifier(): ?BaseNotifierInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('translator', 'translator') : Locator::getTranslator();
+        return (self::class === Locator::class) ? Locator::runtimeGet('notifier', 'base.notifier') : Locator::findNotifier();
     }
 
-    public static function getSlugger(): ?SluggerInterface
+    public static function getNotifier(): BaseNotifierInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('slugger', 'slugger') : Locator::getSlugger();
+        return self::findNotifier() ?? throw MissingContractException::for(BaseNotifierInterface::class);
     }
 
-    public static function getTrading(): ?TradingInterface
+    public static function findTranslator(): ?TranslatorInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('tradingMarket', 'trading_market') : Locator::getTrading();
+        return (self::class === Locator::class) ? Locator::runtimeGet('translator', 'translator') : Locator::findTranslator();
+    }
+
+    public static function getTranslator(): TranslatorInterface
+    {
+        return self::findTranslator() ?? throw MissingContractException::for(TranslatorInterface::class);
+    }
+
+    public static function findTrading(): ?TradingInterface
+    {
+        return (self::class === Locator::class) ? Locator::runtimeGet('tradingMarket', 'trading_market') : Locator::findTrading();
+    }
+
+    public static function getTrading(): TradingInterface
+    {
+        return self::findTrading() ?? throw MissingContractException::for(TradingInterface::class);
     }
 
     /**
-     * @param string $key
-     * @param array|null $bag
+     * The parameters contract when the registry has it (C9): under Symfony the same
+     * `parameter_bag` (the settings stored in the database over the container's).
+     */
+    public static function findParameterBag(): ?ParameterBagInterface
+    {
+        return Runtime::find(ParameterBagInterface::class)
+            ?? (self::class === Locator::class ? Locator::runtimeGet('parameterBag', 'parameter_bag') : Locator::findParameterBag());
+    }
+
+    /**
+     * The application's parameters, or one of them by its dotted path (null when it has
+     * no such key); MissingContractException when the host has no parameters at all.
+     *
      * @return array|ParameterBagInterface|bool|float|int|string|\UnitEnum|null
      */
     public static function getParameterBag(string $key = "", ?array $bag = null)
     {
-        // The parameters contract when the registry has it (C9): under Symfony the same
-        // `parameter_bag` (the settings stored in the database over the container's).
-        $parameterBag = Runtime::find(ParameterBagInterface::class)
-            ?? (self::class === Locator::class ? Locator::runtimeGet('parameterBag', 'parameter_bag') : Locator::getParameterBag());
+        $parameterBag = self::findParameterBag() ?? throw MissingContractException::for(ParameterBagInterface::class);
 
-        return $key ? $parameterBag?->get($key, $bag) : $parameterBag;
+        return $key ? $parameterBag->get($key, $bag) : $parameterBag;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Base\Contract;
 
+use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Bridge\Symfony\RouterRoutes;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
@@ -35,7 +36,7 @@ final class RoutesTest extends KernelTestCase
     /** @return list<array{string, array<string, mixed>}> routes of the core, one with icons */
     private static function routes(): array
     {
-        $router = BaseService::getRouter();
+        $router = FrameworkLocator::router();
         $routes = [];
         foreach ([['security_login', []], ['user_profile', []], ['short_redirect', ['slug' => 'x7Kq2']], ['user_settings', []]] as [$name, $parameters]) {
             if (null !== $router->getRouteCollection()->get($name)) {
@@ -62,7 +63,7 @@ final class RoutesTest extends KernelTestCase
 
     public function testDeclaredPathsAndIconsAreTheRoutersOfBefore(): void
     {
-        $router = BaseService::getRouter();
+        $router = FrameworkLocator::router();
         $icons = BaseService::getIconProvider();
         $withIcons = 0;
         foreach (self::routes() as [$name, $parameters]) {
@@ -99,7 +100,7 @@ final class RoutesTest extends KernelTestCase
 
     public function testARouteWidgetsLinksAreTheRoutersAddresses(): void
     {
-        $router = BaseService::getRouter();
+        $router = FrameworkLocator::router();
         foreach (self::routes() as [$name, $parameters]) {
             $widget = new Route('A route', $name, $parameters);
             foreach ([Link::ABSOLUTE_URL, Link::ABSOLUTE_PATH, Link::RELATIVE_PATH, Link::NETWORK_PATH] as $type) {

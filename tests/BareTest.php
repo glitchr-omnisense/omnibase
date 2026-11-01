@@ -583,6 +583,11 @@ final class BareTest extends TestCase
         self::assertSame([], $run['framework']);
         self::assertSame([], $run['framework_files']);
         self::assertSame([
+            // BaseTrait with no host (F2f): the service said aloud, its find...() form null.
+            'basetrait, no translator' => 'MissingContractException',
+            'basetrait, no translator, optional' => null,
+            'basetrait, no parameters' => 'MissingContractException',
+            'basetrait, no parameters, optional' => null,
             // Nouns: EntityNouns over a Translations with exists(), a bundle's entity by its namespace.
             'thread, no Nouns' => 'MissingContractException',
             'key, thread' => 'thread',
