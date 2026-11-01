@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Omnibridge\Persistence\Lifecycle;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
 class Alias extends AbstractAttribute implements ExtensionOptionInterface
@@ -100,32 +100,19 @@ class Alias extends AbstractAttribute implements ExtensionOptionInterface
 
     protected static int $i = 0;
 
-    /**
-     * @param LifecycleEventArgs $event
-     * @param ClassMetadata $classMetadata
-     * @param $entity
-     * @param string|null $property
-     * @return void
-     */
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    /** The neutral hooks (plan "omnibase agnostic", step F2c): the alias bound to its column. */
+    public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
     {
-        $column = $this->column;
-        $alias = $property ?? $this->alias;
-
-        $this->bind($entity, $column, $alias);
+        $this->bind($event->entity, $this->column, $property ?? $this->alias);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
-        $column = $this->column;
-        $alias = $property ?? $this->alias;
-        $this->bind($entity, $column, $alias);
+        $this->bind($event->entity, $this->column, $property ?? $this->alias);
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
-        $column = $this->column;
-        $alias = $property ?? $this->alias;
-        $this->bind($entity, $column, $alias);
+        $this->bind($event->entity, $this->column, $property ?? $this->alias);
     }
 }

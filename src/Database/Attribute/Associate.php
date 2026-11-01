@@ -5,8 +5,8 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Base\Database\Mapping\EntityShapes;
+use Omnibridge\Persistence\Lifecycle;
 use Exception;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -38,32 +38,49 @@ class Associate extends AbstractAttribute implements ExtensionOptionInterface
         return ($target == AttributeReader::TARGET_PROPERTY);
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /**
+     * The neutral hooks (plan "omnibase agnostic", step F2c): before a write, an associated entity kept as
+     * its identifier and its root class; after, the entity read back by that identifier.
+     */
+    public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
-        $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->toIdentifier($event, $event->entity, $property);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
-        $this->preLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->toIdentifier($event, $event->entity, $property);
     }
 
-    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPostUpdate(Lifecycle\PostUpdate $event, ?string $property = null): void
     {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->toEntity($event, $event->entity, $property);
     }
 
-    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPostPersist(Lifecycle\PostPersist $event, ?string $property = null): void
     {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->toEntity($event, $event->entity, $property);
     }
 
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
     {
-        $this->postLifecycleEvent($event, $classMetadata, $entity, $property);
+        $this->toEntity($event, $event->entity, $property);
     }
 
-    public function preLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /** The root class of an entity (or an entity's class), null for anything else. */
+    protected function rootOf(Lifecycle\EntityEvent $event, mixed $reference): ?string
+    {
+        if (!\is_object($reference) && !\is_string($reference)) {
+            return null;
+        }
+
+        $shapes = $this->backend($event, EntityShapes::class);
+
+        return $shapes->has($reference) ? $shapes->shape($reference)->rootClass() : null;
+    }
+
+    /** Formerly preLifecycleEvent(), which took Doctrine's event and metadata. */
+    protected function toIdentifier(Lifecycle\EntityEvent $event, object $entity, ?string $property): void
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
@@ -75,14 +92,10 @@ class Associate extends AbstractAttribute implements ExtensionOptionInterface
             $reference = $value;
         }
 
-        $metadata = null;
-        if ($this->getClassMetadataManipulator()->isEntity($reference)) {
-            $metadata = $this->getClassMetadata($this->getClassMetadata($reference)->rootEntityName);
-        }
-
-        if ($metadata) {
-            $reference = class_exists($this->metadata) ? $this->metadata : $metadata->name;
-            if ($metadata->name == $reference) {
+        $root = $this->rootOf($event, $reference);
+        if ($root) {
+            $reference = class_exists($this->metadata) ? $this->metadata : $root;
+            if ($root == $reference) {
                 if (is_array($value)) {
                     $value = array_map(fn($v) => is_object($v) ? $v->getId() : $v, $value);
                 } else {
@@ -93,11 +106,12 @@ class Associate extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         if ($this->metadata && $propertyAccessor->isReadable($entity, $this->metadata)) {
-            $propertyAccessor->setValue($entity, $this->metadata, $metadata?->name);
+            $propertyAccessor->setValue($entity, $this->metadata, $root);
         }
     }
 
-    public function postLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    /** Formerly postLifecycleEvent(), which took Doctrine's event and metadata. */
+    protected function toEntity(Lifecycle\EntityEvent $event, object $entity, ?string $property): void
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
@@ -106,7 +120,8 @@ class Associate extends AbstractAttribute implements ExtensionOptionInterface
             $className = $propertyAccessor->getValue($entity, $this->metadata);
         }
 
-        $repository = $this->getClassMetadataManipulator()->isEntity($className) ? $this->getRepository($this->getClassMetadata($className)->rootEntityName) : null;
+        $root = $this->rootOf($event, $className);
+        $repository = $root ? $this->getRepository($root) : null;
         if (!$repository) {
             return;
         }

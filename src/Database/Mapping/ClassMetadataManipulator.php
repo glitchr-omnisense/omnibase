@@ -4,6 +4,7 @@ namespace Base\Database\Mapping;
 
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Bridge\Doctrine\DoctrineShapes;
 use Base\Bridge\Doctrine\EnumTypeAdapter;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
@@ -27,6 +28,7 @@ use Base\Database\Mapping\ClassMetadataFactory;
 use Doctrine\ORM\Mapping\AssociationMapping;
 use Doctrine\ORM\Mapping\FieldMapping;
 use Doctrine\Persistence\Proxy;
+use Omnibridge\Schema\Relation;
 use RuntimeException;
 
 use Doctrine\ORM\Mapping\OwningSideMapping;
@@ -75,6 +77,40 @@ class ClassMetadataManipulator extends AbstractLocalCache
             parent::__construct(self::$cacheDir, self::$buildDir);
         }
     }
+
+    /** The entities' shapes as this entity manager maps them (plan "omnibase agnostic", step F2c). */
+    public function getShapes(): EntityShapes
+    {
+        return $this->shapes ??= new DoctrineShapes($this->getEntityManager());
+    }
+
+    protected ?EntityShapes $shapes = null;
+
+    /**
+     * The shape of an entity or an entity class, null for anything else - a ClassMetadata too: the mapping
+     * hooks give one while it is being built, read as it stands.
+     */
+    public function getShape(null|string|object $entityOrClass): ?EntityShape
+    {
+        if (null === $entityOrClass || $entityOrClass instanceof ClassMetadata) {
+            return null;
+        }
+        if (is_string($entityOrClass) && !class_exists($entityOrClass)) {
+            return null;
+        }
+
+        $shapes = $this->getShapes();
+
+        return $shapes->has($entityOrClass) ? $shapes->shape($entityOrClass) : null;
+    }
+
+    /** Doctrine's numbers of the association kinds (ClassMetadata::ONE_TO_ONE...), as getAssociationType() answers. */
+    protected const ASSOCIATION_TYPES = [
+        Relation::ONE_TO_ONE => ClassMetadata::ONE_TO_ONE,
+        Relation::MANY_TO_ONE => ClassMetadata::MANY_TO_ONE,
+        Relation::ONE_TO_MANY => ClassMetadata::ONE_TO_MANY,
+        Relation::MANY_TO_MANY => ClassMetadata::MANY_TO_MANY,
+    ];
 
     public function getEntityManager(): EntityManagerInterface
     {
@@ -1183,6 +1219,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function isOwningSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
+        if ($shape = $this->getShape($entityOrClassOrMetadata)) {
+            return $shape->isOwningSide($this->getFieldName($entityOrClassOrMetadata, $fieldName) ?? $fieldName);
+        }
+
         if (!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
             return false;
         }
@@ -1197,6 +1237,10 @@ class ClassMetadataManipulator extends AbstractLocalCache
 
     public function isInverseSide(null|string|object $entityOrClassOrMetadata, string $fieldName): bool
     {
+        if ($shape = $this->getShape($entityOrClassOrMetadata)) {
+            return $shape->isInverseSide($this->getFieldName($entityOrClassOrMetadata, $fieldName) ?? $fieldName);
+        }
+
         if (!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
             return false;
         }
@@ -1257,6 +1301,12 @@ class ClassMetadataManipulator extends AbstractLocalCache
      */
     public function getAssociationType(null|string|object $entityOrClassOrMetadata, string $fieldName)
     {
+        if ($shape = $this->getShape($entityOrClassOrMetadata)) {
+            $kind = $shape->associationKind($this->getFieldName($entityOrClassOrMetadata, $fieldName) ?? $fieldName);
+
+            return null === $kind ? false : self::ASSOCIATION_TYPES[$kind];
+        }
+
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if (!$classMetadata) {
             return false;

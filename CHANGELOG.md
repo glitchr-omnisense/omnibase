@@ -10,6 +10,27 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the entity's shape (2026-11-01)
+
+Plan "omnibase agnostic", step F2c. See docs/20-architecture/doctrine.md.
+
+- `Base\Database\Mapping\EntityShape`: what the core reads of an entity's mapping - class, root,
+  identifier, fields and their types, associations (kind, side, target, mappedBy/inversedBy),
+  discriminator - one `Omnibridge\Schema\Entity` of the Description. `EntityShapes` gives them:
+  `DescriptionShapes` (from a Description, no ORM), `Base\Bridge\Doctrine\DoctrineShapes` (each
+  class's metadata through omnibridge/doctrine's `MetadataDescription`, registered for
+  `DoctrineUnitOfWork` in `Backends`). `AbstractAttribute::shape($event, $class)`.
+- `#[Alias]`, `#[Associate]` and `#[OrderColumn]` answer the neutral hooks and read the shape; their
+  Doctrine-typed hooks are gone. `Associate::preLifecycleEvent()`/`postLifecycleEvent()` are
+  `toIdentifier()`/`toEntity()`. OrderColumn's lazy ordering of a PersistentCollection is
+  `OrderColumnBackend` (`DoctrineOrderColumnBackend`), the rest sorts at once; it reads a parent's
+  private property where it is declared.
+- `ClassMetadataManipulator::getShapes()`, `getShape()`; `getAssociationType()` (so `isToManySide()`
+  and the other kinds), `isOwningSide()` and `isInverseSide()` read the shape for an entity or a class,
+  the metadata as it stands for a `ClassMetadata` (the mapping hooks give one while it is built).
+  `EntityHydrator`'s defaults, `fromProxy()` and `getOriginalEntityData()` read the shape.
+- Agnostic core 660 -> 664, Foundation 873 -> 877.
+
 ### Added: the behaviours' persistence parts, the listeners' logic apart (2026-11-01)
 
 Plan "omnibase agnostic", step F2b (second part). See docs/20-architecture/doctrine.md.
