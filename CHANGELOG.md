@@ -50,8 +50,8 @@ and take nothing away when it is not; the view engine is the application's choic
 - **bare**: on `var/bare/vendor`, which has no Twig any more, a class of `src/Twig` that cannot
   load for want of Twig's is reported `"optional": "twig/twig"`, not as a failure; every other class
   is measured as before (`BareTest::testTwigIsOptional`), and the helpers run there under `--strict`
-  (`testTheViewHelpersWorkWithoutTwig`, tests/View/helpers-without-twig.php). Foundation 865 -> 881,
-  agnostic core 652 -> 669.
+  (`testTheViewHelpersWorkWithoutTwig`, tests/View/helpers-without-twig.php). Foundation 873 -> 889,
+  agnostic core 660 -> 677.
 - `MediaService` and `FileService` take Twig's environment as optional (`?Environment`): the file
   and image rules need none, only the media tags (audio(), video(), imagify(), lightbox()), which
   refuse aloud without it; tests/Service/media-without-framework.php builds MediaService with none.

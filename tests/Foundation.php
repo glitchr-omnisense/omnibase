@@ -158,7 +158,8 @@
  * 864 after step F1 of the plan "omnibase agnostic" (2026-11-01, +4: the finder language without Doctrine -
  * Base\Database\Repository\Finder\{Parser, Query, Criterion, Subject}).
  * 865 after step F2a (+1: Base\Database\Type\Enumerations, the enumerations by the name of their type).
- * 881 after step F4 (+16: the neutral view helpers Base\View\* - Formats, Captions, Dates, Money, Pagination,
+ * 873 after step F2b (+8: the listeners' logic and the behaviours' backends, see CHANGELOG.md).
+ * 889 after step F4 (+16: the neutral view helpers Base\View\* - Formats, Captions, Dates, Money, Pagination,
  * Links, Enums, Menus, Bell, Pictures, Commons, Wysiwyg, Demo, DeployVersion, Widgets and the AssetPaths contract -,
  * the logic of omnibase's Twig functions and filters for every view technology). Twig is a suggestion of the core
  * since then: on var/bare/vendor, where it is not installed, the classes of src/Twig that extend Twig's are
