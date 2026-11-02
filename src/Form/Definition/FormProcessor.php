@@ -152,9 +152,11 @@ final class FormProcessor
         if (\is_object($binding->data)) {
             foreach ($this->validation->validate($binding->data, [], $groups) as $violation) {
                 $field = preg_split('/[.\[]/', $violation->path, 2)[0] ?? '';
-                if (!isset($unread[$field])) {
-                    $violations[] = $violation;
+                if (isset($unread[$field])) {
+                    continue;
                 }
+                // The data's rule on a field that gives its errors to the form (Symfony's error_bubbling).
+                $violations[] = $form->has($field) && true === $form->get($field)->getOption('error_bubbling') ? new Violation('', $violation->message, $violation->code, $violation->parameters) : $violation;
             }
         }
 
