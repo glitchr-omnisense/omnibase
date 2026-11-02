@@ -23,6 +23,7 @@ use Omnibridge\Contract\Requests;
 use Omnibridge\Contract\Urls;
 use Omnibridge\Contract\Views;
 use Omnibridge\Runtime;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Omnibridge\Persistence\UnitOfWork;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -214,7 +215,7 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
      * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
      * @param Views|Environment                 $views      Twig's environment is deprecated (until 6.0): wrapped in omnibridge/twig's TwigViews
      */
-    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork|EntityManagerInterface $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface|Urls $router, Views|Environment $views, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork|EntityManagerInterface $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, #[Autowire(service: 'advanced_router')] AdvancedRouterInterface|Urls $router, Views|Environment $views, SettingBag $settingBag, bool $debug = false)
     {
         $this->views = EmailComposer::views($views);
         $this->twig = $views instanceof Environment ? $views : null;
