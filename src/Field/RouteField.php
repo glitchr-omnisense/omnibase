@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\RouteType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -16,7 +15,7 @@ class RouteField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/select')
-            ->setFormType(RouteType::class)
+            ->setKind(Kind::ROUTE)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)

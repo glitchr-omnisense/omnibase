@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\IconType;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
@@ -17,7 +16,7 @@ class IconField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/icon')
-            ->setFormType(IconType::class)
+            ->setKind(Kind::ICON)
             ->setTextAlign(TextAlign::CENTER);
     }
 

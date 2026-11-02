@@ -2,6 +2,7 @@
 
 namespace Base;
 
+use Base\Form\Definition\FormProcessor;
 use Base\Notifier\Mail\EmailComposer;
 use Base\Screen\Builder\Stories;
 use Base\Service\MediaService;
@@ -80,6 +81,8 @@ final class Services
             ['class' => Stories::class],
             // omnibase's e-mails, written through Views the same way under every host; the sender the technical address.
             ['class' => EmailComposer::class, 'arguments' => ['$from' => '%base.notifier.technical_recipient.email%']],
+            // The neutral form layer's processing (bind, token, validation, unit of work): each contract optional.
+            ['class' => FormProcessor::class],
         ];
     }
 }

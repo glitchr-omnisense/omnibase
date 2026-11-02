@@ -93,6 +93,35 @@ trait FieldTrait
         return $this;
     }
 
+    /** The field's neutral kind (Kind::TEXT, Kind::CHOICE...): what every host renders it by. */
+    public function setKind(string $kind): static
+    {
+        $this->dto->setKind($kind);
+        return $this;
+    }
+
+    /** Constraints the field's value is checked against, beside those of the data's class. */
+    public function addConstraint(object ...$constraints): static
+    {
+        $this->dto->addConstraint(...$constraints);
+        return $this;
+    }
+
+    /** Options as plain data, "." paths supported: setFormTypeOptions() by its neutral name. */
+    public function setOptions(array $options): static
+    {
+        return $this->setFormTypeOptions($options);
+    }
+
+    public function setOption(string $optionName, mixed $optionValue): static
+    {
+        return $this->setFormTypeOption($optionName, $optionValue);
+    }
+
+    /**
+     * Names a Symfony form type directly (Symfony only, the escape hatch): a
+     * field no kind describes. Prefer setKind().
+     */
     public function setFormType(string $formTypeFqcn): static
     {
         $this->dto->setFormType($formTypeFqcn);

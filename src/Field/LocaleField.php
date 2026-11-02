@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\LocaleType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
@@ -26,7 +25,7 @@ class LocaleField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/country')
-            ->setFormType(LocaleType::class)
+            ->setKind(Kind::LOCALE)
             ->addCssClass('field-locale')
             ->setDefaultColumns('col-md-5 col-xxl-4')
             ->setCustomOption(self::OPTION_SHOW_CODE, false)

@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class IntegerField implements FieldInterface
@@ -15,7 +14,7 @@ class IntegerField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(IntegerType::class)
+            ->setKind(Kind::INTEGER)
             ->addCssClass('field-integer')
             ->setDefaultColumns('col-md-4 col-xxl-3');
     }

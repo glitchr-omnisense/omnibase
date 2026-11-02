@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\MoneyType;
 use Base\Field\Option\TextAlign;
 use Symfony\Component\Intl\Currencies;
 
@@ -25,7 +24,7 @@ final class MoneyField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/money')
-            ->setFormType(MoneyType::class)
+            ->setKind(Kind::MONEY)
             ->addCssClass('field-money')
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_CURRENCY, null)

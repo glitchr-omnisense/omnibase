@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\PasswordType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class PasswordField implements FieldInterface
@@ -15,7 +14,7 @@ final class PasswordField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(PasswordType::class)
+            ->setKind(Kind::PASSWORD)
             ->addCssClass('field-password');
     }
 

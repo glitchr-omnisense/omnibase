@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
@@ -18,7 +17,7 @@ final class YearField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/year')
-            ->setFormType(IntegerType::class)
+            ->setKind(Kind::YEAR)
             ->addCssClass('field-integer');
     }
 }

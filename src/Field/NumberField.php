@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\NumberType;
 
 final class NumberField implements FieldInterface
 {
@@ -28,7 +27,7 @@ final class NumberField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/number')
-            ->setFormType(NumberType::class)
+            ->setKind(Kind::NUMBER)
             ->addCssClass('field-number')
             ->setDefaultColumns(3)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)

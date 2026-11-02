@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\ForexType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -16,7 +15,7 @@ class ForexField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/icon')
-            ->setFormType(ForexType::class)
+            ->setKind(Kind::FOREX)
             ->setTextAlign(TextAlign::CENTER);
     }
 }

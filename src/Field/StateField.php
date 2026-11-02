@@ -3,7 +3,6 @@
 namespace Base\Field;
 
 use Base\Enum\ThreadState;
-use Base\Field\Type\StateType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -17,7 +16,7 @@ class StateField extends SelectField
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/select')
-            ->setFormType(StateType::class)
+            ->setKind(Kind::STATE)
             ->setCustomOption(self::OPTION_CLASS, ThreadState::class)
             // The badge template (crud/field/select) resolves a value's
             // icon, colour and translated label from OPTION_ENUM_CLASS -

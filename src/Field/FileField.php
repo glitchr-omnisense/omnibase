@@ -2,8 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\FileType;
-use Base\Field\Type\ImageType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -25,7 +23,7 @@ class FileField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/file')
-            ->setFormType(FileType::class)
+            ->setKind(Kind::FILE)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)
@@ -119,7 +117,7 @@ class FileField implements FieldInterface
     public function renderAsImage(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, 'image')
-            ->setFormType(ImageType::class);
+            ->setKind(Kind::IMAGE);
 
         return $this;
     }

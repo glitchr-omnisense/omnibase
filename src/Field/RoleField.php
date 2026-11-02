@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\RoleType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -14,7 +13,7 @@ class RoleField extends SelectField
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/select')
-            ->setFormType(RoleType::class)
+            ->setKind(Kind::ROLE)
             ->setCustomOption(SelectField::OPTION_CLASS, $enumClass = class_exists('App\\Enum\\UserRole') ? 'App\\Enum\\UserRole' : 'Base\\Enum\\UserRole')
             // Both spellings on purpose - see StateField::new()'s own
             // comment: OPTION_CLASS is the form side, OPTION_ENUM_CLASS is

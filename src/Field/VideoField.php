@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\VideoType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -16,7 +15,7 @@ class VideoField extends FileField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/file')
-            ->setFormType(VideoType::class)
+            ->setKind(Kind::VIDEO)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)

@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\ColorPickerType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -17,6 +16,6 @@ final class ColorPickerField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/color')
-            ->setFormType(ColorPickerType::class);
+            ->setKind(Kind::COLOR_PICKER);
     }
 }

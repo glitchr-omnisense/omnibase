@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\QuadrantType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -27,7 +26,7 @@ final class QuadrantField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/select')
-            ->setFormType(QuadrantType::class)
+            ->setKind(Kind::QUADRANT)
             ->addCssClass('field-quadrant')
             ->addCssClass('quadrant-widget')
             ->setTextAlign(TextAlign::CENTER)

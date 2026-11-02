@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class DateField implements FieldInterface
@@ -15,7 +14,7 @@ class DateField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/date')
-            ->setFormType(DateType::class)
+            ->setKind(Kind::DATE)
             ->setFormTypeOption('widget', 'single_text')
             ->addCssClass('field-date')
             ->setDefaultColumns('col-md-4 col-xxl-3');

@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\StockType;
 
 final class StockField implements FieldInterface
 {
@@ -24,7 +23,7 @@ final class StockField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/stock')
-            ->setFormType(StockType::class)
+            ->setKind(Kind::STOCK)
             ->addCssClass('field-stock')
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
             ->setCustomOption(self::OPTION_ALLOW_INFINITY, false)

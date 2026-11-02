@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\BooleanType;
 use Base\Field\Option\TextAlign;
 
 final class BooleanField implements FieldInterface
@@ -26,7 +25,7 @@ final class BooleanField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/boolean')
-            ->setFormType(BooleanType::class)
+            ->setKind(Kind::BOOLEAN)
             ->addCssClass('field-boolean')
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_RENDER_AS_SWITCH, true)

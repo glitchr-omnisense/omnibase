@@ -2,7 +2,7 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\CountryType;
+use Base\Field\Choice\Countries;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class CountryField extends SelectField implements FieldInterface
@@ -15,8 +15,8 @@ class CountryField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/country')
-            ->setFormType(CountryType::class)
-            ->setChoices(CountryType::getChoices())
+            ->setKind(Kind::COUNTRY)
+            ->setChoices(Countries::getChoices())
             ->addCssClass('field-country');
     }
 }

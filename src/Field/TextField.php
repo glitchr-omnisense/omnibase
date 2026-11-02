@@ -3,7 +3,6 @@
 namespace Base\Field;
 
 use InvalidArgumentException;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class TextField implements FieldInterface
@@ -24,7 +23,7 @@ class TextField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(TextType::class)
+            ->setKind(Kind::TEXT)
             ->addCssClass('field-text')
             ->setDefaultColumns('col-md-6 col-xxl-5')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null)

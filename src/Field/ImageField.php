@@ -4,7 +4,6 @@ namespace Base\Field;
 
 use Base\Field\Option\TextAlign;
 
-use Base\Field\Type\ImageType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class ImageField extends FileField implements FieldInterface
@@ -17,7 +16,7 @@ class ImageField extends FileField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/file')
-            ->setFormType(ImageType::class)
+            ->setKind(Kind::IMAGE)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)

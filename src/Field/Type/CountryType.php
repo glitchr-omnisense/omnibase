@@ -4,91 +4,41 @@ namespace Base\Field\Type;
 
 use Base\Entity\User;
 use Base\Service\Model\SelectInterface;
-use Symfony\Component\Intl\Countries;
+use Base\Field\Choice\Countries;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 class CountryType extends SelectType implements SelectInterface
 {
-    private static array $additionalList = [];
-    private static array $rejectCountryList = [ // Rejected just because missing flag.. to do later
-        "AO", "AI", "AQ", "AW", "BM", "CW", "GS", "GI", "GL",
-        "GP", "GU", "GG", "GF", "BV", "CX", "IM", "NF", "AX",
-        "KY", "CC", "CK", "FO", "HM", "FK", "MP", "UM", "PN",
-        "TC", "VG", "VI", "JE", "RE", "MQ", "YT", "MS", "NU",
-        "NC", "BQ", "PF", "MO", "EH", "BL", "MF", "SX", "PM",
-        "SH", "AS", "SJ", "TF", "IO", "TK", "WF",
-    ];
-
-    // A way to add countries to the list.. (Another way is shown below using options)
-
-    /**
-     * @param $code
-     * @param $country
-     * @return void
-     */
+    /** @see Countries::addCountry() */
     public static function addCountry($code, $country)
     {
-        self::addCountries([$code => $country]);
+        Countries::addCountry($code, $country);
     }
 
-    /**
-     * @param $array
-     * @return void
-     */
+    /** @see Countries::addCountries() */
     public static function addCountries($array)
     {
-        $countryList = Countries::getNames();
-        foreach ($array as $code => $country) {
-            if (array_key_exists($code, $countryList)) {
-                throw new Exception("Country code \"$code\" ($country) already added in the true country list");
-            }
-            if (array_key_exists($code, self::$additionalList)) {
-                throw new Exception("Country code \"$code\" ($country) already added in the fake country list");
-            }
-
-            self::$additionalList[$code] = $country;
-        }
+        Countries::addCountries($array);
     }
 
-    /**
-     * @param string $code
-     * @return mixed|string
-     */
     public static function getName(string $code)
     {
-        if (array_key_exists($code, self::$additionalList)) {
-            return self::$additionalList[$code];
-        }
         return Countries::getName($code);
     }
 
-    /**
-     * @return array|string[]
-     */
     public static function getNamesWithoutAddons()
     {
-        return self::getNames(true);
+        return Countries::getNamesWithoutAddons();
     }
 
-    /**
-     * @param $addons
-     * @return array|string[]
-     */
     public static function getNames($addons = false)
     {
-        $countryList = Countries::getNames() + ($addons ? self::$additionalList : []);
-        foreach (self::$rejectCountryList as $code) {
-            unset($countryList[$code]);
-        }
-
-        return $countryList;
+        return Countries::getNames($addons);
     }
 
     public static function getChoices(): array
     {
-        return array_flip(self::getNames());
+        return Countries::getChoices();
     }
 
     public static function getIcon(string $id, int $index = -1): ?string

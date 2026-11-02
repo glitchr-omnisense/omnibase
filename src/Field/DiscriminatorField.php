@@ -3,7 +3,6 @@
 namespace Base\Field;
 
 use Base\Field\Option\TextAlign;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class DiscriminatorField extends SelectField implements FieldInterface
@@ -19,7 +18,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label ?? "Type")
             ->setTemplateName('crud/field/select')
-            ->setFormType(HiddenType::class) // To be replaced by DiscriminatorType once ready..
+            ->setKind(Kind::DISCRIMINATOR) // To be replaced by DiscriminatorType once ready..
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_DISCRIMINATOR_AUTOLOAD, false)
