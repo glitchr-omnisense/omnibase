@@ -10,6 +10,16 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: eight of Bridge\Symfony's classes back in the core (plan "omnibase agnostic", step F5c, item 3, slice 5 fix, 2026-11-03)
+
+- `Base\Bridge\Symfony\{NotificationMessages, AccountScreens, SecurityUser, SecurityUserLoader, SecurityUserProvider,
+  TwoFactorUser, PasskeyRecords, PasskeyUsers}` are the core's again, as they were before slice 5: they stand on Symfony's
+  components (security-core, mime, http-foundation), not on its framework, and the core reaches them under any host -
+  `Entity\User\Notification` calls NotificationMessages, the contracts `SecurityUser`, `TwoFactorUser`, the passkeys' and the
+  user loader's alias them where security-core is installed, omnibridge/laravel renders the account pages with
+  AccountScreens. Under Laravel (lesringostars-laravel) slice 5 made a notification's rendering fail ("Class
+  Base\Bridge\Symfony\NotificationMessages not found"). FormerNamesTest 325. The other twelve stay omnibridge/symfony's.
+
 ### Moved: Bridge\Symfony to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 5, 2026-11-03)
 
 - The 20 Symfony adapters of `Base\Bridge\Symfony\*` (the contracts' adapters - `LocalizerLocales`, `MediaPictures`,

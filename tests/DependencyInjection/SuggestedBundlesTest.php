@@ -133,8 +133,8 @@ class SuggestedBundlesTest extends KernelTestCase
         ] as $interface) {
             $this->assertContains($interface, class_implements(UserRepository::class), $interface);
         }
-        $this->assertSame('Omnibridge\\Symfony\\Omnibase\\SecurityUserProvider', (new \ReflectionClass(SecurityUserProvider::class))->getName(), 'the alias of the Symfony side');
-        $this->assertSame('Omnibridge\\Symfony\\Omnibase\\SecurityUserLoader', (new \ReflectionClass(SecurityUserLoader::class))->getName(), 'the alias of the Symfony side');
+        $this->assertSame('Base\\Bridge\\Symfony\\SecurityUserProvider', (new \ReflectionClass(SecurityUserProvider::class))->getName(), 'the alias of the Symfony side');
+        $this->assertSame('Base\\Bridge\\Symfony\\SecurityUserLoader', (new \ReflectionClass(SecurityUserLoader::class))->getName(), 'the alias of the Symfony side');
     }
 
     /**

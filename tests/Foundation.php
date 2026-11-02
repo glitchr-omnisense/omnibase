@@ -215,6 +215,8 @@ return [
     Base\Auth\UserStore::class,
     Base\Auth\UserTotpSecrets::class,
     Base\Auth\UserTrustedVersion::class,
+    Base\Bridge\Symfony\AccountScreens::class,
+    Base\Bridge\Symfony\NotificationMessages::class,
     Base\Cache\Abstract\AbstractLocalCache::class,
     Base\Cache\Abstract\AbstractLocalCacheInterface::class,
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
