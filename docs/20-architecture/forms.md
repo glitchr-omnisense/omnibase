@@ -223,6 +223,19 @@ if ($submission->isValid()) {
 return view('comment', ['form' => $submission->createView()]);   // the values sent, their errors, a token
 ```
 
+### What a host does once a form holds (step F5c)
+
+- An empty string a definition gives as its empty data (`setEmptyData('')`) stays a string, as Symfony's
+  `TextType` keeps it, whether the field came empty or not at all (Laravel sends an empty field as null).
+- What the binder could not read ("The values do not match.") is said in the page's language: the
+  `validators` domain, when the processor has `Translations`.
+- A record's uniqueness declared without its class (`#[UniqueEntity(fields: ['email'])]` on the entity) is
+  looked up among the records of the form's validation entity.
+- A refusal the code that keeps the data gives (a spam, a record not found) is added to the submission:
+  `$submission->withError($message, $field)`, a new submission, as Symfony's `addError()`.
+- A sign-up once its form holds is `Base\Auth\Registration::register()` on every host (approved, its
+  password, named after its address when its class has a username left empty, kept); the host signs it in.
+
 ### The Symfony adapter (omnibridge/symfony)
 
 The Symfony half of the form layer lives in `Omnibridge\Symfony\Omnibase\` since F5b, each class under its

@@ -72,7 +72,8 @@ trait BaseTrait
 
     public static function findSettingBag(): ?SettingBag
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('settings', 'setting_bag') : Locator::findSettingBag();
+        return Runtime::find(SettingBag::class)
+            ?? ((self::class === Locator::class) ? Locator::runtimeGet('settings', 'setting_bag') : Locator::findSettingBag());
     }
 
     public static function getSettingBag(): SettingBag
@@ -141,7 +142,8 @@ trait BaseTrait
 
     public static function findEntityHydrator(): ?EntityHydratorInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('entityHydrator', 'base.database.entity_hydrator') : Locator::findEntityHydrator();
+        return Runtime::find(EntityHydratorInterface::class)
+            ?? ((self::class === Locator::class) ? Locator::runtimeGet('entityHydrator', 'base.database.entity_hydrator') : Locator::findEntityHydrator());
     }
 
     public static function getEntityHydrator(): EntityHydratorInterface
@@ -168,7 +170,8 @@ trait BaseTrait
 
     public static function findObfuscator(): ?Obfuscator
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('obfuscator', 'obfuscator') : Locator::findObfuscator();
+        return Runtime::find(Obfuscator::class)
+            ?? ((self::class === Locator::class) ? Locator::runtimeGet('obfuscator', 'obfuscator') : Locator::findObfuscator());
     }
 
     public static function getObfuscator(): Obfuscator
@@ -188,7 +191,8 @@ trait BaseTrait
 
     public static function findLocalizer(): ?LocalizerInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('localizer', 'localizer') : Locator::findLocalizer();
+        return Runtime::find(LocalizerInterface::class)
+            ?? ((self::class === Locator::class) ? Locator::runtimeGet('localizer', 'localizer') : Locator::findLocalizer());
     }
 
     public static function getLocalizer(): LocalizerInterface
@@ -198,7 +202,8 @@ trait BaseTrait
 
     public static function findNotifier(): ?BaseNotifierInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('notifier', 'base.notifier') : Locator::findNotifier();
+        return Runtime::find(BaseNotifierInterface::class)
+            ?? ((self::class === Locator::class) ? Locator::runtimeGet('notifier', 'base.notifier') : Locator::findNotifier());
     }
 
     public static function getNotifier(): BaseNotifierInterface
@@ -208,7 +213,8 @@ trait BaseTrait
 
     public static function findTranslator(): ?TranslatorInterface
     {
-        return (self::class === Locator::class) ? Locator::runtimeGet('translator', 'translator') : Locator::findTranslator();
+        return Runtime::find(TranslatorInterface::class)
+            ?? ((self::class === Locator::class) ? Locator::runtimeGet('translator', 'translator') : Locator::findTranslator());
     }
 
     public static function getTranslator(): TranslatorInterface

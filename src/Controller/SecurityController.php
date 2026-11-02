@@ -3,6 +3,7 @@
 namespace Base\Controller;
 
 use App\Entity\User;
+use Base\Auth\Registration;
 
 use Base\Database\UnitOfWorks;
 use Base\Entity\User\Notification;
@@ -310,7 +311,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route("/register", name: "security_register")]
-    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response
+    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, Registration $registration): Response
     {
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent()) {
@@ -325,27 +326,11 @@ class SecurityController extends AbstractController
             'validation_groups' => ['new'],
             'validation_entity' => User::class
         ])
-            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator) {
-                
-                $newUser = $formProcessor->hydrate((new User()));
+            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator, $registration) {
 
-                // An account might require to be verified by an admin
-                $adminApprovalRequired = !$this->parameterBag->get("base.user.register.autoapprove") ?? false;
-                $newUser->approve(!$adminApprovalRequired);
-                $newUser->setPlainPassword($formProcessor->getData("plainPassword"));
-                $this->nameAccount($newUser);
-
-                // Social account connection
-                if (($user = $this->getUser()) && $user->isVerified()) {
-                    $newUser->verify($user->isVerified());
-                }
-
-                if ($newUser->isVerified() && $this->parameterBag->get("base.user.register.notify_admins")) {
-                    $this->notifier->sendUserApprovalRequest($newUser);
-                }
-
-                $this->unitOfWork->persist($newUser);
-                $this->unitOfWork->flush();
+                // Approved, its password, named, kept: the same on every host (Base\Auth\Registration).
+                $signedIn = $this->getUser();
+                $newUser = $registration->register($formProcessor->hydrate((new User())), $formProcessor->getData("plainPassword"), $signedIn instanceof User ? $signedIn : null);
 
                 $rememberMeBadge = new RememberMeBadge();
                 $rememberMeBadge->enable();
@@ -387,35 +372,6 @@ class SecurityController extends AbstractController
         }
 
         return false;
-    }
-
-    /**
-     * An application's User usually carries a username - a column of its own,
-     * unique and not null - which the sign-up form does not ask for: the
-     * account was inserted without one and the sign-up answered 500. It is
-     * given the local part of its address, numbered when somebody has it
-     * ("anne", "anne2"), as an invitation's or a demonstration's account is
-     * named. A form that asks for a username (an application's own type)
-     * keeps what was typed; a User without that column is left alone.
-     */
-    private function nameAccount(User $user): void
-    {
-        if (!method_exists($user, "setUsername") || !method_exists($user, "getUsername")) {
-            return;
-        }
-        if (!UnitOfWorks::shapes($this->unitOfWork)->shape($user)->hasField("username") || trim((string) $user->getUsername()) !== "") {
-            return;
-        }
-
-        $base = preg_replace('/[^\p{L}\p{N}._-]+/u', "", mb_strtolower((string) strstr($user->getEmail() . "@", "@", true)));
-        $base = mb_substr($base !== "" && $base !== null ? $base : "user", 0, 200);
-
-        $username = $base;
-        for ($n = 2; $this->userRepository->findOneBy(["username" => $username]); ++$n) {
-            $username = $base . $n;
-        }
-
-        $user->setUsername($username);
     }
 
     #[Route("/verify-email", name: "security_verifyEmail")]

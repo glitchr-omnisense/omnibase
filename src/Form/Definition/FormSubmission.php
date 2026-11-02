@@ -74,6 +74,16 @@ final class FormSubmission
         return false;
     }
 
+    /**
+     * The same submission refused with one more error: what the code that keeps the data says once
+     * the form holds (a spam, a record not found), as Symfony's FormInterface::addError() adds it. A
+     * field's name, or '' for the form's own.
+     */
+    public function withError(string $message, string $field = ''): self
+    {
+        return new self($this->form, $this->submitted, $this->data, $this->values, [...$this->violations, new Violation($field, $message)], $this->clicked, $this->persisted, $this->token);
+    }
+
     /** The view to render again: the values sent, their errors, a fresh token. */
     public function createView(?string $token = null): FormView
     {
