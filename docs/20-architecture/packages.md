@@ -94,7 +94,9 @@ the patch.
 
 Nothing else is changed in an application: its `bin/console` keeps its own line,
 `use Base\Console\Application;` in place of FrameworkBundle's (glitchr/base-plugin
-used to rewrite it at each install; a site made from the skeleton writes it once).
+used to rewrite it at each install; a site made from the skeleton writes it once). The class is
+omnibridge/symfony's `Omnibridge\Symfony\Omnibase\Console\Application` since step F5c; its former name
+stays aliased until 6.0.
 
 ### None required de facto
 

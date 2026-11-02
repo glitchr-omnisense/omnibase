@@ -2,7 +2,7 @@
 
 namespace Base\Traits;
 
-use Base\Console\Command\CacheClearCommand;
+use Omnibridge\Symfony\Omnibase\Console\Command\CacheClearCommand;
 use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;

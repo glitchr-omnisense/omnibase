@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Base\Attributes\AttributeReader;
 use Base\Bundle\AbstractBaseBundle;
 use Base\Contract\Runtime;
-use Base\Console\Command\CacheClearCommand;
+use Omnibridge\Symfony\Omnibase\Console\Command\CacheClearCommand;
 use Base\Demo\DemoGuard;
 use Base\Demo\DemoMode;
 use Base\DependencyInjection\Compiler\Pass\ContractsPass;
