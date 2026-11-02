@@ -10,6 +10,18 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Moved: Bridge\Symfony to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 5, 2026-11-03)
+
+- The 20 Symfony adapters of `Base\Bridge\Symfony\*` (the contracts' adapters - `LocalizerLocales`, `MediaPictures`,
+  `NotificationMessages`, `RouterRoutes`, `ServiceMedia`, `WysiwygTexts`, `FlysystemFiles`, the passkey and security-user
+  adapters -, `ScreenResponder`, `SymfonyScreenContext`, `AccountScreens`, `ActionArguments`, `ActionResults`,
+  `AuthListeners`, `SettingBagWarmer`) are `Omnibridge\Symfony\Omnibase\*` by the F3 rule (`Base\Bridge\Symfony\X` is
+  `Omnibridge\Symfony\Omnibase\X`), as they were; former names aliased (FormerNamesTest 333). `ScreenResponder::legacy()`
+  finds the core's templates beside BaseBundle.
+- The Symfony controllers (`Controller\*` but `Controller\Action\*` and `SignatureController`), `DependencyInjection\*`,
+  `Bundle\*` and `BaseBundle` stay until step F6: the applications import the core's routes as `@BaseBundle/Controller`
+  and register `Base\BaseBundle`, whose path is the core's; they move with the applications' change of those two lines.
+
 ### Moved: Symfony Security's classes to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 4, 2026-11-03)
 
 - 13 classes, as they were, to `Omnibridge\Symfony\Omnibase\Security\`: `AccessTokenHandler`, `LoginFormAuthenticator`,
