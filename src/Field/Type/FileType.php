@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Database\Attribute\Uploader;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Form\FormFactoryInterface;
 use Base\Routing\AdvancedRouterInterface;

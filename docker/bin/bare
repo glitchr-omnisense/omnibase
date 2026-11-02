@@ -200,6 +200,15 @@ function install_bare_vendor(string $core): int
     $composer['require'] = ($composer['require'] ?? []) + ($composer['extra']['omnibase']['bare'] ?? []);
     $composer['autoload']['psr-4'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['psr-4'] ?? []);
     $composer['autoload']['files'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['files'] ?? []);
+    // omnibridge/doctrine as checked out beside the core (the harness's compose.checkouts.yml mounts it
+    // over the application's vendor): the core's Doctrine classes live there since the plan "omnibase
+    // agnostic"'s step F3, and what is measured is the code being worked on, not the last release.
+    foreach (['omnibridge/doctrine'] as $package) {
+        $checkout = dirname($core, 2).'/'.$package;
+        if ('vendor' === basename(dirname($core, 2)) && is_file($checkout.'/composer.json') && is_dir($checkout.'/.git')) {
+            $composer['repositories'][] = ['type' => 'path', 'url' => $checkout, 'options' => ['symlink' => true, 'versions' => [$package => $composer['require'][$package] ?? 'dev-main']]];
+        }
+    }
     $json = json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n";
 
     // composer.installed.json: the composer.json of the last install that succeeded.

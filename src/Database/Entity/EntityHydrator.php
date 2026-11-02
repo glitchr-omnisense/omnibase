@@ -4,7 +4,7 @@ namespace Base\Database\Entity;
 
 use Base\Database\Entity\AggregateHydrator\PopulableInterface;
 use Base\Database\Entity\AggregateHydrator\SerializableInterface;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Type\SetType;
 use Closure;

@@ -2,7 +2,7 @@
 
 namespace Base\Form\Extension;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\FormFactory;

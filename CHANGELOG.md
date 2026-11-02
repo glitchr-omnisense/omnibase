@@ -10,6 +10,53 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: Doctrine moves to omnibridge/doctrine (plan "omnibase agnostic", step F3, 2026-11-02)
+
+The core's Doctrine classes are omnibridge/doctrine's, under `Omnibridge\Doctrine\Omnibase\` - 142 classes, by
+one rule: `Base\Bridge\Doctrine\X` is `Omnibridge\Doctrine\Omnibase\X`, any other `Base\X` is
+`Omnibridge\Doctrine\Omnibase\X`. See [docs/20-architecture/doctrine.md](docs/20-architecture/doctrine.md).
+
+- Moved: `Base\Bridge\Doctrine\*` and `Behaviour\*` (the unit of work, backend, shapes, repositories, query
+  pages, the behaviours' Doctrine backends, the mapping, types, configuration, repository factory, registry,
+  snapshot); `Base\Database\Mapping\{ClassMetadataManipulator, ClassMetadataCompletor, ClassMetadataFactory,
+  NamingStrategy}`; the DBAL types (`ArrayType`, `DateTimeTypeUTC`, `MySQLSetType`, the UTC and passkey types);
+  `Base\Database\{Walker, Function, Filter, Middleware, Event}\*`, `Schema\Describer`; the finder's Doctrine
+  compiler `ServiceEntityParser` and `ServiceEntityRepository`; **the 81 repositories** `Base\Repository\**\*Repository`;
+  the Doctrine listeners `Base\DatabaseSubscriber\{Attribute, Intl, InverseCollectionCache, TrackingPolicy}Subscriber`
+  and `Base\EntitySubscriber\{Extension, Trasheable, Versionable, Setting}Subscriber`.
+- Stays: the neutral half - the finder language's parser and AST, `Entities`, `Repositories`, the repository
+  interfaces and `Aliases`, the shapes, the schema rules, `EnumType`, `SetType`, `Enumerations`, `Utc`, the
+  behaviours' attributes and their backends' contracts, the listeners' logic (`Base\Database\Lifecycle\*`),
+  `DemoAccountLockSubscriber` (F5a), `ThreadSubscriber`, `UserSubscriber` and `ConnectionSubscriber` (F5c).
+- **The former names keep working** until 6.0: `src/Resources/former-names.php`, required by `Functions.php`,
+  aliases each one (the list: `src/Resources/former-names.doctrine.php`, read by the new
+  `Base\Database\FormerNames`), whichever name is loaded first - PHP checks an `instanceof` or a type written
+  with a name without autoloading it, so the moved class loaded by its new name declares its former one at once.
+  `BaseExtension` sets `.container.dumper.inline_class_loader` to false: Symfony's debug container included the
+  services' files itself, past the autoloader. No deprecation is raised yet: the core's entities still name their
+  repositories by their former names, so Doctrine's metadata and `MetadataSnapshot` are those of before.
+- The moved services are registered under their new names, their former ids aliased; BaseBundle maps the
+  moved repositories `Base\Repository\X` => `App\Repository\X` from omnibridge/doctrine's folder and registers
+  them under their former ids (`AbstractBaseBundle::setMapping()`'s `$declaredNamespace`); a former name's
+  App\ alias is recognised by the class it stands for (`declareAlias()`, `setAlias()`).
+- `Base\Bridge\Symfony\FrameworkLocator`'s Doctrine half is `Omnibridge\Doctrine\Omnibase\DoctrineLocator` (its
+  methods call it; the core's validators, `EditorController`, `BaseService` and `FrameworkAccessorsTrait` call it
+  directly). `#[Cache]`'s regions, `#[Vault]`'s unique constraints and `#[OrderColumn]`'s order field - their
+  `loadClassMetadata()`, typed on Doctrine's `ClassMetadata` - are `Behaviour\DoctrineMappingHooks`', run by
+  `AttributeSubscriber` and the manipulator before an attribute's own (deprecated) Doctrine-typed hook.
+- An entity's `repositoryClass` may name a repository interface of the core: omnibridge/doctrine's
+  `RepositoryFactory::implementation()` builds the repository `Base\Repository\Aliases::INTERFACES` binds to it,
+  and under Symfony `RepositoryInterfacesPass` adds the interfaces to DoctrineBundle's repository locator.
+- `UnitOfWorks::ADAPTERS`, `Pagination::ADAPTERS` and `Aliases::INTERFACES` name the moved classes;
+  `MetadataSnapshot` names a moved filter or type by its former name (it compares the mapping, not where a
+  class lives). `RepositoryStub` writes the App\Repository\ stubs from omnibridge/doctrine's folder.
+- `bare --install` installs omnibridge/doctrine from its checkout when one is mounted beside the core
+  (the harness's compose.checkouts.yml).
+- The Foundation 903 -> 793 (-127 moved, +17 listed nowhere though they loaded without the framework); the
+  agnostic core (`bare --strict`) 691 -> 696 (-12 moved, +17).
+- The core still requires omnibridge/doctrine and doctrine/* - the composer.json switch is step F6 - so that
+  the sites keep everything; nothing changes for them.
+
 ### Fixed: a thread's followers and mentions are computed (2026-11-02)
 
 `Base\EntitySubscriber\ThreadSubscriber`'s persistence hooks were registered nowhere: no reply was followed

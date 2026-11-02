@@ -16,6 +16,9 @@ use Omnibridge\Persistence\Lifecycle;
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Cache extends AbstractAttribute implements ExtensionOptionInterface
 {
+    // Its mapping on Doctrine (its regions) is omnibridge/doctrine's DoctrineMappingHooks::cache() since the
+    // plan "omnibase agnostic"'s step F3: it was loadClassMetadata(), a hook typed on Doctrine's ClassMetadata.
+
     /**
      * @var string The concurrency strategy.
      * @Enum({"READ_ONLY", "NONSTRICT_READ_WRITE", "READ_WRITE"})
@@ -115,58 +118,6 @@ class Cache extends AbstractAttribute implements ExtensionOptionInterface
     public function getRegionProperty(ClassMetadata $classMetadata, string $property)
     {
         return $this->getRegion($classMetadata) . "__" . $property;
-    }
-
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
-    {
-        $region = $this->getRegion($classMetadata);
-
-        $usage = null;
-        switch ($this->usage) {
-            case self::READ_ONLY:
-                $usage = ClassMetadata::CACHE_USAGE_READ_ONLY;
-                break;
-            case self::READ_WRITE:
-                $usage = ClassMetadata::CACHE_USAGE_READ_WRITE;
-                break;
-            case self::NONSTRICT_READ_WRITE:
-                $usage = ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE;
-                break;
-        }
-
-        switch ($target) {
-
-            case EntityExtension::TARGET_CLASS:
-
-                $classMetadata->cache = [
-                    "usage" => $usage,
-                    "region" => $region,
-                ];
-
-                foreach ($classMetadata->associationMappings as $property => $associationMapping) {
-                    $isTargetEntityCached = !empty($this->getAttributeReader()->getClassAttributes($associationMapping["targetEntity"], self::class));
-                    if (!$isTargetEntityCached) {
-                        continue;
-                    }
-
-                    $this->loadClassMetadata($classMetadata, EntityExtension::TARGET_PROPERTY, $property);
-                }
-
-                break;
-
-            case EntityExtension::TARGET_PROPERTY:
-
-                if (($classMetadata->associationMappings[$targetValue]["type"] & $this->associations) == 0) {
-                    return;
-                }
-
-                $classMetadata->associationMappings[$targetValue]["cache"] = $classMetadata->associationMappings[$targetValue]["cache"] ?? [
-                    "usage" => $usage,
-                    "region" => $this->getRegionProperty($classMetadata, $targetValue),
-                ];
-
-                break;
-        }
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace Base\EntitySubscriber;
 
 use Base\Entity\Thread;
-use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Lifecycle\ThreadParticipants;
 use Base\Entity\Thread\Mention;
 use Base\Entity\ThreadIntl;

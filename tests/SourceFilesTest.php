@@ -37,7 +37,9 @@ class SourceFilesTest extends TestCase
     public function testTheDeadCopyOfExtensionSubscriberIsGone(): void
     {
         $this->assertFileDoesNotExist(\dirname(__DIR__).'/src/EntitySubscriber/HookExtensionSubscriber.php');
-        $this->assertSame(['ExtensionSubscriber'], self::declaredNames((string) file_get_contents(\dirname(__DIR__).'/src/EntitySubscriber/ExtensionSubscriber.php')));
+        // In omnibridge/doctrine since the plan "omnibase agnostic"'s step F3, its former name aliased by the core.
+        $file = (string) (new \ReflectionClass(\Base\EntitySubscriber\ExtensionSubscriber::class))->getFileName();
+        $this->assertSame(['ExtensionSubscriber'], self::declaredNames((string) file_get_contents($file)));
     }
 
     /** @return list<string> the classes, interfaces, traits and enums the code declares (not anonymous classes, not ::class) */

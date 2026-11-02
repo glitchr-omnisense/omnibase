@@ -4,7 +4,7 @@ namespace Base\Console\Command;
 
 use Base\Console\Command;
 use Base\Database\Entity\EntityHydratorInterface;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Notifier\NotifierInterface;
 use Base\Serializer\Encoder\ExcelEncoder;
 

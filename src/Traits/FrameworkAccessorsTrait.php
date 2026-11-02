@@ -2,8 +2,9 @@
 
 namespace Base\Traits;
 
+use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
 use Base\Bridge\Symfony\FrameworkLocator;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -61,7 +62,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getDoctrine', 'the unit of work (Runtime::unitOfWork()) and the repositories');
 
-        return FrameworkLocator::doctrine();
+        return DoctrineLocator::doctrine();
     }
 
     /** @deprecated since omnisense/omnibase 4.0: the unit of work */
@@ -69,7 +70,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getObjectManager', 'the unit of work (Runtime::unitOfWork())');
 
-        return FrameworkLocator::objectManager($entity);
+        return DoctrineLocator::objectManager($entity);
     }
 
     /** @deprecated since omnisense/omnibase 4.0: the unit of work */
@@ -77,7 +78,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getEntityManager', 'the unit of work (Runtime::unitOfWork())');
 
-        return FrameworkLocator::entityManager($reopen);
+        return DoctrineLocator::entityManager($reopen);
     }
 
     /** @deprecated since omnisense/omnibase 4.0: the repository by its interface, or UnitOfWorks::repositories() */
@@ -85,7 +86,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getRepository', 'the repository by its interface, or Base\Database\UnitOfWorks::repositories()');
 
-        return FrameworkLocator::repository($object ?? static::class);
+        return DoctrineLocator::repository($object ?? static::class);
     }
 
     /** @deprecated since omnisense/omnibase 4.0: UnitOfWorks::shapes(), BaseTrait::isEntity() */
@@ -93,7 +94,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getClassMetadataManipulator', 'Base\Database\UnitOfWorks::shapes() or BaseTrait::isEntity()');
 
-        return FrameworkLocator::classMetadataManipulator();
+        return DoctrineLocator::classMetadataManipulator();
     }
 
     /** @deprecated since omnisense/omnibase 4.0: Runtime::access() */

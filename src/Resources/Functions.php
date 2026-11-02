@@ -18,6 +18,9 @@ namespace {
     use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
     use Symfony\Component\HttpFoundation\Request;
 
+    // The former names of the classes moved to omnibridge/doctrine (plan "omnibase agnostic", F3).
+    require_once __DIR__.'/former-names.php';
+
     if (!function_exists('dumpif')) {
         function dumpif(...$variadic)
         {

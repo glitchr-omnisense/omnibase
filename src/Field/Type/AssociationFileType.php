@@ -5,7 +5,7 @@ namespace Base\Field\Type;
 use Base\Database\Attribute\Uploader;
 use Base\Contract\Runtime;
 use Base\Admin\Controller\AbstractCrudController;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;

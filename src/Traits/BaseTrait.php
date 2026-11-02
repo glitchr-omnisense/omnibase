@@ -84,7 +84,7 @@ trait BaseTrait
     public static function isEntity(mixed $entityOrClassOrMetadata): bool
     {
         $manipulator = Locator::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator')
-            ?? throw MissingContractException::for('Base\Database\Mapping\ClassMetadataManipulator');
+            ?? throw MissingContractException::for('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator');
 
         return $manipulator->isEntity($entityOrClassOrMetadata);
     }

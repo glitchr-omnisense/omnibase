@@ -7,8 +7,8 @@ if(!isset($_SERVER["APP_TIMER"])) {
 }
 
 use App\Entity\User;
-use Base\Bridge\Doctrine\Configuration;
-use Base\Bridge\Doctrine\Types;
+use Omnibridge\Doctrine\Omnibase\Configuration;
+use Omnibridge\Doctrine\Omnibase\Types;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
@@ -190,6 +190,10 @@ class BaseBundle extends AbstractBaseBundle
 
             $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
             $this->setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
+            // The core's repositories, in omnibridge/doctrine (plan "omnibase agnostic", F3), by their former names.
+            if (null !== $repositories = self::doctrineRepositoryDir()) {
+                $this->setMapping($repositories, "Base\Repository", "App\Repository", "Omnibridge\Doctrine\Omnibase\Repository");
+            }
             $this->setMapping($this->getBundleDir() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
 
             $this->setMapping($this->getBundleDir() . "/src/Tests"     , "Base\Tests"     , "App\Tests");
@@ -197,8 +201,7 @@ class BaseBundle extends AbstractBaseBundle
             $this->setMapping($this->getBundleDir() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
             $this->setMapping($this->getBundleDir() . "/src/Form"      , "Base\Form"      , "App\Form");
             $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
-            $this->setMapping($this->getBundleDir() . "/src/Repository", "Base\Repository", "App\Repository");
-            
+
             self::getAllClasses($this->getBundleDir() . "/src/Database/Attribute");
             self::getAllClasses($this->getBundleDir() . "/src/Attributes/Attribute");
             
@@ -217,6 +220,17 @@ class BaseBundle extends AbstractBaseBundle
             flock($lock, LOCK_UN);
             fclose($lock);
         }
+    }
+
+    /**
+     * The directory of the core's repositories: omnibridge/doctrine's Omnibase\Repository since
+     * the plan "omnibase agnostic"'s step F3, null where omnibridge/doctrine is not installed.
+     */
+    public static function doctrineRepositoryDir(): ?string
+    {
+        $class = 'Omnibridge\Doctrine\Omnibase\Repository\UserRepository';
+
+        return class_exists($class) ? dirname((new \ReflectionClass($class))->getFileName()) : null;
     }
 
     /**

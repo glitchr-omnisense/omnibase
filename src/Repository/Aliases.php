@@ -45,6 +45,6 @@ final class Aliases
         Hours\SpecialDays::class => Hours\SpecialDayRepository::class,
         Hours\WeekDays::class => Hours\WeekDayHoursRepository::class,
         // The entities of a class named at run time (Base\Database\Repository\Repositories), Doctrine's answer.
-        \Base\Database\Repository\Repositories::class => \Base\Bridge\Doctrine\DoctrineRepositories::class,
+        \Base\Database\Repository\Repositories::class => \Omnibridge\Doctrine\Omnibase\DoctrineRepositories::class,
     ];
 }

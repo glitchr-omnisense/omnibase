@@ -3,7 +3,7 @@
 namespace Base\Form;
 
 use Base\Database\Entity\EntityHydratorInterface;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\Common\FormTypeInterface;
 use Base\Form\Traits\FormGuessTrait;

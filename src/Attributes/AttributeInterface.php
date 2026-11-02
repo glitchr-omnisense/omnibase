@@ -2,8 +2,8 @@
 
 namespace Base\Attributes;
 
-use Base\Database\Event\DoctrineQueryEventArgs;
-use Base\Database\Event\ResolveDiscriminatorEventArgs;
+use Omnibridge\Doctrine\Omnibase\Database\Event\DoctrineQueryEventArgs;
+use Omnibridge\Doctrine\Omnibase\Database\Event\ResolveDiscriminatorEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;

@@ -4,7 +4,7 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Database\Mapping\NamingStrategy;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy;
 use Base\Service\Localizer;
 use Base\Service\Translator;
 use Exception;

@@ -24,8 +24,10 @@ omnibridge/doctrine's types and `Base\Database\Type\Utc` reads its zone (the typ
 every boot, `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()`);
 `Base\Database\Mapping\NamingStrategy` extends its `NamingStrategy`;
 `Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass` and `Base\Bridge\Doctrine\Mapping`
-wrap every entity manager's driver in its `DeclarationDriver`. Leaving it to the application is
-the agnostic core's step F3. omnibridge/twig left the core's requirements with Twig at step F4:
+wrap every entity manager's driver in its `DeclarationDriver`. Since the agnostic core's step F3
+the core's Doctrine classes themselves are omnibridge/doctrine's (`Omnibridge\Doctrine\Omnibase\`, their
+former names aliased by the core: [the Doctrine mapping](doctrine.md)); leaving the package to the
+application is the composer.json switch, F6. omnibridge/twig left the core's requirements with Twig at step F4:
 `config/services/twig.php` registers its `HelperExtension` with the Twig layer, and
 `Base\Twig\Extension\FunctionTwigExtension` calls it (`join_if_exists`, `less_than`), both only
 where Twig is installed.

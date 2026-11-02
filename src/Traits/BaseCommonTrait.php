@@ -2,7 +2,7 @@
 
 namespace Base\Traits;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\BaseService;
 use Base\Service\Obfuscator;

@@ -3,7 +3,7 @@
 namespace Base\Traits;
 
 use Base\Console\Command\CacheClearCommand;
-use Base\Database\Mapping\ClassMetadataFactory;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;

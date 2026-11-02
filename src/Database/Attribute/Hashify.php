@@ -6,7 +6,7 @@ use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;

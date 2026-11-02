@@ -2,7 +2,7 @@
 
 namespace Base\Bridge\PHPStan;
 
-use Base\Database\Repository\ServiceEntityRepository;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Reflection\MethodsClassReflectionExtension;

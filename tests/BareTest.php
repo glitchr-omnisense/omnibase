@@ -120,8 +120,8 @@ final class BareTest extends TestCase
     /**
      * --strict is not blind, and is stricter than the Foundation's guard: omnibase's repository is
      * doctrine/orm's EntityRepository - Doctrine is allowed by the guard (D2), refused by --strict,
-     * which names the class and the class of the core that asked for it (until step F3 moves the
-     * Doctrine repositories to omnibridge/doctrine); a Twig extension of the core is refused for Twig's
+     * which names the class and the class that asked for it (omnibridge/doctrine's since step F3,
+     * which moved the Doctrine repositories there, the core aliasing their former names); a Twig extension of the core is refused for Twig's
      * AbstractExtension where Twig is installed (this run's vendor: since step F4 the vendor without the
      * framework has no Twig, see testTwigIsOptional()). An enumeration was the first example until
      * step F2a made it a plain class.
@@ -135,8 +135,10 @@ final class BareTest extends TestCase
         self::assertSame(1, $status);
         $repository = $report['classes'][ServiceEntityRepository::class];
         self::assertNull($repository['error']);
-        self::assertSame(ServiceEntityRepository::class, $repository['framework']['Doctrine\\ORM\\EntityRepository'] ?? null);
+        // omnibridge/doctrine's since step F3, under its former name: the moved class extends Doctrine's.
+        self::assertSame(\Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository::class, $repository['framework']['Doctrine\\ORM\\EntityRepository'] ?? null);
         self::assertNotEmpty(preg_grep('~/doctrine/orm/~', $repository['framework_files']));
+        self::assertNotEmpty(preg_grep('~/omnibridge/doctrine/~', $repository['framework_files']), 'the bridge refused by --strict');
         // Since step F2a an enumeration loads nothing of Doctrine.
         self::assertSame([], $report['classes'][UserRole::class]['framework']);
         self::assertSame([], $report['classes'][UserRole::class]['framework_files']);

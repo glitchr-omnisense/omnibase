@@ -4,9 +4,9 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Database\Attribute\Timestamp;
-use Base\Database\Type\Passkey\Aaguid;
-use Base\Database\Type\Passkey\Base64;
-use Base\Database\Type\Passkey\TrustPath;
+use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Aaguid;
+use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Base64;
+use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\TrustPath;
 use Base\Repository\User\PasskeyRepository;
 
 use DateTimeInterface;

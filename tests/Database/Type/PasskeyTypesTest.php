@@ -110,11 +110,12 @@ final class PasskeyTypesTest extends TestCase
 
     public function testTheyAreTheCoresTypesByName(): void
     {
-        self::assertSame([
+        // In omnibridge/doctrine since the plan "omnibase agnostic"'s step F3: the classes these former names stand for.
+        self::assertSame(array_map(static fn (string $class) => (new \ReflectionClass($class))->getName(), [
             'passkey_base64' => Base64::class,
             'passkey_aaguid' => Aaguid::class,
             'passkey_trust_path' => TrustPath::class,
-        ], Types::passkey());
+        ]), Types::passkey());
         self::assertSame(Types::passkey(), array_intersect_key(Types::core(), Types::passkey()));
 
         Types::register();

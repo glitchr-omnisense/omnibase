@@ -66,7 +66,7 @@ return static function (ContainerConfigurator $container): void {
         'Base\Controller\Client\ContactController' => ['form.proxy', 'base.notifier'],
         'Base\Controller\LocalizerController' => ['localizer', 'Omnibridge\Persistence\UnitOfWork', 'advanced_router', 'referrer', 'translator'],
         'Base\Controller\UX\MediaController' => ['request_stack', 'flysystem', 'base.service.image', 'Base\Repository\Layout\ImageCropRepository'],
-        'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'Omnibridge\Persistence\UnitOfWork', 'Base\Service\Paginator', 'Base\Database\Mapping\ClassMetadataManipulator', 'base.service.image'],
+        'Base\Controller\UX\AutocompleteController' => ['Base\Service\Obfuscator', 'request_stack', 'trading_market', 'translator', 'Omnibridge\Persistence\UnitOfWork', 'Base\Service\Paginator', 'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator', 'base.service.image'],
         'Base\Controller\WidgetController' => ['Base\Repository\Layout\Widget\AttachmentRepository'],
         'Base\Controller\ShortLinkController' => ['advanced_router', 'Base\Repository\Layout\ShortLinkRepository'],
         // The like/follow/publish API. Was silently unregistered (constructor
@@ -223,7 +223,7 @@ return static function (ContainerConfigurator $container): void {
     // constructing SettingBag there (repository -> getClassMetadata) triggers
     // a re-entrant resolveDiscriminator dispatch on the half-initialized
     // event manager.
-    $services->set('Base\EntitySubscriber\SettingSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\EntitySubscriber\SettingSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'postPersist'])
         ->tag('doctrine.event_listener', ['event' => 'postUpdate'])
         ->tag('doctrine.event_listener', ['event' => 'postRemove'])

@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;

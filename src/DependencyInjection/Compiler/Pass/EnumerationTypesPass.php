@@ -2,7 +2,7 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
-use Base\Bridge\Doctrine\EnumerationsMiddleware;
+use Omnibridge\Doctrine\Omnibase\EnumerationsMiddleware;
 use Base\Database\Type\EnumType;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

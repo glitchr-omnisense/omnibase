@@ -10,18 +10,19 @@ use Base\Database\Mapping\EntityShape;
 use Base\Database\Type\Enumerations;
 use Base\Database\Type\SetType;
 
-use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
 use Omnibridge\Persistence\Lifecycle;
 use Exception;
-use Doctrine\DBAL\Types\StringType;
 use ReflectionProperty;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
 {
+    // Its mapping on Doctrine (its order field) is omnibridge/doctrine's DoctrineMappingHooks::orderColumn() since the
+    // plan "omnibase agnostic"'s step F3: it was loadClassMetadata(), a hook typed on Doctrine's ClassMetadata.
+
     public const ASC = "ASC";
     public const DESC = "DESC";
 
@@ -69,45 +70,6 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
         return ($target === AttributeReader::TARGET_PROPERTY);
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
-    {
-        if (!$this->supports($target, $targetValue, $classMetadata)) return;
-
-        // For associations/set, orderBy is mandatory and must be JSON or string
-        $type = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $targetValue);
-        $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-        $isSet    = is_instanceof($doctrineType, SetType::class);
-        $isToMany = $this->getClassMetadataManipulator()->isToManySide($classMetadata, $targetValue);
-    
-        if ($isSet || $isToMany) {
-
-            if (!$this->orderBy) {
-                throw new Exception("The '".$classMetadata->name."::orderBy' field is mandatory for association '{$targetValue}'.");
-            }
-
-            $orderByType = $this->getClassMetadataManipulator()->getTypeOfField($classMetadata, $this->orderBy);
-            if(!$orderByType) $orderByType = "json";
-
-            // Check if orderBy is mapped as JSON or string
-            $doctrineOrderByType = $this->getClassMetadataManipulator()->getDoctrineType($orderByType);
-            if($doctrineOrderByType === null) return;
-
-            $isJson = is_instanceof($doctrineOrderByType, JsonType::class) || $doctrineOrderByType === 'json' || $doctrineOrderByType === JsonType::class;
-            $isString = is_instanceof($doctrineOrderByType, StringType::class) || $doctrineOrderByType === 'string' || $doctrineOrderByType === StringType::class;
-            if (!$isJson && !$isString) {
-                throw new Exception("The '".$classMetadata->name."::orderBy' field '{$this->orderBy}' must be of type JSON or string for association '{$targetValue}'.");
-            }
-
-            // Map the orderBy column if not already mapped
-            if (!$classMetadata->hasField($this->orderBy)) {
-                $classMetadata->mapField([
-                    'fieldName' => $this->orderBy,
-                    'type' => $orderByType,
-                    'nullable' => true
-                ]);
-            }
-        }
-    }
     /**
      * The ordered property's kind, on the entity's shape (plan "omnibase agnostic", step F2c): a to-many
      * association, or a set enumeration's column (the set itself, which gives its ordering keys); null

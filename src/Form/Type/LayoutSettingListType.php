@@ -3,7 +3,7 @@
 namespace Base\Form\Type;
 
 use Base\Database\Attribute\Uploader;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Field\Type\AvatarType;

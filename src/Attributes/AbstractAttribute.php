@@ -4,10 +4,10 @@ namespace Base\Attributes;
 
 use App\Entity\User;
 use Base\Database\Entity\EntityHydratorInterface;
-use Base\Database\Event\DoctrineQueryEventArgs;
-use Base\Database\Event\ResolveDiscriminatorEventArgs;
-use Base\Database\Mapping\ClassMetadataManipulator;
-use Base\Database\Mapping\ClassMetadataCompletor;
+use Omnibridge\Doctrine\Omnibase\Database\Event\DoctrineQueryEventArgs;
+use Omnibridge\Doctrine\Omnibase\Database\Event\ResolveDiscriminatorEventArgs;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
