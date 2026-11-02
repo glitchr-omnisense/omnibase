@@ -23,6 +23,12 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   same on every host; `SecurityController::Register()` uses it (its private `nameAccount()` moved there as `name()`).
 - `Localizer` reads its default locale from the host's `Locales` contract where `kernel.default_locale` is unset.
 
+#### Fixed
+
+- The profile's editor (`UserProfileController::Edit()`) answered 500 on a name another account has (the database's
+  refusal), and the session was signed out with it: the account written is held to its class's rules first
+  (`Base\Form\Definition\RecordRules`), the refusal said under its field, the account read again as it is stored.
+
 ### Changed: the request, the session and the events on contracts (plan "omnibase agnostic", step F5c, first part, 2026-11-02)
 
 - The services that read Symfony's request stack read omnisense/omnibridge's `Omnibridge\Contract\Requests` (the visitor's

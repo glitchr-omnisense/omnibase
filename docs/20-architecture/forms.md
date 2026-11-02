@@ -233,6 +233,10 @@ return view('comment', ['form' => $submission->createView()]);   // the values s
   looked up among the records of the form's validation entity.
 - A refusal the code that keeps the data gives (a spam, a record not found) is added to the submission:
   `$submission->withError($message, $field)`, a new submission, as Symfony's `addError()`.
+- A record the form has just written into is held to its class's rules before it is kept:
+  `RecordRules::violations($validation, $record, $groups)` - its uniqueness above all, the record itself not
+  counted as taken. omnibase's profile editor does it on both hosts: a name another account has is said
+  under its field, the account read again as it is stored (it answered 500 and signed the session out).
 - A sign-up once its form holds is `Base\Auth\Registration::register()` on every host (approved, its
   password, named after its address when its class has a username left empty, kept); the host signs it in.
 

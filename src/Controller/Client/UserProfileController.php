@@ -8,12 +8,16 @@ use Base\Attributes\Attribute\Iconize;
 use Base\Bridge\Symfony\AccountScreens;
 use Base\Bridge\Symfony\ScreenResponder;
 use Base\Enum\UserRole;
+use Base\Form\Definition\RecordRules;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
 use Base\Repository\Users;
 use Base\Screen\View;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Omnibridge\Contract\Validation;
+use Omnibridge\Persistence\UnitOfWork;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -34,7 +38,7 @@ class UserProfileController extends AbstractController
     }
 
     #[Route("/profile/{id}/edit/", name: "user_profileEdit")]
-    public function Edit(Request $request, int $id = -1)
+    public function Edit(Request $request, Validation $validation, UnitOfWork $unitOfWork, int $id = -1)
     {
         if ($id > 0) {
             if (!($user = $this->users->oneById($id))) {
@@ -59,8 +63,21 @@ class UserProfileController extends AbstractController
                     "form" => $formProcessor->getForm()->createView()
                 ]);
             })
-            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user) {
+            ->onSubmit(function (FormProcessorInterface $formProcessor, Request $request) use ($user, $validation, $unitOfWork) {
                 $user = $formProcessor->hydrate($user);
+
+                // Its rules before it is kept (a name another account has): said under the field, the account
+                // read again as it is stored, where the database's refusal answered 500 and signed the session out.
+                if ([] !== $violations = RecordRules::violations($validation, $user, ['edit'])) {
+                    $unitOfWork->refresh($user);
+                    $form = $formProcessor->getForm();
+                    foreach ($violations as $violation) {
+                        $field = preg_split('/[.\[]/', $violation->path, 2)[0] ?? '';
+                        ($field !== '' && $form->has($field) ? $form->get($field) : $form)->addError(new FormError($violation->message));
+                    }
+
+                    return $this->render('client/user/profile_edit.html.twig', ['user' => $user, 'form' => $form->createView()]);
+                }
                 $this->users->flush();
 
                 return $this->redirectToRoute('user_profileEdit');
