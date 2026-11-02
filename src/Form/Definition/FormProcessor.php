@@ -158,7 +158,8 @@ final class FormProcessor
                 ? (\is_array($binding->data) ? ($binding->data[$name] ?? $field->getValue()) : $field->getValue())
                 : $this->read($binding->data, $field->getOption('property_path') ?? $name);
             foreach ($this->validation->validate($value, $constraints, $groups) as $violation) {
-                $path = '' === $violation->path ? $name : $name.'.'.$violation->path;
+                // A field that gives its errors to the form (Symfony's error_bubbling).
+                $path = true === $field->getOption('error_bubbling') ? '' : ('' === $violation->path ? $name : $name.'.'.$violation->path);
                 $violations[] = new Violation($path, $violation->message, $violation->code, $violation->parameters);
             }
         }
