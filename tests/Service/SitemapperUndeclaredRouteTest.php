@@ -45,7 +45,7 @@ class SitemapperUndeclaredRouteTest extends KernelTestCase
         $container = static::getContainer();
         $container->get('request_stack')->push(Request::create('http://localhost/sitemap.xml'));   // the router's context
 
-        return (new Sitemapper($container->get('twig'), $container->get('base.attribute_reader'), $container->get('advanced_router'), $container->get('localizer'), $logger))
+        return (new Sitemapper($container->get(\Omnibridge\Contract\Views::class), $container->get('base.attribute_reader'), $container->get('advanced_router'), $container->get('localizer'), $logger))
             ->setHostname('http://localhost');
     }
 

@@ -2,6 +2,7 @@
 
 namespace Base\Notifier\Mail;
 
+use Omnibridge\Contract\Views;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Twig\Environment;
@@ -11,8 +12,11 @@ use Twig\Error\LoaderError;
  * omnibase's e-mails, written the same way under every host (plan
  * "omniauth", step AU8b; R26 of the master plan's gaps): a notification's
  * template rendered by Twig in the e-mail frame, its subject the page's
- * <title>, its embedded pictures as inline parts. Framework-free: Twig and
- * symfony/mime, which every host has (Laravel's mail is Symfony's Mailer).
+ * <title>, its embedded pictures as inline parts. Framework-free: the views
+ * through omnibridge's Views (plan "omnibase agnostic", step F5a: Twig's
+ * environment through omnibridge/twig's TwigViews, or any engine that has
+ * omnibase's templates) and symfony/mime, which every host has (Laravel's
+ * mail is Symfony's Mailer). The text part is written here, in PHP.
  *
  * Under Symfony Base\Bridge\Symfony\NotificationMessages::email() writes a
  * notification's e-mail with render() and alias() - the same lines it had -;
@@ -32,26 +36,47 @@ final class EmailComposer
      * The e-mail's text: Symfony's Twig bridge's notification text
      * (@email/zurb_2/notification/body.txt.twig, which NotificationEmail
      * renders under Symfony), its subject, then its notification's content -
-     * the text part is not the HTML's.
+     * the text part is not the HTML's. Kept as the reference text() writes
+     * (EmailComposerTest renders both); no view engine renders it any more.
      */
-    private const TEXT = "{% autoescape false %}{% block lead %}\n{{ subject }}\n{% endblock %}\n\n{% block content %}\n{{ content }}\n{% endblock %}\n\n{% block action %}\n{% if action_url %}\n{{ action_text }}: {{ action_url }}\n{% endif %}\n{% endblock %}\n\n{% block exception %}\n{% if exception %}\nException stack trace attached.\n{{ exception }}\n{% endif %}\n{% endblock %}\n{% endautoescape %}";
+    public const TEXT = "{% autoescape false %}{% block lead %}\n{{ subject }}\n{% endblock %}\n\n{% block content %}\n{{ content }}\n{% endblock %}\n\n{% block action %}\n{% if action_url %}\n{{ action_text }}: {{ action_url }}\n{% endif %}\n{% endblock %}\n\n{% block exception %}\n{% if exception %}\nException stack trace attached.\n{{ exception }}\n{% endif %}\n{% endblock %}\n{% endautoescape %}";
 
     /** Before the subject of an e-mail to a test address. */
     public const TEST_PREFIX = "Test: ";
 
+    private readonly Views $views;
+
     /**
-     * @param string|\Closure(): string             $from   the sender: the technical address (the Notifier's getTechnicalRecipient())
+     * @param string|\Closure(): string|null        $from   the sender: the technical address (the Notifier's getTechnicalRecipient()); null where the host has none configured (base.notifier.technical_recipient.email), refused when an e-mail is composed
      * @param (\Closure(string $to): bool)|null      $isTest whether an e-mail to that address goes to the technical address instead (the Notifier's isTest(): base.notifier.technical_loopback, test_recipients)
      * @param (\Closure(string $id): string)|null    $trans  the words of a test e-mail (@emails.fake_test.*)
      * @param (\Closure(): array<string, mixed>)|null $globals what the templates read as globals where the host's Twig has none of omnibase's (`app`: MailVariables)
+     * @param Views|Environment                      $views  the views; Twig's environment is deprecated (until 6.0), wrapped in omnibridge/twig's TwigViews
      */
     public function __construct(
-        private readonly Environment $twig,
-        private readonly string|\Closure $from,
+        Views|Environment $views,
+        private readonly string|\Closure|null $from,
         private readonly ?\Closure $isTest = null,
         private readonly ?\Closure $trans = null,
         private readonly ?\Closure $globals = null,
     ) {
+        $this->views = self::views($views);
+    }
+
+    /** The views, Twig's environment (deprecated) wrapped in omnibridge/twig's TwigViews. */
+    public static function views(Views|Environment $views): Views
+    {
+        return \Base\View\ViewsAdapter::of($views);
+    }
+
+    /**
+     * The e-mail's text part: its subject, then its notification's content,
+     * as Symfony's notification text template writes them with no action
+     * and no exception (TEXT, rendered by Twig until step F5a).
+     */
+    public static function text(string $subject, string $content): string
+    {
+        return $subject."\n\n".$content."\n\n\n";
     }
 
     /**
@@ -115,15 +140,16 @@ final class EmailComposer
      *
      * @return array{html: string, subject: ?string}
      */
-    public static function render(Environment $twig, ?string $template, array $parameters): array
+    public static function render(Views|Environment $views, ?string $template, array $parameters): array
     {
+        $views = self::views($views);
         // A notification without an HTML template of its own is written in the e-mail frame, as one whose
-        // template is not found: "" was given to Twig, which refused it ("Failed to render template """).
+        // template is not found: "" was given to Twig, which refused it ("Failed to render template \"\"").
         $template = $template ?: self::FRAME;
         try {
-            $html = $twig->render($template, $parameters);
-        } catch (LoaderError $e) {
-            $html = $twig->render(self::FRAME, $parameters);
+            $html = $views->exists($template) ? $views->render($template, $parameters) : $views->render(self::FRAME, $parameters);
+        } catch (LoaderError $e) { // a template it includes not found (Twig's, caught by name: nothing of Twig is loaded without it)
+            $html = $views->render(self::FRAME, $parameters);
         } catch (\RuntimeException $e) { // @phpstan-ignore catch.neverThrown (as NotificationMessages caught it: a Twig extension's)
             throw new \UnexpectedValueException("Failed to render template \"$template\". See below", 500, $e);
         }
@@ -174,7 +200,10 @@ final class EmailComposer
         if (array_key_exists('email', $parameters)) {
             throw new \UnexpectedValueException('`email` is a reserved key. Cannot pass it through html parameters.');
         }
-        $from = \is_string($this->from) ? $this->from : ($this->from)();
+        $from = \is_string($this->from) || null === $this->from ? $this->from : ($this->from)();
+        if (null === $from || '' === $from) {
+            throw new \LogicException('EmailComposer has no sender: base.notifier.technical_recipient.email, or a closure giving the technical address.');
+        }
         $footer = '';
         $fwd = '';
         $recipient ??= $to;
@@ -197,12 +226,12 @@ final class EmailComposer
             'footer_text' => $footer,
             'recipient' => $recipient,
         ];
-        $rendered = self::render($this->twig, $template, array_merge($context, $parameters, ['email' => new InlineImages($this->twig, $email)]));
+        $rendered = self::render($this->views, $template, array_merge($context, $parameters, ['email' => new InlineImages($this->views, $email)]));
         $html = self::alias($email, $rendered['html']);
-        $body = $this->twig->render(self::BODY, array_merge($context, ['html' => $html]));
+        $body = $this->views->render(self::BODY, array_merge($context, ['html' => $html]));
 
         $subject = $fwd.($rendered['subject'] ?? $subject);
-        $text = $this->twig->createTemplate(self::TEXT, 'omnibase_email_text')->render(['subject' => $subject, 'content' => $content, 'action_url' => null, 'action_text' => null, 'exception' => false]);
+        $text = self::text($subject, $content);
 
         return $email
             ->subject($subject)

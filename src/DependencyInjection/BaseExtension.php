@@ -49,6 +49,8 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         $loader->load('services-public.php');
         $loader->load('services-fix.php');
         $loader->load('services-decoration.php');
+        // The core's list of services, read last (plan "omnibase agnostic", F5a): the contracts it lists aliased.
+        $loader->load('services-list.php');
 
         // The container loads its services' classes through the autoloader, also with debug, where Symfony would
         // write include_once of their files (inline_class_loader): a class moved to omnibridge/doctrine (plan

@@ -2,6 +2,8 @@
 
 namespace Base\Service\Qr;
 
+use Base\View\ViewsAdapter;
+use Omnibridge\Contract\Views;
 use Twig\Environment;
 
 /**
@@ -34,9 +36,13 @@ class QrSheet
 
     public function __construct(
         protected readonly QrCode $qr,
-        protected readonly ?Environment $twig = null,
+        Views|Environment|null $views = null,
     ) {
+        $this->views = ViewsAdapter::ofNullable($views);
     }
+
+    /** The views the sheet renders through (plan "omnibase agnostic", F5a; Twig's environment before, deprecated until 6.0). */
+    protected readonly ?Views $views;
 
     /** @return array{width: float, height: float, columns: int, rows: int, top: float, left: float, pitchX: float, pitchY: float} */
     public static function layout(string $name): array
@@ -81,11 +87,11 @@ class QrSheet
     /** The printable HTML page (@Base/qr/sheet.html.twig). */
     public function render(iterable $items, string $layout = 'a4', ?string $title = null, int $skip = 0): string
     {
-        if (!$this->twig) {
-            throw new \LogicException('QrSheet::render() needs Twig.');
+        if (!$this->views) {
+            throw new \LogicException('QrSheet::render() needs omnibridge\'s Views.');
         }
 
-        return $this->twig->render('@Base/qr/sheet.html.twig', [
+        return $this->views->render('@Base/qr/sheet.html.twig', [
             'title' => $title,
             'layout' => $layout,
             'grid' => self::layout($layout),

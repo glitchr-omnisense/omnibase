@@ -3,7 +3,8 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use Base\Bridge\Symfony\FrameworkLocator;
+use Omnibridge\Contract\Views;
+use Omnibridge\Runtime;
 use Base\Bridge\Symfony\NotificationMessages;
 use Base\Notifier\Abstract\BaseNotificationInterface;
 use Base\Service\Model\IconizeInterface;
@@ -559,7 +560,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $message = $exception->getMessage();
 
             $this->setContent("<div class='title'>" . $location . "</div><div class='message'>" . $message . '</div>');
-        } elseif (FrameworkLocator::twig()->getLoader()->exists($content)) {
+        } elseif (Runtime::has(Views::class) && Runtime::views()->exists($content)) {
             $this->setHtmlTemplate($content);
             $this->setContent("");
         } else {
@@ -595,7 +596,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
             ], $context, $this->getHtmlParameters());
 
-            return FrameworkLocator::twig()->render($htmlTemplate, $context);
+            return Runtime::views()->render($htmlTemplate, $context);
         }
 
         return $this->getContent();
@@ -672,12 +673,13 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     /**
      * The e-mail: Base\Bridge\Symfony\NotificationMessages::email(), with the notifier and the
-     * project's directory this notification reaches through BaseTrait, and Twig through
-     * Base\Bridge\Symfony\FrameworkLocator (until the mails render through Views, F5a).
+     * project's directory this notification reaches through BaseTrait, and the views through
+     * omnibridge's Views (Runtime::views(), since step F5a; Twig's environment through
+     * Base\Bridge\Symfony\FrameworkLocator before).
      */
     public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): ?EmailMessage
     {
-        return NotificationMessages::email($this, $recipient, $this->getNotifier(), FrameworkLocator::twig(), $this->getProjectDir());
+        return NotificationMessages::email($this, $recipient, $this->getNotifier(), Runtime::views(), $this->getProjectDir());
     }
 
     public function asChatMessage(RecipientInterface $recipient, ?string $transport = null): ?ChatMessage

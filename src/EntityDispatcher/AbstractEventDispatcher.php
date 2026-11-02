@@ -3,6 +3,7 @@
 namespace Base\EntityDispatcher;
 
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Database\UnitOfWorks;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\PersistentCollection;
@@ -15,6 +16,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDi
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Contracts\Service\ResetInterface;
+use Omnibridge\Persistence\UnitOfWork;
 
 abstract class AbstractEventDispatcher implements EventDispatcherInterface, ResetInterface
 {
@@ -69,7 +71,11 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     /**
      * @var EntityManagerInterface
      */
-    protected EntityManagerInterface $entityManager;
+    /** What the listeners changed is flushed through it (plan "omnibase agnostic", F5a). */
+    protected UnitOfWork $unitOfWork;
+
+    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: $unitOfWork (null when a unit of work that is not Doctrine's was given) */
+    protected ?EntityManagerInterface $entityManager;
 
     /**
      * @var RequestStack
@@ -81,12 +87,14 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
      */
     protected PropertyAccessorInterface $propertyAccessor;
 
-    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, EntityManagerInterface $entityManager, RequestStack $requestStack)
+    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
+    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, UnitOfWork|EntityManagerInterface $unitOfWork, RequestStack $requestStack)
     {
         self::$live ??= new \WeakMap();
         self::$live[$this] = true;
         $this->dispatcher = $dispatcher;
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->entityManager = $unitOfWork instanceof EntityManagerInterface ? $unitOfWork : (method_exists($this->unitOfWork, 'entityManager') ? $this->unitOfWork->entityManager() : null);
         $this->entityHydrator = $entityHydrator;
 
         $this->requestStack = $requestStack;
@@ -168,7 +176,8 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     public function flushPending(): void
     {
         for ($round = 0; $this->flushPending && !$this->flushing && $round < 5; ++$round) {
-            if (!$this->entityManager->isOpen()) {
+            // A closed entity manager (an exception during a flush) cannot flush again.
+            if (null !== $this->entityManager && !$this->entityManager->isOpen()) {
                 $this->flushPending = false;
 
                 return;
@@ -177,7 +186,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
             $this->flushPending = false;
             $this->flushing = true;
             try {
-                $this->entityManager->flush();
+                $this->unitOfWork->flush();
             } finally {
                 $this->flushing = false;
             }
@@ -196,20 +205,31 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     }
 
     /**
-     * @return EntityManagerInterface
+     * @deprecated since omnisense/omnibase 4.x, removed at 6.0: getUnitOfWork()
+     *
+     * @return EntityManagerInterface|null
      */
     public function getEntityManager()
     {
+        @trigger_error(sprintf('Since omnisense/omnibase 4.x: %s::getEntityManager() is deprecated, use getUnitOfWork().', static::class), E_USER_DEPRECATED);
+
         return $this->entityManager;
+    }
+
+    public function getUnitOfWork(): UnitOfWork
+    {
+        return $this->unitOfWork;
     }
 
     public function getAssociationChangeSet($entity): array
     {
-        $classMetadata = $this->entityManager->getClassMetadata(is_object($entity) ? get_class($entity) : $entity);
-        if(!$classMetadata) return [];
+        $shapes = UnitOfWorks::shapes($this->unitOfWork);
+        $class = is_object($entity) ? $this->unitOfWork->className($entity) : $entity;
+        if(!$shapes->has($class)) return [];
+        $shape = $shapes->shape($class);
 
         $changeSet = [];
-        foreach($classMetadata->getAssociationNames() as $associationName) {
+        foreach($shape->associationNames() as $associationName) {
 
             if(!empty($this->getAssociationDeleteDiff($entity, $associationName))) $changeSet[] = $associationName;
             else if(!empty($this->getAssociationInsertDiff($entity, $associationName))) $changeSet[] = $associationName;

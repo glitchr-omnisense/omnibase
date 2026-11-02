@@ -16,6 +16,8 @@ use Symfony\Component\Notifier\Message\EmailMessage;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Throwable;
+use Omnibridge\Contract\Views;
+use Omnibridge\Twig\TwigViews;
 use Twig\Environment;
 use UnexpectedValueException;
 
@@ -59,8 +61,11 @@ final class NotificationMessages
         return new Response($html);
     }
 
-    public static function email(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Environment $twig, string $projectDir): EmailMessage
+    public static function email(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views|Environment $views, string $projectDir): EmailMessage
     {
+        // Symfony's templated e-mail is Twig's (WrappedTemplatedEmail): the environment behind the views (step F5a).
+        $twig = $views instanceof Environment ? $views : ($views instanceof TwigViews ? $views->environment() : throw new \LogicException('Symfony\'s notification e-mail is rendered by Twig: the views are '.get_debug_type($views).', not omnibridge/twig\'s TwigViews.'));
+        $views = $views instanceof Views ? $views : new TwigViews($views);
         $message = EmailMessage::fromNotification($notification, $recipient);
 
         /**
@@ -166,7 +171,7 @@ final class NotificationMessages
 
         // The template in the e-mail frame, the subject its <title> gives (Base\Notifier\Mail\EmailComposer:
         // the same lines under every host).
-        $rendered = EmailComposer::render($twig, $notification->getHtmlTemplate(), $htmlParameters);
+        $rendered = EmailComposer::render($views, $notification->getHtmlTemplate(), $htmlParameters);
         $context["html"] = $rendered["html"];
         $subject = $rendered["subject"] ?? $subject;
 

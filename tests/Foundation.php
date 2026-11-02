@@ -178,6 +178,7 @@
  * {EmailComposer, InlineImages, MailVariables, SignInMails}, Base\Routing\CookieDomain, Base\Security\
  * {ConnectionTracker, SignInCaptcha}, Base\Service\ReadSettings, Base\Traits\FrameworkAccessorsTrait, and the new
  * Base\Database\FormerNames.
+ * 796 after step F5a (2026-11-02, +3): Base\Services, Base\View\ViewsAdapter, Base\Demo\DemoAccountLock.
  */
 
 return [
@@ -335,6 +336,7 @@ return [
     Base\Database\UnitOfWorks::class,
     Base\Demo\DemoAccount::class,
     Base\Demo\DemoAccountFactory::class,
+    Base\Demo\DemoAccountLock::class,
     Base\Demo\DemoAccountProviderInterface::class,
     Base\Demo\DemoAccountRegistry::class,
     Base\Demo\DemoGuard::class,
@@ -856,6 +858,7 @@ return [
     Base\Service\WidgetProviderInterface::class,
     Base\Service\WysiwygEnhancer::class,
     Base\Service\WysiwygEnhancerInterface::class,
+    Base\Services::class,
     Base\Subscriber\AnalyticsSubscriber::class,
     Base\Subscriber\DemoBackOfficeSubscriber::class,
     Base\Subscriber\DemoSubscriber::class,
@@ -972,6 +975,7 @@ return [
     Base\View\Money::class,
     Base\View\Pagination::class,
     Base\View\Pictures::class,
+    Base\View\ViewsAdapter::class,
     Base\View\Widgets::class,
     Base\View\Wysiwyg::class,
 ];

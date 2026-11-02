@@ -22,7 +22,7 @@ class EditorEnhancer extends WysiwygEnhancer implements EditorEnhancerInterface
         // itself. `hydrate` (true by default) also leaves the document in
         // data-edjs, for the editor's script to take over as a read-only
         // editor where a page loads it; false prints the HTML alone.
-        return $this->twig->render("@Base/form/wysiwyg/editor_js.html.twig", [
+        return $this->views->render("@Base/form/wysiwyg/editor_js.html.twig", [
             "json" => $json,
             "html" => EditorJsRenderer::render($json),
             "hydrate" => $options["hydrate"] ?? true,

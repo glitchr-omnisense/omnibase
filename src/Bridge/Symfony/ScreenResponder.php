@@ -19,6 +19,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Base\View\ViewsAdapter;
+use Omnibridge\Contract\Views;
+use Omnibridge\Contract\ViewSources;
 use Twig\Environment;
 
 /**
@@ -39,13 +42,18 @@ class ScreenResponder
 {
     private ?Negotiation $negotiation = null;
 
+    /** The views the templates render through (plan "omnibase agnostic", F5a; Twig's environment before). */
+    private readonly Views $views;
+
+    /** @param Views|Environment $views Twig's environment is deprecated (until 6.0) */
     public function __construct(
-        private readonly Environment $twig,
+        Views|Environment $views,
         private readonly ContextProvider $context,
         private readonly ?string $version = null,
         /** Whether omnibridge/react's protocol is spoken for a View; null: when omnibridge/react is installed. */
         private readonly ?bool $omnibridge = null,
     ) {
+        $this->views = ViewsAdapter::of($views);
     }
 
     /** @param array<string, mixed> $legacy a View's variables of before, for a site's own template */
@@ -119,7 +127,7 @@ class ScreenResponder
     {
         $own ??= \dirname(__DIR__, 3).'/templates';
         $own = realpath($own) ?: $own;
-        $path = (string) $this->twig->getLoader()->getSourceContext($template)->getPath();
+        $path = $this->views instanceof ViewSources ? (string) $this->views->sourcePath($template) : '';
 
         return str_starts_with(realpath($path) ?: $path, rtrim($own, '/').'/') ? [] : $variables();
     }
@@ -138,6 +146,6 @@ class ScreenResponder
 
     public function negotiation(): Negotiation
     {
-        return $this->negotiation ??= new Negotiation(fn (string $template, array $context): string => $this->twig->render($template, $context), $this->context, $this->version, $this->omnibridge);
+        return $this->negotiation ??= new Negotiation(fn (string $template, array $context): string => $this->views->render($template, $context), $this->context, $this->version, $this->omnibridge);
     }
 }

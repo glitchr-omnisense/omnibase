@@ -282,7 +282,7 @@ final class HostlessEffectsTest extends KernelTestCase
             }
         };
         $composer = new EmailComposer(
-            $container->get('twig'),
+            $container->get(\Omnibridge\Contract\Views::class),
             static fn (): string => $notifier->getTechnicalRecipient()->getEmail(),
             static fn (string $to): bool => $notifier->isTest(new Recipient($to)),
             static fn (string $id): string => $notifier->getTranslator()->trans($id),

@@ -186,7 +186,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\Sitemapper')
         ->public()
         ->args([
-            new Reference('twig'),
+            new Reference('Omnibridge\Contract\Views'),
             new Reference('base.attribute_reader'),
             new Reference('advanced_router'),
             new Reference('localizer'),
@@ -239,7 +239,7 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->tag('twig.runtime')
         ->args([
-            new Reference('twig'),
+            new Reference('Omnibridge\Contract\Views'),
             new Reference('heading_enhancer'),
             new Reference('semantic_enhancer'),
             new Reference('mention_enhancer'),
@@ -290,7 +290,7 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->tag('twig.runtime')
         ->args([
-            new Reference('twig'),
+            new Reference('Omnibridge\Contract\Views', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             new Reference('advanced_router'),
             new Reference('obfuscator'),
             new Reference('flysystem'),
@@ -343,7 +343,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\Sharing')->public()->tag('twig.runtime');
 
     $services->set('Base\Service\Model\Sharing\AbstractSharingAdapter')
-        ->args([new Reference('twig')]);
+        ->args([new Reference('Omnibridge\Contract\Views')]);
 
     foreach ([
         'FacebookAdapter',

@@ -72,7 +72,7 @@ final class ScreenResponderTest extends TestCase
             }
         };
 
-        return new ScreenResponder($twig, $context, $version, $omnibridge);
+        return new ScreenResponder(new \Omnibridge\Twig\TwigViews($twig), $context, $version, $omnibridge);
     }
 
     private static function view(): View

@@ -339,12 +339,12 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service('notifier'),
             service('notifier.channel_policy'),
-            service('doctrine.orm.entity_manager'),
+            service('Omnibridge\Persistence\UnitOfWork'),
             service('parameter_bag'),
             service('translator'),
             service('localizer'),
             service('advanced_router'),
-            service('twig'),
+            service('Omnibridge\Contract\Views'),
             service('setting_bag'),
         ])
         ->bind('$debug', '%kernel.debug%')
@@ -479,7 +479,7 @@ return static function (ContainerConfigurator $container): void {
         ]);
     $services->alias('Base\Screen\ContextProvider', 'Base\Bridge\Symfony\SymfonyScreenContext')->public();
     $services->set('Base\Bridge\Symfony\ScreenResponder')->public()
-        ->args([service('twig'), service('Base\Screen\ContextProvider'), '%base.screens.version%']);
+        ->args([service('Omnibridge\Contract\Views'), service('Base\Screen\ContextProvider'), '%base.screens.version%']);
     // Actions written once for every host (audit "lesringostars face au master plan", R27): plain
     // classes whose #[Route] the router reads (a site's src/Action; the core's src/Controller/Action, which the
     // routes import of an omnibase site, @BaseBundle/Controller, reads) and

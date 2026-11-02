@@ -11,14 +11,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
+use Base\View\ViewsAdapter;
+use Omnibridge\Contract\Views;
 use Twig\Environment;
 
 class Sitemapper implements SitemapperInterface
 {
-    /**
-     * @var Environment
-     */
-    protected $twig;
+    /** The views the sitemap renders through (plan "omnibase agnostic", F5a; Twig's environment before). */
+    protected Views $views;
 
     /**
      * @var AttributeReader
@@ -49,9 +49,10 @@ class Sitemapper implements SitemapperInterface
 
     protected ?LoggerInterface $logger;
 
-    public function __construct(Environment $twig, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer, ?LoggerInterface $logger = null)
+    /** @param Views|Environment $views Twig's environment is deprecated (until 6.0) */
+    public function __construct(Views|Environment $views, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer, ?LoggerInterface $logger = null)
     {
-        $this->twig = $twig;
+        $this->views = ViewsAdapter::of($views);
         $this->router = $router;
         $this->localizer = $localizer;
         $this->attributeReader = $attributeReader;
@@ -430,7 +431,7 @@ class Sitemapper implements SitemapperInterface
         $mimeTypes = $this->mimeTypes->getMimeTypes($extension);
 
         $response = new Response(
-            $this->twig->render(
+            $this->views->render(
                 $name,
                 array_merge($context, [
                     'urlset' => $urlset,

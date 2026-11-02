@@ -25,8 +25,17 @@ class Obfuscator extends AbstractLocalCache implements ObfuscatorInterface
         return [];
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir, ?string $buildDir = null)
+    /**
+     * @param iterable<CompressionInterface> $compressions the compressions known from the start (Base\Services' list, plan
+     *                                                    "omnibase agnostic", F5a); under Symfony the services tagged
+     *                                                    obfuscator.compression are added after (addCompression())
+     */
+    public function __construct(ParameterBagInterface $parameterBag, string $cacheDir, ?string $buildDir = null, iterable $compressions = [])
     {
+        foreach ($compressions as $compression) {
+            $this->addCompression($compression);
+        }
+
         $this->uuid = $parameterBag->get("base.obfuscator.uuid") ?? Uuid::NAMESPACE_URL;
 
         $this->compression = $parameterBag->get("base.obfuscator.compression") ?? "null";

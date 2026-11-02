@@ -8,14 +8,14 @@ use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
 use Base\Service\Model\Wysiwyg\LinkEnhancerInterface;
 use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
+use Base\View\ViewsAdapter;
+use Omnibridge\Contract\Views;
 use Twig\Environment;
 
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
-    /**
-     * @var Environment
-     */
-    protected $twig;
+    /** The views the editor's markup renders through (plan "omnibase agnostic", F5a; Twig's environment before). */
+    protected Views $views;
 
     /**
      * @var HeadingEnhancerInterface
@@ -43,14 +43,14 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
     protected $mediaEnhancer;
 
     public function __construct(
-        Environment $twig,
+        Views|Environment $views,
         HeadingEnhancerInterface $headingEnhancer,
         SemanticEnhancerInterface $semanticEnhancer,
         MentionEnhancerInterface $mentionEnhancer,
         LinkEnhancerInterface $linkEnhancer,
         MediaEnhancerInterface $mediaEnhancer)
     {
-        $this->twig = $twig;
+        $this->views = ViewsAdapter::of($views);
 
         $this->headingEnhancer = $headingEnhancer;
         $this->semanticEnhancer = $semanticEnhancer;
@@ -70,7 +70,7 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
             return "";
         }
 
-        return $this->twig->render("@Base/form/wysiwyg/quill.html.twig", ["html" => $html, "options" => $options]);
+        return $this->views->render("@Base/form/wysiwyg/quill.html.twig", ["html" => $html, "options" => $options]);
     }
 
     public function getTableOfContents(mixed $html, ?int $maxLevel = null): array

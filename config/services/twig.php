@@ -7,6 +7,7 @@ use \Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_closure;
 
 /*
  * omnibase's Twig layer (src/Twig): its environment, loader, variables, tag renderers and
@@ -29,6 +30,18 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
 
     $services->defaults()
         ->public(false);
+
+    // omnibridge's Views over Twig's environment (plan "omnibase agnostic", F5a): what the core's services
+    // render through - the notifier and its mails, the sitemap, the QR sheet, the sharing buttons, the
+    // media tags, the editor, the screens. The environment asked when first needed (its extensions take
+    // some of those services). omnibridge/twig is required by omnibridge/symfony; an application binds
+    // its own Views over this alias to render them with another engine.
+    if (class_exists(\Omnibridge\Twig\TwigViews::class)) {
+        $services->set('Omnibridge\Twig\TwigViews')->args([service_closure('twig')]);
+        $services->alias('Omnibridge\Contract\Views', 'Omnibridge\Twig\TwigViews')->public();
+        // A constructor that still accepts Twig's environment, deprecated (until 6.0), beside Views.
+        $services->alias('Omnibridge\Contract\Views|Twig\Environment', 'Omnibridge\Contract\Views');
+    }
 
     // The tag renderers, handed to omnibase's environment (TagRendererPass).
     $builder->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');

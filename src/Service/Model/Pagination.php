@@ -4,6 +4,7 @@ namespace Base\Service\Model;
 
 use Base\Exception\InvalidPageException;
 use Doctrine\ORM\Query;
+use Omnibridge\Contract\Urls;
 use Symfony\Component\Routing\RouterInterface;
 use Countable;
 use Iterator;
@@ -11,7 +12,8 @@ use UnexpectedValueException;
 
 class Pagination implements PaginationInterface, Iterator, Countable
 {
-    protected RouterInterface $router;
+    /** The addresses of the pages: omnibridge's Urls (plan "omnibase agnostic", F5a: where the host has no router of Symfony's), or Symfony's router (its advanced_router under Symfony, its links as they were). */
+    protected Urls|RouterInterface $router;
     private bool $build;
 
     protected mixed $paginator = null;
@@ -37,7 +39,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     ];
 
     /** @param array|Pages|Query $arrayOrQuery the rows: an array, or a query's Pages (a Doctrine Query is adapted) */
-    public function __construct(array|Pages|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
+    public function __construct(array|Pages|Query $arrayOrQuery, Urls|RouterInterface $router, ?string $parameterName = "page")
     {
         if (!is_array($arrayOrQuery)) {
             $this->paginator = self::pages($arrayOrQuery);
@@ -293,7 +295,9 @@ class Pagination implements PaginationInterface, Iterator, Countable
             $page = $this->getPage();
         }
 
-        return $this->router->generate($name, array_merge($parameters, [$this->getParameterName() => $page]));
+        $parameters = array_merge($parameters, [$this->getParameterName() => $page]);
+
+        return $this->router instanceof Urls ? $this->router->path($name, $parameters) : $this->router->generate($name, $parameters);
     }
 
     protected array $lastResult = [];

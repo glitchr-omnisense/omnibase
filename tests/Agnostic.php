@@ -49,6 +49,8 @@
  * {ExtensionSubscriber, SettingSubscriber, TrasheableSubscriber, VersionableSubscriber}, which loaded nothing of
  * Doctrine themselves -; +17, the classes that passed --strict and were listed nowhere (see tests/Foundation.php),
  * Base\Database\FormerNames among them.
+ * 699 after step F5a (2026-11-02, +3): Base\Services (the core's services as data), Base\View\ViewsAdapter
+ * (Views from what a service was given) and Base\Demo\DemoAccountLock (the demonstration accounts' rule).
  */
 
 return [
@@ -196,6 +198,7 @@ return [
     Base\Database\UnitOfWorks::class,
     Base\Demo\DemoAccount::class,
     Base\Demo\DemoAccountFactory::class,
+    Base\Demo\DemoAccountLock::class,
     Base\Demo\DemoAccountProviderInterface::class,
     Base\Demo\DemoAccountRegistry::class,
     Base\Demo\DemoGuard::class,
@@ -710,6 +713,7 @@ return [
     Base\Service\WidgetProviderInterface::class,
     Base\Service\WysiwygEnhancer::class,
     Base\Service\WysiwygEnhancerInterface::class,
+    Base\Services::class,
     Base\Traits\BagTrait::class,
     Base\Traits\BaseCommonTrait::class,
     Base\Traits\BaseTrait::class,
@@ -746,6 +750,7 @@ return [
     Base\View\Money::class,
     Base\View\Pagination::class,
     Base\View\Pictures::class,
+    Base\View\ViewsAdapter::class,
     Base\View\Widgets::class,
     Base\View\Wysiwyg::class,
 ];

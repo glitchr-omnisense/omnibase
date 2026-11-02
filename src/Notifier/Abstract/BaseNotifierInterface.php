@@ -5,7 +5,6 @@ namespace Base\Notifier\Abstract;
 use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\NotifierInterface;
-use Twig\Environment;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -48,7 +47,8 @@ interface BaseNotifierInterface extends NotifierInterface
 
     public function getTranslator(): TranslatorInterface;
 
-    public function getEnvironment(): Environment;
+    /** The views the mails and pages render through (getEnvironment(), Twig's, until step F5a). */
+    public function getViews(): \Omnibridge\Contract\Views;
 
     /**
      * @return mixed

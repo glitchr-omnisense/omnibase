@@ -10,6 +10,35 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the services available everywhere (plan "omnibase agnostic", step F5a, 2026-11-02)
+
+Marco's answer 3: the services stay available everywhere. See
+[docs/20-architecture/services.md](docs/20-architecture/services.md).
+
+- **`Base\Services::definitions()`**: the core's services as data (class, id, contracts, arguments by
+  name), read by Symfony's container (`config/services-list.php`, loaded last: a listed service the
+  configuration does not define is defined from the list, a listed contract it does not alias is
+  aliased), by Laravel's (omnibridge/laravel's `Container\Definitions`) and by omnisense/omnibridge's
+  plain-PHP `Omnibridge\Container` (`fromDefinitions()`). Today: the obfuscator and its compressions,
+  MediaService, Paginator, Translator, Stories, EmailComposer.
+- **Views in place of Twig's environment**: the notifier (`BaseNotifier::getViews()`, in
+  `BaseNotifierInterface` in place of `getEnvironment()`), `EmailComposer` and `InlineImages` (the picture
+  through omnibridge's `ViewSources`; the text part written in PHP, `EmailComposer::text()`),
+  `Notification::renderHtml()` and its template check, `NotificationMessages::email()`,
+  `MediaService`/`FileService`, `Sitemapper`, `QrSheet`, the sharing adapters, `WysiwygEnhancer`/`EditorEnhancer`,
+  `ScreenResponder`. Under Symfony `Omnibridge\Contract\Views` is omnibridge/twig's `TwigViews` over `twig`
+  (config/services/twig.php), and a contract of the runtime (ContractsPass). Twig's environment is still
+  accepted, deprecated until 6.0 (`Base\View\ViewsAdapter`).
+- **On contracts**: `AbstractEventDispatcher` and `BaseNotifier` on omnibridge's `UnitOfWork` (the entity
+  manager deprecated, `getEntityManager()` for `getUnitOfWork()`); `Paginator`/`Pagination` accept `Urls`
+  (`advanced_router` under Symfony, as before); `Translator` reads omnibridge's `Environment`; `Obfuscator`
+  takes its compressions in its constructor too; `DemoAccountLockSubscriber`'s rule is
+  `Base\Demo\DemoAccountLock`'s.
+- `bare --strict` +3 (`Base\Services`, `Base\View\ViewsAdapter`, `Base\Demo\DemoAccountLock`); BareTest builds
+  the services with `Omnibridge\Container` alone (`tests/Services/container-without-framework.php`);
+  `tests/ServicesTest` checks the list against Symfony's container; `tests/Notifier/Mail/EmailComposerTest`.
+- `bare --install` takes omnisense/omnibridge from its checkout when one is mounted beside the core.
+
 ### Changed: Doctrine moves to omnibridge/doctrine (plan "omnibase agnostic", step F3, 2026-11-02)
 
 The core's Doctrine classes are omnibridge/doctrine's, under `Omnibridge\Doctrine\Omnibase\` - 142 classes, by

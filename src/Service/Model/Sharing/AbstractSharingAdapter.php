@@ -3,24 +3,24 @@
 namespace Base\Service\Model\Sharing;
 
 use Base\Service\Model\IconizeInterface;
+use Base\View\ViewsAdapter;
+use Omnibridge\Contract\Views;
 use Twig\Environment;
 
 abstract class AbstractSharingAdapter implements SharingAdapterInterface, IconizeInterface
 {
-    /**
-     * @var Environment
-     */
-
-    protected Environment $twig;
+    /** The views the button renders through (plan "omnibase agnostic", F5a; Twig's environment before). */
+    protected Views $views;
 
     public function __iconize(): ?array
     {
         return null;
     }
 
-    public function __construct(Environment $twig)
+    /** @param Views|Environment $views Twig's environment is deprecated (until 6.0) */
+    public function __construct(Views|Environment $views)
     {
-        $this->twig = $twig;
+        $this->views = ViewsAdapter::of($views);
     }
 
     public function getTemplate(): string
@@ -34,7 +34,7 @@ abstract class AbstractSharingAdapter implements SharingAdapterInterface, Iconiz
         $search = array_map(fn($e) => "{" . $e . "}", array_keys($options));
         $replace = array_map(fn($o) => urlencode($o), array_values($options));
 
-        return $this->twig->render(
+        return $this->views->render(
             $template ?? $this->getTemplate(),
             array_merge($options, [
                 "adapter" => $this,
