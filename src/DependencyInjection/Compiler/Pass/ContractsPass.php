@@ -11,6 +11,7 @@ use Omnibridge\Contract\Access;
 use Omnibridge\Contract\Environment;
 use Omnibridge\Contract\Files;
 use Omnibridge\Contract\Locales;
+use Omnibridge\Contract\Requests;
 use Omnibridge\Contract\Routes;
 use Omnibridge\Contract\Sessions;
 use Omnibridge\Contract\Tokens;
@@ -62,6 +63,7 @@ final class ContractsPass implements CompilerPassInterface
         Media::class,
         Texts::class,
         Tokens::class,
+        Requests::class,
         Views::class,
         Validation::class,
         ClockInterface::class,

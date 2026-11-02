@@ -14,6 +14,10 @@ use Omnishield\Exception\ProviderException;
 use Omnishield\Model\Label;
 use Omnishield\Model\Submission;
 use Psr\Log\LoggerInterface;
+use Base\Http\RequestsOf;
+use Omnibridge\Contract\Requests;
+use Omnibridge\Contract\Urls;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -34,23 +38,34 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * text, the date. A provider that does not answer is base.guard.unreachable:
  * accept (NOT_SPAM) or reject (MAYBE_SPAM, held for a person); a key refused
  * is the site's error, let through and logged. Nothing is swallowed silently.
+ *
+ * Neutral (plan "omnibase agnostic", F5c): the request through Omnibridge\Contract\Requests,
+ * the home page through omnibase's router or the host's Urls ("/"); a host without a
+ * classifier configured asks nothing (NOT_SPAM).
  */
 class SpamChecker implements SpamCheckerInterface
 {
     protected ?ClassifierInterface $classifier = null;
     protected bool $resolved = false;
 
+    protected ?Requests $requests;
+
+    /**
+     * @param Requests|RequestStack|null           $requests Symfony's RequestStack is deprecated (until 6.0)
+     * @param AdvancedRouterInterface|Urls|null    $router   the home page's address
+     */
     public function __construct(
-        protected RequestStack $requestStack,
+        #[Autowire(service: Requests::class)] Requests|RequestStack|null $requests,
         protected SettingBagInterface $settingBag,
         protected ParameterBagInterface $parameterBag,
         protected TranslatorInterface $translator,
         protected HttpClientInterface $client,
         protected bool $debug,
         protected ?FormGuard $guard = null,
-        protected ?AdvancedRouterInterface $router = null,
+        protected AdvancedRouterInterface|Urls|null $router = null,
         protected ?LoggerInterface $logger = null,
     ) {
+        $this->requests = RequestsOf::of($requests);
     }
 
     public function getLang(): ?string
@@ -65,17 +80,17 @@ class SpamChecker implements SpamCheckerInterface
     /** The site's home page: what Akismet calls the blog - not the page the form is on. */
     public function getUrl(): ?string
     {
-        $request = $this->requestStack->getCurrentRequest();
         try {
-            $home = $this->router?->getUrlIndex();
+            $home = $this->router instanceof Urls ? $this->router->url('/') : $this->router?->getUrlIndex();
         } catch (\Throwable) {
             $home = null;
         }
         if ($home && preg_match('#^https?://#', $home)) {
             return $home;
         }
+        $host = $this->requests?->host();
 
-        return $request ? $request->getSchemeAndHttpHost().'/'.ltrim((string) $home, '/') : null;
+        return null !== $host ? $host.'/'.ltrim((string) $home, '/') : null;
     }
 
     /**
@@ -129,7 +144,7 @@ class SpamChecker implements SpamCheckerInterface
      */
     public function submission(SpamProtectionInterface $candidate, array $context = []): Submission
     {
-        $request = $this->requestStack->getCurrentRequest();
+        $request = $this->requests;
         $user = $candidate->getSpamBlameable();
         $date = $candidate->getSpamDate();
 
@@ -138,10 +153,10 @@ class SpamChecker implements SpamCheckerInterface
             $this->text($context['comment_author'] ?? $this->read($candidate, 'name') ?? ($user ? (string) $user : null)),
             $this->text($context['comment_author_email'] ?? $this->read($candidate, 'email') ?? $user?->getEmail()),
             $this->text($context['comment_author_url'] ?? $this->read($candidate, 'website')),
-            $this->text($context['user_ip'] ?? $request?->getClientIp() ?? $this->read($candidate, 'ip')),
-            $this->text($context['user_agent'] ?? $request?->headers->get('user-agent') ?? $this->read($candidate, 'userAgent')),
-            $this->text($context['referrer'] ?? $request?->headers->get('referer')),
-            $this->text($context['permalink'] ?? $request?->getUri()),
+            $this->text($context['user_ip'] ?? $request?->ip() ?? $this->read($candidate, 'ip')),
+            $this->text($context['user_agent'] ?? $request?->header('user-agent') ?? $this->read($candidate, 'userAgent')),
+            $this->text($context['referrer'] ?? $request?->header('referer')),
+            $this->text($context['permalink'] ?? $request?->uri()),
             $this->getUrl(),
             $this->getLang(),
             (string) ($context['comment_type'] ?? Submission::COMMENT),

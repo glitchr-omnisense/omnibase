@@ -10,8 +10,12 @@ use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
 
+use Base\Http\RequestsOf;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
+use Omnibridge\Contract\Requests;
+use Omnibridge\Event\Events;
+use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -59,9 +63,10 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     }
 
     /**
-     * @var SymfonyEventDispatcherInterface
+     * Any PSR-14 dispatcher (plan "omnibase agnostic", F5c): Symfony's is given the event's name
+     * (user.register...), any other the event alone, which carries it (Omnibridge\Event\NamedEvent).
      */
-    protected SymfonyEventDispatcherInterface $dispatcher;
+    protected PsrEventDispatcherInterface $dispatcher;
 
     /**
      * @var EntityHydratorInterface
@@ -77,18 +82,19 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: $unitOfWork (null when a unit of work that is not Doctrine's was given) */
     protected ?EntityManagerInterface $entityManager;
 
-    /**
-     * @var RequestStack
-     */
-    protected RequestStack $requestStack;
+    /** The request being answered, which an event carries (null in a command, a worker, plain PHP). */
+    protected ?Requests $requests;
 
     /**
      * @var PropertyAccessorInterface
      */
     protected PropertyAccessorInterface $propertyAccessor;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, UnitOfWork|EntityManagerInterface $unitOfWork, RequestStack $requestStack)
+    /**
+     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
+     * @param Requests|RequestStack|null       $requests   Symfony's RequestStack is deprecated (until 6.0): adapted by RequestsOf
+     */
+    public function __construct(PsrEventDispatcherInterface $dispatcher, EntityHydratorInterface $entityHydrator, UnitOfWork|EntityManagerInterface $unitOfWork, #[Autowire(service: Requests::class)] Requests|RequestStack|null $requests = null)
     {
         self::$live ??= new \WeakMap();
         self::$live[$this] = true;
@@ -97,7 +103,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
         $this->entityManager = $unitOfWork instanceof EntityManagerInterface ? $unitOfWork : (method_exists($this->unitOfWork, 'entityManager') ? $this->unitOfWork->entityManager() : null);
         $this->entityHydrator = $entityHydrator;
 
-        $this->requestStack = $requestStack;
+        $this->requests = RequestsOf::of($requests);
         $this->events = [];
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -147,7 +153,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
         $reflush = false;
         $eventClass = $this->getEventClass();
 
-        $request = $this->requestStack->getCurrentRequest();
+        $request = $this->requests?->request();
         foreach ($this->events[$id] as $eventName => $alreadyTriggered) {
 
             if ($alreadyTriggered === false) {
@@ -155,7 +161,11 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
             }
 
             $this->events[$id][$eventName] = false;
-            $this->dispatcher->dispatch(new $eventClass($event, $request), $eventName);
+            $dispatched = new $eventClass($event, $request);
+            if ($dispatched instanceof AbstractEvent) {
+                $dispatched->setEventName($eventName);
+            }
+            Events::dispatch($this->dispatcher, $dispatched, $eventName);
             $reflush = true;
         }
 

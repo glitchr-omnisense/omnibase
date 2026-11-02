@@ -9,6 +9,8 @@ use Base\Service\Model\IntlDateTime;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Omnibridge\Contract\Access;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class Launcher implements LauncherInterface
 {
@@ -19,11 +21,13 @@ class Launcher implements LauncherInterface
     /** @var SettingBagInterface */
     protected SettingBagInterface $settingBag;
     /** @var AuthorizationCheckerInterface */
-    protected AuthorizationCheckerInterface $authorizationChecker;
+    /** Who may pass (plan "omnibase agnostic", F5c: Omnibridge\Contract\Access; Security's checker deprecated until 6.0). */
+    protected AuthorizationCheckerInterface|Access $authorizationChecker;
     /** @var TokenStorageInterface */
-    protected TokenStorageInterface $tokenStorage;
+    /** Who is signed in: Access, or Security's token storage (deprecated until 6.0). */
+    protected TokenStorageInterface|Access|null $tokenStorage;
 
-    public function __construct(AdvancedRouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage)
+    public function __construct(AdvancedRouterInterface $router, ParameterBagInterface $parameterBag, SettingBagInterface $settingBag, #[Autowire(service: Access::class)] AuthorizationCheckerInterface|Access $authorizationChecker, #[Autowire(service: Access::class)] TokenStorageInterface|Access|null $tokenStorage = null)
     {
         $this->router = $router;
         $this->parameterBag = $parameterBag;
@@ -138,9 +142,14 @@ class Launcher implements LauncherInterface
             $this->router->redirectEvent($event, $redirectOnDeny, [], 302);
         }
 
-        $token = $this->tokenStorage->getToken();
-        if ($token && $token->getUser()) {
-            $token->getUser()->Logout();
+        $user = match (true) {
+            $this->tokenStorage instanceof Access => $this->tokenStorage->getUser(),
+            null !== $this->tokenStorage => $this->tokenStorage->getToken()?->getUser(),
+            $this->authorizationChecker instanceof Access => $this->authorizationChecker->getUser(),
+            default => null,
+        };
+        if ($user && method_exists($user, 'Logout')) {
+            $user->Logout();
         }
 
         return true;

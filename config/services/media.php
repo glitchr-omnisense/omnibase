@@ -172,7 +172,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\SpamChecker')
         ->public()
         ->args([
-            new Reference('request_stack'),
+            new Reference('Omnibridge\Contract\Requests'),
             new Reference('setting_bag'),
             new Reference('parameter_bag'),
             new Reference('translator'),

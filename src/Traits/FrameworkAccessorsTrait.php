@@ -36,7 +36,8 @@ use Twig\Environment;
  *   Runtime::sessions(), Runtime::routes();
  * - getService(): the contracts the facade answered (Runtime::environment(), ::access()...);
  * - getSlugger(): symfony/string's AsciiSlugger, or an injected slugger.
- * Host code of the core and the Symfony half of a bundle: Base\Bridge\Symfony\FrameworkLocator,
+ * Host code of the core and the Symfony half of a bundle: omnibridge/symfony's Omnibridge\Symfony\Omnibase\FrameworkLocator
+ * (formerly Base\Bridge\Symfony\FrameworkLocator, step F5c; each accessor answers null without the bridge),
  * the same services without the deprecation.
  *
  * @deprecated since omnisense/omnibase 4.0 (F2f): removed with the former names at 6.0, after
@@ -54,7 +55,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getService', 'the contracts the facade answered (Runtime::environment(), Runtime::access()...)');
 
-        return FrameworkLocator::service();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::service() : null;
     }
 
     /** @deprecated since omnisense/omnibase 4.0: the unit of work, the repositories */
@@ -102,7 +103,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getTokenStorage', 'Runtime::access()');
 
-        return FrameworkLocator::tokenStorage();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::tokenStorage() : null;
     }
 
     /** @deprecated since omnisense/omnibase 4.0: Runtime::sessions(), Runtime::locales() */
@@ -110,7 +111,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getRequestStack', 'Runtime::sessions() or Runtime::locales()');
 
-        return FrameworkLocator::requestStack();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::requestStack() : null;
     }
 
     /** @deprecated since omnisense/omnibase 4.0: Runtime::routes() */
@@ -118,7 +119,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getFirewallMap', 'Runtime::routes()');
 
-        return FrameworkLocator::firewallMap();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::firewallMap() : null;
     }
 
     /** @deprecated since omnisense/omnibase 4.0: Omnibridge\Contract\Views (Runtime::views()) */
@@ -126,7 +127,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getTwig', 'Omnibridge\Contract\Views (Runtime::views())');
 
-        return FrameworkLocator::twig();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::twig() : null;
     }
 
     /** @deprecated since omnisense/omnibase 4.0: symfony/string's AsciiSlugger, or an injected slugger */
@@ -134,7 +135,7 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getSlugger', "symfony/string's AsciiSlugger, or an injected slugger");
 
-        return FrameworkLocator::slugger();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::slugger() : null;
     }
 
     /** @deprecated since omnisense/omnibase 4.0: Base\Contract\Link::to(), Runtime::urls() */
@@ -142,6 +143,6 @@ trait FrameworkAccessorsTrait
     {
         self::deprecatedAccessor('getRouter', 'Base\Contract\Link::to() or Runtime::urls()');
 
-        return FrameworkLocator::router();
+        return class_exists(FrameworkLocator::class) ? FrameworkLocator::router() : null;
     }
 }

@@ -7,6 +7,8 @@ use Base\Routing\AdvancedRouterInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Omnibridge\Contract\Access;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
@@ -17,18 +19,20 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     /** @var SettingBagInterface */
     protected SettingBagInterface $settingBag;
     /** @var AuthorizationCheckerInterface */
-    protected AuthorizationCheckerInterface $authorizationChecker;
+    /** Who may pass (plan "omnibase agnostic", F5c: Omnibridge\Contract\Access; Security's checker deprecated until 6.0). */
+    protected AuthorizationCheckerInterface|Access $authorizationChecker;
     /** @var LocalizerInterface */
     protected LocalizerInterface $localizer;
     /** @var TokenStorageInterface */
-    protected TokenStorageInterface $tokenStorage;
+    /** Who is signed in: Access, or Security's token storage (deprecated until 6.0). */
+    protected TokenStorageInterface|Access|null $tokenStorage;
 
     protected int $remainingTime = 0;
     protected int $percentage = -1;
     protected int $uptime = 0;
     protected int $downtime = 0;
 
-    public function __construct(AdvancedRouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, TokenStorageInterface $tokenStorage)
+    public function __construct(AdvancedRouterInterface $router, SettingBagInterface $settingBag, #[Autowire(service: Access::class)] AuthorizationCheckerInterface|Access $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, #[Autowire(service: Access::class)] TokenStorageInterface|Access|null $tokenStorage = null)
     {
         $this->router = $router;
 
@@ -164,9 +168,14 @@ class MaintenanceProvider implements MaintenanceProviderInterface
             $this->router->redirectEvent($event, $redirectOnDeny, [], 302);
         }
 
-        $token = $this->tokenStorage->getToken();
-        if ($token && $token->getUser()) {
-            $token->getUser()->Logout();
+        $user = match (true) {
+            $this->tokenStorage instanceof Access => $this->tokenStorage->getUser(),
+            null !== $this->tokenStorage => $this->tokenStorage->getToken()?->getUser(),
+            $this->authorizationChecker instanceof Access => $this->authorizationChecker->getUser(),
+            default => null,
+        };
+        if ($user && method_exists($user, 'Logout')) {
+            $user->Logout();
         }
 
         return true;

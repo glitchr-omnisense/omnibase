@@ -3,15 +3,22 @@
 namespace Base\Service;
 
 use Base\Routing\AdvancedRouterInterface;
+use Base\Http\RequestsOf;
+use Omnibridge\Contract\Requests;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
 use  Base\Security\LoginFormAuthenticator;
 use  Base\Security\RescueFormAuthenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
+/**
+ * Where to go back to: the target path posted or kept in the session, the
+ * firewall's, the referer. The request and its session through
+ * Omnibridge\Contract\Requests (plan "omnibase agnostic", F5c).
+ */
 class Referrer implements ReferrerInterface
 {
-    /** @var RequestStack */
-    private RequestStack $requestStack;
+    private ?Requests $requests;
 
     /** @var AdvancedRouterInterface */
     private AdvancedRouterInterface $router;
@@ -21,9 +28,10 @@ class Referrer implements ReferrerInterface
         return $this->getUrl() ?? "";
     }
 
-    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router)
+    /** @param Requests|RequestStack|null $requests Symfony's RequestStack is deprecated (until 6.0) */
+    public function __construct(#[Autowire(service: Requests::class)] Requests|RequestStack|null $requests, AdvancedRouterInterface $router)
     {
-        $this->requestStack = $requestStack;
+        $this->requests = RequestsOf::of($requests);
         $this->router = $router;
     }
 
@@ -59,9 +67,9 @@ class Referrer implements ReferrerInterface
 
     public function clear()
     {
-        $this->requestStack->getMainRequest()->getSession()->remove('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
-        $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
-        $this->requestStack->getMainRequest()->getSession()->set('_target_path', null);
+        $this->requests?->forget('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
+        $this->requests?->forget('_security.account.target_path'); // Internal definition by firewall
+        $this->requests?->remember('_target_path', null);
     }
 
     /**
@@ -74,9 +82,9 @@ class Referrer implements ReferrerInterface
             return $this;
         }
         
-        $this->requestStack->getMainRequest()->getSession()->remove('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
-        $this->requestStack->getMainRequest()->getSession()->remove('_security.account.target_path'); // Internal definition by firewall
-        $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
+        $this->requests?->forget('_security.' . $this->router->getRouteFirewall()->getName() . '.target_path');
+        $this->requests?->forget('_security.account.target_path'); // Internal definition by firewall
+        $this->requests?->remember('_target_path', $url);
 
         return $this;
     }
@@ -91,44 +99,44 @@ class Referrer implements ReferrerInterface
 
     public function getUrl(): ?string
     {
-        $request = $this->requestStack->getMainRequest();
-        if (null === $request) {
+        if (null === $this->requests || !$this->requests->has()) {
             return null;
         }
+        $posted = $this->requests->request()?->request;
 
         // Target path fallbacks
-        $targetPath = $request->request->get('_target_path');
+        $targetPath = $posted?->get('_target_path');
         $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
         $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
 
         if (!$targetRoute) {
-            $targetPath = $request->getSession()->get('_target_path');
+            $targetPath = $this->requests->session('_target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         // Security fallbacks
         if (!$targetRoute) {
-            $targetPath = $request->getSession()->get('_security.main.target_path');
+            $targetPath = $this->requests->session('_security.main.target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         if (!$targetRoute) {
-            $targetPath = $request->getSession()->get('_security.account.target_path');
+            $targetPath = $this->requests->session('_security.account.target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         // Default referrer
         if (!$targetRoute) {
-            $targetPath = $request->headers->get("referer"); // Yes.. with the legendary misspelling.
+            $targetPath = $this->requests->header("referer"); // Yes.. with the legendary misspelling.
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         if (!$targetRoute) {
-            $targetPath = $request->request->get('referrer');
+            $targetPath = $posted?->get('referrer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
             $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }

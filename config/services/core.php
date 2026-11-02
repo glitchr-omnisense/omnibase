@@ -35,7 +35,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Service\Referrer')
         ->public(true)
         ->args([
-            service('request_stack'),
+            service('Omnibridge\Contract\Requests'),
             service('advanced_router'),
         ]);
 
@@ -576,11 +576,11 @@ return static function (ContainerConfigurator $container): void {
     // Maintenance / Launcher / Paginator / Breadgrinder / WidgetProvider
     $services->set('Base\Service\MaintenanceProvider')
         ->public(true)
-        ->args([service('advanced_router'), service('setting_bag'), service('security.authorization_checker'), service('parameter_bag'), service('localizer'), service('security.token_storage')]);
+        ->args([service('advanced_router'), service('setting_bag'), service('Omnibridge\Contract\Access'), service('parameter_bag'), service('localizer'), service('Omnibridge\Contract\Access')]);
 
     $services->set('Base\Service\Launcher')
         ->public(true)
-        ->args([service('advanced_router'), service('parameter_bag'), service('setting_bag'), service('security.authorization_checker'), service('security.token_storage')]);
+        ->args([service('advanced_router'), service('parameter_bag'), service('setting_bag'), service('Omnibridge\Contract\Access'), service('Omnibridge\Contract\Access')]);
 
     $services->set('Base\Service\Paginator')
         ->public(true)

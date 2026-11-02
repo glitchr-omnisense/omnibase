@@ -7,7 +7,7 @@ use Base\Service\Model\LocaleNormalizer;
 use DateTimeZone;
 use Exception;
 use Locale;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface as ContainerParameters;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Currencies;
@@ -19,7 +19,8 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
 {
     public const LOCALE_FORMAT = "xx-XX";
 
-    protected ?ParameterBagInterface $parameterBag = null;
+    /** omnibase's parameters, or the container's (plan "omnibase agnostic", F5c: a host without Symfony's container gives omnibase's). */
+    protected ParameterBagInterface|ContainerParameters|null $parameterBag = null;
 
     protected static $isLate = null; // Turns on when on kernel request
 
@@ -66,7 +67,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
         return $this;
     }
 
-    public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator, string $cacheDir, ?string $buildDir = null)
+    public function __construct(ParameterBagInterface|ContainerParameters $parameterBag, TranslatorInterface $translator, string $cacheDir, ?string $buildDir = null)
     {
         $this->parameterBag = $parameterBag;
         $this->translator = $translator;

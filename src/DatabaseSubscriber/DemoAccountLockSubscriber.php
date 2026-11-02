@@ -6,6 +6,9 @@ use Base\Demo\DemoAccountLock;
 use Base\Demo\DemoAccountRegistry;
 use Base\Entity\User;
 use Doctrine\ORM\Event\PreFlushEventArgs;
+use Base\Http\RequestsOf;
+use Omnibridge\Contract\Requests;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
@@ -29,7 +32,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * The rule itself is Base\Demo\DemoAccountLock's (plan "omnibase agnostic",
  * step F5a); this listener is its Doctrine and Symfony side - Doctrine's
  * identity map and original rows, the request, the flash message - and
- * leaves for omnibridge/doctrine and omnibridge/symfony with them.
+ * leaves for omnibridge/doctrine with them. The request and the flash message
+ * go through Omnibridge\Contract\Requests (step F5c).
  */
 class DemoAccountLockSubscriber
 {
@@ -37,19 +41,23 @@ class DemoAccountLockSubscriber
 
     private readonly DemoAccountLock $lock;
 
+    private readonly ?Requests $requests;
+
+    /** @param Requests|RequestStack|null $requests Symfony's RequestStack is deprecated (until 6.0) */
     public function __construct(
         DemoAccountRegistry $accounts,
-        private readonly RequestStack $requestStack,
+        #[Autowire(service: Requests::class)] Requests|RequestStack|null $requests,
         PasswordHasherFactoryInterface $hashers,
         ?TranslatorInterface $translator = null,
         ?DemoAccountLock $lock = null,
     ) {
         $this->lock = $lock ?? new DemoAccountLock($accounts, $hashers, $translator);
+        $this->requests = RequestsOf::of($requests);
     }
 
     public function preFlush(PreFlushEventArgs $event): void
     {
-        if (null === $this->requestStack->getMainRequest()) {
+        if (null === $this->requests || !$this->requests->has()) {
             return;
         }
 
@@ -96,12 +104,11 @@ class DemoAccountLockSubscriber
             return;
         }
 
-        $request = $this->requestStack->getMainRequest();
-        if (!$request?->hasSession()) {
+        if (null === $this->requests || !$this->requests->has()) {
             return;
         }
 
-        $request->getSession()->getFlashBag()->add('warning', $this->lock->message('locked'));
+        $this->requests->flash('warning', $this->lock->message('locked'));
         $this->told = true;
     }
 

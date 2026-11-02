@@ -19,7 +19,10 @@ use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Database\UnitOfWorks;
 use Base\Notifier\Mail\EmailComposer;
+use Omnibridge\Contract\Requests;
+use Omnibridge\Contract\Urls;
 use Omnibridge\Contract\Views;
+use Omnibridge\Runtime;
 use Omnibridge\Persistence\UnitOfWork;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -121,9 +124,10 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
     protected ParameterBagInterface $parameterBag;
 
     /**
-     * @var AdvancedRouterInterface
+     * The addresses the notifications link to: omnibase's router, or the host's Urls (plan "omnibase
+     * agnostic", F5c: a host without omnibase's router, Laravel's).
      */
-    protected AdvancedRouterInterface $router;
+    protected AdvancedRouterInterface|Urls $router;
 
     /**
      * @var LocalizerInterface
@@ -210,7 +214,7 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
      * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
      * @param Views|Environment                 $views      Twig's environment is deprecated (until 6.0): wrapped in omnibridge/twig's TwigViews
      */
-    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork|EntityManagerInterface $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface $router, Views|Environment $views, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork|EntityManagerInterface $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface|Urls $router, Views|Environment $views, SettingBag $settingBag, bool $debug = false)
     {
         $this->views = EmailComposer::views($views);
         $this->twig = $views instanceof Environment ? $views : null;
@@ -225,7 +229,7 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
 
         $this->testRecipients = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
 
-        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email") ?? "postmaster@" . $this->router->getDomain();
+        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email") ?? "postmaster@" . $this->domain();
         $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
         $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
         $this->technicalLoopback  = $parameterBag->get("base.notifier.technical_loopback");
@@ -459,19 +463,55 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         return $this;
     }
 
-    public function getRouter(): AdvancedRouterInterface
+    public function getRouter(): AdvancedRouterInterface|Urls
     {
         return $this->router;
     }
 
     /**
-     * @param AdvancedRouterInterface $router
+     * @param AdvancedRouterInterface|Urls $router
      * @return $this
      */
-    public function setRouter(AdvancedRouterInterface $router)
+    public function setRouter(AdvancedRouterInterface|Urls $router)
     {
         $this->router = $router;
         return $this;
+    }
+
+    /** A route's absolute address, by omnibase's router or the host's Urls. */
+    protected function urlOf(string $route, array $parameters = []): ?string
+    {
+        return $this->router instanceof Urls ? $this->router->url($route, $parameters) : $this->router->getUrl($route, $parameters);
+    }
+
+    /** A route's path. */
+    protected function pathOf(string $route, array $parameters = []): ?string
+    {
+        return $this->router instanceof Urls ? $this->router->path($route, $parameters) : $this->router->generate($route, $parameters);
+    }
+
+    /** The route answering the request, if any. */
+    protected function currentRoute(): ?string
+    {
+        return $this->router instanceof Urls ? Runtime::find(Requests::class)?->route() : $this->router->getRouteName();
+    }
+
+    /** The site's domain (the technical address's): omnibase's router's, else the request's host, else the home page's. */
+    protected function domain(): ?string
+    {
+        if (!$this->router instanceof Urls) {
+            return $this->router->getDomain();
+        }
+        $host = Runtime::find(Requests::class)?->host();
+        if (null === $host) {
+            try {
+                $host = $this->router->url('/');
+            } catch (\Throwable) {
+                $host = null;
+            }
+        }
+
+        return null !== $host ? (parse_url($host, PHP_URL_HOST) ?: null) : null;
     }
 
     /**

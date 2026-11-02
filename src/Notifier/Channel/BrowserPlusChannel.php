@@ -2,18 +2,28 @@
 
 namespace Base\Notifier\Channel;
 
-use Symfony\Component\Notifier\Channel\ChannelInterface;
+use Base\Http\RequestsOf;
+use Omnibridge\Contract\Requests;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Notifier\Channel\ChannelInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
+/**
+ * A notification shown once on the visitor's next page: a flash message of
+ * its importance, through the request contract (plan "omnibase agnostic",
+ * F5c: Symfony's flash bag, Laravel's session). Nothing outside a request;
+ * the same message twice under one type is shown once.
+ */
 final class BrowserPlusChannel implements ChannelInterface
 {
-    private RequestStack $requestStack;
+    private ?Requests $requests;
 
-    public function __construct(RequestStack $requestStack)
+    /** @param Requests|RequestStack|null $requests Symfony's RequestStack is deprecated (until 6.0) */
+    public function __construct(#[Autowire(service: Requests::class)] Requests|RequestStack|null $requests)
     {
-        $this->requestStack = $requestStack;
+        $this->requests = RequestsOf::of($requests);
     }
 
     public function supports(Notification $notification, RecipientInterface $recipient): bool
@@ -23,29 +33,20 @@ final class BrowserPlusChannel implements ChannelInterface
 
     public function notify(Notification $notification, RecipientInterface $recipient, ?string $transportName = null): void
     {
-        if (null === $request = $this->requestStack->getCurrentRequest()) {
-            return;
-        }
-        if (!$request->hasSession()) {
+        if (null === $this->requests || !$this->requests->has()) {
             return;
         }
 
-        // Prepare variables
         $type = $notification->getImportance();
         $message = $notification->getContent();
 
-        // Avoid double flash messages
-        // (when using subscriber or redirections for instance)
-        $flashBag = $request->getSession()->getFlashBag()->peekAll();
-        if (array_key_exists($type, $flashBag)) {
-            foreach ($flashBag[$type] as $content) {
-                if ($message == $content) {
-                    return;
-                }
+        // Avoid double flash messages (when using subscriber or redirections for instance)
+        foreach ($this->requests->flashes()[$type] ?? [] as $content) {
+            if ($message == $content) {
+                return;
             }
         }
 
-        // Send notification to flashbag
-        $request->getSession()->getFlashBag()->add($notification->getImportance(), $message);
+        $this->requests->flash($type, $message);
     }
 }

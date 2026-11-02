@@ -81,4 +81,9 @@ return [
     'Base\Form\Type\UserProfileType' => 'Omnibridge\Symfony\Omnibase\Form\Type\UserProfileType',
     'Base\Form\Type\UserSearchType' => 'Omnibridge\Symfony\Omnibase\Form\Type\UserSearchType',
     'Base\Form\Type\UserSettingsType' => 'Omnibridge\Symfony\Omnibase\Form\Type\UserSettingsType',
+    'Base\Bridge\Symfony\FrameworkLocator' => 'Omnibridge\Symfony\Omnibase\FrameworkLocator',
+    'Base\Cache\Warmer\WebpackCacheWarmer' => 'Omnibridge\Symfony\Omnibase\Cache\Warmer\WebpackCacheWarmer',
+    'Base\Subscriber\AnalyticsSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\AnalyticsSubscriber',
+    'Base\Subscriber\TemplatedEmailSubjectSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\TemplatedEmailSubjectSubscriber',
+    'Base\Subscriber\TwigSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\TwigSubscriber',
 ];
