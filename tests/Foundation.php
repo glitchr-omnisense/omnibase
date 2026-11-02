@@ -181,6 +181,7 @@
  * 796 after step F5a (2026-11-02, +3): Base\Services, Base\View\ViewsAdapter, Base\Demo\DemoAccountLock.
  * 807 after step F5b's first part (2026-11-02, +11): the neutral form layer (the ten of tests/Agnostic.php) and
  * Base\Bridge\Symfony\Form\SymfonyKinds, the Symfony form type of each kind (strings only).
+ * 799 after step F5b's move (2026-11-02, -8): the seven of tests/Agnostic.php and SymfonyKinds, moved to omnibridge/symfony.
  */
 
 return [
@@ -213,7 +214,6 @@ return [
     Base\Auth\UserTrustedVersion::class,
     Base\Bridge\Symfony\AccountScreens::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
-    Base\Bridge\Symfony\Form\SymfonyKinds::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\MediaPictures::class,
     Base\Bridge\Symfony\NotificationMessages::class,
@@ -570,10 +570,6 @@ return [
     Base\Form\Definition\FormSubmission::class,
     Base\Form\Definition\FormView::class,
     Base\Form\Definition\Properties::class,
-    Base\Form\FormProcessor::class,
-    Base\Form\FormProcessorInterface::class,
-    Base\Form\FormProxy::class,
-    Base\Form\FormProxyInterface::class,
     Base\Form\Model\CommentModel::class,
     Base\Form\Model\ContactModel::class,
     Base\Form\Model\SecurityLoginModel::class,
@@ -584,9 +580,6 @@ return [
     Base\Form\Model\UserEditModel::class,
     Base\Form\Model\UserProfileModel::class,
     Base\Form\Model\UserSearchModel::class,
-    Base\Form\Traits\FormGuessInterface::class,
-    Base\Form\Traits\FormGuessTrait::class,
-    Base\Form\Traits\FormProcessorTrait::class,
     Base\Imagine\FilterInterface::class,
     Base\Imagine\Filter\Advanced\SanitizeFilter::class,
     Base\Imagine\Filter\Basic\BackgroundFilter::class,

@@ -4,7 +4,7 @@ namespace Tests\Base\Field;
 
 use Base\Database\Attribute\Backend\Backends;
 use Base\Database\Mapping\EntityShapes;
-use Base\Field\Type\EditorType;
+use Omnibridge\Symfony\Omnibase\Field\Type\EditorType;
 use Base\Form\Extension\FormTypeCollabExtension;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Collab\CollabRoomResolver;

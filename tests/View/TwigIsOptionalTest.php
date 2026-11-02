@@ -31,7 +31,6 @@ final class TwigIsOptionalTest extends TestCase
      */
     private const TWIG_HOST = [
         'src/Cache/Warmer/WebpackCacheWarmer.php',
-        'src/Form/Extension/FormTypeWebpackExtension.php',
         'src/Subscriber/TwigSubscriber.php',
     ];
 

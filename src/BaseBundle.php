@@ -200,6 +200,10 @@ class BaseBundle extends AbstractBaseBundle
             $this->setMapping($this->getBundleDir() . "/src/Enum"      , "Base\Enum"      , "App\Enum");
             $this->setMapping($this->getBundleDir() . "/src/Notifier"  , "Base\Notifier"  , "App\Notifier");
             $this->setMapping($this->getBundleDir() . "/src/Form"      , "Base\Form"      , "App\Form");
+            // The core's form types, extensions and services, in omnibridge/symfony (plan "omnibase agnostic", F5b), by their former names.
+            if (null !== $forms = self::symfonyFormDir()) {
+                $this->setMapping($forms, "Base\Form", "App\Form", "Omnibridge\Symfony\Omnibase\Form");
+            }
             $this->setMapping($this->getBundleDir() . "/src/Entity"    , "Base\Entity"    , "App\Entity");
 
             self::getAllClasses($this->getBundleDir() . "/src/Database/Attribute");
@@ -229,6 +233,17 @@ class BaseBundle extends AbstractBaseBundle
     public static function doctrineRepositoryDir(): ?string
     {
         $class = 'Omnibridge\Doctrine\Omnibase\Repository\UserRepository';
+
+        return class_exists($class) ? dirname((new \ReflectionClass($class))->getFileName()) : null;
+    }
+
+    /**
+     * The directory of the core's form types, extensions and services: omnibridge/symfony's
+     * Omnibase\Form since the plan "omnibase agnostic"'s step F5b, null where it is not installed.
+     */
+    public static function symfonyFormDir(): ?string
+    {
+        $class = 'Omnibridge\Symfony\Omnibase\Form\FormProxy';
 
         return class_exists($class) ? dirname((new \ReflectionClass($class))->getFileName()) : null;
     }

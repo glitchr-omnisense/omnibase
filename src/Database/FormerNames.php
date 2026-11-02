@@ -3,10 +3,10 @@
 namespace Base\Database;
 
 /**
- * The former names of the core's classes that moved to omnibridge/doctrine (plan
- * "omnibase agnostic", step F3), as data: former => new, read from
- * src/Resources/former-names.doctrine.php, whose list src/Resources/former-names.php
- * aliases. For what names a moved class the way it was named before - MetadataSnapshot,
+ * The former names of the core's classes that moved to omnibridge/doctrine and
+ * omnibridge/symfony (plan "omnibase agnostic", steps F3 and F5b), as data: former =>
+ * new, read from src/Resources/former-names.{doctrine,symfony}.php, whose lists
+ * src/Resources/former-names.php aliases. For what names a moved class the way it was named before - MetadataSnapshot,
  * which compares the mapping and not where a class lives, and the tests.
  */
 final class FormerNames
@@ -20,7 +20,7 @@ final class FormerNames
     /** @return array<class-string, class-string> former => new */
     public static function moved(): array
     {
-        return self::$moved ??= require \dirname(__DIR__).'/Resources/former-names.doctrine.php';
+        return self::$moved ??= (require \dirname(__DIR__).'/Resources/former-names.doctrine.php') + (require \dirname(__DIR__).'/Resources/former-names.symfony.php');
     }
 
     /** The former name of a moved class, null for any other. */

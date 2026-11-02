@@ -20,7 +20,7 @@ final class Kinds
      * MAP (kind => type) and, optionally, ALIASES (type => kind).
      */
     public const ADAPTERS = [
-        'symfony' => 'Base\Bridge\Symfony\Form\SymfonyKinds',
+        'symfony' => 'Omnibridge\Symfony\Omnibase\Form\SymfonyKinds',
     ];
 
     /** @var array<string, array<string, string>> host => kind => type */

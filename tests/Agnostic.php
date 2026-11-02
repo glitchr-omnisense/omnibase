@@ -54,6 +54,9 @@
  * 709 after step F5b's first part (2026-11-02, +10): the neutral form layer - Base\Field\{Kind, Kinds}, Base\Field\Choice\Countries
  * (a country field's choices, which CountryType held), Base\Form\Definition\{FormDefinition, FormBinder, Binding, FormView,
  * FormProcessor, FormSubmission, Properties}.
+ * 702 after step F5b's move (2026-11-02, -7, moved to omnibridge/symfony, a decision of the plan: --strict refuses the bridge):
+ * Base\Form\{FormProcessor, FormProcessorInterface, FormProxy, FormProxyInterface}, Base\Form\Traits\{FormGuessInterface, FormGuessTrait,
+ * FormProcessorTrait}, which loaded nothing of Symfony Form themselves.
  */
 
 return [
@@ -427,10 +430,6 @@ return [
     Base\Form\Definition\FormSubmission::class,
     Base\Form\Definition\FormView::class,
     Base\Form\Definition\Properties::class,
-    Base\Form\FormProcessor::class,
-    Base\Form\FormProcessorInterface::class,
-    Base\Form\FormProxy::class,
-    Base\Form\FormProxyInterface::class,
     Base\Form\Model\CommentModel::class,
     Base\Form\Model\ContactModel::class,
     Base\Form\Model\SecurityLoginModel::class,
@@ -441,9 +440,6 @@ return [
     Base\Form\Model\UserEditModel::class,
     Base\Form\Model\UserProfileModel::class,
     Base\Form\Model\UserSearchModel::class,
-    Base\Form\Traits\FormGuessInterface::class,
-    Base\Form\Traits\FormGuessTrait::class,
-    Base\Form\Traits\FormProcessorTrait::class,
     Base\Imagine\FilterInterface::class,
     Base\Imagine\Filter\Advanced\SanitizeFilter::class,
     Base\Imagine\Filter\Basic\BackgroundFilter::class,

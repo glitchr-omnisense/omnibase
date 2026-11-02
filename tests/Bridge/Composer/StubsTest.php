@@ -64,7 +64,11 @@ final class StubsTest extends TestCase
                 $app = $namespace[1].'\\'.$class[1];
                 self::assertSame($class[2], ClassAliases::base($app), $file);
                 // The core's repositories are omnibridge/doctrine's since step F3, by their former names here.
-                self::assertFileExists('Repository' === $name ? \dirname((string) (new \ReflectionClass(\Base\Repository\UserRepository::class))->getFileName()).'/'.$file : self::root().'/src/'.$name.'/'.$file);
+                // The form types, extensions and services are omnibridge/symfony's since step F5b, the same way.
+                self::assertTrue('Repository' === $name || is_file(self::root().'/src/'.$name.'/'.$file) || 'Form' === $name && class_exists($class[2]), $file);
+                if ('Repository' === $name) {
+                    self::assertFileExists(\dirname((string) (new \ReflectionClass(\Base\Repository\UserRepository::class))->getFileName()).'/'.$file);
+                }
                 self::assertStringContainsString("if (!class_exists('\\".$app."'))", $content);
             }
         }

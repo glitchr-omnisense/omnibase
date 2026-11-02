@@ -16,11 +16,11 @@ final class FormerNamesTest extends TestCase
     public function testEachFormerNameIsTheMovedClass(): void
     {
         $moved = FormerNames::moved();
-        self::assertCount(142, $moved);
+        self::assertCount(220, $moved); // 142 to omnibridge/doctrine (F3), 78 to omnibridge/symfony (F5b)
 
         $wrong = [];
         foreach ($moved as $former => $new) {
-            if (!class_exists($former) || (new \ReflectionClass($former))->getName() !== $new) {
+            if (!class_exists($former) && !interface_exists($former) && !trait_exists($former) || (new \ReflectionClass($former))->getName() !== $new) {
                 $wrong[] = $former;
             }
         }
@@ -36,7 +36,7 @@ final class FormerNamesTest extends TestCase
             if (is_file($src.str_replace('\\', '/', substr($former, \strlen('Base\\'))).'.php')) {
                 $left[] = $former;
             }
-            self::assertStringStartsWith('Omnibridge\\Doctrine\\Omnibase\\', $new);
+            self::assertMatchesRegularExpression('/^Omnibridge\\\\(Doctrine|Symfony)\\\\Omnibase\\\\/', $new);
         }
 
         self::assertSame([], $left);
