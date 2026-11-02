@@ -82,7 +82,8 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
     {
         self::$locales = $this->getCache("/Localize/Locales", self::getLocales());
         self::$fallbackLocales = self::$fallbackLocales ?? self::normalizeLocale($this->translator->getFallbackLocales());
-        self::$defaultLocale = self::$defaultLocale ?? self::normalizeLocale($this->parameterBag->get("kernel.default_locale"));
+        // The kernel's default under Symfony; another host's from its Locales contract (Laravel's config).
+        self::$defaultLocale = self::$defaultLocale ?? self::normalizeLocale($this->parameterBag->get("kernel.default_locale") ?? \Base\Contract\Runtime::find(\Omnibridge\Contract\Locales::class)?->getDefaultLocale() ?? "en");
 
         return [];
     }

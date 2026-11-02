@@ -77,6 +77,7 @@ return [
     Base\Auth\Listener\WelcomeBack::class,
     Base\Auth\NotifierSender::class,
     Base\Auth\Policy::class,
+    Base\Auth\Registration::class,
     Base\Auth\PolicyLinking::class,
     Base\Auth\UserAccounts::class,
     Base\Auth\UserBackupCodes::class,

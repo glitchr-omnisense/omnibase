@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: an account's forms served beyond Symfony (plan "omnibase agnostic", step F5c, second part, 2026-11-02)
+
+- BaseTrait's `getNotifier()`, `getTranslator()`, `getLocalizer()`, `getSettingBag()`, `getEntityHydrator()` and
+  `getObfuscator()` (and their `find*()`) ask the registry first (`Runtime::find()`, as `getMediaService()` and
+  `getParameterBag()` did): a host that binds them (omnibridge/laravel) answers them, Symfony's locator after.
+- The neutral form layer: an empty string given as a field's empty data stays a string (Symfony's `TextType`), also when
+  the host sends the field as null; the binder's refusals are translated in the `validators` domain; a class-level
+  uniqueness without its class is looked up in the form's validation entity; `FormSubmission::withError()` refuses a
+  submission once it holds; `FormProcessor::readers()` registers omnibase's attribute readers.
+- `Base\Auth\Registration` (in `Base\Services`): a sign-up once its form holds, approved, its password, named, kept, the
+  same on every host; `SecurityController::Register()` uses it (its private `nameAccount()` moved there as `name()`).
+- `Localizer` reads its default locale from the host's `Locales` contract where `kernel.default_locale` is unset.
+
 ### Changed: the request, the session and the events on contracts (plan "omnibase agnostic", step F5c, first part, 2026-11-02)
 
 - The services that read Symfony's request stack read omnisense/omnibridge's `Omnibridge\Contract\Requests` (the visitor's

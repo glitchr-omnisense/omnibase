@@ -48,7 +48,12 @@ final class FormProcessor
         private readonly ?Translations $translations = null,
     ) {
         $this->binder = $binder ?? new FormBinder($unitOfWork);
-        // omnibase's own rules, read as the kept constraints wherever a class declares them.
+        self::readers();
+    }
+
+    /** omnibase's own rules, read as the kept constraints wherever a class declares them. */
+    public static function readers(): void
+    {
         AttributeConstraints::register('Base\Validator\Constraints\UniqueEntity', static fn (array $arguments): Unique => AttributeConstraints::unique($arguments, self::uniqueMessage($arguments)));
         AttributeConstraints::register('Base\Validator\Constraints\NotBlank', AttributeConstraints::keep(NotBlank::class, ['message', 'allowNull', 'groups']));
     }
@@ -103,7 +108,11 @@ final class FormProcessor
         }
 
         $binding = $this->binder->bind($form, $submitted, $data);
-        array_push($violations, ...$binding->violations);
+        // What the binder could not read says it in the page's language, as a Symfony form's invalid_message
+        // (the validators domain: "The values do not match." for a value typed twice).
+        foreach ($binding->violations as $violation) {
+            $violations[] = null !== $this->translations ? new Violation($violation->path, $this->translations->trans($violation->message, $violation->parameters, 'validators'), $violation->code, $violation->parameters) : $violation;
+        }
         array_push($violations, ...$this->inspect($form, $submitted, $binding, $address));
         if (null !== $this->validation) {
             array_push($violations, ...$this->validate($form, $binding, $groups));
@@ -242,6 +251,10 @@ final class FormProcessor
 
         $violations = [];
         foreach (AttributeConstraints::ofClass($class) as $constraint) {
+            // A record's uniqueness looked up among the records of its class: the form's values are no record.
+            if ($constraint instanceof Unique && null === $constraint->entityClass) {
+                $constraint = new Unique($constraint->fields, $class, $constraint->errorPath, $constraint->message, $constraint->groups);
+            }
             $values = [];
             foreach ($constraint->fields ?? [] as $field) {
                 $values[$field] = \is_array($binding->data) ? ($binding->data[$field] ?? null) : $this->read($binding->data, $field);

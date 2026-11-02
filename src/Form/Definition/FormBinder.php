@@ -194,6 +194,12 @@ final class FormBinder
             $raw = trim($raw);
         }
         if (null === $raw || '' === $raw) {
+            // An empty string the definition gives as its empty data stays a string, as Symfony's TextType
+            // keeps it (a setter typed string: App\Entity\User::setUsername()); a host that sends nothing as
+            // null (Laravel's ConvertEmptyStringsToNull) gets it too.
+            if ('' === $field->getEmptyData()) {
+                return '';
+            }
             $empty = $field->getEmptyData() ?? $field->getOption('empty_data');
 
             return $empty instanceof \Closure ? $empty() : ('' === $empty ? null : $empty);
