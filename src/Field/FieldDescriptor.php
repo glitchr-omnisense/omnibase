@@ -7,7 +7,14 @@ use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
  * Single mutable descriptor carried by every field: what property it maps,
- * which Symfony FormType renders it, where it is displayed, and how.
+ * what kind of field it is (Kind), its options and constraints, where it is
+ * displayed, and how.
+ *
+ * Neutral: a descriptor names a kind, never a host's widget. The host maps
+ * the kind (Kinds: Symfony's form type, a theme's block); getFormType()
+ * answers Symfony's type of the kind, or the type named directly with
+ * setFormType() (the escape hatch of a Symfony-only field). The options are
+ * plain data, the constraints plain objects the host's Validation reads.
  *
  * This is the EasyCorp-free replacement for both FieldDto and its
  * KeyValueStore bags: one class, plain arrays, no builder/DTO split.
@@ -35,8 +42,11 @@ final class FieldDescriptor
     protected TranslatableInterface|string|null $help = null;
     protected array $translationParameters = [];
 
+    protected ?string $kind = null;
     protected ?string $formType = null;
     protected array $formTypeOptions = [];
+    /** @var list<object> */
+    protected array $constraints = [];
 
     protected ?bool $sortable = null;
     protected ?bool $virtual = null;
@@ -190,15 +200,99 @@ final class FieldDescriptor
         return $this;
     }
 
-    public function getFormType(): ?string
+    /**
+     * The field's neutral kind (Kind::TEXT, Kind::CHOICE...): the one set, else
+     * the kind of the Symfony type named with setFormType() (Kinds), else
+     * Kind::CUSTOM for a type no kind renders; null for neither.
+     */
+    public function getKind(): ?string
     {
-        return $this->formType;
+        if (null !== $this->kind) {
+            return $this->kind;
+        }
+        if (null === $this->formType) {
+            return null;
+        }
+
+        return Kinds::kind($this->formType) ?? Kind::CUSTOM;
     }
 
+    public function setKind(?string $kind): static
+    {
+        $this->kind = $kind;
+        return $this;
+    }
+
+    /**
+     * The Symfony form type rendering this field: the one named with
+     * setFormType(), else the type of its kind (Kinds). The generic renderers
+     * read getKind() instead.
+     */
+    public function getFormType(): ?string
+    {
+        return $this->formType ?? Kinds::type($this->kind);
+    }
+
+    /**
+     * Names a Symfony form type directly: a field no kind describes, or a
+     * kind rendered by another type. A type a kind maps to (Kinds) sets that
+     * kind too (TextField's ChoiceType is a choice); another keeps the kind set
+     * (what the generic renderers print), Kind::CUSTOM when none was.
+     */
     public function setFormType(?string $formTypeFqcn): static
     {
         $this->formType = $formTypeFqcn;
+        if (null !== $kind = Kinds::kind($formTypeFqcn)) {
+            $this->kind = $kind;
+        }
+
         return $this;
+    }
+
+    /** Whether the Symfony type was named directly rather than by the kind. */
+    public function hasExplicitFormType(): bool
+    {
+        return null !== $this->formType;
+    }
+
+    /**
+     * The constraints the field's value is checked against (plain objects the
+     * host's Validation reads: omnibridge's neutral constraints, or a host's
+     * own, symfony/validator's), beside those the data's class declares.
+     *
+     * @return list<object>
+     */
+    public function getConstraints(): array
+    {
+        return $this->constraints;
+    }
+
+    /** @param list<object> $constraints */
+    public function setConstraints(array $constraints): static
+    {
+        $this->constraints = array_values($constraints);
+        return $this;
+    }
+
+    public function addConstraint(object ...$constraints): static
+    {
+        foreach ($constraints as $constraint) {
+            $this->constraints[] = $constraint;
+        }
+
+        return $this;
+    }
+
+    /** The field's options as plain data: what getFormTypeOptions() answers, by its neutral name. */
+    public function getOptions(): array
+    {
+        return $this->formTypeOptions;
+    }
+
+    /** One option, "." paths supported ("attr.autofocus"). */
+    public function getOption(string $optionName, mixed $default = null): mixed
+    {
+        return $this->getFormTypeOption($optionName, $default);
     }
 
     public function getFormTypeOptions(): array

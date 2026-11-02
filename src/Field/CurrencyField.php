@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\CurrencyType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class CurrencyField extends SelectField implements FieldInterface
@@ -13,6 +12,6 @@ class CurrencyField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/currency')
-            ->setFormType(CurrencyType::class);
+            ->setKind(Kind::CURRENCY);
     }
 }

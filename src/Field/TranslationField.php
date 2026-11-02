@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\TranslationType;
 use Base\Service\Localizer;
 use Base\Field\FieldDescriptor;
 use Symfony\Contracts\Translation\TranslatableInterface;
@@ -23,7 +22,7 @@ class TranslationField implements FieldInterface
             ->setTemplateName('crud/field/translatable')
             ->setCustomOption('required', true)
             ->setCustomOption(self::OPTION_MAX_LENGTH, 50)
-            ->setFormType(TranslationType::class);
+            ->setKind(Kind::TRANSLATION);
 
         if ($propertyName) {
             $field->setFields([$propertyName => []])->showOnIndex($propertyName);

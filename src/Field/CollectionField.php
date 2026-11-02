@@ -3,7 +3,6 @@
 namespace Base\Field;
 
 
-use Base\Field\Type\CollectionType;
 
 class CollectionField implements FieldInterface
 {
@@ -29,7 +28,7 @@ class CollectionField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/collection')
-            ->setFormType(CollectionType::class)
+            ->setKind(Kind::COLLECTION)
             ->setCustomOption(self::OPTION_ALLOW_ADD, true)
             ->setCustomOption(self::OPTION_ALLOW_DELETE, true)
             ->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, null)

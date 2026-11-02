@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AudioType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -16,7 +15,7 @@ class AudioField extends FileField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/file')
-            ->setFormType(AudioType::class)
+            ->setKind(Kind::AUDIO)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)

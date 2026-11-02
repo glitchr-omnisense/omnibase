@@ -128,3 +128,87 @@ given") in place of the form's error.
 The field's errors no longer go up to the form (`error_bubbling` is `false`,
 as for Symfony's own compound choice and date fields): a constraint of the
 property is printed beside the select too, not at the top of the form.
+
+## The neutral form layer (plan "omnibase agnostic", step F5b)
+
+Every site has forms, and the admin builds its own from the Fields (Marco's answer 4): forms
+are not Symfony's alone. The core describes a form without a form library; each host renders
+and processes it.
+
+### Field descriptors name a kind
+
+A field descriptor (`TextField::new('title')`, `FieldDescriptor`) names a **kind**
+(`Base\Field\Kind`: `text`, `textarea`, `email`, `password`, `integer`, `number`, `money`,
+`choice`, `country`, `association`, `date`, `datetime`, `file`, `image`, `collection`, `boolean`,
+`editor`...), never a Symfony form type class. Its options are plain data (`getOptions()`,
+`getOption('attr.maxlength')`), its constraints plain objects (`addConstraint()`) that the host's
+`Omnibridge\Contract\Validation` reads, its label and help translatable keys.
+
+`Base\Field\Kinds` maps a kind to a host's own name for it: Symfony's form type for
+`getFormType()` (the map `SymfonyKinds`, read by name: the same class each descriptor named before),
+a theme's block for another host. A bundle or an application registers its own kinds:
+
+```php
+Kinds::register('symfony', ['signature' => SignatureType::class]);
+```
+
+`setFormType()` stays, as the escape hatch of a Symfony-only field: a type a kind maps to sets that
+kind too (a `TextField` given `ChoiceType` is a `choice`), another keeps the kind set, or is
+`Kind::CUSTOM`.
+
+### A form: FormDefinition
+
+```php
+use Base\Form\Definition\FormDefinition;
+
+$form = FormDefinition::new('comment')
+    ->add(TextareaField::new('content', 'comment.content')->setRequired(true)->addConstraint(new NotBlank()))
+    ->add(BooleanField::new('notify'), 'options')
+    ->addAction('submit', 'comment.submit')
+    ->setDataClass(Comment::class);
+
+// or the fields a CRUD page shows
+$form = FormDefinition::fromFields('crud_form', $controller->configureFields('edit'), 'edit');
+```
+
+A definition holds its fields by name, their groups, its actions (the buttons; the one clicked is
+the submitted intent), its method and target, the intent of its token (its name by default), the
+data class, the translation domain (the host's default when null) and, as an escape hatch, options
+only one host reads (`setHostOptions([...], 'symfony')`).
+
+### Binding, view, processing
+
+- `FormBinder` turns what is sent into the data (an array, an entity, a DTO) and the data into the
+  values shown, by kind: a trimmed string (a password untrimmed), `''` as null or the empty data, an
+  integer, a number, a date (`input`: `datetime`, `datetime_immutable`, `string`), a choice among
+  the field's `choices`, an association by its id (`UnitOfWork::reference()`), a file as the host
+  gives it, a missing checkbox as false. A value it cannot read is a violation of its field with
+  Symfony's own message ("Please enter an integer.") and leaves the data untouched; a disabled field
+  keeps the data's value; the data is written only where its value changes (`Properties`: getters,
+  setters, public properties, "." paths, without property-info). Transformers are plain callables:
+  `withTransformer($kind, $reverse, $transform)`, or a field's custom options
+  `FormBinder::OPTION_REVERSE` / `OPTION_TRANSFORM`.
+- `FormView` is a plain tree a renderer reads: each view's `vars` (name, full_name, id, kind, type,
+  value, label, help, errors, attr, required, disabled, choices as a list of value/label, multiple,
+  checked; the root's method, action, valid) named as Symfony's FormView names them, its children
+  by name, the token as the hidden child `_token`. `toArray()` (and `json_encode()`) gives the props
+  of a React page.
+- `FormProcessor` handles a request's part: bind, check the token (`Omnibridge\Contract\Tokens`, the
+  definition's intent), validate (`Omnibridge\Contract\Validation`: the data against what its class
+  declares, each field's value against the field's constraints), then keep the data
+  (`Omnibridge\Persistence\UnitOfWork`) when asked and valid. Each contract is optional. It is in
+  `Base\Services::definitions()`, so every host's container gives it.
+
+```php
+$submission = $processor->handle($form, $request->request->all('comment') + $request->files->all('comment'), $comment, persist: true);
+if ($submission->isValid()) {
+    return redirect(...);
+}
+
+return view('comment', ['form' => $submission->createView()]);   // the values sent, their errors, a token
+```
+
+Symfony keeps its own forms and processing: the adapter builds a Symfony form from a definition
+(omnibridge/symfony, F5b's second part). The generic renderers - the Twig theme (omnibridge/twig),
+the Blade theme (omnibridge/laravel), React - read `FormView`. The whole layer loads under
+`bare --strict` (`BareTest::testTheFormLayerWorksWithoutAFormLibrary`).

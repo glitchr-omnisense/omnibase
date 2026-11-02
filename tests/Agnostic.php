@@ -51,6 +51,9 @@
  * Base\Database\FormerNames among them.
  * 699 after step F5a (2026-11-02, +3): Base\Services (the core's services as data), Base\View\ViewsAdapter
  * (Views from what a service was given) and Base\Demo\DemoAccountLock (the demonstration accounts' rule).
+ * 709 after step F5b's first part (2026-11-02, +10): the neutral form layer - Base\Field\{Kind, Kinds}, Base\Field\Choice\Countries
+ * (a country field's choices, which CountryType held), Base\Form\Definition\{FormDefinition, FormBinder, Binding, FormView,
+ * FormProcessor, FormSubmission, Properties}.
  */
 
 return [
@@ -368,6 +371,7 @@ return [
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
     Base\Field\BooleanField::class,
+    Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
     Base\Field\CollectionField::class,
     Base\Field\ColorField::class,
@@ -393,6 +397,8 @@ return [
     Base\Field\IdField::class,
     Base\Field\ImageField::class,
     Base\Field\IntegerField::class,
+    Base\Field\Kind::class,
+    Base\Field\Kinds::class,
     Base\Field\LocaleField::class,
     Base\Field\MoneyField::class,
     Base\Field\NumberField::class,
@@ -414,6 +420,13 @@ return [
     Base\Form\Common\AbstractModel::class,
     Base\Form\Common\FormModelInterface::class,
     Base\Form\Common\NativeEnum::class,
+    Base\Form\Definition\Binding::class,
+    Base\Form\Definition\FormBinder::class,
+    Base\Form\Definition\FormDefinition::class,
+    Base\Form\Definition\FormProcessor::class,
+    Base\Form\Definition\FormSubmission::class,
+    Base\Form\Definition\FormView::class,
+    Base\Form\Definition\Properties::class,
     Base\Form\FormProcessor::class,
     Base\Form\FormProcessorInterface::class,
     Base\Form\FormProxy::class,

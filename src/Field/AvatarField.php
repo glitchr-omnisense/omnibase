@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AvatarType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -16,7 +15,7 @@ class AvatarField extends ImageField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/file')
-            ->setFormType(AvatarType::class)
+            ->setKind(Kind::AVATAR)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)

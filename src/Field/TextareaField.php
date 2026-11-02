@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class TextareaField implements FieldInterface
@@ -18,7 +17,7 @@ class TextareaField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(TextareaType::class)
+            ->setKind(Kind::TEXTAREA)
             ->addCssClass('field-textarea')
             ->setDefaultColumns('col-md-8 col-xxl-6')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null)

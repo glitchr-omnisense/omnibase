@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\SlugType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class SlugField implements FieldInterface
@@ -19,7 +18,7 @@ final class SlugField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/slug')
-            ->setFormType(SlugType::class)
+            ->setKind(Kind::SLUG)
             ->showLeadingHash()
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
             ->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, null)

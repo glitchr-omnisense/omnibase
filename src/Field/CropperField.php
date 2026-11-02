@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\ImageType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -19,7 +18,7 @@ class CropperField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/cropper')
-            ->setFormType(ImageType::class)
+            ->setKind(Kind::CROPPER)
             ->addCssClass('field-cropper')
             ->addCssClass('cropper-widget')
             ->setTextAlign(TextAlign::CENTER)

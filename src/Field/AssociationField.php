@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AssociationType;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -41,7 +40,7 @@ final class AssociationField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/association')
-            ->setFormType(AssociationType::class)
+            ->setKind(Kind::ASSOCIATION)
             ->addCssClass('field-entity')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)

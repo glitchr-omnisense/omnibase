@@ -243,6 +243,39 @@ final class BareTest extends TestCase
      * Base\Database\Repository\Finder\Parser, on an entity described by its fields, parses a finder
      * of the core's under bare --strict, nothing of Doctrine, Twig nor the framework loaded.
      */
+    /**
+     * The neutral form layer works where no form library is installed (plan "omnibase agnostic", step F5b;
+     * Marco's answer 4: every site has forms, the admin builds its own from the Fields): field descriptors in a
+     * Base\Form\Definition\FormDefinition, bound, their token checked and validated through omnibridge's
+     * contracts by Base\Form\Definition\FormProcessor, their view made - under bare --strict: nothing of
+     * Symfony Form, the validator, the framework, Doctrine nor Twig loaded.
+     */
+    public function testTheFormLayerWorksWithoutAFormLibrary(): void
+    {
+        $script = __DIR__.'/Form/Definition/form-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame([
+            'refused' => [
+                '' => ['The CSRF token is invalid. Please try to resubmit the form.'],
+                'rating' => ['Please enter an integer.'],
+                'content' => ['This value should not be blank.'],
+            ],
+            'kept' => ['email' => 'ringo@example.com', 'content' => 'Hello', 'rating' => 5, 'notify' => true, 'country' => 'JP'],
+            'view' => [
+                'email' => 'ringo@example.com',
+                'rating' => 'five',
+                'content' => ['This value should not be blank.'],
+                'country' => 'choice',
+                'token' => 'comment[_token]=token:comment',
+            ],
+        ], $run['result']);
+    }
+
     public function testTheFinderLanguageIsReadWithoutDoctrine(): void
     {
         $script = __DIR__.'/Database/Repository/Finder/parse-without-framework.php';

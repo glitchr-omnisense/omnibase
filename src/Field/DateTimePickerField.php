@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\DateTimePickerType;
 use DateTime;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -50,7 +49,7 @@ final class DateTimePickerField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/datetime')
-            ->setFormType(DateTimePickerType::class)
+            ->setKind(Kind::DATETIME_PICKER)
             ->addCssClass('field-datetime')
             ->setDebug(false)
 

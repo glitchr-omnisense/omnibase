@@ -3,7 +3,6 @@
 namespace Base\Field;
 
 use Base\Enum\Gender;
-use Base\Field\Type\GenderType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class GenderField extends SelectField implements FieldInterface
@@ -16,7 +15,7 @@ class GenderField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/select')
-            ->setFormType(GenderType::class)
+            ->setKind(Kind::GENDER)
             // Both spellings on purpose - see StateField::new()'s own
             // comment: OPTION_CLASS is the form side, OPTION_ENUM_CLASS is
             // what the index/detail badge reads for icon, colour and label.

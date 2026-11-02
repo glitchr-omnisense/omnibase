@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 class DateTimeField implements FieldInterface
@@ -15,7 +14,7 @@ class DateTimeField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(DateTimeType::class)
+            ->setKind(Kind::DATETIME)
             ->setFormTypeOption('widget', 'single_text')
             ->addCssClass('field-datetime')
             ->setDefaultColumns('col-md-4 col-xxl-3');

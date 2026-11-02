@@ -3,7 +3,6 @@
 namespace Base\Field;
 
 use Base\Field\Option\TextAlign;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 
 class EmailField implements FieldInterface
 {
@@ -28,7 +27,7 @@ class EmailField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/email')
-            ->setFormType(EmailType::class)
+            ->setKind(Kind::EMAIL)
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON)
             ->setCustomOption(self::OPTION_ICON_CUSTOM, 'fa-solid fa-at')

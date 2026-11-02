@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\WysiwygType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class WysiwygField implements FieldInterface
@@ -23,7 +22,7 @@ final class WysiwygField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/textarea')
             ->shorten()
-            ->setFormType(WysiwygType::class)
+            ->setKind(Kind::WYSIWYG)
             ->setCustomOption(self::OPTION_STRIP_TAGS, true);
     }
 

@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class IdField implements FieldInterface
@@ -19,7 +18,7 @@ final class IdField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/id')
-            ->setFormType(HiddenType::class)
+            ->setKind(Kind::HIDDEN)
             ->addCssClass('field-id')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null)
             ->setCustomOption(self::OPTION_IMPERSONATE, true)

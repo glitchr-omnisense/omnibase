@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AttributeType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 final class AttributeField implements FieldInterface
@@ -32,7 +31,7 @@ final class AttributeField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/attribute')
-            ->setFormType(AttributeType::class)
+            ->setKind(Kind::ATTRIBUTE)
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->addCssClass('field-text');

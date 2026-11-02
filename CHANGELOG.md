@@ -10,6 +10,30 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the neutral form layer, first part (plan "omnibase agnostic", step F5b, 2026-11-02)
+
+Marco's answer 4: every site has forms and the admin builds its own from the Fields, so forms are
+no longer Symfony's alone. See [docs/20-architecture/forms.md](docs/20-architecture/forms.md).
+
+- **Kinds**: `Base\Field\Kind` (the neutral kinds: text, textarea, email, choice, association,
+  date, file, image, collection, boolean...) and `Base\Field\Kinds` (a host's map, kind => its own
+  name; Symfony's `Base\Bridge\Symfony\Form\SymfonyKinds`, read by name). The 45 field descriptors
+  name a kind (`setKind()`) in place of a form type class; `getFormType()` answers the same Symfony
+  type as before (tests/Field/KindsTest). `setFormType()` stays, the escape hatch: a type a kind maps
+  to sets that kind. `FieldDescriptor::getKind()`, `getConstraints()`/`addConstraint()`,
+  `getOptions()`/`getOption()`; the same on the fields' fluent surface (`setKind()`, `addConstraint()`,
+  `setOptions()`, `setOption()`).
+- **`Base\Form\Definition\`**: `FormDefinition` (fields, groups, actions, method, target, token intent,
+  data class, host-only options; `fromFields()` for a CRUD page), `FormBinder` (submitted values <=> the
+  data, by kind, Symfony's messages for what cannot be read, transformers as callables), `Binding`,
+  `FormView` (a plain tree with Symfony's var names; `toArray()` for React), `FormProcessor` (bind, token
+  through `Tokens`, validation through `Validation`, kept through `UnitOfWork`; in `Base\Services`),
+  `FormSubmission`, `Properties` (reads and writes the data without property-info).
+- `Base\Field\Choice\Countries`: a country field's choices, which `CountryType` held (it delegates
+  there), so describing a country field loads no form library.
+- The agnostic core (`bare --strict`) 699 -> 709, the Foundation 796 -> 807;
+  `BareTest::testTheFormLayerWorksWithoutAFormLibrary`, tests/Form/Definition/FormLayerTest.
+
 ### Added: the services available everywhere (plan "omnibase agnostic", step F5a, 2026-11-02)
 
 Marco's answer 3: the services stay available everywhere. See

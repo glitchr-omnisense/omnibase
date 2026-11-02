@@ -179,6 +179,8 @@
  * {ConnectionTracker, SignInCaptcha}, Base\Service\ReadSettings, Base\Traits\FrameworkAccessorsTrait, and the new
  * Base\Database\FormerNames.
  * 796 after step F5a (2026-11-02, +3): Base\Services, Base\View\ViewsAdapter, Base\Demo\DemoAccountLock.
+ * 807 after step F5b's first part (2026-11-02, +11): the neutral form layer (the ten of tests/Agnostic.php) and
+ * Base\Bridge\Symfony\Form\SymfonyKinds, the Symfony form type of each kind (strings only).
  */
 
 return [
@@ -211,6 +213,7 @@ return [
     Base\Auth\UserTrustedVersion::class,
     Base\Bridge\Symfony\AccountScreens::class,
     Base\Bridge\Symfony\FlysystemFiles::class,
+    Base\Bridge\Symfony\Form\SymfonyKinds::class,
     Base\Bridge\Symfony\LocalizerLocales::class,
     Base\Bridge\Symfony\MediaPictures::class,
     Base\Bridge\Symfony\NotificationMessages::class,
@@ -511,6 +514,7 @@ return [
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
     Base\Field\BooleanField::class,
+    Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
     Base\Field\CollectionField::class,
     Base\Field\ColorField::class,
@@ -536,6 +540,8 @@ return [
     Base\Field\IdField::class,
     Base\Field\ImageField::class,
     Base\Field\IntegerField::class,
+    Base\Field\Kind::class,
+    Base\Field\Kinds::class,
     Base\Field\LocaleField::class,
     Base\Field\MoneyField::class,
     Base\Field\NumberField::class,
@@ -557,6 +563,13 @@ return [
     Base\Form\Common\AbstractModel::class,
     Base\Form\Common\FormModelInterface::class,
     Base\Form\Common\NativeEnum::class,
+    Base\Form\Definition\Binding::class,
+    Base\Form\Definition\FormBinder::class,
+    Base\Form\Definition\FormDefinition::class,
+    Base\Form\Definition\FormProcessor::class,
+    Base\Form\Definition\FormSubmission::class,
+    Base\Form\Definition\FormView::class,
+    Base\Form\Definition\Properties::class,
     Base\Form\FormProcessor::class,
     Base\Form\FormProcessorInterface::class,
     Base\Form\FormProxy::class,

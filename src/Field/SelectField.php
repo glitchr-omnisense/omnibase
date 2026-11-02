@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\SelectType;
 use Doctrine\Common\Collections\Collection;
 use Base\Field\Option\TextAlign;
 use Symfony\Contracts\Translation\TranslatableInterface;
@@ -58,7 +57,7 @@ class SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/select')
-            ->setFormType(SelectType::class)
+            ->setKind(Kind::CHOICE)
             ->useHtml(false) // Do not use HTML by default in EasyAdmin.. (line height are constrained)
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)

@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\EditorType;
 
 use Symfony\Contracts\Translation\TranslatableInterface;
 
@@ -16,6 +15,6 @@ final class EditorField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/hidden')
-            ->setFormType(EditorType::class);
+            ->setKind(Kind::EDITOR);
     }
 }

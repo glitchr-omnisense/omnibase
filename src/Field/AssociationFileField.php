@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AssociationFileType;
 use Base\Field\Type\AvatarType;
 use Base\Field\Type\ImageType;
 use Base\Field\Option\TextAlign;
@@ -40,7 +39,7 @@ final class AssociationFileField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/association')
-            ->setFormType(AssociationFileType::class)
+            ->setKind(Kind::ASSOCIATION_FILE)
             ->addCssClass('field-entity')
             ->addCssClass('file-widget')
             ->setTextAlign(TextAlign::CENTER)

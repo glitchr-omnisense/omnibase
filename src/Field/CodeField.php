@@ -2,7 +2,6 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\CodeType;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
@@ -22,7 +21,7 @@ class CodeField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(CodeType::class)
+            ->setKind(Kind::CODE)
             ->addCssClass('field-code')
             ->setDefaultColumns('col-md-4 col-xxl-3');
     }
