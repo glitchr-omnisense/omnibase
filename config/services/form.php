@@ -97,7 +97,7 @@ return static function (ContainerConfigurator $container): void {
     // ------------------------------
     $services->set('Base\Notifier\Channel\BrowserPlusChannel')
         ->tag('notifier.channel', ['channel' => 'browser+'])
-        ->args([new Reference('request_stack')]);
+        ->args([new Reference('Omnibridge\Contract\Requests')]);
 
     $services->set('Base\Notifier\Channel\EmailPlusChannel')
         ->parent('notifier.channel.email')

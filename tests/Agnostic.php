@@ -57,6 +57,7 @@
  * 702 after step F5b's move (2026-11-02, -7, moved to omnibridge/symfony, a decision of the plan: --strict refuses the bridge):
  * Base\Form\{FormProcessor, FormProcessorInterface, FormProxy, FormProxyInterface}, Base\Form\Traits\{FormGuessInterface, FormGuessTrait,
  * FormProcessorTrait}, which loaded nothing of Symfony Form themselves.
+ * 705 after step F5c's first part (2026-11-02, +1 on F5b group 5's 704): Base\Http\RequestsOf (the request contract out of a RequestStack).
  */
 
 return [
@@ -442,6 +443,7 @@ return [
     Base\Form\Model\UserEditModel::class,
     Base\Form\Model\UserProfileModel::class,
     Base\Form\Model\UserSearchModel::class,
+    Base\Http\RequestsOf::class,
     Base\Imagine\FilterInterface::class,
     Base\Imagine\Filter\Advanced\SanitizeFilter::class,
     Base\Imagine\Filter\Basic\BackgroundFilter::class,

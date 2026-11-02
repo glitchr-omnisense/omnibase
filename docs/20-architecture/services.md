@@ -74,13 +74,45 @@ Each of these constructors still accepts Twig's environment, deprecated until 6.
   deprecated, as step F2d did; `getEntityManager()` deprecated for `getUnitOfWork()`); the dispatcher's
   association change set reads the entity's shape.
 - `DemoAccountLockSubscriber`: its rule is `Base\Demo\DemoAccountLock`'s (the original row, the columns,
-  how to read and write them); the listener keeps Doctrine's identity map, the request and the flash
-  message, which leave with omnibridge/doctrine and omnibridge/symfony.
+  how to read and write them); the listener keeps Doctrine's identity map (it leaves with omnibridge/doctrine);
+  the request and the flash message go through `Omnibridge\Contract\Requests` (F5c).
+
+### The request, the session and the events (F5c)
+
+omnisense/omnibridge's `Omnibridge\Contract\Requests` is the request being answered, read without the
+framework's request object: `has()`, `ip()`, `header()`, `uri()`, `host()`, `route()`, `attribute()`, the
+session's `session()`, `remember()`, `forget()`, its flashes `flash()`, `flashes()`, and `request()` for code
+that still needs the host's own object. Symfony answers it with omnibridge/symfony's `StackRequests`,
+Laravel with omnibridge/laravel's `LaravelRequests`; outside a request nothing is read or written.
+
+| Service | Reads now | Former argument (deprecated until 6.0) |
+|---|---|---|
+| `AbstractEventDispatcher` (user.*, thread.*, an application's) | `Requests` (the event's request), any PSR-14 dispatcher | `RequestStack`, Symfony's dispatcher contract |
+| `SpamChecker` | `Requests` (address, browser, referrer, page), the home page through the router or `Urls` | `RequestStack` |
+| `Referrer` | `Requests` (the target paths kept in the session, the referer) | `RequestStack` |
+| `BrowserPlusChannel` (`browser+`) | `Requests` (the flashes) | `RequestStack` |
+| `DemoAccountLockSubscriber` | `Requests` (whether a request is answered, the warning) | `RequestStack` |
+| `UserSubscriber` | `Access` (who is signed in) | Security's token storage |
+| `Launcher`, `MaintenanceProvider` | `Access` (roles, who is signed in) | Security's checker and token storage |
+| `BaseNotifier`, `Notifier` | omnibase's router or `Urls` (the links), `Requests` (the route) | - |
+| `Localizer` | omnibase's `ParameterBagInterface` or the container's | - |
+
+A `RequestStack` given is wrapped by `Base\Http\RequestsOf` in omnibridge/symfony's `StackRequests`.
+
+The entity events are dispatched with `Omnibridge\Event\Events::dispatch()` through any PSR-14
+dispatcher. `AbstractEvent` is a `NamedEvent`: its dispatcher sets the name it is raised under
+(`user.register`), Symfony's dispatcher is given that name, omnibridge/laravel's `DispatcherEvents` gives
+the event to the listeners of its name, so `UserSubscriber::listen()` registers the same listeners on
+Laravel's dispatcher as `getSubscribedEvents()` does on Symfony's.
+
+A notification's e-mail is the Twig bridge's `NotificationEmail` under Symfony; on a host without Symfony's
+Twig bridge (Laravel) it is `EmailComposer::compose()`'s, from `NotificationMessages::composed()`.
 
 ## Left for later steps
 
 - F5b: the field and form types (the neutral form layer); the services that take Symfony's form factory.
-- F5c: the Symfony host's code, and with it the services that still read the request, the session, the
-  firewall or the kernel (`AbstractEventDispatcher`'s `RequestStack`, `BaseService`, `Referrer`,
-  `Launcher`, `MaintenanceProvider`, `Localizer`, `HotParameterBag`, `SecurityPolicy`,
-  `TemplatedEmailSubjectSubscriber`, `AnalyticsSubscriber`...); config/services/*.php, which then read the list.
+- F5c, what its first part left: `BaseService` (the facade, Symfony's by nature), `HotParameterBag` (the container's
+  half of `HotParameters`), `SecurityPolicy` (the role hierarchy), the field types' `twig` arguments, `EntityHydrator`
+  (Doctrine's metadata), `Referrer`'s and the Notifier's use of omnibase's router; the moves of §2.2 (Console, the
+  kernel subscribers, Routing, the warmers, Security, the controllers, DI, BaseBundle); config/services/*.php,
+  which then read the list.

@@ -27,12 +27,12 @@ final class TwigIsOptionalTest extends TestCase
      * The Symfony host's classes of the Twig layer outside src/Twig: the kernel subscriber that adds
      * the renderers' tags to a page (its INJECT attribute is read by applications), the warmer of the
      * Webpack renderer's entry points, the form extension that loads a field's Webpack entry. They
-     * move to omnibridge/symfony at F5c; config/services/twig.php registers them. The list only shrinks.
+     * moved to omnibridge/symfony (the extension at F5b, the other two at F5c); config/services/twig.php
+     * registers them by their former names. Empty: the list only shrinks.
+     *
+     * @var list<string>
      */
-    private const TWIG_HOST = [
-        'src/Cache/Warmer/WebpackCacheWarmer.php',
-        'src/Subscriber/TwigSubscriber.php',
-    ];
+    private const TWIG_HOST = [];
 
     private const PACKAGES = ['twig/twig', 'twig/cache-extra', 'twig/cssinliner-extra', 'twig/inky-extra', 'twig/intl-extra', 'omnibridge/twig'];
 
@@ -67,6 +67,7 @@ final class TwigIsOptionalTest extends TestCase
 
     public function testTheTwigHostListOnlyNamesClassesThatStillNeedIt(): void
     {
+        self::assertLessThanOrEqual(2, \count(self::TWIG_HOST), 'the list only shrinks');
         foreach (self::TWIG_HOST as $path) {
             self::assertFileExists(self::root().'/'.$path);
             self::assertNotSame([], self::twigLayerNames((string) file_get_contents(self::root().'/'.$path)), $path.' no longer names the Twig layer: take it out of the list');

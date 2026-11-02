@@ -10,6 +10,32 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the request, the session and the events on contracts (plan "omnibase agnostic", step F5c, first part, 2026-11-02)
+
+- The services that read Symfony's request stack read omnisense/omnibridge's `Omnibridge\Contract\Requests` (the visitor's
+  address and headers, the address, the route, the session's values and flash messages; `Runtime::requests()`, Symfony's
+  `StackRequests` in omnibridge/symfony, Laravel's `LaravelRequests` in omnibridge/laravel): `AbstractEventDispatcher` (and the
+  event's request), `SpamChecker`, `Referrer`, `BrowserPlusChannel` (the `browser+` flashes), `DemoAccountLockSubscriber`. A
+  `RequestStack` given still works until 6.0, adapted by `Base\Http\RequestsOf`. Services keep their arguments' order.
+- The entity events go through any PSR-14 dispatcher: `AbstractEventDispatcher` takes `Psr\EventDispatcher\EventDispatcherInterface`
+  and dispatches with `Omnibridge\Event\Events::dispatch()` (Symfony's is given the name, any other the event alone);
+  `AbstractEvent` is an `Omnibridge\Event\NamedEvent` (`eventName()`, `setEventName()`), so a Laravel listener of `user.register`
+  hears it. `UserSubscriber` reads who is signed in through `Omnibridge\Contract\Access` (Symfony's token storage deprecated) and
+  gives its listeners to a host that listens by name (`listen()`).
+- `Launcher` and `MaintenanceProvider` ask `Omnibridge\Contract\Access` (Security's checker and token storage deprecated).
+- The Notifier links through omnibase's router or, on a host without it, the host's `Omnibridge\Contract\Urls` (`urlOf()`,
+  `pathOf()`, `currentRoute()`, `domain()` on `BaseNotifier`). A notification's e-mail without Symfony's Twig bridge is
+  `EmailComposer`'s (`NotificationMessages::composed()`), a plain symfony/mime e-mail in the Notifier's `EmailMessage`.
+- `Localizer` takes omnibase's `Base\Service\ParameterBagInterface` as well as the container's parameters.
+
+### Moved: Symfony host code to omnibridge/symfony (step F5c, first part, 2026-11-02)
+
+- `Base\Bridge\Symfony\FrameworkLocator`, `Base\Subscriber\{TwigSubscriber, TemplatedEmailSubjectSubscriber, AnalyticsSubscriber}`,
+  `Base\Cache\Warmer\WebpackCacheWarmer` are `Omnibridge\Symfony\Omnibase\`'s by the F5b rule, their former names in
+  `src/Resources/former-names.symfony.php` (225 former names). `FrameworkAccessorsTrait`'s deprecated accessors answer null where
+  omnibridge/symfony is not installed. Nothing outside src/Twig names the Twig layer any more (TwigIsOptionalTest's host list is empty).
+- Foundation 801 -> 799, agnostic core (`bare --strict`) 704 -> 705.
+
 ### Moved: the Symfony form layer to omnibridge/symfony (plan "omnibase agnostic", step F5b, 2026-11-02)
 
 - 78 classes are `Omnibridge\Symfony\Omnibase\`'s, each under its former path: `Base\Field\Type\*` (39), `Base\Form\Type\*`

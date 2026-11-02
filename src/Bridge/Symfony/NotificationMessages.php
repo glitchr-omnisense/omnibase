@@ -6,6 +6,7 @@ use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Notifier\Mail\EmailComposer;
 use Base\Notifier\Abstract\BaseNotifierInterface;
+use Base\Notifier\Recipient\Recipient;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
@@ -63,6 +64,12 @@ final class NotificationMessages
 
     public static function email(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views|Environment $views, string $projectDir): EmailMessage
     {
+        // Without Symfony's Twig bridge (a host that is not Symfony: Laravel), or views that are not Twig's: the
+        // e-mail EmailComposer writes the same way under every host (plan "omnibase agnostic", F5c).
+        if (!class_exists(TemplatedEmail::class) || !($views instanceof Environment || $views instanceof TwigViews)) {
+            return self::composed($notification, $recipient, $notifier, $views);
+        }
+
         // Symfony's templated e-mail is Twig's (WrappedTemplatedEmail): the environment behind the views (step F5a).
         $twig = $views instanceof Environment ? $views : ($views instanceof TwigViews ? $views->environment() : throw new \LogicException('Symfony\'s notification e-mail is rendered by Twig: the views are '.get_debug_type($views).', not omnibridge/twig\'s TwigViews.'));
         $views = $views instanceof Views ? $views : new TwigViews($views);
@@ -196,5 +203,38 @@ final class NotificationMessages
         }
 
         return $message;
+    }
+
+    /**
+     * A notification's e-mail without Symfony's Twig bridge: EmailComposer::compose(), from the technical
+     * address, to the recipient or the technical address for a test one, a plain symfony/mime Email in
+     * the Notifier's EmailMessage. Forwarded to the administrators, it says so as Symfony's does.
+     */
+    public static function composed(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views|Environment $views): EmailMessage
+    {
+        $technical = $notifier->getTechnicalRecipient();
+        if ($technical instanceof NoRecipient || !$technical instanceof EmailRecipientInterface) {
+            throw new UnexpectedValueException("No support address found.");
+        }
+        $translator = $notifier->getTranslator();
+        $composer = new EmailComposer(
+            $views,
+            $technical->getEmail(),
+            static fn (string $to): bool => $recipient instanceof Recipient && $notifier->isTest($recipient),
+            static fn (string $id): string => $translator->trans($id),
+        );
+
+        $subject = (string) $notification->getSubject();
+        $content = (string) $notification->getContent();
+        if ($notification->isMarkAsAdmin()) {
+            $user = $notification->getUser() ?? "User \"" . User::getIp() . "\"";
+            $subject = "Fwd: " . $subject;
+            $content = $translator->trans("@emails.admin_forwarding.notice", [$user, $notification->getTitle()]);
+        }
+
+        $parameters = $notification->getContext(["title" => $notification->getTitle(), "content" => $content, "footer_text" => $notification->getFooter(), "recipient" => $recipient]);
+        $email = $composer->compose($recipient->getEmail(), $notification->getHtmlTemplate(), array_merge($parameters, $notification->getHtmlParameters()), $content, $subject, $recipient);
+
+        return new EmailMessage($email);
     }
 }

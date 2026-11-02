@@ -71,7 +71,6 @@ final class CorePathTest extends TestCase
         'Service/TrashManager.php',
         'Service/VersionManager.php',
         'Service/WidgetProvider.php',
-        'Subscriber/AnalyticsSubscriber.php',
         'Subscriber/NewDeviceSubscriber.php',
         'Traits/BaseTrait.php',
         'Twig/Extension/HtmlTwigExtension.php',

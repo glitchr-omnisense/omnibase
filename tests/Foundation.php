@@ -182,6 +182,8 @@
  * 807 after step F5b's first part (2026-11-02, +11): the neutral form layer (the ten of tests/Agnostic.php) and
  * Base\Bridge\Symfony\Form\SymfonyKinds, the Symfony form type of each kind (strings only).
  * 799 after step F5b's move (2026-11-02, -8): the seven of tests/Agnostic.php and SymfonyKinds, moved to omnibridge/symfony.
+ * 799 after step F5c's first part (2026-11-02, -3 +1 on F5b group 5's 801): Base\Subscriber\{AnalyticsSubscriber, TemplatedEmailSubjectSubscriber,
+ * TwigSubscriber} moved to omnibridge/symfony (with FrameworkLocator and WebpackCacheWarmer, listed nowhere); Base\Http\RequestsOf.
  */
 
 return [
@@ -582,6 +584,7 @@ return [
     Base\Form\Model\UserEditModel::class,
     Base\Form\Model\UserProfileModel::class,
     Base\Form\Model\UserSearchModel::class,
+    Base\Http\RequestsOf::class,
     Base\Imagine\FilterInterface::class,
     Base\Imagine\Filter\Advanced\SanitizeFilter::class,
     Base\Imagine\Filter\Basic\BackgroundFilter::class,
@@ -867,7 +870,6 @@ return [
     Base\Service\WysiwygEnhancer::class,
     Base\Service\WysiwygEnhancerInterface::class,
     Base\Services::class,
-    Base\Subscriber\AnalyticsSubscriber::class,
     Base\Subscriber\DemoBackOfficeSubscriber::class,
     Base\Subscriber\DemoSubscriber::class,
     Base\Subscriber\EntityDispatcherFlushSubscriber::class,
@@ -889,8 +891,6 @@ return [
     Base\Subscriber\SecondLevelCacheConsoleSubscriber::class,
     Base\Subscriber\SecurityEnrolmentSubscriber::class,
     Base\Subscriber\SecuritySubscriber::class,
-    Base\Subscriber\TemplatedEmailSubjectSubscriber::class,
-    Base\Subscriber\TwigSubscriber::class,
     Base\Subscriber\ValidCacheSubscriber::class,
     Base\Traits\BagTrait::class,
     Base\Traits\BaseCommonTrait::class,

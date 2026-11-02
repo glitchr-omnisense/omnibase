@@ -11,7 +11,6 @@ use Base\Entity\User\Token;
 use Base\Form\Model\ContactModel;
 use Base\Notifier\Abstract\BaseNotifier;
 use Base\Notifier\Recipient\Recipient;
-use Symfony\Component\Routing\Router;
 
 class Notifier extends BaseNotifier implements NotifierInterface
 {
@@ -38,12 +37,12 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("email.html.twig");
         $notification->setUser($user);
 
-        $route = $this->router->getRouteName();
+        $route = $this->currentRoute();
         if(!$route) $route = "_profiler_email";
 
         $url = null;
         if (!str_ends_with($route, "_send")) {
-            $url = $this->router->generate($route . "_send");
+            $url = $this->pathOf($route . "_send");
         }
 
         $notification->setContext([
@@ -75,7 +74,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
                     Donec nibh erat, maximus in condimentum ac, condimentum eget lorem.
                     Sed hendrerit maximus ante, eu euismod purus tempor vel.",
 
-            "footer_text" => $this->translator->trans('@emails.returnIndex', [$this->router->generate("/", [], Router::ABSOLUTE_URL)]) ?? null
+            "footer_text" => $this->translator->trans('@emails.returnIndex', [$this->urlOf("/")]) ?? null
         ]);
 
         return $notification;
@@ -139,7 +138,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.accountGoodbye.subject", [$user]),
             "content" => $this->translator->trans("@emails.accountGoodbye.content"),
             "action_text" => $this->translator->trans("@emails.accountGoodbye.action_text"),
-            "action_url" => $this->router->getUrl("security_login")
+            "action_url" => $this->urlOf("security_login")
         ]);
 
         return $notification;
@@ -160,7 +159,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.adminApproval.subject", [$user]),
             "content" => $this->translator->trans("@emails.adminApproval.content", [$user, $user->getId()]),
             "action_text" => $this->translator->trans("@emails.adminApproval.action_text"),
-            "action_url" => $this->router->getUrl("admin")
+            "action_url" => $this->urlOf("admin")
         ]);
 
         return $notification;
@@ -180,7 +179,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.adminApprovalConfirm.subject"),
             "content" => $this->translator->trans("@emails.adminApprovalConfirm.content", [$user]),
             "action_text" => $this->translator->trans("@emails.adminApprovalConfirm.action_text"),
-            "action_url" => $this->router->getUrl("security_login")
+            "action_url" => $this->urlOf("security_login")
         ]);
 
         return $notification;
@@ -207,7 +206,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
                 htmlspecialchars($password),
             ]),
             "action_text" => $this->translator->trans("@emails.accountCreated.action_text"),
-            "action_url" => $this->router->getUrl("security_login"),
+            "action_url" => $this->urlOf("security_login"),
             "footer_text" => $this->translator->trans("@emails.accountCreated.footer"),
         ]);
 
@@ -232,7 +231,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.resetPassword.subject"),
             "content" => $this->translator->trans("@emails.resetPassword.content"),
             "action_text" => $this->translator->trans("@emails.resetPassword.action_text"),
-            "action_url" => $this->router->getUrl("security_resetPasswordWithToken", ["token" => $token->get()])
+            "action_url" => $this->urlOf("security_resetPasswordWithToken", ["token" => $token->get()])
         ]);
 
         if ($token->getLifetime() > 0 && $token->getLifetime() < 3600 * 24 * 7) {
@@ -262,7 +261,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.verifyEmail.subject"),
             "content" => $this->translator->trans("@emails.verifyEmail.content"),
             "action_text" => $this->translator->trans("@emails.verifyEmail.action_text"),
-            "action_url" => $this->router->getUrl("security_verifyEmailWithToken", ["token" => $token->get()])
+            "action_url" => $this->urlOf("security_verifyEmailWithToken", ["token" => $token->get()])
         ]);
 
         if ($token->getLifetime() > 0 && $token->getLifetime() < 3600 * 24 * 7) {
@@ -295,7 +294,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
             "subject" => $this->translator->trans("@emails.loginToken.subject"),
             "content" => $this->translator->trans("@emails.loginToken.content"),
             "action_text" => $this->translator->trans("@emails.loginToken.action_text"),
-            "action_url" => $this->router->getUrl("security_loginWithToken", ["token" => $token->get()]),
+            "action_url" => $this->urlOf("security_loginWithToken", ["token" => $token->get()]),
         ]);
 
         if ($token->getLifetime() > 0 && $token->getLifetime() <= 3600 * 24 * 365) {
@@ -321,7 +320,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification = new Notification("loginToken.confirmation");
         $notification->setUser($user);
         $notification->setHtmlTemplate("email.html.twig");
-        $notification->setHtmlParameters(SignInMails::loginLinkParameters($this->words(), $this->duration(), $this->router->getUrl(SignInMails::LINK_ROUTE, ["token" => $token]), $until));
+        $notification->setHtmlParameters(SignInMails::loginLinkParameters($this->words(), $this->duration(), $this->urlOf(SignInMails::LINK_ROUTE, ["token" => $token]), $until));
 
         return $notification;
     }
@@ -352,7 +351,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
-        $notification->setHtmlParameters(SignInMails::welcomeBackParameters($this->words(), $user, $this->router->getUrl(SignInMails::WELCOME_BACK_ROUTE, ["token" => $token->get()])));
+        $notification->setHtmlParameters(SignInMails::welcomeBackParameters($this->words(), $user, $this->urlOf(SignInMails::WELCOME_BACK_ROUTE, ["token" => $token->get()])));
 
         return $notification;
     }
