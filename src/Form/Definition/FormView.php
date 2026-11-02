@@ -72,7 +72,7 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         }
         if ($form->hasCsrf() && null !== $token) {
             $root->children[FormDefinition::TOKEN_FIELD] = new self(FormDefinition::TOKEN_FIELD, [
-                'kind' => Kind::HIDDEN, 'type' => 'hidden', 'value' => $token,
+                'kind' => Kind::HIDDEN, 'type' => 'hidden', 'value' => $token, 'attr' => ['data-controller' => 'csrf-protection'],
             ], $root);
         }
 
