@@ -2,8 +2,8 @@
 
 namespace Base\Controller\UX;
 
+use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
 use App\Entity\User;
-use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Contract\Runtime;
 use Base\Service\PaginatorInterface;
 use App\Repository\UserRepository;
@@ -587,7 +587,7 @@ class EditorController extends AbstractController
             return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Invalid autosave target."], 400);
         }
 
-        $em = FrameworkLocator::entityManager();
+        $em = DoctrineLocator::entityManager();
         if (!$em || $em->getMetadataFactory()->isTransient($fqcn)) {
             return new JsonResponse(["success" => self::STATUS_BAD, "error" => "Invalid autosave target."], 400);
         }

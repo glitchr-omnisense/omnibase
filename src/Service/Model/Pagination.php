@@ -33,7 +33,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
      * (Base\Bridge\Doctrine\QueryPages, by name: nothing of Doctrine is loaded here).
      */
     public const ADAPTERS = [
-        'Doctrine\ORM\Query' => 'Base\Bridge\Doctrine\QueryPages',
+        'Doctrine\ORM\Query' => 'Omnibridge\Doctrine\Omnibase\QueryPages',
     ];
 
     /** @param array|Pages|Query $arrayOrQuery the rows: an array, or a query's Pages (a Doctrine Query is adapted) */

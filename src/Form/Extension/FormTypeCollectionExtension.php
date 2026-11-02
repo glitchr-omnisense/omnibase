@@ -2,7 +2,7 @@
 
 namespace Base\Form\Extension;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 

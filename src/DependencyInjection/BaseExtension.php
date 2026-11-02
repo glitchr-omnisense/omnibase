@@ -4,8 +4,8 @@ namespace Base\DependencyInjection;
 
 use Base\Attributes\AttributeInterface;
 use Base\BaseBundle;
-use Base\Database\Type\UtcDateTimeImmutableType;
-use Base\Database\Type\UtcDateTimeType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeType;
 use Doctrine\DBAL\Types\Type;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Database\Entity\EntityExtensionInterface;
@@ -50,6 +50,13 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         $loader->load('services-fix.php');
         $loader->load('services-decoration.php');
 
+        // The container loads its services' classes through the autoloader, also with debug, where Symfony would
+        // write include_once of their files (inline_class_loader): a class moved to omnibridge/doctrine (plan
+        // "omnibase agnostic", step F3) loaded by its file was never aliased by its former name, which the core's
+        // autoloader declares when the class is loaded (src/Resources/former-names.php) - and PHP checks a type or
+        // an instanceof written with the former name without autoloading it, so they failed on that class.
+        $container->setParameter('.container.dumper.inline_class_loader', false);
+
         // Configuration file: ./config/package/base.yaml
         $processor = new Processor();
         $configuration = new BaseConfiguration();
@@ -81,7 +88,7 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
         // (plan "omnibase agnostique", C3b), no longer DoctrineBundle's ServiceEntityRepository, whose
         // interface DoctrineBundle tags: an application's repository extending them (App\Repository\*)
         // is tagged here, and DoctrineBundle's repository factory finds it in the container as before.
-        $container->registerForAutoconfiguration(\Base\Database\Repository\ServiceEntityRepository::class)->addTag('doctrine.repository_service');
+        $container->registerForAutoconfiguration(\Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository::class)->addTag('doctrine.repository_service');
 
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "preUpdate"]);
         $container->registerForAutoconfiguration(EventDispatcherInterface::class)->addTag('doctrine.event_listener', ["event" => "postUpdate"]);
@@ -152,7 +159,7 @@ class BaseExtension extends AbstractBaseExtension implements PrependExtensionInt
             UtcDateTimeType::NAME => UtcDateTimeType::class,
         ];
         // The columns of a passkey, which the core describes (plan "omniauth", AU1).
-        $types += \Base\Bridge\Doctrine\Types::passkey();
+        $types += \Omnibridge\Doctrine\Omnibase\Types::passkey();
 
         $classList = array_merge(
             BaseBundle::getAllClasses(BaseBundle::getBundleDir() . "/src/Enum"),

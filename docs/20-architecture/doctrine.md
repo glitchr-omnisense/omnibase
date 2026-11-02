@@ -17,12 +17,65 @@ DoctrineBundle - on doctrine/orm **as published**: nothing needs a member
 Doctrine keeps private, and nothing patches doctrine/orm (since 4.0 the core
 declares its one patch, on symfony/process, to omnibridge/composer: `extra.omnibridge`).
 
+## In omnibridge/doctrine since step F3
+
+Since step F3 of the plan "omnibase agnostic" (2026-11-02), the core's Doctrine
+classes are omnibridge/doctrine's, under `Omnibridge\Doctrine\Omnibase\`: 142
+classes, by one rule - `Base\Bridge\Doctrine\X` is `Omnibridge\Doctrine\Omnibase\X`,
+any other keeps its path below `Omnibridge\Doctrine\Omnibase\`.
+
+| Former name | Now |
+|---|---|
+| `Base\Bridge\Doctrine\*` (the unit of work, backend, shapes, repositories, mapping, types, configuration, snapshot, `Behaviour\*`) | `Omnibridge\Doctrine\Omnibase\*` |
+| `Base\Database\Mapping\{ClassMetadataManipulator, ClassMetadataCompletor, ClassMetadataFactory, NamingStrategy}` | `Omnibridge\Doctrine\Omnibase\Database\Mapping\*` |
+| `Base\Database\Type\{ArrayType, DateTimeTypeUTC, MySQLSetType, UtcDateTimeType, UtcDateTimeImmutableType, Passkey\*}` | `Omnibridge\Doctrine\Omnibase\Database\Type\*` |
+| `Base\Database\{Walker, Function, Filter, Middleware, Event}\*`, `Base\Database\Schema\Describer` | `Omnibridge\Doctrine\Omnibase\Database\...` |
+| `Base\Database\Repository\{ServiceEntityRepository, ServiceEntityParser}` (the finder's Doctrine compiler) | `Omnibridge\Doctrine\Omnibase\Database\Repository\*` |
+| the 81 repositories `Base\Repository\**\*Repository` | `Omnibridge\Doctrine\Omnibase\Repository\**\*Repository` |
+| `Base\DatabaseSubscriber\{Attribute, Intl, InverseCollectionCache, TrackingPolicy}Subscriber`, `Base\EntitySubscriber\{Extension, Trasheable, Versionable, Setting}Subscriber` | `Omnibridge\Doctrine\Omnibase\{DatabaseSubscriber, EntitySubscriber}\*` |
+
+What stays in the core: the neutral parts - the finder language (`Base\Database\Repository\Finder\*`),
+`Entities`, `Repositories`, the repository interfaces (`Base\Repository\Users`, `Thread\Tags`...) and
+`Aliases`, the shapes (`EntityShape`, `EntityShapes`, `DescriptionShapes`), the schema rules, the
+enumerations (`EnumType`, `SetType`, `Enumerations`), `Utc`, the behaviours' attributes and their
+neutral backends' contracts, the listeners' logic (`Base\Database\Lifecycle\*`). The Doctrine half of
+`Base\Bridge\Symfony\FrameworkLocator` is `Omnibridge\Doctrine\Omnibase\DoctrineLocator` (FrameworkLocator's
+methods call it). `#[Cache]`'s regions, `#[Vault]`'s unique constraints and `#[OrderColumn]`'s order field -
+the attributes' `loadClassMetadata()`, typed on Doctrine's `ClassMetadata` - are
+`Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineMappingHooks`, which `AttributeSubscriber` and the
+manipulator call for each attribute before its own (deprecated) Doctrine-typed hook.
+
+**The former names keep working**, until 6.0: `src/Resources/former-names.php` (required by
+`Functions.php`) aliases each one, from `src/Resources/former-names.doctrine.php` (former => new;
+`Base\Database\FormerNames` reads it). The alias is declared whichever name is loaded first - asked
+by its former name, the moved class is loaded and aliased; loaded by its new name (or as a parent),
+its file is included by the core's autoloader and the former name aliased at once, because PHP checks
+an `instanceof` or a type written with a name without autoloading it. For the same reason the core's
+extension sets `.container.dumper.inline_class_loader` to false: Symfony's debug container would
+otherwise include the services' files itself, past the autoloader.
+
+- The entities still name their repositories by their former names (`repositoryClass:
+  UserRepository::class`, `Base\Repository\UserRepository`): Doctrine's metadata, and
+  `MetadataSnapshot`, are those of before. BaseBundle maps the moved repositories
+  `Base\Repository\X` => `App\Repository\X` from omnibridge/doctrine's folder, and registers them
+  under their former ids, as before.
+- An entity's `repositoryClass` may name a repository **interface** of the core
+  (`Base\Repository\Thread\Tags`): `Omnibridge\Doctrine\Omnibase\RepositoryFactory::implementation()`
+  gives the repository bound to it (`Base\Repository\Aliases::INTERFACES`), and under Symfony
+  `RepositoryInterfacesPass` adds the interfaces to DoctrineBundle's repository locator.
+- The moved services are registered under their new names; their former ids are aliases
+  (config/services/database.php).
+- `MetadataSnapshot` names a filter or a type whose class moved by its former name: it compares the
+  mapping, not where a class lives.
+- The core still requires omnibridge/doctrine (and doctrine/*) until the composer.json switch (F6), so
+  that the sites keep everything they had.
+
 ## Without Symfony
 
 ```php
 use Doctrine\DBAL\DriverManager;
 use Omnibridge\Doctrine\EntityManagers;
-use Base\Bridge\Doctrine\Mapping;
+use Omnibridge\Doctrine\Omnibase\Mapping;   // formerly Base\Bridge\Doctrine\Mapping
 
 $connection = DriverManager::getConnection(['driver' => 'pdo_mysql', 'host' => ..., 'dbname' => ...]);
 $entityManager = EntityManagers::create($connection, [

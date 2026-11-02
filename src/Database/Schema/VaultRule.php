@@ -4,7 +4,7 @@ namespace Base\Database\Schema;
 
 use Base\Database\Attribute\Vault;
 use Base\Database\Entity\Extension\TranslationInterface;
-use Base\Database\Walker\TranslatableWalker;
+use Omnibridge\Doctrine\Omnibase\Database\Walker\TranslatableWalker;
 use Omnibridge\Schema\Builder;
 use Omnibridge\Schema\Builder\Draft;
 use Omnibridge\Schema\Builder\Rule;

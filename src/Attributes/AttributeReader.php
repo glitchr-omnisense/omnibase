@@ -14,7 +14,7 @@ use App\Entity\User;
 use Base\Service\Model\ClassFinder;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;

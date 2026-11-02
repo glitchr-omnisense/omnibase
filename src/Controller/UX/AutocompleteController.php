@@ -2,9 +2,9 @@
 
 namespace Base\Controller\UX;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Contract\Runtime;
-use Base\Database\Repository\ServiceEntityRepository;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 
 use Base\Database\UnitOfWorks;
 use Base\Service\MediaServiceInterface;

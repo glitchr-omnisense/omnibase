@@ -2,7 +2,8 @@
 
 namespace Base\Bridge\Symfony;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
 use Base\Service\Locator;
@@ -28,8 +29,10 @@ use Twig\Environment;
  * For the core's host code - BaseService, the validators, the controllers,
  * Notification's Twig until it renders through Omnibridge\Contract\Views
  * (F5a) - and for Base\Traits\FrameworkAccessorsTrait, the deprecated
- * accessors that still reach these through BaseTrait. It moves with the rest
- * of the host code: Doctrine's part at F3, Symfony's at F5c.
+ * accessors that still reach these through BaseTrait. Its Doctrine half is
+ * omnibridge/doctrine's Omnibridge\Doctrine\Omnibase\DoctrineLocator since step F3
+ * (the methods here call it); its Symfony half moves with the rest of the host
+ * code at F5c.
  */
 final class FrameworkLocator
 {
@@ -38,50 +41,31 @@ final class FrameworkLocator
         return Locator::runtimeGet('instance', 'base.service');
     }
 
+    /** Doctrine's registry: Omnibridge\Doctrine\Omnibase\DoctrineLocator's (step F3), as each of the four below. */
     public static function doctrine(): ?ManagerRegistry
     {
-        return Locator::runtimeGet('doctrine', 'doctrine');
+        return DoctrineLocator::doctrine();
     }
 
     public static function objectManager(object|string $entity): ?ObjectManager
     {
-        return self::doctrine()?->getManagerForClass(is_object($entity) ? get_class($entity) : $entity);
+        return DoctrineLocator::objectManager($entity);
     }
 
     /** The default entity manager; a closed one is null, or recreated when $reopen. */
     public static function entityManager(bool $reopen = false): ?EntityManagerInterface
     {
-        $doctrine = self::doctrine();
-        if (!$doctrine) {
-            return null;
-        }
-
-        $entityManager = $doctrine->getManager($doctrine->getDefaultManagerName());
-        if (!$entityManager instanceof EntityManagerInterface) {
-            return null;
-        }
-        if (!$entityManager->isOpen()) {
-            if (!$reopen) {
-                return null;
-            }
-
-            /** @var \Doctrine\ORM\EntityManager $entityManager */
-            $entityManager = $entityManager->create($entityManager->getConnection(), $entityManager->getConfiguration());
-        }
-
-        return $entityManager;
+        return DoctrineLocator::entityManager($reopen);
     }
 
     public static function repository(object|string $entity): ?ObjectRepository
     {
-        $class = is_object($entity) ? get_class($entity) : $entity;
-
-        return self::objectManager($class)?->getRepository($class);
+        return DoctrineLocator::repository($entity);
     }
 
     public static function classMetadataManipulator(): ?ClassMetadataManipulator
     {
-        return Locator::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator');
+        return DoctrineLocator::classMetadataManipulator();
     }
 
     public static function tokenStorage(): ?TokenStorageInterface

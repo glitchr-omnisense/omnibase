@@ -5,8 +5,6 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Traits\VaultTrait;
-use Base\Database\Entity\Extension\TranslationInterface;
-use Base\Database\Walker\TranslatableWalker;
 use Base\Database\Attribute\Backend\VaultBackend;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Omnibridge\Persistence\Lifecycle;
@@ -17,12 +15,14 @@ use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-
 use function is_file;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Vault extends AbstractAttribute
 {
+    // Its mapping on Doctrine (its unique constraints) is omnibridge/doctrine's DoctrineMappingHooks::vault() since the
+    // plan "omnibase agnostic"'s step F3: it was loadClassMetadata(), a hook typed on Doctrine's ClassMetadata.
+
     /**
      * @var string
      */
@@ -199,37 +199,6 @@ class Vault extends AbstractAttribute
         // unserialized. Now that is_serialized() works, the type must be mixed
         // or an array/object @Vault field would hit "Array to string conversion".
         return is_serialized($value) ? unserialize($value) : $value;
-    }
-
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
-    {
-        if ($classMetadata->reflClass === null) {
-            return;
-        } // Class has not yet been fully built, ignore this event
-
-        if ($classMetadata->isMappedSuperclass) {
-            return;
-        }
-
-        $namingStrategy = $this->getEntityManager()->getConfiguration()->getNamingStrategy();
-        if ($this->unique) {
-            $name = $namingStrategy->classToTableName($classMetadata->name) . '_unique';
-            $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
-                $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
-                $this->unique
-            ));
-        }
-
-        if (is_instanceof($classMetadata->name, TranslationInterface::class)) {
-            $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' . TranslatableWalker::SALT;
-            if ($classMetadata->getName() == $classMetadata->rootEntityName) {
-                $classMetadata->table['uniqueConstraints'][$name] ??= [];
-                $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
-                    $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
-                    [$this->vault]
-                ));
-            }
-        }
     }
 
     /**

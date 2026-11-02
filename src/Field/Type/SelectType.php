@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Admin\Controller\AbstractCrudController;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Enum\UserRole;
 use Base\Database\Repository\Repositories;
 use Base\Form\Common\NativeEnum;

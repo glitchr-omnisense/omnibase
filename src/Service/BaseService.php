@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Profiler\Profile;
@@ -11,7 +12,7 @@ use Omnibridge\Contract\Access;
 use Omnibridge\Contract\Environment as EnvironmentContract;
 use Base\Bridge\Symfony\FrameworkLocator;
 use Base\Contract\Runtime;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\DevelopmentEnvironment;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\AdvancedRouterInterface;
@@ -715,7 +716,7 @@ class BaseService extends Locator
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         $entity = $eventOrEntity->getObject();
-        $originalEntityData = FrameworkLocator::entityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
+        $originalEntityData = DoctrineLocator::entityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
 
         if ($eventOrEntity instanceof PreUpdateEventArgs) {
             $event = $eventOrEntity;

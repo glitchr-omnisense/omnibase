@@ -217,10 +217,13 @@ final class FinderParityTest extends KernelTestCase
         return ['result' => self::normalise($result)];
     }
 
-    /** An exception's message without where it was raised (the line moved with the parser). */
+    /**
+     * An exception's message without where it was raised (the line moved with the parser), the classes
+     * moved to omnibridge/doctrine (step F3: the parser itself) named by their former names.
+     */
     private static function message(\Throwable $e): string
     {
-        return (string) preg_replace('~, called in \S+ on line \d+~', '', $e->getMessage());
+        return strtr((string) preg_replace('~, called in \S+ on line \d+~', '', $e->getMessage()), array_flip(\Base\Database\FormerNames::moved()));
     }
 
     private static function normalise(mixed $value): mixed

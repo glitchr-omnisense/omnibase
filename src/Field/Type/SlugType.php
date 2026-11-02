@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\Model\AutovalidateInterface;
 use Twig\Environment;
 use Doctrine\Common\Collections\Collection;

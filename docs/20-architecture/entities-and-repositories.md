@@ -93,7 +93,9 @@ A persistence compiles the Query into its own queries. On Doctrine it is
 `ServiceEntityParser`: the Subject of its entity, `read()` (the parse alone) and
 `execute()` (the DQL, the joins, the date bounds, the DQL functions, the caches,
 the eager loading); `parse()` does both, as `ServiceEntityRepository::__call()`
-asks. The compiler moves to omnibridge/doctrine at step F3, and
+asks. The compiler is omnibridge/doctrine's since step F3
+(`Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityParser`, its former
+name aliased by the core, see [the Doctrine mapping](doctrine.md)), and
 omnibridge/eloquent compiles the same Query into Illuminate's query builder at
 F7: the language is one, whatever the backend.
 

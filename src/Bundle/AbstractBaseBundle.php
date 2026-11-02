@@ -99,9 +99,16 @@ abstract class AbstractBaseBundle extends Bundle
         }, get_declared_classes())));
     }
 
-    public function setMapping(string $path, string $inputNamespace = "", string $outputNamespace = "")
+    /**
+     * Maps the classes of $path, $inputNamespace\X => $outputNamespace\X. $declaredNamespace is
+     * the namespace the files declare when it is not $inputNamespace: the core's repositories,
+     * in omnibridge/doctrine since the plan "omnibase agnostic"'s step F3 (Omnibridge\Doctrine\
+     * Omnibase\Repository\X), mapped by their former names (Base\Repository\X), which
+     * src/Resources/former-names.php resolves.
+     */
+    public function setMapping(string $path, string $inputNamespace = "", string $outputNamespace = "", ?string $declaredNamespace = null)
     {
-        $classList = $this->getAllClasses($path, $inputNamespace);
+        $classList = $this->getAllClasses($path, $declaredNamespace ?? $inputNamespace);
     
         $aliasList = [];
         foreach ($classList as $class) {
@@ -293,7 +300,8 @@ abstract class AbstractBaseBundle extends Bundle
     public static function declareAlias(string $class, string $alias, bool $lookup = true): bool
     {
         if (class_exists($alias, false) || interface_exists($alias, false) || trait_exists($alias, false)) {
-            return (new \ReflectionClass($alias))->getName() === ltrim($class, "\\");
+            // The declared name, not the one asked: $class may be a former name (src/Resources/former-names.php).
+            return (new \ReflectionClass($alias))->getName() === self::declaredName($class);
         }
 
         if ($lookup) {
@@ -312,6 +320,22 @@ abstract class AbstractBaseBundle extends Bundle
         class_alias($class, $alias);
 
         return true;
+    }
+
+    /**
+     * The name $class is declared under: itself, or the class a former name stands for (a class moved
+     * to omnibridge/doctrine at the plan "omnibase agnostic"'s step F3, aliased by
+     * src/Resources/former-names.php) - so that an App\ alias of Base\Repository\UserRepository is
+     * known as that class's.
+     */
+    private static function declaredName(string $class): string
+    {
+        $class = ltrim($class, "\\");
+        try {
+            return (class_exists($class) || interface_exists($class) || trait_exists($class)) ? (new \ReflectionClass($class))->getName() : $class;
+        } catch (\ReflectionException) {
+            return $class;
+        }
     }
 
     /** Whether $file is a stub (omnibridge/composer's, or glitchr/base-plugin's before 4.0), not a class of the application. */
@@ -371,8 +395,8 @@ abstract class AbstractBaseBundle extends Bundle
             return false;
         }
 
-        return $reflection->getName() === \Base\Database\Repository\ServiceEntityRepository::class
-            || $reflection->isSubclassOf(\Base\Database\Repository\ServiceEntityRepository::class)
+        return $reflection->getName() === \Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository::class
+            || $reflection->isSubclassOf(\Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository::class)
             || (interface_exists(\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface::class)
                 && $reflection->implementsInterface(\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface::class));
     }
@@ -392,7 +416,7 @@ abstract class AbstractBaseBundle extends Bundle
             // and the next process booted without those aliases.
             $outputIsAlias = false;
             if ($inputExists && $outputExists) {
-                try { $outputIsAlias = (new \ReflectionClass($output))->getName() === ltrim($input, "\\"); }
+                try { $outputIsAlias = (new \ReflectionClass($output))->getName() === self::declaredName($input); }
                 catch (\ReflectionException $e) { }
             }
 

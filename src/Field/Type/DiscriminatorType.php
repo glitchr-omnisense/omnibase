@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Controller\Admin\AbstractDashboardController;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
 use Base\Service\Model\IconizeInterface;

@@ -2,8 +2,8 @@
 
 namespace Base\DependencyInjection\Compiler\Pass;
 
-use Base\Bridge\Doctrine\Configuration;
-use Base\Bridge\Doctrine\MappingDriver;
+use Omnibridge\Doctrine\Omnibase\Configuration;
+use Omnibridge\Doctrine\Omnibase\MappingDriver;
 use Omnibridge\Doctrine\DeclarationDriver;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;

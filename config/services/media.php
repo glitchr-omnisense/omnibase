@@ -78,17 +78,17 @@ return static function (ContainerConfigurator $container): void {
         ->tag('kernel.event_subscriber');
 
     // Database Subscribers
-    $services->set('Base\Database\Middleware\PlatformMiddleware')
+    $services->set('Omnibridge\Doctrine\Omnibase\Database\Middleware\PlatformMiddleware')
         ->tag('doctrine.middleware');
 
     // The schema managers of every connection that takes DoctrineBundle's default factory: on MySQL,
     // a SET column read with its values and the "(DC2Type:...)" comments of before left out (doctrine/dbal
     // as published, plan "omnibase agnostique" C6b). Nothing to decorate without DoctrineBundle.
-    $services->set('Base\Bridge\Doctrine\SchemaManagerFactory')
+    $services->set('Omnibridge\Doctrine\Omnibase\SchemaManagerFactory')
         ->decorate('doctrine.dbal.default_schema_manager_factory', null, 0, ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
         ->args([new Reference('.inner')]);
 
-    $services->set('Base\DatabaseSubscriber\AttributeSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\AttributeSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata', 'priority' => 4096])
         ->tag('doctrine.event_listener', ['event' => 'resolveDiscriminator', 'priority' => 2048])
         ->tag('doctrine.event_listener', ['event' => 'preQuery', 'priority' => 2048])
@@ -114,7 +114,7 @@ return static function (ContainerConfigurator $container): void {
     * Doctrine Subscribers
     * ------------------------------*/
 
-    $services->set('Base\DatabaseSubscriber\IntlSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\IntlSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata',    'priority' => 4096])
         ->tag('doctrine.event_listener', ['event' => 'resolveDiscriminator', 'priority' => 2048])
         ->tag('doctrine.event_listener', ['event' => 'onQuery',              'priority' => 2048])
@@ -128,14 +128,14 @@ return static function (ContainerConfigurator $container): void {
         ]);
 
     // Low priority: after the subscribers that still change associations in onFlush.
-    $services->set('Base\DatabaseSubscriber\InverseCollectionCacheSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\InverseCollectionCacheSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'onFlush', 'priority' => -1024]);
 
-    $services->set('Base\DatabaseSubscriber\TrackingPolicySubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\TrackingPolicySubscriber')
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata'])
         ->args([new Reference('base.database.metadata_manipulator')]);
 
-    $services->set('Base\EntitySubscriber\ExtensionSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\EntitySubscriber\ExtensionSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'onFlush'])
         ->tag('doctrine.event_listener', ['event' => 'postPersist'])
         ->tag('doctrine.event_listener', ['event' => 'loadClassMetadata'])
@@ -149,14 +149,14 @@ return static function (ContainerConfigurator $container): void {
     // stamped updatedAt and the initiator by the time a revision reads the
     // change set; Trasheable runs above Versionable so a removal that turns
     // into a soft delete never also reads as an edit.
-    $services->set('Base\EntitySubscriber\TrasheableSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\EntitySubscriber\TrasheableSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'onFlush',   'priority' => 1024])
         ->tag('doctrine.event_listener', ['event' => 'postFlush', 'priority' => 1024])
         ->args([
             '%base.extension.empty_trash%',
         ]);
 
-    $services->set('Base\EntitySubscriber\VersionableSubscriber')
+    $services->set('Omnibridge\Doctrine\Omnibase\EntitySubscriber\VersionableSubscriber')
         ->tag('doctrine.event_listener', ['event' => 'onFlush',   'priority' => 512])
         ->tag('doctrine.event_listener', ['event' => 'postFlush', 'priority' => 512])
         ->args([

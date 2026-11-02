@@ -32,7 +32,7 @@ final class UnitOfWorks
      * @var array<class-string, class-string<UnitOfWork>>
      */
     public const ADAPTERS = [
-        'Doctrine\ORM\EntityManagerInterface' => 'Base\Bridge\Doctrine\DoctrineUnitOfWork',
+        'Doctrine\ORM\EntityManagerInterface' => 'Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork',
     ];
 
     /** @var array<class-string, class-string<UnitOfWork>|\Closure(object): UnitOfWork> */

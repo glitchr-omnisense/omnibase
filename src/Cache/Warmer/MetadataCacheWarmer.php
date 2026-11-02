@@ -6,7 +6,7 @@ use Base\Attributes\AttributeReader;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Cache\Abstract\AbstractLocalCacheInterface;
 use Base\Cache\Abstract\AbstractLocalCacheWarmer;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class MetadataCacheWarmer extends AbstractLocalCacheWarmer

@@ -128,13 +128,13 @@ return static function (ContainerConfigurator $container): void {
     $services->alias('Base\Service\ThemizerInterface', 'themizer');
 
     // Database
-    $services->alias('doctrine.orm.naming_strategy.camel', 'Base\Database\Mapping\NamingStrategy');
-    $services->alias('base.database.metadata_factory', 'Base\Database\Mapping\ClassMetadataFactory');
+    $services->alias('doctrine.orm.naming_strategy.camel', 'Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy');
+    $services->alias('base.database.metadata_factory', 'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory');
 
     $services->alias('Base\Database\Entity\EntityHydratorInterface', 'base.database.entity_hydrator');
     $services->alias('base.database.entity_hydrator', 'Base\Database\Entity\EntityHydrator');
 
-    $services->alias('base.database.metadata_manipulator', 'Base\Database\Mapping\ClassMetadataManipulator');
+    $services->alias('base.database.metadata_manipulator', 'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator');
 
     // Attributes
     $services->alias('base.attribute_reader', 'Base\Attributes\AttributeReader');

@@ -14,8 +14,8 @@ return static function (ContainerConfigurator $container): void {
         ->public(false);
 
     // Database services
-    $services->set('Base\Database\Mapping\NamingStrategy')->public();
-    $services->set('Base\Database\Mapping\ClassMetadataFactory')->public();
+    $services->set('Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy')->public();
+    $services->set('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory')->public();
 
     $services->set('Base\Database\Entity\EntityHydrator')->public()
         ->args([
@@ -23,7 +23,7 @@ return static function (ContainerConfigurator $container): void {
             new Reference('base.database.metadata_manipulator'),
         ]);
 
-    $services->set('Base\Database\Mapping\ClassMetadataManipulator')->public()
+    $services->set('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator')->public()
         ->args([
             new Reference('doctrine'),
             new Reference('doctrine.orm.entity_manager'),
@@ -80,19 +80,44 @@ return static function (ContainerConfigurator $container): void {
     // that name), as every other service of the core that takes it. Public, as the repositories
     // themselves are handed out by getRepository(): kept when nothing of the container asks them.
     // The list is Base\Repository\Aliases' (step R27), which omnibridge/laravel binds as well.
-    $services->set(\Base\Bridge\Doctrine\DoctrineRepositories::class)->args([service('doctrine.orm.entity_manager')]);
+    $services->set(\Omnibridge\Doctrine\Omnibase\DoctrineRepositories::class)->args([service('doctrine.orm.entity_manager')]);
 
     // The unit of work the core's services take in place of the entity manager (plan "omnibase agnostic",
     // step F2d): omnisense/omnibridge's contract, Doctrine's adapter behind it (omnibridge/doctrine's at F3).
-    $services->set(\Base\Bridge\Doctrine\DoctrineUnitOfWork::class)->args([service('doctrine.orm.entity_manager')]);
-    $services->alias(\Omnibridge\Persistence\UnitOfWork::class, \Base\Bridge\Doctrine\DoctrineUnitOfWork::class)->public();
+    $services->set(\Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork::class)->args([service('doctrine.orm.entity_manager')]);
+    $services->alias(\Omnibridge\Persistence\UnitOfWork::class, \Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork::class)->public();
     // What a constructor that still accepts the entity manager (deprecated, until 6.0) is autowired with:
     // Symfony names a union type's service by its sorted members.
-    $services->alias('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork', \Base\Bridge\Doctrine\DoctrineUnitOfWork::class);
+    $services->alias('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork', \Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork::class);
     // The persistence installed, its scopes (trash, vault) as Doctrine's filters (step F2e).
-    $services->set(\Base\Bridge\Doctrine\DoctrineBackend::class)->args([service(\Base\Bridge\Doctrine\DoctrineUnitOfWork::class)]);
-    $services->alias(\Omnibridge\Persistence\Backend::class, \Base\Bridge\Doctrine\DoctrineBackend::class)->public();
+    $services->set(\Omnibridge\Doctrine\Omnibase\DoctrineBackend::class)->args([service(\Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork::class)]);
+    $services->alias(\Omnibridge\Persistence\Backend::class, \Omnibridge\Doctrine\Omnibase\DoctrineBackend::class)->public();
     foreach (\Base\Repository\Aliases::INTERFACES as $interface => $repository) {
         $services->alias($interface, $repository)->public();
+    }
+
+    // The services whose classes moved to omnibridge/doctrine (plan "omnibase agnostic", step F3) are
+    // registered under their new names; their former ids stay, as aliases, for a configuration that names
+    // one (an argument, a decoration). The classes' former names are src/Resources/former-names.php's.
+    $moved = require \dirname(__DIR__, 2).'/src/Resources/former-names.doctrine.php';
+    foreach ([
+        'Base\Database\Mapping\NamingStrategy',
+        'Base\Database\Mapping\ClassMetadataFactory',
+        'Base\Database\Mapping\ClassMetadataManipulator',
+        'Base\Bridge\Doctrine\DoctrineRepositories',
+        'Base\Bridge\Doctrine\DoctrineUnitOfWork',
+        'Base\Bridge\Doctrine\DoctrineBackend',
+        'Base\Database\Middleware\PlatformMiddleware',
+        'Base\Bridge\Doctrine\SchemaManagerFactory',
+        'Base\DatabaseSubscriber\AttributeSubscriber',
+        'Base\DatabaseSubscriber\IntlSubscriber',
+        'Base\DatabaseSubscriber\InverseCollectionCacheSubscriber',
+        'Base\DatabaseSubscriber\TrackingPolicySubscriber',
+        'Base\EntitySubscriber\ExtensionSubscriber',
+        'Base\EntitySubscriber\TrasheableSubscriber',
+        'Base\EntitySubscriber\VersionableSubscriber',
+        'Base\EntitySubscriber\SettingSubscriber',
+    ] as $former) {
+        $services->alias($former, $moved[$former])->public();
     }
 };

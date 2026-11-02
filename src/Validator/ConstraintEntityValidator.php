@@ -2,7 +2,7 @@
 
 namespace Base\Validator;
 
-use Base\Bridge\Symfony\FrameworkLocator;
+use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraint;
@@ -91,13 +91,13 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         }
 
         if ($constraint->em) {
-            $em = FrameworkLocator::doctrine()->getManager($constraint->em);
+            $em = DoctrineLocator::doctrine()->getManager($constraint->em);
 
             if (!$em) {
                 throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em));
             }
         } else {
-            $em = FrameworkLocator::doctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
+            $em = DoctrineLocator::doctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
             if (!$em) {
                 throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
             }
@@ -136,7 +136,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         // if (null !== $constraint->errorPath && !\is_string($constraint->errorPath))
         //     throw new UnexpectedTypeException($constraint->errorPath, 'string or null');
 
-        $this->em = FrameworkLocator::doctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
+        $this->em = DoctrineLocator::doctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
     }
 
     /**
