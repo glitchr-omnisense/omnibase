@@ -62,9 +62,22 @@ final class FormSubmission
         return $errors;
     }
 
+    /** Whether the record's rules refused this field's value as already taken. */
+    public function isTaken(string $field): bool
+    {
+        foreach ($this->violations as $violation) {
+            if (\Omnibridge\Validation\Constraint\Unique::CODE === $violation->code && $field === ($violation->parameters['{{ field }}'] ?? $violation->path)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** The view to render again: the values sent, their errors, a fresh token. */
     public function createView(?string $token = null): FormView
     {
+        // The guard's fields, when it added them, are made anew: a form shown again is a form shown.
         return FormView::of($this->form, $this->values, $this->getErrors(), $token ?? $this->token, $this->submitted);
     }
 }

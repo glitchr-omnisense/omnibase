@@ -25,7 +25,7 @@ final class FormDefinition
     public const METHOD_GET = 'GET';
 
     /** The name a submitted token is sent under. */
-    public const TOKEN_FIELD = '_token';
+    public const TOKEN_FIELD = '_csrf_token';
 
     /** @var array<string, FieldDescriptor> by name */
     private array $fields = [];
@@ -33,7 +33,7 @@ final class FormDefinition
     /** @var array<string, array{label: string|null, fields: list<string>}> */
     private array $groups = [];
 
-    /** @var array<string, array{label: string|null, kind: string, attr: array<string, mixed>}> */
+    /** @var array<string, array{label: string|null, kind: string, attr: array<string, mixed>, options: array<string, mixed>}> */
     private array $actions = [];
 
     private string $method = self::METHOD_POST;
@@ -49,6 +49,21 @@ final class FormDefinition
     /** @var array<string, mixed> what a host-only feature needs (Symfony's form options...) */
     private array $hostOptions = [];
 
+    /** @var array<string, mixed>|false Base\Service\FormGuard's options, false for none */
+    private array|false $guard = false;
+
+    /** @var list<callable(array<string, mixed>): array<string, mixed>> */
+    private array $rewrites = [];
+
+    /** @var list<string>|null */
+    private ?array $validationGroups = null;
+
+    /** @var class-string|null */
+    private ?string $validationEntity = null;
+
+    /** @var list<string> */
+    private array $entityErrorFields = [];
+
     public function __construct(private readonly string $name)
     {
         if ('' === $name || !preg_match('/^[a-zA-Z0-9_][a-zA-Z0-9_\-:]*$/', $name)) {
@@ -59,6 +74,15 @@ final class FormDefinition
     public static function new(string $name): self
     {
         return new self($name);
+    }
+
+    /**
+     * A bare field of a kind (Base\Field\Kind), for a form that is no CRUD
+     * page's: none of what a descriptor class adds for the back office.
+     */
+    public static function field(string $name, string $kind, ?string $label = null): FieldDescriptor
+    {
+        return (new FieldDescriptor())->setProperty($name)->setKind($kind)->setLabel($label);
     }
 
     /**
@@ -121,6 +145,20 @@ final class FormDefinition
         return $this;
     }
 
+    /**
+     * A copy of the form with only these fields, its other settings kept: a host's type that adds
+     * them to its parent's asks its own part.
+     *
+     * @param list<string> $names
+     */
+    public function only(array $names): self
+    {
+        $form = clone $this;
+        $form->fields = array_intersect_key($this->fields, array_flip($names));
+
+        return $form;
+    }
+
     public function has(string $name): bool
     {
         return isset($this->fields[$name]);
@@ -155,16 +193,21 @@ final class FormDefinition
      * A button that submits the form: its name is the submitted intent
      * (FormSubmission::getClicked()), its label a translatable key.
      *
+     * The options are plain data a renderer reads: `confirmation` (the button
+     * asks in a modal first) and `type` (what its HTML element says: "submit"
+     * on a button that is an action of Kind::BUTTON).
+     *
      * @param array<string, mixed> $attr
+     * @param array<string, mixed> $options
      */
-    public function addAction(string $name, ?string $label = null, string $kind = Kind::SUBMIT, array $attr = []): self
+    public function addAction(string $name, ?string $label = null, string $kind = Kind::SUBMIT, array $attr = [], array $options = []): self
     {
-        $this->actions[$name] = ['label' => $label, 'kind' => $kind, 'attr' => $attr];
+        $this->actions[$name] = ['label' => $label, 'kind' => $kind, 'attr' => $attr, 'options' => $options];
 
         return $this;
     }
 
-    /** @return array<string, array{label: string|null, kind: string, attr: array<string, mixed>}> */
+    /** @return array<string, array{label: string|null, kind: string, attr: array<string, mixed>, options: array<string, mixed>}> */
     public function getActions(): array
     {
         return $this->actions;
@@ -199,6 +242,12 @@ final class FormDefinition
     public function getIntent(): string
     {
         return $this->intent ?? $this->name;
+    }
+
+    /** Whether an intent was set: without one, a host may name the token as it does (Symfony: the form's own name). */
+    public function hasIntent(): bool
+    {
+        return null !== $this->intent;
     }
 
     public function setIntent(?string $intent): self
@@ -244,6 +293,91 @@ final class FormDefinition
         $this->translationDomain = $domain;
 
         return $this;
+    }
+
+    /**
+     * Base\Service\FormGuard over this form: the trap, the time, the lists, the
+     * captcha. true, or Symfony's option `guard`'s array: trap, min_delay,
+     * challenge, action, reputation, email, name, captcha_after.
+     *
+     * @param array<string, mixed>|bool $guard
+     */
+    public function setGuard(array|bool $guard): self
+    {
+        $this->guard = true === $guard ? [] : $guard;
+
+        return $this;
+    }
+
+    /** @return array<string, mixed>|false */
+    public function getGuard(): array|false
+    {
+        return $this->guard;
+    }
+
+    /**
+     * What was sent, rewritten before it is read (Symfony's PRE_SUBMIT): a
+     * "tick everything" box expanded into the list it stands for.
+     *
+     * @param callable(array<string, mixed>): array<string, mixed> $rewrite
+     */
+    public function addRewrite(callable $rewrite): self
+    {
+        $this->rewrites[] = $rewrite;
+
+        return $this;
+    }
+
+    /**
+     * @param array<string, mixed> $submitted
+     *
+     * @return array<string, mixed>
+     */
+    public function rewrite(array $submitted): array
+    {
+        foreach ($this->rewrites as $rewrite) {
+            $submitted = $rewrite($submitted);
+        }
+
+        return $submitted;
+    }
+
+    /** @return list<string>|null the groups the form validates, the host's default when null */
+    public function getValidationGroups(): ?array
+    {
+        return $this->validationGroups;
+    }
+
+    /** @param list<string>|null $groups */
+    public function setValidationGroups(?array $groups): self
+    {
+        $this->validationGroups = $groups;
+
+        return $this;
+    }
+
+    /** @return class-string|null the record the form makes, whose class-level rules (its uniqueness) the data must hold */
+    public function getValidationEntity(): ?string
+    {
+        return $this->validationEntity;
+    }
+
+    /**
+     * @param class-string|null $class
+     * @param list<string>      $errorFields the fields whose refusal is said under them; the others' is the form's own
+     */
+    public function setValidationEntity(?string $class, array $errorFields = []): self
+    {
+        $this->validationEntity = $class;
+        $this->entityErrorFields = $errorFields;
+
+        return $this;
+    }
+
+    /** @return list<string> */
+    public function getEntityErrorFields(): array
+    {
+        return $this->entityErrorFields;
     }
 
     /** @return array<string, mixed> the <form> element's attributes */

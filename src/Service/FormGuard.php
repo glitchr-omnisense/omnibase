@@ -135,7 +135,7 @@ class FormGuard
      * visitor: always when $after is 0, or when their tries cannot be counted
      * (no cache, no address, no session); otherwise from $after tries refused.
      */
-    public function captchaAsked(string $form, int $after, ?Request $request): bool
+    public function captchaAsked(string $form, int $after, Request|string|null $request): bool
     {
         if ($after <= 0) {
             return true;
@@ -146,7 +146,7 @@ class FormGuard
     }
 
     /** The refused tries of the form $form from this visitor in the last 15 minutes; null when they cannot be counted. */
-    public function failures(string $form, ?Request $request): ?int
+    public function failures(string $form, Request|string|null $request): ?int
     {
         if (null === $key = $this->attemptKey($form, $request)) {
             return null;
@@ -157,7 +157,7 @@ class FormGuard
     }
 
     /** One more refused try: the guard said no (trap, time, lists, captcha, spam), or the form is invalid. */
-    public function failed(string $form, ?Request $request): void
+    public function failed(string $form, Request|string|null $request): void
     {
         if (null === $key = $this->attemptKey($form, $request)) {
             return;
@@ -167,7 +167,7 @@ class FormGuard
     }
 
     /** A form sent: its tries are forgotten. */
-    public function succeeded(string $form, ?Request $request): void
+    public function succeeded(string $form, Request|string|null $request): void
     {
         if (null !== $key = $this->attemptKey($form, $request)) {
             $this->cache->deleteItem($key);
@@ -175,10 +175,13 @@ class FormGuard
     }
 
     /** Who tries: the address, else the session already started; null when neither, or without a cache. */
-    protected function attemptKey(string $form, ?Request $request): ?string
+    protected function attemptKey(string $form, Request|string|null $request): ?string
     {
         if (null === $this->cache || null === $request) {
             return null;
+        }
+        if (\is_string($request)) { // A host without Symfony's request says the address.
+            return '' === $request ? null : 'base.form_failures.'.hash('sha256', $form.'|'.$request);
         }
         $who = $request->getClientIp();
         if (null === $who && $request->hasSession() && $request->getSession()->isStarted()) {
@@ -260,13 +263,38 @@ class FormGuard
      */
     public function inspect(FormInterface $form, ?Request $request, ?int $minDelay = null, string $emailField = 'email', string $nameField = 'name', bool $lists = true): ?array
     {
-        if ($form->has(self::TRAP_FIELD) && '' !== trim((string) $form->get(self::TRAP_FIELD)->getData())) {
+        $values = [];
+        foreach ([self::TRAP_FIELD, self::STAMP_FIELD] as $field) {
+            if ($form->has($field)) {
+                $values[$field] = (string) $form->get($field)->getData();
+            }
+        }
+
+        $found = $this->inspectValues($values, $request?->getClientIp(), $minDelay, $this->value($form, $emailField), $this->value($form, $nameField), $lists);
+        if (null !== $found && self::DISPOSABLE === $found[0] && $form->has($emailField)) {
+            $found[1] = $emailField;
+        }
+
+        return $found;
+    }
+
+    /**
+     * inspect() on what a form sent, whichever host read it: the values of
+     * TRAP_FIELD and STAMP_FIELD, when the form has them.
+     *
+     * @param array<string, string> $values
+     *
+     * @return array{0: string, 1: ?string}|null the reason, and the field it is about (null: the form)
+     */
+    public function inspectValues(array $values, ?string $address, ?int $minDelay = null, ?string $email = null, ?string $name = null, bool $lists = true): ?array
+    {
+        if ('' !== trim($values[self::TRAP_FIELD] ?? '')) {
             return [self::TRAPPED, null];
         }
 
         $minDelay ??= $this->minDelay();
-        if ($form->has(self::STAMP_FIELD)) {
-            $elapsed = $this->elapsed((string) $form->get(self::STAMP_FIELD)->getData());
+        if (\array_key_exists(self::STAMP_FIELD, $values)) {
+            $elapsed = $this->elapsed($values[self::STAMP_FIELD]);
             if (null === $elapsed) {
                 return [self::STALE, null];
             }
@@ -281,10 +309,9 @@ class FormGuard
         if (!$lists || [] === $this->reputationGateways()) {
             return null;
         }
-        $email = $this->value($form, $emailField);
-        $reason = $this->reputation(new Identity($request?->getClientIp(), $email, $this->value($form, $nameField)));
+        $reason = $this->reputation(new Identity($address, $email, $name));
 
-        return null === $reason ? null : [$reason, self::DISPOSABLE === $reason && $form->has($emailField) ? $emailField : null];
+        return null === $reason ? null : [$reason, null];
     }
 
     /**
@@ -327,14 +354,14 @@ class FormGuard
      * not answer follows omnishield.challenge.unreachable; a key refused is
      * the site's error, let through and logged.
      */
-    public function challenge(string $gateway, ?string $token, ?Request $request, ?string $action = null): ?string
+    public function challenge(string $gateway, ?string $token, Request|string|null $request, ?string $action = null): ?string
     {
         $token = trim((string) $token);
         if ('' === $token) {
             return self::CHALLENGE_MISSING;
         }
         try {
-            $verdict = $this->registry->challenge($gateway)->verify(new \Omnishield\Model\Attempt($token, $request?->getClientIp(), $action));
+            $verdict = $this->registry->challenge($gateway)->verify(new \Omnishield\Model\Attempt($token, \is_string($request) ? $request : $request?->getClientIp(), $action));
         } catch (InvalidKeyException $e) {
             $this->logger?->error('Form guard: the captcha "{gateway}" refused the site\'s key: {message}', ['gateway' => $gateway, 'message' => $e->getMessage()]);
 

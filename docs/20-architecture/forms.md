@@ -176,6 +176,21 @@ the submitted intent), its method and target, the intent of its token (its name 
 data class, the translation domain (the host's default when null) and, as an escape hatch, options
 only one host reads (`setHostOptions([...], 'symfony')`).
 
+What a site's form needs beyond fields, each read by every host:
+
+- `FormDefinition::field('email', Kind::EMAIL)`: a bare field, none of what a descriptor class adds for the back office;
+- `setFormTypeOption('data', true)`: a value fixed whatever the data; `'choices' => $repository->subscribable(...)`: a callable, asked when
+  read; a list of records as choices (each says its own name, its id the value);
+- `addRewrite(fn (array $sent): array => ...)`: what was sent rewritten before it is read (Symfony's PRE_SUBMIT);
+- `Kind::REPEATED`: one value typed twice, option `type` the kind of the two inputs, the mismatch said under the first;
+- `addAction('submit', null, Kind::BUTTON, [], ['confirmation' => true, 'type' => 'submit'])`: ButtonType's modal;
+- `setGuard(['action' => 'signup'])`: `FormGuard`'s trap, stamp, lists, under Symfony by the option `guard`, elsewhere by `FormProcessor`;
+- `setValidationGroups(['new'])`, `setValidationEntity(User::class, ['username'])`: the record's class-level rules on the form's values, its
+  refusals the form's own but for the fields named. `FormSubmission::isTaken('email')` tells a page which.
+
+A model's or entity's rules stay on one line: `Omnibridge\Validation\AttributeConstraints` reads symfony/validator's attributes by name, their
+class never loaded, as the kept constraints. `Unique` asks `Base\Form\Definition\UniqueLookup`, over `Repositories`, on both hosts.
+
 ### Binding, view, processing
 
 - `FormBinder` turns what is sent into the data (an array, an entity, a DTO) and the data into the
@@ -223,6 +238,8 @@ name is a plain string while Symfony's registry asks a type's extensions by its 
 `Omnibridge\Symfony\Omnibase\Form\DefinitionForms` makes a Symfony form of a definition - types by kind, options
 as the admin maps a CRUD field's, kept constraints translated (`SymfonyConstraints`), actions as buttons,
 `getHostOptions()` winning - and `Omnibridge\Contract\Validation` is `SymfonyValidation` over symfony/validator.
+A site's form stays a type, what Symfony asks for: `Omnibridge\Symfony\Omnibase\Form\DefinitionType` builds it from a definition
+(`definition(array $options)`), so `FormProxy::createProcessor()`, its name and its block prefix do not change.
 The generic renderers - the Twig theme (omnibridge/twig),
 the Blade theme (omnibridge/laravel), React - read `FormView`. The whole layer loads under
 `bare --strict` (`BareTest::testTheFormLayerWorksWithoutAFormLibrary`).

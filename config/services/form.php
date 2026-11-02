@@ -18,6 +18,9 @@ return static function (ContainerConfigurator $container): void {
         ->public()
         ->args([new Reference('form.factory')]);
 
+    $services->set('Base\Form\Definition\UniqueLookup')
+        ->args([new Reference('Base\Database\Repository\Repositories')]);
+
     // ------------------------------
     // Form Extensions
     // ------------------------------

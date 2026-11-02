@@ -73,6 +73,8 @@ final class Kind
     public const ATTRIBUTE = 'attribute';
     public const ARRAY = 'array';
     public const COLLECTION = 'collection';
+    /** One value typed twice: its option `type` is the kind of the two inputs, first_options and second_options theirs. */
+    public const REPEATED = 'repeated';
     public const TRANSLATION = 'translation';
     public const DISCRIMINATOR = 'discriminator';
 

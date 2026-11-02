@@ -1404,6 +1404,18 @@ which doctrine/orm 3 requires and nothing of the Foundation loads.
 
 ## [Unreleased]
 
+### Added
+
+- **The neutral forms hold what the sites' forms need** (plan "omnibase agnostic", step F5b, group 5). `FormDefinition::TOKEN_FIELD` is
+  `_csrf_token`, what omnibase's Symfony forms post. `FormDefinition::field()` (a bare field of a kind), `setGuard()`, `addRewrite()` (what was
+  sent rewritten before it is read: Symfony's PRE_SUBMIT), `setValidationGroups()`, `setValidationEntity()` (the record's class-level rules on the
+  form's values, as Symfony's `validation_entity`, with the fields whose refusal is said under them), `only()`, `addAction()`'s options
+  (`confirmation`, `type`: ButtonType's modal). A field's fixed `data`, `choices` as a callable, a list of records as choices, `Kind::REPEATED`.
+  `FormProcessor` goes through `FormGuard` (its trap and stamp in the view, what they say first; `inspectValues()`, addresses as strings where a
+  host has no Symfony request) and says its refusals in the host's language. `FormSubmission::isTaken()`.
+  `AccountForms`: the sign-in, the sign-in by a link, the sign-up, the profile's editor, neutral.
+- **`Base\Form\Definition\UniqueLookup`**: omnibridge's `Unique` through `Repositories`, the `$exists` of the hosts' Validation.
+
 ### Security
 
 - `#[Vault]` fails closed again: `allowsPlaintext()` called `AbstractAttribute::getParameterBag()`

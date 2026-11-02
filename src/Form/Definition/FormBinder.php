@@ -55,6 +55,7 @@ final class FormBinder
         Kind::URL => 'Please enter a valid URL.',
         Kind::FILE => 'Please select a valid file.',
         Kind::IMAGE => 'Please select a valid file.',
+        Kind::REPEATED => 'The values do not match.',
     ];
 
     public const INVALID_MESSAGE = 'This value is not valid.';
@@ -95,7 +96,11 @@ final class FormBinder
             if (\in_array($field->getKind(), Kind::UNMAPPED_KINDS, true)) {
                 continue;
             }
-            $value = $this->isMapped($field) && null !== $data ? $this->getValue($data, $this->path($name, $field)) : $field->getValue();
+            if (\array_key_exists('data', $field->getOptions())) {
+                $value = $field->getOption('data');
+            } else {
+                $value = $this->isMapped($field) && null !== $data ? $this->getValue($data, $this->path($name, $field)) : $field->getValue();
+            }
             $values[$name] = $this->transform($value, $field);
         }
 
@@ -113,6 +118,7 @@ final class FormBinder
     public function bind(FormDefinition $form, array $submitted, mixed $data = null): Binding
     {
         $data ??= null !== $form->getDataClass() && class_exists($form->getDataClass()) ? new ($form->getDataClass())() : [];
+        $submitted = $form->rewrite($submitted);
         $values = [];
         $violations = [];
 
@@ -133,7 +139,7 @@ final class FormBinder
             try {
                 $value = $this->reverse($raw, $field);
             } catch (\UnexpectedValueException) {
-                $violations[] = new Violation($name, (string) ($field->getOption('invalid_message') ?? self::INVALID_MESSAGES[$kind] ?? self::INVALID_MESSAGE), 'invalid', ['{{ value }}' => \is_scalar($raw) ? (string) $raw : '']);
+                $violations[] = new Violation(Kind::REPEATED === $kind ? $name.'.'.($field->getOption('first_name') ?? 'first') : $name, (string) ($field->getOption('invalid_message') ?? self::INVALID_MESSAGES[$kind] ?? self::INVALID_MESSAGE), 'invalid', ['{{ value }}' => \is_scalar($raw) ? (string) $raw : '']);
                 $values[$name] = \is_scalar($raw) || \is_array($raw) ? $raw : null;
                 continue;
             }
@@ -167,6 +173,9 @@ final class FormBinder
 
         if (Kind::BOOLEAN === $kind || Kind::CHECKBOX === $kind) {
             return null !== $raw && false !== $raw && '0' !== $raw && '' !== $raw;
+        }
+        if (Kind::REPEATED === $kind) {
+            return $this->repeated($raw, $field);
         }
         if (Kind::isFile($kind)) {
             return '' === $raw ? null : $raw;
@@ -238,6 +247,18 @@ final class FormBinder
         }
 
         return $this->scalar($value);
+    }
+
+    /** Both inputs say the same: that value, read by the inputs' own kind; otherwise it cannot be read. */
+    private function repeated(mixed $raw, FieldDescriptor $field): mixed
+    {
+        $first = \is_array($raw) ? ($raw[$field->getOption('first_name') ?? 'first'] ?? null) : null;
+        $second = \is_array($raw) ? ($raw[$field->getOption('second_name') ?? 'second'] ?? null) : null;
+        if (($first ?? '') !== ($second ?? '')) {
+            throw new \UnexpectedValueException('The two values differ.');
+        }
+
+        return null === $first || '' === $first ? null : $this->reverse($first, (clone $field)->setKind((string) ($field->getOption('type') ?? Kind::TEXT)));
     }
 
     private function scalar(mixed $value): mixed
@@ -346,9 +367,20 @@ final class FormBinder
         return $this->offered((string) $raw, $field);
     }
 
+    /** A field's choices, a callable called once it is asked (a query's answer); null without any. */
+    public static function choices(FieldDescriptor $field): ?iterable
+    {
+        $choices = $field->getOption('choices');
+        if ($choices instanceof \Closure || \is_array($choices) && \is_callable($choices)) {
+            $choices = $choices();
+        }
+
+        return is_iterable($choices) ? $choices : null;
+    }
+
     private function offered(string $raw, FieldDescriptor $field): mixed
     {
-        if (Kind::ASSOCIATION === $field->getKind() || null !== $field->getOption('class') && null === $field->getOption('choices')) {
+        if ((Kind::ASSOCIATION === $field->getKind() || null !== $field->getOption('class')) && null === $field->getOption('choices')) {
             $class = $field->getOption('class');
             if (\is_string($class) && null !== $this->unitOfWork) {
                 return $this->unitOfWork->reference($class, ctype_digit($raw) ? (int) $raw : $raw);
@@ -357,8 +389,8 @@ final class FormBinder
             return $raw;
         }
 
-        $choices = $field->getOption('choices');
-        if (!is_iterable($choices)) {
+        $choices = self::choices($field);
+        if (null === $choices) {
             return $raw;
         }
         foreach (self::flatten($choices) as $value) {

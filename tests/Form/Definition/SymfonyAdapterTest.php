@@ -72,4 +72,24 @@ class SymfonyAdapterTest extends TestCase
         self::assertSame('Base\Field\Type\BooleanType', $definition->get('notify')->getFormType());
         self::assertSame('Omnibridge\Symfony\Omnibase\Field\Type\BooleanType', (new \ReflectionClass($definition->get('notify')->getFormType()))->getName());
     }
+
+    public function testARepeatedFieldChoicesAskedLateAndARewriteAreSymfonys(): void
+    {
+        $definition = \Base\Form\Definition\FormDefinition::new('sign_up')->setCsrf(false)
+            ->add(\Base\Form\Definition\FormDefinition::field('password', \Base\Field\Kind::REPEATED)->setFormTypeOption('type', \Base\Field\Kind::TEXT))
+            ->add(\Base\Form\Definition\FormDefinition::field('tags', \Base\Field\Kind::CHECKBOX)->setFormType(\Symfony\Component\Form\Extension\Core\Type\ChoiceType::class)->setFormTypeOptions(['multiple' => true, 'choices' => static fn (): array => ['A' => 'a', 'B' => 'b']]))
+            ->add(\Base\Form\Definition\FormDefinition::field('all', \Base\Field\Kind::CHECKBOX)->setVirtual(true)->setRequired(false))
+            ->addRewrite(static fn (array $sent): array => empty($sent['all']) ? $sent : ['tags' => ['a', 'b']] + $sent);
+
+        $form = $this->forms()->create($definition);
+        $form->submit(['password' => ['first' => 'one', 'second' => 'one'], 'all' => '1']);
+        self::assertTrue($form->isValid());
+        self::assertSame('one', $form->get('password')->getData());
+        self::assertSame(['a', 'b'], $form->get('tags')->getData());
+
+        $refused = $this->forms()->create($definition);
+        $refused->submit(['password' => ['first' => 'one', 'second' => 'two']]);
+        self::assertFalse($refused->isValid());
+        self::assertCount(1, $refused->get('password')->get('first')->getErrors());
+    }
 }

@@ -271,7 +271,7 @@ final class BareTest extends TestCase
                 'rating' => 'five',
                 'content' => ['This value should not be blank.'],
                 'country' => 'choice',
-                'token' => 'comment[_token]=token:comment',
+                'token' => 'comment[_csrf_token]=token:comment',
             ],
         ], $run['result']);
     }
