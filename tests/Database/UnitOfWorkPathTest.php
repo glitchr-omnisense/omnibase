@@ -116,6 +116,11 @@ final class UnitOfWorkPathTest extends TestCase
     private static function tokens(string $file): array
     {
         $path = \dirname(__DIR__, 2).'/src/'.$file;
+        // A file the core moved to a bridge (omnibridge/symfony's console, step F5c) is read where its class is now.
+        $moved = \Base\Database\FormerNames::moved()['Base\\'.str_replace('/', '\\', substr($file, 0, -4))] ?? null;
+        if (!is_file($path) && null !== $moved && class_exists($moved)) {
+            $path = (string) (new \ReflectionClass($moved))->getFileName();
+        }
         self::assertFileExists($path);
 
         return array_values(array_filter(token_get_all((string) file_get_contents($path)), static fn ($t) => !\is_array($t) || !\in_array($t[0], [\T_WHITESPACE, \T_COMMENT, \T_DOC_COMMENT], true)));

@@ -221,7 +221,7 @@ What keeps the entity manager, on purpose: the mapping (`ClassMetadataManipulato
 `ClassMetadataFactory`, `EntityHydrator`), `ServiceEntityRepository`, the Doctrine listeners, the
 Doctrine commands (`doctrine:database:import`, `doctrine:array:upgrade`, the schema's charset), the
 validators and `CropperType` (the form layer, F5b), `AbstractEventDispatcher` and `BaseNotifier` (F5a),
-`DemoAccountFactory` (Doctrine's fixtures), `Base\Console\Command` (its deprecated `$entityManager`, read
+`DemoAccountFactory` (Doctrine's fixtures), `Base\Console\Command` (omnibridge/symfony's `Omnibase\Console\Command` since F5c; its deprecated `$entityManager`, read
 by the applications' commands, beside its `$unitOfWork`), `Base\Bridge\Symfony\FrameworkLocator` (since F2f: the entity
 manager and the registry BaseTrait handed out, now deprecated there). `tests/Database/UnitOfWorkPathTest`
 keeps the converted files off the entity manager.

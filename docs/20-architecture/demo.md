@@ -413,5 +413,5 @@ base:
 | `Base\Demo\DemoAccountFactory` | the rows: `account()`, `load()`, `missing()` |
 | `Base\Demo\DemoMode` | `isActive()`: the `demo` environment, and no other |
 | `Base\Demo\DemoGuard` | what demo refuses to start on |
-| `Base\Console\Command\DemoResetCommand` | `demo:reset` |
+| `Base\Console\Command\DemoResetCommand` (omnibridge/symfony's `Omnibase\Console\Command\DemoResetCommand` since F5c, former name aliased) | `demo:reset` |
 | `tests/Demo/` | the suite; `Fixtures\DemoTestKernel` boots a host application in `demo` or `prod` |

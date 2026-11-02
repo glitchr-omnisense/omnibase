@@ -230,7 +230,6 @@ return [
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
     Base\Cache\SimpleCache::class,
     Base\Cache\SimpleCacheInterface::class,
-    Base\Console\Console::class,
     Base\Console\ConsoleInterface::class,
     Base\Contract\Framework::class,
     Base\Contract\Link::class,

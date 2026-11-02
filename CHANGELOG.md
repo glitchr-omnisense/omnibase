@@ -10,6 +10,15 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Moved: the console to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 2, 2026-11-03)
+
+- `Base\Console\{Application, Command, Console}` and the 30 commands of `Base\Console\Command\*` are omnibridge/symfony's
+  `Omnibridge\Symfony\Omnibase\Console\*`, as they were; their former names are aliased (former-names.symfony.php,
+  FormerNamesTest 262), so `bin/console`'s `use Base\Console\Application;`, an application's command extending
+  `Base\Console\Command` and config/services/core.php's service ids keep working. `Base\Console\ConsoleInterface` stays.
+- The commands' names, options and output are unchanged (lesringostars' TranslationKeysTest: `translation:crud`,
+  `:entities`, `:enums` print the same keys).
+
 ### Changed: roles, hot parameters and the field types off Symfony (plan "omnibase agnostic", step F5c, item 3, slice 1, 2026-11-02)
 
 - `SecurityPolicy` reads omnisense/omnibridge's `Contract\Roles` (`#[Autowire(service: Roles::class)]`, in the core's
