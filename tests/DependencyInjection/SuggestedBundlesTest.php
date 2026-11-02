@@ -76,7 +76,8 @@ class SuggestedBundlesTest extends KernelTestCase
         $this->assertNotContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(UserProvider::class))->getInterfaceNames());
         if (interface_exists('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface')) {
             // OAuthUserProvider declares hwi's interface: it loads only where hwi/oauth-bundle is (an application without it, lesringostars since AU7, never names it).
-            $this->assertContains(UserProvider::class, class_parents(OAuthUserProvider::class));
+            // class_parents() gives the classes' names, omnibridge/symfony's since step F5c: UserProvider's, through its former name.
+            $this->assertContains((new \ReflectionClass(UserProvider::class))->getName(), class_parents(OAuthUserProvider::class));
             $this->assertContains('HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface', (new \ReflectionClass(OAuthUserProvider::class))->getInterfaceNames());
         }
     }
