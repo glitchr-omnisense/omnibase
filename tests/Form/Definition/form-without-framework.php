@@ -46,8 +46,8 @@ $form = FormDefinition::new('comment')
     ->addAction('submit', 'comment.submit');
 $processor = new FormProcessor($validation, $tokens);
 
-$refused = $processor->handle($form, ['email' => ' ringo@example.com ', 'content' => '', 'rating' => 'five', 'country' => 'FR', '_token' => 'forged']);
-$kept = $processor->handle($form, ['email' => 'ringo@example.com', 'content' => 'Hello', 'rating' => '5', 'notify' => '1', 'country' => 'JP', '_token' => 'token:comment']);
+$refused = $processor->handle($form, ['email' => ' ringo@example.com ', 'content' => '', 'rating' => 'five', 'country' => 'FR', '_csrf_token' => 'forged']);
+$kept = $processor->handle($form, ['email' => 'ringo@example.com', 'content' => 'Hello', 'rating' => '5', 'notify' => '1', 'country' => 'JP', '_csrf_token' => 'token:comment']);
 $view = $refused->createView();
 
 return [
@@ -58,6 +58,6 @@ return [
         'rating' => $view['rating']->vars['value'],
         'content' => $view['content']->vars['errors'],
         'country' => $view['country']->vars['type'],
-        'token' => $view['_token']->vars['full_name'].'='.$view['_token']->vars['value'],
+        'token' => $view['_csrf_token']->vars['full_name'].'='.$view['_csrf_token']->vars['value'],
     ],
 ];

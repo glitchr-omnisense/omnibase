@@ -2,10 +2,16 @@
 
 namespace Base\Form\Definition;
 
+use Base\Field\Kind;
+use Base\Service\FormGuard;
 use Omnibridge\Contract\Tokens;
+use Omnibridge\Contract\Translations;
 use Omnibridge\Contract\Validation;
 use Omnibridge\Contract\Violation;
 use Omnibridge\Persistence\UnitOfWork;
+use Omnibridge\Validation\AttributeConstraints;
+use Omnibridge\Validation\Constraint\NotBlank;
+use Omnibridge\Validation\Constraint\Unique;
 
 /**
  * A form's processing, neutral: bind what was sent (FormBinder), check the
@@ -14,7 +20,10 @@ use Omnibridge\Persistence\UnitOfWork;
  * field's constraints), then keep the data (Omnibridge\Persistence\UnitOfWork)
  * when asked and valid. Each piece is optional: without Validation nothing is
  * validated but what the binder could not read, without Tokens no token is
- * made nor checked, without a unit of work nothing is kept.
+ * made nor checked, without a unit of work nothing is kept. A form that asks
+ * for it (FormDefinition::setGuard()) goes through Base\Service\FormGuard when
+ * one is given: its trap and stamp are added to the view, what they say comes
+ * first; $translations says the guard's and the token's refusals.
  *
  *     $submission = $processor->handle($form, $request->request->all($form->getName()), $comment, persist: true);
  *     if ($submission->isValid()) { ... redirect ... }
@@ -35,8 +44,19 @@ final class FormProcessor
         private readonly ?Tokens $tokens = null,
         private readonly ?UnitOfWork $unitOfWork = null,
         ?FormBinder $binder = null,
+        private readonly ?FormGuard $guard = null,
+        private readonly ?Translations $translations = null,
     ) {
         $this->binder = $binder ?? new FormBinder($unitOfWork);
+        // omnibase's own rules, read as the kept constraints wherever a class declares them.
+        AttributeConstraints::register('Base\Validator\Constraints\UniqueEntity', static fn (array $arguments): Unique => AttributeConstraints::unique($arguments, self::uniqueMessage($arguments)));
+        AttributeConstraints::register('Base\Validator\Constraints\NotBlank', AttributeConstraints::keep(NotBlank::class, ['message', 'allowNull', 'groups']));
+    }
+
+    /** @param array<int|string, mixed> $arguments */
+    private static function uniqueMessage(array $arguments): string
+    {
+        return '@validators.unique_entity';
     }
 
     /**
@@ -44,6 +64,8 @@ final class FormProcessor
      */
     public function createView(FormDefinition $form, mixed $data = null): FormView
     {
+        $form = $this->guarded($form);
+
         return FormView::of($form, $this->binder->read($form, $data), [], $this->token($form));
     }
 
@@ -52,10 +74,13 @@ final class FormProcessor
      * form's name) is a form not submitted.
      *
      * @param array<string, mixed>|null $submitted the values under the form's name, files merged in
-     * @param list<string>|null         $groups    validation groups, the host's default when null
+     * @param list<string>|null         $groups    validation groups, the form's when null
+     * @param string|null               $address   the visitor's address, for the guard's lists and counts
      */
-    public function handle(FormDefinition $form, ?array $submitted, mixed $data = null, bool $persist = false, ?array $groups = null): FormSubmission
+    public function handle(FormDefinition $form, ?array $submitted, mixed $data = null, bool $persist = false, ?array $groups = null, ?string $address = null): FormSubmission
     {
+        $form = $this->guarded($form);
+        $groups ??= $form->getValidationGroups();
         $token = $this->token($form);
         if (null === $submitted) {
             return new FormSubmission($form, false, $data, $this->binder->read($form, $data), [], null, false, $token);
@@ -65,7 +90,7 @@ final class FormProcessor
         if ($form->hasCsrf() && null !== $this->tokens) {
             $sent = $submitted[FormDefinition::TOKEN_FIELD] ?? null;
             if (!$this->tokens->isValid($form->getIntent(), \is_string($sent) ? $sent : null)) {
-                $violations[] = new Violation('', self::CSRF_MESSAGE, 'csrf');
+                $violations[] = new Violation('', $this->translations?->trans(self::CSRF_MESSAGE, [], 'validators') ?? self::CSRF_MESSAGE, 'csrf');
             }
         }
 
@@ -79,8 +104,13 @@ final class FormProcessor
 
         $binding = $this->binder->bind($form, $submitted, $data);
         array_push($violations, ...$binding->violations);
+        array_push($violations, ...$this->inspect($form, $submitted, $binding, $address));
         if (null !== $this->validation) {
             array_push($violations, ...$this->validate($form, $binding, $groups));
+            array_push($violations, ...$this->entity($form, $binding, $groups));
+        }
+        if (false !== $form->getGuard() && null !== $this->guard) {
+            [] === $violations ? $this->guard->succeeded($form->getName(), $address) : $this->guard->failed($form->getName(), $address);
         }
 
         $persisted = false;
@@ -130,6 +160,94 @@ final class FormProcessor
             foreach ($this->validation->validate($value, $constraints, $groups) as $violation) {
                 $path = '' === $violation->path ? $name : $name.'.'.$violation->path;
                 $violations[] = new Violation($path, $violation->message, $violation->code, $violation->parameters);
+            }
+        }
+
+        return $violations;
+    }
+
+    /** The form with what its guard adds: the trap, and the stamp of the time it is shown. */
+    private function guarded(FormDefinition $form): FormDefinition
+    {
+        $guard = $form->getGuard();
+        if (false === $guard || null === $this->guard) {
+            return $form;
+        }
+
+        $form = clone $form;
+        if ($guard['trap'] ?? true) {
+            $form->add(FormDefinition::field(FormGuard::TRAP_FIELD, Kind::TEXT)->setVirtual(true)->setRequired(false)->setFormTypeOptions([
+                'label' => false, 'attr' => ['tabindex' => '-1', 'autocomplete' => 'off'],
+                'row_attr' => ['class' => 'base-trap', 'aria-hidden' => 'true', 'style' => 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden'],
+            ]));
+        }
+
+        return $form->add(FormDefinition::field(FormGuard::STAMP_FIELD, Kind::HIDDEN)->setVirtual(true)->setFormTypeOption('data', $this->guard->stamp()));
+    }
+
+    /**
+     * What the guard says of what was sent, before the validation.
+     *
+     * @param array<string, mixed> $submitted
+     *
+     * @return list<Violation>
+     */
+    private function inspect(FormDefinition $form, array $submitted, Binding $binding, ?string $address): array
+    {
+        $guard = $form->getGuard();
+        if (false === $guard || null === $this->guard) {
+            return [];
+        }
+        $values = [];
+        foreach ([FormGuard::TRAP_FIELD, FormGuard::STAMP_FIELD] as $field) {
+            if ($form->has($field)) {
+                $values[$field] = \is_string($submitted[$field] ?? null) ? $submitted[$field] : '';
+            }
+        }
+        $emailField = (string) ($guard['email'] ?? 'email');
+        $found = $this->guard->inspectValues($values, $address, $guard['min_delay'] ?? null, $this->text($binding, $emailField), $this->text($binding, (string) ($guard['name'] ?? 'name')), (bool) ($guard['reputation'] ?? true));
+        if (null === $found) {
+            return [];
+        }
+        $key = '@forms.guard.'.$found[0];
+        $message = $this->translations?->trans($key);
+
+        return [new Violation(FormGuard::DISPOSABLE === $found[0] && $form->has($emailField) ? $emailField : '', null !== $message && '' !== $message ? $message : $key, $found[0])];
+    }
+
+    private function text(Binding $binding, string $field): ?string
+    {
+        $value = \is_array($binding->data) ? ($binding->data[$field] ?? null) : $this->read($binding->data, $field);
+
+        return \is_string($value) && '' !== trim($value) ? trim($value) : null;
+    }
+
+    /**
+     * The class-level rules of the record the form makes (its uniqueness), on
+     * the values the form holds: Symfony's option validation_entity. Their
+     * refusal is the form's own, unless the definition puts it under its field.
+     *
+     * @param list<string>|null $groups
+     *
+     * @return list<Violation>
+     */
+    private function entity(FormDefinition $form, Binding $binding, ?array $groups): array
+    {
+        $class = $form->getValidationEntity();
+        if (null === $class) {
+            return [];
+        }
+        $groups ??= [\Omnibridge\Validation\Constraint\Constraint::DEFAULT_GROUP, (new \ReflectionClass($class))->getShortName()];
+
+        $violations = [];
+        foreach (AttributeConstraints::ofClass($class) as $constraint) {
+            $values = [];
+            foreach ($constraint->fields ?? [] as $field) {
+                $values[$field] = \is_array($binding->data) ? ($binding->data[$field] ?? null) : $this->read($binding->data, $field);
+            }
+            foreach ($this->validation->validate($values, [$constraint], $groups) as $violation) {
+                $field = \in_array($violation->path, $form->getEntityErrorFields(), true) ? $violation->path : '';
+                $violations[] = new Violation($field, $violation->message, $violation->code, ['{{ field }}' => $violation->path] + $violation->parameters);
             }
         }
 

@@ -64,8 +64,10 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         }
         foreach ($form->getActions() as $name => $action) {
             $root->children[$name] = new self($name, [
-                'kind' => $action['kind'], 'type' => Kind::BUTTON === $action['kind'] ? 'button' : 'submit',
+                'kind' => $action['kind'], 'type' => $action['options']['type'] ?? (Kind::BUTTON === $action['kind'] ? 'button' : 'submit'),
                 'label' => $action['label'], 'attr' => $action['attr'],
+                'confirmation' => (bool) ($action['options']['confirmation'] ?? false),
+                'button' => Kind::BUTTON === $action['kind'],
             ], $root);
         }
         if ($form->hasCsrf() && null !== $token) {
@@ -97,7 +99,8 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             'errors' => array_values($errors),
             'attr' => $attr,
             'row_attr' => (array) $field->getOption('row_attr', []),
-            'required' => (bool) ($field->isRequired() ?? $field->getOption('required') ?? false),
+            // As Symfony's forms: a field is required unless it says otherwise, a hidden one never.
+            'required' => Kind::HIDDEN !== $kind && (bool) ($field->isRequired() ?? $field->getOption('required') ?? true),
             'disabled' => (bool) ($field->isDisabled() ?? $field->getOption('disabled') ?? false),
             'multiple' => $multiple,
             'expanded' => true === $field->getOption('expanded'),
@@ -108,12 +111,29 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             $vars['checked'] = (bool) $value;
             $vars['value'] = (string) ($field->getOption('value') ?? '1');
         }
-        if (null !== $choices = $field->getOption('choices')) {
-            $vars['choices'] = self::choices(is_iterable($choices) ? $choices : [], $field);
+        if (null !== $field->getOption('choices')) {
+            $vars['choices'] = self::choices(FormBinder::choices($field) ?? [], $field);
             $vars['placeholder'] = $field->getOption('placeholder');
         }
 
-        return new self($name, $vars, $root);
+        $view = new self($name, $vars, $root);
+        if (Kind::REPEATED === $kind) {
+            $inner = (string) ($field->getOption('type') ?? Kind::TEXT);
+            $errored = $errors;
+            foreach (['first', 'second'] as $part) {
+                $child = $field->getOption($part.'_name') ?? $part;
+                $view->children[$child] = new self($child, [
+                    'kind' => $inner, 'type' => Kind::inputType($inner) ?? 'text', 'value' => null, 'required' => $vars['required'],
+                    'attr' => (array) (($field->getOption($part.'_options') ?? [])['attr'] ?? []),
+                    'label' => (($field->getOption($part.'_options') ?? [])['label'] ?? null),
+                    'errors' => $errored,
+                ], $view);
+                $errored = [];
+            }
+            $view->vars['errors'] = [];
+        }
+
+        return $view;
     }
 
     private static function type(string $kind, FieldDescriptor $field): string
@@ -146,7 +166,8 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
                 continue;
             }
             $shown = $binder->transform($value, (clone $field)->setFormTypeOption('multiple', false));
-            $list[] = ['value' => \is_scalar($shown) ? (string) $shown : '', 'label' => (string) $label];
+            // A list of records, as an entity's choices: each says its own name.
+            $list[] = ['value' => \is_scalar($shown) ? (string) $shown : '', 'label' => \is_object($value) && \is_int($label) ? (string) $value : (string) $label];
         }
 
         return $list;

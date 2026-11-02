@@ -147,12 +147,12 @@ class FormLayerTest extends TestCase
         $this->assertSame([['value' => 's', 'label' => 'Small'], ['value' => 'l', 'label' => 'Large']], $view['room']->vars['choices']);
         $this->assertTrue($view['room']->isSelected('l'));
         $this->assertSame('submit', $view['submit']->vars['type']);
-        $this->assertSame('tok', $view['_token']->vars['value']);
-        $this->assertSame('comment[_token]', $view['_token']->vars['full_name']);
+        $this->assertSame('tok', $view['_csrf_token']->vars['value']);
+        $this->assertSame('comment[_csrf_token]', $view['_csrf_token']->vars['full_name']);
 
         $props = json_decode(json_encode($view), true);
         $this->assertSame('comment', $props['name']);
-        $this->assertSame(['author', 'email', 'content', 'notify', 'room', 'submit', '_token'], array_column($props['children'], 'name'));
+        $this->assertSame(['author', 'email', 'content', 'notify', 'room', 'submit', '_csrf_token'], array_column($props['children'], 'name'));
     }
 
     public function testProcessingBindsChecksTheTokenValidatesAndKeeps(): void
@@ -174,15 +174,15 @@ class FormLayerTest extends TestCase
         $processor = new FormProcessor(new NotEmptyValidation(), $tokens, $unitOfWork);
 
         $this->assertFalse($processor->handle($this->comment(), null, new CommentData())->isSubmitted());
-        $this->assertSame('token-comment', $processor->createView($this->comment())['_token']->vars['value']);
+        $this->assertSame('token-comment', $processor->createView($this->comment())['_csrf_token']->vars['value']);
 
-        $refused = $processor->handle($this->comment(), ['author' => 'Ringo', 'content' => '', '_token' => 'forged'], new CommentData(), persist: true);
+        $refused = $processor->handle($this->comment(), ['author' => 'Ringo', 'content' => '', '_csrf_token' => 'forged'], new CommentData(), persist: true);
         $this->assertFalse($refused->isValid());
         $this->assertSame(['' => [FormProcessor::CSRF_MESSAGE], 'content' => ['This value should not be blank.']], $refused->getErrors());
         $this->assertSame(['This value should not be blank.'], $refused->createView()['content']->vars['errors']);
         $this->assertFalse($refused->persisted);
 
-        $kept = $processor->handle($this->comment(), ['author' => 'Ringo', 'content' => 'Hi', '_token' => 'token-comment', 'submit' => ''], new CommentData(), persist: true);
+        $kept = $processor->handle($this->comment(), ['author' => 'Ringo', 'content' => 'Hi', '_csrf_token' => 'token-comment', 'submit' => ''], new CommentData(), persist: true);
         $this->assertTrue($kept->isValid());
         $this->assertTrue($kept->persisted);
         $this->assertSame('submit', $kept->getClicked());
