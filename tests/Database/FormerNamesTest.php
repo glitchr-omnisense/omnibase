@@ -61,7 +61,15 @@ final class FormerNamesTest extends TestCase
             echo json_encode($answer);
             PHP;
 
-        $autoload = \dirname((new \ReflectionClass(ClassLoader::class))->getFileName(), 2).'/autoload.php';
+        // The application's autoloader, the one that loads the core (PHPUnit may come with a Composer of its own).
+        $autoload = null;
+        foreach (ClassLoader::getRegisteredLoaders() as $vendor => $loader) {
+            if (false !== $loader->findFile(\Base\BaseBundle::class)) {
+                $autoload = $vendor.'/autoload.php';
+                break;
+            }
+        }
+        self::assertNotNull($autoload);
         $output = shell_exec(escapeshellarg(\PHP_BINARY).' -r '.escapeshellarg($script).' '.escapeshellarg($autoload).' 2>&1');
 
         self::assertSame(['new first' => true, 'former first' => true, 'as a parent' => true, 'typed' => true], json_decode((string) $output, true), (string) $output);
