@@ -59,6 +59,8 @@ class MentionEnhancer implements MentionEnhancerInterface
         foreach($array as &$entry) {
 
             if(!$entry) continue;
+            // No tag, nothing to parse: ThreadSubscriber asks at every flush that writes a thread's text.
+            if(!is_string($entry) || false === stripos($entry, '<mention')) continue;
 
             // mb_utf8(), not mb_detect_encoding($entry): unsure, the latter says ASCII for a text
             // that opens on enough of it (an older article's photos kept inline in base64, 2.6MB),

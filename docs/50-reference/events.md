@@ -96,6 +96,13 @@ thread's state becomes `FUTURE`) and `thread.publishable` (its state becomes
 `PUBLISH`; each author is e-mailed `thread.published`, each member mentioned who
 is not an author `thread.mentioned`).
 
+The mentions it mails are stored at flush (`Base\Database\Lifecycle\ThreadParticipants`,
+since 2026-11-02): each user a thread's text mentions (its `<mention>` tags, every
+translation) has one `Mention`, added or removed as the text changes; a reply is
+followed by its parent's owners. A thread written before then gets its mentions at
+the next save that changes its text, or at the flush that publishes it: it mails its
+mentionees once, at its publication.
+
 `Base\EntitySubscriber\UserSubscriber` tells an account's owner what happened to
 it, each notification sent with the importance `success` through the site's channel
 policy (`framework.notifier.channel_policy`), and only for what the owner did, or

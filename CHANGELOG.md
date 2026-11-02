@@ -10,6 +10,26 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: a thread's followers and mentions are computed (2026-11-02)
+
+`Base\EntitySubscriber\ThreadSubscriber`'s persistence hooks were registered nowhere: no reply was followed
+by its parent's owners, no `Mention` was stored, so `thread.mentioned` was never mailed. Its logic is now
+`Base\Database\Lifecycle\ThreadParticipants`, on omnibridge's neutral `PrePersist` and `OnFlush`;
+ThreadSubscriber relays Doctrine's `prePersist` and `onFlush` to it (`doctrine.event_listener`, the
+enhancer in a `service_closure`).
+
+- A reply gets its parent's owners as followers at its creation, and at the flush that moves it under
+  another parent (its collection recomputed; the former `preUpdate` hook, where Doctrine writes no
+  collection change, is gone).
+- Each user a thread's text mentions (its `<mention>` tags, every translation) has one `Mention`, added or
+  removed at the flush that writes the text or makes the thread publishable: the new ones persisted and
+  their change sets computed in the running flush, the old ones removed.
+- `thread.publishable` mails the authors (`getAuthors()` when the class has one, its owners otherwise: Thread
+  has none, the publication threw on the entities without an alias) and each mentionee who is not an author.
+- `Base\Bridge\Doctrine\DoctrineUnitOfWork::recompute()` computes the first change set of an entity persisted
+  during the flush (it threw on it).
+- **For the sites**: a thread whose content already mentions members mails them once, at its publication.
+
 ### Changed: BaseTrait names contracts only (2026-11-02)
 
 Plan "omnibase agnostic", step F2f. See docs/20-architecture/contracts.md (BaseTrait on contracts only).
