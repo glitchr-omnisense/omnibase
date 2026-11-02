@@ -10,6 +10,18 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Moved: the kernel subscribers, the router, the warmers, the collectors and the responses to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 3, 2026-11-03)
+
+- 38 classes, as they were, to `Omnibridge\Symfony\Omnibase\` by the same rule: the 21 `Subscriber\*`;
+  `Routing\{AdvancedRouter, AdvancedRouterInterface, Generator\AdvancedUrlGenerator, Matcher\AdvancedUrlMatcher,
+  Loader\RouteTranslationsResourceLoader}`; `Cache\Warmer\*` (6), `Cache\Clearer\CodeCachesClearer`,
+  `Cache\Abstract\AbstractLocalCacheWarmer`; `Inspector\{LocalizerDataCollector, DoctrineDataCollector}`;
+  `Response\{PdfResponse, XmlResponse}`. Former names aliased (FormerNamesTest 300); the service ids are unchanged.
+- Stay, framework-free: `Routing\{AdminRouteNames, AdminUrlGeneratorInterface, NullAdminUrlGenerator, CookieDomain}`,
+  `Cache\{SimpleCache, SimpleCacheInterface}`, `Cache\Abstract\{AbstractLocalCache, AbstractLocalCacheInterface,
+  AbstractLocalCacheWarmerInterface}`.
+- docs/20-architecture/packages.md lists what is omnibridge/symfony's.
+
 ### Moved: the console to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 2, 2026-11-03)
 
 - `Base\Console\{Application, Command, Console}` and the 30 commands of `Base\Console\Command\*` are omnibridge/symfony's

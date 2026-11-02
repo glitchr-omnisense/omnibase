@@ -66,6 +66,14 @@ An application coming from 3.x already had every one of them, through the core: 
 them itself keeps them (Composer would otherwise remove what nothing requires any more). No
 Flex recipe runs again for a package already locked: nothing changes in `config/`.
 
+The core's Symfony host code is omnibridge/symfony's, under `Omnibridge\Symfony\Omnibase\` with the same
+path (step F5c): the form layer (`Field\Type\*`, `Form\*`), the console (`Console\*`), the kernel subscribers
+(`Subscriber\*`), the router (`Routing\{AdvancedRouter, AdvancedRouterInterface, Generator, Matcher, Loader}`),
+the cache warmers and clearer (`Cache\{Warmer, Clearer}\*`, `Cache\Abstract\AbstractLocalCacheWarmer`), the
+data collectors (`Inspector\*`), `Response\{PdfResponse, XmlResponse}`. The pages of this manual still name
+them by their former names (`Base\Subscriber\...`), which the core aliases until 6.0
+(`src/Resources/former-names.symfony.php`).
+
 ### Composer: omnibridge/composer
 
 The core requires one Composer plugin, **omnibridge/composer** (in place of
