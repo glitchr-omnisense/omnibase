@@ -37,6 +37,8 @@ services:
       # omnibridge/twig as checked out over the image's (audit R24): its HelperExtension (|at,
       # |emoji_only), which the core's Twig extensions leave to it (FrameworkFreeExtensionsTest).
       - ${OMNIBRIDGE:-../../../omnibridge}/twig:/srv/demo/vendor/omnibridge/twig:ro
+      # omnibridge/symfony as checked out over the image's (step F5b): the form types the core moved there.
+      - ${OMNIBRIDGE:-../../../omnibridge}/symfony:/srv/demo/vendor/omnibridge/symfony:ro
       - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
       - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
       - ./demo.sh:/usr/local/bin/demo:ro

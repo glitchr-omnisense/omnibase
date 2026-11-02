@@ -9,6 +9,11 @@
  * Base\Repository\UserRepository is Omnibridge\Doctrine\Omnibase\Repository\UserRepository.
  * The list is former-names.doctrine.php (former => new).
  *
+ * The same for the Symfony form layer (step F5b), former-names.symfony.php: Base\Field\Type\*,
+ * Base\Form\{Type, Extension, Transformer, Traits}\*, FormFactory, FormProxy, FormProcessor and
+ * their interfaces keep their path under Omnibridge\Symfony\Omnibase\, resolved only where
+ * omnibridge/symfony is installed.
+ *
  * Each former name is the moved class under its former name, a class_alias the
  * core declares - resolved only where omnibridge/doctrine is installed:
  * - when the former name is asked first (an entity's repositoryClass, a site's
@@ -33,7 +38,7 @@ use Composer\Autoload\ClassLoader;
 
 (static function (): void {
     /** @var array<class-string, class-string> $moved */
-    $moved = require __DIR__.'/former-names.doctrine.php';
+    $moved = (require __DIR__.'/former-names.doctrine.php') + (require __DIR__.'/former-names.symfony.php');
     $former = array_flip($moved);
 
     $exists = static fn (string $class, bool $autoload): bool => class_exists($class, $autoload) || interface_exists($class, $autoload) || trait_exists($class, $autoload);

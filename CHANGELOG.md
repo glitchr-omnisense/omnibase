@@ -10,6 +10,21 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Moved: the Symfony form layer to omnibridge/symfony (plan "omnibase agnostic", step F5b, 2026-11-02)
+
+- 78 classes are `Omnibridge\Symfony\Omnibase\`'s, each under its former path: `Base\Field\Type\*` (39), `Base\Form\Type\*`
+  (17), `Base\Form\{Extension, Transformer, Traits}\*`, `Base\Form\Common\{AbstractType, FormTypeInterface}`,
+  `Base\Form\{FormFactory, FormProxy, FormProcessor}` and their interfaces, and `SymfonyKinds`. Former names kept until 6.0
+  (`src/Resources/former-names.symfony.php`, `Base\Database\FormerNames`), resolved where the bridge is installed:
+  **a Symfony site moves its omnibridge/symfony lock with the core.**
+- `FormerFormTypesPass`: Symfony Form finds a moved type and its extensions under both names. `FormStub` and
+  `BaseBundle::symfonyFormDir()`: the `App\Form\` convention reads the bridge's folder too. `FormProxy::createProcessor()`
+  compares declared names.
+- `Omnibridge\Contract\Validation` is a contract of the runtime under Symfony (`SymfonyValidation`);
+  `DefinitionForms` is a service.
+- A hand-built form factory's `PreloadedExtension` knows a moved type by its new name.
+- Agnostic core 709 -> 702, Foundation 807 -> 799 (decisions of the plan: `--strict` refuses the bridge).
+
 ### Added: the neutral form layer, first part (plan "omnibase agnostic", step F5b, 2026-11-02)
 
 Marco's answer 4: every site has forms and the admin builds its own from the Fields, so forms are

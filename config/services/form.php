@@ -13,6 +13,11 @@ return static function (ContainerConfigurator $container): void {
     $services->defaults()
         ->public(false);
 
+    // A neutral FormDefinition as a Symfony form (plan "omnibase agnostic", step F5b).
+    $services->set('Omnibridge\Symfony\Omnibase\Form\DefinitionForms')
+        ->public()
+        ->args([new Reference('form.factory')]);
+
     // ------------------------------
     // Form Extensions
     // ------------------------------

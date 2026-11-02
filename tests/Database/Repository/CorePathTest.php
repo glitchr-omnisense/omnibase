@@ -47,7 +47,6 @@ final class CorePathTest extends TestCase
         'Database/Attribute/Uploader.php',
         'Database/Lifecycle/ThreadParticipants.php',
         'EntitySubscriber/ThreadSubscriber.php',
-        'Field/Type/SelectType.php',
         'Notifier/Abstract/BaseNotifier.php',
         'Notifier/Channel/InAppChannel.php',
         'Security/AccessTokenHandler.php',

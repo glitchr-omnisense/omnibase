@@ -208,7 +208,21 @@ if ($submission->isValid()) {
 return view('comment', ['form' => $submission->createView()]);   // the values sent, their errors, a token
 ```
 
-Symfony keeps its own forms and processing: the adapter builds a Symfony form from a definition
-(omnibridge/symfony, F5b's second part). The generic renderers - the Twig theme (omnibridge/twig),
+### The Symfony adapter (omnibridge/symfony)
+
+The Symfony half of the form layer lives in `Omnibridge\Symfony\Omnibase\` since F5b, each class under its
+former path: `Field\Type\*`, `Form\Type\*`, `Form\Extension\*`, `Form\Transformer\*`, `Form\Traits\*`,
+`Form\Common\{AbstractType, FormTypeInterface}`, `Form\{FormFactory, FormProxy, FormProcessor}` and their
+interfaces (78 classes). Their `Base\` names keep working until 6.0: `src/Resources/former-names.symfony.php`.
+Sites keep `createForm()`, their themes and `Base\Field\Type\X::class` everywhere. Because `::class` of a former
+name is a plain string while Symfony's registry asks a type's extensions by its declared name,
+`FormerFormTypesPass` gives the type locator both names and files the extensions under the declared one. A
+`PreloadedExtension` (a hand-built factory, in a test) knows the declared name only: ask it by the new one.
+`App\Form\` stubs and aliases read both folders (`FormStub`, `BaseBundle::symfonyFormDir()`).
+
+`Omnibridge\Symfony\Omnibase\Form\DefinitionForms` makes a Symfony form of a definition - types by kind, options
+as the admin maps a CRUD field's, kept constraints translated (`SymfonyConstraints`), actions as buttons,
+`getHostOptions()` winning - and `Omnibridge\Contract\Validation` is `SymfonyValidation` over symfony/validator.
+The generic renderers - the Twig theme (omnibridge/twig),
 the Blade theme (omnibridge/laravel), React - read `FormView`. The whole layer loads under
 `bare --strict` (`BareTest::testTheFormLayerWorksWithoutAFormLibrary`).
