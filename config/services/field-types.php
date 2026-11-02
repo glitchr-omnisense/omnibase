@@ -11,6 +11,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  * file that was distributed with this source code.
  */
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 
 /*
@@ -18,6 +19,10 @@ use Symfony\Component\DependencyInjection\Reference;
  * the former services/admin.php: the Types are plain Symfony form types used
  * by base-bundle-admin and regular forms alike, so they stay registered here
  * after the EA-era admin layer moved to omnibase/admin.
+ *
+ * No type takes Twig's environment any more (plan "omnibase agnostic", step
+ * F5c): FileType and its children read the page's asset paths through
+ * Base\View\AssetPaths, the others never read it.
  */
 return function (ContainerConfigurator $configurator) {
 
@@ -29,16 +34,15 @@ return function (ContainerConfigurator $configurator) {
 
     $services->set('Base\Field\Type\PasswordType')
         ->tag('form.type')
-        ->args([new Reference('translator'), new Reference('twig')]);
+        ->args([new Reference('translator')]);
     $services->set('Base\Field\Type\TranslationType')
         ->tag('form.type')
         ->args([
             new Reference('base.database.metadata_manipulator'),
             new Reference('localizer'),
-            new Reference('twig'),
         ]);
-    $services->set('Base\Field\Type\BooleanType')->tag('form.type')->args([new Reference('twig')]);
-    $services->set('Base\Field\Type\ButtonType')->tag('form.type')->args([new Reference('twig')]);
+    $services->set('Base\Field\Type\BooleanType')->tag('form.type');
+    $services->set('Base\Field\Type\ButtonType')->tag('form.type');
     $services->set('Base\Field\Type\RouteType')
         ->tag('form.type')
         ->args([new Reference('advanced_router'), new Reference('localizer')]);
@@ -52,7 +56,6 @@ return function (ContainerConfigurator $configurator) {
             new Reference('security.csrf.token_manager'),
             new Reference('localizer'),
             new Reference('Base\Routing\AdminUrlGeneratorInterface'),
-            new Reference('twig'),
             new Reference('security.authorization_checker'),
             new Reference('obfuscator'),
             new Reference('parameter_bag'),
@@ -89,7 +92,6 @@ return function (ContainerConfigurator $configurator) {
         ->args([
             new Reference('form.factory'),
             new Reference('base.database.metadata_manipulator'),
-            new Reference('twig'),
         ]);
     $services->set('Base\Field\Type\DiscriminatorType')
         ->tag('form.type')
@@ -102,14 +104,12 @@ return function (ContainerConfigurator $configurator) {
         ->args([
             new Reference('parameter_bag'),
             new Reference('translator'),
-            new Reference('twig'),
         ]);
     $services->set('Base\Field\Type\EditorType')
         ->tag('form.type')
         ->args([
             new Reference('parameter_bag'),
             new Reference('translator'),
-            new Reference('twig'),
             new Reference('advanced_router'),
             new Reference('security.csrf.token_manager'),
             new Reference('obfuscator'),
@@ -122,15 +122,13 @@ return function (ContainerConfigurator $configurator) {
         ->tag('form.type')
         ->args([new Reference('trading_market')]);
     $services->set('Base\Field\Type\NumberType')
-        ->tag('form.type')
-        ->args([new Reference('twig')]);
+        ->tag('form.type');
     $services->set('Base\Field\Type\StockType')
         ->tag('form.type');
     $services->set('Base\Field\Type\DateTimePickerType')
         ->tag('form.type')
         ->args([
             new Reference('parameter_bag'),
-            new Reference('twig'),
             new Reference('localizer'),
         ]);
     $services->set('Base\Field\Type\CodeType')->tag('form.type');
@@ -138,7 +136,6 @@ return function (ContainerConfigurator $configurator) {
     $services->set('Base\Field\Type\ColorType')
         ->tag('form.type')
         ->args([
-            new Reference('twig'),
             new Reference('parameter_bag'),
         ]);
     $services->set('Base\Field\Type\ColorPickerType')
@@ -149,26 +146,23 @@ return function (ContainerConfigurator $configurator) {
     $services->set('Base\Field\Type\SlugType')
         ->tag('form.type')
         ->args([
-            new Reference('twig'),
             new Reference('base.database.metadata_manipulator'),
         ]);
     $services->set('Base\Field\Type\QuadrantType')
-        ->tag('form.type')
-        ->args([new Reference('twig')]);
+        ->tag('form.type');
     $services->set('Base\Field\Type\CropperType')
         ->tag('form.type')
         ->args([
             new Reference('form.factory'),
             new Reference('doctrine.orm.entity_manager'),
             new Reference('parameter_bag'),
-            new Reference('twig'),
         ]);
     $services->set('Base\Field\Type\FileType')
         ->tag('form.type')
         ->args([
             new Reference('parameter_bag'),
             new Reference('translator'),
-            new Reference('twig'),
+            new Reference('Base\View\AssetPaths', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             new Reference('base.database.metadata_manipulator'),
             new Reference('security.csrf.token_manager'),
             new Reference('form.factory'),
@@ -192,7 +186,6 @@ return function (ContainerConfigurator $configurator) {
     $services->set('Base\Field\Type\CollectionType')
         ->tag('form.type')
         ->args([
-            new Reference('twig'),
             new Reference('translator'),
             new Reference('security.authorization_checker'),
             new Reference('Base\Routing\AdminUrlGeneratorInterface'),

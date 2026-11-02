@@ -23,6 +23,11 @@ use UnitEnum;
  * each from the first source that has it. has() reads the same sources in the
  * same order.
  *
+ * warm() takes the settings in once, from the SettingBag (or a callable that
+ * gives them): what the host does on the first request or command (Symfony:
+ * omnibridge/symfony's HotParameterBagSubscriber; omnibridge/laravel when the
+ * parameters are first built), catching its own store's errors.
+ *
  * The overlay is on when the configuration says so (base.parameter_bag.use_hot_bag:
  * true) or when it is built on. Off, get() and has() read the $bag given and the
  * configuration: the parameters are always there.
@@ -33,7 +38,7 @@ use UnitEnum;
  * $bag was given), took its settings in through the exception the frozen bag's
  * add() threw, and ordered has() differently from get().
  */
-class HotParameters implements ParameterBagInterface
+class HotParameters implements HotParameterBagInterface
 {
     use BagTrait;
 
@@ -107,6 +112,27 @@ class HotParameters implements ParameterBagInterface
     public function set(string $path, array|bool|string|int|float|UnitEnum|null $value, ?array &$bag = null): void
     {
         $this->config->set($path, $value, $bag);
+    }
+
+    /**
+     * The settings taken in, once: nothing when they are in already. The store's error is
+     * left to the host, which knows its own (a database not created yet: the configuration
+     * alone, not ready).
+     *
+     * @param SettingBagInterface|callable(): array<string, mixed> $settings
+     *
+     * @return bool whether they were taken in now
+     */
+    public function warm(SettingBagInterface|callable $settings): bool
+    {
+        if ($this->isReady) {
+            return false;
+        }
+
+        $this->add($settings instanceof SettingBagInterface ? $settings->getBagParameters() : $settings());
+        $this->markAsReady();
+
+        return true;
     }
 
     public function isReady(): bool

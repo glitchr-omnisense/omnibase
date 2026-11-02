@@ -100,4 +100,36 @@ final class HotParametersTest extends TestCase
 
         self::assertSame(['base' => ['site' => ['title' => 'Ringo']]], $values);
     }
+
+    /**
+     * warm(): the settings taken in once, from a SettingBag or a callable (plan "omnibase agnostic", step F5c:
+     * what omnibridge/symfony's HotParameterBagSubscriber does on the first request, any host can); a store that
+     * fails leaves the configuration, not ready.
+     */
+    public function testWarmTakesTheSettingsInOnce(): void
+    {
+        $bag = new HotParameters(self::config());
+        $asked = 0;
+        $settings = static function () use (&$asked): array {
+            ++$asked;
+
+            return ['base.site.title' => 'Ringo'];
+        };
+
+        self::assertTrue($bag->warm($settings));
+        self::assertFalse($bag->warm($settings), 'once');
+        self::assertSame(1, $asked);
+        self::assertTrue($bag->isReady());
+        self::assertSame('Ringo', $bag->get('base.site.title'));
+        self::assertInstanceOf(\Base\Service\HotParameterBagInterface::class, $bag);
+
+        $failing = new HotParameters(self::config());
+        try {
+            $failing->warm(static fn (): array => throw new \RuntimeException('no database yet'));
+            self::fail('the store\'s error is the host\'s');
+        } catch (\RuntimeException) {
+        }
+        self::assertFalse($failing->isReady());
+        self::assertSame('Les Ringo Stars', $failing->get('base.site.title'));
+    }
 }

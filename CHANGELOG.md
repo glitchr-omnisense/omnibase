@@ -10,6 +10,19 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: roles, hot parameters and the field types off Symfony (plan "omnibase agnostic", step F5c, item 3, slice 1, 2026-11-02)
+
+- `SecurityPolicy` reads omnisense/omnibridge's `Contract\Roles` (`#[Autowire(service: Roles::class)]`, in the core's
+  `ContractsPass`); a Security `RoleHierarchyInterface` given in its place still works, deprecated until 6.0.
+- `HotParameters::warm()`: the hot parameters loaded without a kernel event. `HotParameters` implements
+  `HotParameterBagInterface`, which now extends omnibase's own `ParameterBagInterface`, no longer DI's.
+- The field types are no longer given the `twig` service (config/services/field-types.php); `FileType` (and `ImageType`'s
+  thumbnail) takes `Base\View\AssetPaths`, optional, an alias of `twig` (config/services/twig.php).
+- Moved to omnibridge/symfony (`Omnibridge\Symfony\Omnibase\`): `Service\HotParameterBag`, `Service\ParameterBag`,
+  `Subscriber\HotParameterBagSubscriber`; to omnibridge/doctrine (`Omnibridge\Doctrine\Omnibase\`):
+  `DatabaseSubscriber\DemoAccountLockSubscriber`. Their former names are aliased (former-names.symfony.php,
+  former-names.doctrine.php).
+
 ### Changed: an account's forms served beyond Symfony (plan "omnibase agnostic", step F5c, second part, 2026-11-02)
 
 - BaseTrait's `getNotifier()`, `getTranslator()`, `getLocalizer()`, `getSettingBag()`, `getEntityHydrator()` and

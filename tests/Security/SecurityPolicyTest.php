@@ -81,4 +81,29 @@ class SecurityPolicyTest extends TestCase
         $this->assertFalse($strict->canSkipEnrolment($staff));
         $this->assertTrue($strict->canSkipEnrolment($patient), 'nothing to skip: nothing is asked of them');
     }
+
+    /**
+     * The hierarchy is omnisense/omnibridge's Contract\Roles (plan "omnibase agnostic", step F5c): any host's,
+     * Security's RoleHierarchyInterface still accepted (until 6.0), the same answers.
+     */
+    public function testTheHierarchyIsTheHostsRolesContract(): void
+    {
+        $bag = $this->createStub(SettingBagInterface::class);
+        $roles = new class implements \Omnibridge\Contract\Roles {
+            public function reachable(array $roles): array
+            {
+                return \in_array('ROLE_ADMIN', $roles, true) ? [...$roles, 'ROLE_STAFF', 'ROLE_USER'] : $roles;
+            }
+        };
+        $admin = new InMemoryUser('admin', null, ['ROLE_ADMIN']);
+        $patient = new InMemoryUser('patient', null, ['ROLE_USER']);
+
+        $policy = new SecurityPolicy($bag, $roles, ['ROLE_STAFF']);
+        $this->assertTrue($policy->isTwoFactorRequiredByRole($admin), 'ROLE_ADMIN reaches ROLE_STAFF through the contract');
+        $this->assertFalse($policy->isTwoFactorRequiredByRole($patient));
+        $this->assertTrue($policy->isAdministrator($admin));
+
+        $this->assertSame($policy->isTwoFactorRequiredByRole($admin), $this->policy(['ROLE_STAFF'])->isTwoFactorRequiredByRole($admin), 'as with Security\'s hierarchy');
+        $this->assertFalse((new SecurityPolicy($bag, null, ['ROLE_STAFF']))->isTwoFactorRequiredByRole($admin), 'without one, the account\'s own roles');
+    }
 }

@@ -13,7 +13,6 @@ use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
-use Base\Twig\Environment;
 use Omnibridge\Persistence\UnitOfWork;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -60,7 +59,6 @@ class EditorTypeCollabRelayTest extends TestCase
         $editor = new EditorType(
             $this->createMock(ParameterBagInterface::class),
             $translator,
-            $this->createMock(Environment::class),
             $router,
             $csrf,
             $obfuscator,

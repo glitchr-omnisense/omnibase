@@ -16,7 +16,7 @@ final class FormerNamesTest extends TestCase
     public function testEachFormerNameIsTheMovedClass(): void
     {
         $moved = FormerNames::moved();
-        self::assertCount(225, $moved); // 142 to omnibridge/doctrine (F3), 78 to omnibridge/symfony (F5b), 5 more (F5c)
+        self::assertCount(229, $moved); // 142 to omnibridge/doctrine (F3), 78 to omnibridge/symfony (F5b), 5 more (F5c), 4 more (F5c item 3: 3 to omnibridge/symfony, 1 to omnibridge/doctrine)
 
         $wrong = [];
         foreach ($moved as $former => $new) {

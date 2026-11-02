@@ -2,14 +2,15 @@
 
 namespace Base\Service;
 
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use UnitEnum;
 
 /**
- * The parameters with the settings stored in the database laid over them, as
- * DependencyInjection's ParameterBagInterface: what `parameter_bag` is under
- * Symfony (Base\Service\HotParameterBag over Base\Service\HotParameters, plan
- * "omnibase agnostique", C9).
+ * The parameters with the settings stored in the database laid over them:
+ * Base\Service\HotParameters (plan "omnibase agnostique", C9), which
+ * `parameter_bag` is under Symfony (omnibridge/symfony's HotParameterBag, also
+ * DependencyInjection's ParameterBagInterface) and the parameters under
+ * omnibridge/laravel. Since step F5c of plan "omnibase agnostic" it extends
+ * omnibase's ParameterBagInterface, no longer DependencyInjection's.
  */
 interface HotParameterBagInterface extends ParameterBagInterface
 {

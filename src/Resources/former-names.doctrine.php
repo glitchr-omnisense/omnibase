@@ -145,4 +145,5 @@ return [
     'Base\Repository\User\PushSubscriptionRepository' => 'Omnibridge\Doctrine\Omnibase\Repository\User\PushSubscriptionRepository',
     'Base\Repository\User\SanctionRepository' => 'Omnibridge\Doctrine\Omnibase\Repository\User\SanctionRepository',
     'Base\Repository\User\TokenRepository' => 'Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository',
+    'Base\DatabaseSubscriber\DemoAccountLockSubscriber' => 'Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\DemoAccountLockSubscriber',
 ];
