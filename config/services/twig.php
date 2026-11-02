@@ -43,6 +43,10 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
         $services->alias('Omnibridge\Contract\Views|Twig\Environment', 'Omnibridge\Contract\Views');
     }
 
+    // An asset's path as the page links it (Base\View\AssetPaths): omnibase's environment, which decorates `twig`,
+    // answers it - what the Symfony field types read (FileType's thumbnail) in place of Twig's environment (step F5c).
+    $services->alias('Base\View\AssetPaths', 'twig');
+
     // The tag renderers, handed to omnibase's environment (TagRendererPass).
     $builder->registerForAutoconfiguration(TagRendererInterface::class)->addTag('twig.tag_renderer');
 

@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Base\Demo\DemoAccountRegistry;
 use Base\Demo\DemoMode;
+use Omnibridge\Contract\Roles;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 
@@ -37,7 +38,10 @@ use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
  * The accounts are asked of as plain objects (omnibase's users), not as
  * Security's UserInterface: omniauth's Base\Auth\Policy asks the same
  * questions under any host (plan "omniauth", AU4, the former P4). The role
- * hierarchy is Symfony's where there is one, else the account's own roles.
+ * hierarchy is the host's, through omnisense/omnibridge's Contract\Roles
+ * (plan "omnibase agnostic", step F5c): Symfony's role hierarchy
+ * (omnibridge/symfony's HierarchyRoles), Laravel's role_hierarchy
+ * (omnibridge/laravel's Auth\Roles); without one, the account's own roles.
  *
  * In the `demo` environment a demonstration account (Base\Demo) is shared by
  * every visitor: nothing is required of it - not the second factor of its
@@ -71,11 +75,12 @@ class SecurityPolicy
     /**
      * @param string[] $requiredRoles roles whose holders must have a second factor (base.security.two_factor.required_roles)
      * @param bool     $postpone      whether the enrolment prompt offers a "not now" (base.security.two_factor.postpone)
-     * @param (\Closure(string[]): string[])|null $reachableRoles the roles some roles reach, where the host has no Symfony hierarchy (omnibridge/laravel: config/omniauth.php's role_hierarchy)
+     * @param Roles|RoleHierarchyInterface|null $roleHierarchy the host's hierarchy; Security's RoleHierarchyInterface is deprecated (until 6.0)
+     * @param (\Closure(string[]): string[])|null $reachableRoles the roles some roles reach, where the host gives no Roles (omnibridge/laravel: config/omniauth.php's role_hierarchy)
      */
     public function __construct(
         private SettingBagInterface $settingBag,
-        private ?RoleHierarchyInterface $roleHierarchy = null,
+        #[Autowire(service: Roles::class)] private Roles|RoleHierarchyInterface|null $roleHierarchy = null,
         #[Autowire('%base.security.two_factor.required_roles%')] private array $requiredRoles = [],
         #[Autowire('%base.security.two_factor.postpone%')] private bool $postpone = true,
         private ?DemoMode $demoMode = null,
@@ -179,7 +184,7 @@ class SecurityPolicy
 
     /**
      * The account's roles, those the role hierarchy reaches from them included
-     * when there is one (Symfony's; a host without one gives the account's own).
+     * when there is one (the host's Roles; a host without one gives the account's own).
      *
      * @return string[]
      */
@@ -187,11 +192,17 @@ class SecurityPolicy
     {
         $roles = array_map(static fn ($role) => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $user->getRoles());
 
-        if (null === $this->roleHierarchy && null !== $this->reachableRoles) {
+        if ($this->roleHierarchy instanceof Roles) {
+            return $this->roleHierarchy->reachable($roles);
+        }
+        if (null !== $this->roleHierarchy) {
+            return $this->roleHierarchy->getReachableRoleNames($roles);
+        }
+        if (null !== $this->reachableRoles) {
             return ($this->reachableRoles)($roles);
         }
 
-        return $this->roleHierarchy ? $this->roleHierarchy->getReachableRoleNames($roles) : $roles;
+        return $roles;
     }
 
     /** Are passkeys offered as a login method? */

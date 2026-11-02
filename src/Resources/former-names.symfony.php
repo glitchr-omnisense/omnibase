@@ -86,4 +86,7 @@ return [
     'Base\Subscriber\AnalyticsSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\AnalyticsSubscriber',
     'Base\Subscriber\TemplatedEmailSubjectSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\TemplatedEmailSubjectSubscriber',
     'Base\Subscriber\TwigSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\TwigSubscriber',
+    'Base\Service\HotParameterBag' => 'Omnibridge\Symfony\Omnibase\Service\HotParameterBag',
+    'Base\Service\ParameterBag' => 'Omnibridge\Symfony\Omnibase\Service\ParameterBag',
+    'Base\Subscriber\HotParameterBagSubscriber' => 'Omnibridge\Symfony\Omnibase\Subscriber\HotParameterBagSubscriber',
 ];
