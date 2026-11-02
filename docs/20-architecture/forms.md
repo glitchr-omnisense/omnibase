@@ -239,6 +239,7 @@ return view('comment', ['form' => $submission->createView()]);   // the values s
   under its field, the account read again as it is stored (it answered 500 and signed the session out).
 - A sign-up once its form holds is `Base\Auth\Registration::register()` on every host (approved, its
   password, named after its address when its class has a username left empty, kept); the host signs it in.
+- A rule of the data on a field with `error_bubbling` is the form's error, as a rule of the field's own.
 - The sign-up's terms of use are checked by the server (`agreeTerms`, `user.agree_terms`), in the default
   group and the sign-up's `new`.
 

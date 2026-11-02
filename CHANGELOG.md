@@ -30,6 +30,8 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
   (`Base\Form\Definition\RecordRules`), the refusal said under its field, the account read again as it is stored.
 - The sign-up's terms of use were checked by the browser alone: `AccountForms::signUp()`'s `agreeTerms` is refused
   unticked (`NotBlank`, groups `Default` and `new`), on top of the form; `user.agree_terms` in the validators' catalogues.
+- A rule of the form's data (a model's `#[Assert\Count]`) on a field with `error_bubbling` stood under the field in the
+  neutral `FormProcessor`: it is the form's error, as Symfony's mapper gives it (lesringostars' newsletter with nothing ticked).
 
 ### Changed: the request, the session and the events on contracts (plan "omnibase agnostic", step F5c, first part, 2026-11-02)
 
