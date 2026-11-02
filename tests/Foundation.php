@@ -574,6 +574,7 @@ return [
     Base\Form\Definition\FormSubmission::class,
     Base\Form\Definition\FormView::class,
     Base\Form\Definition\Properties::class,
+    Base\Form\Definition\RecordRules::class,
     Base\Form\Definition\UniqueLookup::class,
     Base\Form\Model\CommentModel::class,
     Base\Form\Model\ContactModel::class,
