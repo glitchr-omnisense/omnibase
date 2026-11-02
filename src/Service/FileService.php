@@ -5,6 +5,8 @@ namespace Base\Service;
 use Base\Contract\MediaRouter;
 use finfo;
 use Symfony\Component\Uid\Uuid;
+use Base\View\ViewsAdapter;
+use Omnibridge\Contract\Views;
 use Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,10 +41,8 @@ class FileService implements FileServiceInterface
      */
     protected MediaRouter $router;
 
-    /**
-     * @var Environment
-     */
-    protected ?Environment $twig;
+    /** The views the media tags render through (plan "omnibase agnostic", F5a; Twig's environment before). */
+    protected ?Views $views;
 
     /** * @var string */
     protected string $projectDir;
@@ -53,9 +53,10 @@ class FileService implements FileServiceInterface
     /** @var string     */
     protected string $localCache;
 
-    public function __construct(?Environment $twig, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
+    /** @param Views|Environment|null $views Twig's environment is deprecated (until 6.0) */
+    public function __construct(Views|Environment|null $views, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
     {
-        $this->twig = $twig;
+        $this->views = ViewsAdapter::ofNullable($views);
         $this->router = $router;
         $this->obfuscator = $obfuscator;
         $this->flysystem = $flysystem;
@@ -443,14 +444,14 @@ class FileService implements FileServiceInterface
     }
 
     /**
-     * The view engine the media tags are rendered with (audio(), video(), imagify(), lightbox()).
+     * The views the media tags are rendered through (audio(), video(), imagify(), lightbox()).
      * Optional since step F4 of the plan "omnibase agnostic" (Twig is a suggestion of the core): the
      * file and image rules - addresses, thumbnails, the stored files - need none.
      *
      * @throws \LogicException when the service was built without one
      */
-    protected function views(): Environment
+    protected function views(): Views
     {
-        return $this->twig ?? throw new \LogicException(static::class.' renders its media tags with Twig, and was built without it.');
+        return $this->views ?? throw new \LogicException(static::class.' renders its media tags through omnibridge\'s Views, and was built without them.');
     }
 }

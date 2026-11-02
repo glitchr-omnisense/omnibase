@@ -201,6 +201,44 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The core's services are available where there is no framework (plan "omnibase agnostic", step F5a;
+     * Marco's answer 3): omnisense/omnibridge's Omnibridge\Container, built from Base\Services::definitions()
+     * - the list Symfony's container and Laravel's read - and the host's contracts in plain PHP, resolves
+     * the obfuscator, MediaService, the paginator, the translator, Stories and EmailComposer, and they work
+     * (an e-mail composed through omnibridge's Views), under bare --strict: nothing of Symfony's container,
+     * the framework, Doctrine nor Twig loaded.
+     */
+    public function testTheServicesAreBuiltByAPlainPhpContainer(): void
+    {
+        $script = __DIR__.'/Services/container-without-framework.php';
+
+        // Nothing of the framework (Symfony's container, kernel, routing, HttpFoundation...).
+        [$status, $report] = self::bare([$script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+
+        // Nor Doctrine, Twig nor a host's bridge (--strict), but two packages outside the kept list, each
+        // used by a service when it works, not when it loads: symfony/cache, the obfuscator's identifiers'
+        // map (Base\Cache\Abstract\AbstractLocalCache's PhpArrayAdapter), and doctrine/lexer, which
+        // egulias/email-validator reads when symfony/mime checks an e-mail's address (plan, F6).
+        [, $strict] = self::bare(['--strict', $script]);
+        $outside = array_keys($strict['classes'][$script]['framework']);
+        self::assertSame([], array_values(preg_grep('~^(?:Symfony\\\\Component\\\\Cache\\\\|Doctrine\\\\Common\\\\Lexer\\\\)~', $outside, PREG_GREP_INVERT)), 'only symfony/cache and doctrine/lexer outside the kept list');
+
+        self::assertSame([
+            'obfuscator' => [\Base\Service\Obfuscator::class, 5, true],
+            'media' => [\Base\Service\MediaService::class, true],
+            'paginator' => [10, '/home?page=3'],
+            'translator' => [\Base\Service\Translator::class, 'Bonjour Anne'],
+            'stories' => \Base\Screen\Builder\Stories::class,
+            'email' => ['Welcome Anne', '<body><title>Welcome Anne</title><p>Hello Anne.</p></body>', "Welcome Anne\n\nHello Anne.\n\n\n", '"Les Ringo Stars" <postmaster@lesringostars.test>'],
+        ], $run['result']);
+    }
+
+    /**
      * The finder language is read without Doctrine (plan "omnibase agnostic", 2026-11-01, step F1):
      * Base\Database\Repository\Finder\Parser, on an entity described by its fields, parses a finder
      * of the core's under bare --strict, nothing of Doctrine, Twig nor the framework loaded.

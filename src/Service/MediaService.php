@@ -14,6 +14,7 @@ use Base\Contract\MediaRouter;
 use Imagine\Image\Palette\RGB;
 use League\Flysystem\UnableToCreateDirectory;
 use LogicException;
+use Omnibridge\Contract\Views;
 use Twig\Environment;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -79,7 +80,7 @@ class MediaService extends FileService implements MediaServiceInterface
     protected array $mountStorages = [];
 
     public function __construct(
-        ?Environment            $twig,
+        Views|Environment|null  $views,
         MediaRouter             $router,
         ObfuscatorInterface     $obfuscator,
         Storages                $flysystem,
@@ -90,7 +91,7 @@ class MediaService extends FileService implements MediaServiceInterface
         ?LoggerInterface        $logger = null
     )
     {
-        parent::__construct($twig, $router, $obfuscator, $flysystem, $parameterBag);
+        parent::__construct($views, $router, $obfuscator, $flysystem, $parameterBag);
 
         $this->profiler = $profiler;
         $this->logger = $logger;
@@ -115,7 +116,6 @@ class MediaService extends FileService implements MediaServiceInterface
         $this->noImage = $parameterBag->get("base.images.no_image") ?? [];
         $this->debug = $parameterBag->get("base.images.debug");
 
-        $this->twig = $twig;
     }
 
     /**

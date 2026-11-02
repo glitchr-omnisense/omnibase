@@ -17,6 +17,10 @@ use Base\Service\SettingBag;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Base\Database\UnitOfWorks;
+use Base\Notifier\Mail\EmailComposer;
+use Omnibridge\Contract\Views;
+use Omnibridge\Persistence\UnitOfWork;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface as MailerTransportException;
@@ -95,20 +99,21 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
      */
     protected SymfonyNotifierInterface $notifier;
 
-    /**
-     * @var Environment
-     */
-    protected Environment $twig;
+    /** The views the mails and pages render through (plan "omnibase agnostic", F5a). */
+    protected Views $views;
+
+    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: $views (null when the views are not Twig's) */
+    protected ?Environment $twig = null;
 
     /**
      * @var ChannelPolicyInterface
      */
     protected ChannelPolicyInterface $policy;
 
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $entityManager;
+    protected UnitOfWork $unitOfWork;
+
+    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: $unitOfWork (null when it is not Doctrine's) */
+    protected ?EntityManagerInterface $entityManager = null;
 
     /**
      * @var ParameterBagInterface
@@ -176,9 +181,19 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         return $this->testRecipients;
     }
 
+    public function getViews(): Views
+    {
+        return $this->views;
+    }
+
+    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: getViews() */
     public function getEnvironment(): Environment
     {
-        return $this->twig;
+        @trigger_error(sprintf('Since omnisense/omnibase 4.x: %s::getEnvironment() is deprecated, use getViews().', static::class), E_USER_DEPRECATED);
+
+        $this->twig ??= method_exists($this->views, 'environment') ? $this->views->environment() : null;
+
+        return $this->twig ?? throw new \LogicException(static::class.'\'s views are not Twig\'s: getViews().');
     }
 
     /** The accounts by their interface (step R28): the administrators to notify. */
@@ -191,9 +206,14 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         return $this;
     }
 
-    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface $router, Environment $twig, SettingBag $settingBag, bool $debug = false)
+    /**
+     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
+     * @param Views|Environment                 $views      Twig's environment is deprecated (until 6.0): wrapped in omnibridge/twig's TwigViews
+     */
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork|EntityManagerInterface $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, AdvancedRouterInterface $router, Views|Environment $views, SettingBag $settingBag, bool $debug = false)
     {
-        $this->twig = $twig;
+        $this->views = EmailComposer::views($views);
+        $this->twig = $views instanceof Environment ? $views : null;
         $this->notifier = $notifier;
 
         $this->policy = $policy;
@@ -210,7 +230,8 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
         $this->technicalLoopback  = $parameterBag->get("base.notifier.technical_loopback");
 
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->entityManager = $unitOfWork instanceof EntityManagerInterface ? $unitOfWork : (method_exists($this->unitOfWork, 'entityManager') ? $this->unitOfWork->entityManager() : null);
         $this->settingBag = $settingBag;
         $this->localizer = $localizer;
         $this->translator = $translator;

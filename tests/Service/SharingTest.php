@@ -24,7 +24,7 @@ class SharingTest extends TestCase
 
     public function testAdaptersAreKeyedByClass(): void
     {
-        $facebook = new FacebookAdapter($this->twig);
+        $facebook = new FacebookAdapter(new \Omnibridge\Twig\TwigViews($this->twig));
 
         $sharing = (new Sharing())->addAdapter($facebook);
 
@@ -33,7 +33,7 @@ class SharingTest extends TestCase
 
     public function testGetAdapterByClassOrIdentifier(): void
     {
-        $facebook = new FacebookAdapter($this->twig);
+        $facebook = new FacebookAdapter(new \Omnibridge\Twig\TwigViews($this->twig));
         $sharing = (new Sharing())->addAdapter($facebook);
 
         $this->assertSame($facebook, $sharing->getAdapter(FacebookAdapter::class));
@@ -51,8 +51,8 @@ class SharingTest extends TestCase
      */
     public function testRemoveAdapter(): void
     {
-        $facebook = new FacebookAdapter($this->twig);
-        $twitter = new TwitterAdapter($this->twig);
+        $facebook = new FacebookAdapter(new \Omnibridge\Twig\TwigViews($this->twig));
+        $twitter = new TwitterAdapter(new \Omnibridge\Twig\TwigViews($this->twig));
         $sharing = (new Sharing())->addAdapter($facebook)->addAdapter($twitter);
 
         $sharing->removeAdapter($facebook);
@@ -68,7 +68,7 @@ class SharingTest extends TestCase
 
     public function testGenerateWithAPlainStringUrl(): void
     {
-        $sharing = (new Sharing())->addAdapter(new FacebookAdapter($this->twig));
+        $sharing = (new Sharing())->addAdapter(new FacebookAdapter(new \Omnibridge\Twig\TwigViews($this->twig)));
 
         $this->assertSame(
             'https://www.facebook.com/sharer/sharer.php?quote=hi&u=https%3A%2F%2Ffoo%2Fbar',
@@ -84,7 +84,7 @@ class SharingTest extends TestCase
             ->with([], UrlGeneratorInterface::ABSOLUTE_URL)
             ->willReturn('https://absolute.example/page');
 
-        $sharing = (new Sharing())->addAdapter(new FacebookAdapter($this->twig));
+        $sharing = (new Sharing())->addAdapter(new FacebookAdapter(new \Omnibridge\Twig\TwigViews($this->twig)));
 
         $this->assertStringContainsString(
             urlencode('https://absolute.example/page'),

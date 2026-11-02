@@ -38,7 +38,8 @@ return static function (ContainerConfigurator $container): void {
         ->tag('twig.runtime')
         ->args([
             new Reference('.inner'),
-            new Reference('kernel'),
+            // Whether the kernel debugs, through omnibridge's Environment (plan "omnibase agnostic", F5a).
+            new Reference('Omnibridge\Contract\Environment'),
             new Reference('parameter_bag'),
             // How the site addresses people (base.translator.politeness: plain, polite, formal - or nothing).
             '%base.translator.politeness%',

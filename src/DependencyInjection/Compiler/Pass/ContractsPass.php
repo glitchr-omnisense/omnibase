@@ -16,6 +16,7 @@ use Omnibridge\Contract\Sessions;
 use Omnibridge\Contract\Tokens;
 use Omnibridge\Contract\Translations;
 use Omnibridge\Contract\Urls;
+use Omnibridge\Contract\Views;
 use Omnibridge\Symfony\DependencyInjection\ContractsPass as HostContractsPass;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -60,6 +61,7 @@ final class ContractsPass implements CompilerPassInterface
         Media::class,
         Texts::class,
         Tokens::class,
+        Views::class,
         ClockInterface::class,
         EventDispatcherInterface::class,
         MailerInterface::class,

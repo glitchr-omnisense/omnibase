@@ -9,6 +9,7 @@ use Base\Service\Model\EnumNouns;
 use Base\Service\Model\NounVariants;
 use Doctrine\DBAL\Types\Type;
 use Omnibridge\Contract\Translations;
+use Omnibridge\Contract\Environment;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatableMessage;
@@ -103,7 +104,7 @@ class Translator implements TranslatorInterface, Translations
      *                                                                     translations/ directory, by domain and locale
      *                                                                     (ApplicationTextsPass; read only when a level is set)
      */
-    public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel, ParameterBagInterface $parameterBag, ?string $politeness = null, array $applicationTexts = [])
+    public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, Environment|KernelInterface $kernel, ParameterBagInterface $parameterBag, ?string $politeness = null, array $applicationTexts = [])
     {
         $this->parameterBag = $parameterBag;
         $this->translator = $translator;

@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Omnibridge\Contract\Urls;
 use Symfony\Component\Routing\RouterInterface;
 use Base\Service\Model\Pages;
 use Base\Service\Model\Pagination;
@@ -13,14 +13,15 @@ class Paginator implements PaginatorInterface
     /**
      * @var RouterInterface
      */
-    protected RouterInterface $router;
+    /** The addresses of the pages: omnibridge's Urls (plan "omnibase agnostic", F5a: where the host has no router of Symfony's), or Symfony's router (its advanced_router under Symfony, its links as they were). */
+    protected Urls|RouterInterface $router;
 
     /**
      * @var ParameterBagInterface
      */
     protected ParameterBagInterface $parameterBag;
 
-    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag)
+    public function __construct(Urls|RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->router = $router;
         $this->parameterBag = $parameterBag;
