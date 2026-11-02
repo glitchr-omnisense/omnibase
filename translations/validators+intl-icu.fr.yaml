@@ -6,6 +6,7 @@ abstract_attribute:
       unique: "Code {value} est déjà utilisé"
 
 user:
+   agree_terms: "Merci d'accepter les conditions d'utilisation pour créer un compte."
    email:
       unique: "Un compte existe déjà avec cette adresse."
    username:

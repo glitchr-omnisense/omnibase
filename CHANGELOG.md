@@ -28,6 +28,8 @@ applications still locked on it. See [docs/20-architecture/packages.md](docs/20-
 - The profile's editor (`UserProfileController::Edit()`) answered 500 on a name another account has (the database's
   refusal), and the session was signed out with it: the account written is held to its class's rules first
   (`Base\Form\Definition\RecordRules`), the refusal said under its field, the account read again as it is stored.
+- The sign-up's terms of use were checked by the browser alone: `AccountForms::signUp()`'s `agreeTerms` is refused
+  unticked (`NotBlank`, groups `Default` and `new`), on top of the form; `user.agree_terms` in the validators' catalogues.
 
 ### Changed: the request, the session and the events on contracts (plan "omnibase agnostic", step F5c, first part, 2026-11-02)
 

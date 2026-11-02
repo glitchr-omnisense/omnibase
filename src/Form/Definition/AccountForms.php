@@ -3,6 +3,7 @@
 namespace Base\Form\Definition;
 
 use Base\Field\Kind;
+use Omnibridge\Validation\Constraint\NotBlank;
 use Base\Form\Model\SecurityLoginModel;
 use Base\Form\Model\SecurityLoginTokenModel;
 use Base\Form\Model\SecurityRegistrationModel;
@@ -49,7 +50,8 @@ final class AccountForms
         return FormDefinition::new($name)->setDataClass(SecurityRegistrationModel::class)
             ->setGuard(['action' => 'signup'])
             ->add(FormDefinition::field('email', Kind::EMAIL))
-            ->add(FormDefinition::field('agreeTerms', Kind::CHECKBOX)->setVirtual(true))
+            // The terms of use accepted, checked here and not only by the browser: said on top of the form.
+            ->add(FormDefinition::field('agreeTerms', Kind::CHECKBOX)->setVirtual(true)->addConstraint(new NotBlank(message: 'user.agree_terms', groups: ['Default', 'new']))->setFormTypeOption('error_bubbling', true))
             ->add(FormDefinition::field('plainPassword', Kind::REPEATED)->setFormTypeOptions([
                 'type' => Kind::PASSWORD,
                 'required' => true,
