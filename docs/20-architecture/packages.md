@@ -71,7 +71,8 @@ path (step F5c): the form layer (`Field\Type\*`, `Form\*`), the console (`Consol
 (`Subscriber\*`), the router (`Routing\{AdvancedRouter, AdvancedRouterInterface, Generator, Matcher, Loader}`),
 the cache warmers and clearer (`Cache\{Warmer, Clearer}\*`, `Cache\Abstract\AbstractLocalCacheWarmer`), the
 data collectors (`Inspector\*`), `Response\{PdfResponse, XmlResponse}`, Symfony Security's authenticators, user
-providers, user checker, sign-in guard, session storage and voters (`Security\*`, but the framework-free ones). The pages of this manual still name
+providers, user checker, sign-in guard, session storage and voters (`Security\*`, but the framework-free ones), the
+contracts' Symfony adapters (`Bridge\Symfony\X` is `Omnibridge\Symfony\Omnibase\X`). The pages of this manual still name
 them by their former names (`Base\Subscriber\...`), which the core aliases until 6.0
 (`src/Resources/former-names.symfony.php`).
 
