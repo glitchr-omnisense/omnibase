@@ -199,13 +199,14 @@ persistence, and their Doctrine part in their former class, which keeps its name
 | `SettingsInvalidation` (neutral `PostPersist`/`PostUpdate`/`PostRemove`) | `EntitySubscriber\SettingSubscriber` | the relay |
 | `TrashRecorder` (purge or trashing, the trash entry) | `EntitySubscriber\TrasheableSubscriber` | the deletion cancelled, the stamp's extra update, the cascade rescued, the second-level cache evicted |
 | `RevisionRecorder` (the diff, the values' form, the revision, no repeat) | `EntitySubscriber\VersionableSubscriber` | the updated entities and dirty collections, the revision in the running flush, the trim |
+| `ThreadParticipants` (a reply's followers, one `Mention` per user the text mentions; neutral `PrePersist`/`OnFlush`) | `EntitySubscriber\ThreadSubscriber` | the threads whose text the flush writes, a reply moved under another parent (its followers' collection recomputed) |
 
 The others are Doctrine's by nature and move as they are at F3: `IntlSubscriber` (the translations'
 mapping and discriminators, orphan removal), `ExtensionSubscriber` (extension rows written inside the
 flush), `InverseCollectionCacheSubscriber` (the second-level cache), `TrackingPolicySubscriber` (the
 mapping), `AttributeSubscriber` itself (the relay, the mapping and query hooks). `DemoAccountLockSubscriber`
 reads the request and the session (step F5a); `ConnectionSubscriber`, `UserSubscriber` and
-`ThreadSubscriber` listen to Symfony's events (F5c).
+`ThreadSubscriber` (besides its Doctrine wiring above) listen to Symfony's events (F5c).
 
 ## The discriminator maps
 

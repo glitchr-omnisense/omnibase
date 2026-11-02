@@ -297,9 +297,20 @@ return static function (ContainerConfigurator $container): void {
     //
     // Author and mention notifications live in the same handler, so they were
     // silently dead for the same reason.
+    //
+    // Its Doctrine hooks were registered nowhere until 2026-11-02 (Marco's decision
+    // to turn them on): no reply was followed by its parent's owners, no Mention was
+    // ever stored, so thread.mentioned was never mailed. prePersist and onFlush relay
+    // to Base\Database\Lifecycle\ThreadParticipants; the enhancer comes in a
+    // closure, as SettingSubscriber's SettingBag does: Doctrine builds its listeners
+    // when the event manager initialises, and the enhancer's repositories read the
+    // mapping there.
     $services->set('Base\EntitySubscriber\ThreadSubscriber')
         ->autowire()
-        ->autoconfigure();
+        ->autoconfigure()
+        ->arg('$mentionEnhancer', service_closure('Base\Service\Model\Wysiwyg\MentionEnhancerInterface'))
+        ->tag('doctrine.event_listener', ['event' => 'prePersist'])
+        ->tag('doctrine.event_listener', ['event' => 'onFlush']);
 
     // The user.* events' listener (UserEventDispatcher raises them): the verification asked at
     // a registration, the approval confirmed, the goodbye of an account closed by its owner, the

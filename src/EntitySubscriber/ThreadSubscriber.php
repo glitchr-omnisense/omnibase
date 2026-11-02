@@ -3,28 +3,48 @@
 namespace Base\EntitySubscriber;
 
 use Base\Entity\Thread;
+use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Base\Database\Lifecycle\ThreadParticipants;
 use Base\Entity\Thread\Mention;
 use Base\Entity\ThreadIntl;
-use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\EntityDispatcher\Event\ThreadEvent;
 use Base\Enum\ThreadState;
 use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Omnibridge\Persistence\Lifecycle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * The threads' kernel events (thread.scheduled, thread.publishable: the state, the authors' and the
+ * mentionees' mails) and the Doctrine wiring of their followers and mentions (prePersist, onFlush), whose
+ * logic is Base\Database\Lifecycle\ThreadParticipants, on the neutral lifecycle events.
+ */
 class ThreadSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var MentionEnhancerInterface
+     * The enhancer, or a closure that builds it (service_closure): Doctrine builds this listener when its
+     * event manager initialises, and the enhancer's repositories read the mapping there (see
+     * SettingSubscriber).
+     *
+     * @var MentionEnhancerInterface|\Closure(): MentionEnhancerInterface
      */
     protected $mentionEnhancer;
 
-    public function __construct(MentionEnhancerInterface $mentionEnhancer)
+    /** @param MentionEnhancerInterface|\Closure(): MentionEnhancerInterface $mentionEnhancer */
+    public function __construct(MentionEnhancerInterface|\Closure $mentionEnhancer)
     {
         $this->mentionEnhancer = $mentionEnhancer;
+    }
+
+    protected function mentionEnhancer(): MentionEnhancerInterface
+    {
+        if ($this->mentionEnhancer instanceof \Closure) {
+            $this->mentionEnhancer = ($this->mentionEnhancer)();
+        }
+
+        return $this->mentionEnhancer;
     }
 
     public static function getSubscribedEvents(): array
@@ -47,7 +67,8 @@ class ThreadSubscriber implements EventSubscriberInterface
         $thread = $event->getThread();
         $thread->setState(ThreadState::PUBLISH);
 
-        foreach ($thread->getAuthors() as $author) {
+        $authors = $this->authors($thread);
+        foreach ($authors as $author) {
 
             $notification = new Notification('thread.published');
             $notification->setHtmlTemplate("@Base/client/thread/email/publish.html.twig", ["thread" => $thread]);
@@ -57,7 +78,7 @@ class ThreadSubscriber implements EventSubscriberInterface
 
         foreach ($thread->getMentions() as $mention) {
 
-            if($thread->getAuthors()->contains($mention->getMentionee())) continue;
+            if(in_array($mention->getMentionee(), $authors, true)) continue;
 
             /**
              * @var Mention $mention
@@ -69,92 +90,77 @@ class ThreadSubscriber implements EventSubscriberInterface
         }
     }
 
-    public function prePersist(PrePersistEventArgs $event)
+    /**
+     * A thread's authors: its owners, unless its class says otherwise with a getAuthors() of its own
+     * (omnibase/marketplace's Product) or an $authors property its magic getter reads (lesringostars'
+     * Article and Comment, an alias of the owners). Thread itself has none: the others threw at their
+     * publication, after their state.
+     *
+     * @return object[]
+     */
+    protected function authors(Thread $thread): array
     {
-        if(!$event->getObject() instanceof Thread) return;
-        
-        $thread = $event->getObject();
-        $this->updateFollowers($thread);
+        $authors = method_exists($thread, 'getAuthors') || property_exists($thread, 'authors') ? $thread->getAuthors() : $thread->getOwners();
+
+        return array_values(array_filter(is_iterable($authors) ? [...$authors] : []));
     }
 
-    public function preUpdate(PreUpdateEventArgs $event)
+    /** The followers and mentions, on the neutral lifecycle events; the methods below are their Doctrine wiring. */
+    protected function participants(): ThreadParticipants
     {
-        if(!$event->getObject() instanceof Thread) return;
-        
-        $thread = $event->getObject();
-        $this->updateFollowers($thread);
+        return $this->participants ??= new ThreadParticipants(fn () => $this->mentionEnhancer());
     }
 
-    protected function updateFollowers(Thread $thread)
-    {
-        $parent = $thread->getParent();
-        if(!$parent) return;
+    private ?ThreadParticipants $participants = null;
 
-        foreach($parent->getOwners() as $owner) {
-            
-            /**
-             * @var User $owner
-             */
-            $thread->addFollower($owner);
-        }
+    /** A new reply followed by its parent's owners. */
+    public function prePersist(PrePersistEventArgs $event): void
+    {
+        $this->participants()->onPrePersist(new Lifecycle\PrePersist($event->getObject(), new DoctrineUnitOfWork($event->getObjectManager())));
     }
 
-    public function onFlush(OnFlushEventArgs $event)
+    /**
+     * The mentions of every thread whose text this flush writes (a translation inserted, or its content
+     * changed) or that this flush makes publishable (an update that leaves the text alone otherwise -
+     * poke(), a counter - parses nothing), and the followers of a reply moved under another parent.
+     *
+     * The followers are added here, not at preUpdate, where Doctrine writes no collection changed; the
+     * thread's change set is then computed again with its collections (computeChangeSet(), Doctrine's:
+     * the neutral UnitOfWork::recompute() is recomputeSingleEntityChangeSet(), fields only).
+     */
+    public function onFlush(OnFlushEventArgs $event): void
     {
-        $uow = $event->getObjectManager()->getUnitOfWork();
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+        $entityManager = $event->getObjectManager();
+        $unitOfWork = $entityManager->getUnitOfWork();
 
-            if(!$entity instanceof Thread) continue;
-            $this->onFlushMentions($event, $entity);
+        $threads = [];
+        foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
+            if ($entity instanceof Thread) {
+                $threads[spl_object_id($entity)] = $entity;
+            } elseif ($entity instanceof ThreadIntl && $entity->getTranslatable() instanceof Thread) {
+                $threads[spl_object_id($entity->getTranslatable())] = $entity->getTranslatable();
+            }
         }
 
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
-
-            if(!$entity instanceof Thread) continue;
-            $this->onFlushMentions($event, $entity);
-        }
-    }
-
-    protected function onFlushMentions(OnFlushEventArgs $event, Thread $thread)
-    {
-        $em  = $event->getObjectManager();
-        $uow = $em->getUnitOfWork();
-
-        $extractedMentionees = [];
-        foreach($thread->getTranslations() as $threadIntl) {
-
-            $content = $threadIntl->getContent();
-            $content = is_json($content) ? json_leaves($content) : $content;
-            $extractedMentionees = array_unique(array_merge($extractedMentionees, $this->mentionEnhancer->extractMentionees($content)));
-        }
-
-        $persistentMentions = $thread->getId() === null ? [] : $this->mentionEnhancer->mentions()->byThread($thread);
-        $persistentMentionees = array_map(fn($m) => $m->getMentionee(), $persistentMentions);
-        
-        $newMentionees = array_diff_object($extractedMentionees, $persistentMentionees);
-        $oldMentionees = array_diff_object($persistentMentionees, $extractedMentionees);
-        $oldMentions   = array_map(fn($k) => $persistentMentions[$k], array_keys($oldMentionees));
-
-        foreach($newMentionees as $mentionee) {
-
-            $mention = new Mention($mentionee, $thread);
-            foreach($thread->getOwners() as $mentioner) {
-
-                /**
-                 * @var User $mentioner
-                 */    
-                $mention->addMentioner($mentioner);
+        foreach ($unitOfWork->getScheduledEntityUpdates() as $entity) {
+            if ($entity instanceof ThreadIntl && $entity->getTranslatable() instanceof Thread && array_key_exists('content', $unitOfWork->getEntityChangeSet($entity))) {
+                $threads[spl_object_id($entity->getTranslatable())] = $entity->getTranslatable();
             }
 
-            $thread->addMention($mention);
+            // The flush that publishes it (thread.publishable is dispatched after it): its mentions are
+            // read again, so that a thread written before its mentions were stored mails them too.
+            if ($entity instanceof Thread && $entity->isPublishable()) {
+                $threads[spl_object_id($entity)] = $entity;
+            }
+
+            if ($entity instanceof Thread && array_key_exists('parent', $unitOfWork->getEntityChangeSet($entity)) && $this->participants()->follow($entity)) {
+                $unitOfWork->computeChangeSet($entityManager->getClassMetadata($entity::class), $entity);
+            }
         }
 
-        foreach($oldMentions as $mention) {
-            $thread->removeMention($mention);
-        }
-
-        if($newMentionees !== [] || $oldMentionees !== []) {
-            $uow->recomputeSingleEntityChangeSet($em->getMetadataFactory()->getMetadataFor(Thread::class), $thread);
+        $threads = array_filter($threads, fn (Thread $thread) => !$unitOfWork->isScheduledForDelete($thread));
+        if ($threads) {
+            $this->participants()->onFlush(new Lifecycle\OnFlush(new DoctrineUnitOfWork($entityManager)), $threads);
         }
     }
 }

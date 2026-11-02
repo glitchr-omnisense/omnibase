@@ -157,6 +157,7 @@ return [
     Base\Database\Events::class,
     Base\Database\Lifecycle\RevisionRecorder::class,
     Base\Database\Lifecycle\SettingsInvalidation::class,
+    Base\Database\Lifecycle\ThreadParticipants::class,
     Base\Database\Lifecycle\TrashRecorder::class,
     Base\Database\Mapping\ClassMetadataCompletor::class,
     Base\Database\Mapping\ClassMetadataManipulator::class,

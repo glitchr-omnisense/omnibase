@@ -90,9 +90,23 @@ final class DoctrineUnitOfWork implements UnitOfWork
         return $this->entityManager->getUnitOfWork()->getEntityChangeSet($entity);
     }
 
-    /** Doctrine's recomputeSingleEntityChangeSet(): for an entity a listener changed during a flush. */
+    /**
+     * Doctrine's recomputeSingleEntityChangeSet(): for an entity a listener changed during a flush. An
+     * entity a listener persisted during the flush (OnFlush) has no change set to compute again: its first
+     * one is computed (computeChangeSet(), what Doctrine asks of an onFlush listener for a new entity),
+     * where recomputeSingleEntityChangeSet() threw ("before computeChangeSet").
+     */
     public function recompute(object $entity): void
     {
-        $this->entityManager->getUnitOfWork()->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata($entity::class), $entity);
+        $unitOfWork = $this->entityManager->getUnitOfWork();
+        $metadata = $this->entityManager->getClassMetadata($entity::class);
+
+        if ($unitOfWork->isScheduledForInsert($entity) && [] === $unitOfWork->getOriginalEntityData($entity)) {
+            $unitOfWork->computeChangeSet($metadata, $entity);
+
+            return;
+        }
+
+        $unitOfWork->recomputeSingleEntityChangeSet($metadata, $entity);
     }
 }
