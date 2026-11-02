@@ -10,6 +10,16 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Moved: Symfony Security's classes to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 4, 2026-11-03)
+
+- 13 classes, as they were, to `Omnibridge\Symfony\Omnibase\Security\`: `AccessTokenHandler`, `LoginFormAuthenticator`,
+  `RescueFormAuthenticator`, `UserProvider`, `OAuthUserProvider`, `UserChecker`, `SignInGuard`,
+  `Session\{DynamicSessionStorage, DynamicSessionStorageFactory}`, `Voter\{AccessVoter, AdminVoter, ComplaintVoter,
+  PermissionVoter}`. Former names aliased (FormerNamesTest 313): security.yaml's authenticators, providers and checker, and
+  the services' ids, keep their names.
+- Stay, framework-free: `ConnectionTracker`, `CookieAnswer`, `LoginRestrictionInterface`, `SignInCaptcha`, `SignOut`,
+  `UserTracker`, `WebauthnUserEntityRepository`.
+
 ### Moved: the kernel subscribers, the router, the warmers, the collectors and the responses to omnibridge/symfony (plan "omnibase agnostic", step F5c, item 3, slice 3, 2026-11-03)
 
 - 38 classes, as they were, to `Omnibridge\Symfony\Omnibase\` by the same rule: the 21 `Subscriber\*`;

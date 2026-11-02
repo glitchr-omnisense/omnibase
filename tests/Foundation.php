@@ -713,7 +713,6 @@ return [
     Base\Security\CookieAnswer::class,
     Base\Security\LoginRestrictionInterface::class,
     Base\Security\SignInCaptcha::class,
-    Base\Security\SignInGuard::class,
     Base\Security\SignOut::class,
     Base\Security\UserTracker::class,
     Base\Security\WebauthnUserEntityRepository::class,
