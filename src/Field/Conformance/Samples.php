@@ -114,8 +114,9 @@ final class Samples
             new Sample(Kind::ASSOCIATION_FILE, self::field(Kind::ASSOCIATION_FILE, ['class' => \Base\Entity\Layout\Image::class, 'entity_file' => 'source']), dataClass: \Base\Entity\Layout\ImageCrop::class, name: 'image'),
             // No record of the core holds attributes (an application's account's hyperlinks do).
             new Sample(Kind::ATTRIBUTE, self::field(Kind::ATTRIBUTE), exercised: false),
-            new Sample(Kind::ARRAY, self::field(Kind::ARRAY)),
-            new Sample(Kind::COLLECTION, self::field(Kind::COLLECTION)),
+            // A list of texts, a list of hidden values: each entry shown, the list sent kept in its order.
+            new Sample(Kind::ARRAY, self::field(Kind::ARRAY), ['un', 'deux'], ['un', 'deux'], ['trois', 'quatre'], ['trois', 'quatre']),
+            new Sample(Kind::COLLECTION, self::field(Kind::COLLECTION, ['allow_add' => true]), ['un', 'deux'], ['un', 'deux'], ['trois', 'quatre', 'cinq'], ['trois', 'quatre', 'cinq']),
             new Sample(Kind::REPEATED, self::field(Kind::REPEATED, ['type' => Kind::TEXT]), null, Sample::NONE, ['first' => 'yeah', 'second' => 'yeah'], 'yeah', ['first' => 'yeah', 'second' => 'no']),
             new Sample(Kind::TRANSLATION, self::field(Kind::TRANSLATION), dataClass: \Base\Entity\Thread::class, name: 'translations'),
             new Sample(Kind::DISCRIMINATOR, self::field(Kind::DISCRIMINATOR)),

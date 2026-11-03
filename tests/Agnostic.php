@@ -72,6 +72,8 @@
  * from uploads), for every host.
  * 738 after step F5d, slice 6 (2026-11-03, +3): Base\Field\Behaviour\{Editor, Wysiwyg} (what EditorType and WysiwygType decide) and
  * Base\Field\Editor\EditorJs (what EditorController answered under Symfony), the editors for every host.
+ * 741 after step F5d, slice 7 (2026-11-03, +3): Base\Field\Behaviour\{Association, Collection, Attribute} (what AssociationType,
+ * CollectionType, ArrayType and AttributeType decide), embedded forms, lists and attributes for every host.
  */
 
 return [
@@ -390,10 +392,13 @@ return [
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
     Base\Field\Behaviour\AbstractBehaviour::class,
+    Base\Field\Behaviour\Association::class,
     Base\Field\Behaviour\AssociationFile::class,
+    Base\Field\Behaviour\Attribute::class,
     Base\Field\Behaviour\Behaviours::class,
     Base\Field\Behaviour\ChoiceList::class,
     Base\Field\Behaviour\Choices::class,
+    Base\Field\Behaviour\Collection::class,
     Base\Field\Behaviour\ColorPickr::class,
     Base\Field\Behaviour\CountrySelect::class,
     Base\Field\Behaviour\DateTimePicker::class,

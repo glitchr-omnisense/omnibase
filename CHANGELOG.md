@@ -10,6 +10,28 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: embedded forms, lists and attributes on every host (plan "omnibase agnostic", step F5d, slice 7, 2026-11-03)
+
+- **`Base\Field\Behaviour\Association`** (`association`, an embedded record's form): what omnibridge/symfony's
+  `AssociationType` decided, which it now asks - `DEFAULTS`, `options()` (several records never required, entries added and
+  deleted only inside a group), `collection()` and `entry()` (the options of `_collection` and of one record's form) -, and for
+  the neutral side `targetClass()`/`isMultiple()`/`property()` (the association read through its #[Alias]), `fields()`
+  (`RecordFields`, guessed), `records()`, `bind()` (each entry sent bound into its record, a new one from the prototype told its
+  owner, one not sent removed where the field deletes, a windowed page's undrawn ones kept).
+- **`Base\Field\Behaviour\Collection`** (`collection`, `array`): `CollectionType`'s and `ArrayType`'s `DEFAULTS`,
+  `ARRAY_DEFAULTS`, `options()` (a fixed length neither adds nor deletes), `length()` (a pattern's `{n}`), `window()`,
+  `rendered()`, `empty()`, `entries()` and `shown()`.
+- **`Base\Field\Behaviour\Attribute`** (`attribute`): `AttributeType`'s `DEFAULTS`, `classes()`, `choice()` (its select of
+  adapters), `key()`, `held()`, `translated()`, `value()`, `bind()`.
+- `FormView` draws an embedded association (`_collection`, its entries, `prototype`, `_index`; nothing required inside a field
+  not required, as Symfony's forms), a record's attributes (`choice` and each attribute's part) and a list's entries (padded to
+  a fixed length, the prototype); `FormBinder` binds them, and reads a list sent for `array`/`collection` through
+  `Collection::entries()`.
+- Fixed: `FormBinder` writes a list of records into the collection a record holds in place (the records no longer chosen out,
+  the new ones in) instead of replacing it with an array (an ordered collection, OrderColumn, failed at the flush).
+- The conformance samples of `array` and `collection` carry values (shown, bound in their order).
+- `tests/Field/AssociationTest`. `tests/Agnostic.php` 741, `tests/Foundation.php` 804.
+
 ### Added: the editors on every host (plan "omnibase agnostic", step F5d, slice 6, 2026-11-03)
 
 - **`Base\Field\Behaviour\Wysiwyg`** (`wysiwyg`, Quill) and **`Base\Field\Behaviour\Editor`** (`editor`, Editor.js): what
