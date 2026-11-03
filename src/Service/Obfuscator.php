@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use Base\BaseBundle;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Service\Model\Obfuscator\CompressionInterface;
 use ErrorException;

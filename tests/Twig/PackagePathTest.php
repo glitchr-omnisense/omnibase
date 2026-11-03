@@ -46,7 +46,7 @@ final class PackagePathTest extends TestCase
 
     public function testTheDefaultIsThePackagesTemplates(): void
     {
-        $config = (new \Symfony\Component\Config\Definition\Processor())->processConfiguration(new \Base\DependencyInjection\BaseConfiguration(), []);
+        $config = (new \Symfony\Component\Config\Definition\Processor())->processConfiguration(new \Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration(), []);
 
         self::assertSame(realpath(__DIR__.'/../../templates'), realpath($config['twig']['default_path']));
     }

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Bundle;
 
-use Base\BaseBundle;
+use Omnibridge\Symfony\Omnibase\BaseBundle;
 use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
 

@@ -53,8 +53,15 @@ class SuggestedBundlesTest extends KernelTestCase
 
         $this->assertSame([], array_values(array_intersect(self::NOT_REQUIRED, array_keys($composer['require']))));
         $this->assertArrayNotHasKey('omnibridge/symfony', $composer['require'], 'a Laravel application would receive Symfony');
-        foreach (['symfony/var-dumper', 'symfony/error-handler', 'web-auth/webauthn-lib', 'doctrine/common', 'omnibridge/doctrine', 'doctrine/orm'] as $foundation) {
-            $this->assertArrayHasKey($foundation, $composer['require'], $foundation.' is loaded by the Foundation');
+        // Since 5.0 (plan "omnibase agnostic", step F6) the core is a library: no persistence, no Symfony component
+        // outside the kept list; the bridges bring them (omnibridge/doctrine, omnibridge/symfony), or the
+        // application that uses the feature requires the package (suggested).
+        $this->assertSame('library', $composer['type']);
+        foreach (['symfony/var-dumper', 'symfony/error-handler', 'symfony/validator', 'symfony/cache', 'web-auth/webauthn-lib', 'doctrine/common', 'doctrine/orm', 'doctrine/dbal', 'omnibridge/doctrine'] as $left) {
+            $this->assertArrayNotHasKey($left, $composer['require'], $left.' is not required since 5.0');
+        }
+        foreach (['omnibridge/doctrine', 'symfony/validator', 'symfony/http-client', 'web-auth/webauthn-lib', 'phpoffice/phpspreadsheet'] as $suggested) {
+            $this->assertArrayHasKey($suggested, $composer['suggest'], $suggested.' is suggested');
         }
         // The view engine is the application's choice (plan "omnibase agnostic", step F4): Twig is suggested.
         foreach (['omnibridge/twig', 'twig/twig'] as $view) {
@@ -68,7 +75,7 @@ class SuggestedBundlesTest extends KernelTestCase
             $this->assertArrayHasKey($package, $composer['suggest'], $package.' is suggested');
             $this->assertArrayHasKey($package, $composer['require-dev'], $package.' is there for the core\'s own suite');
         }
-        $this->assertSame('4.0.x-dev', $composer['extra']['branch-alias']['dev-4.x']);
+        $this->assertSame('5.0.x-dev', $composer['extra']['branch-alias']['dev-5.x']);
     }
 
     public function testTheUserProviderNamesNoInterfaceOfHwi(): void
@@ -216,7 +223,7 @@ class SuggestedBundlesTest extends KernelTestCase
 
         $bundles = array_map(fn ($bundle) => $bundle::class, $kernel->getBundles());
         $this->assertSame([], array_values(array_intersect(WithoutSuggestedBundlesKernel::LEFT_OUT, $bundles)));
-        $this->assertContains('Base\\BaseBundle', $bundles);
+        $this->assertContains('Omnibridge\\Symfony\\Omnibase\\BaseBundle', $bundles);
 
         // The provider of the firewalls, without hwi/oauth-bundle registered: the class follows the
         // package, which is installed here; the service compiles either way.

@@ -4,10 +4,11 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-# base's own controllers: login, registration, the profile.
+# base's own controllers: login, registration, the profile - omnibridge/symfony's and the core's
+# actions (src/Controller/Action), through omnibridge/symfony's loader since 5.0.
 base_controller:
-    resource: "@BaseBundle/Controller"
-    type: attribute
+    resource: .
+    type: omnibase
     prefix: /
 
 # The back office's CRUDs (omnibase/admin), /admin.

@@ -1,11 +1,12 @@
 {
     "name": "omnisense/omnibase",
-    "type": "symfony-bundle",
-    "description": "omnibase: entities, view models, contracts and helpers on Doctrine and Twig; under Symfony with omnibridge/symfony",
+    "type": "library",
+    "description": "omnibase: entities, view models, contracts, forms and helpers for any PHP host; under Symfony with omnibridge/symfony, under Laravel with omnibridge/laravel, persisted through omnibridge/doctrine",
     "keywords": [
-        "symfony",
-        "base",
-        "helper"
+        "omnibase",
+        "entities",
+        "forms",
+        "contracts"
     ],
     "homepage": "https://github.com/glitchr-omnisense/omnibase",
     "license": "MIT",
@@ -66,52 +67,35 @@
         "ext-exif": "*",
         "ext-igbinary": "*",
         "ext-imagick": "*",
-        "beberlei/doctrineextensions": "^1.0",
         "composer-runtime-api": "^2.0",
         "doctrine/collections": "^3.1",
-        "doctrine/common": "^3.0",
-        "doctrine/dbal": "^4.2",
-        "doctrine/event-manager": "^2.0",
-        "doctrine/orm": "^3.4",
-        "doctrine/persistence": "^4.0",
         "embed/embed": "^4.4",
         "endroid/qr-code": "^6.0",
         "enshrined/svg-sanitize": "^1.0",
-        "florianv/swap": "^4.0",
         "hashids/hashids": "^5.0",
         "imagine/imagine": "^1.2",
         "jaybizzle/crawler-detect": "^1.2",
         "league/flysystem": "^3.0",
-        "league/flysystem-ftp": "^3.0",
         "omnibridge/composer": "1.x-dev",
-        "omnibridge/doctrine": "1.x-dev",
         "omnisense/omnibridge": "1.x-dev",
         "omnisense/omnidrive": "1.x-dev",
-        "phpoffice/phpspreadsheet": "^1.23|^2.0",
         "psr/cache": "^1.0|^2.0|^3.0",
         "psr/clock": "^1.0",
         "psr/container": "^1.1|^2.0",
         "psr/event-dispatcher": "^1.0",
         "psr/log": "^1.0|^2.0|^3.0",
         "psr/simple-cache": "^1.0|^2.0|^3.0",
-        "scienta/doctrine-json-functions": "~4.3",
-        "symfony/asset": "^6.0|^7.0|^8.0",
-        "symfony/cache": "^6.0|^7.0|^8.0",
-        "symfony/discord-notifier": "^6.0|^7.0|^8.0",
-        "symfony/error-handler": "^6.0|^7.0|^8.0",
-        "symfony/event-dispatcher": "^6.0|^7.0|^8.0",
+        "symfony/cache-contracts": "^2.5|^3.0",
         "symfony/event-dispatcher-contracts": "^2.5|^3.0",
-        "symfony/expression-language": "^6.0|^7.0|^8.0",
         "symfony/filesystem": "^6.0|^7.0|^8.0",
         "symfony/finder": "^6.0|^7.0|^8.0",
-        "symfony/http-client": "^6.0|^7.0|^8.0",
+        "symfony/http-client-contracts": "^2.5|^3.0",
         "symfony/intl": "^6.0|^7.0|^8.0",
         "symfony/mailer": "^6.0|^7.0|^8.0",
         "symfony/mime": "^6.0|^7.0|^8.0",
         "symfony/notifier": "^6.0|^7.0|^8.0",
         "symfony/options-resolver": "^6.0|^7.0|^8.0",
         "symfony/password-hasher": "^6.0|^7.0|^8.0",
-        "symfony/process": "^6.0|^7.0|^8.0",
         "symfony/property-access": "^6.0|^7.0|^8.0",
         "symfony/serializer": "^6.0|^7.0|^8.0",
         "symfony/service-contracts": "^2.5|^3.0",
@@ -119,18 +103,23 @@
         "symfony/translation": "^6.0|^7.0|^8.0",
         "symfony/translation-contracts": "^2.5|^3.0",
         "symfony/uid": "^6.0|^7.0|^8.0",
-        "symfony/validator": "^6.0|^7.0|^8.0",
-        "symfony/var-dumper": "^6.0|^7.0|^8.0",
-        "symfony/workflow": "^6.0|^7.0|^8.0",
-        "symfony/yaml": "^6.0|^7.0|^8.0",
-        "web-auth/webauthn-lib": "^5.3"
+        "symfony/yaml": "^6.0|^7.0|^8.0"
     },
     "replace": {
         "omniscient/omnibase": "self.version",
         "glitchr/omnibase": "self.version"
     },
     "suggest": {
-        "omnibridge/symfony": "The core under Symfony (since 4.0; BaseBundle refuses to start without it): the adapters of the host's contracts over Symfony's services (Omnibridge\\Symfony\\*, since A1) and the framework packages the core no longer requires - FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, MonologBundle, twig/extra-bundle, Form, Routing, HttpKernel... A Symfony site requires it beside omnisense/omnibase, with the bundles below that its config/bundles.php registers; a Laravel site does not (omnibridge/laravel)",
+        "omnibridge/symfony": "The core under Symfony: since 5.0 the bundle itself (Omnibridge\\Symfony\\Omnibase\\BaseBundle, registered in config/bundles.php), its configuration (base:), its container extension and compiler passes, the Symfony controllers (their routes imported with `type: omnibase`), the adapters of the host's contracts and the framework packages (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, Form, Routing, HttpKernel, Validator, Cache, Process, Workflow...) (1.x-dev)",
+        "omnibridge/doctrine": "The persistence on Doctrine: since 5.0 the core requires no Doctrine package but doctrine/collections; omnibridge/doctrine brings doctrine/orm and dbal, the DQL functions (beberlei/doctrineextensions, scienta/doctrine-json-functions), the repositories, the mapping and the types of the core's entities (1.x-dev)",
+        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (1.x-dev)",
+        "symfony/validator": "The validation of the entities' #[Assert\\...] attributes under Symfony (omnibridge/symfony requires it), and its `validators` catalogue (^6.0|^7.0|^8.0)",
+        "symfony/http-client": "An HTTP client behind the core's HTTP contract (symfony/http-client-contracts): the currency rates (Trading), the remote classifiers, embeds (^6.0|^7.0|^8.0)",
+        "florianv/swap": "The currency rates of Base\\Service\\Trading (^4.0)",
+        "phpoffice/phpspreadsheet": "The spreadsheets exported and read by the back office and the commands (^1.23|^2.0)",
+        "league/flysystem-ftp": "FTP storages behind the core's flysystem (^3.0)",
+        "web-auth/webauthn-lib": "Passkeys: the userPasskey columns and Base\\Repository\\User\\PasskeyRepository's records (^5.3)",
+        "symfony/discord-notifier": "Notifications to Discord through the core's notifier (^6.0|^7.0|^8.0)",
         "scheb/2fa": "Two-factor sign-in (TOTP, e-mail codes, backup codes, trusted devices): installed, Base\\Entity\\User implements its Scheb\\TwoFactorBundle\\Model interfaces (Base\\Contract\\TwoFactorUser); register SchebTwoFactorBundle for the sign-in itself (^7.0|^8.0)",
         "league/flysystem-bundle": "The storages of the application's configuration (local, S3, SFTP...) behind the `flysystem` service every file, image and backup service reads; without it, omnibase's local storages (local.cache, local.uploads, local.wysiwyg and their .public) (^3.1)",
         "hwi/oauth-bundle": "Signing in through an identity provider (Google...): Base\\Security\\UserProvider is then the OAuth-aware provider (Base\\Security\\OAuthUserProvider) (^2.1)",
@@ -167,15 +156,22 @@
     },
     "require-dev": {
         "api-platform/symfony": "^4.0",
+        "beberlei/doctrineextensions": "^1.0",
+        "doctrine/dbal": "^4.2",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "doctrine/doctrine-migrations-bundle": "^3.0",
+        "doctrine/orm": "^3.4",
+        "florianv/swap": "^4.0",
         "glitchr/backup-manager": "4.0.*-dev",
         "glitchr/ux-google": "1.0.*-dev",
         "hwi/oauth-bundle": "^2.1",
         "league/flysystem-bundle": "^3.1",
+        "league/flysystem-ftp": "^3.0",
         "omniauth/otp": "1.x-dev",
         "omniauth/webauthn": "1.x-dev",
+        "omnibridge/doctrine": "1.x-dev",
         "omnibridge/symfony": "1.x-dev",
+        "omnibridge/twig": "1.x-dev",
         "omnisense/omniauth": "1.x-dev",
         "omnisense/omnishield": "1.x-dev",
         "omnisense/omnisign": "1.x-dev",
@@ -183,17 +179,27 @@
         "omnishield/altcha": "1.x-dev",
         "omnishield/disposable": "1.x-dev",
         "omnisign/docuseal": "1.x-dev",
+        "phpoffice/phpspreadsheet": "^1.23|^2.0",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.5",
         "scheb/2fa": "^7.0|^8.0",
+        "scienta/doctrine-json-functions": "~4.3",
         "squizlabs/php_codesniffer": "^3.7",
+        "symfony/cache": "^6.0|^7.0|^8.0",
         "symfony/debug-bundle": "^6.0|^7.0|^8.0",
+        "symfony/discord-notifier": "^6.0|^7.0|^8.0",
+        "symfony/http-client": "^6.0|^7.0|^8.0",
         "symfony/lock": "^6.0|^7.0|^8.0",
         "symfony/phpunit-bridge": "^6.0|^7.0|^8.0",
+        "symfony/process": "^6.0|^7.0|^8.0",
         "symfony/stopwatch": "^6.0|^7.0|^8.0",
+        "symfony/validator": "^6.0|^7.0|^8.0",
         "symfony/web-profiler-bundle": "^6.0|^7.0|^8.0",
         "symfony/webpack-encore-bundle": "^2.0",
+        "symfony/workflow": "^6.0|^7.0|^8.0",
+        "twig/twig": "^3.0",
         "wapmorgan/php-deprecation-detector": "^2.0",
+        "web-auth/webauthn-lib": "^5.3",
         "web-auth/webauthn-symfony-bundle": "^5.3"
     },
     "minimum-stability": "dev",
@@ -227,8 +233,18 @@
                     "file": "Process.php",
                     "why": "A Process built without a timeout - the core's own, new Process([...]) in CacheClearTrait, IntegritySubscriber and WebpackTagRenderer, and any other - waits SYMFONY_PROCESS_TIMEOUT seconds (a site sets it to its PHP max execution time), 60 when it is not set: Process's default 60 becomes null, read from the environment in the constructor.",
                     "do": [
-                        { "default": "null", "of": ["Symfony\\Component\\Process\\Process::__construct($timeout)", "Symfony\\Component\\Process\\Process::fromShellCommandline($timeout)"] },
-                        { "prepend": "$timeout ??= $_ENV['SYMFONY_PROCESS_TIMEOUT'] ?? 60;", "before": "$this->setTimeout($timeout);", "count": 1 }
+                        {
+                            "default": "null",
+                            "of": [
+                                "Symfony\\Component\\Process\\Process::__construct($timeout)",
+                                "Symfony\\Component\\Process\\Process::fromShellCommandline($timeout)"
+                            ]
+                        },
+                        {
+                            "prepend": "$timeout ??= $_ENV['SYMFONY_PROCESS_TIMEOUT'] ?? 60;",
+                            "before": "$this->setTimeout($timeout);",
+                            "count": 1
+                        }
                     ]
                 }
             ]
@@ -238,11 +254,12 @@
                 "glitchr/backup-manager": "4.0.*-dev",
                 "omnisense/omniauth": "1.x-dev",
                 "omniauth/webauthn": "1.x-dev",
-                "omniauth/otp": "1.x-dev"
+                "omniauth/otp": "1.x-dev",
+                "omnibridge/doctrine": "1.x-dev"
             }
         },
         "branch-alias": {
-            "dev-4.x": "4.0.x-dev"
+            "dev-5.x": "5.0.x-dev"
         }
     }
 }

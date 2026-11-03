@@ -178,6 +178,20 @@ is its guard, `testTheStrictCheckNamesDoctrineAndTwig` shows it is not blind
 with the other options: `bare --strict --all --each` says which classes of
 `src/` pass, `bare --strict --names` names the wider set.
 
+### The core alone: `bare --alone` (5.0)
+
+Since 5.0 (plan "omnibase agnostic", step F6) the core requires the agnostic core's packages alone.
+`bare --install --alone` makes `var/bare-alone/vendor` from the core's `require` and nothing else
+(not `extra.omnibase.bare`, which `var/bare` adds: omniauth and its methods, glitchr/backup-manager
+and omnibridge/doctrine), and `bare --strict --alone` loads `tests/Agnostic.php` there
+(`BareTest::testTheCoreAloneLoadsTheAgnosticCore`, which also builds the services' list in plain PHP
+on it). `demo test` makes both vendors before the core's suite. A class that stands on a package the
+core only suggests (symfony/validator, workflow, asset; omniauth, glitchr/backup-manager on the
+vendor alone) is reported as optional where that package is not installed, as src/Twig is without
+Twig. `--strict` accepts doctrine/lexer, which egulias/email-validator reads when symfony/mime
+checks an address. On 2026-11-03 (core 5.x): 741 agnostic classes on both vendors, the Foundation
+802 (19 optional for symfony/validator, 35 for Twig, 1 each for workflow and asset).
+
 On 2026-11-01 (core 4.x e156cfaf): 625 of the Foundation's 860 classes. What
 keeps the others out, most often: Twig's `AbstractExtension`, doctrine/orm's
 `EntityRepository` (the 81 repositories), the console, DBAL's `Type` (the 20

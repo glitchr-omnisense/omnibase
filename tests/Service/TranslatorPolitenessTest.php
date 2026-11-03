@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Service;
 
-use Base\BaseBundle;
-use Base\Bundle\AbstractBaseBundle;
+use Omnibridge\Symfony\Omnibase\BaseBundle;
+use Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle;
 use Base\Service\Localizer;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
@@ -257,7 +257,7 @@ class TranslatorPolitenessTest extends TestCase
         file_put_contents($directory.'/notes.txt', 'not a catalogue');
 
         try {
-            $texts = \Base\DependencyInjection\Compiler\Pass\ApplicationTextsPass::read($directory);
+            $texts = \Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\ApplicationTextsPass::read($directory);
         } finally {
             array_map('unlink', glob($directory.'/*'));
             rmdir($directory);

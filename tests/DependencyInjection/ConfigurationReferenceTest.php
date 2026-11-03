@@ -2,7 +2,7 @@
 
 namespace Tests\Base\DependencyInjection;
 
-use Base\DependencyInjection\BaseConfiguration;
+use Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Config\Definition\ArrayNode;

@@ -102,13 +102,16 @@ reference: the smallest `bundles.php`, `base.yaml`, `doctrine.yaml`,
 | Tooling | `Console/`, `Inspector/`, `Attributes/` | Console commands, profiler data collectors, attribute reader |
 
 Extension points are autoconfigured by tag — implement the interface, the tag is
-applied automatically (see `src/DependencyInjection/BaseExtension.php`):
+applied automatically (see omnibridge/symfony's `src/Omnibase/DependencyInjection/BaseExtension.php`):
 `base.entity_extension`, `base.annotation`, `base.icon_provider`,
 `base.service.sharer`, `base.simple_cache`, …
 
 ## Service wiring
 
-Service definitions live in `config/`:
+Since 5.0 the Symfony service definitions are omnibridge/symfony's (`config/omnibase/`, loaded by
+its `Omnibridge\Symfony\Omnibase\DependencyInjection\BaseExtension`); the core keeps the list of
+its services as data (`Base\Services::definitions()`), which Symfony, Laravel and a plain-PHP
+container read alike. The files there:
 
 - `services.php` — registrations (split per domain, loaded by `BaseExtension`)
 - `services-decoration.php` — decorations of framework/third-party services

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Routing;
 
-use Base\DependencyInjection\Compiler\Pass\AdminUrlGeneratorPass;
+use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\AdminUrlGeneratorPass;
 use Base\Routing\AdminUrlGeneratorInterface;
 use Base\Routing\NullAdminUrlGenerator;
 use PHPUnit\Framework\TestCase;

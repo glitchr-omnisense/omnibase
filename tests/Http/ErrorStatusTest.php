@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Http;
 
-use Base\Controller\ErrorController;
+use Omnibridge\Symfony\Omnibase\Controller\ErrorController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * omnibase's error controller (framework.error_controller:
- * Base\Controller\ErrorController::Main) answers an error under its own
+ * Omnibridge\Symfony\Omnibase\Controller\ErrorController::Main) answers an error under its own
  * status. Its debug page answered 404 for everything: a refusal (403) and a
  * validation failure (422) of a signed-in user read as "not found" in dev and
  * in every application's tests.

@@ -3,7 +3,47 @@ title: What the core requires
 order: 21
 ---
 
-# What the core requires (4.0)
+# What the core requires (5.0)
+
+Since 5.0 (branch `5.x`, plan "omnibase agnostic", step F6) `omnisense/omnibase` is a **library**
+(`type: library`) that requires the agnostic core's packages alone, the list `bare --strict` holds
+it to: PHP 8.4 and its extensions (bcmath, exif, igbinary, imagick); the PSRs (cache, clock,
+container, event-dispatcher, log, simple-cache); omnisense/omnibridge, omnisense/omnidrive,
+omnibridge/composer; doctrine/collections; embed, endroid/qr-code, svg-sanitize, hashids, imagine,
+crawler-detect, league/flysystem; the standalone Symfony components kept (string, uid, intl,
+translation, mime, mailer, notifier, property-access, options-resolver, yaml, password-hasher,
+filesystem, finder, serializer) and the contracts (service, translation, event-dispatcher, cache,
+http-client). `docker/bin/bare --install --alone` installs exactly that (var/bare-alone), and
+`bare --strict --alone` loads the agnostic core on it (BareTest's testTheCoreAloneLoadsTheAgnosticCore).
+
+| Left the core's `require` | Comes from |
+|---|---|
+| doctrine/orm, dbal, persistence, event-manager, common, beberlei/doctrineextensions, scienta/doctrine-json-functions, omnibridge/doctrine | **omnibridge/doctrine** (the persistence; it requires beberlei and scienta since then), suggested by the core |
+| symfony/validator, cache, event-dispatcher, process, workflow, var-dumper, error-handler, asset, expression-language | **omnibridge/symfony** |
+| symfony/http-client, discord-notifier, league/flysystem-ftp, phpoffice/phpspreadsheet, web-auth/webauthn-lib, florianv/swap | `suggest`: the application that uses the feature requires it |
+
+The bundle itself is omnibridge/symfony's since 5.0: `Omnibridge\Symfony\Omnibase\BaseBundle`, its
+`Bundle\*`, `DependencyInjection\*`, the Symfony controllers and the service configuration
+(`config/omnibase/`); their former names (`Base\BaseBundle`...) stay aliases until 6.0. The bundle's
+path is still the core's `src/` (`@BaseBundle/...`, the templates, the translations), and its
+extension maps the core's entities under the bundle's name, as auto_mapping did.
+
+The classes of the core that stand on a package it now suggests load where that package is
+installed: the constraints of `Base\Validator\` (symfony/validator), `Base\Service\Model\WorkflowInterface`
+(symfony/workflow), `Base\Twig\AssetPackage` (symfony/asset). `bare` reports them as optional
+where the package is absent, as it does src/Twig without Twig. The local caches (the
+obfuscator's map...) take any PSR-6 pool: symfony/cache's PHP array file where it is installed,
+`Base\Cache\Pool\MemoryPool` otherwise. doctrine/lexer, which egulias/email-validator reads when
+symfony/mime checks an address, is accepted by `--strict` as the mailer stack's.
+
+The symfony/process patch is still declared by the core (applied only where symfony/process is
+installed): it moves to omnibridge/symfony when 4.x is no longer served, because the 4.x core
+declares it too and the second declaration would fail on the sites still on 4.x.
+
+4.x (branch `4.x`, `4.0.x-dev`) is kept for the applications locked on it; the bridges' 1.x serve
+both majors. Upgrading: [UPGRADE-5.0.md](../../UPGRADE-5.0.md). What follows is the 4.0 state.
+
+## 4.0
 
 Since 4.0 (branch `4.x`, plan "omnibase agnostique", step C7) `omnisense/omnibase`
 requires its **Foundation** alone: what `tests/Foundation.php` loads, and what it stands on.

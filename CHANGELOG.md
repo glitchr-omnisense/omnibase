@@ -4,6 +4,52 @@ All notable changes to this bundle are documented here, per release tag.
 Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 `3.1.0`, … (the next major continues on `4.x`).
 
+## [5.0] — branch `5.x`, unreleased
+
+The core is a library that imposes no framework, no persistence and no view engine (plan "omnibase
+agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
+both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
+
+### Changed
+
+- `composer.json`: `type: library`; `require` is the agnostic core's (§1.4 of the plan): doctrine/orm, dbal,
+  persistence, event-manager, common, beberlei/doctrineextensions, scienta/doctrine-json-functions and
+  omnibridge/doctrine left it (omnibridge/doctrine brings them, suggested); symfony/validator, cache,
+  event-dispatcher, process, workflow, var-dumper, error-handler, asset and expression-language left it
+  (omnibridge/symfony requires them); symfony/http-client, discord-notifier, league/flysystem-ftp,
+  phpoffice/phpspreadsheet, web-auth/webauthn-lib and florianv/swap are suggested; symfony/cache-contracts
+  and symfony/http-client-contracts are required. Branch alias `dev-5.x` → `5.0.x-dev`.
+- Moved to omnibridge/symfony, each under `Omnibridge\Symfony\Omnibase\` with its path, the former name an
+  alias the core declares (src/Resources/former-names.symfony.php, 52 more, FormerNamesTest 377): `BaseBundle`,
+  `Bundle\*`, `DependencyInjection\*` (the extension, the configuration, the 21 compiler passes, the dumpers),
+  the Symfony controllers (`Controller\*` but `Controller\Action\*` and `SignatureController`), and the
+  service configuration (`config/services*.php`, `config/services/*.php`, omnibridge/symfony's `config/omnibase/`).
+  An application registers `Omnibridge\Symfony\Omnibase\BaseBundle` and imports the controllers' routes with
+  `type: omnibase`; the routes are the same (names, paths, requirements), their `_controller` names the moved
+  class, the controllers' former service ids are aliases.
+- The local caches (`Base\Cache\Abstract\AbstractLocalCache`, `SimpleCacheTrait`) take any PSR-6 pool (main's
+  decision for F6): the one given, symfony/cache's PHP array file where it is installed (as before), or the new
+  `Base\Cache\Pool\MemoryPool`.
+- `Translator`, `dumpif()`/`enable_dumpif()`/`disable_dumpif()` ask for the bundle only where it is installed.
+- `docker/bin/bare`: `--alone` measures the core installed alone (`var/bare-alone`: its require, nothing else);
+  a class standing on a package the core suggests (symfony/validator, workflow, asset) is optional where the
+  package is absent, as src/Twig without Twig; `--strict` accepts doctrine/lexer (egulias/email-validator's,
+  the mailer stack's: main's decision for F6); the bare vendor's require-dev is no longer resolved, and
+  `extra.omnibase.bare` adds omnibridge/doctrine (the Foundation's guard allows Doctrine, D2).
+- The harness registers `Omnibridge\Symfony\Omnibase\BaseBundle` and imports `type: omnibase` (its
+  routes.yaml mounted by compose.checkouts.yml); its image installs `5.x-dev`.
+
+### Kept on purpose
+
+- The symfony/process patch stays declared by the core: on the sites still on 4.x the core's declaration
+  would fail if omnibridge/symfony declared it too (omnibridge/composer applies the bridge's first). It moves
+  when 4.x is no longer served.
+
+### Removed
+
+- The service files at the package's root (`services*.php`, which `config/services*.php` linked to) left with
+  the configuration.
+
 ## [4.0] — branch `4.x`, unreleased
 
 The core requires its Foundation alone (plan "omnibase agnostique", step C7; decisions D7 and
