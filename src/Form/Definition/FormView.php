@@ -2,6 +2,7 @@
 
 namespace Base\Form\Definition;
 
+use Base\Field\Behaviour\AssociationFile;
 use Base\Field\Behaviour\Behaviours;
 use Base\Field\Behaviour\Guess;
 use Base\Field\Behaviour\Translation;
@@ -79,6 +80,10 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
 
         foreach ($form->getFields() as $name => $field) {
             $field = \Base\Field\Behaviour\Guess::from($field, $form->getDataClass());
+            if (Kind::ASSOCIATION_FILE === $field->getKind() && !$field->hasExplicitFormType()) {
+                $root->children[$name] = self::associationFile($root, $name, $field, $data, $errors[$name] ?? [], $form->getDataClass());
+                continue;
+            }
             if (Behaviours::ofField($field) instanceof Upload) {
                 $field = self::uploaded($field, $name, $data, $values[$name] ?? null);
             }
@@ -120,6 +125,54 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         return (clone $field)->setFormTypeOptions($field->getFormTypeOptions() + [
             'upload_record' => \is_object($data) ? $data : null, 'upload_property' => $name, 'upload_data' => $value,
         ]);
+    }
+
+    /**
+     * Records made from uploads (AssociationFile), as AssociationFileType builds them: a compound
+     * (widget `associationfile`) holding one upload field named by the first part of `entity_file`, which
+     * shows the related records' files; its vars are the type's - multiple, allow_delete, href, entityId
+     * (each stored file's name by its record's id, which the block gives the upload's data-entry-id).
+     *
+     * @param list<string> $errors
+     */
+    private static function associationFile(self $root, string $name, FieldDescriptor $field, mixed $data, array $errors, ?string $dataClass): self
+    {
+        $options = AssociationFile::options($field->getFormTypeOptions());
+        $property = (string) ($field->getOption('property_path') ?? $field->getProperty() ?? $name);
+        $records = \is_object($data) && false !== $field->getOption('mapped') && Properties::isReadable($data, $property) ? Properties::get($data, $property) : null;
+        $label = $field->getLabel() ?? $field->getOption('label');
+        $view = new self($name, [
+            'kind' => Kind::ASSOCIATION_FILE,
+            'type' => 'association_file',
+            'widget' => 'associationfile',
+            'value' => null,
+            'label' => false === $label ? false : (null !== $label ? (string) $label : null),
+            'help' => null !== ($help = $field->getHelp() ?? $field->getOption('help')) ? (string) $help : null,
+            'errors' => array_values($errors),
+            'attr' => array_replace($field->getHtmlAttributes(), (array) $field->getOption('attr', [])),
+            'row_attr' => (array) $field->getOption('row_attr', []),
+            'required' => (bool) ($field->isRequired() ?? $field->getOption('required') ?? true),
+            'disabled' => (bool) ($field->isDisabled() ?? $field->getOption('disabled') ?? false),
+            'multiple' => (bool) $options['multiple'],
+            'allow_delete' => $options['allow_delete'],
+            'href' => $options['href'],
+            'entityId' => AssociationFile::entries($records, $options),
+            'explicit' => false,
+            'translation_domain' => $field->getOption('translation_domain') ?? $root->vars['translation_domain'],
+        ], $root);
+
+        $child = AssociationFile::child($options);
+        $required = AssociationFile::required($dataClass ?? (\is_object($data) ? $data::class : null), $property);
+        $upload = FormDefinition::field($child, AssociationFile::kind($options))
+            ->setFormTypeOptions(AssociationFile::childOptions($options, $required) + [
+                // What the upload's block reads (Upload::vars()): the related record, or the collection, and its files.
+                'upload_record' => \is_object($records) ? $records : null, 'upload_property' => $child, 'upload_data' => AssociationFile::files($records, $options),
+            ])
+            ->setRequired($required)
+            ->setDisabled($view->vars['disabled']);
+        $view->children[$child] = self::field($view, $child, $upload, null, []);
+
+        return $view;
     }
 
     /** @param list<string> $errors */

@@ -2,8 +2,10 @@
 
 namespace Base\Form\Definition;
 
+use Base\Field\Behaviour\AssociationFile;
 use Base\Field\Behaviour\Behaviours;
 use Base\Field\Behaviour\Translation;
+use Base\Field\Behaviour\Upload;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
 use Omnibridge\Contract\Violation;
@@ -159,6 +161,21 @@ final class FormBinder
                 }
                 continue;
             }
+            if (Kind::ASSOCIATION_FILE === $kind && !$field->hasExplicitFormType() && \is_object($data) && $mapped) {
+                // Records made from uploads (AssociationFile): the upload field's files made into the related records.
+                if (\is_array($raw) && null !== $refusal = $this->associationFile($data, $path, $raw, \Base\Field\Behaviour\Guess::from($field, $form->getDataClass() ?? $data::class))) {
+                    $violations[] = new Violation($name.'.'.$refusal[2], $refusal[0], 'file', $refusal[1]);
+                }
+                $values[$name] = null;
+                continue;
+            }
+            if (Kind::isFile($kind) && ($upload = Behaviours::ofField($field)) instanceof Upload
+                && null !== $refusal = $upload->refusal($raw, Behaviours::complete($field)->getFormTypeOptions(), $name)) {
+                // The file sent refused as FileType's constraint refuses it (its type, its size), the data untouched.
+                $violations[] = new Violation($name, $refusal[0], 'file', $refusal[1]);
+                $values[$name] = null;
+                continue;
+            }
             try {
                 $value = $this->reverse($raw, $field);
             } catch (\UnexpectedValueException) {
@@ -290,6 +307,38 @@ final class FormBinder
         }
 
         return $this->scalar($value);
+    }
+
+    /**
+     * Records made from uploads (AssociationFile, as AssociationFileType maps them): the upload field's part
+     * read as the upload reads it, made into the related records (records()), written into the record
+     * (bind()). Nothing sent under the upload's name keeps the records held; a file sent that the upload
+     * refuses (Upload::refusal()) leaves them too, and is answered: its message, its parameters, the upload's name.
+     *
+     * @param array<string, mixed> $submitted
+     *
+     * @return array{0: string, 1: array<string, int|string>, 2: string}|null
+     */
+    private function associationFile(object $data, string $path, array $submitted, FieldDescriptor $field): ?array
+    {
+        $options = AssociationFile::options($field->getFormTypeOptions());
+        $child = AssociationFile::child($options);
+        if (!\array_key_exists($child, $submitted)) {
+            return null;
+        }
+        $upload = FormDefinition::field($child, AssociationFile::kind($options))->setFormTypeOptions(AssociationFile::childOptions($options, true));
+        $behaviour = Behaviours::ofField($upload);
+        if ($behaviour instanceof Upload && null !== $refusal = $behaviour->refusal($submitted[$child], Behaviours::complete($upload)->getFormTypeOptions(), $child)) {
+            return [...$refusal, $child];
+        }
+        $files = $this->reverse($submitted[$child], $upload);
+        $hydrator = \Omnibridge\Runtime::find(\Base\Database\Entity\EntityHydratorInterface::class);
+        if (!$hydrator instanceof \Base\Database\Entity\EntityHydratorInterface) {
+            throw new \LogicException('Records made from uploads need omnibase\'s entity hydrator (Base\\Database\\Entity\\EntityHydratorInterface) from the host.');
+        }
+        AssociationFile::bind($data, $path, AssociationFile::records($files, $this->getValue($data, $path), $options, $data, $hydrator), $options);
+
+        return null;
     }
 
     /** A translations field told its record's class where its options do not say it. */

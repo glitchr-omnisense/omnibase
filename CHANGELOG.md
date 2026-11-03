@@ -10,6 +10,34 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: records made from uploads, and the file sent refused when the form is validated, on every host (plan "omnibase agnostic", step F5d, slice 5, 2026-11-03)
+
+- **`Base\Field\Behaviour\AssociationFile`** (the `association_file` kind: a gallery's photos, a photo's picture): what
+  omnibridge/symfony's `AssociationFileType` decided, which it now asks - `DEFAULTS`, `options()` (its normalizers: the class and
+  `entity_file` required, `form_type` an upload's, its former or new class name or a variant's name), `variant()`/`kind()`,
+  `child()` and `path()` (the upload field's name, the file's path in a related record), `files()` (the related records' public
+  files), `entries()` (each stored file's name by its record's id: `data-entry-id`), `childOptions()`, `records()` (what is sent
+  made into the related records: a file sent a new record given `entity_data`, a stored file's name its record kept) - and, for
+  the neutral side, `bind()` (the records written into the record: a to-many collection replaced, an inverse side's records told
+  their owner, from the entity's shape), `required()`, `isToMany()`. `FormView` draws it as the type's compound (widget
+  `associationfile`, its upload field inside, `entityId`); `FormBinder` binds it (the entity hydrator from the host's runtime);
+  `Guess` reads whether it holds several and in order from the shape.
+- **`Upload::refusal()`**: `FileType`'s `File` constraint on the file sent (`[raw]`), on every host - a type its `mime_types` do
+  not match (`file.mime_type`), else a size over its ceiling (`file.max_size`), with the constraint's message and parameters.
+  The neutral `FormBinder` refuses such a file as a violation of the field (an `association_file`'s: of its upload field), the
+  data untouched, so a host without Symfony's forms refuses it when the form is validated, no longer later at the flush.
+- `BaseTrait::isEntity()` answers from the unit of work's shapes where the host gives no Doctrine manipulator (omnibridge/laravel:
+  a trashed record's entry, `TrashRecorder`, asked it and failed).
+- tests/Field/AssociationFileTest.
+- The harness's image (docker/Dockerfile) requires the Twig extras the core's templates use (`twig/cache-extra`, `intl-extra`,
+  `inky-extra`, `cssinliner-extra`), as a Twig site does: an image built afresh had none since F4.
+
+### Fixed
+
+- `Base\Validator\Constraints\File` reads an integer as bytes: `FileType` gives its ceiling so (`Uploader::getMaxFilesize()`),
+  which the constraint read as a string of bits - a field announcing 32 MB refused a file over 4 MB. A size written out
+  (`#[File(max_size: "32MB")]`) is read as before.
+
 ### Added: the uploads on every host (plan "omnibase agnostic", step F5d, slice 4, 2026-11-03)
 
 - **`Base\Field\Behaviour\Upload`** (the behaviour of `file`, `image`, `avatar`, `audio` and `video`, one variant each): what

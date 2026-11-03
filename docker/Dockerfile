@@ -58,6 +58,11 @@ ARG PLUGINS="omnibase/admin omnibase/marketplace omnibase/forge omnibase/forum o
 # and league/flysystem-bundle are required de facto under Symfony (Base\Entity\User implements
 # scheb's interfaces, Base\Service\Flysystem extends the bundle's LazyFactory).
 ARG BUNDLES="scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelmio/security-bundle nelmio/cors-bundle hwi/oauth-bundle symfony/webpack-encore-bundle glitchr/ux-google:1.0.*-dev api-platform/symfony api-platform/doctrine-orm symfony/ux-twig-component web-auth/webauthn-symfony-bundle"
+# The Twig extras the core suggests for its templates ({% cache %} in breakpoints.css.twig and the
+# widgets, the e-mail frame's inky_to_html and inline_css, format_date()...), required here as a
+# Twig site using those templates requires them (lesringostars does): since step F4 of the plan
+# "omnibase agnostic" the core no longer brings them, and an image built afresh had none.
+ARG TWIG_EXTRAS="twig/cache-extra twig/intl-extra twig/inky-extra twig/cssinliner-extra"
 # --no-scripts: Flex recipes and cache:clear would compile the container
 # against recipe defaults BEFORE the demo config overlay below exists. The
 # overlay ships every config file the demo needs; the container is compiled
@@ -82,7 +87,7 @@ RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families a
     # a Symfony application adds omnibridge/symfony (the framework) and the bundles its
     # config/bundles.php registers - here every one the core suggests (app/config/bundles.php).
     && composer require "omnisense/omnibase:4.x-dev as 4.0.x-dev" "omnibridge/symfony:1.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
-        $BUNDLES \
+        $BUNDLES $TWIG_EXTRAS \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
         "omnisense/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \
         omnipay/stripe symfony/translation symfony/messenger symfony/lock "glitchr/backup-manager:4.0.*-dev" \

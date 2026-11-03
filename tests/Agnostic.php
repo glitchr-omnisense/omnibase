@@ -68,6 +68,8 @@
  * (what TranslationType decides, the translation entity's fields from its shape).
  * 734 after step F5d, slice 4 (2026-11-03, +2): Base\Field\Behaviour\Upload (what FileType and its children decide and show of a
  * record's files) and Base\Field\Upload\Dropzone (what DropzoneController answered under Symfony), the uploads for every host.
+ * 735 after step F5d, slice 5 (2026-11-03, +1): Base\Field\Behaviour\AssociationFile (what AssociationFileType decides: records made
+ * from uploads), for every host.
  */
 
 return [
@@ -386,6 +388,7 @@ return [
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
     Base\Field\Behaviour\AbstractBehaviour::class,
+    Base\Field\Behaviour\AssociationFile::class,
     Base\Field\Behaviour\Behaviours::class,
     Base\Field\Behaviour\ChoiceList::class,
     Base\Field\Behaviour\Choices::class,
