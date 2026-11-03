@@ -14,7 +14,9 @@
  * Environment, the media router, the storages), Imagine and symfony/translation's
  * catalogues. Then the services are asked of it and used: the obfuscator with
  * its compressions, a thumbnail's address, a page's links, a word translated,
- * a thread's screens' builder, an e-mail composed through the views.
+ * a thread's screens' builder, an e-mail composed through the views; and (step F5c,
+ * item 3) the facade BaseService on the contracts, the entity hydrator on a unit of
+ * work of plain PHP and the entities' shapes from a Description.
  */
 
 use Base\Contract\MediaRouter;
@@ -131,6 +133,35 @@ final class PlainMediaRouter implements MediaRouter
     }
 }
 
+/** An entity of plain PHP, described below. */
+final class Poem
+{
+    public ?int $id = null;
+    public ?string $title = null;
+    public ?array $lines = null;
+}
+
+/** A unit of work of plain PHP that remembers what it was given as read. */
+final class PlainUnitOfWork implements Omnibridge\Persistence\UnitOfWork, Omnibridge\Persistence\Snapshots
+{
+    /** @var array<int, array<string, mixed>> */
+    public array $snapshots = [];
+
+    public function persist(object $entity): void {}
+    public function remove(object $entity): void {}
+    public function flush(): void {}
+    public function refresh(object $entity): void {}
+    public function contains(object $entity): bool { return isset($this->snapshots[spl_object_id($entity)]); }
+    public function reference(string $class, mixed $id): object { throw new LogicException('No references here.'); }
+    public function transactional(callable $work): mixed { return $work($this); }
+    public function isNew(object $entity): bool { return !$this->contains($entity); }
+    public function identifier(object $entity): mixed { return $entity->id ?? null; }
+    public function className(object $entity): string { return $entity::class; }
+    public function changes(object $entity): array { return []; }
+    public function recompute(object $entity): void {}
+    public function original(object $entity): array { return $this->snapshots[spl_object_id($entity)] ?? []; }
+}
+
 $root = sys_get_temp_dir().'/omnibase-bare-services-'.getmypid();
 @mkdir($root.'/source', 0777, true);
 $source = $root.'/source/photo.png';
@@ -205,6 +236,14 @@ $container = Container::fromDefinitions(Services::definitions(), $values, [
     'imagine.bitmap' => new Imagine\Imagick\Imagine(),
     'imagine.svg' => new Base\Imagine\Svg\Imagine(),
     Catalogues::class => $catalogues,
+    Omnibridge\Persistence\UnitOfWork::class => $unitOfWork = new PlainUnitOfWork(),
+    Base\Database\Mapping\EntityShapes::class => new Base\Database\Mapping\DescriptionShapes(new Omnibridge\Schema\Description([
+        Poem::class => new Omnibridge\Schema\Entity(Poem::class, 'poem', identifier: ['id'], fields: [
+            'id' => new Omnibridge\Schema\Field('id', 'id', 'integer', id: true),
+            'title' => new Omnibridge\Schema\Field('title', 'title', 'string'),
+            'lines' => new Omnibridge\Schema\Field('lines', 'lines', 'json', nullable: true),
+        ]),
+    ])),
 ]);
 
 $obfuscator = $container->get(ObfuscatorInterface::class);
@@ -213,6 +252,12 @@ $pagination = $container->get(PaginatorInterface::class)->paginate(range(1, 25),
 $translator = $container->get(TranslatorInterface::class);
 $email = $container->get(EmailComposer::class)->compose('Anne <anne@example.org>', '@App/mail/welcome.html.twig', ['name' => 'Anne'], 'Hello Anne.');
 
+$base = $container->get('base.service');
+$hydrator = $container->get(Base\Database\Entity\EntityHydratorInterface::class);
+$poem = $hydrator->hydrate(Poem::class, ['id' => 3, 'title' => 'Le Pont Mirabeau']);
+$unitOfWork->snapshots[spl_object_id($poem)] = ['title' => 'Alcools'];
+$poem->title = 'Le Pont Mirabeau, changed';
+
 $result = [
     'obfuscator' => [$obfuscator::class, count($obfuscator->getCompressions()), $obfuscator === $container->get('obfuscator')],
     'media' => [$media::class, (bool) preg_match('#^/images/([0-9a-f]{2}/){5}[0-9a-f]{22}/image\.png$#', $media->thumbnail($source, 100, 100, ['webp' => false]))],
@@ -220,6 +265,8 @@ $result = [
     'translator' => [$translator::class, $translator->trans('hello', ['%name%' => 'Anne'], 'messages', 'fr')],
     'stories' => $container->get(Stories::class)::class,
     'email' => [$email->getSubject(), (string) $email->getHtmlBody(), $email->getTextBody(), $email->getFrom()[0]->toString()],
+    'base service' => [$base::class, $base === $container->get(Base\Service\BaseService::class), Base\Service\BaseService::getEnvironment(), $base->isDebug(), $base->getParameter('base.paginator.page_size')],
+    'entity hydrator' => [$hydrator::class, $poem->title, $poem->lines, $hydrator->getOriginalEntity($poem)->title, $hydrator->getOriginalEntity($poem)->id],
 ];
 
 exec('rm -rf '.escapeshellarg($root));

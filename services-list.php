@@ -7,13 +7,14 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 /*
- * The core's list of services (Base\Services::definitions(), plan "omnibase agnostic", step F5a), read by
- * Symfony's container as Laravel's and Omnibridge\Container read it: a listed service the configuration
- * above does not define is defined from the list (autowired, public, its arguments given - '@id' a service,
- * '%name%' a parameter, as Symfony writes them), and each listed contract the configuration does not alias
- * itself is aliased to its service. Loaded last (BaseExtension), so that the services
- * and aliases of config/services*.php - which still wire the listed services, until omnibridge/symfony
- * reads the list in their place (F5c) - stay what they are; tests/ServicesTest checks that both agree.
+ * The core's list of services (Base\Services::definitions(), plan "omnibase agnostic", steps F5a and F5c item 3),
+ * read by Symfony's container as Laravel's and Omnibridge\Container read it: each listed service is defined from
+ * the list - its class, its id, autowired, public, its arguments given ('@id' a service, '%name%' a parameter, as
+ * Symfony writes them). Loaded first (BaseExtension): config/services/*.php and services-decoration.php then say
+ * only what Symfony adds to a listed service, through $services->get() - its tags, its decoration, the class of
+ * its Symfony half (BaseService's), the framework's services it is given in place of what the list autowires.
+ * The contracts the list names are aliased last (services-list-contracts.php). tests/ServicesTest checks that
+ * Symfony's container answers the list.
  */
 return static function (ContainerConfigurator $container, ContainerBuilder $builder): void {
     $services = $container->services();
@@ -26,20 +27,13 @@ return static function (ContainerConfigurator $container, ContainerBuilder $buil
     };
     foreach (Services::definitions() as $definition) {
         $id = $definition['id'] ?? $definition['class'];
-        if (!$builder->has($id)) {
-            if (!class_exists($definition['class'])) {
-                continue;
-            }
-            $arguments = [];
-            foreach ($definition['arguments'] ?? [] as $name => $value) {
-                $arguments[str_starts_with($name, '$') ? $name : '$'.$name] = $reference($value);
-            }
-            $services->set($id, $definition['class'])->autowire()->public()->args($arguments);
+        if ($builder->has($id) || !class_exists($definition['class'])) {
+            continue;
         }
-        foreach ($definition['contracts'] ?? [] as $contract) {
-            if (!$builder->has($contract)) {
-                $services->alias($contract, $id);
-            }
+        $arguments = [];
+        foreach ($definition['arguments'] ?? [] as $name => $value) {
+            $arguments[str_starts_with($name, '$') ? $name : '$'.$name] = $reference($value);
         }
+        $services->set($id, $definition['class'])->autowire()->public()->args($arguments);
     }
 };

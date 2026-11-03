@@ -10,6 +10,41 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: BaseService neutral, EntityHydrator on the unit of work and the shapes, the configuration reading Base\Services (plan "omnibase agnostic", step F5c, item 3, 2026-11-03)
+
+- **`Base\Service\BaseService` is framework-neutral**: its constructor takes `?Environment`, `?ParameterBagInterface`,
+  the project's folder and the start time, nothing of a framework; every method asks omnisense/omnibridge's contracts -
+  the session and route through `Requests` (`addSession()`, `getSession($name)`, `removeSession()`, `getCurrentRouteName()`),
+  `Urls` (`generateUrl()`, `getAsset()`), `Environment` (`isDebug()`, `isDevelopment()`, `getSecret()`), `Access`
+  (`getUser()`, `isGranted()`), `Tokens` (`isCsrfTokenValid()` with a token), `UnitOfWork` (`inDoctrine()`), the entity
+  hydrator (`getOriginalEntityData()`, `getOriginalEntity()`); `getParameter()`/`hasParameter()` read the parameters.
+  Listed in `Base\Services` (`base.service`), so Laravel and `Omnibridge\Container` build it too.
+- **Its Symfony half is omnibridge/symfony's `Omnibridge\Symfony\Omnibase\Service\SymfonyBaseService`**, which the
+  container hands out as `base.service` and `Base\Service\BaseService` (lazy, the same 23 arguments): the kernel and its
+  container (`getContainer()`, `getAvailableServices()`, `getParameter()`...), `exec()`, `createForm()`, the profiler,
+  Symfony's request, routes and responses (`getRequest()`, `getRoute()`, `redirect()`, `redirectToRoute()`, `refresh()`,
+  `isAdmin()`...), `getToken()`, `isCsrfTokenValid()` with a form, the session object, and Symfony's services as the fallback
+  where no contract answers - every method an application called is kept.
+- **`EntityHydrator` on omnisense/omnibridge's `UnitOfWork` and `EntityShapes`**, no Doctrine metadata: the mapping is read
+  from the shapes and `Base\Database\Mapping\EntityFields` (the names - aliases from `#[Alias]`, fields by column,
+  associations -, `resolve()`, `target()`, `hasAssociation()`: what ClassMetadataManipulator's getFieldNames(),
+  resolveFieldPath(), fetchEntityName() answered); references through `UnitOfWork::reference()`, associations by id, uuid or
+  slug through `UnitOfWorks::repositories()`, the original values through omnibridge's new `Persistence\Snapshots`
+  (refused aloud, `UnsupportedBehaviourException`, by a unit of work without), which types hold an array through the new
+  backend seam `Base\Database\Backend\ColumnTypes` (Doctrine's: a JsonType or a set enumeration, omnibridge/doctrine's
+  DoctrineColumnTypes; without one: `json` or a SetType). Lifecycle events: omnibridge's (`EntityEvent`, `PreUpdate`'s changes)
+  and Doctrine's. The property accessor is made when first needed. Doctrine's entity manager and ClassMetadataManipulator
+  are still accepted, deprecated until 6.0. Listed in `Base\Services` (`base.database.entity_hydrator`).
+- **config/services*.php read `Base\Services`**: `services-list.php` is loaded first and defines each listed service from
+  the list; the configuration says only what Symfony adds, through `$services->get()` (tags, decoration, SymfonyBaseService's
+  class, the framework's services given in place of what the list autowires); the list's contracts are aliased last
+  (`services-list-contracts.php`). The compiled container is the same, definition for definition and alias for alias
+  (`debug:container --format=json` before and after, in the harness).
+- Tests: tests/Database/Entity/EntityHydratorTest (a Description and a unit of work of plain PHP; on Doctrine every entity's
+  names, paths, targets, associations and array types as the manipulator answered them), tests/Services/container-without-framework.php
+  (BareTest: BaseService and the hydrator from the list in plain PHP), tests/Contract/basetrait-seams-without-framework.php
+  (the facade's session, route, link, asset and user on the contracts), BaseServiceLazyTest (the ghost is SymfonyBaseService's).
+
 ### Fixed: eight of Bridge\Symfony's classes back in the core (plan "omnibase agnostic", step F5c, item 3, slice 5 fix, 2026-11-03)
 
 - `Base\Bridge\Symfony\{NotificationMessages, AccountScreens, SecurityUser, SecurityUserLoader, SecurityUserProvider,

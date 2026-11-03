@@ -58,6 +58,8 @@
  * Base\Form\{FormProcessor, FormProcessorInterface, FormProxy, FormProxyInterface}, Base\Form\Traits\{FormGuessInterface, FormGuessTrait,
  * FormProcessorTrait}, which loaded nothing of Symfony Form themselves.
  * 705 after step F5c's first part (2026-11-02, +1 on F5b group 5's 704): Base\Http\RequestsOf (the request contract out of a RequestStack).
+ * 708 after step F5c, item 3 (2026-11-03, +2 on 706): Base\Database\Mapping\EntityFields (an entity's names, aliases and paths on its shape) and
+ * Base\Database\Backend\ColumnTypes (which column types hold an array), for EntityHydrator on the unit of work and the shapes.
  */
 
 return [
@@ -148,6 +150,7 @@ return [
     Base\Database\Attribute\Vault::class,
     Base\Database\Attribute\Versionable::class,
     Base\Database\Backend\BulkDeletes::class,
+    Base\Database\Backend\ColumnTypes::class,
     Base\Database\Backend\ConditionalUpdates::class,
     Base\Database\Backend\EntityCache::class,
     Base\Database\Backend\RowLocks::class,
@@ -180,6 +183,7 @@ return [
     Base\Database\Lifecycle\ThreadParticipants::class,
     Base\Database\Lifecycle\TrashRecorder::class,
     Base\Database\Mapping\DescriptionShapes::class,
+    Base\Database\Mapping\EntityFields::class,
     Base\Database\Mapping\EntityShape::class,
     Base\Database\Mapping\EntityShapes::class,
     Base\Database\Repository\Entities::class,

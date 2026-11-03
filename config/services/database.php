@@ -17,11 +17,8 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy')->public();
     $services->set('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory')->public();
 
-    $services->set('Base\Database\Entity\EntityHydrator')->public()
-        ->args([
-            new Reference('doctrine.orm.entity_manager'),
-            new Reference('base.database.metadata_manipulator'),
-        ]);
+    // Base\Database\Entity\EntityHydrator is defined from Base\Services (config/services-list.php): on the unit
+    // of work and its persistence's shapes (plan "omnibase agnostic", step F5c, item 3).
 
     $services->set('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator')->public()
         ->args([

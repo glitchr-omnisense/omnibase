@@ -2,73 +2,40 @@
 
 namespace Base\Service;
 
-use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpKernel\Profiler\Profile;
-use Symfony\Component\Routing\Route;
 use App\Entity\User;
+use Base\Contract\Runtime;
+use Base\Database\Entity\EntityHydrator;
+use Base\Exception\MissingContractException;
+use Base\Service\Model\DevelopmentEnvironment;
 use Omnibridge\Contract\Access;
 use Omnibridge\Contract\Environment as EnvironmentContract;
-use Base\Bridge\Symfony\FrameworkLocator;
-use Base\Contract\Runtime;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
-use Base\Service\Model\DevelopmentEnvironment;
-use Base\Database\Entity\EntityHydratorInterface;
-use Base\Routing\AdvancedRouterInterface;
-
-use Symfony\Component\Form\FormInterface;
-
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpKernel\Profiler\Profiler;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\Persistence\Event\PreUpdateEventArgs;
-use Doctrine\Persistence\ManagerRegistry;
-use Exception;
-use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
-
-use Twig\Environment;
-
-use Symfony\Component\Notifier\NotifierInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
-
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Contracts\EventDispatcher\Event;
-
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Http\FirewallMapInterface;
-use function is_object;
+use Omnibridge\Contract\Requests;
+use Omnibridge\Contract\Tokens;
+use Omnibridge\Contract\Urls;
+use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The facade of omnibase's services for an application's code (plan "omnibase
- * agnostique", C9): kept, not deprecated, with BaseTrait. It is a lazy service -
- * a ghost of this class until one of its methods reads a property - and the
- * core injects it nowhere on a page's path any more: the core and the bundles
- * ask the contracts (Base\Contract\Runtime) or the services they need.
+ * agnostique", C9): kept, not deprecated, with BaseTrait. Framework-neutral
+ * since the plan "omnibase agnostic", step F5c, item 3: its constructor takes
+ * nothing of a framework, every host builds it from the core's list
+ * (Base\Services), and each method asks omnisense/omnibridge's contracts
+ * through Base\Contract\Runtime - the settings, the request's session and
+ * route (Requests), the addresses and assets (Urls), the environment
+ * (Environment), the visitor (Access), the forms' tokens (Tokens), the unit of
+ * work (UnitOfWork), the entity hydrator.
  *
- * What a contract answers, it asks the contract when the registry has it:
- * isDebug(), isDevelopment(), getSecret()/getSalt() (Environment), isGranted()
- * (Access), and BaseTrait's getParameterBag() and getEnvironment(). Those
- * methods read no property of the object: called on the ghost, they build
- * nothing.
+ * What only a framework has - its kernel and container, its console, its form
+ * factory, its profiler, its request, route and response objects - is the
+ * host's facade, a subclass of this one: under Symfony omnibridge/symfony's
+ * Omnibridge\Symfony\Omnibase\Service\SymfonyBaseService, which the container
+ * hands out as `base.service` and Base\Service\BaseService, so the
+ * applications' code and templates calling those methods keep them, with
+ * Symfony's services as the fallback of the methods below.
+ *
+ * Under Symfony it is a lazy service - a ghost of the class until one of its
+ * methods reads a property: the methods a contract answers read none of its
+ * properties, called on the ghost they build nothing.
  *
  * It no longer declares Twig's RuntimeExtensionInterface (plan "omnibase
  * agnostic", F4: Twig is a suggestion of the core): no Twig function was ever
@@ -76,117 +43,33 @@ use function is_object;
  */
 class BaseService extends Locator
 {
-
     /**
-     * @var KernelInterface
+     * @param EnvironmentContract|null   $environment  what the application runs as (its name kept for BaseTrait's getEnvironment())
+     * @param ParameterBagInterface|null $parameterBag the parameters (kept for BaseTrait's getParameterBag(); base.user.identifier read)
+     * @param string|null                $projectDir   the application's folder
+     * @param float|null                 $startTime    when the request (or the process) started; now by default
      */
-    private KernelInterface $kernel;
-
-    /**
-     * @var AuthorizationCheckerInterface
-     */
-    protected AuthorizationCheckerInterface $authorizationChecker;
-
-    /**
-     * @var CsrfTokenManagerInterface
-     */
-    protected CsrfTokenManagerInterface $csrfTokenManager;
-
-    /**
-     * @var FormFactoryInterface
-     */
-    protected $formFactory;
-
-    /**
-     * @var ContainerInterface
-     */
-    protected ContainerInterface $container;
-
-    /**
-     * @param $name
-     * @return object|ContainerInterface|null
-     */
-    public function getContainer($name)
-    {
-        return ($name ? $this->container->get($name) : $this->container);
-    }
-
-    public function getAvailableServices(): array
-    {
-        if (!isset($this->container)) {
-            throw new Exception("Symfony container not found in BaseService. Did you overloaded self::__construct ?");
-        }
-
-        return $this->container->getServiceIds();
-    }
-
-    protected ?Profiler $profiler = null;
-
     public function __construct(
-        KernelInterface               $kernel,
-        RequestStack                  $requestStack,
-        FirewallMapInterface          $firewallMap,
-        Environment                   $twig,
-        SluggerInterface              $slugger,
-        ManagerRegistry               $doctrine,
-        AuthorizationCheckerInterface $authorizationChecker,
-        TokenStorageInterface         $tokenStorage,
-        CsrfTokenManagerInterface     $csrfTokenManager,
-        ParameterBagInterface         $parameterBag,
-        NotifierInterface             $notifier,
-        FormFactoryInterface          $formFactory,
-        LocalizerInterface            $localizer,
-        TradingInterface        $tradingMarket,
-        Obfuscator                    $obfuscator,
-        SettingBag                    $settingBag,
-        MediaService                  $mediaService,
-        IconProvider                  $iconProvider,
-        TranslatorInterface           $translator,
-        AdvancedRouterInterface               $router,
-        EntityHydratorInterface       $entityHydrator,
-        ClassMetadataManipulator      $classMetadataManipulator,
-        ?Profiler                     $profiler
-    )
-    {
+        ?EnvironmentContract $environment = null,
+        ?ParameterBagInterface $parameterBag = null,
+        ?string $projectDir = null,
+        ?float $startTime = null,
+    ) {
         $this->setInstance($this);
-        $this->startTime($kernel->getStartTime());
+        $this->startTime($startTime);
 
-        // Kernel and additional stopwatch
-        $this->kernel = $kernel;
-        $this->container = $kernel->getContainer();
-        $this->setProjectDir($kernel->getProjectDir());
-        $this->setEnvironment($kernel->getEnvironment());
-
-        $this->authorizationChecker = $authorizationChecker;
-        $this->csrfTokenManager = $csrfTokenManager;
-        $this->formFactory = $formFactory;
-        $this->profiler = $profiler;
-
-        // Additional common containers
-        $this->setClassMetadataManipulator($classMetadataManipulator);
-        $this->setMediaService($mediaService);
-        $this->setIconProvider($iconProvider);
-        $this->setSettingBag($settingBag);
-        $this->setLocalizer($localizer);
-        $this->setTrading($tradingMarket);
-        $this->setTwig($twig);
-        $this->setRouter($router);
-        $this->setFirewallMap($firewallMap);
-        $this->setObfuscator($obfuscator);
-        $this->setParameterBag($parameterBag);
-        $this->setTranslator($translator);
-        $this->setSlugger($slugger);
-        $this->setDoctrine($doctrine);
-        $this->setEntityHydrator($entityHydrator);
-        $this->setRequestStack($requestStack);
-        $this->setUserIdentifier($this->getParameterBag()->get("base.user.identifier"));
-        $this->setTokenStorage($tokenStorage);
-        $this->setNotifier($notifier);
-    }
-
-    public function getRouteIndex(): string
-    {
-        return FrameworkLocator::router()->getRouteIndex();
+        if (null !== $projectDir) {
+            $this->setProjectDir($projectDir);
+        }
+        if (null !== $environment) {
+            $this->setEnvironment($environment->name());
+        }
+        if (null !== $parameterBag) {
+            $this->setParameterBag($parameterBag);
+            if (\is_string($identifier = $parameterBag->get('base.user.identifier'))) {
+                $this->setUserIdentifier($identifier);
+            }
+        }
     }
 
     /**
@@ -231,29 +114,6 @@ class BaseService extends Locator
         return $this->getSettingBag()->get("base.settings.meta", $locale) ?? [];
     }
 
-
-    /**
-     * @param string $command
-     * @param array $arguments
-     * @return Response
-     * @throws Exception
-     */
-    public function exec(string $command, array $arguments = [])
-    {
-        $application = new Application($this->kernel);
-        $application->setAutoExit(false);
-
-        $input = new ArrayInput(array_merge($arguments, ['command' => $command]));
-        $output = new BufferedOutput();
-        $application->run($input, $output);
-
-        $content = $output->fetch();
-        return new Response($content);
-    }
-
-    /*
-     * Stylesheet and javascripts blocks
-     */
     /**
      * @return SettingBag|null
      */
@@ -262,10 +122,8 @@ class BaseService extends Locator
         return $this->getSettingBag();
     }
 
-    /**
-     *
-     * Symfony kernel container related methods
-     *
+    /*
+     * How long the request (or the process) has run.
      */
     protected float $startTime = 0;
 
@@ -276,7 +134,7 @@ class BaseService extends Locator
 
     public function startTime(?float $startTime = null)
     {
-        $this->startTime = $startTime;
+        $this->startTime = $startTime ?? 0;
         if (!$this->startTime || is_infinite($this->startTime)) {
             $this->startTime = microtime(true);
         }
@@ -306,46 +164,58 @@ class BaseService extends Locator
         return isset($_SESSION);
     }
 
+    /** The request being answered, through the Requests contract: null outside one, or where the host binds none. */
+    protected static function requests(): ?Requests
+    {
+        $requests = Runtime::find(Requests::class);
+
+        return ($requests && $requests->has()) ? $requests : null;
+    }
+
     /**
+     * A value kept in the visitor's session (Requests::remember()); nothing outside a request.
+     *
      * @param $name
      * @param $value
      * @return void
      */
     public function addSession($name, $value)
     {
-        $this->getSession()->set($name, $value);
+        self::requests()?->remember($name, $value);
     }
 
     /**
+     * A value of the visitor's session, taken out of it (Requests::session(), forget()).
+     *
      * @param $name
      * @return mixed|null
      */
     public function removeSession($name)
     {
-        return (FrameworkLocator::requestStack() && FrameworkLocator::requestStack()->getSession()->has($name)) ? FrameworkLocator::requestStack()->getSession()->remove($name) : null;
+        if (!$requests = self::requests()) {
+            return null;
+        }
+
+        $value = $requests->session($name);
+        $requests->forget($name);
+
+        return $value;
     }
 
     /**
+     * A value of the visitor's session (Requests::session()). Without a name, the host's session object, which
+     * only the host's facade hands out (Symfony's, omnibridge/symfony): none here.
+     *
      * @param $name
-     * @return mixed|SessionInterface|null
+     * @return mixed|null
      */
     public function getSession($name = null)
     {
         if (!$name) {
-            return FrameworkLocator::requestStack()->getSession();
+            return null;
         }
-        return (FrameworkLocator::requestStack() && FrameworkLocator::requestStack()->getSession()->has($name)) ? FrameworkLocator::requestStack()->getSession()->get($name) : null;
-    }
 
-    /**
-     * @param $type
-     * @param $data
-     * @param array $options
-     * @return FormInterface
-     */
-    public function createForm($type, $data = null, array $options = []): FormInterface
-    {
-        return $this->formFactory->create($type, $data, $options);
+        return self::requests()?->session($name);
     }
 
     /**
@@ -373,147 +243,39 @@ class BaseService extends Locator
         return Runtime::find(EnvironmentContract::class)?->secret() ?? $this->getParameterBag("kernel.secret");
     }
 
-    public function getProfiler(): ?Profiler
-    {
-        return $this->profiler;
-    }
-
-    /**
-     * @param $response
-     * @return Profile|null
-     */
-    public function getProfile($response = null)
-    {
-        if (!$response) {
-            return null;
-        }
-        return $this->getProfiler()->loadProfileFromResponse($response);
-    }
-
+    /** A parameter of the application, from its parameters (the host's facade reads its container's). */
     public function getParameter(string $name): array|bool|string|int|float|null
     {
-        return $this->kernel->getContainer()->getParameter($name);
+        $value = $this->getParameterBag($name);
+
+        return $value instanceof \UnitEnum ? null : $value;
     }
 
     public function hasParameter(string $name): bool
     {
-        return $this->kernel->getContainer()->hasParameter($name);
+        return (bool) self::findParameterBag()?->has($name);
     }
 
-    public function setParameter(string $name, array|bool|string|int|float|null $value)
-    {
-        $this->kernel->getContainer()->setParameter($name, $value);
-    }
-
+    /** An asset's address (Urls::asset()). */
     public function getAsset(string $url): string
     {
-        return FrameworkLocator::twig()->getAsset($url);
+        $urls = Runtime::find(Urls::class) ?? throw MissingContractException::for(Urls::class);
+
+        return $urls->asset($url);
     }
 
-    public function getRequest(): ?Request
-    {
-        return FrameworkLocator::router()->getRequest();
-    }
-
-    public function getCurrentRequest(): ?Request
-    {
-        return $this->getRequest();
-    }
-
-    public function getRoute(?string $url): ?Route
-    {
-        return FrameworkLocator::router()->getRoute($url);
-    }
-
-    public function getCurrentRoute(): ?Route
-    {
-        return FrameworkLocator::router()->getRoute();
-    }
-
-    public function getRouteName(?string $url): ?string
-    {
-        return FrameworkLocator::router()->getRouteName($url);
-    }
-
+    /** The route of the request being answered (Requests::route()), null outside one. */
     public function getCurrentRouteName(): ?string
     {
-        return FrameworkLocator::router()->getRouteName();
+        return self::requests()?->route();
     }
 
+    /** A route's address, its absolute path (Urls::path()). */
     public function generateUrl(string $routeName, array $routeParameters = []): string
     {
-        return FrameworkLocator::router()->generate($routeName, $routeParameters);
-    }
+        $urls = Runtime::find(Urls::class) ?? throw MissingContractException::for(Urls::class);
 
-    public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
-    {
-        if (filter_var($urlOrRoute, FILTER_VALIDATE_URL) || str_contains($urlOrRoute, "/")) {
-            return new RedirectResponse($urlOrRoute);
-        }
-        return new RedirectResponse(FrameworkLocator::router()->generate($urlOrRoute, $routeParameters), $state, $headers);
-    }
-
-    public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): ?RedirectResponse
-    {
-        $routeNameBak = $routeName;
-
-        $event = null;
-        if (array_key_exists("event", $headers)) {
-            $event = $headers["event"];
-            if (!($event instanceof Event)) {
-                throw new InvalidArgumentException("header variable \"event\" must be " . Event::class . ", currently: " . (is_object($event) ? get_class($event) : gettype($event)));
-            }
-            unset($headers["event"]);
-        }
-
-        $exceptions = [];
-        if (array_key_exists("exceptions", $headers)) {
-            $exceptions = $headers["exceptions"];
-            if (!is_string($exceptions) && !is_array($exceptions)) {
-                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: " . (is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
-            }
-            unset($headers["exceptions"]);
-        }
-
-        $callback = null;
-        if (array_key_exists("callback", $headers)) {
-            $callback = $headers["callback"];
-            if (!is_callable($callback)) {
-                throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: " . (is_object($callback) ? get_class($callback) : gettype($callback)));
-            }
-
-            unset($headers["callback"]);
-        }
-
-        $url = FrameworkLocator::router()->generate($routeName, $routeParameters) ?? $routeName;
-        $routeName = $this->getRouteName($url);
-        if (!$routeName) {
-            throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
-        }
-
-        foreach ($exceptions as $pattern) {
-            if (preg_match($pattern, $this->getCurrentRouteName())) {
-                return null;
-            }
-        }
-
-        $response = new RedirectResponse($url, $state, $headers);
-        if ($event && method_exists($event, "setResponse")) {
-            $event->setResponse($response);
-        }
-
-        // Callable action if redirection happens
-        if (is_callable($callback)) {
-            $callback();
-        }
-
-        return $response;
-    }
-
-    public function refresh(?Request $request = null): RedirectResponse
-    {
-        $request = $request ?? $this->getRequest();
-        return $this->redirect($request->attributes->get('_route'));
+        return $urls->path($routeName, $routeParameters);
     }
 
     /**
@@ -525,7 +287,7 @@ class BaseService extends Locator
             return DevelopmentEnvironment::is($environment);
         }
 
-        return DevelopmentEnvironment::named($this->kernel->getEnvironment(), $this->kernel->isDebug());
+        return DevelopmentEnvironment::named((string) self::getEnvironment(), (bool) self::findParameterBag()?->get('kernel.debug'));
     }
 
     /**
@@ -549,28 +311,12 @@ class BaseService extends Locator
      */
     public function isDebug()
     {
-        return Runtime::find(EnvironmentContract::class)?->isDebug() ?? $this->kernel->isDebug();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAdmin()
-    {
-        return FrameworkLocator::router()->isAdmin();
-    }
-
-    /**
-     * @return bool
-     */
-    public function isProfiler()
-    {
-        return FrameworkLocator::router()->isProfiler();
+        return Runtime::find(EnvironmentContract::class)?->isDebug() ?? (bool) self::findParameterBag()?->get('kernel.debug');
     }
 
     /**
      *
-     * Security container related methods
+     * Security related methods
      *
      */
 
@@ -584,112 +330,65 @@ class BaseService extends Locator
     }
 
     /**
+     * Whether a token sent back is the visitor's token of that intent (Tokens::isValid()). The host's facade also
+     * takes a form and its request (Symfony's).
+     *
      * @param string $id
      * @param $tokenOrForm
-     * @param Request|null $request
+     * @param mixed $request
      * @param string $csrfFieldId
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
-    public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null, string $csrfFieldId = "_csrf_token"): bool
+    public function isCsrfTokenValid(string $id, $tokenOrForm, $request = null, string $csrfFieldId = "_csrf_token"): bool
     {
-        if (!isset($this->csrfTokenManager)) {
-            throw new Exception("No CSRF token manager found in BaseService. Did you overloaded self::__construct ?");
+        if ($tokenOrForm !== null && !is_string($tokenOrForm)) {
+            throw new \Exception("Unexpected token value provided: string expected");
         }
 
-        // Prepare token parameter
+        $tokens = Runtime::find(Tokens::class) ?? throw MissingContractException::for(Tokens::class);
 
-        $token = null;
-        if (!$tokenOrForm instanceof FormInterface) {
-            $token = $tokenOrForm;
-        } else {
-            $form = $tokenOrForm;
-            if ($request == null) {
-                throw new Exception("Request required as FormInterface provided");
-            }
-
-            //$form->handleRequest($request); // TBC
-            if ($request->request->has($form->getName())) {
-                $token = $request->request->get($form->getName())[$csrfFieldId] ?? null;
-            }
-        }
-
-        // Handling CSRF token exception
-        if ($token && !is_string($token)) {
-            throw new Exception("Unexpected token value provided: string expected");
-        }
-
-        // Checking validity
-        return $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
+        return $tokens->isValid($id, $tokenOrForm);
     }
 
     /**
-     * @return TokenInterface|null
-     * @throws Exception
-     */
-    public function getToken()
-    {
-        if (FrameworkLocator::tokenStorage() === null) {
-            throw new Exception("No token storage found in BaseService. Did you overloaded self::__construct ?");
-        }
-
-        return FrameworkLocator::tokenStorage()->getToken();
-    }
-
-    /**
-     * @return UserInterface|null
-     * @throws Exception
+     * The visitor signed in, null for none (Access::getUser()).
+     *
+     * @return object|null
      */
     public function getUser()
     {
-        if (!$token = $this->getToken()) {
-            return null;
-        }
-
-        $user = $token->getUser();
-        if (!is_object($user)) {
-            return null;
-        }
-
-        if (!$user instanceof UserInterface) {
-            return null;
-        }
-
-        return $user;
+        return Runtime::find(Access::class)?->getUser();
     }
 
     /**
+     * Whether the visitor is granted that attribute (Access::isGranted()).
+     *
      * @param $attribute
      * @param $subject
      * @return bool
-     * @throws Exception
      */
     public function isGranted($attribute, $subject = null): bool
     {
-        if ($access = Runtime::find(Access::class)) {
-            return $access->isGranted($attribute, $subject);
-        }
+        $access = Runtime::find(Access::class) ?? throw MissingContractException::for(Access::class);
 
-        if (!isset($this->authorizationChecker)) {
-            throw new Exception("No authorization checker found in BaseService. Did you overloaded self::__construct ?");
-        }
-
-        return $this->authorizationChecker->isGranted($attribute, $subject);
+        return $access->isGranted($attribute, $subject);
     }
-
 
     /**
      *
-     * Doctrine related methods
+     * Persistence related methods
      *
      */
 
+    /** Whether the unit of work manages that entity (UnitOfWork::contains()). */
     public function inDoctrine($entity): bool
     {
         if (!is_object($entity)) {
             return false;
         }
-        return $this->entityManager->contains($entity);
+
+        return (bool) Runtime::find(UnitOfWork::class)?->contains($entity);
     }
 
     /**
@@ -707,53 +406,56 @@ class BaseService extends Locator
     }
 
     /**
+     * An entity's values as read or last flushed - of the entity, or of a lifecycle event's, a PreUpdate's changes
+     * read as the values before -: the entity hydrator's, on the unit of work's Snapshots.
+     *
      * @param $eventOrEntity
      * @param bool $inDoctrineStack
-     * @param bool $reopen
+     * @param bool $reopen the host's facade reopens a closed entity manager (Symfony's, on Doctrine)
      * @return mixed[]
-     * @throws Exception
+     * @throws \Exception
      */
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
-        $entity = $eventOrEntity->getObject();
-        $originalEntityData = DoctrineLocator::entityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
+        $hydrator = self::getEntityHydrator();
+        if (!$hydrator instanceof EntityHydrator) {
+            throw new \LogicException(sprintf('The entity hydrator %s does not read original values.', get_debug_type($hydrator)));
+        }
 
-        if ($eventOrEntity instanceof PreUpdateEventArgs) {
-            $event = $eventOrEntity;
-            foreach ($event->getEntityChangeSet() as $field => $data) {
-                $originalEntityData[$field] = $data[0];
-            }
-        } elseif ($inDoctrineStack === true && $this->inDoctrineStack()) {
-            throw new Exception("Achtung ! You are trying to access data object within a Doctrine method.." .
+        if ($inDoctrineStack === true && !self::isPreUpdate($eventOrEntity) && $this->inDoctrineStack()) {
+            throw new \Exception("Achtung ! You are trying to access data object within a Doctrine method.." .
                 "Original entity might have already been updated.");
         }
 
-        return $originalEntityData;
+        return $hydrator->getOriginalEntityData($eventOrEntity);
     }
 
-    protected static $entitySerializer = null;
-
     /**
+     * The entity given (or the lifecycle event's) hydrated with its original values.
+     *
      * @param $eventOrEntity
      * @param bool $inDoctrineStack
      * @param bool $reopen
      * @return mixed
-     * @throws Exception
+     * @throws \Exception
      */
     public function getOriginalEntity($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
-        if (!self::$entitySerializer) {
-            self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
-        }
-
         $data = $this->getOriginalEntityData($eventOrEntity, $inDoctrineStack, $reopen);
 
-        if (!$eventOrEntity instanceof LifecycleEventArgs) {
-            $entity = $eventOrEntity;
-        } else {
-            $entity = $eventOrEntity->getObject();
-        }
+        $entity = match (true) {
+            $eventOrEntity instanceof \Omnibridge\Persistence\Lifecycle\EntityEvent => $eventOrEntity->entity,
+            is_a($eventOrEntity, 'Doctrine\Persistence\Event\LifecycleEventArgs') => $eventOrEntity->getObject(),
+            default => $eventOrEntity,
+        };
 
         return self::getEntityHydrator()->hydrate($entity, $data);
+    }
+
+    /** A PreUpdate, omnisense/omnibridge's or Doctrine's (by name). */
+    private static function isPreUpdate(mixed $event): bool
+    {
+        return $event instanceof \Omnibridge\Persistence\Lifecycle\PreUpdate
+            || (\is_object($event) && (is_a($event, 'Doctrine\Persistence\Event\PreUpdateEventArgs') || is_a($event, 'Doctrine\ORM\Event\PreUpdateEventArgs')));
     }
 }
