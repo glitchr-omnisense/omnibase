@@ -33,6 +33,10 @@ final class Guess
         }
         $behaviour = Behaviours::of($field->getKind());
         $guessed = clone $field;
+        if (\Base\Field\Kind::TRANSLATION === $field->getKind() && null === $field->getOption('translation_class') && null === $field->getOption('translatable_class')) {
+            // TranslationType: the translations of the form's record (its data class).
+            $guessed->setFormTypeOption('translatable_class', $dataClass);
+        }
         // A property named by its alias (#[Alias]: an article's authors are its owners) is the aliased one's.
         $property = (new \Base\Database\Mapping\EntityFields(self::$shapes))->name($dataClass, $property) ?? $property;
         if ($behaviour instanceof Select && null === $field->getOption('class')) {
@@ -43,6 +47,9 @@ final class Guess
                 // An enumeration's column: its class, whose words and icons the entries show, the field's own choices kept.
                 $guessed->setFormTypeOption('class', $enumeration);
                 $guessed->setFormTypeOptionIfNotSet('multiple', is_a($enumeration, SetType::class, true));
+            } elseif ($shape->hasField($property) && \in_array($shape->fieldType($property), ['array', 'json'], true)) {
+                // FormGuessTrait::guessMultiple(): a list column (a translation's keywords, free tags) holds several.
+                $guessed->setFormTypeOptionIfNotSet('multiple', true);
             }
         }
         if ($behaviour instanceof Select && null === $field->getOption('sortable') && !$field->getOption('multivalue')) {

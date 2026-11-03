@@ -187,6 +187,7 @@
  * 771 after step F5c, item 3 (2026-11-03, +2 on 769): Base\Database\Mapping\EntityFields and Base\Database\Backend\ColumnTypes.
  * 791 after step F5d (2026-11-03, +20): Base\Field\Behaviour\* and Base\Field\Conformance\* (see tests/Agnostic.php).
  * 793 after step F5d, slice 2 (2026-11-03, +2): Base\Field\Search\{RemoteSearch, Answer} (see tests/Agnostic.php).
+ * 795 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields} (see tests/Agnostic.php).
  */
 
 return [
@@ -523,9 +524,11 @@ return [
     Base\Field\Behaviour\JsColor::class,
     Base\Field\Behaviour\Number::class,
     Base\Field\Behaviour\Password::class,
+    Base\Field\Behaviour\RecordFields::class,
     Base\Field\Behaviour\Select::class,
     Base\Field\Behaviour\Slug::class,
     Base\Field\Behaviour\Toggle::class,
+    Base\Field\Behaviour\Translation::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,

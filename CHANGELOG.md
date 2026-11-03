@@ -10,6 +10,30 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: a translations field on every host (plan "omnibase agnostic", step F5d, slice 3, 2026-11-03)
+
+- **`Base\Field\Behaviour\Translation`**: what omnibase's `TranslationType` decides, which it now asks - `options()` (its
+  defaults through the `Locales` contract), `requiredLocales()`, `locales()` (the languages drawn; a single-language field draws
+  the default one, or the record's one language with the default's fields), `entryRequired()` (the default and the required
+  languages), `perLocale()` (`locale_options`, `display: false`), `required()` (a callable `required` checked and called); and
+  for the hosts without Symfony's forms, `fields()` (each language's descriptors), `read()` (the record's translations as each
+  language's values), `bind()` (what is sent written into the record's translations through `translate()`, an empty one not
+  kept).
+- **`Base\Field\Behaviour\RecordFields`**: a record's fields as an embedding form lists them, what
+  `ClassMetadataManipulator::getFields()` answers from Doctrine read from the entity's shape - the fields named first, then the
+  other columns, the identifier, the translation's record and language and the excluded ones left out, each with the kind its
+  column says (a string a text, a text a textarea, a list a select of free tags, an integer a number, a date and time a
+  datetime picker, an enumeration a select); `descriptor()` (a field as `AssociationType` adds it: not required where its column
+  may be empty), `kindOf()` (a host type's name read as the kind it renders).
+- **`FormView`**: a translations field has one part per language, each its translation entity's fields with the record's values,
+  named and identified as Symfony names them (`form[translations][fr-FR][title]`), required where the field, its part and the
+  translations field are; its vars are `TranslationType`'s (`single_locale`, `default_locale`, `available_locales`,
+  `required_locales`, `nonempty_locales`, `compatible_locale`, `translations_empty`). **`FormBinder`** reads and binds it.
+  **`Guess`**: a translations field's record is the form's; a select over a list column (json, array) holds several
+  (`FormGuessTrait::guessMultiple()`).
+- `tests/Field/TranslationTest` (RecordFields against `getFields()` on a thread's translations; a thread's translations drawn
+  and bound). tests/Agnostic.php 732, tests/Foundation.php 795 (+2). Docs: docs/20-architecture/forms.md (translations).
+
 ### Added: a select's remote search on every host (plan "omnibase agnostic", step F5d, slice 2, 2026-11-03)
 
 - **`Base\Field\Search\RemoteSearch`** (in `Base\Services`' list) and **`Answer`**: what `AutocompleteController` answered under

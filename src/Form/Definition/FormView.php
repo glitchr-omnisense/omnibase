@@ -3,6 +3,8 @@
 namespace Base\Form\Definition;
 
 use Base\Field\Behaviour\Behaviours;
+use Base\Field\Behaviour\Guess;
+use Base\Field\Behaviour\Translation;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
 use Base\Field\Search\RemoteSearch;
@@ -152,6 +154,9 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         }
 
         $view = new self($name, $vars, $root);
+        if (Kind::TRANSLATION === $kind && !$field->hasExplicitFormType()) {
+            self::translations($view, $field, $value);
+        }
         if (Kind::REPEATED === $kind) {
             $inner = (string) ($field->getOption('type') ?? Kind::TEXT);
             $errored = $errors;
@@ -169,6 +174,52 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         }
 
         return $view;
+    }
+
+    /**
+     * A translations field's parts, as TranslationType builds them (Translation): one per language drawn,
+     * named by it, each the translation entity's fields with the values the record holds in that language
+     * (FormBinder: language => field => value). A field is required where it, its language's part and the
+     * translations field are (Symfony's forms: a field inside a part not required is not). Its vars are
+     * TranslationType's: locale, single_locale, default_locale, available_locales, required_locales,
+     * nonempty_locales, compatible_locale (the tab shown first), translations_empty.
+     */
+    private static function translations(self $view, FieldDescriptor $field, mixed $value): void
+    {
+        $options = Translation::options($field->getFormTypeOptions());
+        $class = Translation::translationClass($options, null);
+        $values = \is_array($value) ? $value : [];
+        $fields = null !== $class ? Translation::fields($class, $options, array_map('strval', array_keys($values))) : [];
+        ['default' => $default] = Translation::locales($options, array_map('strval', array_keys($values)));
+
+        $nonempty = [];
+        foreach ($fields as $locale => $descriptors) {
+            $entry = Translation::entryRequired($locale, $default, $options) ?? true;
+            $part = new self($locale, ['kind' => 'form', 'type' => 'form', 'label' => false, 'required' => $entry && $view->vars['required']], $view);
+            foreach ($descriptors as $name => $descriptor) {
+                $child = self::field($part, $name, Guess::from($descriptor, $class), $values[$locale][$name] ?? null, []);
+                $child->vars['required'] = $child->vars['required'] && $part->vars['required'];
+                $part->children[$name] = $child;
+            }
+            if ([] !== array_filter($values[$locale] ?? [], static fn (mixed $shown): bool => null !== $shown && '' !== $shown && [] !== $shown)) {
+                $nonempty[] = $locale;
+            }
+            $view->children[$locale] = $part;
+        }
+
+        $page = (string) $options['locale'];
+        $view->vars = array_replace($view->vars, [
+            'type' => 'translation',
+            'locale' => $page,
+            'single_locale' => $options['single_locale'],
+            'default_locale' => $default,
+            'available_locales' => $options['available_locales'],
+            'required_locales' => $options['required_locales'],
+            'nonempty_locales' => $nonempty,
+            // The page's language where something is written in it, else the default one.
+            'compatible_locale' => $page !== $default && \in_array($page, $nonempty, true) ? $page : $default,
+            'translations_empty' => [] === array_filter($view->children, static fn (self $part): bool => [] !== $part->children),
+        ]);
     }
 
     /**

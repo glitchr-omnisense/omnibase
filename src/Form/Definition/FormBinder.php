@@ -3,6 +3,7 @@
 namespace Base\Form\Definition;
 
 use Base\Field\Behaviour\Behaviours;
+use Base\Field\Behaviour\Translation;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
 use Omnibridge\Contract\Violation;
@@ -103,6 +104,10 @@ final class FormBinder
             if (\in_array($field->getKind(), Kind::UNMAPPED_KINDS, true)) {
                 continue;
             }
+            if (Kind::TRANSLATION === $field->getKind() && \is_object($data)) {
+                // The record's translations read by its translation entity's fields.
+                $field = $this->translatable($field, $data::class);
+            }
             if (\array_key_exists('data', $field->getOptions())) {
                 $value = $field->getOption('data');
             } else {
@@ -143,6 +148,17 @@ final class FormBinder
             }
 
             $raw = $submitted[$name] ?? null;
+            if (Kind::TRANSLATION === $kind && !$field->hasExplicitFormType() && $data instanceof \Base\Database\Entity\Extension\TranslatableInterface && $mapped && $name === $path) {
+                // Each language's part written into the record's translations (Translation::bind()).
+                $field = $this->translatable($field, $data::class);
+                try {
+                    $values[$name] = Translation::bind($data, \is_array($raw) ? $raw : [], $this->translationFields($field, $data->getTranslations()), $this);
+                } catch (\UnexpectedValueException $exception) {
+                    $violations[] = new Violation($name.'.'.$exception->getMessage(), self::INVALID_MESSAGE, 'invalid', ['{{ value }}' => '']);
+                    $values[$name] = $raw;
+                }
+                continue;
+            }
             try {
                 $value = $this->reverse($raw, $field);
             } catch (\UnexpectedValueException) {
@@ -243,6 +259,10 @@ final class FormBinder
         if (Kind::BOOLEAN === $kind || Kind::CHECKBOX === $kind) {
             return (bool) $value;
         }
+        if (Kind::TRANSLATION === $kind && !$field->hasExplicitFormType()) {
+            // Each language the record is written in and the field draws: its fields' values.
+            return Translation::read($value, array_intersect_key($this->translationFields($field, $value), array_flip(Translation::recordLocales($value))), $this);
+        }
         if (null === $value) {
             return true === $field->getOption('multiple') ? [] : null;
         }
@@ -270,6 +290,36 @@ final class FormBinder
         }
 
         return $this->scalar($value);
+    }
+
+    /** A translations field told its record's class where its options do not say it. */
+    private function translatable(FieldDescriptor $field, string $class): FieldDescriptor
+    {
+        if (null !== $field->getOption('translation_class') || null !== $field->getOption('translatable_class')) {
+            return $field;
+        }
+
+        return (clone $field)->setFormTypeOption('translatable_class', $class);
+    }
+
+    /**
+     * A translations field's descriptors, by language (Translation::fields()); none when its translation
+     * entity is unknown (no class given, no translation held).
+     *
+     * @return array<string, array<string, FieldDescriptor>>
+     */
+    private function translationFields(FieldDescriptor $field, mixed $translations): array
+    {
+        $options = Translation::options($field->getFormTypeOptions());
+        $class = Translation::translationClass($options, null);
+        if (null === $class && is_iterable($translations)) {
+            foreach ($translations as $translation) {
+                $class = \is_object($translation) ? $translation::class : null;
+                break;
+            }
+        }
+
+        return null !== $class ? Translation::fields($class, $options, Translation::recordLocales($translations)) : [];
     }
 
     /** Both inputs say the same: that value, read by the inputs' own kind; otherwise it cannot be read. */
