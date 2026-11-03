@@ -81,13 +81,34 @@ trait BaseTrait
         return self::findSettingBag() ?? throw MissingContractException::for(SettingBag::class);
     }
 
-    /** Whether the persistence maps it as an entity (an object, a class, a metadata). */
+    /**
+     * Whether the persistence maps it as an entity (an object, a class, a metadata): Doctrine's manipulator
+     * where the host gives it, else the unit of work's shapes for an object or a class (a host without it:
+     * omnibridge/laravel; a metadata is Doctrine's, which the manipulator answers).
+     */
     public static function isEntity(mixed $entityOrClassOrMetadata): bool
     {
-        $manipulator = Locator::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator')
-            ?? throw MissingContractException::for('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator');
-
-        return $manipulator->isEntity($entityOrClassOrMetadata);
+        $manipulator = Locator::runtimeGet('classMetadataManipulator', 'base.database.metadata_manipulator');
+        if (null !== $manipulator) {
+            return $manipulator->isEntity($entityOrClassOrMetadata);
+        }
+        $unitOfWork = \Omnibridge\Runtime::find(\Omnibridge\Persistence\UnitOfWork::class);
+        if (!$unitOfWork instanceof \Omnibridge\Persistence\UnitOfWork) {
+            throw MissingContractException::for('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator');
+        }
+        $class = match (true) {
+            \is_string($entityOrClassOrMetadata) => $entityOrClassOrMetadata,
+            \is_object($entityOrClassOrMetadata) => $unitOfWork->className($entityOrClassOrMetadata),
+            default => null,
+        };
+        if (null === $class || !class_exists($class)) {
+            return false;
+        }
+        try {
+            return \Base\Database\UnitOfWorks::shapes($unitOfWork)->has($class);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public static function getProjectDir(): string

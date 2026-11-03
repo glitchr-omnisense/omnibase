@@ -342,6 +342,24 @@ what `[file]` names - the dropzone's kept files, or a stored file's name -; a co
 sent keeps it. The record's `#[Uploader]` stores the file when the record is flushed. Symfony's types and its
 `DropzoneController` ask the behaviour and the service; the neutral `FormView` gives the behaviour the record it edits.
 
+The file sent is refused when the form is validated, as `FileType`'s `File` constraint on `[raw]` refuses it, on every host
+(`Upload::refusal()`, which the neutral `FormBinder` applies): a type its `mime_types` do not match (`file.mime_type`), else a
+size over its ceiling - PHP's upload limit, narrowed by its `class`' `#[Uploader]` and `#[File]` and by `max_size` -
+(`file.max_size`); the field's error is the constraint's message (the `validators` catalogue), the data is left untouched, the
+record's `#[Uploader]` is never reached. `Base\Validator\Constraints\File` reads an integer as bytes: `FileType`'s ceiling,
+which it read as bits until then (32 MB refused a file over 4 MB).
+
+**Records made from uploads.** An `association_file` field (a gallery's photos, a photo's picture: `AssociationFileField`) is
+`Base\Field\Behaviour\AssociationFile` on every host: a compound holding one upload field (`file`, `image` or `avatar`, by its
+`form_type`) named by the first part of `entity_file`, the path from a related record to its file (`image.source`). The upload
+field shows the related records' files (`files()`) and carries each stored file's name by its record's id (`entries()`,
+`data-entry-id`); several records when the association is to-many (the entity's shape), in order where it is kept so. What is sent
+is made into the related records (`records()`): a file sent (or kept by the dropzone) a new record - hydrated, then given
+`entity_data`, a callable or values, else its file -, a stored file's name its record kept, a name left out its record left; the
+neutral `FormBinder` writes them into the record (`bind()`: a to-many collection replaced, an inverse side's records told their
+owner, from the shape), Symfony's `AssociationFileType` into its `PersistentCollection` as before. The admin's edit link of a
+record (`href`) stays the Symfony back office's.
+
 **Translations.** A translations field (`translation`) is one part per language, each the translation entity's
 fields, on every host: `Base\Field\Behaviour\Translation` holds what `TranslationType` decides (the languages drawn -
 every offered one, or for `single_locale` the default one, the record's one language when it has exactly one -; which

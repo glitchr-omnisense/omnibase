@@ -56,6 +56,15 @@ final class Guess
             // FormGuessTrait::guessSortable(): a property kept in its order (#[OrderColumn], on itself or the column it aliases).
             $guessed->setFormTypeOption('sortable', self::ordered($dataClass, $field->getProperty()) || self::ordered($dataClass, $property));
         }
+        if (\Base\Field\Kind::ASSOCIATION_FILE === $field->getKind()) {
+            // AssociationFileType: several records for a to-many association, in order where it is kept so (FormGuessTrait).
+            if (null === $field->getOption('multiple') && $shape->hasAssociation($property)) {
+                $guessed->setFormTypeOption('multiple', $shape->isToMany($property));
+            }
+            if (null === $field->getOption('sortable')) {
+                $guessed->setFormTypeOption('sortable', self::ordered($dataClass, $field->getProperty()) || self::ordered($dataClass, $property));
+            }
+        }
         if ($behaviour instanceof Slug && null === $field->isRequired() && $shape->hasField($property)) {
             // SlugType: a slug whose column may not be empty is required.
             $guessed->setRequired(!$shape->entity->field($property)->nullable);

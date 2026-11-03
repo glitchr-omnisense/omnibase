@@ -321,6 +321,45 @@ final class Upload extends AbstractBehaviour
         return empty($data) ? null : $data;
     }
 
+    /**
+     * The file sent refused as FileType's constraint refuses it (Base\Validator\Constraints\File on its
+     * `raw` part, when the form is validated): a type its `mime_types` do not match, else a size over the
+     * ceiling - PHP's upload limit, narrowed by the class' #[Uploader] and #[File] (its `class` option) and its
+     * `max_size`. Its message and parameters are the constraint's (the validators catalogue: file.mime_type,
+     * file.max_size); null for a file accepted, for none sent, for several (the constraint reads one file).
+     *
+     * @param array<string, mixed> $options the field's options, completed
+     *
+     * @return array{0: string, 1: array<string, int|string>}|null
+     */
+    public function refusal(mixed $submitted, array $options, string $property): ?array
+    {
+        $file = \is_array($submitted) ? ($submitted['raw'] ?? null) : null;
+        if (!$file instanceof \SplFileInfo || !($options['allow_reupload'] ?? true) || !is_file($file->getPathname())) {
+            return null;
+        }
+        $mimeTypes = array_values((array) ($options['mime_types'] ?? []));
+        $maxSize = Uploader::getMaxFilesize($options['class'] ?? null, (string) ($options['data_mapping'] ?? $property));
+        if (!empty($options['max_size'])) {
+            $maxSize = min($maxSize, (int) $options['max_size']);
+        }
+
+        $type = method_exists($file, 'getMimeType') ? $file->getMimeType() : (new \finfo(\FILEINFO_MIME_TYPE))->file($file->getPathname());
+        $compatible = [] === $mimeTypes;
+        foreach ($mimeTypes as $mimeType) {
+            $compatible = $compatible || (bool) preg_match('/'.str_replace('/', '\/', (string) $mimeType).'/', (string) $type);
+        }
+        if (!$compatible) {
+            return ['file.mime_type', ['{0}' => \count($mimeTypes), '{1}' => implode(', ', array_map(static fn (string $mimeType): string => (string) last(explode('/', $mimeType)), $mimeTypes))]];
+        }
+        $size = (int) $file->getSize();
+        if ($size > $maxSize) {
+            return ['file.max_size', ['{1}' => byte2str($size), '{0}' => byte2str($maxSize)]];
+        }
+
+        return null;
+    }
+
     /** Whether the form's data is a record the persistence maps (FileType: the metadata's isEntity()). */
     private static function isRecord(mixed $data): bool
     {

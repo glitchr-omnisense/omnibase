@@ -189,6 +189,7 @@
  * 793 after step F5d, slice 2 (2026-11-03, +2): Base\Field\Search\{RemoteSearch, Answer} (see tests/Agnostic.php).
  * 795 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields} (see tests/Agnostic.php).
  * 797 after step F5d, slice 4 (2026-11-03, +2): Base\Field\Behaviour\Upload, Base\Field\Upload\Dropzone (see tests/Agnostic.php).
+ * 798 after step F5d, slice 5 (2026-11-03, +1): Base\Field\Behaviour\AssociationFile (see tests/Agnostic.php).
  */
 
 return [
@@ -514,6 +515,7 @@ return [
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
     Base\Field\Behaviour\AbstractBehaviour::class,
+    Base\Field\Behaviour\AssociationFile::class,
     Base\Field\Behaviour\Behaviours::class,
     Base\Field\Behaviour\ChoiceList::class,
     Base\Field\Behaviour\Choices::class,
