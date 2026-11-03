@@ -348,6 +348,9 @@ class Flysystem implements FlysystemInterface, Storages
     protected function getPublicRealpath(?string $path = null, int $depth = 1): array
     {
         $publicPath = realpath($this->getPublicDir() . "/" . str_lstrip($path, [$this->getPublicDir(), "/"]));
+        if (false === $publicPath || !is_dir($publicPath)) {
+            return []; // no public folder (a host without one, a test's): nothing is reachable from it
+        }
 
         $endpoints = [$publicPath => realpath($publicPath)];
         foreach (Finder::create()->followLinks()->directories()->in($publicPath)->depth("< " . $depth) as $path) {

@@ -360,6 +360,19 @@ neutral `FormBinder` writes them into the record (`bind()`: a to-many collection
 owner, from the shape), Symfony's `AssociationFileType` into its `PersistentCollection` as before. The admin's edit link of a
 record (`href`) stays the Symfony back office's.
 
+**Editors.** A text written in Editor.js (`editor`) or in Quill (`wysiwyg`) is kept in a hidden input on every host, its
+script's element beside it. `Base\Field\Behaviour\Wysiwyg` gives Quill's settings (`wysiwyg`: theme, toolbar, placeholder,
+height); `Base\Field\Behaviour\Editor` gives Editor.js's (`editor`: the placeholder and, when `collab_autosave` or `collab_live`
+is asked and the form's record is stored, its field's room - token, version hash, the account signed in; `collab_live` only
+where a relay is configured), the value with each picture's address made from its stored origin, and the five addresses of
+the editor's routes (`uploadByFile`, `uploadByUrl`, `endpointByUser`, `endpointByThread`, `endpointByKeyword`); a document
+sent without a block is read back as no text. Both widgets' ids have their dashes made underscores (a translation's `fr-FR`
+part). The routes are `Base\Field\Editor\EditorJs`'s (`ROUTES`, the `ux_editorjs_*` names): the mentions with the editor's
+token (`editorjs`), five by page; a picture sent or fetched, stored in the editor's storage (`base.twig.editor.storage`); the
+relay's ticket and one field's autosave with its room's own token (a stale version refused, 409). Symfony's
+`EditorController` and omnibridge/laravel's answer them through it; the neutral `FormView` gives the behaviour the record and
+the field's name (`editor_record`, `editor_field`).
+
 **Translations.** A translations field (`translation`) is one part per language, each the translation entity's
 fields, on every host: `Base\Field\Behaviour\Translation` holds what `TranslationType` decides (the languages drawn -
 every offered one, or for `single_locale` the default one, the record's one language when it has exactly one -; which
@@ -373,7 +386,7 @@ datetime a datetime picker, an enumeration a select of its values) or the one it
 `form_translations_fr-FR_title`), the record's values in each, and `TranslationType`'s vars (`nonempty_locales`,
 `compatible_locale`...); `FormBinder` writes what is sent into the record's translations (`translate()`), a language
 left empty is not kept. omnibridge/laravel draws it as `translatable_widget` does - a tab per language -, and refuses it
-aloud when one of its fields is a kind it does not draw (an editor, a wysiwyg).
+aloud when one of its fields is a kind it does not draw.
 
 **Conformance.** `Base\Field\Conformance\Suite` runs `Samples::all()` (one sample per kind of `Kind::all()`, with
 Symfony's values: the reference) on a `Host` - its name, `render()`, `submit()`: every kind declared, each

@@ -39,7 +39,7 @@ final class ParameterBagServicesTest extends KernelTestCase
         self::assertSame($bag, $container->get(ContainerBagInterface::class));
         self::assertSame($bag, Runtime::parameters());
         self::assertSame($bag, BaseService::getParameterBag());
-        self::assertSame($bag, (new \ReflectionProperty('Base\\Controller\\UX\\EditorController', 'parameterBag'))->getValue($container->get('Base\\Controller\\UX\\EditorController')), 'a service autowired on omnibase\'s interface');
+        self::assertSame($bag, (new \ReflectionProperty('Base\\Service\\Paginator', 'parameterBag'))->getValue($container->get('Base\\Service\\Paginator')), 'a service autowired on omnibase\'s interface');
     }
 
     public function testASettingStoredAsFalseWins(): void

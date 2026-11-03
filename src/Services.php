@@ -5,6 +5,7 @@ namespace Base;
 use Base\Auth\Registration;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Field\Editor\EditorJs;
 use Base\Field\Search\RemoteSearch;
 use Base\Field\Upload\Dropzone;
 use Base\Form\Definition\FormProcessor;
@@ -93,6 +94,8 @@ final class Services
             ['class' => RemoteSearch::class],
             // A dropzone's uploads before its form is sent (ux_dropzone...): kept in the cache folder, the session's token.
             ['class' => Dropzone::class, 'arguments' => ['$cacheDir' => '%kernel.cache_dir%']],
+            // An editor's routes (ux_editorjs_...): the mentions, its pictures in the editor's storage, the collaboration's saves.
+            ['class' => EditorJs::class, 'arguments' => ['$storage' => '%base.twig.editor.storage%']],
             // A sign-up once its form holds: approved, its password, named, kept (the host signs it in).
             ['class' => Registration::class],
             // An entity filled from data and rebuilt as it was: on the unit of work, its persistence's shapes and snapshots.

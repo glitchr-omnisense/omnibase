@@ -13,7 +13,11 @@ use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
+use Base\Field\Editor\EditorJs;
+use Omnibridge\Contract\Tokens;
+use Omnibridge\Contract\Urls;
 use Omnibridge\Persistence\UnitOfWork;
+use Omnibridge\Runtime;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -55,6 +59,12 @@ class EditorTypeCollabRelayTest extends TestCase
         $translator->method('trans')->willReturnArgument(0);
 
         $tokenStorage = new TokenStorage();
+        // The editor's routes and rooms, which EditorType's behaviour asks (Base\Field\Editor\EditorJs, slice 6 of F5d).
+        $tokens = $this->createMock(Tokens::class);
+        $tokens->method('csrf')->willReturn('token');
+        $urls = $this->createMock(Urls::class);
+        $urls->method('path')->willReturnCallback(static fn (string $name) => '/route/'.$name);
+        Runtime::set(EditorJs::class, new EditorJs($obfuscator, $tokens, $unitOfWork, urls: $urls, rooms: $rooms, tickets: $tickets));
 
         $editor = new EditorType(
             $this->createMock(ParameterBagInterface::class),
@@ -72,6 +82,11 @@ class EditorTypeCollabRelayTest extends TestCase
             ->addType($editor)
             ->addTypeExtension(new FormTypeCollabExtension($rooms, $tokenStorage, $csrf, $router, $tickets))
             ->getFormFactory();
+    }
+
+    protected function tearDown(): void
+    {
+        Runtime::set(EditorJs::class, null);
     }
 
     private function record(): object
