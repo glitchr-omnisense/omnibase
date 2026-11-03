@@ -64,6 +64,8 @@
  * the generic renderers both read, Guess the record's mapping on the unit of work's shapes), and the field conformance suite, Base\Field\Conformance\{Host, Outcome, Sample, Samples, Suite}.
  * 730 after step F5d, slice 2 (2026-11-03, +2): Base\Field\Search\{RemoteSearch, Answer}, a select's remote search for every host
  * (what AutocompleteController answered under Symfony).
+ * 732 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields}, a translations field for every host
+ * (what TranslationType decides, the translation entity's fields from its shape).
  */
 
 return [
@@ -393,9 +395,11 @@ return [
     Base\Field\Behaviour\JsColor::class,
     Base\Field\Behaviour\Number::class,
     Base\Field\Behaviour\Password::class,
+    Base\Field\Behaviour\RecordFields::class,
     Base\Field\Behaviour\Select::class,
     Base\Field\Behaviour\Slug::class,
     Base\Field\Behaviour\Toggle::class,
+    Base\Field\Behaviour\Translation::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,

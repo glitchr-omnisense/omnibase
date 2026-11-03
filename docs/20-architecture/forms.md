@@ -330,6 +330,21 @@ and body and send its `Answer` as JSON. `SelectType` makes its `data` with it; t
 `search` endpoint its `data` and starts select2 with the entries chosen (the records found by their ids, an icon
 named by its adapter's list), so both hosts draw the same picker.
 
+**Translations.** A translations field (`translation`) is one part per language, each the translation entity's
+fields, on every host: `Base\Field\Behaviour\Translation` holds what `TranslationType` decides (the languages drawn -
+every offered one, or for `single_locale` the default one, the record's one language when it has exactly one -; which
+part is required - the default and `required_locales`; `locale_options` per language; a callable `required`), and
+Symfony's type asks it. The translation entity's fields are `Base\Field\Behaviour\RecordFields::of()`, what
+`ClassMetadataManipulator::getFields()` lists from Doctrine read from the entity's shape: the `fields` named first, then
+the other columns unless `autoload` is off, `id`, `translatable`, `locale` and `excluded_fields` left out, each with
+the kind its column says (string a text, text a textarea, json or array a select of free tags, integer a number,
+datetime a datetime picker, an enumeration a select of its values) or the one its `form_type` names. The neutral
+`FormView` gives such a field a part per language (`form[translations][fr-FR][title]`, ids
+`form_translations_fr-FR_title`), the record's values in each, and `TranslationType`'s vars (`nonempty_locales`,
+`compatible_locale`...); `FormBinder` writes what is sent into the record's translations (`translate()`), a language
+left empty is not kept. omnibridge/laravel draws it as `translatable_widget` does - a tab per language -, and refuses it
+aloud when one of its fields is a kind it does not draw (an editor, a wysiwyg).
+
 **Conformance.** `Base\Field\Conformance\Suite` runs `Samples::all()` (one sample per kind of `Kind::all()`, with
 Symfony's values: the reference) on a `Host` - its name, `render()`, `submit()`: every kind declared, each
 implemented one drawn under its name, its value shown, what is sent bound to the same value, a value it cannot
