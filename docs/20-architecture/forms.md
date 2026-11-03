@@ -304,7 +304,8 @@ named (`setFormType()`) has no behaviour: its type decides.
 `Kinds::coverage($host)` (completed by `Kinds::declare()`); `Kinds::faults($host)` names a kind left undeclared,
 an application's own kinds included. A kind a host declares unsupported is refused aloud when drawn
 (`Omnibridge\Form\UnsupportedKind`): `DefinitionForms` for Symfony (`html`), omnibridge/laravel's `FormRenderer`
-for Laravel, which also refuses a select whose remote search route it does not have. A field that names its host
+for Laravel, which also refuses a select whose remote search route it does not have (an application without
+omnibase's media, through which the search's payload goes). A field that names its host
 type (`setFormType()`) and keeps a kind is drawn from its generic view by the generic renderers (`explicit` in its
 vars); one with no kind at all (`custom`) is refused there. lesringostars-react declares its own coverage
 (`src/screens/kinds.json`) against `src/Resources/field-kinds.json`, the core's list of kinds as JSON.
@@ -314,6 +315,20 @@ The record's mapping completes what a field leaves out, as the Symfony types gue
 association's target, an enumeration column's class) and whether it holds several, its sorting (`#[OrderColumn]`),
 a slug's `required` (its column not nullable). A select2's entries are omnibase's `Autocomplete::resolve()`'s (an
 enumeration's word and icon) where the host gives omnibase's translator; a country's carries its flag.
+
+**The remote search.** A select of records (an association picked, `class` a record's) and an icon picker
+search their entries on the host: `Base\Field\Search\RemoteSearch`, the same on every host, at the routes of
+`RemoteSearch::ROUTES` - `ux_autocomplete` (`/ux/autocomplete/{data}`: a class's records through its repository's
+`cacheByInstanceOf()`, paged by the Paginator, named by `Autocomplete`, kept when their text holds the term; an
+enumeration's values) and `ux_autocomplete_icons` (`/ux/autocomplete/{provider}/{pageSize}/{data}`: an icon adapter's
+icons, through `Base\Service\Icons`). `data` is `RemoteSearch::data()`: the class, the fields, the filters
+(`RemoteSearch::filters()`), the case, whether the entries are HTML and show faces, and the visitor's token of
+intent `select2` (the `Tokens` contract), obfuscated in its short form; the search refuses another token, an unknown
+payload, a method the environment does not take (GET and POST in debug, POST otherwise: `autocomplete_type`).
+Symfony's `AutocompleteController` and omnibridge/laravel's `SearchController` hand it the request's method, query
+and body and send its `Answer` as JSON. `SelectType` makes its `data` with it; the neutral `FormView` gives the
+`search` endpoint its `data` and starts select2 with the entries chosen (the records found by their ids, an icon
+named by its adapter's list), so both hosts draw the same picker.
 
 **Conformance.** `Base\Field\Conformance\Suite` runs `Samples::all()` (one sample per kind of `Kind::all()`, with
 Symfony's values: the reference) on a `Host` - its name, `render()`, `submit()`: every kind declared, each

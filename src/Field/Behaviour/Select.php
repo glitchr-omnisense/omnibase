@@ -69,7 +69,7 @@ class Select extends AbstractBehaviour
             'autocomplete_data' => null,
             'autocomplete_processResults' => null,
             'autocomplete_delay' => 500,
-            'autocomplete_type' => 'POST',
+            'autocomplete_type' => null,
             'sortable' => null,
         ];
     }
@@ -90,6 +90,8 @@ class Select extends AbstractBehaviour
         if (null === $options['choices']) {
             $options['autocomplete'] ??= false;
         }
+        // SelectType: the search asked by GET in debug (readable in the browser), by POST otherwise.
+        $options['autocomplete_type'] ??= self::debug() ? 'GET' : 'POST';
 
         return $options;
     }
@@ -259,5 +261,12 @@ class Select extends AbstractBehaviour
     protected function controller(): ?string
     {
         return 'select2';
+    }
+
+    private static function debug(): bool
+    {
+        $environment = \Omnibridge\Runtime::find(\Omnibridge\Contract\Environment::class);
+
+        return $environment instanceof \Omnibridge\Contract\Environment && $environment->isDebug();
     }
 }

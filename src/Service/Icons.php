@@ -35,6 +35,21 @@ final class Icons
     }
 
     /**
+     * The adapter of that class, or the first that supports that name or icon (fa, fa-solid fa-icons),
+     * as IconProvider::getAdapter() finds it; null for none.
+     */
+    public function adapter(string $idOrClass): ?IconAdapterInterface
+    {
+        foreach ($this->getAdapters() as $adapter) {
+            if ($adapter::class === $idOrClass || (!class_exists($idOrClass) && $adapter->supports($idOrClass))) {
+                return $adapter;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param string|array<array-key, mixed>|EnumType|IconizeInterface|null $icon
      * @param array<string, mixed>                                          $attributes
      *

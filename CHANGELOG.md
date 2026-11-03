@@ -10,6 +10,28 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: a select's remote search on every host (plan "omnibase agnostic", step F5d, slice 2, 2026-11-03)
+
+- **`Base\Field\Search\RemoteSearch`** (in `Base\Services`' list) and **`Answer`**: what `AutocompleteController` answered under
+  Symfony, moved here as it was - `records()` (ux_autocomplete: a class's records, paged, named, filtered by the term; an
+  enumeration's values), `icons()` (ux_autocomplete_icons: an icon adapter's icons), `data()` (the payload a select hands its
+  search, with the visitor's token of intent `select2` through the `Tokens` contract), `filters()`, `ROUTES`. Every check is
+  kept: the token, the payload, the method (GET and POST in debug, POST otherwise). `AutocompleteController::Main()` and
+  `Icons()` delegate to it (their routes, names and answers unchanged; the forex rates stay the controller's); omnibridge/symfony's
+  `SelectType` makes its payload with `data()`; omnibridge/laravel answers the same routes. In the Symfony runtime's contracts.
+- **`FormView`**: a select searched remotely gets its search's `data` (its address on the host, null without the route or the
+  search) and starts with the entries chosen, as `SelectType` gives them - a record found by its id and named by `Autocomplete`
+  (its face where the field asks for one), an icon named by its adapter's list; a select's `required` is the field's word
+  (select2's `allowClear`).
+- `Select`: `autocomplete_type` follows the environment (GET in debug, POST otherwise), as `SelectType`'s. `Icon`: the adapter
+  defaults to `base.icon_provider.default_adapter` (Font Awesome's), an icon chosen is named as `IconType` names it
+  (`Icon::entry()`). `Base\Service\Icons::adapter()`. `Autocomplete::resolveArray()` is static (it reads no translator).
+- Fixed: an enumeration's search filtered the parts of each entry instead of the entries and failed (a TypeError) - each value
+  whose word holds the term is given. `Translator::getEntityNouns()` outside Symfony's kernel reads the host's `Nouns` namespaces
+  (it asked BaseBundle, which a Laravel host has not).
+- `tests/Field/RemoteSearchTest`. tests/Agnostic.php 730, tests/Foundation.php 793 (+2). Docs: docs/20-architecture/forms.md
+  (the remote search).
+
 ### Added: every field kind on every host - behaviours, coverage, conformance (plan "omnibase agnostic", step F5d, slice 1, 2026-11-03)
 
 - **`Base\Field\Behaviour\*`**, the neutral behaviours of the rich kinds (omnisense/omnibridge's `Omnibridge\Form\FieldBehaviour`):

@@ -5,6 +5,7 @@ namespace Base;
 use Base\Auth\Registration;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Entity\EntityHydratorInterface;
+use Base\Field\Search\RemoteSearch;
 use Base\Form\Definition\FormProcessor;
 use Base\Notifier\Mail\EmailComposer;
 use Base\Screen\Builder\Stories;
@@ -87,6 +88,8 @@ final class Services
             ['class' => EmailComposer::class, 'arguments' => ['$from' => '%base.notifier.technical_recipient.email%']],
             // The neutral form layer's processing (bind, token, validation, unit of work): each contract optional.
             ['class' => FormProcessor::class],
+            // A select's remote search (ux_autocomplete, ux_autocomplete_icons): its payload through the obfuscator, the session's token.
+            ['class' => RemoteSearch::class],
             // A sign-up once its form holds: approved, its password, named, kept (the host signs it in).
             ['class' => Registration::class],
             // An entity filled from data and rebuilt as it was: on the unit of work, its persistence's shapes and snapshots.

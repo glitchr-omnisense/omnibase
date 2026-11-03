@@ -62,6 +62,8 @@
  * Base\Database\Backend\ColumnTypes (which column types hold an array), for EntityHydrator on the unit of work and the shapes.
  * 728 after step F5d (2026-11-03, +20): the rich kinds' neutral behaviours, Base\Field\Behaviour\* (what the Symfony types and
  * the generic renderers both read, Guess the record's mapping on the unit of work's shapes), and the field conformance suite, Base\Field\Conformance\{Host, Outcome, Sample, Samples, Suite}.
+ * 730 after step F5d, slice 2 (2026-11-03, +2): Base\Field\Search\{RemoteSearch, Answer}, a select's remote search for every host
+ * (what AutocompleteController answered under Symfony).
  */
 
 return [
@@ -436,6 +438,8 @@ return [
     Base\Field\QuadrantField::class,
     Base\Field\RoleField::class,
     Base\Field\RouteField::class,
+    Base\Field\Search\Answer::class,
+    Base\Field\Search\RemoteSearch::class,
     Base\Field\SelectField::class,
     Base\Field\SlugField::class,
     Base\Field\StateField::class,

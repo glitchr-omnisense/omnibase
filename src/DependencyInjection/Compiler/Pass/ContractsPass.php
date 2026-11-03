@@ -21,6 +21,7 @@ use Omnibridge\Contract\Urls;
 use Omnibridge\Contract\Validation;
 use Omnibridge\Contract\Views;
 use Omnibridge\Symfony\DependencyInjection\ContractsPass as HostContractsPass;
+use Base\Field\Search\RemoteSearch;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -71,6 +72,8 @@ final class ContractsPass implements CompilerPassInterface
         ClockInterface::class,
         EventDispatcherInterface::class,
         MailerInterface::class,
+        // A select's remote search (plan "omnibase agnostic", F5d): SelectType hands it its payload, as FormView does elsewhere.
+        RemoteSearch::class,
     ];
 
     /**
