@@ -263,3 +263,62 @@ A site's form stays a type, what Symfony asks for: `Omnibridge\Symfony\Omnibase\
 The generic renderers - the Twig theme (omnibridge/twig),
 the Blade theme (omnibridge/laravel), React - read `FormView`. The whole layer loads under
 `bare --strict` (`BareTest::testTheFormLayerWorksWithoutAFormLibrary`).
+
+### Every kind on every host: behaviours, coverage, conformance (step F5d)
+
+What a rich field does - a date picker, a slug made from another field, a switch that asks first, a
+select2 searched remotely, a colour, a localized number, a password typed twice - lived only in its
+Symfony type, and a host that did not know a kind drew a plain input in silence. Three pieces close it.
+
+**Behaviours.** omnisense/omnibridge's `Omnibridge\Form\FieldBehaviour` is the contract one behaviour
+answers whatever host draws it: `options()` (the given ones over its defaults, normalized), `vars()` (what
+its widget reads, plain data: `datetimepicker`, `select2`, data attributes under `attr`), `transform()` and
+`reverse()` (the value shown, the value read back; `\UnexpectedValueException` for a value it cannot read),
+`assets()` (the script's entry, the prefix of the attributes its controller reads, `FieldAssets`),
+`endpoints()` (the host's routes it calls, `Endpoint`: a select's remote search). The core's
+`Base\Field\Behaviour\*` hold the logic the Symfony types held, and `Behaviours::of($kind)` gives them:
+
+| Kind | Behaviour | Widget |
+|---|---|---|
+| `datetime_picker` | `DateTimePicker`: ICU `format`, flatpickr's settings merged key by key | `datetimepicker` |
+| `slug` | `Slug`: separator, kept characters, strict, lock, the `target` path | `slug` |
+| `boolean` | `Toggle`: switch, confirmations, the toggle route | `boolean` |
+| `color` | `JsColor`: `#RRGGBBAA` shown, as short as written kept | `jscolor` |
+| `color_picker` | `ColorPickr`: Pickr's settings, the alpha completed | `color` |
+| `number` | `Number`: the page's language (48,857), divisor, prefix, suffix, steppers | `number` |
+| `password` | `Password`: `plain` and `plain_repeater`, strength bounds | `password2` |
+| `choice`, `role`, `state`, `gender`, `currency`, `country` | `Select` (`CountrySelect`): select2's settings (`Select::select2()`), an enum's choices (`Choices::of()`), a record's remote search (`ux_autocomplete`) | `select2` |
+| `icon` | `Icon`: the icon provider's search (`ux_autocomplete_icons`) | `select2` |
+| `locale` | `ChoiceList`: Intl's locales | a plain select |
+
+The Symfony types read them (`DateTimePickerType`, `SlugType`, `BooleanType`, `ColorType`, `ColorPickerType`,
+`NumberType`, `SelectType`'s select2 settings): the 13 forms and the back office's pages draw the same markup.
+The neutral `FormBinder` reads through a behaviour first (the field's options completed with its defaults),
+then the kind's generic rule; the neutral `FormView` gives a rich field its `widget`, `webpack_entry`, settings
+and `endpoints` (the address of each route on this host, null where it has none). A select2 is its form's
+`choice` part on both hosts (`name[value][choice]`), as `SelectType` names it. A field whose host type is
+named (`setFormType()`) has no behaviour: its type decides.
+
+**Coverage.** Each host declares every kind, implemented or `Coverage::unsupported('why')` (omnisense/omnibridge's
+`Omnibridge\Form\Coverage`): Symfony's `SymfonyKinds::COVERAGE`, Laravel's `LaravelKinds::COVERAGE`, read by
+`Kinds::coverage($host)` (completed by `Kinds::declare()`); `Kinds::faults($host)` names a kind left undeclared,
+an application's own kinds included. A kind a host declares unsupported is refused aloud when drawn
+(`Omnibridge\Form\UnsupportedKind`): `DefinitionForms` for Symfony (`html`), omnibridge/laravel's `FormRenderer`
+for Laravel, which also refuses a select whose remote search route it does not have. A field that names its host
+type (`setFormType()`) and keeps a kind is drawn from its generic view by the generic renderers (`explicit` in its
+vars); one with no kind at all (`custom`) is refused there. lesringostars-react declares its own coverage
+(`src/screens/kinds.json`) against `src/Resources/field-kinds.json`, the core's list of kinds as JSON.
+
+The record's mapping completes what a field leaves out, as the Symfony types guess it from Doctrine
+(`Base\Field\Behaviour\Guess`, on the unit of work's entity shapes, aliases resolved): a select's class (an
+association's target, an enumeration column's class) and whether it holds several, its sorting (`#[OrderColumn]`),
+a slug's `required` (its column not nullable). A select2's entries are omnibase's `Autocomplete::resolve()`'s (an
+enumeration's word and icon) where the host gives omnibase's translator; a country's carries its flag.
+
+**Conformance.** `Base\Field\Conformance\Suite` runs `Samples::all()` (one sample per kind of `Kind::all()`, with
+Symfony's values: the reference) on a `Host` - its name, `render()`, `submit()`: every kind declared, each
+implemented one drawn under its name, its value shown, what is sent bound to the same value, a value it cannot
+read refused; each unsupported one refused. A kind added to `Kind` without a sample fails `Samples::all()`;
+without a host's word, the host's suite. The hosts' suites: `tests/Field/SymfonyConformanceTest` (the harness,
+`Omnibridge\Symfony\Omnibase\Form\Conformance\SymfonyHost`), omnibridge/laravel's `tests/FieldConformanceTest`
+(`Omnibridge\Laravel\Form\Conformance\LaravelHost`), and an application's own.

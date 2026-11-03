@@ -2,8 +2,14 @@
 
 namespace Base\Form\Definition;
 
+use Base\Field\Behaviour\Behaviours;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
+use Omnibridge\Contract\Locales;
+use Omnibridge\Contract\Routes;
+use Omnibridge\Contract\Urls;
+use Omnibridge\Form\Endpoint;
+use Omnibridge\Runtime;
 
 /**
  * A form as a renderer reads it, neutral: a plain tree of views, each with
@@ -16,6 +22,13 @@ use Base\Field\Kind;
  * Its vars are named as Symfony's FormView names them, so a theme written for
  * either reads both: the Twig theme (omnibridge/twig), the Blade theme
  * (omnibridge/laravel), and React through toArray() (the page's props).
+ *
+ * A rich kind's field also carries what its behaviour gives
+ * (Base\Field\Behaviour\Behaviours, the vars omnibase's Symfony type gives
+ * its block): `widget`, the block its markup is (datetimepicker, slug,
+ * select2...), `webpack_entry`, its settings (datetimepicker, select2...,
+ * data attributes in attr), and `endpoints`, the address of each route it
+ * calls on this host (null where the host has no such route).
  *
  * @implements \ArrayAccess<string, FormView>
  * @implements \IteratorAggregate<string, FormView>
@@ -60,7 +73,12 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         ]);
 
         foreach ($form->getFields() as $name => $field) {
-            $root->children[$name] = self::field($root, $name, $field, $values[$name] ?? null, $errors[$name] ?? []);
+            $root->children[$name] = self::field($root, $name, \Base\Field\Behaviour\Guess::from($field, $form->getDataClass()), $values[$name] ?? null, $errors[$name] ?? []);
+        }
+        foreach ($root->children as $child) {
+            if ('slug' === ($child->vars['widget'] ?? null)) {
+                $child->vars['target_id'] = self::target($root, $child->vars['target'] ?? null);
+            }
         }
         foreach ($form->getActions() as $name => $action) {
             $root->children[$name] = new self($name, [
@@ -82,6 +100,8 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
     /** @param list<string> $errors */
     private static function field(self $root, string $name, FieldDescriptor $field, mixed $value, array $errors): self
     {
+        $behaviour = Behaviours::ofField($field);
+        $field = Behaviours::complete($field);
         $kind = (string) $field->getKind();
         $multiple = true === $field->getOption('multiple');
         $attr = array_replace($field->getHtmlAttributes(), (array) $field->getOption('attr', []));
@@ -105,8 +125,19 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             'multiple' => $multiple,
             'expanded' => true === $field->getOption('expanded'),
             'label_translation_parameters' => $field->getTranslationParameters(),
+            // A field that names its host type (setFormType(), the escape hatch): no behaviour, its generic view only.
+            'explicit' => $field->hasExplicitFormType(),
             'translation_domain' => $field->getOption('translation_domain') ?? $root->vars['translation_domain'],
         ];
+        if (Kind::SUBMIT === $kind || Kind::BUTTON === $kind) {
+            // A button given as a field: omnibase's button2, as Symfony's SubmitType and ButtonType draw it.
+            $vars['button'] = true;
+            $vars['confirmation'] = (bool) $field->getOption('confirmation');
+            $vars['required'] = false;
+        }
+        if (Kind::HTML === $kind) {
+            $vars['html'] = $field->getOption('html'); // the markup given whole, printed as it is
+        }
         if (Kind::BOOLEAN === $kind || Kind::CHECKBOX === $kind) {
             $vars['checked'] = (bool) $value;
             $vars['value'] = (string) ($field->getOption('value') ?? '1');
@@ -114,6 +145,9 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         if (null !== $field->getOption('choices')) {
             $vars['choices'] = self::choices(FormBinder::choices($field) ?? [], $field);
             $vars['placeholder'] = $field->getOption('placeholder');
+        }
+        if (null !== $behaviour) {
+            $vars = self::behave($vars, $behaviour, $field, $value, $root->vars['id'].'_'.$name);
         }
 
         $view = new self($name, $vars, $root);
@@ -136,6 +170,119 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         return $view;
     }
 
+    /**
+     * A rich kind's vars: its widget, its script's entry, its settings, its
+     * routes' addresses on this host.
+     *
+     * @param array<string, mixed> $vars
+     *
+     * @return array<string, mixed>
+     */
+    private static function behave(array $vars, \Omnibridge\Form\FieldBehaviour $behaviour, FieldDescriptor $field, mixed $value, string $id): array
+    {
+        $options = $field->getFormTypeOptions();
+        $endpoints = array_map(self::address(...), $behaviour->endpoints($options));
+        $options['search_url'] = $endpoints['search'] ?? null;
+        if (isset($vars['choices']) && $behaviour instanceof \Base\Field\Behaviour\Select) {
+            $chosen = array_map('strval', array_filter(\is_array($value) ? $value : [$value], 'is_scalar'));
+            $options['entries'] = self::entries($behaviour, $vars['choices'], $options, $chosen);
+        }
+        $extra = $behaviour->vars($options, $value, $id);
+        $vars['attr'] = array_replace($vars['attr'], (array) ($extra['attr'] ?? []));
+        unset($extra['attr']);
+        $assets = $behaviour->assets($options);
+
+        return array_replace($vars, $extra, ['widget' => $assets->controller, 'webpack_entry' => $assets->entry, 'endpoints' => $endpoints]);
+    }
+
+    /**
+     * select2's entries as SelectType gives them: each choice resolved by omnibase's Autocomplete (an
+     * enumeration's word and icon, a record's name) when the host gives omnibase's translator, its label in
+     * the page's words otherwise; the chosen ones selected.
+     *
+     * @param list<array<string, mixed>> $choices
+     * @param array<string, mixed>       $options
+     * @param list<string>               $chosen
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function entries(\Base\Field\Behaviour\Select $behaviour, array $choices, array $options, array $chosen): array
+    {
+        try {
+            $translator = Runtime::find(\Base\Service\TranslatorInterface::class);
+        } catch (\Throwable) {
+            $translator = null; // a host that cannot build omnibase's translator: the labels in the page's words
+        }
+        $translations = Runtime::find(\Omnibridge\Contract\Translations::class);
+        $autocomplete = $translator instanceof \Base\Service\TranslatorInterface ? new \Base\Service\Model\Autocomplete($translator) : null;
+        $format = null === $options['capitalize'] ? FORMAT_IDENTITY : ($options['capitalize'] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE);
+        $class = \is_string($options['class'] ?? null) ? $options['class'] : null;
+        $entries = [];
+        foreach (self::flat($choices) as $choice) {
+            $entry = $autocomplete?->resolve($choice['value'], $class, ['html' => $options['use_html'], 'format' => $format, 'avatar' => $options['avatar']])
+                ?? ['id' => $choice['value'], 'icon' => null, 'color' => null, 'search' => null, 'text' => null, 'html' => null, 'data' => []];
+            $label = $choice['label'];
+            $entry['text'] ??= $label;
+            if (null === $class && '' !== $label && $label !== $choice['value']) {
+                $entry['text'] = castcase($translations instanceof \Omnibridge\Contract\Translations ? $translations->trans($label) : $label, $format);
+            }
+            $entry['depth'] = $choice['depth'] ?? 0;
+            $entry['selected'] = (int) \in_array((string) $choice['value'], $chosen, true);
+            $entries[] = $behaviour->entry($entry, $options);
+        }
+
+        return $entries;
+    }
+
+    /** The address of a route a widget calls, on this host; null where it has no such route. */
+    private static function address(Endpoint $endpoint): ?string
+    {
+        $routes = Runtime::find(Routes::class);
+        $urls = Runtime::find(Urls::class);
+        if (!$routes instanceof Routes || !$urls instanceof Urls || null === $routes->pattern($endpoint->route)) {
+            return null;
+        }
+        try {
+            return $urls->path($endpoint->route, $endpoint->parameters);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * The id of the field a slug is made from: its path in the form, the
+     * default language's part of a translations field.
+     *
+     * @param list<string>|null $path
+     */
+    private static function target(self $root, ?array $path): ?string
+    {
+        if (null === $path) {
+            return null;
+        }
+        $id = $root->vars['id'];
+        foreach ($path as $part) {
+            $id .= '_'.$part;
+            if ('translations' === $part) {
+                $locales = Runtime::find(Locales::class);
+                $id .= '_'.($locales instanceof Locales ? $locales->getDefaultLocale() : \Locale::getDefault());
+            }
+        }
+
+        return $id;
+    }
+
+    /** @param list<array<string, mixed>> $choices @return list<array{value: string, label: string}> */
+    private static function flat(array $choices): array
+    {
+        $flat = [];
+        foreach ($choices as $choice) {
+            isset($choice['choices']) ? array_push($flat, ...self::flat($choice['choices'])) : $flat[] = $choice;
+        }
+
+        return $flat;
+    }
+
     private static function type(string $kind, FieldDescriptor $field): string
     {
         if (Kind::isChoice($kind) || null !== $field->getOption('choices')) {
@@ -146,6 +293,10 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             Kind::BOOLEAN, Kind::CHECKBOX => 'checkbox',
             Kind::TEXTAREA, Kind::EDITOR, Kind::WYSIWYG, Kind::CODE => 'textarea',
             Kind::HTML => 'html',
+            // Its two inputs are its children: a renderer draws a row for each (was a text input).
+            Kind::REPEATED => 'repeated',
+            Kind::SUBMIT => 'submit',
+            Kind::BUTTON => 'button',
             default => Kind::inputType($kind) ?? 'text',
         };
     }
@@ -162,6 +313,13 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         $list = [];
         foreach ($choices as $label => $value) {
             if (\is_array($value)) {
+                // A group that is a choice itself (an enumeration's `_self`, as SelectType reads it): the group's value, then its own, flat.
+                if (\array_key_exists('_self', $value)) {
+                    $self = $value['_self'];
+                    unset($value['_self']);
+                    array_push($list, ...self::choices([$self], $field), ...array_map(static fn (array $choice): array => $choice + ['depth' => 1], self::choices($value, $field)));
+                    continue;
+                }
                 $list[] = ['label' => (string) $label, 'choices' => self::choices($value, $field)];
                 continue;
             }
