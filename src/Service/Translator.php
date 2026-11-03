@@ -682,7 +682,18 @@ class Translator implements TranslatorInterface, Translations
      */
     public function getEntityNouns(): EntityNouns
     {
-        return $this->entityNouns ??= new EntityNouns($this, EntityNouns::namespacesOf(\Base\BaseBundle::getInstance()->getBundles()));
+        if (null !== $this->entityNouns) {
+            return $this->entityNouns;
+        }
+        // Outside Symfony's kernel (omnibridge/laravel, plain PHP): the host's namespaces, as its Nouns contract has them.
+        $bundle = class_exists(\Symfony\Component\DependencyInjection\Kernel\AbstractBundle::class) ? \Base\BaseBundle::getInstance(false) : null;
+        if (null === $bundle) {
+            $nouns = \Omnibridge\Runtime::find(\Base\Contract\Nouns::class);
+
+            return $this->entityNouns = new EntityNouns($this, $nouns instanceof EntityNouns ? $nouns->getNamespaces() : []);
+        }
+
+        return $this->entityNouns = new EntityNouns($this, EntityNouns::namespacesOf($bundle->getBundles()));
     }
 
     /** A number of seconds in words (Base\Service\Model\Duration, C4b): "2 jours 3 heures". */

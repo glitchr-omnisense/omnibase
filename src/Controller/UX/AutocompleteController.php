@@ -7,6 +7,8 @@ use Base\Contract\Runtime;
 use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 
 use Base\Database\UnitOfWorks;
+use Base\Field\Search\Answer;
+use Base\Field\Search\RemoteSearch;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Autocomplete;
 use Base\Service\ObfuscatorInterface;
@@ -69,7 +71,9 @@ class AutocompleteController extends AbstractController
      */
     protected ?ManagerRegistry $doctrine;
 
-    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, UnitOfWork $unitOfWork, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null, ?ManagerRegistry $doctrine = null)
+    protected RemoteSearch $search;
+
+    public function __construct(ObfuscatorInterface $obfuscator, RequestStack $requestStack, TradingInterface $tradingMarket, TranslatorInterface $translator, UnitOfWork $unitOfWork, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, RemoteSearch $search, ?MediaServiceInterface $mediaService = null, ?Profiler $profiler = null, ?ManagerRegistry $doctrine = null)
     {
         $this->doctrine = $doctrine;
         $this->requestStack = $requestStack;
@@ -80,138 +84,32 @@ class AutocompleteController extends AbstractController
         $this->paginator = $paginator;
         $this->autocomplete = new Autocomplete($translator, $mediaService);
         $this->profiler = $profiler;
-        $this->requestStack = $requestStack;
+        $this->search = $search;
     }
 
+    /** The search's answer as this host sends it. */
+    private static function respond(Answer $answer): JsonResponse
+    {
+        return new JsonResponse($answer->body, $answer->status);
+    }
+
+    /** A select's records (or an enumeration's values): Base\Field\Search\RemoteSearch::records(). */
     #[Route("/ux/autocomplete/{data}", name:"ux_autocomplete")]
     public function Main(Request $request, string $data): Response
     {
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->attributes->get("_route"), "ux_");
+        $this->quiet();
+
+        return self::respond($this->search->records($data, $request->getMethod(), $request->query->all(), $request->request->all(), $this->repository(...)));
+    }
+
+    /** Symfony's profiler stays out of a ux_ route's answer. */
+    private function quiet(): void
+    {
+        $isUX = str_starts_with((string) $this->requestStack->getCurrentRequest()?->attributes->get("_route"), "ux_");
         if ($this->profiler !== null && $isUX) {
             $this->profiler->disable();
         }
-
-        $dict = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
-        if ($dict === null) {
-            return new JsonResponse("Unexpected request", 500);
-        }
-
-        $fields = $dict["fields"] ?? null;
-        $filters = $dict["filters"] ?? null;
-        $class = $dict["class"] ?? null;
-        $html = $dict["html"] ?? true;
-        // Whether this particular field asked for profile pictures - see
-        // SelectType's `avatar` option. Carried in the obfuscated payload so
-        // the dropdown and the already-selected chips agree: a field showing
-        // faces in one and role icons in the other reads as a bug.
-        $avatar = $dict["avatar"] ?? false;
-
-        $format = FORMAT_IDENTITY;
-        if ($dict["capitalize"] !== null) {
-            $format = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-        }
-
-        $token = $dict["token"] ?? null;
-        $tokenName = $dict["token_name"] ?? null;
-        if (!$tokenName || !$this->isCsrfTokenValid($tokenName, $token)) {
-            return new JsonResponse("Invalid token. Please refresh the page and try again", 500);
-        }
-
-        $expectedMethods = Runtime::environment()->isDebug() ? ["GET", "POST"] : ["POST"];
-        if (in_array($request->getMethod(), $expectedMethods)) {
-
-            if (Runtime::environment()->isDebug()) {
-                $term = $request->query->get('term', $request->request->get('term', ''));
-                $pageParam = $request->query->get('page', $request->request->get('page', ''));
-            } else {
-                $term = $request->request->get('term', '');
-                $pageParam = $request->request->get('page', '');
-            }
-
-            $term = strtolower(str_strip_accents($term));
-            $meta = explode('.', $pageParam);
-            $page = max(1, intval($meta[0] ?? 1));
-            $bookmark = max(0, intval($meta[1] ?? 0));
-
-            $results = [];
-            $pagination = false;
-            if ($this->classMetadataManipulator->isEntity($class)) {
-                $repository = $this->repository($class);
-
-                if (!is_associative($fields)) {
-                    $fields = array_fill_keys($fields, $term);
-                }
-                $fields = array_filter($fields);
-
-                $index0 = -1;
-                $entries = $repository->cacheByInstanceOf($filters, [], [], null, null, ["id"]); // Term matching happens below via $search/$term; $fields only decides which columns feed that comparison.
-
-                do {
-                    $bookIsFull = false;
-                    $book = $this->paginator->paginate($entries, $page);
-                    if ($page > $book->getTotalPages() + 1) {
-                        break;
-                    }
-
-                    foreach ($book as $index => $result) {
-                        $entry = $result["entity"] ?? null;
-                        $entry = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html, "avatar" => $avatar]);
-
-                        if ($entry === null) {
-                            continue;
-                        }
-                        if ($index0 < 0) {
-                            $index0 = $index;
-                        }
-                        if ($index - $index0 < $bookmark) {
-                            continue;
-                        }
-
-                        $search = strtolower(str_strip_accents(strval($entry["search"] ?? $entry["text"])));
-                        if (str_contains($search, $term)) {
-                            $results[] = $entry;
-                        }
-
-                        $bookIsFull = count($results) >= $book->getPageSize();
-                        if ($bookIsFull) {
-                            break;
-                        }
-
-                        $bookmark++;
-                    }
-
-                    $bookmark = $bookmark % $book->getPageSize();
-                } while ($page++ < $book->getTotalPages() && !$bookIsFull);
-
-                $pagination = [];
-                $pagination["more"] = $book->getTotalPages() > $book->getPage() || $bookIsFull;
-                if ($pagination["more"]) {
-                    $page = $book->getPage();
-                    $bookmark = ($book->getBookmark() + 1) % $book->getPageSize();
-                    if ($bookmark == 0) {
-                        $page++;
-                    }
-
-                    $pagination["page"] = $page . "." . $bookmark;
-                }
-            } elseif ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
-                $values = $class::getPermittedValues();
-                foreach ($values as $value) {
-                    $results[] = array_values(array_filter($this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html, "avatar" => $avatar]), fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
-                }
-            }
-
-            $array = [
-                "pagination" => $pagination,
-                "results" => $results
-            ];
-
-            return new JsonResponse($array);
-        }
-
-        return new JsonResponse("Invalid request", 500);
     }
-
 
     /**
      * The repository a picker looks into: the entity's own when it is
@@ -272,89 +170,17 @@ class AutocompleteController extends AbstractController
     }
 
 
+    /** An icon adapter's icons: Base\Field\Search\RemoteSearch::icons(), on this host's icon provider. */
     #[Route("/ux/autocomplete/{provider}/{pageSize}/{data}", name:"ux_autocomplete_icons")]
     public function Icons(Request $request, string $provider, int $pageSize, string $data, ?Profiler $profiler = null): Response
     {
-        $isUX = str_starts_with($this->requestStack->getCurrentRequest()->attributes->get("_route"), "ux_");
-        if ($this->profiler !== null && $isUX) {
-            $this->profiler->disable();
+        $this->quiet();
+
+        $adapter = $this->getIconProvider()->getAdapter($provider);
+        if (null === $adapter) {
+            return self::respond(Answer::refused("Invalid request"));
         }
 
-        $dict = $this->obfuscator->decode($data, ObfuscatorInterface::USE_SHORT);
-
-        $token = $dict["token"] ?? null;
-        $html = $dict["html"] ?? true;
-        $pageSize = $dict["page_size"] ?? 200;
-
-        $format = FORMAT_IDENTITY;
-        if ($dict["capitalize"] !== null) {
-            $format = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-        }
-
-        $results = [];
-        $pagination = false;
-        $expectedMethod = Runtime::environment()->isDebug() ? "GET" : "POST";
-        if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
-            $term = mb_strtolower($request->query->get("term", $request->request->get("term", "")));
-            $meta = explode(".", $request->query->get("page", $request->request->get("page", "")));
-            $page = max(1, intval($meta[0] ?? 1));
-            $bookmark = max(0, intval($meta[1] ?? 0));
-
-            $iconProvider = $this->getIconProvider()->getAdapter($provider);
-            $entries = $iconProvider->getChoices($term);
-
-            $index0 = -1;
-            do {
-                $bookIsFull = false;
-                $book = $this->paginator->paginate($entries, $page, $pageSize);
-                if ($page > $book->getTotalPages() + 1) {
-                    break;
-                }
-
-                foreach ($book as $index => $result) {
-                    $entry = $this->autocomplete->resolveArray($result, ["format" => $format, "html" => $html]);
-                    if ($entry === null) {
-                        continue;
-                    }
-                    if ($index0 < 0) {
-                        $index0 = $index;
-                    }
-                    if ($index - $index0 < $bookmark) {
-                        continue;
-                    }
-
-                    $bookIsFull = count_leaves($results) >= $book->getPageSize();
-                    if ($bookIsFull) {
-                        break;
-                    }
-
-                    $bookmark++;
-                    $results[] = $entry;
-                }
-
-                $bookmark = $bookmark % $book->getPageSize();
-            } while ($page++ < $book->getTotalPages() && !$bookIsFull);
-
-            $pagination = [];
-            $pagination["more"] = $book->getTotalPages() > $book->getPage() || $bookIsFull;
-            if ($pagination["more"]) {
-                $page = $book->getPage();
-                $bookmark = ($book->getBookmark() + 1) % $book->getPageSize();
-                if ($bookmark == 0) {
-                    $page++;
-                }
-
-                $pagination["page"] = $page . "." . $bookmark;
-            }
-
-            $array = [
-                "pagination" => $pagination,
-                "results" => $results
-            ];
-
-            return new JsonResponse($array);
-        }
-
-        return new JsonResponse("Invalid request", 500);
+        return self::respond($this->search->icons($adapter, $pageSize, $data, $request->getMethod(), $request->query->all(), $request->request->all()));
     }
 }

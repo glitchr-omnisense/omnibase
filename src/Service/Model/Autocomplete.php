@@ -176,7 +176,7 @@ class Autocomplete
      * @return array
      * @throws \Exception
      */
-    public function resolveArray($entry, array $entryOptions = [])
+    public static function resolveArray($entry, array $entryOptions = [])
     {
         $entryOptions["format"] ??= FORMAT_IDENTITY;
 

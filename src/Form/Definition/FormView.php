@@ -5,6 +5,7 @@ namespace Base\Form\Definition;
 use Base\Field\Behaviour\Behaviours;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
+use Base\Field\Search\RemoteSearch;
 use Omnibridge\Contract\Locales;
 use Omnibridge\Contract\Routes;
 use Omnibridge\Contract\Urls;
@@ -181,11 +182,24 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
     private static function behave(array $vars, \Omnibridge\Form\FieldBehaviour $behaviour, FieldDescriptor $field, mixed $value, string $id): array
     {
         $options = $field->getFormTypeOptions();
-        $endpoints = array_map(self::address(...), $behaviour->endpoints($options));
+        $declared = $behaviour->endpoints($options);
+        if (isset($declared['search']) && $behaviour instanceof \Base\Field\Behaviour\Select) {
+            $declared['search'] = self::searched($declared['search'], $options);
+        }
+        $endpoints = array_map(self::address(...), $declared);
         $options['search_url'] = $endpoints['search'] ?? null;
-        if (isset($vars['choices']) && $behaviour instanceof \Base\Field\Behaviour\Select) {
+        if ($behaviour instanceof \Base\Field\Behaviour\Select && null !== $field->isRequired()) {
+            // The field's word over the select's default, as the admin hands it to SelectType (select2's allowClear).
+            $options['required'] = $field->isRequired();
+        }
+        if ($behaviour instanceof \Base\Field\Behaviour\Select) {
             $chosen = array_map('strval', array_filter(\is_array($value) ? $value : [$value], 'is_scalar'));
-            $options['entries'] = self::entries($behaviour, $vars['choices'], $options, $chosen);
+            if (isset($vars['choices'])) {
+                $options['entries'] = self::entries($behaviour, $vars['choices'], $options, $chosen);
+            } elseif (null !== $options['search_url'] && [] !== $chosen) {
+                // Searched remotely: select2 starts with the entries chosen, as SelectType gives them.
+                $options['entries'] = self::entries($behaviour, array_map(static fn (string $id): array => ['value' => self::record($options, $id) ?? $id, 'id' => $id, 'label' => ''], $chosen), $options, $chosen);
+            }
         }
         $extra = $behaviour->vars($options, $value, $id);
         $vars['attr'] = array_replace($vars['attr'], (array) ($extra['attr'] ?? []));
@@ -214,24 +228,78 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             $translator = null; // a host that cannot build omnibase's translator: the labels in the page's words
         }
         $translations = Runtime::find(\Omnibridge\Contract\Translations::class);
-        $autocomplete = $translator instanceof \Base\Service\TranslatorInterface ? new \Base\Service\Model\Autocomplete($translator) : null;
+        $media = Runtime::find(\Base\Service\MediaServiceInterface::class); // a face for a field that asks for one (`avatar`)
+        $autocomplete = $translator instanceof \Base\Service\TranslatorInterface ? new \Base\Service\Model\Autocomplete($translator, $media instanceof \Base\Service\MediaServiceInterface ? $media : null) : null;
         $format = null === $options['capitalize'] ? FORMAT_IDENTITY : ($options['capitalize'] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE);
         $class = \is_string($options['class'] ?? null) ? $options['class'] : null;
         $entries = [];
         foreach (self::flat($choices) as $choice) {
             $entry = $autocomplete?->resolve($choice['value'], $class, ['html' => $options['use_html'], 'format' => $format, 'avatar' => $options['avatar']])
-                ?? ['id' => $choice['value'], 'icon' => null, 'color' => null, 'search' => null, 'text' => null, 'html' => null, 'data' => []];
+                ?? ['id' => \is_object($choice['value']) ? ($choice['id'] ?? null) : $choice['value'], 'icon' => null, 'color' => null, 'search' => null, 'text' => null, 'html' => null, 'data' => []];
             $label = $choice['label'];
             $entry['text'] ??= $label;
             if (null === $class && '' !== $label && $label !== $choice['value']) {
                 $entry['text'] = castcase($translations instanceof \Omnibridge\Contract\Translations ? $translations->trans($label) : $label, $format);
             }
             $entry['depth'] = $choice['depth'] ?? 0;
-            $entry['selected'] = (int) \in_array((string) $choice['value'], $chosen, true);
+            $entry['selected'] = (int) \in_array((string) (\is_object($choice['value']) ? ($entry['id'] ?? '') : $choice['value']), $chosen, true);
             $entries[] = $behaviour->entry($entry, $options);
         }
 
         return $entries;
+    }
+
+    /**
+     * A select's remote search with its `data` (RemoteSearch::data(): what it searches, its token), as
+     * SelectType hands it; as it is where the host gives no RemoteSearch (its address is then null).
+     *
+     * @param array<string, mixed> $options
+     */
+    private static function searched(Endpoint $endpoint, array $options): Endpoint
+    {
+        $search = Runtime::find(RemoteSearch::class);
+        if (!$search instanceof RemoteSearch || \array_key_exists('data', $endpoint->parameters)) {
+            return $endpoint;
+        }
+        try {
+            $data = $search->data(
+                \is_string($options['class'] ?? null) ? $options['class'] : null,
+                (array) ($options['autocomplete_fields'] ?? []),
+                RemoteSearch::filters($options),
+                $options['capitalize'] ?? null,
+                (bool) ($options['use_html'] ?? false),
+                (bool) ($options['avatar'] ?? false),
+            );
+        } catch (\Throwable) {
+            return $endpoint; // no token without a session, no obfuscator's cache: no search
+        }
+
+        return new Endpoint($endpoint->route, $endpoint->parameters + ['data' => $data], $endpoint->method);
+    }
+
+    /**
+     * A record chosen in a select searched remotely, found by its id; null where the class is no
+     * record's (an icon, an enumeration's value) or the record is gone.
+     *
+     * @param array<string, mixed> $options
+     */
+    private static function record(array $options, string $id): ?object
+    {
+        $class = $options['class'] ?? null;
+        $unitOfWork = Runtime::find(\Omnibridge\Persistence\UnitOfWork::class);
+        if (!\is_string($class) || !$unitOfWork instanceof \Omnibridge\Persistence\UnitOfWork) {
+            return null;
+        }
+        try {
+            if (!\Base\Database\UnitOfWorks::shapes($unitOfWork)->has($class)) {
+                return null;
+            }
+            $repository = \Base\Database\UnitOfWorks::repositories($unitOfWork)->of($class);
+
+            return $repository->find(ctype_digit($id) ? (int) $id : $id);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** The address of a route a widget calls, on this host; null where it has no such route. */
