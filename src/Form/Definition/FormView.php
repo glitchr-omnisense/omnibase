@@ -6,6 +6,7 @@ use Base\Field\Behaviour\AssociationFile;
 use Base\Field\Behaviour\Behaviours;
 use Base\Field\Behaviour\Guess;
 use Base\Field\Behaviour\Translation;
+use Base\Field\Behaviour\Editor;
 use Base\Field\Behaviour\Upload;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
@@ -86,6 +87,10 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             }
             if (Behaviours::ofField($field) instanceof Upload) {
                 $field = self::uploaded($field, $name, $data, $values[$name] ?? null);
+            }
+            if (Behaviours::ofField($field) instanceof Editor || (Kind::TRANSLATION === $field->getKind() && !$field->hasExplicitFormType())) {
+                // An editor's collaboration room is the form's record's (EditorType: the root form's data), its field's name.
+                $field = (clone $field)->setFormTypeOptions($field->getFormTypeOptions() + ['editor_record' => \is_object($data) ? $data : null, 'editor_field' => $name]);
             }
             $root->children[$name] = self::field($root, $name, $field, $values[$name] ?? null, $errors[$name] ?? []);
         }
@@ -272,6 +277,10 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             $entry = Translation::entryRequired($locale, $default, $options) ?? true;
             $part = new self($locale, ['kind' => 'form', 'type' => 'form', 'label' => false, 'required' => $entry && $view->vars['required']], $view);
             foreach ($descriptors as $name => $descriptor) {
+                if (Behaviours::ofField($descriptor) instanceof Editor) {
+                    // The form's record, as EditorType reads its root form's data; no language (TranslationType gives its own field one).
+                    $descriptor = (clone $descriptor)->setFormTypeOptions($descriptor->getFormTypeOptions() + ['editor_record' => $field->getOption('editor_record'), 'editor_field' => $name]);
+                }
                 $child = self::field($part, $name, Guess::from($descriptor, $class), $values[$locale][$name] ?? null, []);
                 $child->vars['required'] = $child->vars['required'] && $part->vars['required'];
                 $part->children[$name] = $child;

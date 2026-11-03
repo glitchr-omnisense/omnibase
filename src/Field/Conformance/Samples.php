@@ -63,8 +63,9 @@ final class Samples
             new Sample(Kind::SEARCH, self::field(Kind::SEARCH), 'abbey', 'abbey', 'road', 'road'),
             new Sample(Kind::SLUG, self::field(Kind::SLUG), 'les-ringo', 'les-ringo', 'les-ringo-stars', 'les-ringo-stars'),
             new Sample(Kind::CODE, self::field(Kind::CODE), null, Sample::NONE, '123456', '123456'),
-            new Sample(Kind::EDITOR, self::field(Kind::EDITOR)),
-            new Sample(Kind::WYSIWYG, self::field(Kind::WYSIWYG)),
+            // An Editor.js document kept as JSON, shown as it is; one sent without a block is no text.
+            new Sample(Kind::EDITOR, self::field(Kind::EDITOR), '{"time":1,"blocks":[{"id":"a","type":"paragraph","data":{"text":"Help!"}}]}', '{"time":1,"blocks":[{"id":"a","type":"paragraph","data":{"text":"Help!"}}]}', '{"time":2,"blocks":[]}', null),
+            new Sample(Kind::WYSIWYG, self::field(Kind::WYSIWYG), '<p>Help!</p>', '<p>Help!</p>', '<p>Yesterday</p>', '<p>Yesterday</p>'),
             new Sample(Kind::HIDDEN, self::field(Kind::HIDDEN), 'x', 'x', 'y', 'y'),
 
             // Numbers

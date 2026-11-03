@@ -190,6 +190,7 @@
  * 795 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields} (see tests/Agnostic.php).
  * 797 after step F5d, slice 4 (2026-11-03, +2): Base\Field\Behaviour\Upload, Base\Field\Upload\Dropzone (see tests/Agnostic.php).
  * 798 after step F5d, slice 5 (2026-11-03, +1): Base\Field\Behaviour\AssociationFile (see tests/Agnostic.php).
+ * 801 after step F5d, slice 6 (2026-11-03, +3): Base\Field\Behaviour\{Editor, Wysiwyg}, Base\Field\Editor\EditorJs (see tests/Agnostic.php).
  */
 
 return [
@@ -522,6 +523,7 @@ return [
     Base\Field\Behaviour\ColorPickr::class,
     Base\Field\Behaviour\CountrySelect::class,
     Base\Field\Behaviour\DateTimePicker::class,
+    Base\Field\Behaviour\Editor::class,
     Base\Field\Behaviour\Guess::class,
     Base\Field\Behaviour\Icon::class,
     Base\Field\Behaviour\JsColor::class,
@@ -533,6 +535,7 @@ return [
     Base\Field\Behaviour\Toggle::class,
     Base\Field\Behaviour\Translation::class,
     Base\Field\Behaviour\Upload::class,
+    Base\Field\Behaviour\Wysiwyg::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
@@ -552,6 +555,7 @@ return [
     Base\Field\DateTimePickerField::class,
     Base\Field\DiscriminatorField::class,
     Base\Field\EditorField::class,
+    Base\Field\Editor\EditorJs::class,
     Base\Field\EmailField::class,
     Base\Field\EmojiPickerField::class,
     Base\Field\FieldDescriptor::class,

@@ -10,6 +10,25 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the editors on every host (plan "omnibase agnostic", step F5d, slice 6, 2026-11-03)
+
+- **`Base\Field\Behaviour\Wysiwyg`** (`wysiwyg`, Quill) and **`Base\Field\Behaviour\Editor`** (`editor`, Editor.js): what
+  omnibridge/symfony's `WysiwygType` and `EditorType` decided, which they now ask - their options, the widget's id (dashes made
+  underscores), Quill's settings, Editor.js's (the collaboration's room when one is asked: `editor_record`, `editor_field`,
+  `editor_locale`), the value with its pictures' addresses, the routes' addresses; `reverse()` reads a document without a block
+  as no text (EditorType's PRE_SUBMIT). Registered in `Behaviours`; `FormView` gives an editor its record and its field's name,
+  inside a translations field too.
+- **`Base\Field\Editor\EditorJs`**: what `EditorController` answered under Symfony, moved here as it was - `ROUTES` (the seven
+  `ux_editorjs_*`), `data()`/`addresses()`, the mentions `users()`/`keywords()`/`threads()` (a site's own `$fields` still taken),
+  `uploadByFile()`/`uploadByUrl()`, `ticket()`, `autosave()` (on the unit of work and the entities' shapes, no longer Doctrine's
+  entity manager), `roomToken()`, `author()`, `picture()`. In `Base\Services` and the Symfony runtime's contracts;
+  `EditorController` delegates (its constructor takes the service; `App\Controller\UX\EditorController` overrides keep working).
+- The conformance samples of `editor` and `wysiwyg` carry values: a document shown, an empty one bound as null; an HTML text.
+- Fixed: `Flysystem::getPublic()` no longer fails where the host has no public folder (a package's tests): nothing is reachable
+  from it.
+- `tests/Field/EditorTest`; `EditorTypeCollabRelayTest` hands the type its `EditorJs`; `ParameterBagServicesTest` reads the
+  paginator's bag (the controller has none any more). `tests/Agnostic.php` 738, `tests/Foundation.php` 801.
+
 ### Added: records made from uploads, and the file sent refused when the form is validated, on every host (plan "omnibase agnostic", step F5d, slice 5, 2026-11-03)
 
 - **`Base\Field\Behaviour\AssociationFile`** (the `association_file` kind: a gallery's photos, a photo's picture): what

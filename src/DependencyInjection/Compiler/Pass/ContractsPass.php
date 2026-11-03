@@ -22,6 +22,7 @@ use Omnibridge\Contract\Validation;
 use Omnibridge\Contract\Views;
 use Omnibridge\Symfony\DependencyInjection\ContractsPass as HostContractsPass;
 use Base\Field\Search\RemoteSearch;
+use Base\Field\Editor\EditorJs;
 use Base\Field\Upload\Dropzone;
 use Psr\Clock\ClockInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -77,6 +78,8 @@ final class ContractsPass implements CompilerPassInterface
         RemoteSearch::class,
         // A dropzone's uploads (F5d, slice 4): FileType hands its payload, as the Upload behaviour does elsewhere.
         Dropzone::class,
+        // An editor's routes (F5d, slice 6): EditorType hands their payload and its pictures' addresses, as the Editor behaviour does elsewhere.
+        EditorJs::class,
     ];
 
     /**

@@ -105,6 +105,9 @@ final class Behaviours
             Kind::LOCALE => new ChoiceList(Choices::locales(...)),
             // A file sent with its form, its stored files shown (FileType and its children).
             Kind::FILE, Kind::IMAGE, Kind::AVATAR, Kind::AUDIO, Kind::VIDEO => new Upload((string) Upload::variantOf($kind)),
+            // A text written in Editor.js (its routes Base\Field\Editor\EditorJs) or in Quill (no route).
+            Kind::EDITOR => new Editor(),
+            Kind::WYSIWYG => new Wysiwyg(),
             default => null,
         };
     }
