@@ -22,7 +22,8 @@ return [
     Omnishield\Bridge\Symfony\OmnishieldBundle::class => ['all' => true],
     // Documents signed for any entity: Base\Service\Signatures through glitchr/omnisign.
     Omnisign\Bridge\Symfony\OmnisignBundle::class => ['all' => true],
-    Base\BaseBundle::class => ['all' => true],
+    // omnibase's bundle, omnibridge/symfony's since 5.0 (Base\BaseBundle until then).
+    Omnibridge\Symfony\Omnibase\BaseBundle::class => ['all' => true],
     // The back office; the shop and the forge sell and deliver through it.
     Base\Admin\AdminBundle::class => ['all' => true],
     Base\Marketplace\MarketplaceBundle::class => ['all' => true],

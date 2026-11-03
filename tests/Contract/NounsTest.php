@@ -118,7 +118,7 @@ final class NounsTest extends KernelTestCase
     /** Translator::parseClass($class) before C4b (PARSE_NAMESPACE), as it was. */
     private static function keyBefore(string $class): string
     {
-        $bundleEntityNamespaces = array_map(fn ($b) => dirname_namespace($b).'\\Entity\\', \Base\BaseBundle::getInstance()->getBundles());
+        $bundleEntityNamespaces = array_map(fn ($b) => dirname_namespace($b).'\\Entity\\', \Omnibridge\Symfony\Omnibase\BaseBundle::getInstance()->getBundles());
         $entityNamespaces = array_merge(['Proxies\\__CG__\\', 'App\\Entity\\', 'Base\\Entity\\'], $bundleEntityNamespaces);
 
         $entityPrefix = array_fill(0, 3, '');

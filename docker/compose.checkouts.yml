@@ -40,5 +40,7 @@ services:
       # omnibridge/symfony as checked out over the image's (step F5b): the form types the core moved there.
       - ${OMNIBRIDGE:-../../../omnibridge}/symfony:/srv/demo/vendor/omnibridge/symfony:ro
       - ./app/config/bundles.php:/srv/demo/config/bundles.php:ro
+      # Its routes as well: omnibase's controllers are imported with `type: omnibase` since 5.0.
+      - ./app/config/routes.yaml:/srv/demo/config/routes.yaml:ro
       - ./app/config/routes/plugins.php:/srv/demo/config/routes/plugins.php:ro
       - ./demo.sh:/usr/local/bin/demo:ro

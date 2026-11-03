@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service;
 
-use Base\Controller\UX\MediaController;
+use Omnibridge\Symfony\Omnibase\Controller\UX\MediaController;
 use Base\Service\ImageRoute;
 use Base\Service\MediaService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

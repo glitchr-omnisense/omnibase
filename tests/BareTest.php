@@ -309,7 +309,7 @@ final class BareTest extends TestCase
         self::assertSame(1, $status);
         $bundle = $report['classes'][BaseBundle::class];
         self::assertNull($bundle['error']);
-        self::assertSame('Base\\Bundle\\AbstractBaseBundle', $bundle['framework']['Symfony\\Component\\HttpKernel\\Bundle\\Bundle'] ?? null);
+        self::assertSame('Omnibridge\\Symfony\\Omnibase\\Bundle\\AbstractBaseBundle', $bundle['framework']['Symfony\\Component\\HttpKernel\\Bundle\\Bundle'] ?? null);
         self::assertNotEmpty(preg_grep('~/symfony/http-kernel/~', $bundle['framework_files']));
 
         $repository = $report['classes'][UserRepository::class];
@@ -762,6 +762,38 @@ final class BareTest extends TestCase
      * The autoloader of var/bare/vendor, the core installed alone without the framework (docker/bin/bare
      * --install); the case is skipped where it was not made.
      */
+    /**
+     * The core installed alone (plan "omnibase agnostic", step F6: 5.0 is a library): on a vendor made of
+     * its require and nothing else - no omnibridge/doctrine, no Doctrine but collections, no Twig, no
+     * Symfony component outside the kept list -, the agnostic core loads (bare --strict, tests/Agnostic.php),
+     * and the services' list builds and works in plain PHP (symfony/event-dispatcher is there, symfony/mailer's
+     * requirement, loaded by nothing of the agnostic core) (the obfuscator's map in memory there,
+     * Base\Cache\Pool\MemoryPool, symfony/cache being absent).
+     */
+    public function testTheCoreAloneLoadsTheAgnosticCore(): void
+    {
+        $autoload = __DIR__.'/../var/bare-alone/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor of the core alone here (var/bare-alone/vendor): "docker/bin/bare --install --alone" makes it, the harness does before this suite.');
+        }
+        $installed = json_decode((string) file_get_contents(\dirname($autoload).'/composer/installed.json'), true);
+        $names = array_column($installed['packages'] ?? $installed, 'name');
+        self::assertSame([], array_values(preg_grep('~^(?:doctrine/(?!collections$|deprecations$|lexer$)|twig/|omnibridge/(?:doctrine|twig|symfony|laravel)$|symfony/(?:validator|cache|process|workflow|http-client|var-dumper|error-handler|asset|expression-language)$)~', $names)), 'the core alone installs nothing it left to the bridges');
+
+        [$status, $report] = self::bare(['--strict'], (string) realpath($autoload));
+        $failed = array_filter($report['classes'], static fn (array $class) => $class['framework'] || $class['framework_files'] || null !== $class['error']);
+        self::assertSame([], array_keys($failed));
+        self::assertSame(0, $status);
+        self::assertCount(\count(require __DIR__.'/Agnostic.php'), $report['classes']);
+
+        $script = __DIR__.'/Services/container-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script], (string) realpath($autoload));
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame(0, $status);
+        self::assertSame([\Base\Service\Obfuscator::class, 5, true], $run['result']['obfuscator']);
+    }
+
     private static function withoutTheFramework(): string
     {
         $autoload = __DIR__.'/../var/bare/vendor/autoload.php';
@@ -781,7 +813,7 @@ final class BareTest extends TestCase
     {
         $autoload = \dirname((string) (new \ReflectionClass(\Composer\Autoload\ClassLoader::class))->getFileName(), 2).'/autoload.php';
         foreach (\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
-            if (false !== $loader->findFile(BaseBundle::class)) {
+            if (false !== $loader->findFile(\Base\Services::class)) {
                 return $vendorDir.'/autoload.php';
             }
         }

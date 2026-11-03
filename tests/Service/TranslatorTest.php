@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Service;
 
-use Base\BaseBundle;
-use Base\Bundle\AbstractBaseBundle;
+use Omnibridge\Symfony\Omnibase\BaseBundle;
+use Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Service\Localizer;
@@ -48,7 +48,7 @@ class TranslatorTest extends TestCase
     }
 
     /**
-     * parseClass(PARSE_NAMESPACE) reads Base\BaseBundle::getInstance() to
+     * parseClass(PARSE_NAMESPACE) reads Omnibridge\Symfony\Omnibase\BaseBundle::getInstance() to
      * build its bundle-specific entity-namespace replacements. In a real
      * app Symfony's kernel always constructs BaseBundle directly during
      * bundle registration, seeding the singleton before anything calls
@@ -379,7 +379,7 @@ class TranslatorTest extends TestCase
     /**
      * parseClass()'s default PARSE_NAMESPACE branch also strips
      * bundle-specific entity namespaces (derived at runtime from
-     * Base\BaseBundle::getInstance()->getBundles(), a reflection scan over
+     * Omnibridge\Symfony\Omnibase\BaseBundle::getInstance()->getBundles(), a reflection scan over
      * whatever Base\*Bundle classes happen to be autoloaded in THIS
      * process) — deliberately not exercised here, since it's dependent on
      * autoloading order across the whole test run. Every case below only

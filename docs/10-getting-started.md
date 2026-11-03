@@ -31,15 +31,20 @@ the core's harness runs on SQLite. The commands `doctrine:schema:charset` and
 
 ```bash
 composer config allow-plugins.omnibridge/composer true
-composer require omnisense/omnibase omnibridge/symfony
+composer require omnisense/omnibase:5.x-dev omnibridge/symfony:1.x-dev omnibridge/doctrine:1.x-dev omnibridge/twig:1.x-dev
 ```
+
+Since 5.0 the core is a library that requires neither Symfony's framework nor Doctrine nor Twig
+([What the core requires](20-architecture/packages.md)): omnibridge/symfony is the bundle and the
+framework, omnibridge/doctrine the persistence, omnibridge/twig Twig's helpers. A feature that needs
+a package the core only suggests (symfony/http-client, phpoffice/phpspreadsheet,
+web-auth/webauthn-lib, florianv/swap, league/flysystem-ftp, symfony/discord-notifier, the Twig
+extras) asks the application to require it. Upgrading from 4.x: [UPGRADE-5.0.md](../UPGRADE-5.0.md).
 
 `omnibridge/composer` is a Composer plugin (it applies the core's patch to
 symfony/process): Composer asks before it runs one, hence the first line.
-omnibridge/doctrine and omnibridge/twig come with the core (it requires them:
-its column types, naming strategy and mapping driver extend omnibridge/doctrine's,
-its Twig helpers are omnibridge/twig's); a site may require them at its root
-as well, the sites do.
+omnibridge/doctrine and omnibridge/twig are the application's to require since 5.0
+(4.x required omnibridge/doctrine).
 
 The backups ([Backups](30-operations/backups.md), the `timemachine:*` commands)
 need **glitchr/backup-manager**, a suggestion of the core since 4.0: a site that
@@ -61,7 +66,8 @@ return [
     Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
     // ...
-    Base\BaseBundle::class => ['all' => true],
+    // omnibase's bundle, omnibridge/symfony's since 5.0 (Base\BaseBundle in 4.x)
+    Omnibridge\Symfony\Omnibase\BaseBundle::class => ['all' => true],
 ];
 ```
 

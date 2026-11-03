@@ -13,7 +13,7 @@ use Omnibridge\Contract\Files;
 use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
 use Omnibridge\Contract\Urls;
-use Base\DependencyInjection\Compiler\Pass\ContractsPass;
+use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\ContractsPass;
 use Base\Entity\Thread;
 use Base\Service\BaseService;
 use Omnibridge\Contract\Translations;

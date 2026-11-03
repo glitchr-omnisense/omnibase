@@ -92,20 +92,37 @@ ini_set('display_errors', 'stderr');
 // (Symfony\Component\Intl\Data\Bundle\...), a standalone component's (plan, C3e).
 const FRAMEWORK_DEFAULT = '~^(?:Symfony\\\\Component\\\\(?:DependencyInjection|Config|HttpKernel|HttpFoundation|Routing|Security|Form|Console)\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
 const FRAMEWORK_FILES_DEFAULT = '~/vendor/(?:symfony/(?:dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|console|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
-// --strict: nor Doctrine (collections and the deprecations it reads aside), nor Twig, nor a bridge to a host or a
+// --strict: nor Doctrine (collections and the deprecations it reads aside, and doctrine/lexer, which egulias/email-validator
+// reads when symfony/mime checks an address: the mailer stack's, accepted at F6), nor Twig, nor a bridge to a host or a
 // persistence, nor Laravel, nor a Symfony component outside the kept list (plan "omnibase agnostic", 2026-11-01, F0).
+// The packages the core suggests that some of its classes stand on (since 5.0, plan "omnibase agnostic",
+// step F6; Twig's, src/Twig only, since F4, below): a class that cannot load for want of one of their classes, where the package is
+// not installed, is reported as optional - "optional": the package -, not as a failure.
+const OPTIONAL = [
+    'Symfony\\Component\\Validator\\' => 'symfony/validator',
+    'Symfony\\Component\\Workflow\\' => 'symfony/workflow',
+    'Symfony\\Component\\Asset\\' => 'symfony/asset',
+    // What extra.omnibase.bare installs beside the core in var/bare, absent from var/bare-alone (--alone):
+    // Base\Auth\ fills omniauth's stores, the TimeMachine extends backup-manager's Manager.
+    'Omniauth\\WebAuthn\\' => 'omniauth/webauthn',
+    'Omniauth\\Otp\\' => 'omniauth/otp',
+    'Omniauth\\Google\\' => 'omniauth/google',
+    'Omniauth\\' => 'omnisense/omniauth',
+    'Backup\\Manager\\' => 'glitchr/backup-manager',
+];
 const KEPT_COMPONENTS = 'String|Uid|Intl|Translation|Mime|Mailer|Notifier|PropertyAccess|OptionsResolver|Yaml|PasswordHasher|Filesystem|Finder|Serializer';
 const KEPT_PACKAGES = 'string|uid|intl|translation|mime|mailer|notifier|property-access|options-resolver|yaml|password-hasher|filesystem|finder|serializer|polyfill-[a-z0-9-]+|[a-z-]+-contracts';
-const FRAMEWORK_STRICT = '~^(?:Doctrine\\\\(?!Common\\\\Collections\\\\|Deprecations\\\\)|Twig\\\\|Omnibridge\\\\(?:Doctrine|Twig|Symfony|Laravel)\\\\|Illuminate\\\\|Symfony\\\\Component\\\\(?!(?:'.KEPT_COMPONENTS.')\\\\)|Symfony\\\\Component\\\\Notifier\\\\Bridge\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
-const FRAMEWORK_FILES_STRICT = '~/vendor/(?:doctrine/(?!collections/|deprecations/)[a-z0-9_.-]+|twig/[a-z0-9_.-]+|omnibridge/(?:doctrine|twig|symfony|laravel)|laravel/[a-z0-9_.-]+|illuminate/[a-z0-9_.-]+|symfony/(?!(?:'.KEPT_PACKAGES.')/)[a-z0-9_.-]+|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
+const FRAMEWORK_STRICT = '~^(?:Doctrine\\\\(?!Common\\\\Collections\\\\|Common\\\\Lexer\\\\|Deprecations\\\\)|Twig\\\\|Omnibridge\\\\(?:Doctrine|Twig|Symfony|Laravel)\\\\|Illuminate\\\\|Symfony\\\\Component\\\\(?!(?:'.KEPT_COMPONENTS.')\\\\)|Symfony\\\\Component\\\\Notifier\\\\Bridge\\\\|Symfony\\\\(?:Bundle|Bridge|UX)\\\\|ApiPlatform\\\\|HWI\\\\|Scheb\\\\|Nelmio\\\\|(?!Base\\\\|Symfony\\\\Component\\\\Intl\\\\)(?:[A-Za-z0-9_]+\\\\)*[A-Za-z0-9_]*Bundle\\\\)~';
+const FRAMEWORK_FILES_STRICT = '~/vendor/(?:doctrine/(?!collections/|lexer/|deprecations/)[a-z0-9_.-]+|twig/[a-z0-9_.-]+|omnibridge/(?:doctrine|twig|symfony|laravel)|laravel/[a-z0-9_.-]+|illuminate/[a-z0-9_.-]+|symfony/(?!(?:'.KEPT_PACKAGES.')/)[a-z0-9_.-]+|[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/[a-z0-9_.-]+|hwi/[a-z0-9_.-]+|scheb/[a-z0-9_.-]+|nelmio/[a-z0-9_.-]+)/~';
 
-$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false, 'install' => false, 'strict' => false];
+$options = ['json' => false, 'all' => false, 'each' => false, 'names' => false, 'install' => false, 'strict' => false, 'alone' => false];
 $classes = [];
 foreach (array_slice($argv, 1) as $argument) {
     if (in_array($argument, ['-h', '--help'], true)) {
         echo "bare [--all] [--each] [--json] [class...]: the classes named, every class of src/ (--all) or the Foundation (tests/Foundation.php), loaded with Composer's autoloader alone.\n";
         echo "bare --names [--all] [--json] [class...]: informative, not a guard: which of those classes name the framework in their use lines or code, themselves or through the Base\\ classes they name.\n";
         echo "bare --strict [...]: the same against a wider set - nor Doctrine (collections aside), nor Twig, nor a host's bridge, nor a Symfony component outside the kept list; without classes, the agnostic core (tests/Agnostic.php).\n";
+        echo "bare --alone [--install|--strict...]: the same on var/bare-alone/vendor, the core's require alone (no extra.omnibase.bare: neither omniauth nor omnibridge/doctrine).\n";
         echo "bare --install: makes var/bare/vendor, the core installed alone by composer install --no-dev, where the classes are then loaded (again when composer.json changed).\n";
         exit(0);
     }
@@ -122,10 +139,10 @@ define('FRAMEWORK_FILES', STRICT ? FRAMEWORK_FILES_STRICT : FRAMEWORK_FILES_DEFA
 
 $core = dirname(__DIR__, 2);
 if ($options['install']) {
-    exit(install_bare_vendor($core));
+    exit(install_bare_vendor($core, $options['alone']));
 }
 $autoload = getenv('OMNIBASE_AUTOLOAD') ?: null;
-foreach ([$core.'/var/bare/vendor/autoload.php', $core.'/vendor/autoload.php', $core.'/../../autoload.php'] as $candidate) {
+foreach (($options['alone'] ? [$core.'/var/bare-alone/vendor/autoload.php'] : [$core.'/var/bare/vendor/autoload.php', $core.'/vendor/autoload.php', $core.'/../../autoload.php']) as $candidate) {
     $autoload ??= is_file($candidate) ? realpath($candidate) : null;
 }
 if (null === $autoload) {
@@ -164,9 +181,9 @@ printf("The core in bare PHP%s: %d classes loaded with %s alone, no kernel, no c
 foreach ([...$report['baseline']['symbols'], ...$report['baseline']['files']] as $loaded) {
     printf("  the autoloader itself, before any class: %s\n", $loaded);
 }
-$optional = array_keys(array_filter($report['classes'], static fn (array $class) => isset($class['optional'])));
-if ($optional) {
-    printf("  %d classes of src/Twig not loaded for want of Twig's: twig/twig is not installed (Twig is optional in the core).\n", count($optional));
+$optional = array_count_values(array_column(array_filter($report['classes'], static fn (array $class) => isset($class['optional'])), 'optional'));
+foreach ($optional as $package => $count) {
+    printf("  %d classes not loaded for want of %s's classes: %s is not installed (a suggestion of the core).\n", $count, $package, $package);
 }
 foreach ($failed as $class => $result) {
     printf("✗ %s\n", $class);
@@ -190,14 +207,19 @@ exit($failed || $report['baseline']['symbols'] ? 1 : 0);
  * composer.json it would write changed (the core's requirements did) or the
  * vendor is missing. Composer's output goes to the error output.
  */
-function install_bare_vendor(string $core): int
+function install_bare_vendor(string $core, bool $alone = false): int
 {
-    $dir = $core.'/var/bare';
+    // --alone (since 5.0, plan "omnibase agnostic", step F6): the core's require and nothing else, in
+    // var/bare-alone - what a host gets with `composer require omnisense/omnibase` alone.
+    $dir = $core.($alone ? '/var/bare-alone' : '/var/bare');
     $composer = json_decode((string) file_get_contents($core.'/composer.json'), true, 512, JSON_THROW_ON_ERROR);
     unset($composer['autoload-dev']);
+    // --no-dev still resolves require-dev: the core alone is its require, nothing else is asked of Composer
+    // (since 5.0 the bridges the core no longer requires are in its require-dev, for its own suite).
+    unset($composer['require-dev']);
     // The suggested packages some classes of the Foundation implement the contracts of (extra.omnibase.bare:
     // omniauth, for Base\Auth\): installed beside the core, none of them a framework.
-    $composer['require'] = ($composer['require'] ?? []) + ($composer['extra']['omnibase']['bare'] ?? []);
+    $composer['require'] = ($composer['require'] ?? []) + ($alone ? [] : ($composer['extra']['omnibase']['bare'] ?? []));
     $composer['autoload']['psr-4'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['psr-4'] ?? []);
     $composer['autoload']['files'] = array_map(static fn (string $path) => '../../'.ltrim(preg_replace('~^\./~', '', $path), '/'), $composer['autoload']['files'] ?? []);
     // omnibridge/doctrine as checked out beside the core (the harness's compose.checkouts.yml mounts it
@@ -275,6 +297,9 @@ function load_here(array $classes, string $autoload): array
     // extension, the environment, the loader) is reported as optional, not as a failure. The others of
     // src/Twig, and every class outside it, are measured as before: none may need Twig to load.
     $twig = twig_installed($autoload);
+    // Since 5.0 the same for the other packages the core suggests and a class of it stands on (OPTIONAL):
+    // where the package is not installed, a class that cannot load for want of one of its classes is optional.
+    $absent = array_filter(OPTIONAL, static fn (string $package) => !package_installed($autoload, $package));
 
     $report = [];
     foreach ($classes as $class) {
@@ -307,6 +332,14 @@ function load_here(array $classes, string $autoload): array
             $report[$class] = ['error' => null, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary, 'optional' => 'twig/twig'];
             continue;
         }
+        if (null !== $error && preg_match('~^Error: (?:Class|Interface|Trait) "([^"]+)" not found~', $error, $missing)) {
+            foreach ($absent as $prefix => $package) {
+                if (str_starts_with($missing[1], $prefix)) {
+                    $report[$class] = ['error' => null, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary, 'optional' => $package];
+                    continue 2;
+                }
+            }
+        }
         $report[$class] = ['error' => $error, 'framework' => $framework, 'framework_files' => array_values(preg_grep(FRAMEWORK_FILES, array_slice(get_included_files(), $files))), 'boundary' => $boundary] + (null === $result ? [] : ['result' => $result]);
     }
 
@@ -319,13 +352,21 @@ function load_here(array $classes, string $autoload): array
  */
 function twig_installed(string $autoload): bool
 {
+    return package_installed($autoload, 'twig/twig');
+}
+
+/**
+ * Whether a package is installed beside the autoloader measured (Composer's installed.php read).
+ */
+function package_installed(string $autoload, string $package): bool
+{
     $installed = dirname($autoload).'/composer/installed.php';
     if (!is_file($installed)) {
         return true; // not a Composer 2 vendor: as before, the classes are loaded
     }
     $packages = (static fn (string $file) => require $file)($installed);
 
-    return isset($packages['versions']['twig/twig']);
+    return isset($packages['versions'][$package]);
 }
 
 /**

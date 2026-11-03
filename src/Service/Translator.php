@@ -686,7 +686,7 @@ class Translator implements TranslatorInterface, Translations
             return $this->entityNouns;
         }
         // Outside Symfony's kernel (omnibridge/laravel, plain PHP): the host's namespaces, as its Nouns contract has them.
-        $bundle = class_exists(\Symfony\Component\DependencyInjection\Kernel\AbstractBundle::class) ? \Base\BaseBundle::getInstance(false) : null;
+        $bundle = class_exists(\Base\BaseBundle::class) ? \Base\BaseBundle::getInstance(false) : null;
         if (null === $bundle) {
             $nouns = \Omnibridge\Runtime::find(\Base\Contract\Nouns::class);
 

@@ -24,21 +24,27 @@ namespace {
     if (!function_exists('dumpif')) {
         function dumpif(...$variadic)
         {
-            BaseBundle::dump("", ...$variadic);
+            if (class_exists(BaseBundle::class)) {
+                BaseBundle::dump("", ...$variadic);
+            }
         }
     }
 
     if (!function_exists('enable_dumpif')) {
         function enable_dumpif()
         {
-            BaseBundle::enableDump("");
+            if (class_exists(BaseBundle::class)) {
+                BaseBundle::enableDump("");
+            }
         }
     }
 
     if (!function_exists('disable_dumpif')) {
         function disable_dumpif()
         {
-            BaseBundle::disableDump("");
+            if (class_exists(BaseBundle::class)) {
+                BaseBundle::disableDump("");
+            }
         }
     }
 

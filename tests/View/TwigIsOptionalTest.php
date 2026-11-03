@@ -76,14 +76,14 @@ final class TwigIsOptionalTest extends TestCase
 
     public function testTheServicesRegisterTheTwigLayerOnlyWithTwig(): void
     {
-        $twig = (string) file_get_contents(self::root().'/config/services/twig.php');
+        $twig = (string) file_get_contents(self::config().'/services/twig.php');
         $body = substr($twig, (int) strpos($twig, 'return static function'));
         self::assertMatchesRegularExpression('~^return static function[^{]*\{\s*if \(!class_exists\(\\\\Twig\\\\Environment::class\)\) \{\s*return;\s*\}~', $body, 'config/services/twig.php returns first without Twig');
 
-        $files = array_merge(glob(self::root().'/config/services/*.php') ?: [], glob(self::root().'/services*.php') ?: []);
+        $files = array_merge(glob(self::config().'/services/*.php') ?: [], glob(self::config().'/services*.php') ?: []);
         $outside = [];
         foreach ($files as $file) {
-            if (str_ends_with($file, '/config/services/twig.php')) {
+            if (str_ends_with($file, '/services/twig.php')) {
                 continue;
             }
             $depth = 0;
@@ -145,5 +145,11 @@ final class TwigIsOptionalTest extends TestCase
     private static function root(): string
     {
         return \dirname(__DIR__, 2);
+    }
+
+    /** The core's service files, omnibridge/symfony's since 5.0 (plan "omnibase agnostic", step F6). */
+    private static function config(): string
+    {
+        return \dirname((new \ReflectionClass(\Omnibridge\Symfony\Omnibase\BaseBundle::class))->getFileName(), 3).'/config/omnibase';
     }
 }

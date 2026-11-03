@@ -2,7 +2,7 @@
 
 namespace Tests\Base\DependencyInjection;
 
-use Base\DependencyInjection\BaseConfiguration;
+use Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Processor;
 

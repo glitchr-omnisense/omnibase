@@ -347,8 +347,6 @@ return [
     Base\Demo\DemoAccountRegistry::class,
     Base\Demo\DemoGuard::class,
     Base\Demo\DemoMode::class,
-    Base\DependencyInjection\Dumper\CliDumper::class,
-    Base\DependencyInjection\Dumper\HtmlDumper::class,
     Base\EntityDispatcher\AbstractEvent::class,
     Base\EntityDispatcher\AbstractEventDispatcher::class,
     Base\EntityDispatcher\EventDispatcherInterface::class,

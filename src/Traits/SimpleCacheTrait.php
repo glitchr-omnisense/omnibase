@@ -5,18 +5,26 @@ namespace Base\Traits;
 use DateInterval;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
+use Base\Cache\Pool\MemoryPool;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;
 
 trait SimpleCacheTrait
 {
-    public function __construct(string $cacheDir, ?string $buildDir = null)
+    /**
+     * The local cache is a PSR-6 pool (psr/cache, since 5.0: plan "omnibase agnostic", step F6): the one given,
+     * or symfony/cache's PHP array file over a filesystem pool in the cache folder where symfony/cache is
+     * installed (as before 5.0, every Symfony site), or one held in memory (Base\Cache\Pool\MemoryPool).
+     */
+    public function __construct(string $cacheDir, ?string $buildDir = null, ?CacheItemPoolInterface $pool = null)
     {
-        $phpCacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], static::class) . ".php";
-        $fsCacheFile = $cacheDir . "/pools/simple/fs/" . str_replace(['\\', '/'], ['__', '_'], static::class);
+        if (null === $pool && class_exists(PhpArrayAdapter::class)) {
+            $phpCacheFile = $cacheDir . "/pools/simple/php/" . str_replace(['\\', '/'], ['__', '_'], static::class) . ".php";
+            $fsCacheFile = $cacheDir . "/pools/simple/fs/" . str_replace(['\\', '/'], ['__', '_'], static::class);
 
-        $phpArrayAdapter = new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile));
-        $this->setCache($phpArrayAdapter);
+            $pool = new PhpArrayAdapter($phpCacheFile, new FilesystemAdapter('', 0, $fsCacheFile));
+        }
+        $this->setCache($pool ?? new MemoryPool());
 
         $this->warmUp($cacheDir, $buildDir);
     }

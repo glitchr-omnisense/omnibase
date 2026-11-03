@@ -8,7 +8,10 @@ order: 60
 ## Importing the routes
 
 The core's controllers carry their routes as attributes. A site imports them
-with the `BaseBundle` alias, beside its own:
+through omnibridge/symfony's loader (`type: omnibase`, since 5.0), beside its own: it reads
+omnibridge/symfony's Symfony controllers (`Omnibridge\Symfony\Omnibase\Controller\*`) and the
+core's actions written once for every host (`src/Controller/Action`, `SignatureController`).
+In 4.x the import was `resource: "@BaseBundle/Controller"`, `type: attribute`.
 
 ```yaml
 # config/routes.yaml
@@ -19,8 +22,8 @@ controllers:
     type: attribute
 
 base_controller:
-    resource: "@BaseBundle/Controller"
-    type: attribute
+    resource: .
+    type: omnibase
     prefix: /
 ```
 

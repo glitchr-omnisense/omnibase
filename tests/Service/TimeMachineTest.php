@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service;
 
-use Base\DependencyInjection\BaseExtension;
+use Omnibridge\Symfony\Omnibase\DependencyInjection\BaseExtension;
 use Base\Service\TimeMachine;
 use LogicException;
 use PHPUnit\Framework\TestCase;

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Bridge\Composer;
 
-use Base\Bundle\AbstractBaseBundle;
+use Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle;
 use Base\Service\Model\ClassAliases;
 use Omnibridge\Composer\Stub\StubContext;
 use Omnibridge\Composer\Stub\StubInterface;
