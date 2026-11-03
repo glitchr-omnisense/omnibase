@@ -71,7 +71,7 @@ final class FormProcessor
     {
         $form = $this->guarded($form);
 
-        return FormView::of($form, $this->binder->read($form, $data), [], $this->token($form));
+        return FormView::of($form, $this->binder->read($form, $data), [], $this->token($form), false, $data);
     }
 
     /**

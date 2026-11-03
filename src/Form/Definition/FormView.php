@@ -5,6 +5,7 @@ namespace Base\Form\Definition;
 use Base\Field\Behaviour\Behaviours;
 use Base\Field\Behaviour\Guess;
 use Base\Field\Behaviour\Translation;
+use Base\Field\Behaviour\Upload;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
 use Base\Field\Search\RemoteSearch;
@@ -65,8 +66,9 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
      *
      * @param array<string, mixed>        $values     by field name (FormBinder::read() or Binding::$values)
      * @param array<string, list<string>> $errors     by field name, "" for the form's own
+     * @param mixed                       $data       the data the form edits: a file field shows the record's stored files
      */
-    public static function of(FormDefinition $form, array $values = [], array $errors = [], ?string $token = null, bool $submitted = false): self
+    public static function of(FormDefinition $form, array $values = [], array $errors = [], ?string $token = null, bool $submitted = false, mixed $data = null): self
     {
         $root = new self($form->getName(), [
             'kind' => 'form', 'type' => 'form', 'method' => $form->getMethod(), 'action' => $form->getTarget() ?? '',
@@ -76,7 +78,11 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         ]);
 
         foreach ($form->getFields() as $name => $field) {
-            $root->children[$name] = self::field($root, $name, \Base\Field\Behaviour\Guess::from($field, $form->getDataClass()), $values[$name] ?? null, $errors[$name] ?? []);
+            $field = \Base\Field\Behaviour\Guess::from($field, $form->getDataClass());
+            if (Behaviours::ofField($field) instanceof Upload) {
+                $field = self::uploaded($field, $name, $data, $values[$name] ?? null);
+            }
+            $root->children[$name] = self::field($root, $name, $field, $values[$name] ?? null, $errors[$name] ?? []);
         }
         foreach ($root->children as $child) {
             if ('slug' === ($child->vars['widget'] ?? null)) {
@@ -98,6 +104,22 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         }
 
         return $root;
+    }
+
+    /**
+     * A file field told what its block reads (Upload::vars()): the record it edits, its property, its
+     * value where the data is no record (a form's model).
+     */
+    private static function uploaded(FieldDescriptor $field, string $name, mixed $data, mixed $value): FieldDescriptor
+    {
+        $property = (string) ($field->getOption('property_path') ?? $field->getProperty() ?? $name);
+        if (null === $value && null !== $data && false !== $field->getOption('mapped') && Properties::isReadable($data, $property)) {
+            $value = Properties::get($data, $property);
+        }
+
+        return (clone $field)->setFormTypeOptions($field->getFormTypeOptions() + [
+            'upload_record' => \is_object($data) ? $data : null, 'upload_property' => $name, 'upload_data' => $value,
+        ]);
     }
 
     /** @param list<string> $errors */

@@ -330,6 +330,18 @@ and body and send its `Answer` as JSON. `SelectType` makes its `data` with it; t
 `search` endpoint its `data` and starts select2 with the entries chosen (the records found by their ids, an icon
 named by its adapter's list), so both hosts draw the same picker.
 
+**Uploads.** A file field (`file`, `image`, `avatar`, `audio`, `video`) is `Base\Field\Behaviour\Upload` on every host:
+the defaults and normalizers of omnibase's `FileType` and its children, and what their blocks show of the record's files -
+the stored files' names (the hidden input `[file]`), their public addresses, thumbnails and previews, the download links, the
+largest size and the types accepted (the record's `#[Uploader]` and `#[File]`), an image's thumbnail, modal and cropper. The
+file to send is `[raw]` (or `[url]` with `allow_url`); a field of several files with a dropzone sends each file as it is dropped
+to `Base\Field\Upload\Dropzone`'s `ux_dropzone`, which keeps it under a uuid in the cache folder's `dropzone/` until the form
+is sent (`ux_dropzone_preview` shows it again, `ux_dropzone_delete` removes it; its payload carries the visitor's token of intent
+`dropzone`). What is sent back is read as `FileType` reads it (`Upload::reverse()`): the file sent, else the one fetched, else
+what `[file]` names - the dropzone's kept files, or a stored file's name -; a compound sent empty removes the file, a field not
+sent keeps it. The record's `#[Uploader]` stores the file when the record is flushed. Symfony's types and its
+`DropzoneController` ask the behaviour and the service; the neutral `FormView` gives the behaviour the record it edits.
+
 **Translations.** A translations field (`translation`) is one part per language, each the translation entity's
 fields, on every host: `Base\Field\Behaviour\Translation` holds what `TranslationType` decides (the languages drawn -
 every offered one, or for `single_locale` the default one, the record's one language when it has exactly one -; which
