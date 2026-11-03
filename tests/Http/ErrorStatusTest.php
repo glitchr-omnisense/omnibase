@@ -60,4 +60,14 @@ class ErrorStatusTest extends KernelTestCase
         $this->assertSame(403, $this->controller->Main(new AccessDeniedHttpException('No.'))->getStatusCode());
         $this->assertSame(422, $this->controller->Main(new UnprocessableEntityHttpException('Invalid.'))->getStatusCode());
     }
+
+    /**
+     * The controller moved to omnibridge/symfony at 5.0 (plan "omnibase agnostic", step F6): its former service id
+     * is the same service, as a site's `framework.error_controller: Base\Controller\ErrorController::Main` names it.
+     */
+    public function testTheFormerIdIsTheMovedController(): void
+    {
+        $this->assertSame($this->controller, static::getContainer()->get('Base\Controller\ErrorController'));
+        $this->assertSame(static::getContainer()->get(\Omnibridge\Symfony\Omnibase\Controller\UX\MediaController::class), static::getContainer()->get('Base\Controller\UX\MediaController'));
+    }
 }
