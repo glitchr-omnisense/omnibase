@@ -184,6 +184,7 @@
  * 799 after step F5b's move (2026-11-02, -8): the seven of tests/Agnostic.php and SymfonyKinds, moved to omnibridge/symfony.
  * 799 after step F5c's first part (2026-11-02, -3 +1 on F5b group 5's 801): Base\Subscriber\{AnalyticsSubscriber, TemplatedEmailSubjectSubscriber,
  * TwigSubscriber} moved to omnibridge/symfony (with FrameworkLocator and WebpackCacheWarmer, listed nowhere); Base\Http\RequestsOf.
+ * 771 after step F5c, item 3 (2026-11-03, +2 on 769): Base\Database\Mapping\EntityFields and Base\Database\Backend\ColumnTypes.
  */
 
 return [
@@ -276,6 +277,7 @@ return [
     Base\Database\Attribute\Vault::class,
     Base\Database\Attribute\Versionable::class,
     Base\Database\Backend\BulkDeletes::class,
+    Base\Database\Backend\ColumnTypes::class,
     Base\Database\Backend\ConditionalUpdates::class,
     Base\Database\Backend\EntityCache::class,
     Base\Database\Backend\RowLocks::class,
@@ -308,6 +310,7 @@ return [
     Base\Database\Lifecycle\ThreadParticipants::class,
     Base\Database\Lifecycle\TrashRecorder::class,
     Base\Database\Mapping\DescriptionShapes::class,
+    Base\Database\Mapping\EntityFields::class,
     Base\Database\Mapping\EntityShape::class,
     Base\Database\Mapping\EntityShapes::class,
     Base\Database\Repository\Entities::class,

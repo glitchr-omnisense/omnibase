@@ -32,7 +32,9 @@ return static function (ContainerConfigurator $container): void {
     // Translator services
     $services->alias('Base\Service\TranslatorInterface', 'Base\Service\Translator');
 
-    $services->set('Base\Service\Translator')
+    // Defined from Base\Services (config/services-list.php); under Symfony it decorates the framework's translator.
+    $services->get('Base\Service\Translator')
+        ->autowire(false)
         ->decorate('translator')
         ->public(true)
         ->tag('twig.runtime')

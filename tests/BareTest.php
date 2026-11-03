@@ -235,6 +235,9 @@ final class BareTest extends TestCase
             'translator' => [\Base\Service\Translator::class, 'Bonjour Anne'],
             'stories' => \Base\Screen\Builder\Stories::class,
             'email' => ['Welcome Anne', '<body><title>Welcome Anne</title><p>Hello Anne.</p></body>', "Welcome Anne\n\nHello Anne.\n\n\n", '"Les Ringo Stars" <postmaster@lesringostars.test>'],
+            // Step F5c, item 3: the facade on the contracts, the hydrator on a unit of work and a Description.
+            'base service' => [\Base\Service\BaseService::class, true, 'prod', false, 10],
+            'entity hydrator' => [\Base\Database\Entity\EntityHydrator::class, 'Le Pont Mirabeau, changed', [], 'Alcools', 3],
         ], $run['result']);
     }
 
@@ -718,6 +721,7 @@ final class BareTest extends TestCase
             'hot parameters, a false setting, a null one, off' => [false, 300, 300],
             'baseservice, debug, development, salt' => [true, true, 'not-so-secret'],
             'baseservice, granted' => [true, false],
+            'baseservice, session, route, link, asset, user' => ['/japon', '/japon', null, 'blog_articles', '/blog_article?slug=le-fuji', '/assets/app.css', null],
             // Sessions and Locales: the visitor signed out (not kicked), someone else kicked, the locales.
             'user, the visitor signed out' => [true, false],
             'user, someone else kicked' => true,

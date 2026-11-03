@@ -3,9 +3,12 @@
 namespace Base;
 
 use Base\Auth\Registration;
+use Base\Database\Entity\EntityHydrator;
+use Base\Database\Entity\EntityHydratorInterface;
 use Base\Form\Definition\FormProcessor;
 use Base\Notifier\Mail\EmailComposer;
 use Base\Screen\Builder\Stories;
+use Base\Service\BaseService;
 use Base\Service\MediaService;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Obfuscator\Compression\DeflateCompression;
@@ -86,6 +89,11 @@ final class Services
             ['class' => FormProcessor::class],
             // A sign-up once its form holds: approved, its password, named, kept (the host signs it in).
             ['class' => Registration::class],
+            // An entity filled from data and rebuilt as it was: on the unit of work, its persistence's shapes and snapshots.
+            ['class' => EntityHydrator::class, 'contracts' => [EntityHydratorInterface::class, 'base.database.entity_hydrator']],
+            // The facade of the services for an application's code, on the contracts (the host's own half, a subclass:
+            // Symfony's is omnibridge/symfony's SymfonyBaseService, which the Symfony configuration defines here).
+            ['class' => BaseService::class, 'contracts' => ['base.service']],
         ];
     }
 }

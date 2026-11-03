@@ -516,7 +516,7 @@ return static function (ContainerConfigurator $container): void {
     $services->set('Base\Controller\Action\Widget\Page')->public()
         ->args([service('Base\Repository\Layout\Widget\PageRepository')])
         ->tag('controller.service_arguments');
-    $services->set('Base\Screen\Builder\Stories')->public()
+    $services->get('Base\Screen\Builder\Stories')->autowire(false)->public() // Base\Services'
         ->args([service('Base\Contract\Texts'), service('Base\Contract\Pictures')]); // "now": Runtime::clock(), the framework's unless one is set by hand
     // The account's screens (C5, its second part): the builder asks the security policy, the
     // Urls and Tokens contracts; AccountScreens, a Twig runtime (it reads Twig's functions:
@@ -527,8 +527,12 @@ return static function (ContainerConfigurator $container): void {
 
     // BaseService: a lazy facade (plan "omnibase agnostique", C9). Lazy, it is a ghost
     // of the class until one of its methods reads a property: injecting it builds
-    // none of its 23 services.
-    $services->set('Base\Service\BaseService')
+    // none of its 23 services. The core's facade is framework-neutral (plan "omnibase
+    // agnostic", step F5c, item 3; Base\Services lists it for every host); under Symfony
+    // it is omnibridge/symfony's SymfonyBaseService, its host half (kernel, console, form
+    // factory, profiler, Symfony's request, routes and responses).
+    $services->get('Base\Service\BaseService')->class(\Omnibridge\Symfony\Omnibase\Service\SymfonyBaseService::class)
+        ->autowire(false)
         ->public(true)
         ->lazy()
         ->args([
@@ -582,7 +586,8 @@ return static function (ContainerConfigurator $container): void {
         ->public(true)
         ->args([service('advanced_router'), service('parameter_bag'), service('setting_bag'), service('Omnibridge\Contract\Access'), service('Omnibridge\Contract\Access')]);
 
-    $services->set('Base\Service\Paginator')
+    $services->get('Base\Service\Paginator') // Base\Services' (config/services-list.php), on omnibase's router
+        ->autowire(false)
         ->public(true)
         ->args([service('advanced_router'), service('parameter_bag')]);
 

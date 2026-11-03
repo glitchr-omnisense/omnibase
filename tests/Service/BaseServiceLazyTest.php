@@ -31,7 +31,9 @@ final class BaseServiceLazyTest extends KernelTestCase
     {
         $service = static::getContainer()->get('base.service');
 
-        self::assertSame(BaseService::class, $service::class, 'a ghost, not a proxy subclass');
+        // The core's facade is neutral; Symfony's is its host half, omnibridge/symfony's (step F5c, item 3).
+        self::assertSame(\Omnibridge\Symfony\Omnibase\Service\SymfonyBaseService::class, $service::class, 'a ghost, not a proxy subclass');
+        self::assertInstanceOf(BaseService::class, $service);
         self::assertSame($service, static::getContainer()->get(BaseService::class));
         self::assertTrue((new \ReflectionClass($service))->isUninitializedLazyObject($service));
     }

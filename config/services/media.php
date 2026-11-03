@@ -265,17 +265,20 @@ return static function (ContainerConfigurator $container): void {
         'GzipCompression',
         'DeflateCompression',
     ] as $class) {
-        $services->set("Base\Service\Model\Obfuscator\Compression\\$class")
-            ->parent('Base\Service\Model\Obfuscator\AbstractCompression')
+        // Defined from Base\Services (config/services-list.php), as the four below: Symfony adds its tags.
+        $services->get("Base\Service\Model\Obfuscator\Compression\\$class")
+            ->autowire(false)
             ->tag('obfuscator.compression');
     }
 
-    $services->set('Base\Service\Model\Obfuscator\Compression\HashidsCompression')
-        ->parent('Base\Service\Model\Obfuscator\AbstractCompression')
+    $services->get('Base\Service\Model\Obfuscator\Compression\HashidsCompression')
+        ->autowire(false)
         ->tag('obfuscator.compression')
-        ->bind('$secret', '%kernel.secret%');
+        ->arg('$secret', '%kernel.secret%');
 
-    $services->set('Base\Service\Obfuscator')
+    // The compressions given by their tag (ObfuscatorCompressionPass), its parameters omnibase's bag.
+    $services->get('Base\Service\Obfuscator')
+        ->autowire(false)
         ->public()
         ->tag('twig.runtime')
         ->args([new Reference('parameter_bag')])
@@ -297,11 +300,17 @@ return static function (ContainerConfigurator $container): void {
             new Reference('parameter_bag'),
         ]);
 
-    $services->set('Base\Service\MediaService')
-            ->parent('Base\Service\FileService')
+    // Defined from Base\Services (config/services-list.php); Symfony's services given as FileService's are.
+    $services->get('Base\Service\MediaService')
+            ->autowire(false)
             ->public()
             ->tag('twig.runtime')
             ->args([
+                new Reference('Omnibridge\Contract\Views', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference('advanced_router'),
+                new Reference('obfuscator'),
+                new Reference('flysystem'),
+                new Reference('parameter_bag'),
                 new Reference('imagine.bitmap'),
                 new Reference('imagine.svg'),
                 new Reference('profiler', ContainerInterface::IGNORE_ON_INVALID_REFERENCE),

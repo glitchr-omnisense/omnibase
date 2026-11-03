@@ -17,7 +17,7 @@ name, in `Omnibridge\Container`'s syntax - `'@id'` a service, `'%name%'` a param
 
 | Host | Reads the list with |
 |---|---|
-| Symfony | `config/services-list.php`, loaded last by `BaseExtension`: each listed contract the configuration does not alias itself is aliased to its service. The services themselves are still wired by `config/services/*.php`, which move to omnibridge/symfony at F5c, where it reads the list in their place. `tests/ServicesTest` checks that the two agree. |
+| Symfony | `config/services-list.php`, loaded first by `BaseExtension`: each listed service is defined from the list (autowired, public, its arguments). `config/services/*.php` and `services-decoration.php` then say only what Symfony adds, through `$services->get()` - tags, decoration, the class of a service's Symfony half (BaseService's, omnibridge/symfony's SymfonyBaseService), the framework's services given in place of what the list autowires; `config/services-list-contracts.php`, loaded last, aliases each listed contract the configuration does not alias itself (step F5c, item 3). The files move to omnibridge/symfony with the rest of the DI at F6. `tests/ServicesTest` checks that the container answers the list. |
 | Laravel | omnibridge/laravel's `Container\Definitions::bind()`, at boot: every listed service it (or the application) does not bind yet is a singleton of its class, its contracts aliases. |
 | Plain PHP | omnisense/omnibridge's `Omnibridge\Container::fromDefinitions()` (docs: omnibridge's `docs/container.md`). |
 

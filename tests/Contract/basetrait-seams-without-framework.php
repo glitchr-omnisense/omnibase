@@ -335,6 +335,32 @@ $answers['hot parameters, a false setting, a null one, off'] = [$hot->get('base.
 $facade = (new ReflectionClass(BaseService::class))->newInstanceWithoutConstructor();
 $answers['baseservice, debug, development, salt'] = [$facade->isDebug(), $facade->isDevelopment(), $facade->getSalt()];
 $answers['baseservice, granted'] = [$facade->isGranted('ROLE_ADMIN'), $facade->isGranted('ROLE_SUPERADMIN')];
+// The facade's session, route, link, asset and user on the contracts (F5c item 3): a request with a session of its own.
+Runtime::set(\Omnibridge\Contract\Requests::class, new class implements \Omnibridge\Contract\Requests {
+    /** @var array<string, mixed> */
+    private array $values = [];
+
+    public function has(): bool { return true; }
+    public function ip(): ?string { return null; }
+    public function header(string $name): ?string { return null; }
+    public function uri(): ?string { return '/japon/articles'; }
+    public function host(): ?string { return 'lesringostars.test'; }
+    public function route(): ?string { return 'blog_articles'; }
+    public function attribute(string $name, mixed $default = null): mixed { return $default; }
+    public function session(string $key, mixed $default = null): mixed { return $this->values[$key] ?? $default; }
+    public function remember(string $key, mixed $value): void { $this->values[$key] = $value; }
+    public function forget(string $key): void { unset($this->values[$key]); }
+    public function flash(string $type, string $message): void {}
+    public function flashes(): array { return []; }
+    public function request(): ?object { return null; }
+});
+$facade->addSession('_referrer', '/japon');
+$answers['baseservice, session, route, link, asset, user'] = [
+    $facade->getSession('_referrer'), $facade->removeSession('_referrer'), $facade->getSession('_referrer'),
+    $facade->getCurrentRouteName(), $facade->generateUrl('blog_article', ['slug' => 'le-fuji']), $facade->getAsset('/assets/app.css'),
+    $facade->getUser(),
+];
+Runtime::set(\Omnibridge\Contract\Requests::class, null);
 
 // Sessions and Locales: a user signed out or kicked, a user's locale.
 Runtime::set(Sessions::class, new class implements Sessions {
