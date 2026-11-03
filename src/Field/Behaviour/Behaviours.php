@@ -103,6 +103,8 @@ final class Behaviours
             Kind::COUNTRY => new CountrySelect(),
             Kind::ICON => new Icon(),
             Kind::LOCALE => new ChoiceList(Choices::locales(...)),
+            // A file sent with its form, its stored files shown (FileType and its children).
+            Kind::FILE, Kind::IMAGE, Kind::AVATAR, Kind::AUDIO, Kind::VIDEO => new Upload((string) Upload::variantOf($kind)),
             default => null,
         };
     }

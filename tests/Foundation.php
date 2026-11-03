@@ -188,6 +188,7 @@
  * 791 after step F5d (2026-11-03, +20): Base\Field\Behaviour\* and Base\Field\Conformance\* (see tests/Agnostic.php).
  * 793 after step F5d, slice 2 (2026-11-03, +2): Base\Field\Search\{RemoteSearch, Answer} (see tests/Agnostic.php).
  * 795 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields} (see tests/Agnostic.php).
+ * 797 after step F5d, slice 4 (2026-11-03, +2): Base\Field\Behaviour\Upload, Base\Field\Upload\Dropzone (see tests/Agnostic.php).
  */
 
 return [
@@ -529,6 +530,7 @@ return [
     Base\Field\Behaviour\Slug::class,
     Base\Field\Behaviour\Toggle::class,
     Base\Field\Behaviour\Translation::class,
+    Base\Field\Behaviour\Upload::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
@@ -580,6 +582,7 @@ return [
     Base\Field\TextField::class,
     Base\Field\TextareaField::class,
     Base\Field\TranslationField::class,
+    Base\Field\Upload\Dropzone::class,
     Base\Field\VideoField::class,
     Base\Field\WysiwygField::class,
     Base\Field\YearField::class,

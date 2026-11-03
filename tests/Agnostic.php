@@ -66,6 +66,8 @@
  * (what AutocompleteController answered under Symfony).
  * 732 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields}, a translations field for every host
  * (what TranslationType decides, the translation entity's fields from its shape).
+ * 734 after step F5d, slice 4 (2026-11-03, +2): Base\Field\Behaviour\Upload (what FileType and its children decide and show of a
+ * record's files) and Base\Field\Upload\Dropzone (what DropzoneController answered under Symfony), the uploads for every host.
  */
 
 return [
@@ -400,6 +402,7 @@ return [
     Base\Field\Behaviour\Slug::class,
     Base\Field\Behaviour\Toggle::class,
     Base\Field\Behaviour\Translation::class,
+    Base\Field\Behaviour\Upload::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
@@ -451,6 +454,7 @@ return [
     Base\Field\TextField::class,
     Base\Field\TextareaField::class,
     Base\Field\TranslationField::class,
+    Base\Field\Upload\Dropzone::class,
     Base\Field\VideoField::class,
     Base\Field\WysiwygField::class,
     Base\Field\YearField::class,

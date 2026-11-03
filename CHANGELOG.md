@@ -10,6 +10,27 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the uploads on every host (plan "omnibase agnostic", step F5d, slice 4, 2026-11-03)
+
+- **`Base\Field\Behaviour\Upload`** (the behaviour of `file`, `image`, `avatar`, `audio` and `video`, one variant each): what
+  omnibridge/symfony's `FileType`, `ImageType`, `AvatarType`, `AudioType` and `VideoType` decided, which they now ask -
+  `DEFAULTS` and `VARIANTS` (their defaults; `FileType`'s `sortable-js` stays the host's), `options()` (their normalizers: the
+  class the data class, a sound's or a film's several sources, the clipboard, an avatar's square cropper), `vars()` (what their
+  blocks read of the record's files: the stored files' names, public addresses, thumbnails, previews, download links, the largest
+  size and the types accepted from the record's `#[Uploader]` and `#[File]`, the dropzone's settings and its address, an image's
+  thumbnail, modal and cropper), `endpoints()` (`ux_dropzone`), `reverse()` (what a form sends back, read as `FileType` reads
+  it: the file sent, else the one fetched, else what `file` names - a dropzone's kept files, a stored file's name -; nothing is
+  null). The record's `#[Uploader]` stores the file when it is flushed, as before.
+- **`Base\Field\Upload\Dropzone`** (in `Base\Services`' list and the Symfony runtime's contracts): what `DropzoneController`
+  answered, moved as it was - `ROUTES` (`ux_dropzone`, `_preview`, `_delete`), `data()` (the settings and the visitor's token of
+  intent `dropzone`, obfuscated), `store()` (a file kept under a new uuid in the cache folder's `dropzone/`, or refused in the
+  fields' words), `preview()`, `delete()`, `files()` (the uuids a form sends back as the files to store). `DropzoneController`
+  delegates to it; omnibridge/laravel's `UploadController` asks it the same way.
+- `FormView::of()` takes the data the form edits (`FormProcessor::createView()` and `FormSubmission::createView()` give it): a
+  file field's view carries the Upload behaviour's vars for the record. `FormBinder`: a file field's compound sent empty writes
+  null (its file removed, as `FileType` reads it); a field not sent keeps the data's file, as before.
+- `tests/Field/UploadTest`. tests/Agnostic.php 734, tests/Foundation.php 797 (+2). Docs: docs/20-architecture/forms.md.
+
 ### Fixed: a record's picker starts with its records selected (plan "omnibase agnostic", step F5d, 2026-11-03)
 
 - omnibridge/symfony's `SelectType` told select2 to select the records themselves, which JSON printed as empty objects

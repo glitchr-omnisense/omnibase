@@ -88,6 +88,6 @@ final class FormSubmission
     public function createView(?string $token = null): FormView
     {
         // The guard's fields, when it added them, are made anew: a form shown again is a form shown.
-        return FormView::of($this->form, $this->values, $this->getErrors(), $token ?? $this->token, $this->submitted);
+        return FormView::of($this->form, $this->values, $this->getErrors(), $token ?? $this->token, $this->submitted, $this->data);
     }
 }

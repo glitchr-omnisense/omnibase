@@ -172,8 +172,8 @@ final class FormBinder
                 $field->setValue($value);
                 continue;
             }
-            if (Kind::isFile($kind) && null === $value) {
-                continue; // no file sent: the data keeps its own
+            if (Kind::isFile($kind) && null === $value && !\is_array($raw)) {
+                continue; // no file sent: the data keeps its own (a file field's compound sent empty is its file removed, as FileType reads it)
             }
             if (\is_array($data)) {
                 $data[$path] = $value;
