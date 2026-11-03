@@ -10,6 +10,12 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: a record's picker starts with its records selected (plan "omnibase agnostic", step F5d, 2026-11-03)
+
+- omnibridge/symfony's `SelectType` told select2 to select the records themselves, which JSON printed as empty objects
+  (`[{}]`), and form-type-select2.js's `$(field).val()` selected nothing; it tells their ids now, the values of their entries,
+  as omnibridge/laravel's renderer does. `tests/Field/SelectTypeSelectedTest`.
+
 ### Added: a translations field on every host (plan "omnibase agnostic", step F5d, slice 3, 2026-11-03)
 
 - **`Base\Field\Behaviour\Translation`**: what omnibase's `TranslationType` decides, which it now asks - `options()` (its
