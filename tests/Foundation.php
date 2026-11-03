@@ -191,6 +191,7 @@
  * 797 after step F5d, slice 4 (2026-11-03, +2): Base\Field\Behaviour\Upload, Base\Field\Upload\Dropzone (see tests/Agnostic.php).
  * 798 after step F5d, slice 5 (2026-11-03, +1): Base\Field\Behaviour\AssociationFile (see tests/Agnostic.php).
  * 801 after step F5d, slice 6 (2026-11-03, +3): Base\Field\Behaviour\{Editor, Wysiwyg}, Base\Field\Editor\EditorJs (see tests/Agnostic.php).
+ * 804 after step F5d, slice 7 (2026-11-03, +3): Base\Field\Behaviour\{Association, Collection, Attribute} (see tests/Agnostic.php).
  */
 
 return [
@@ -516,10 +517,13 @@ return [
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
     Base\Field\Behaviour\AbstractBehaviour::class,
+    Base\Field\Behaviour\Association::class,
     Base\Field\Behaviour\AssociationFile::class,
+    Base\Field\Behaviour\Attribute::class,
     Base\Field\Behaviour\Behaviours::class,
     Base\Field\Behaviour\ChoiceList::class,
     Base\Field\Behaviour\Choices::class,
+    Base\Field\Behaviour\Collection::class,
     Base\Field\Behaviour\ColorPickr::class,
     Base\Field\Behaviour\CountrySelect::class,
     Base\Field\Behaviour\DateTimePicker::class,

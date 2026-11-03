@@ -373,6 +373,26 @@ relay's ticket and one field's autosave with its room's own token (a stale versi
 `EditorController` and omnibridge/laravel's answer them through it; the neutral `FormView` gives the behaviour the record and
 the field's name (`editor_record`, `editor_field`).
 
+**Embedded forms, lists and attributes.** A related record's form (`association`, an `AssociationField` that embeds) is
+drawn on every host as `AssociationType` builds it: one record, its fields and its `_index`; several (a to-many association),
+the collection `_collection` whose entries, by their index in the association, are each one record's form, with the
+prototype of a new one where entries are added (`__prototype__`) and the window of a capped collection (`max_entries`,
+`entry_offset`; the indexes drawn sent back as `_rendered`). `Base\Field\Behaviour\Association` holds what the type decides
+(several records are never required, and nothing inside them; entries added and deleted only inside a group; the
+collection's and an entry's options) and its fields (`RecordFields`, the field's `fields`, `autoload`, `excluded_fields`), the
+association read through its alias (#[Alias]: a comment's replies); the neutral `FormBinder` binds each entry sent into its
+record, a new one from the prototype told its owner, one not sent removed where the field deletes (an entry's own collection
+of records is not written from it, as `AssociationType` leaves it). A list (`collection`, `array`) is
+`Base\Field\Behaviour\Collection`: `CollectionType`'s and `ArrayType`'s defaults (a pattern's `{n}` counted as a fixed
+length that neither adds nor deletes), the window, the empty markup, what is sent read as the list kept (an associative array's
+`{key, value}` entries as key => value). A record's attributes (`attribute`) are `Base\Field\Behaviour\Attribute`: the
+attribute's class and its adapters', the select of adapters (searched remotely, `filter` narrowing them), each attribute's part
+named by its adapter's code and id; bound, an attribute kept for each adapter still chosen, a new one for an adapter newly
+chosen. A translated attribute's value (its `intl` part, a `TranslationType` of several records) is drawn by Symfony's forms
+only: omnibridge/laravel refuses such a field aloud once it holds one. Symfony's `AssociationType`, `CollectionType`,
+`ArrayType` and `AttributeType` ask these helpers; a list of records written into the collection a record holds is written
+in place by the neutral binder (the records no longer chosen out, the new ones in), as Symfony's forms do through adders.
+
 **Translations.** A translations field (`translation`) is one part per language, each the translation entity's
 fields, on every host: `Base\Field\Behaviour\Translation` holds what `TranslationType` decides (the languages drawn -
 every offered one, or for `single_locale` the default one, the record's one language when it has exactly one -; which

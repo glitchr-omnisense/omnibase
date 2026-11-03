@@ -2,7 +2,10 @@
 
 namespace Base\Form\Definition;
 
+use Base\Field\Behaviour\Association;
 use Base\Field\Behaviour\AssociationFile;
+use Base\Field\Behaviour\Attribute;
+use Base\Field\Behaviour\Collection;
 use Base\Field\Behaviour\Behaviours;
 use Base\Field\Behaviour\Guess;
 use Base\Field\Behaviour\Translation;
@@ -83,6 +86,15 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             $field = \Base\Field\Behaviour\Guess::from($field, $form->getDataClass());
             if (Kind::ASSOCIATION_FILE === $field->getKind() && !$field->hasExplicitFormType()) {
                 $root->children[$name] = self::associationFile($root, $name, $field, $data, $errors[$name] ?? [], $form->getDataClass());
+                continue;
+            }
+            if (Kind::ASSOCIATION === $field->getKind() && !$field->hasExplicitFormType() && null === $field->getOption('choices')) {
+                // Embedded (AssociationType); one given its choices is a list of records to pick, drawn as a choice.
+                $root->children[$name] = self::association($root, $name, $field, $data, $errors[$name] ?? [], $form->getDataClass());
+                continue;
+            }
+            if (Kind::ATTRIBUTE === $field->getKind() && !$field->hasExplicitFormType()) {
+                $root->children[$name] = self::attribute($root, $name, $field, $data, $errors[$name] ?? [], $form->getDataClass());
                 continue;
             }
             if (Behaviours::ofField($field) instanceof Upload) {
@@ -180,6 +192,265 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         return $view;
     }
 
+    /**
+     * The common vars of a field built here as a compound (an embedded record, its attributes).
+     *
+     * @param list<string> $errors
+     *
+     * @return array<string, mixed>
+     */
+    private static function compound(self $root, FieldDescriptor $field, string $kind, array $errors): array
+    {
+        $label = $field->getLabel() ?? $field->getOption('label');
+
+        return [
+            'kind' => $kind, 'type' => $kind, 'widget' => $kind, 'value' => null,
+            'label' => false === $label ? false : (null !== $label ? (string) $label : null),
+            'help' => null !== ($help = $field->getHelp() ?? $field->getOption('help')) ? (string) $help : null,
+            'errors' => array_values($errors),
+            'attr' => array_replace($field->getHtmlAttributes(), (array) $field->getOption('attr', [])),
+            'row_attr' => (array) $field->getOption('row_attr', []),
+            'disabled' => (bool) ($field->isDisabled() ?? $field->getOption('disabled') ?? false),
+            'explicit' => false,
+            'translation_domain' => $field->getOption('translation_domain') ?? $root->vars['translation_domain'],
+        ];
+    }
+
+    /**
+     * A related record's form embedded (Association), as AssociationType builds it: one record, its fields
+     * (and its `_index`); several, the collection `_collection` (widget collection2) whose entries, by their
+     * index in the association, are each one record's form - the window a capped collection shows, its
+     * total -, and, where entries are added, the prototype of a new one (vars `prototype`, named
+     * `__prototype__`). Its vars are the type's: multiple, group, row_group, allow_add, allow_delete,
+     * keep_indexes, length, href, html.
+     *
+     * @param list<string> $errors
+     */
+    private static function association(self $root, string $name, FieldDescriptor $field, mixed $data, array $errors, ?string $dataClass): self
+    {
+        $property = (string) ($field->getOption('property_path') ?? $field->getProperty() ?? $name);
+        $owner = $dataClass ?? (\is_object($data) ? $data::class : null);
+        $given = $field->getFormTypeOptions();
+        $given['class'] = Association::targetClass($given, $owner, $property);
+        $given['multiple'] = Association::isMultiple($given, $owner, $property);
+        $options = Association::options($given);
+        $value = \is_object($data) && false !== $field->getOption('mapped') && Properties::isReadable($data, $property) ? Properties::get($data, $property) : null;
+
+        $view = new self($name, self::compound($root, $field, Kind::ASSOCIATION, $errors) + [
+            'required' => $options['multiple'] ? false : (bool) ($field->isRequired() ?? $options['required']),
+            'multiple' => $options['multiple'], 'group' => $options['group'], 'row_group' => $options['row_group'],
+            'allow_add' => $options['allow_add'], 'allow_delete' => $options['allow_delete'], 'keep_indexes' => $options['keep_indexes'],
+            'length' => $options['length'], 'href' => $options['href'], 'html' => $options['html'],
+        ], $root);
+        if (null === $options['class']) {
+            throw new \RuntimeException('Unable to get "class" or compute "data_class" from form "'.$name.'": define the "class" option of its association field.');
+        }
+        $fields = Association::fields($options['class'], $options, $name);
+        if (!$options['multiple']) {
+            self::entry($view, $fields, $options['class'], \is_object($value) ? $value : null, $options, $view);
+
+            return $view;
+        }
+
+        $collection = Collection::options(Association::collection($options));
+        $records = Association::records($value);
+        $shown = Collection::window($records, $collection);
+        $list = new self(Association::COLLECTION, [
+            'kind' => Kind::COLLECTION, 'type' => Kind::COLLECTION, 'widget' => 'collection2', 'label' => false, 'required' => true,
+            'value' => $shown, 'entry_total' => \count($records),
+        ] + self::listed($collection), $view);
+        foreach ($shown as $index => $record) {
+            $entry = new self((string) $index, ['kind' => 'form', 'type' => 'form', 'widget' => 'association_entry', 'label' => false, 'required' => true, 'value' => $record, 'group' => $options['group'], 'row_group' => $options['row_group']], $list);
+            self::entry($entry, $fields, $options['class'], $record, $options, $entry);
+            $list->children[(string) $index] = $entry;
+        }
+        if ($collection['allow_add'] && $collection['prototype']) {
+            $prototype = new self((string) $collection['prototype_name'], ['kind' => 'form', 'type' => 'form', 'widget' => 'association_entry', 'label' => false, 'required' => true, 'value' => null, 'group' => $options['group'], 'row_group' => $options['row_group'], 'attr' => ['placeholder' => self::trans('@fields.array.value')]], $list);
+            self::entry($prototype, $fields, $options['class'], null, $options, $prototype);
+            $list->vars['prototype'] = $prototype;
+        }
+        $view->children[Association::COLLECTION] = $list;
+        if (!$view->vars['required']) {
+            self::unrequire($view); // Symfony's forms: nothing inside a field not required is
+        }
+
+        return $view;
+    }
+
+    /** A field not required: nothing inside it is, its prototypes' fields included. */
+    private static function unrequire(self $view): void
+    {
+        foreach ($view->children as $child) {
+            $child->vars['required'] = false;
+            self::unrequire($child);
+        }
+        if (($view->vars['prototype'] ?? null) instanceof self) {
+            $view->vars['prototype']->vars['required'] = false;
+            self::unrequire($view->vars['prototype']);
+        }
+    }
+
+    /**
+     * One record's form inside an embedded association: its fields with the values it holds, its `_index`.
+     *
+     * @param array<string, FieldDescriptor> $fields
+     * @param array<string, mixed>           $options
+     */
+    private static function entry(self $parent, array $fields, string $class, ?object $record, array $options, self $into): void
+    {
+        $definition = FormDefinition::new('entry')->setCsrf(false)->setDataClass($class);
+        foreach ($fields as $descriptor) {
+            $definition->add($descriptor);
+        }
+        $values = null !== $record ? (new FormBinder(self::unitOfWork()))->read($definition, $record) : [];
+        foreach ($fields as $name => $descriptor) {
+            $value = $values[$name] ?? null;
+            if (null !== $record && \in_array($descriptor->getKind(), [Kind::COLLECTION, Kind::ARRAY], true) && Properties::isReadable($record, $name)) {
+                $value = Properties::get($record, $name); // its entries as they are (records listed by a collection)
+            }
+            $into->children[$name] = self::field($parent, $name, Guess::from($descriptor, $class), $value, []);
+        }
+        if ($options['keep_indexes']) {
+            $into->children[Association::INDEX] = new self(Association::INDEX, ['kind' => Kind::HIDDEN, 'type' => 'hidden', 'value' => null, 'required' => false], $parent);
+        }
+    }
+
+    /**
+     * A record's attributes (Attribute), as AttributeType builds them: its select of adapters (`choice`,
+     * searched remotely), then for each attribute held its part, named by its adapter's code and its id,
+     * holding its value's field (`value`) - a translated one's marked (`translated`: its value is a
+     * TranslationType there). Its vars are the type's: multiple, allow_add, allow_delete, is_inherited.
+     *
+     * @param list<string> $errors
+     */
+    private static function attribute(self $root, string $name, FieldDescriptor $field, mixed $data, array $errors, ?string $dataClass): self
+    {
+        $property = (string) ($field->getOption('property_path') ?? $field->getProperty() ?? $name);
+        $owner = $dataClass ?? (\is_object($data) ? $data::class : null);
+        $options = Attribute::options($field->getFormTypeOptions());
+        $shape = self::shapeOf($owner);
+        $options = array_replace($options, Attribute::classes($options, null !== $shape && $shape->hasAssociation($property) ? $shape->targetClass($property) : null));
+        $options['multiple'] ??= null !== $shape && $shape->hasAssociation($property) ? $shape->isToMany($property) : false;
+        if (null === $options['sortable'] && null !== $owner) {
+            $guessed = Guess::from(FormDefinition::field($property, Kind::CHOICE)->setProperty($property)->setFormTypeOptions(['class' => $options['abstract_class'], 'multivalue' => $options['multivalue']]), $owner);
+            $options['sortable'] = (bool) $guessed->getOption('sortable');
+        }
+        $value = \is_object($data) && false !== $field->getOption('mapped') && Properties::isReadable($data, $property) ? Properties::get($data, $property) : null;
+        $held = Attribute::held($value, (bool) $options['multiple']);
+
+        $view = new self($name, self::compound($root, $field, Kind::ATTRIBUTE, $errors) + [
+            'required' => (bool) ($field->isRequired() ?? $field->getOption('required') ?? true),
+            'multiple' => (bool) $options['multiple'], 'allow_add' => $options['allow_add'], 'allow_delete' => $options['allow_delete'], 'is_inherited' => false,
+        ], $root);
+        $chosen = array_values(array_filter(array_map(static fn (\Base\Entity\Layout\Attribute\Common\AbstractAttribute $attribute): ?string => null !== ($id = $attribute->getAdapter()?->getId()) ? (string) $id : null, $held)));
+        $choice = FormDefinition::field('choice', Kind::CHOICE)->setFormTypeOptions(Attribute::choice($options, \is_object($data) ? $data : null))->setRequired($view->vars['required'])->setLabel(false);
+        $view->children['choice'] = self::field($view, 'choice', $choice, $options['multiple'] ? $chosen : ($chosen[0] ?? null), []);
+        foreach ($held as $attribute) {
+            $key = Attribute::key($attribute);
+            $part = new self($key, ['kind' => Kind::ASSOCIATION, 'type' => Kind::ASSOCIATION, 'widget' => Kind::ASSOCIATION, 'label' => false, 'required' => false, 'multiple' => false, 'group' => false, 'row_group' => false, 'value' => $attribute, 'translated' => Attribute::translated($attribute)], $view);
+            if (!Attribute::translated($attribute)) {
+                $descriptor = Attribute::value($attribute);
+                $part->children['value'] = self::field($part, 'value', $descriptor, (new FormBinder(self::unitOfWork()))->transform($attribute->get(), $descriptor), []);
+            }
+            $view->children[$key] = $part;
+        }
+
+        return $view;
+    }
+
+    /**
+     * A list's entries (Collection), as CollectionType and ArrayType build them: one field of the entry's kind
+     * per entry (an associative array's, its key and its value), padded to a fixed length, the prototype of a
+     * new one where entries are added (vars `prototype`). Its vars are the types': allow_add, allow_delete,
+     * group, row_group, entry_collapsed, length, max_entries, entry_offset, entry_total, prototype_name,
+     * pattern, placeholder, associative, html, href.
+     */
+    private static function collection(self $view, FieldDescriptor $field, mixed $value): void
+    {
+        $kind = (string) $field->getKind();
+        $options = Collection::options($field->getFormTypeOptions(), $kind);
+        $entries = Collection::shown($value, $options + ['kind' => $kind]);
+        if (\is_int($options['length']) && $options['length'] > 0) {
+            $entries = array_pad($entries, $options['length'], null);
+        }
+        $total = \count($entries);
+        $entries = Collection::window($entries, $options);
+        $view->vars = array_replace($view->vars, ['type' => $kind, 'widget' => Kind::ARRAY === $kind ? 'array' : 'collection2', 'value' => $entries, 'required' => true, 'entry_total' => $total] + self::listed($options), [
+            'pattern' => $options['pattern'] ?? null, 'placeholder' => $options['placeholder'] ?? [], 'associative' => $options['associative'] ?? null,
+        ]);
+        $type = $options['entry_type'];
+        $entryKind = \is_string($type) && class_exists($type) ? \Base\Field\Behaviour\RecordFields::kindOf($type) : (string) $type;
+        $entryOptions = array_diff_key((array) $options['entry_options'], ['block_name' => true, 'label' => true]);
+        $make = static function (string $name, mixed $shown, array $attr = []) use ($view, $entryKind, $entryOptions, $options): self {
+            $descriptor = FormDefinition::field($name, $entryKind)->setFormTypeOptions(array_replace_recursive($entryOptions, [] !== $attr ? ['attr' => $attr] : []))->setLabel(false);
+            if (null !== $options['entry_required']) {
+                $descriptor->setRequired((bool) $options['entry_required']);
+            }
+            if ($options['associative'] ?? false) {
+                $entry = new self($name, ['kind' => 'form', 'type' => 'form', 'label' => false, 'required' => true], $view);
+                $entry->children['key'] = self::field($entry, 'key', FormDefinition::field('key', Kind::TEXT)->setLabel(false)->setFormTypeOptions(['attr' => ['placeholder' => self::trans('@fields.array.key')]]), \is_array($shown) ? ($shown['key'] ?? null) : null, []);
+                $entry->children['value'] = self::field($entry, 'value', $descriptor->setProperty('value'), \is_array($shown) ? ($shown['value'] ?? null) : null, []);
+
+                return $entry;
+            }
+
+            return self::field($view, $name, $descriptor, \is_object($shown) ? (method_exists($shown, '__toString') ? (string) $shown : (method_exists($shown, 'getId') ? $shown->getId() : null)) : $shown, []);
+        };
+        foreach ($entries as $index => $shown) {
+            $view->children[(string) $index] = $make((string) $index, $shown);
+        }
+        if ($options['allow_add'] && $options['prototype']) {
+            $view->vars['prototype'] = $make((string) $options['prototype_name'], null, ['placeholder' => self::trans('@fields.array.value')]);
+        }
+    }
+
+    /**
+     * A list's vars, as CollectionType gives them to its block.
+     *
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>
+     */
+    private static function listed(array $options): array
+    {
+        return [
+            'allow_add' => $options['allow_add'], 'allow_delete' => $options['allow_delete'], 'group' => $options['group'],
+            'row_group' => $options['row_group'], 'entry_collapsed' => $options['entry_collapsed'], 'length' => $options['length'],
+            'max_entries' => $options['max_entries'], 'entry_offset' => max(0, (int) $options['entry_offset']),
+            'prototype_name' => $options['allow_add'] && $options['prototype'] ? $options['prototype_name'] : null,
+            'html' => $options['html'], 'href' => $options['href'], 'empty' => Collection::empty(),
+        ];
+    }
+
+    private static function trans(string $key): string
+    {
+        $translations = Runtime::find(\Omnibridge\Contract\Translations::class);
+
+        return $translations instanceof \Omnibridge\Contract\Translations ? $translations->trans($key) : $key;
+    }
+
+    private static function unitOfWork(): ?\Omnibridge\Persistence\UnitOfWork
+    {
+        $unitOfWork = Runtime::find(\Omnibridge\Persistence\UnitOfWork::class);
+
+        return $unitOfWork instanceof \Omnibridge\Persistence\UnitOfWork ? $unitOfWork : null;
+    }
+
+    private static function shapeOf(?string $class): ?\Base\Database\Mapping\EntityShape
+    {
+        $unitOfWork = self::unitOfWork();
+        if (null === $class || null === $unitOfWork) {
+            return null;
+        }
+        try {
+            $shapes = \Base\Database\UnitOfWorks::shapes($unitOfWork);
+
+            return $shapes->has($class) ? $shapes->shape($class) : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     /** @param list<string> $errors */
     private static function field(self $root, string $name, FieldDescriptor $field, mixed $value, array $errors): self
     {
@@ -234,6 +505,9 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
         }
 
         $view = new self($name, $vars, $root);
+        if ((Kind::COLLECTION === $kind || Kind::ARRAY === $kind) && !$field->hasExplicitFormType()) {
+            self::collection($view, $field, $value);
+        }
         if (Kind::TRANSLATION === $kind && !$field->hasExplicitFormType()) {
             self::translations($view, $field, $value);
         }

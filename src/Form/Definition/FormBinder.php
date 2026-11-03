@@ -169,6 +169,18 @@ final class FormBinder
                 $values[$name] = null;
                 continue;
             }
+            if (Kind::ASSOCIATION === $kind && !$field->hasExplicitFormType() && null === $field->getOption('choices') && \is_object($data) && $mapped) {
+                // A related record's form embedded (Association): each entry's fields bound into its record.
+                array_push($violations, ...$this->association($data, $path, $name, \is_array($raw) ? $raw : [], $field, $form->getDataClass() ?? $data::class));
+                $values[$name] = null;
+                continue;
+            }
+            if (Kind::ATTRIBUTE === $kind && !$field->hasExplicitFormType() && \is_object($data) && $mapped) {
+                // A record's attributes (Attribute): the adapters chosen, each attribute's value.
+                $this->attribute($data, $path, \is_array($raw) ? $raw : [], $field, $form->getDataClass() ?? $data::class);
+                $values[$name] = null;
+                continue;
+            }
             if (Kind::isFile($kind) && ($upload = Behaviours::ofField($field)) instanceof Upload
                 && null !== $refusal = $upload->refusal($raw, Behaviours::complete($field)->getFormTypeOptions(), $name)) {
                 // The file sent refused as FileType's constraint refuses it (its type, its size), the data untouched.
@@ -194,6 +206,15 @@ final class FormBinder
             }
             if (\is_array($data)) {
                 $data[$path] = $value;
+            } elseif (\is_array($value) && ($held = $this->getValue($data, $path)) instanceof \Doctrine\Common\Collections\Collection) {
+                // A list of records written into the collection the record holds, in place (as Symfony's forms write
+                // one through its adders and removers): the records no longer chosen out, the new ones in, in order.
+                foreach ($held->toArray() as $record) {
+                    \in_array($record, $value, true) || $held->removeElement($record);
+                }
+                foreach ($value as $record) {
+                    $held->contains($record) || $held->add($record);
+                }
             } elseif ($this->getValue($data, $path) !== $value) {
                 Properties::set($data, $path, $value);
             }
@@ -228,6 +249,10 @@ final class FormBinder
             return $this->choice($raw, $field);
         }
         if (\is_array($raw)) {
+            if ((Kind::ARRAY === $kind || Kind::COLLECTION === $kind) && !$field->hasExplicitFormType()) {
+                // A list's entries in their order, an associative array's as key => value (Collection).
+                return \Base\Field\Behaviour\Collection::entries($raw, \Base\Field\Behaviour\Collection::options($field->getFormTypeOptions(), $kind));
+            }
             if (\in_array($kind, [Kind::ARRAY, Kind::COLLECTION, Kind::ATTRIBUTE, Kind::TRANSLATION, Kind::CUSTOM], true)) {
                 return $raw;
             }
@@ -339,6 +364,68 @@ final class FormBinder
         AssociationFile::bind($data, $path, AssociationFile::records($files, $this->getValue($data, $path), $options, $data, $hydrator), $options);
 
         return null;
+    }
+
+    /**
+     * A related record's form embedded (Association, as AssociationType maps it): several records' entries
+     * bound into them (Association::bind()); one record's fields bound into it, a new one made where the
+     * record holds none.
+     *
+     * @param array<string, mixed> $submitted
+     *
+     * @return list<Violation>
+     */
+    private function association(object $data, string $path, string $name, array $submitted, FieldDescriptor $field, string $owner): array
+    {
+        $given = $field->getFormTypeOptions();
+        $given['class'] = \Base\Field\Behaviour\Association::targetClass($given, $owner, $path);
+        $given['multiple'] = \Base\Field\Behaviour\Association::isMultiple($given, $owner, $path);
+        $options = \Base\Field\Behaviour\Association::options($given);
+        if (null === $options['class']) {
+            return [];
+        }
+        $fields = \Base\Field\Behaviour\Association::fields($options['class'], $options, $name);
+        $prefix = static fn (Violation $violation): Violation => new Violation($name.'.'.$violation->path, $violation->message, $violation->code, $violation->parameters);
+        if ($options['multiple']) {
+            $collection = \is_array($submitted[\Base\Field\Behaviour\Association::COLLECTION] ?? null) ? $submitted[\Base\Field\Behaviour\Association::COLLECTION] : [];
+            $collectionOptions = \Base\Field\Behaviour\Collection::options(\Base\Field\Behaviour\Association::collection($options));
+
+            return array_map($prefix, \Base\Field\Behaviour\Association::bind($data, $path, $collection, ['allow_add' => $collectionOptions['allow_add'], 'allow_delete' => $collectionOptions['allow_delete']] + $options, $fields, $this));
+        }
+        $record = $this->getValue($data, $path);
+        if (!\is_object($record)) {
+            $record = new ($options['class'])();
+        }
+        $definition = FormDefinition::new($name)->setCsrf(false)->setDataClass($options['class']);
+        foreach ($fields as $descriptor) {
+            if (!\in_array($descriptor->getKind(), [Kind::COLLECTION, Kind::ASSOCIATION], true)) {
+                $definition->add($descriptor);
+            }
+        }
+        $binding = $this->bind($definition, array_diff_key($submitted, [\Base\Field\Behaviour\Association::INDEX => true]), $record);
+        if ($this->getValue($data, $path) !== $record) {
+            Properties::set($data, $path, $record);
+        }
+
+        return array_map($prefix, $binding->violations);
+    }
+
+    /**
+     * A record's attributes (Attribute, as AttributeType maps them): the adapters chosen read as its select
+     * reads them (their records by id), written by Attribute::bind().
+     *
+     * @param array<string, mixed> $submitted
+     */
+    private function attribute(object $data, string $path, array $submitted, FieldDescriptor $field, string $owner): void
+    {
+        $options = \Base\Field\Behaviour\Attribute::options($field->getFormTypeOptions());
+        $shape = null !== $this->unitOfWork && \Base\Database\UnitOfWorks::shapes($this->unitOfWork)->has($owner) ? \Base\Database\UnitOfWorks::shapes($this->unitOfWork)->shape($owner) : null;
+        $options = array_replace($options, \Base\Field\Behaviour\Attribute::classes($options, null !== $shape && $shape->hasAssociation($path) ? $shape->targetClass($path) : null));
+        $options['multiple'] ??= null !== $shape && $shape->hasAssociation($path) ? $shape->isToMany($path) : false;
+        $choice = FormDefinition::field('choice', Kind::CHOICE)->setFormTypeOptions(\Base\Field\Behaviour\Attribute::choice($options, $data));
+        $chosen = $this->reverse($submitted['choice'] ?? null, $choice);
+        $chosen = null === $chosen ? [] : (is_iterable($chosen) ? (\is_array($chosen) ? array_values($chosen) : iterator_to_array($chosen, false)) : [$chosen]);
+        \Base\Field\Behaviour\Attribute::bind($data, $path, $submitted, $options, $chosen, $this);
     }
 
     /** A translations field told its record's class where its options do not say it. */
