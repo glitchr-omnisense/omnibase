@@ -60,6 +60,8 @@
  * 705 after step F5c's first part (2026-11-02, +1 on F5b group 5's 704): Base\Http\RequestsOf (the request contract out of a RequestStack).
  * 708 after step F5c, item 3 (2026-11-03, +2 on 706): Base\Database\Mapping\EntityFields (an entity's names, aliases and paths on its shape) and
  * Base\Database\Backend\ColumnTypes (which column types hold an array), for EntityHydrator on the unit of work and the shapes.
+ * 728 after step F5d (2026-11-03, +20): the rich kinds' neutral behaviours, Base\Field\Behaviour\* (what the Symfony types and
+ * the generic renderers both read, Guess the record's mapping on the unit of work's shapes), and the field conformance suite, Base\Field\Conformance\{Host, Outcome, Sample, Samples, Suite}.
  */
 
 return [
@@ -377,12 +379,32 @@ return [
     Base\Field\AttributeField::class,
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
+    Base\Field\Behaviour\AbstractBehaviour::class,
+    Base\Field\Behaviour\Behaviours::class,
+    Base\Field\Behaviour\ChoiceList::class,
+    Base\Field\Behaviour\Choices::class,
+    Base\Field\Behaviour\ColorPickr::class,
+    Base\Field\Behaviour\CountrySelect::class,
+    Base\Field\Behaviour\DateTimePicker::class,
+    Base\Field\Behaviour\Guess::class,
+    Base\Field\Behaviour\Icon::class,
+    Base\Field\Behaviour\JsColor::class,
+    Base\Field\Behaviour\Number::class,
+    Base\Field\Behaviour\Password::class,
+    Base\Field\Behaviour\Select::class,
+    Base\Field\Behaviour\Slug::class,
+    Base\Field\Behaviour\Toggle::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
     Base\Field\CollectionField::class,
     Base\Field\ColorField::class,
     Base\Field\ColorPickerField::class,
+    Base\Field\Conformance\Host::class,
+    Base\Field\Conformance\Outcome::class,
+    Base\Field\Conformance\Sample::class,
+    Base\Field\Conformance\Samples::class,
+    Base\Field\Conformance\Suite::class,
     Base\Field\CountryField::class,
     Base\Field\CropperField::class,
     Base\Field\CurrencyField::class,

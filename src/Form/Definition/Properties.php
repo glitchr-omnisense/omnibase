@@ -4,7 +4,7 @@ namespace Base\Form\Definition;
 
 /**
  * Reads and writes a property of the data a form edits, the way Symfony's
- * PropertyAccess does for a form's paths - getX()/isX()/hasX() and setX(), a
+ * PropertyAccess does for a form's paths - getX()/x()/isX()/hasX() and setX(), a
  * public property, an array's key, "." paths - without its property-info and
  * type-info, which the core does not keep (bare --strict).
  */
@@ -64,9 +64,10 @@ final class Properties
         }
 
         $camel = self::camelize($property);
-        foreach (['get', 'is', 'has', 'can'] as $prefix) {
-            if (method_exists($data, $prefix.$camel) && \is_callable([$data, $prefix.$camel])) {
-                return $data->{$prefix.$camel}();
+        // PropertyAccess's order: getX(), the property itself as a method (an account's isApproved()), isX(), hasX(), canX().
+        foreach (['get'.$camel, lcfirst($camel), 'is'.$camel, 'has'.$camel, 'can'.$camel] as $method) {
+            if (method_exists($data, $method) && \is_callable([$data, $method]) && 0 === (new \ReflectionMethod($data, $method))->getNumberOfRequiredParameters()) {
+                return $data->{$method}();
             }
         }
         if (property_exists($data, $property) && (new \ReflectionProperty($data, $property))->isPublic()) {

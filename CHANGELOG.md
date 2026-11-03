@@ -10,6 +10,37 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: every field kind on every host - behaviours, coverage, conformance (plan "omnibase agnostic", step F5d, slice 1, 2026-11-03)
+
+- **`Base\Field\Behaviour\*`**, the neutral behaviours of the rich kinds (omnisense/omnibridge's `Omnibridge\Form\FieldBehaviour`):
+  `DateTimePicker`, `Slug`, `Toggle` (boolean), `JsColor` (color), `ColorPickr` (color_picker), `Number`, `Password`, `Select`
+  (choice, role, state, gender, currency; `CountrySelect`; `Icon`), `ChoiceList` (locale), `Choices` (an enum's, the countries',
+  the locales'), `Behaviours::of()` / `ofField()` / `complete()` / `register()`. The logic their Symfony types held - options and
+  defaults, view vars, the shown and read values, select2's settings (`Select::select2()`) - is theirs; omnibridge/symfony's types
+  read it, omnibridge/laravel's renderer too.
+- **`FormBinder` and `FormView` read through them**: a behaviour first, the kind's generic rule after; a rich field's view carries its
+  `widget`, `webpack_entry`, settings and `endpoints` (each route's address on this host, null without it); a slug's `target_id`;
+  select2's entries in `SelectType`'s shape, their labels translated. A field whose host type is named has no behaviour.
+- **Coverage per host**: `Kinds::ADAPTERS` names Laravel's map too (`Omnibridge\Laravel\Form\LaravelKinds`); `Kinds::coverage()`,
+  `declaration()`, `declare()`, `known()`, `faults()`; `Kind::all()`.
+- **`Base\Field\Conformance\{Host, Outcome, Sample, Samples, Suite}`**: the field conformance suite, the same on every host (one
+  Symfony-valued sample per kind; a kind without a sample, or a host's word, fails). `tests/Field/SymfonyConformanceTest` (56 kinds,
+  the harness), `BehavioursTest`.
+- **`Base\Field\Behaviour\Guess`**: what a field leaves out and the record's mapping says, read on the unit of work's entity
+  shapes (aliases resolved), as the Symfony types guess it from Doctrine - a select's class and multiplicity, its sorting
+  (`#[OrderColumn]`), a slug's `required`. `src/Resources/field-kinds.json`: `Kind::all()` as JSON, for a host without PHP.
+- tests/Agnostic.php 728, tests/Foundation.php 791 (+20 each).
+
+### Fixed (step F5d)
+
+- `FormBinder` reads a date, a date and time and a time as Symfony does: what is not typed is zero (midnight, no seconds), not
+  the clock's (`'!'` formats). A `datetime_picker` is shown and read in its ICU `format` (2026-11-03 10:30), as `DateTimePickerType`.
+- `FormBinder` reads a collection of records (a translations' or an association's field) item by item, and a value the unit of
+  work does not map by its `getId()`; `Properties` reads a property through the method named after it (`isApproved()`), as
+  PropertyAccess does.
+- `FormView`: a `repeated` field's view says `repeated` (a renderer drew it as one text input), a submit or a button given as a field
+  is omnibase's button2, the markup of a `html` field is in its vars.
+
 ### Changed: BaseService neutral, EntityHydrator on the unit of work and the shapes, the configuration reading Base\Services (plan "omnibase agnostic", step F5c, item 3, 2026-11-03)
 
 - **`Base\Service\BaseService` is framework-neutral**: its constructor takes `?Environment`, `?ParameterBagInterface`,

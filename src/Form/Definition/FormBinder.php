@@ -2,6 +2,7 @@
 
 namespace Base\Form\Definition;
 
+use Base\Field\Behaviour\Behaviours;
 use Base\Field\FieldDescriptor;
 use Base\Field\Kind;
 use Omnibridge\Contract\Violation;
@@ -26,6 +27,12 @@ use Omnibridge\Persistence\UnitOfWork;
  * with the custom options OPTION_REVERSE (submitted => data) and
  * OPTION_TRANSFORM (data => shown); a reverse transformer throws
  * \UnexpectedValueException for a value it cannot read.
+ *
+ * A kind's behaviour (Base\Field\Behaviour\Behaviours, the same object the
+ * Symfony type reads) reads first, with the field's options completed by its
+ * defaults: a colour shortened, a date in the picker's format, a localized
+ * number, a select's part of a compound name; the kind's generic rule then
+ * reads what it gives (a string to a date, to a number).
  */
 final class FormBinder
 {
@@ -170,6 +177,10 @@ final class FormBinder
         if (\is_callable($custom)) {
             return $custom($raw, $field);
         }
+        if (null !== $behaviour = Behaviours::ofField($field)) {
+            $field = Behaviours::complete($field);
+            $raw = $behaviour->reverse($raw, $field->getFormTypeOptions());
+        }
 
         if (Kind::BOOLEAN === $kind || Kind::CHECKBOX === $kind) {
             return null !== $raw && false !== $raw && '0' !== $raw && '' !== $raw;
@@ -208,8 +219,9 @@ final class FormBinder
         return match ($kind) {
             Kind::INTEGER, Kind::YEAR, Kind::STOCK => $this->integer($raw),
             Kind::NUMBER, Kind::MONEY, Kind::FOREX => $this->number($raw, $field),
-            Kind::DATE => $this->date($raw, $field, ['Y-m-d', '!Y-m-d']),
-            Kind::DATETIME, Kind::DATETIME_PICKER => $this->date($raw, $field, ['Y-m-d\TH:i:s', 'Y-m-d\TH:i', 'Y-m-d H:i:s', 'Y-m-d H:i']),
+            // '!': what is not typed is zero, as Symfony reads it (midnight, no seconds), not the clock's.
+            Kind::DATE => $this->date($raw, $field, ['!Y-m-d']),
+            Kind::DATETIME, Kind::DATETIME_PICKER => $this->date($raw, $field, ['!Y-m-d\TH:i:s', '!Y-m-d\TH:i', '!Y-m-d H:i:s', '!Y-m-d H:i']),
             Kind::TIME => $this->date($raw, $field, ['!H:i:s', '!H:i']),
             default => \is_scalar($raw) ? (string) $raw : $raw,
         };
@@ -222,6 +234,10 @@ final class FormBinder
         $custom = $field->getCustomOption(self::OPTION_TRANSFORM) ?? $this->transformers[$kind][1] ?? null;
         if (\is_callable($custom)) {
             return $custom($value, $field);
+        }
+        if (null !== $behaviour = Behaviours::ofField($field)) {
+            $field = Behaviours::complete($field);
+            $value = $behaviour->transform($value, $field->getFormTypeOptions());
         }
 
         if (Kind::BOOLEAN === $kind || Kind::CHECKBOX === $kind) {
@@ -240,7 +256,8 @@ final class FormBinder
                 default => 'Y-m-d\TH:i',
             });
         }
-        if (is_iterable($value) && (Kind::isChoice($kind) || true === $field->getOption('multiple'))) {
+        // A list, or a collection of records (a translations' or an association's field): each item read.
+        if (is_iterable($value) && (Kind::isChoice($kind) || true === $field->getOption('multiple') || !\is_array($value))) {
             $list = [];
             foreach ($value as $item) {
                 $list[] = $this->scalar($item);
@@ -282,7 +299,12 @@ final class FormBinder
             return (string) $value;
         }
         if (\is_object($value)) {
-            $id = null !== $this->unitOfWork ? $this->unitOfWork->identifier($value) : (method_exists($value, 'getId') ? $value->getId() : null);
+            try {
+                $id = null !== $this->unitOfWork ? $this->unitOfWork->identifier($value) : null;
+            } catch (\Throwable) {
+                $id = null; // not a record the unit of work maps
+            }
+            $id ??= method_exists($value, 'getId') ? $value->getId() : null;
 
             return null !== $id ? (string) $id : null;
         }

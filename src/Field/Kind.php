@@ -115,6 +115,17 @@ final class Kind
     {
     }
 
+    /**
+     * Every kind the core names, in the order of the constants above (a
+     * host's coverage declares each: Kinds::coverage()).
+     *
+     * @return list<string>
+     */
+    public static function all(): array
+    {
+        return array_values(array_filter((new \ReflectionClass(self::class))->getConstants(), \is_string(...)));
+    }
+
     /** The HTML input type of a kind printed as an input, null for any other widget. */
     public static function inputType(?string $kind): ?string
     {

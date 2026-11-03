@@ -185,6 +185,7 @@
  * 799 after step F5c's first part (2026-11-02, -3 +1 on F5b group 5's 801): Base\Subscriber\{AnalyticsSubscriber, TemplatedEmailSubjectSubscriber,
  * TwigSubscriber} moved to omnibridge/symfony (with FrameworkLocator and WebpackCacheWarmer, listed nowhere); Base\Http\RequestsOf.
  * 771 after step F5c, item 3 (2026-11-03, +2 on 769): Base\Database\Mapping\EntityFields and Base\Database\Backend\ColumnTypes.
+ * 791 after step F5d (2026-11-03, +20): Base\Field\Behaviour\* and Base\Field\Conformance\* (see tests/Agnostic.php).
  */
 
 return [
@@ -509,12 +510,32 @@ return [
     Base\Field\AttributeField::class,
     Base\Field\AudioField::class,
     Base\Field\AvatarField::class,
+    Base\Field\Behaviour\AbstractBehaviour::class,
+    Base\Field\Behaviour\Behaviours::class,
+    Base\Field\Behaviour\ChoiceList::class,
+    Base\Field\Behaviour\Choices::class,
+    Base\Field\Behaviour\ColorPickr::class,
+    Base\Field\Behaviour\CountrySelect::class,
+    Base\Field\Behaviour\DateTimePicker::class,
+    Base\Field\Behaviour\Guess::class,
+    Base\Field\Behaviour\Icon::class,
+    Base\Field\Behaviour\JsColor::class,
+    Base\Field\Behaviour\Number::class,
+    Base\Field\Behaviour\Password::class,
+    Base\Field\Behaviour\Select::class,
+    Base\Field\Behaviour\Slug::class,
+    Base\Field\Behaviour\Toggle::class,
     Base\Field\BooleanField::class,
     Base\Field\Choice\Countries::class,
     Base\Field\CodeField::class,
     Base\Field\CollectionField::class,
     Base\Field\ColorField::class,
     Base\Field\ColorPickerField::class,
+    Base\Field\Conformance\Host::class,
+    Base\Field\Conformance\Outcome::class,
+    Base\Field\Conformance\Sample::class,
+    Base\Field\Conformance\Samples::class,
+    Base\Field\Conformance\Suite::class,
     Base\Field\CountryField::class,
     Base\Field\CropperField::class,
     Base\Field\CurrencyField::class,
