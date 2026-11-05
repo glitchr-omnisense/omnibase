@@ -181,7 +181,13 @@ the `demo` environment only ([The demo environment](../20-architecture/demo.md))
 
 ## Voters
 
-The core registers four voters (`config/services/database.php`).
+The core registers four voters (omnibridge/symfony's `config/omnibase/services/database.php`).
+Since 5.0 (plan "omnibase agnostic", step F5e) each is an adapter of a policy of the core,
+`Base\Auth\Policy\*`, which holds its rule: `Access`, `Maintenance` and `Launch` (AccessVoter),
+`Admin` (AdminVoter), `Permission` (PermissionVoter), `Complaint` (ComplaintVoter). The
+restriction a request meets (SecuritySubscriber) is `Restriction`, the word of welcome after a
+sign-in `Welcome`. omnibridge/laravel's gate (`Auth\Policies`) and its `AccessRestriction`
+middleware ask the same policies, so both hosts take the same decisions.
 
 ### `AccessVoter`
 

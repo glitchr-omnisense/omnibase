@@ -203,6 +203,24 @@ final class BareTest extends TestCase
     }
 
     /**
+     * omnibase's access policies (plan "omnibase agnostic", step F5e, slice 1: Base\Auth\Policy\*) decide without
+     * any framework: the restriction's attributes and exceptions, maintenance and launch, BACKEND, the permission
+     * tags, the complaints, what a restricted request meets, the word of welcome - the rules omnibridge/symfony's
+     * voters and SecuritySubscriber held, which they and omnibridge/laravel's gate and middleware now ask.
+     */
+    public function testTheAccessPoliciesDecideWithoutAFramework(): void
+    {
+        $script = __DIR__.'/Auth/Policy/policies-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame(require __DIR__.'/Auth/Policy/policies-without-framework.expected.php', $run['result']);
+    }
+
+    /**
      * The core's services are available where there is no framework (plan "omnibase agnostic", step F5a;
      * Marco's answer 3): omnisense/omnibridge's Omnibridge\Container, built from Base\Services::definitions()
      * - the list Symfony's container and Laravel's read - and the host's contracts in plain PHP, resolves

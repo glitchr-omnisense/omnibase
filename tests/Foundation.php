@@ -194,6 +194,7 @@
  * 804 after step F5d, slice 7 (2026-11-03, +3): Base\Field\Behaviour\{Association, Collection, Attribute} (see tests/Agnostic.php).
  * 805 after step E1 (2026-11-04, from 802 at F6, +3): Base\Service\Links, Base\Validator\Constraints\{Unique, UniqueValidator}
  * (optional without symfony/validator).
+ * 815 after step F5e, slice 1 (2026-11-04, +10): Base\Auth\Policy\* (see tests/Agnostic.php).
  */
 
 return [
@@ -214,6 +215,16 @@ return [
     Base\Auth\NotifierSender::class,
     Base\Auth\Policy::class,
     Base\Auth\PolicyLinking::class,
+    Base\Auth\Policy\Access::class,
+    Base\Auth\Policy\Admin::class,
+    Base\Auth\Policy\Complaint::class,
+    Base\Auth\Policy\Launch::class,
+    Base\Auth\Policy\Maintenance::class,
+    Base\Auth\Policy\Page::class,
+    Base\Auth\Policy\Permission::class,
+    Base\Auth\Policy\Restriction::class,
+    Base\Auth\Policy\RestrictionDecision::class,
+    Base\Auth\Policy\Welcome::class,
     Base\Auth\Registration::class,
     Base\Auth\UserAccounts::class,
     Base\Auth\UserBackupCodes::class,

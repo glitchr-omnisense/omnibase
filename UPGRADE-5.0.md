@@ -90,6 +90,14 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   deprecated, FrameworkAccessorsTrait's part is); the core's entities ask `Base\Contract\Runtime`
   (`notifier()`, `translator()`, `projectDir()` are new).
 
+## The access rules are the core's (step F5e, slice 1)
+
+- `Base\Security\Voter\{AccessVoter, AdminVoter, PermissionVoter, ComplaintVoter}` keep their names, constants,
+  constructors and decisions; they ask `Base\Auth\Policy\*`. A voter of the application that extended one keeps
+  working; its rule can be asked of the policy instead (`new Base\Auth\Policy\Permission()`...).
+- `Base\Subscriber\SecuritySubscriber` keeps its events and priorities; its access restriction and its word of
+  welcome are `Base\Auth\Policy\Restriction` and `Welcome`.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

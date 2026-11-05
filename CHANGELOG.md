@@ -39,6 +39,24 @@ both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md
 - The harness registers `Omnibridge\Symfony\Omnibase\BaseBundle` and imports `type: omnibase` (its
   routes.yaml mounted by compose.checkouts.yml); its image installs `5.x-dev`.
 
+### Added: the access policies (plan "omnibase agnostic", step F5e, slice 1, 2026-11-04)
+
+- **`Base\Auth\Policy\*`**, the rules omnibridge/symfony's voters and SecuritySubscriber held, typed on the core's
+  services and omnibridge's contracts, tested in `bare` (tests/Auth/Policy/policies-without-framework.php, BareTest):
+  - `Access`: ADMIN_ACCESS, USER_ACCESS, ANONYMOUS_ACCESS and EXCEPTION_ACCESS (`base.access_restriction.*`; the
+    exceptions of the locale read once; the firewall of an address and the environment's name asked of the host);
+  - `Maintenance` (MAINTENANCE_ACCESS), `Launch` (LAUNCH_ACCESS): not under maintenance / launched, or an exception;
+  - `Admin` (BACKEND on the back office's and the profiler's pages), `Permission` (the permission tags, "ARTICLE.*"),
+    `Complaint` (COMPLAINT_READ / COMPLAINT_HANDLE on the Roles contract's hierarchy);
+  - `Restriction` and `RestrictionDecision`: what a request meets while the access is restricted (open, with a notice
+    perhaps; not found; sent to the first of `redirect_on_deny`, else the sign-in), `Page` the host's facts about it;
+  - `Welcome`: the word of welcome's key after a sign-in (`login.social`, `login.success.alien`,
+    `login.success.<period>.<active>`).
+- omnibridge/symfony's AccessVoter, AdminVoter, PermissionVoter, ComplaintVoter and SecuritySubscriber's
+  onAccessRequest()/onLoginSuccess() ask them (the same constructors, services and decisions); omnibridge/laravel's
+  gate (`Omnibridge\Laravel\Auth\Policies`), its `AccessRestriction` middleware and its WelcomeFlash ask them too.
+  Under 4.x the bridges keep their former code in `Legacy\` folders.
+
 ### Changed: the entities reach no service (plan "omnibase agnostic", step E1, 2026-11-04)
 
 - `Widget\{Page, Link, Attachment}::__toLink()` name no routing component: their reference type defaults to

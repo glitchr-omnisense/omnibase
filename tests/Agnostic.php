@@ -75,6 +75,8 @@
  * 741 after step F5d, slice 7 (2026-11-03, +3): Base\Field\Behaviour\{Association, Collection, Attribute} (what AssociationType,
  * CollectionType, ArrayType and AttributeType decide), embedded forms, lists and attributes for every host.
  * 742 after step E1 (2026-11-04, +1): Base\Service\Links, the entities' addresses on the Urls contract.
+ * 752 after step F5e, slice 1 (2026-11-04, +10): Base\Auth\Policy\{Access, Admin, Complaint, Launch, Maintenance, Page,
+ * Permission, Restriction, RestrictionDecision, Welcome}, the rules of omnibridge/symfony's voters and SecuritySubscriber.
  */
 
 return [
@@ -95,6 +97,16 @@ return [
     Base\Auth\NotifierSender::class,
     Base\Auth\Policy::class,
     Base\Auth\PolicyLinking::class,
+    Base\Auth\Policy\Access::class,
+    Base\Auth\Policy\Admin::class,
+    Base\Auth\Policy\Complaint::class,
+    Base\Auth\Policy\Launch::class,
+    Base\Auth\Policy\Maintenance::class,
+    Base\Auth\Policy\Page::class,
+    Base\Auth\Policy\Permission::class,
+    Base\Auth\Policy\Restriction::class,
+    Base\Auth\Policy\RestrictionDecision::class,
+    Base\Auth\Policy\Welcome::class,
     Base\Auth\Registration::class,
     Base\Auth\UserAccounts::class,
     Base\Auth\UserBackupCodes::class,
