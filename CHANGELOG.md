@@ -39,6 +39,30 @@ both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md
 - The harness registers `Omnibridge\Symfony\Omnibase\BaseBundle` and imports `type: omnibase` (its
   routes.yaml mounted by compose.checkouts.yml); its image installs `5.x-dev`.
 
+### Changed: the entities reach no service (plan "omnibase agnostic", step E1, 2026-11-04)
+
+- `Widget\{Page, Link, Attachment}::__toLink()` name no routing component: their reference type defaults to
+  `Base\Contract\Link::ABSOLUTE_PATH` (1, Symfony's `UrlGeneratorInterface::ABSOLUTE_PATH`), and `Link::to()`
+  is the static door of the new **`Base\Service\Links`**, a service on the `Urls` contract (in
+  `Base\Services::definitions()`). The same addresses.
+- `User::getUserIdentifier()` reads the identifier field as symfony/property-access read it (its getter -
+  get, the field's name, is, has, can -, else a public `__get()`, else a public property), without it.
+- **`Base\Validator\Constraints\Unique`** (and `UniqueValidator`): symfony/doctrine-bridge's `UniqueEntity`
+  without Doctrine, the records looked up through the unit of work's `Repositories` (`findBy($criteria, null,
+  2)`); the same arguments (but `em`, `service`, `identifierFieldNames`), message, code, path and value.
+  `Layout\Redirection` and `Layout\TextOverride` declare it in place of `UniqueEntity`; the neutral form
+  layer reads it as omnisense/omnibridge's `Unique`. omnibridge/symfony registers its validator on the unit
+  of work.
+- `User\Notification` asks its notifier, its translator and the project's folder of
+  `Base\Contract\Runtime::notifier()`, `::translator()`, `::projectDir()` (new; the services BaseTrait's
+  accessors answered), `Extension\Abstract\AbstractExtension` asks `Locator::isEntity()`: no entity calls an
+  accessor of BaseTrait any more. The entities keep `use BaseTrait` for the applications that call its
+  accessors through them, until 6.0.
+- `docker/bin/bare --strict` guards it: no file of `src/Entity` names `Symfony\Component\Routing`,
+  `Symfony\Component\PropertyAccess` or `Symfony\Bridge`, nor calls `self::get*()`/`static::get*()` or an
+  accessor of BaseTrait (through `$this`, `self`, `static`, `Locator`); its JSON report's `entities`, empty,
+  is asserted by BareTest. Unused: `Thread\Tag`'s import of property-access's `AccessException`, removed.
+
 ### Kept on purpose
 
 - The symfony/process patch stays declared by the core: on the sites still on 4.x the core's declaration

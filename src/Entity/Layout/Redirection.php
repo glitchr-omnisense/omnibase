@@ -5,7 +5,7 @@ namespace Base\Entity\Layout;
 use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
 use Base\Repository\Layout\RedirectionRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Base\Validator\Constraints\Unique;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -26,7 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: RedirectionRepository::class)]
 #[ORM\Table(name: 'layoutRedirection')]
 #[ORM\UniqueConstraint(name: 'layout_redirection_source', columns: ['source'])]
-#[UniqueEntity(fields: ['source'], message: 'This address is already redirected: edit that one.')]
+#[Unique(fields: ['source'], message: 'This address is already redirected: edit that one.')]
 class Redirection
 {
     public const PERMANENT = 301;

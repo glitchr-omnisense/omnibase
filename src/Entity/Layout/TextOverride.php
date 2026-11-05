@@ -4,7 +4,7 @@ namespace Base\Entity\Layout;
 
 use Base\Repository\Layout\TextOverrideRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Base\Validator\Constraints\Unique;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: TextOverrideRepository::class)]
 #[ORM\Table(name: 'layoutTextOverride')]
 #[ORM\UniqueConstraint(name: 'layout_text_override_key', columns: ['domain', 'textKey', 'locale'])]
-#[UniqueEntity(fields: ['domain', 'key', 'locale'], message: 'This text is already rewritten in this language: edit that one.')]
+#[Unique(fields: ['domain', 'key', 'locale'], message: 'This text is already rewritten in this language: edit that one.')]
 class TextOverride
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column]

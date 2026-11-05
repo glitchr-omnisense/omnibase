@@ -22,7 +22,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TagRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 #[ORM\Entity(repositoryClass: TagRepository::class)]
 #[ORM\InheritanceType( "JOINED" )]

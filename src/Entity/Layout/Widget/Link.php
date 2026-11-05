@@ -7,7 +7,6 @@ use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\LinkRepository;
@@ -28,7 +27,7 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
         return ["fa-solid fa-share-square"];
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = \Base\Contract\Link::ABSOLUTE_PATH /* not used */): ?string
     {
         // TODO $routeParameters Implement additional custom layer..
         return $this->getHyperlink()->generate();

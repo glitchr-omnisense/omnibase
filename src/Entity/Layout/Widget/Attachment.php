@@ -13,7 +13,6 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\AttachmentRepository;
@@ -35,7 +34,7 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
         return ["fa-solid fa-paperclip"];
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
 

@@ -4,7 +4,7 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Omnibridge\Contract\Views;
-use Omnibridge\Runtime;
+use Base\Contract\Runtime;
 use Base\Bridge\Symfony\NotificationMessages;
 use Base\Notifier\Abstract\BaseNotificationInterface;
 use Base\Service\Model\IconizeInterface;
@@ -319,7 +319,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     public function markAsReadIfNeeded(array $channels = [])
     {
         $options = [];
-        foreach ($this->getNotifier()->getOptions() as $option) {
+        foreach (Runtime::notifier()->getOptions() as $option) {
             $options[$option["channel"]] = $option;
         }
 
@@ -546,7 +546,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         $this->recipients = [];
 
         // The notifier is needed: MissingContractException when the host has none (step F2f).
-        $this->getNotifier();
+        Runtime::notifier();
 
         // Notification variables
         $this->importance = self::IMPORTANCE_DEFAULT;//parent::getImportance();
@@ -556,7 +556,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
         // Formatting strings if exception passed as argument (an ExceptionEvent's, a FlattenException, a Throwable)
         if (($exception = NotificationMessages::throwable($content)) !== null) {
-            $location = str_replace($this->getProjectDir(), '.', $exception->getFile()) . ":" . $exception->getLine();
+            $location = str_replace(Runtime::projectDir(), '.', $exception->getFile()) . ":" . $exception->getLine();
             $message = $exception->getMessage();
 
             $this->setContent("<div class='title'>" . $location . "</div><div class='message'>" . $message . '</div>');
@@ -564,7 +564,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
             $this->setHtmlTemplate($content);
             $this->setContent("");
         } else {
-            $this->setContent($this->getTranslator()->trans($content, $parameters, $domain, $locale) ?? "");
+            $this->setContent(Runtime::translator()->trans($content, $parameters, $domain, $locale) ?? "");
         }
     }
 
@@ -622,7 +622,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);    
-        $this->getNotifier()->sendUsers($this, ...array_unique($recipients));
+        Runtime::notifier()->sendUsers($this, ...array_unique($recipients));
         return $this;
     }
 
@@ -647,7 +647,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
 
         $recipients = array_filter($recipients, fn($r) => !$r instanceof NoRecipient);
-        $this->getNotifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
+        Runtime::notifier()->sendUsersBy($channels, $this, ...array_unique($recipients));
 
         return $this;
     }
@@ -659,7 +659,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
     public function sendAdmins(string $importance)
     {
         $this->setImportance($importance);
-        $this->getNotifier()->sendAdmins($this);
+        Runtime::notifier()->sendAdmins($this);
 
         return $this;
     }
@@ -673,13 +673,13 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
 
     /**
      * The e-mail: Base\Bridge\Symfony\NotificationMessages::email(), with the notifier and the
-     * project's directory this notification reaches through BaseTrait, and the views through
+     * project's directory this notification reaches through Runtime (step E1; BaseTrait before), and the views through
      * omnibridge's Views (Runtime::views(), since step F5a; Twig's environment through
      * Base\Bridge\Symfony\FrameworkLocator before).
      */
     public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): ?EmailMessage
     {
-        return NotificationMessages::email($this, $recipient, $this->getNotifier(), Runtime::views(), $this->getProjectDir());
+        return NotificationMessages::email($this, $recipient, Runtime::notifier(), Runtime::views(), Runtime::projectDir());
     }
 
     public function asChatMessage(RecipientInterface $recipient, ?string $transport = null): ?ChatMessage
@@ -693,7 +693,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         if ($this->isMarkAsAdmin()) {
             $fwd = "Fwd: ";
             $content = $userIdentifier . " forwarded its notification: \"" . $this->getContent() . "\"";
-        } elseif (in_array($recipient, $this->getRecipients()) && $this->getNotifier()->isTest($recipient)) {
+        } elseif (in_array($recipient, $this->getRecipients()) && Runtime::notifier()->isTest($recipient)) {
             $fwd = "Fwd: [TEST:" . $recipient . "] ";
             $content = $this->getContent();
         }

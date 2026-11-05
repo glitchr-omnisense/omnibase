@@ -101,6 +101,8 @@ final class BareTest extends TestCase
             }
         }
         self::assertSame([], $failures, "a class of the agnostic core loads Doctrine, Twig or the framework:\n".implode("\n", $failures));
+        // Step E1: the entities reach no service (the routing component, property-access, a Symfony bridge, BaseTrait's accessors).
+        self::assertSame([], $report['entities'], "an entity reaches a service:\n".implode("\n", $report['entities']));
         self::assertSame(0, $status);
     }
 
