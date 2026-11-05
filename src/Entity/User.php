@@ -44,7 +44,6 @@ use Base\Traits\BaseTrait;
 use Base\Contract\Runtime;
 use Base\Contract\SecurityUser;
 use Base\Contract\TwoFactorUser;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Exception;
 use Base\Database\Attribute\Cache;
 
@@ -116,22 +115,51 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
 
     public function getUserIdentifier(): string
     {
-        $userIdentifier = null;
-
-        $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isReadable($this, static::$userIdentifier)) {
-            $userIdentifier = $accessor->getValue($this, static::$userIdentifier);
-        }
-
-        if ($accessor->isReadable($this, static::$userIdentifier) && !$userIdentifier) {
-            $userIdentifier = $accessor->getValue($this, static::$userIdentifier);
-        }
+        $userIdentifier = $this->readUserIdentifier(static::$userIdentifier);
 
         if ($userIdentifier === null) {
             throw new Exception("User identifier is NULL. Is this user initialized or database persistent ?");
         }
 
         return $userIdentifier;
+    }
+
+    /**
+     * The identifier field's value, read as symfony/property-access read it before step E1 (plan
+     * "omnibase agnostic": an entity reaches no component's service): its getter (get, is, has, can,
+     * then the field's own name), public, needing no argument and returning something; else a public
+     * __get(); else a public property. Null when none reads it.
+     */
+    private function readUserIdentifier(string $field): mixed
+    {
+        $class = new \ReflectionClass($this);
+        $camel = str_replace(' ', '', ucwords(str_replace('_', ' ', $field)));
+        $deferred = null;
+        foreach (['get'.$camel, lcfirst($camel), 'is'.$camel, 'has'.$camel, 'can'.$camel] as $name) {
+            if (!$class->hasMethod($name)) {
+                continue;
+            }
+            $method = $class->getMethod($name);
+            if (!$method->isPublic() || 0 !== $method->getNumberOfRequiredParameters() || \in_array((string) $method->getReturnType(), ['void', 'never'], true)) {
+                continue;
+            }
+            // A method named after the field that is static or hands back its own class is tried last, as there.
+            $returned = $method->getReturnType();
+            if ($name === lcfirst($camel) && ($method->isStatic() || ($returned instanceof \ReflectionNamedType && \in_array($returned->getName(), ['self', 'static', $method->getDeclaringClass()->getName()], true)))) {
+                $deferred = $method;
+                continue;
+            }
+
+            return $method->isStatic() ? $method->invoke(null) : $method->invoke($this);
+        }
+        if ($class->hasMethod('__get') && $class->getMethod('__get')->isPublic()) {
+            return $this->{$field};
+        }
+        if ($class->hasProperty($field) && ($property = $class->getProperty($field))->isPublic()) {
+            return $property->isStatic() ? $property->getValue() : $this->{$field};
+        }
+
+        return $deferred?->isStatic() ? $deferred->invoke(null) : $deferred?->invoke($this);
     }
 
     /**

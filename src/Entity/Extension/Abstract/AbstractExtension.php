@@ -8,6 +8,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\User;
 use Base\Repository\Extension\Abstract\AbstractExtensionRepository;
 use Base\Service\Model\IconizeInterface;
+use Base\Service\Locator;
 use Base\Traits\BaseTrait;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -69,7 +70,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     public function setEntityId(mixed $entityOrId)
     {
-        if (self::isEntity($entityOrId)) {
+        if (Locator::isEntity($entityOrId)) {
             $this->entityId = $entityOrId->getId();
         } else {
             $this->entityId = $entityOrId;

@@ -77,6 +77,19 @@ The controllers' services are registered under their new names; their former ids
 (`framework.error_controller: Base\Controller\ErrorController::Main` keeps working). A bundle
 extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
 
+## The entities reach no service (step E1)
+
+- `Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity` on an application's entity keeps working
+  under Symfony; `Base\Validator\Constraints\Unique` is the same rule on any persistence (the core's
+  `Redirection` and `TextOverride` use it). It takes `fields`, `message`, `entityClass`, `repositoryMethod`,
+  `errorPath`, `ignoreNull`, `groups`, `payload`; not `em`, `service` nor `identifierFieldNames`.
+- A `__toLink()` override typed on `UrlGeneratorInterface::ABSOLUTE_PATH` keeps working (the value is the
+  same, 1); `Base\Contract\Link::ABSOLUTE_PATH` names it without the routing component, and
+  `Base\Service\Links` makes the address on the `Urls` contract.
+- An entity of the application that calls BaseTrait's accessors keeps working (BaseTrait is not
+  deprecated, FrameworkAccessorsTrait's part is); the core's entities ask `Base\Contract\Runtime`
+  (`notifier()`, `translator()`, `projectDir()` are new).
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

@@ -247,6 +247,26 @@ the implementation's own `generate($name, $parameters, $referenceType)` when it
 has one (`RouterUrls`, the router as before) and refused otherwise. It is a
 helper, not a contract.
 
+Since step E1 `Link::to()` is the static door of `Base\Service\Links`, a service
+on `Urls` (in `Base\Services::definitions()`): the registry's where the host
+lists it, else one made on `Runtime::urls()`. The widgets' `__toLink()`
+(`Page`, `Link`, `Attachment`) default to `Link::ABSOLUTE_PATH` and import
+nothing of the routing component.
+
+## The entities reach no service (step E1)
+
+No entity of `src/Entity` imports Symfony's routing component, property-access
+or a Symfony bridge, nor calls an accessor of `BaseTrait` (`self::`/`static::`
+`get*()`, `$this->getNotifier()`...): `docker/bin/bare --strict` reads the
+sources and refuses it (its report's `entities`, asserted empty by
+`BareTest`). What an entity needs of a service it asks the registry:
+`Notification` its notifier, translator and folder through
+`Runtime::notifier()`, `::translator()`, `::projectDir()`; `User` reads its
+identifier field itself, as property-access read it; `Redirection` and
+`TextOverride` declare `Base\Validator\Constraints\Unique` (UniqueEntity on
+the unit of work's `Repositories`). The entities keep `use BaseTrait` for the
+applications that call its accessors through them.
+
 ## The entities' getters on the contracts (step C3e)
 
 What an entity of the core asked of `BaseTrait`'s services and now asks of the

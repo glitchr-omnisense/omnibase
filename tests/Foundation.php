@@ -192,6 +192,8 @@
  * 798 after step F5d, slice 5 (2026-11-03, +1): Base\Field\Behaviour\AssociationFile (see tests/Agnostic.php).
  * 801 after step F5d, slice 6 (2026-11-03, +3): Base\Field\Behaviour\{Editor, Wysiwyg}, Base\Field\Editor\EditorJs (see tests/Agnostic.php).
  * 804 after step F5d, slice 7 (2026-11-03, +3): Base\Field\Behaviour\{Association, Collection, Attribute} (see tests/Agnostic.php).
+ * 805 after step E1 (2026-11-04, from 802 at F6, +3): Base\Service\Links, Base\Validator\Constraints\{Unique, UniqueValidator}
+ * (optional without symfony/validator).
  */
 
 return [
@@ -785,6 +787,7 @@ return [
     Base\Service\Invitations::class,
     Base\Service\Launcher::class,
     Base\Service\LauncherInterface::class,
+    Base\Service\Links::class,
     Base\Service\LocalBusiness::class,
     Base\Service\Localizer::class,
     Base\Service\LocalizerInterface::class,
@@ -978,8 +981,10 @@ return [
     Base\Validator\Constraints\Password::class,
     Base\Validator\Constraints\PasswordValidator::class,
     Base\Validator\Constraints\StringCaseEntityValidator::class,
+    Base\Validator\Constraints\Unique::class,
     Base\Validator\Constraints\UniqueEntity::class,
     Base\Validator\Constraints\UniqueEntityValidator::class,
+    Base\Validator\Constraints\UniqueValidator::class,
     Base\View\AssetPaths::class,
     Base\View\Bell::class,
     Base\View\Captions::class,

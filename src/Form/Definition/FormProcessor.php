@@ -55,6 +55,8 @@ final class FormProcessor
     public static function readers(): void
     {
         AttributeConstraints::register('Base\Validator\Constraints\UniqueEntity', static fn (array $arguments): Unique => AttributeConstraints::unique($arguments, self::uniqueMessage($arguments)));
+        // UniqueEntity without Doctrine (step E1): Symfony's UniqueEntity's arguments and default message.
+        AttributeConstraints::register('Base\Validator\Constraints\Unique', static fn (array $arguments): Unique => AttributeConstraints::unique($arguments));
         AttributeConstraints::register('Base\Validator\Constraints\NotBlank', AttributeConstraints::keep(NotBlank::class, ['message', 'allowNull', 'groups']));
     }
 

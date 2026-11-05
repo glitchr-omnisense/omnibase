@@ -74,6 +74,7 @@
  * Base\Field\Editor\EditorJs (what EditorController answered under Symfony), the editors for every host.
  * 741 after step F5d, slice 7 (2026-11-03, +3): Base\Field\Behaviour\{Association, Collection, Attribute} (what AssociationType,
  * CollectionType, ArrayType and AttributeType decide), embedded forms, lists and attributes for every host.
+ * 742 after step E1 (2026-11-04, +1): Base\Service\Links, the entities' addresses on the Urls contract.
  */
 
 return [
@@ -662,6 +663,7 @@ return [
     Base\Service\Invitations::class,
     Base\Service\Launcher::class,
     Base\Service\LauncherInterface::class,
+    Base\Service\Links::class,
     Base\Service\LocalBusiness::class,
     Base\Service\Localizer::class,
     Base\Service\LocalizerInterface::class,

@@ -172,9 +172,10 @@ $report = $options['each'] ? each_apart($classes, $autoload) : load_here($classe
 $report['autoload'] = $autoload;
 
 $failed = array_filter($report['classes'], static fn (array $class) => $class['framework'] || $class['framework_files'] || null !== $class['error']);
+$report['entities'] = STRICT ? entities_guard($core) : [];
 if ($options['json']) {
     echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), "\n";
-    exit($failed || $report['baseline']['symbols'] ? 1 : 0);
+    exit($failed || $report['baseline']['symbols'] || $report['entities'] ? 1 : 0);
 }
 
 printf("The core in bare PHP%s: %d classes loaded with %s alone, no kernel, no container.\n\n", STRICT ? ' (strict: nor Doctrine, nor Twig, nor the components left out)' : '', count($classes), $autoload);
@@ -197,8 +198,64 @@ foreach ($failed as $class => $result) {
         printf("    %s\n", $file);
     }
 }
+foreach ($report['entities'] as $violation) {
+    printf("✗ %s\n", $violation);
+}
 printf("\n%d without %s, %d with it or not loaded.\n", count($classes) - count($failed), STRICT ? 'Doctrine, Twig and the framework' : 'the framework', count($failed));
-exit($failed || $report['baseline']['symbols'] ? 1 : 0);
+if (STRICT) {
+    printf("The entities (src/Entity) reach no service: %s.\n", $report['entities'] ? count($report['entities']).' violations' : 'none of the routing component, property-access nor a Symfony bridge imported, no accessor of BaseTrait called');
+}
+exit($failed || $report['baseline']['symbols'] || $report['entities'] ? 1 : 0);
+
+/**
+ * --strict's guard on the entities (plan "omnibase agnostic", step E1): an entity of src/Entity
+ * reaches no service. Read in the sources (comments left out), nothing loaded: no import nor
+ * fully qualified name of Symfony's routing component, of property-access, of a Symfony bridge
+ * (symfony/doctrine-bridge's UniqueEntity: Base\Validator\Constraints\Unique instead); no
+ * self::get*() nor static::get*() call; no call of an accessor of Base\Traits\BaseTrait or
+ * FrameworkAccessorsTrait (through $this, self, static or Base\Service\Locator). What an entity
+ * needs of a service it asks Base\Contract\Runtime, the contracts' registry.
+ *
+ * @return list<string>
+ */
+function entities_guard(string $core): array
+{
+    $accessors = [];
+    foreach (['BaseTrait', 'FrameworkAccessorsTrait'] as $trait) {
+        preg_match_all('~public\s+static\s+function\s+(\w+)~', (string) file_get_contents($core.'/src/Traits/'.$trait.'.php'), $matches);
+        $accessors = [...$accessors, ...$matches[1]];
+    }
+    // isEntity() asks whether a value is a record, of whichever persistence answers: a question, not a service handed out.
+    $accessors = implode('|', array_diff(array_unique($accessors), ['isEntity']));
+    $rules = [
+        '~\bSymfony\\\\Component\\\\Routing\\\\~' => 'names Symfony\'s routing component',
+        '~\bSymfony\\\\Component\\\\PropertyAccess\\\\~' => 'names symfony/property-access',
+        '~\bSymfony\\\\Bridge\\\\~' => 'names a Symfony bridge',
+        '~\b(?:self|static)::(?:get|find)[A-Z]\w*\s*\(~' => 'calls a static accessor (self::/static::get*)',
+        '~(?:\$this->|\b(?:self|static|Locator|BaseTrait)::)(?:'.$accessors.')\s*\(~' => 'calls an accessor of BaseTrait',
+    ];
+    $violations = [];
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($core.'/src/Entity', FilesystemIterator::SKIP_DOTS));
+    foreach ($files as $file) {
+        if (!str_ends_with($file->getFilename(), '.php')) {
+            continue;
+        }
+        $code = '';
+        foreach (token_get_all((string) file_get_contents($file->getPathname())) as $token) {
+            $code .= \is_array($token) ? (\in_array($token[0], [T_COMMENT, T_DOC_COMMENT], true) ? str_repeat("\n", substr_count($token[1], "\n")) : $token[1]) : $token;
+        }
+        foreach (explode("\n", $code) as $number => $line) {
+            foreach ($rules as $pattern => $what) {
+                if (preg_match($pattern, $line)) {
+                    $violations[] = sprintf('src/Entity/%s:%d %s', substr($file->getPathname(), strlen($core.'/src/Entity/')), $number + 1, $what);
+                }
+            }
+        }
+    }
+    sort($violations);
+
+    return $violations;
+}
 
 /**
  * Makes var/bare: the core's composer.json as it is, its autoload pointed back

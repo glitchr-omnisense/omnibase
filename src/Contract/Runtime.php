@@ -2,7 +2,10 @@
 
 namespace Base\Contract;
 
+use Base\Notifier\Abstract\BaseNotifierInterface;
+use Base\Service\Locator;
 use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
 use Omnibridge\Runtime as HostRuntime;
 use Symfony\Component\Mailer\MailerInterface;
 
@@ -71,5 +74,27 @@ final class Runtime extends HostRuntime
     public static function mailer(): MailerInterface
     {
         return self::get(MailerInterface::class);
+    }
+
+    /**
+     * omnibase's notifier, which a Notification sends itself through (step E1: an entity asks this
+     * registry, never BaseTrait's accessors): the one BaseTrait::getNotifier() answered, the registry's
+     * else the host's seeded at boot; MissingContractException without one.
+     */
+    public static function notifier(): BaseNotifierInterface
+    {
+        return Locator::getNotifier();
+    }
+
+    /** omnibase's translator (step E1), the one BaseTrait::getTranslator() answered: a Notification's words. */
+    public static function translator(): TranslatorInterface
+    {
+        return Locator::getTranslator();
+    }
+
+    /** The application's folder (step E1), the one BaseTrait::getProjectDir() answered. */
+    public static function projectDir(): string
+    {
+        return Locator::getProjectDir();
     }
 }

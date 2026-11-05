@@ -12,6 +12,7 @@ use Base\Form\Definition\FormProcessor;
 use Base\Notifier\Mail\EmailComposer;
 use Base\Screen\Builder\Stories;
 use Base\Service\BaseService;
+use Base\Service\Links;
 use Base\Service\MediaService;
 use Base\Service\MediaServiceInterface;
 use Base\Service\Model\Obfuscator\Compression\DeflateCompression;
@@ -77,6 +78,8 @@ final class Services
                 '$imagineBitmap' => '@imagine.bitmap',
                 '$imagineSvg' => '@imagine.svg',
             ]],
+            // A route's address by a reference type on Urls: what the entities' __toLink() ask through Link::to() (step E1).
+            ['class' => Links::class],
             // The pages of a list, their addresses through Urls (Symfony's router under Symfony).
             ['class' => Paginator::class, 'contracts' => [PaginatorInterface::class, 'base.paginator']],
             // The catalogues' words, the site's politeness.

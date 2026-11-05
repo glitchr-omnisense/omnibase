@@ -12,7 +12,6 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\PageRepository;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Base\Database\Attribute\Cache;
 use Base\Entity\Layout\Widget\Set\Book;
@@ -33,7 +32,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
         return ["fa-solid fa-file-alt"];
     }
 
-    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = Link::ABSOLUTE_PATH): ?string
     {
         $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
 

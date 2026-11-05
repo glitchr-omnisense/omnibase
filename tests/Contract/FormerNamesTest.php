@@ -46,6 +46,7 @@ final class FormerNamesTest extends TestCase
         sort($own);
 
         self::assertSame(HostRuntime::class, get_parent_class(Runtime::class));
-        self::assertSame(['mailer', 'media', 'nouns', 'parameters', 'pictures', 'texts'], $own);
+        // notifier, projectDir and translator since step E1: what a Notification asks (BaseTrait's accessors before).
+        self::assertSame(['mailer', 'media', 'notifier', 'nouns', 'parameters', 'pictures', 'projectDir', 'texts', 'translator'], $own);
     }
 }
