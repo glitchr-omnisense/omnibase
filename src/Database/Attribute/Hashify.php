@@ -112,14 +112,14 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
      * @return string|null
      * @throws Exception
      */
-    private function getHashedMessage($entity, ?string $property = null): ?string
+    private function getHashedMessage($entity, ?string $property = null, ?UnitOfWork $unitOfWork = null): ?string
     {
-        $plainMessage = $this->getPlainMessage($entity) ?? null;
+        $plainMessage = $this->getPlainMessage($entity, $unitOfWork) ?? null;
         if ($plainMessage) {
             return $this->getMessageHasher($entity)->hash($plainMessage);
         }
 
-        return ($property ? $this->getFieldValue($entity, $property) : null);
+        return ($property ? $this->getFieldValue($entity, $property, $unitOfWork) : null);
     }
 
     /**
@@ -153,9 +153,12 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
             throw new Exception("Password in @Hashify attribute in \"$property\" for $className needs to be rehashed");
         }
 
+        // The values read on the host's unit of work's shapes (plan "omnibase agnostic", step F7d).
+        $unitOfWork = Runtime::find(UnitOfWork::class);
+
         return $that->getMessageHasher($entity)->verify(
-            $that->getHashedMessage($entity, $property),
-            $that->getFieldValue($entity, $property)
+            $that->getHashedMessage($entity, $property, $unitOfWork),
+            $that->getFieldValue($entity, $property, $unitOfWork)
         );
     }
 
@@ -164,7 +167,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
      * @return string|null
      * @throws Exception
      */
-    private function getPlainMessage($entity): ?string
+    private function getPlainMessage($entity, ?UnitOfWork $unitOfWork = null): ?string
     {
         if ($this->random) {
             return random_bytes(10);
@@ -174,7 +177,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . self::className($entity));
         }
 
-        return $this->getPropertyValue($entity, $this->referenceColumn);
+        return $this->getPropertyValue($entity, $this->referenceColumn, $unitOfWork);
     }
 
     /**
@@ -182,13 +185,13 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
      * @return mixed
      * @throws Exception
      */
-    private function erasePlainMessage($entity)
+    private function erasePlainMessage($entity, ?UnitOfWork $unitOfWork = null)
     {
         if (!$this->referenceColumn) {
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . self::className($entity));
         }
 
-        return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
+        return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""), $unitOfWork);
     }
 
     /**
@@ -209,9 +212,9 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $value = $this->getHashedMessage($entity);
+        $value = $this->getHashedMessage($entity, null, $event->unitOfWork);
         if ($value) {
-            $this->setFieldValue($entity, $property, $value);
+            $this->setFieldValue($entity, $property, $value, $event->unitOfWork);
         }
     }
 
@@ -222,9 +225,9 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $value = $this->getHashedMessage($entity);
+        $value = $this->getHashedMessage($entity, null, $event->unitOfWork);
         if ($value) {
-            $this->setFieldValue($entity, $property, $value);
+            $this->setFieldValue($entity, $property, $value, $event->unitOfWork);
         }
     }
 
@@ -237,7 +240,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPostPersist(Lifecycle\PostPersist $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $this->erasePlainMessage($entity);
+        $this->erasePlainMessage($entity, $event->unitOfWork);
     }
 
     /**
@@ -249,7 +252,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPostUpdate(Lifecycle\PostUpdate $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $this->erasePlainMessage($entity);
+        $this->erasePlainMessage($entity, $event->unitOfWork);
     }
 
     /**

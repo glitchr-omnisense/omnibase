@@ -98,9 +98,8 @@ class Trasheable extends AbstractAttribute implements EntityExtensionInterface
             return null;
         }
 
-        $reader = AttributeReader::getInstance();
         foreach (array_merge([$className], array_values(class_parents($className) ?: [])) as $candidate) {
-            $attributes = $reader->getClassAttributes($candidate, self::class);
+            $attributes = AttributeReader::classAttributesOf($candidate, self::class);
             if (!empty($attributes)) {
                 return end($attributes);
             }

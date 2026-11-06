@@ -50,7 +50,7 @@ final class VaultScope implements Scope
     /** The class's #[Vault], the last one declared. */
     public static function vault(string $class): ?Vault
     {
-        $attributes = AttributeReader::getInstance()->getClassAttributes($class, Vault::class);
+        $attributes = AttributeReader::classAttributesOf($class, Vault::class);
 
         return [] === $attributes ? null : end($attributes);
     }

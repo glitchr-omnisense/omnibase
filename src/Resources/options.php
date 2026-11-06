@@ -32,6 +32,11 @@ return [
     'options' => [
         'autoclear' => $bool(true, 'Automatically clear cache in case of integrity issue'),
 
+        // Plan "omnibase agnostic", step F7d: the persistence, found by what is installed (omnisense/omnibridge's
+        // Persistence\Persistences) - required when omnibridge/doctrine and omnibridge/eloquent are both installed,
+        // refused aloud otherwise; null runs on the only one installed.
+        'persistence' => $scalar(null, 'The persistence: doctrine or eloquent (null: the only one installed; required when both are)'),
+
         'database' => $section([
             'fallback_warning' => $bool(true, 'Fallback warning disable in case there is no fallback'),
             'use_custom' => $bool(null, 'Use custom database settings'),

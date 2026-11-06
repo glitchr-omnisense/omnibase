@@ -3,6 +3,8 @@
 namespace Base\Database\Attribute;
 
 use Omnibridge\Persistence\Lifecycle;
+use Omnibridge\Persistence\UnitOfWork;
+use Omnibridge\Runtime;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
@@ -74,14 +76,16 @@ class Countify extends AbstractAttribute implements ExtensionOptionInterface
      * @return int
      * @throws Exception
      */
-    public function getCount($entity): int
+    public function getCount($entity, ?UnitOfWork $unitOfWork = null): int
     {
+        // Its reference read on the unit of work's shapes (plan "omnibase agnostic", step F7d): the event's, else the host's.
+        $unitOfWork ??= Runtime::find(UnitOfWork::class);
         if (!$this->referenceColumn) {
             throw new Exception("Attribute \"reference\" missing for @Countify in " . get_class($entity));
         }
 
         // Check if field already set.. (it needs to be checked)
-        $value = $this->getFieldValue($entity, $this->referenceColumn) ?? "";
+        $value = $this->getFieldValue($entity, $this->referenceColumn, $unitOfWork) ?? "";
         switch ($this->type) {
             default:
             case self::COUNT_CHARS:
@@ -115,13 +119,13 @@ class Countify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPostLoad(Lifecycle\PostLoad $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $nWords = $this->getFieldValue($entity, $property);
+        $nWords = $this->getFieldValue($entity, $property, $event->unitOfWork);
         if ($nWords) {
             return;
         }
 
-        $count = $this->getCount($entity) ?? 0;
-        $this->setFieldValue($entity, $property, $count);
+        $count = $this->getCount($entity, $event->unitOfWork) ?? 0;
+        $this->setFieldValue($entity, $property, $count, $event->unitOfWork);
     }
 
     /**
@@ -133,8 +137,8 @@ class Countify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPrePersist(Lifecycle\PrePersist $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $count = $this->getCount($entity) ?? 0;
-        $this->setFieldValue($entity, $property, $count);
+        $count = $this->getCount($entity, $event->unitOfWork) ?? 0;
+        $this->setFieldValue($entity, $property, $count, $event->unitOfWork);
     }
 
     /**
@@ -146,7 +150,7 @@ class Countify extends AbstractAttribute implements ExtensionOptionInterface
     public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
         $entity = $event->entity;
-        $count = $this->getCount($entity) ?? 0;
-        $this->setFieldValue($entity, $property, $count);
+        $count = $this->getCount($entity, $event->unitOfWork) ?? 0;
+        $this->setFieldValue($entity, $property, $count, $event->unitOfWork);
     }
 }

@@ -3,6 +3,7 @@
 namespace Base\Database\Entity;
 
 use Base\Database\Entity\Extension\TranslatableInterface;
+use Base\Database\Mapping\EntityFields;
 use Base\Database\Mapping\EntityShape;
 use Base\Database\Mapping\EntityShapes;
 use Base\Database\UnitOfWorks;
@@ -208,6 +209,53 @@ final class EntityValues
         $reflection = $this->reflect($class, $property);
 
         return $reflection ? $reflection->getDeclaringClass()->getName() : null;
+    }
+
+    /**
+     * The field (or association) a name is of: an alias's property (#[Alias]), a column's field, an association by
+     * its name, the field itself - ClassMetadataManipulator::getFieldName()'s answer, from the shape: null for a name
+     * the entity does not map.
+     */
+    public function fieldName(object|string $entityOrClass, string $name): ?string
+    {
+        if (!$this->shapes->has($entityOrClass)) {
+            return null;
+        }
+        $entity = $this->shapes->shape($entityOrClass)->entity;
+        // In the order getFieldNames() merges them: the aliases, then the columns' fields, then the associations.
+        $names = EntityFields::aliases($this->shapes->shape($entityOrClass)->className());
+        foreach ($entity->fields as $field => $description) {
+            $names[$description->column ?? $field] = $field;
+        }
+        foreach (array_keys($entity->relations) as $relation) {
+            $names[$relation] = $relation;
+        }
+
+        return $names[$name] ?? null;
+    }
+
+    /**
+     * The entity class whose folder a field's files go to (Uploader's path): the class declaring the field in the
+     * hierarchy, the target of a path's first association (`gallery.photos`), else the entity's own class -
+     * ClassMetadataManipulator::getDeclaringEntity()'s answer, from the shape.
+     */
+    public function declaringEntity(object|string $entityOrClass, string $fieldPath): ?string
+    {
+        if (!$this->shapes->has($entityOrClass)) {
+            return \is_object($entityOrClass) ? $entityOrClass::class : $entityOrClass;
+        }
+        $shape = $this->shapes->shape($entityOrClass);
+        $declared = $shape->entity->fields[$fieldPath]->declaredIn ?? $shape->entity->relations[$fieldPath]->declaredIn ?? null;
+        if (null !== $declared) {
+            return $declared;
+        }
+        if (($dot = strpos($fieldPath, '.')) > 0) {
+            $association = trim(substr($fieldPath, 0, $dot));
+
+            return $shape->targetClass($this->fieldName($entityOrClass, $association) ?? $association);
+        }
+
+        return $shape->className();
     }
 
     private function raw(object $entity, string $property): mixed
