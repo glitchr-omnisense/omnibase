@@ -15,10 +15,12 @@ namespace Base\Database\Repository\Finder;
  * - $criteria, $options: the criteria the name declares, "field:index" => value,
  *   and their options, "field:index" => list of words;
  * - $separator: And or Or, how the criteria combine (never both);
- * - $column: the column counted or measured (countFor<Column>By, lengthOf<Column>By), null when the name has none;
+ * - $column: the column counted, measured or aggregated (countFor<Column>By, lengthOf<Column>By,
+ *   sumOf<Column>By, minOf<Column>By, maxOf<Column>By), null when the name has none;
  * - $cacheable: a cache... request outside the command line;
  * - $eagerly: the associations an ...Eagerly... request loads, false otherwise;
- * - $request: find, count (distinctCount too) or lengthOf; $special: One, All,
+ * - $request: find, count (distinctCount too), lengthOf, or an aggregate (sumOf, minOf,
+ *   maxOf: __sumOfBy... with the criteria alone, one value back); $special: One, All,
  *   Randomly, AtMost, Last, LastOne, Previous, PreviousOne, Next, NextOne, or null.
  */
 final class Query
@@ -46,7 +48,9 @@ final class Query
     /**
      * Every criterion of the call, in order: those of the criteria array given,
      * then those the name declares, each with its options; not the specials'
-     * numbers and keys (extras()).
+     * numbers and keys (extras()). A group of the criteria array (Group::by())
+     * is one criterion whose value is the Group read, its members in
+     * Group::criterions().
      *
      * @return list<Criterion>
      */

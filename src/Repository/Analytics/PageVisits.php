@@ -2,6 +2,7 @@
 
 namespace Base\Repository\Analytics;
 
+use Base\Database\Repository\BackendOnly;
 use Base\Database\Repository\Entities;
 use Base\Entity\Analytics\PageVisit;
 
@@ -14,9 +15,11 @@ use Base\Entity\Analytics\PageVisit;
  */
 interface PageVisits extends Entities
 {
+    #[BackendOnly('doctrine', 'native SQL: INSERT IGNORE (INSERT OR IGNORE, ON CONFLICT DO NOTHING)')]
     public function recordPresence(string $path, string $subjectType, string $subjectId, \DateTimeImmutable $date): void;
 
     /** @param string|list<string>|null $path */
+    #[BackendOnly('doctrine', 'native SQL: COUNT(*) over a DISTINCT subquery of three columns')]
     public function countUnique(?\DateTimeImmutable $since = null, string|array|null $path = null): int;
 
     /**
@@ -24,6 +27,7 @@ interface PageVisits extends Entities
      *
      * @return array<mixed>
      */
+    #[BackendOnly('doctrine', 'native SQL: a DISTINCT subquery grouped by DATE()')]
     public function dailyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array;
 
     /**
@@ -31,5 +35,6 @@ interface PageVisits extends Entities
      *
      * @return array<mixed>
      */
+    #[BackendOnly('doctrine', 'native SQL: a DISTINCT subquery grouped by the hour bucket')]
     public function hourlyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array;
 }

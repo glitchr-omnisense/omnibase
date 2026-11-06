@@ -212,6 +212,20 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
 - `/timezone/{_timezone}` takes a zone with its slash and answers as `/locale/{_locale}` does (see the CHANGELOG): a
   link that relied on it going to the index whatever it carried now changes the zone.
 
+## The repositories' queries in the finder language (step E2)
+
+- omnibridge/doctrine's repositories answer the same methods with the same rows; most of their hand-written queries
+  are finders now (see the CHANGELOG). Nothing to change in an application that calls them.
+- Removed: `ImageRepository` and `ImageCropRepository`'s `findByExampleField()` and `findOneBySomeField()`, maker
+  boilerplate querying a field that does not exist (they could only fail). The names now reach the finder, which
+  refuses an unknown field as well.
+- An application's repository that extended one of the core's and overrode `NotificationRepository::visibleFor()`
+  should know that `countUnreadFor()` and `findVisibleFor()` no longer call it under 5.0 (their criteria are
+  `visibleTo()`'s, a finder group); it stays the 4.x query.
+- New: `Base\Database\Repository\Finder\Group` (parentheses in a finder), the aggregates `sumOf`/`minOf`/`maxOf`,
+  and `#[Base\Database\Repository\BackendOnly]` with `UnsupportedQueryException` for the methods one persistence runs
+  (the analytics' native SQL, `Redirections::hit()`).
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

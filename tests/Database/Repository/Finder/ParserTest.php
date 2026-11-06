@@ -3,6 +3,7 @@
 namespace Tests\Base\Database\Repository\Finder;
 
 use Base\Database\Repository\Finder\Criterion;
+use Base\Database\Repository\Finder\Group;
 use Base\Database\Repository\Finder\Parser;
 use PHPUnit\Framework\TestCase;
 
@@ -141,6 +142,63 @@ final class ParserTest extends TestCase
         self::assertSame(['image.source' => 'a.jpg', 'slug:0' => 'a-slug'], $query->arguments[0]);
         self::assertSame(['id' => 'DESC'], $query->arguments[1]);
         self::assertEquals([new Criterion('image.source', null, 'a.jpg'), new Criterion('slug', 0, 'a-slug', [Parser::OPTION_EQUAL])], $query->criterions());
+    }
+
+    public function testTheAggregates(): void
+    {
+        // Step E2: sumOf, minOf, maxOf a column, by the criteria of find...By.
+        $query = self::parser()->parse('sumOfIdByStateAndPublishedAtGreaterEqualTo', ['publish', '2026-01-01', ['slug' => 'a']]);
+        self::assertSame('__sumOfBy', $query->method);
+        self::assertSame(Parser::REQUEST_SUM, $query->request);
+        self::assertSame('id', $query->column);
+        self::assertSame(['slug' => 'a', 'state:0' => 'publish', 'publishedAt:0' => '2026-01-01'], $query->arguments[0]);
+        self::assertSame([Parser::OPTION_GREATER_EQUAL], $query->criterions()[2]->options);
+
+        $query = self::parser()->parse('minOfPublishedAt', []);
+        self::assertSame('__minOfBy', $query->method);
+        self::assertSame(Parser::REQUEST_MIN, $query->request);
+        self::assertSame('publishedAt', $query->column);
+        self::assertSame([[]], $query->arguments);
+
+        $query = self::parser()->parse('maxOfIdBy', [['state' => 'publish']]);
+        self::assertSame('__maxOfBy', $query->method);
+        self::assertSame([['state' => 'publish']], $query->arguments);
+    }
+
+    public function testAGroupIsReadAsAFinderOfItsOwn(): void
+    {
+        // Step E2: the parentheses a name cannot say, an entry of the criteria array.
+        $query = self::parser()->parse('findByState', ['publish', ['email' => 'a@example.org', Group::by('SlugNotEmptyOrInsensitivePartialUsername', '%a%')]]);
+        self::assertSame(Parser::SEPARATOR_AND, $query->separator);
+        [$email, $group, $state] = $query->criterions();
+        self::assertSame('email', $email->field);
+        self::assertSame('publish', $state->value);
+        self::assertInstanceOf(Group::class, $group->value);
+        self::assertSame(Parser::SEPARATOR_OR, $group->value->separator());
+        self::assertEquals([
+            new Criterion('slug', 0, '', [Parser::OPTION_NOT_EMPTY]),
+            new Criterion('username', 0, '%a%', [Parser::OPTION_PARTIAL, Parser::OPTION_INSENSITIVE, Parser::OPTION_EQUAL]),
+        ], $group->value->criterions());
+        // The group's criteria stay its own: none in the call's.
+        self::assertSame(['state:0' => 'publish'], $query->criteria);
+
+        self::assertSame(Parser::SEPARATOR_AND, self::parser()->parse('count', [[Group::by('SlugAndEmail', 'a', 'b')]])->arguments[0][0]->separator());
+    }
+
+    public function testAGroupHoldsConditionsOnly(): void
+    {
+        foreach ([
+            ['IdClosestTo', [5], 'orders the rows'],
+            ['SlugWithRoute', ['slug'], 'route parameter'],
+            ['Slug', ['a', ['state' => 'publish']], 'values of its name only'],
+        ] as [$name, $arguments, $message]) {
+            try {
+                self::parser()->parse('findBy', [[Group::by($name, ...$arguments)]]);
+                self::fail($name.' was read');
+            } catch (\Exception $e) {
+                self::assertStringContainsString($message, $e->getMessage(), $name);
+            }
+        }
     }
 
     public function testAFieldHoldingAWordOfTheLanguageIsRefused(): void

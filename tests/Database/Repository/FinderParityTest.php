@@ -142,6 +142,80 @@ final class FinderParityTest extends KernelTestCase
     }
 
     /**
+     * The repositories' hand-written queries rewritten on the finder language (step E2): each method
+     * gives what its query of before gave (HandWrittenQueries, word for word), the same rows in the
+     * same order, on rows written here for the purpose - redirections (exact and by prefix, the
+     * case of letters), text overrides, special days with and without a scope, a scoped week, page
+     * views and visits - and on the harness's empty tables for the others (the query runs on
+     * SQLite: its groups, aggregates and joins compile). lesringostars' FinderParityTest runs the
+     * same on the site's data. The rows are written in a transaction, rolled back after.
+     */
+    public function testTheRewrittenQueriesGiveTheRowsOfBefore(): void
+    {
+        self::bootKernel();
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = static::getContainer()->get('doctrine')->getManager();
+        $connection = $entityManager->getConnection();
+        $connection->beginTransaction();
+
+        try {
+            $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+            $entityManager->persist(new \Base\Entity\Layout\Redirection('/old-page', '/new-page'));
+            $entityManager->persist((new \Base\Entity\Layout\Redirection('/Mixed/Case', '/target'))->setEnabled(true));
+            $entityManager->persist(new \Base\Entity\Layout\Redirection('/legacy/*', '/archive/*'));
+            $entityManager->persist((new \Base\Entity\Layout\Redirection('/off', '/on'))->setEnabled(false));
+            foreach ([['messages', 'fr', 'a.key', 'Un'], ['messages', 'en', 'a.key', 'One'], ['forms', 'fr', 'b_key', 'Deux']] as [$domain, $locale, $key, $value]) {
+                $entityManager->persist((new \Base\Entity\Layout\TextOverride())->setDomain($domain)->setLocale($locale)->setKey($key)->setValue($value));
+            }
+            $entityManager->persist(new \Base\Entity\Hours\SpecialDay($now->modify('+3 days'), $now->modify('+5 days'), 'Holidays'));
+            $entityManager->persist(new \Base\Entity\Hours\SpecialDay($now->modify('+1 day'), null, 'Inventory', 'office'));
+            $entityManager->persist(new \Base\Entity\Hours\SpecialDay($now->modify('-90 days'), null, 'Long ago'));
+            $entityManager->persist(new \Base\Entity\Hours\ScopedWeek('office', [1 => [['09:00', '17:00']]]));
+            foreach ([[Thread::class, 7, '-2 days'], [Thread::class, 8, null], [User::class, 7, '+2 days'], [Thread::class, 7, '-1 day']] as [$class, $id, $permanent]) {
+                $trashBall = (new \Base\Entity\Extension\TrashBall())->setEntityClass($class);
+                $trashBall->setEntityId($id);
+                $trashBall->setAction(\Base\Enum\EntityAction::DELETE);
+                $trashBall->setCreatedAt(new \DateTime());
+                null === $permanent || $trashBall->setPermanentAfter(new \DateTime($permanent));
+                $entityManager->persist($trashBall);
+            }
+            $entityManager->flush();
+
+            $views = $entityManager->getRepository(\Base\Entity\Analytics\PageView::class);
+            $visits = $entityManager->getRepository(\Base\Entity\Analytics\Visit::class);
+            foreach ([['/', 0], ['/', 0], ['/', 40 * 86400], ['/about', 3600]] as [$path, $ago]) {
+                $views->incrementView($path, $now->modify('-'.$ago.' seconds'));
+                $visits->recordPresence(\Base\Entity\Analytics\Visit::TYPE_VISITOR, md5($path.$ago), $now->modify('-'.$ago.' seconds'));
+            }
+            $views->incrementView('/', $now, \Base\Entity\Analytics\PageView::SOURCE_BOT);
+            $visits->recordPresence(\Base\Entity\Analytics\Visit::TYPE_USER, '1', $now);
+            $entityManager->clear();
+
+            $repository = static fn (string $class) => $entityManager->getRepository($class);
+            $latest = static function (string $class) use ($entityManager): ?object {
+                $id = $entityManager->getClassMetadata($class)->getSingleIdentifierFieldName();
+
+                return $entityManager->createQueryBuilder()->select('x')->from($class, 'x')->orderBy('x.'.$id, 'DESC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
+            };
+
+            $compared = 0;
+            foreach (HandWrittenQueries::scenarios($repository, $latest, \App\Entity\User::class, new \DateTime()) as $name => [$before, $after]) {
+                self::assertSame(HandWrittenQueries::normalise($before()), HandWrittenQueries::normalise($after()), $name.': the rows of before, in order');
+                ++$compared;
+            }
+            self::assertGreaterThanOrEqual(30, $compared);
+            // The rows written above are read by the scenarios that have them to read.
+            self::assertSame(['/', '/about'], array_keys(array_filter(['/' => $views->countViews('/'), '/about' => $views->countViews('/about')])));
+            self::assertSame('/new-page', $repository(\Base\Entity\Layout\Redirection::class)->forAddress('/old-page?x=1')?->getTarget(), 'SQLite compares the case of letters, unlike MySQL');
+            self::assertCount(3, $repository(\Base\Entity\Layout\TextOverride::class)->map());
+            self::assertCount(2, $repository(\Base\Entity\Extension\TrashBall::class)->expired());
+        } finally {
+            $connection->rollBack();
+            $entityManager->clear();
+        }
+    }
+
+    /**
      * What the name parses to: since F1 Finder\Parser's Query (ServiceEntityParser::read()); before,
      * the parser's own state after its __parse(), read by reflection (the column reset first: the
      * parser of before kept the previous call's).
