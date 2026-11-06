@@ -31,7 +31,7 @@ final class TimeMachineOptionalTest extends TestCase
         $config = (new Symfony\Component\Config\Definition\Processor())->process($tree, []);
         $container = new Symfony\Component\DependencyInjection\ContainerBuilder();
         $loader = new Symfony\Component\DependencyInjection\Loader\PhpFileLoader($container, new Symfony\Component\Config\FileLocator(CONFIG));
-        foreach (['services-list.php', 'services.php', 'services-public.php', 'services-fix.php', 'services-decoration.php', 'services-list-contracts.php'] as $file) {
+        foreach (['services-list.php', 'services.php', 'services-public.php', 'services-fix.php', 'services-decoration.php'] as $file) {
             $loader->load($file);
         }
         $services = [];
@@ -87,7 +87,7 @@ final class TimeMachineOptionalTest extends TestCase
         }
         $container = new ContainerBuilder();
         $loader = new PhpFileLoader($container, new FileLocator(\dirname((new \ReflectionClass(\Omnibridge\Symfony\Omnibase\BaseBundle::class))->getFileName(), 3).'/config/omnibase'));
-        foreach (['services-list.php', 'services.php', 'services-public.php', 'services-fix.php', 'services-decoration.php', 'services-list-contracts.php'] as $file) {
+        foreach (['services-list.php', 'services.php', 'services-public.php', 'services-fix.php', 'services-decoration.php'] as $file) {
             $loader->load($file);
         }
         foreach (self::SERVICES as $id) {

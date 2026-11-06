@@ -11,18 +11,25 @@ in a plain PHP script. Step F5a (2026-11-02) is what makes that true.
 
 ## One list, three containers
 
-`Base\Services::definitions()` is the core's services as data: each a class, its service id (the class
-by default), the contracts it answers (interfaces and former ids, aliased to it) and its arguments by
-name, in `Omnibridge\Container`'s syntax - `'@id'` a service, `'%name%'` a parameter.
+`Base\Services::definitions()` is the core's services as data (every one of them since step F5e slice 4a: 192
+definitions in `src/Resources/services/<group>.php`): each a class (or its parent's), its service id (the class by
+default), the contracts it answers (interfaces and former ids, aliased to it, with their visibility), its arguments by
+position or by name in `Omnibridge\Container`'s syntax - `'@id'` a service, `'@?id'` one or null, `'%name%'` a
+parameter, `['!tagged_iterator' => tag]`, `['!service_closure' => '@id']` -, its bindings, calls, tags, decoration and
+factory, what a host must have installed for it (`requires`) and the environment it is for (`environment`); what only
+Symfony's container gives it, by Symfony's own ids, is its `symfony` part. The format is omnisense/omnibridge's
+`Omnibridge\Container\Declarations` (its docs/container.md).
 
 | Host | Reads the list with |
 |---|---|
-| Symfony | `config/services-list.php`, loaded first by `BaseExtension`: each listed service is defined from the list (autowired, public, its arguments). `config/services/*.php` and `services-decoration.php` then say only what Symfony adds, through `$services->get()` - tags, decoration, the class of a service's Symfony half (BaseService's, omnibridge/symfony's SymfonyBaseService), the framework's services given in place of what the list autowires; `config/services-list-contracts.php`, loaded last, aliases each listed contract the configuration does not alias itself (step F5c, item 3). The files move to omnibridge/symfony with the rest of the DI at F6. `tests/ServicesTest` checks that the container answers the list. |
-| Laravel | omnibridge/laravel's `Container\Definitions::bind()`, at boot: every listed service it (or the application) does not bind yet is a singleton of its class, its contracts aliases. |
+| Symfony | omnibridge/symfony's `Omnibase\DependencyInjection\Declarations::group()`, called by its `config/omnibase/services*.php` for each group in its place among the bridge's own definitions (the first group in `services-list.php`, loaded first): the compiled container is the one the former Symfony files built, the order of the services a tag collects included. `tests/ServicesTest` checks that the container answers every public service and contract. |
+| Laravel | omnibridge/laravel's `Container\Definitions::bind()`, at boot: every declared service that applies (its `requires`, its environment) and can be built there (what its constructor needs is bound or declared, its options configured) and that it (or the application) does not bind yet is a singleton of its class, its contracts aliases, its tags Laravel's; a decoration is left to the host's own wiring. |
 | Plain PHP | omnisense/omnibridge's `Omnibridge\Container::fromDefinitions()` (docs: omnibridge's `docs/container.md`). |
 
-The list today: the obfuscator and its five compressions, `MediaService`, `Paginator`, `Translator`,
-`Stories`, `EmailComposer`. It grows as each service is written on contracts.
+The whole graph builds in plain PHP: `tests/Services/graph-without-framework.php` (BareTest, on the core installed
+alone) gives `Omnibridge\Container` the host's contracts of `container-without-framework.php`, stand-ins for the
+repositories and the request's contracts, and builds every definition that applies (91 there; the others say what they
+require: Twig, omniauth, symfony/validator, the Symfony router...).
 
 What a constructor asks and the list does not give is the host's: omnibridge's contracts (`Urls`,
 `Views`, `Environment`, `Translations`, `Locales`...), `Base\Service\ParameterBagInterface`,

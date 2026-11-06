@@ -283,7 +283,12 @@ final class BareTest extends TestCase
         // egulias/email-validator reads when symfony/mime checks an e-mail's address (plan, F6).
         [, $strict] = self::bare(['--strict', $script]);
         $outside = array_keys($strict['classes'][$script]['framework']);
-        self::assertSame([], array_values(preg_grep('~^(?:Symfony\\\\Component\\\\Cache\\\\|Doctrine\\\\Common\\\\Lexer\\\\)~', $outside, PREG_GREP_INVERT)), 'only symfony/cache and doctrine/lexer outside the kept list');
+        // Since step F5e slice 4 the list is the core's whole declaration: the facade's optional services are given where
+        // they are declared, and on this vendor (omnibridge/doctrine installed, its extra.omnibase.bare) those include the
+        // Doctrine-backed ones (the group and widget repositories) and three core subscribers (symfony/event-dispatcher's
+        // interface); property-info and type-info, the serializer's extraction. The core alone loads none of Doctrine's
+        // (testTheCoreAloneLoadsTheAgnosticCore).
+        self::assertSame([], array_values(preg_grep('~^(?:Symfony\\\\Component\\\\(?:Cache|EventDispatcher|PropertyInfo|TypeInfo)\\\\|Doctrine\\\\(?:Common\\\\Lexer|ORM|Persistence|DBAL)\\\\|Omnibridge\\\\Doctrine\\\\)~', $outside, PREG_GREP_INVERT)), 'only symfony/cache, event-dispatcher, property-info, type-info, doctrine/lexer and omnibridge/doctrine\'s outside the kept list');
 
         self::assertSame([
             'obfuscator' => [\Base\Service\Obfuscator::class, 5, true],
@@ -844,11 +849,52 @@ final class BareTest extends TestCase
         self::assertCount(\count(require __DIR__.'/Agnostic.php'), $report['classes']);
 
         $script = __DIR__.'/Services/container-without-framework.php';
-        [$status, $report] = self::bare(['--strict', $script], (string) realpath($autoload));
+        [, $report] = self::bare(['--strict', $script], (string) realpath($autoload));
         $run = $report['classes'][$script];
         self::assertNull($run['error']);
-        self::assertSame(0, $status);
+        // Nothing of Doctrine nor Twig: the core alone has neither; three core subscribers' interface and the serializer's
+        // extraction are outside the kept list (step F5e slice 4: the facade is given the services the declaration has).
+        self::assertSame([], array_values(preg_grep('~^Symfony\\\\Component\\\\(?:Cache|EventDispatcher|PropertyInfo|TypeInfo)\\\\~', array_keys($run['framework']), PREG_GREP_INVERT)));
         self::assertSame([\Base\Service\Obfuscator::class, 5, true], $run['result']['obfuscator']);
+    }
+
+    /**
+     * The whole graph of the core's services is built by Omnibridge\Container alone (plan "omnibase agnostic", step F5e
+     * slice 4), on the core installed alone (var/bare-alone: its require, nothing of Symfony's framework, Doctrine, Twig
+     * nor omniauth): every definition of Base\Services that applies there is built, with the plain-PHP host of
+     * container-without-framework.php and stand-ins for what it has no use for at build time (the repositories, the
+     * request's contracts); the abstract classes declared for their children are parents only; each definition left out
+     * says what it requires (Twig, omniauth, symfony/validator, the Symfony router...). Nothing of the framework is loaded;
+     * under --strict, only what three services implement or build with: symfony/event-dispatcher's subscriber interface
+     * (three core subscribers) and property-info/type-info (the serializer's property extraction).
+     */
+    public function testTheWholeGraphOfTheServicesIsBuiltByAPlainPhpContainer(): void
+    {
+        $autoload = __DIR__.'/../var/bare-alone/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor of the core alone here (var/bare-alone/vendor): "docker/bin/bare --alone --install" makes it.');
+        }
+        $script = __DIR__.'/Services/graph-without-framework.php';
+
+        [$status, $report] = self::bare([$script], (string) realpath($autoload));
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+
+        $result = $run['result'];
+        self::assertSame([], $result['failed'], 'every service that applies is built');
+        self::assertSame(\count(\Base\Services::definitions()), $result['declared']);
+        self::assertSame($result['declared'], $result['built'] + \count($result['parents']) + $result['left out, with what they require']);
+        self::assertGreaterThanOrEqual(90, $result['built']);
+        foreach ($result['left'] as $id => $requires) {
+            self::assertNotEmpty($requires, $id.' says what it requires');
+        }
+
+        [, $strict] = self::bare(['--strict', $script], (string) realpath($autoload));
+        $outside = array_keys($strict['classes'][$script]['framework']);
+        self::assertSame([], array_values(preg_grep('~^Symfony\\\\Component\\\\(?:EventDispatcher|PropertyInfo|TypeInfo)\\\\~', $outside, PREG_GREP_INVERT)), 'only symfony/event-dispatcher, property-info and type-info outside the kept list');
     }
 
     private static function withoutTheFramework(): string
