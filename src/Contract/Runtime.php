@@ -33,7 +33,7 @@ use Symfony\Component\Mailer\MailerInterface;
  * Laravel's own mail is built on it).
  *
  * Under Symfony, omnibase's bundle hands its `base.contracts` locator in
- * BaseBundle::boot() (Base\DependencyInjection\Compiler\Pass\ContractsPass);
+ * BaseBundle::boot() (the locator of Base\Discovery's `contracts`, omnibridge/symfony's DiscoveryPass);
  * under Laravel, omnibridge/laravel hands the application. A contract asked
  * and not filled throws MissingContractException; find() answers null
  * instead, for a caller that can do without.

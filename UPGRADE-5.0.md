@@ -156,6 +156,25 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   `storage/framework/cache/omnibase-obfuscator`).
 - An unset `BASE_TRADING_LIVE` means live under Laravel too, as under Symfony.
 
+## What is discovered is the core's declaration (step F5e, slice 4c)
+
+- The lists omnibridge/symfony's compiler passes held (the tags of the core's interfaces, the services each collecting
+  service is handed, the contracts, the admin's links, the guards' arguments, the application's texts, the local
+  storages, the enumerations, the repository interfaces) are `Base\Discovery`'s registries (data in
+  `src/Resources/discovery.php`), compiled by one pass, `Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\DiscoveryPass`.
+  A Symfony site changes nothing: its compiled container is the same.
+- The fifteen former passes are `Omnibridge\Symfony\Omnibase\Legacy\DependencyInjection\Compiler\Pass\*` (registered
+  for a 4.x core only); their former names (`Base\DependencyInjection\Compiler\Pass\*`) point there. Code that read
+  `ContractsPass::SERVICE`/`CONTRACTS` reads `Base\Discovery::registry('contracts')`; `ApplicationTextsPass::read()` is
+  `Base\Translation\ApplicationTexts::read()`; `FlysystemStoragesPass::STORAGES` is `registry('storages')['local']`.
+- `Base\Services` no longer lists the obfuscator's compressions as its argument: they are the `collect` registry's
+  (the services tagged `obfuscator.compression`), which every host applies. A plain-PHP host passes
+  `Base\Discovery::registries()` to `Omnibridge\Container::fromDefinitions()` (fourth argument), or its obfuscator has no
+  compression.
+- omnibridge/laravel binds the entity dispatchers and ThreadSubscriber from the declaration and registers every Doctrine
+  listener the declaration tags on the events its registries give (an application's `omnibridge.omnibase.entity_dispatchers`
+  on the events of `Base\EntityDispatcher\EventDispatcherInterface`); `OmnibaseServices::DISPATCHERS` is deprecated.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

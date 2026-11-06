@@ -211,7 +211,7 @@ Runtime::translations()->trans('@entities.article._singular', [], null, Runtime:
 ```
 
 - **Filled at boot.** `BaseBundle::boot()` hands it the `base.contracts`
-  locator (`ContractsPass`): each contract by its interface's name, bound to
+  locator (`Base\Discovery`'s `contracts`, compiled by omnibridge/symfony's `DiscoveryPass`): each contract by its interface's name, bound to
   the service the container gives that name - an application rebinds one by
   aliasing the interface. Only the contracts whose service exists are listed,
   and a locator holds closures: nothing is built before it is asked. Another

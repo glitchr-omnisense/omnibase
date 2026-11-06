@@ -143,6 +143,33 @@ omnibridge/symfony where the group of services that reads them is compiled, and 
 default. `tests/Options/OptionsHostsTest` gives the same configurations to Symfony's tree and to the Processor and
 expects the same values, refusals and deprecations.
 
+## What is discovered, one declaration (F5e slice 4c)
+
+What a host looks for among the services is declared once as well: `Base\Discovery` reads
+`src/Resources/discovery.php`, one registry per kind (`Discovery::KINDS`, `registries()`, `registry($kind)`). Until slice
+4c omnibridge/symfony held these lists in fifteen compiler passes and BaseExtension; one generic pass, `DiscoveryPass`,
+compiles them now.
+
+| Kind | What it says | Symfony | Laravel | Plain PHP |
+|---|---|---|---|---|
+| `autoconfigure` | the tags a service of an interface gets (`instanceof`, `tags`, `requires`) | `registerForAutoconfiguration()` in BaseExtension | `Definitions::discover()`: the tags; the entity listeners' events | `Omnibridge\Container` |
+| `collect` | the tagged services (or those of a class) handed to a collecting service by a method | method calls | `extend()` on the collecting service | calls |
+| `fallbacks` | a service no one binds: the first candidate, else a default (the admin's links) | alias or definition | binding | alias or definition |
+| `preferred` | an alias moved to a better service where it exists (the rewritten texts' Redis pool) | alias | - | - |
+| `contracts` | the contracts `Base\Contract\Runtime` reaches, the locator's id | the `base.contracts` locator | the container itself | the container itself |
+| `arguments` | arguments from another package's configuration (the guards' captcha) | arguments | - | - |
+| `texts` | the application's own texts, read by `Base\Translation\ApplicationTexts::read()` | the translator's argument | - | - |
+| `storages` | the local storages where the host has none | Flysystem definitions | - (its disks) | - (its storages) |
+| `enumerations` | where the enumerations are and what they extend (`Discovery::enumerations()`) | out of DoctrineBundle's types, into its middleware | - | `Discovery::enumerations()` |
+| `repositories` | the core's repository interfaces and their repositories (`Base\Repository\Aliases`) | DoctrineBundle's repository locator | aliases | - |
+
+The generic kinds (`autoconfigure`, `collect`, `fallbacks`) are in omnisense/omnibridge's `Container\Discovery` format:
+`Omnibridge\Container::fromDefinitions($definitions, $parameters, $services, Discovery::registries())` builds with them,
+and BareTest checks that it discovers what Symfony's container discovers on lesringostars
+(`tests/Services/discovered-by-symfony.php`: the obfuscator's five compressions, the six sharing adapters, the
+enumerations, in their order). Symfony's own passes stay omnibridge/symfony's: TwigComponent, DoctrineConfiguration,
+WebauthnMapping, WebauthnDeprecatedAlias, Workflow, FormerFormTypes.
+
 ## Left for later steps
 
 - F5b: the field and form types (the neutral form layer); the services that take Symfony's form factory.

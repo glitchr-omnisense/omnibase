@@ -10,6 +10,27 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: what is discovered is the core's declaration (plan "omnibase agnostic", step F5e, slice 4c)
+
+- `Base\Discovery`: the registries of what a host discovers among the core's services, as data in
+  `src/Resources/discovery.php` - `autoconfigure` (the tags of the core's interfaces, BaseExtension's and the Twig group's
+  `registerForAutoconfiguration()` until now), `collect` (the attribute reader, entity extensions, icon providers,
+  compressions, sharing adapters, currency providers, tag renderers, each handed to its service), `fallbacks` (the
+  admin's links), `preferred` (the rewritten texts' Redis pool), `contracts` (the 24 contracts of the Runtime and the
+  locator's id), `arguments` (FormGuard's and SignInGuard's captcha settings), `texts` (the application's own texts),
+  `storages` (the six local storages), `enumerations` (folders and base class; `Discovery::enumerations()` reads them
+  without Doctrine) and `repositories` (`Base\Repository\Aliases`). `Base\Translation\ApplicationTexts::read()` (from
+  omnibridge/symfony's ApplicationTextsPass).
+- omnibridge/symfony compiles them in one pass (`DiscoveryPass`) where fifteen passes held them: on lesringostars its
+  compiled container is the same before and after (debug:container JSON dev, prod and hidden, routes, the dumped XML of
+  4 598 services with its parameters in their order). omnibridge/laravel applies `autoconfigure`, `collect` and
+  `fallbacks` to what it binds and reads the entity listeners' events from them; omnisense/omnibridge's
+  `Omnibridge\Container` builds with them.
+- The obfuscator's declaration no longer lists its compressions: the `collect` registry hands them (one list, not two).
+- BareTest: `Omnibridge\Container` alone discovers what Symfony's container discovers on lesringostars
+  (`tests/Services/discovered-by-symfony.php`, written from its compiled container). `tests/DiscoveryTest`.
+  Agnostic 827 -> 829, Foundation 890 -> 892.
+
 ### Changed: the options are the core's declaration (plan "omnibase agnostic", step F5e, slice 4b)
 
 - `Base\Options`: the schema of `base:` as data, in `src/Resources/options.php` - each option's type (`bool`, `int`,

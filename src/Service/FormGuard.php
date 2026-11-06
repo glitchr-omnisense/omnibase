@@ -77,7 +77,7 @@ class FormGuard
 
     /**
      * @param array{challenge?: string|bool|null, fallback?: ?string, reputation?: list<string>, classifier?: ?string, unreachable?: string, min_delay?: int, sign_in_after?: int, captcha_after?: int} $config base.guard
-     * @param string|null $defaultChallenge omnishield.challenge.gateway, when glitchr/omnishield is installed (GuardPass)
+     * @param string|null $defaultChallenge omnishield.challenge.gateway, when glitchr/omnishield is installed (Base\Discovery's `arguments`)
      * @param CacheItemPoolInterface|null $cache where a form's refused tries are counted; without it, the captcha is always asked
      * @param ClockInterface|null $clock what "now" is for the stamp and the delays: the framework's clock (Symfony's
      *                                   `clock`, autowired), else the clock contract of the Foundation (Runtime::clock(),

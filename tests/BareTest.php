@@ -892,6 +892,24 @@ final class BareTest extends TestCase
             self::assertNotEmpty($requires, $id.' says what it requires');
         }
 
+        // What is discovered (step F5e slice 4c): Omnibridge\Container alone, from Base\Discovery's registries, discovers
+        // what Symfony's container discovered among the core's services on lesringostars (its compiled container,
+        // tests/Services/discovered-by-symfony.php) - each collecting service built here handed the same services in the
+        // same order (the obfuscator's five compressions, the six sharing adapters...), the same enumerations; the admin's
+        // links are the null generator where no back office is installed; the entity dispatchers are autoconfigured.
+        $discovered = $result['discovered'];
+        $symfony = require __DIR__.'/Services/discovered-by-symfony.php';
+        self::assertArrayHasKey(\Base\Service\Obfuscator::class, $discovered['collect']);
+        self::assertArrayHasKey(\Base\Service\Sharing::class, $discovered['collect']);
+        foreach ($discovered['collect'] as $service => $handed) {
+            self::assertSame($symfony['collect'][$service], $handed, $service.' is handed what Symfony hands it');
+        }
+        self::assertCount(5, $discovered['collect'][\Base\Service\Obfuscator::class]);
+        self::assertSame($symfony['enumerations'], $discovered['enumerations']);
+        self::assertSame([\Base\Routing\AdminUrlGeneratorInterface::class => \Base\Routing\NullAdminUrlGenerator::class], $discovered['fallbacks']);
+        self::assertContains('Base\EntityDispatcher\Event\UserEventDispatcher', $discovered['autoconfigured']);
+        self::assertContains('Base\EntityDispatcher\Event\ThreadEventDispatcher', $discovered['autoconfigured']);
+
         [, $strict] = self::bare(['--strict', $script], (string) realpath($autoload));
         $outside = array_keys($strict['classes'][$script]['framework']);
         self::assertSame([], array_values(preg_grep('~^Symfony\\\\Component\\\\(?:EventDispatcher|PropertyInfo|TypeInfo)\\\\~', $outside, PREG_GREP_INVERT)), 'only symfony/event-dispatcher, property-info and type-info outside the kept list');

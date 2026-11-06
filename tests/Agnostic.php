@@ -89,6 +89,8 @@
  * UserCreate, MailerTrap, TimeMachineStorage, TimeMachineSnapshot} and their inputs, the console's other tasks (the Doctrine-typed
  * ones, doctrine:array:upgrade, doctrine:schema:charset and doctrine:database:import, are omnibridge/doctrine's).
  * 827 after step F5e, slice 4b (2026-11-06, +1): Base\Options, the schema of the base: options as data.
+ * 829 after step F5e, slice 4c (2026-11-06, +2): Base\Discovery, what a host discovers among the services as data, and
+ * Base\Translation\ApplicationTexts (the application's own texts, read for the politeness).
  */
 
 return [
@@ -308,6 +310,7 @@ return [
     Base\Demo\DemoAccountRegistry::class,
     Base\Demo\DemoGuard::class,
     Base\Demo\DemoMode::class,
+    Base\Discovery::class,
     Base\EntityDispatcher\AbstractEvent::class,
     Base\EntityDispatcher\AbstractEventDispatcher::class,
     Base\EntityDispatcher\EventDispatcherInterface::class,
@@ -890,6 +893,7 @@ return [
     Base\Traits\SimpleCacheTrait::class,
     Base\Traits\SingletonTrait::class,
     Base\Traits\UserInfoTrait::class,
+    Base\Translation\ApplicationTexts::class,
     Base\Translation\OverridingTranslator::class,
     Base\Translation\TextOverrideCacheListener::class,
     Base\Twig\AppVariable::class,

@@ -257,7 +257,7 @@ class TranslatorPolitenessTest extends TestCase
         file_put_contents($directory.'/notes.txt', 'not a catalogue');
 
         try {
-            $texts = \Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\ApplicationTextsPass::read($directory);
+            $texts = \Base\Translation\ApplicationTexts::read($directory);
         } finally {
             array_map('unlink', glob($directory.'/*'));
             rmdir($directory);

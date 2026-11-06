@@ -13,7 +13,7 @@ use Omnibridge\Contract\Files;
 use Omnibridge\Contract\Locales;
 use Base\Contract\Runtime;
 use Omnibridge\Contract\Urls;
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\ContractsPass;
+use Base\Discovery;
 use Base\Entity\Thread;
 use Base\Service\BaseService;
 use Omnibridge\Contract\Translations;
@@ -57,7 +57,7 @@ final class ContractAdaptersTest extends KernelTestCase
     {
         $container = static::getContainer();
 
-        self::assertSame($container->get(ContractsPass::SERVICE), Runtime::getContainer());
+        self::assertSame($container->get(Discovery::registry('contracts')['service']), Runtime::getContainer());
         self::assertInstanceOf(RouterUrls::class, Runtime::urls());
         self::assertInstanceOf(TranslatorTranslations::class, Runtime::translations());
         self::assertInstanceOf(SecurityAccess::class, Runtime::access());
@@ -76,7 +76,7 @@ final class ContractAdaptersTest extends KernelTestCase
         }
 
         // Autowirable by the contract's name, the same objects as the registry's.
-        self::assertSame(Runtime::urls(), $container->get(ContractsPass::SERVICE)->get(Urls::class));
+        self::assertSame(Runtime::urls(), $container->get(Discovery::registry('contracts')['service'])->get(Urls::class));
     }
 
     /**
@@ -88,9 +88,9 @@ final class ContractAdaptersTest extends KernelTestCase
     public function testEachContractIsOneServiceInTheLocatorAndTheRegistry(): void
     {
         $container = static::getContainer();
-        $locator = $container->get(ContractsPass::SERVICE);
+        $locator = $container->get(Discovery::registry('contracts')['service']);
 
-        foreach (ContractsPass::FORMER as $former => $contract) {
+        foreach (Discovery::registry('contracts')['former'] as $former => $contract) {
             if (!$locator->has($contract)) {
                 continue;
             }
