@@ -210,6 +210,8 @@
  * Base\Screen\Welcome, Base\Field\Validation\Autovalidate, Base\Field\Search\ExchangeRate (the controllers' rules).
  * 923 after step E2 (2026-11-06, +3): the finder language's groups, Base\Database\Repository\Finder\Group, and the
  * methods only one persistence runs, Base\Database\Repository\{BackendOnly, UnsupportedQueryException}.
+ * 925 after steps E2b and E2' (2026-11-06, +2): a to-one association compared by its key without a join,
+ * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
  */
 
 return [
@@ -421,6 +423,7 @@ return [
     Base\Database\Repository\Entities::class,
     Base\Database\Repository\Finder\Criterion::class,
     Base\Database\Repository\Finder\Group::class,
+    Base\Database\Repository\Finder\Key::class,
     Base\Database\Repository\Finder\Parser::class,
     Base\Database\Repository\Finder\Query::class,
     Base\Database\Repository\Finder\Subject::class,
@@ -799,6 +802,7 @@ return [
     Base\Repository\Thread\Mentions::class,
     Base\Repository\Thread\Tags::class,
     Base\Repository\Threads::class,
+    Base\Repository\User\Complaints::class,
     Base\Repository\User\Connections::class,
     Base\Repository\User\Identities::class,
     Base\Repository\User\Notifications::class,

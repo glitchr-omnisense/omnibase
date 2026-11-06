@@ -10,6 +10,25 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: an association compared by its key, without a join; the repositories' interfaces completed (plan "omnibase agnostic", steps E2b and E2')
+
+- `Base\Database\Repository\Finder\Key::of($value)`, a criterion's value: a to-one association of the entity compared
+  by its own foreign key, with no join - an entity, its identifier, a list (`IN`) or `null` (`IS NULL`), with `EqualTo` or
+  `NotEqualTo` only (the Parser refuses another word and a path). A join of the association let the persistence's scope
+  of it decide the row: Doctrine's trash filter, in the join's `ON`, made a comment under a trashed thread one of the
+  visitors' book. `Criterion::byKey()`; omnibridge/doctrine compiles it to `e.<association>` (see the docs,
+  docs/20-architecture/entities-and-repositories.md).
+- omnibridge/doctrine's `Comments::findVisible()` and `countVisible()` are finders on it now (`thread` and `parent` by
+  key), the last two of the step E2's sorting (b): the same rows as their former query. Under 4.x they keep it.
+- `Base\Repository\Thread\Comments` declares what omnibase/blog and omnibase/video ask: `findVisible()`, `countVisible()`,
+  `countPending()`, `findPending()`. New `Base\Repository\User\Complaints` (`newest()`), in `Aliases::INTERFACES`
+  (29 with Repositories, 28 before): omnibridge/doctrine's ComplaintRepository implements it.
+- FinderParityTest writes comments under a live thread, under a thread in the trash and in the visitors' book, and
+  compares findVisible()/countVisible() with their former queries (HandWrittenQueries: 7 scenarios more), checks the
+  trashed thread keeps its comment and the key criterion's DQL (no join). ParserTest reads Key. RepositoryInterfacesTest
+  lists Complaints.
+- Agnostic 862, Foundation 925 (+2: Finder\Key, User\Complaints).
+
 ### Changed: the repositories' hand-written queries sorted, most of them finders now (plan "omnibase agnostic", step E2)
 
 - The finder language reads **groups**: `Base\Database\Repository\Finder\Group::by('TitleNotEmptyOrSubjectNotEmpty')`,

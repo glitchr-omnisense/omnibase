@@ -50,7 +50,8 @@ final class Query
      * then those the name declares, each with its options; not the specials'
      * numbers and keys (extras()). A group of the criteria array (Group::by())
      * is one criterion whose value is the Group read, its members in
-     * Group::criterions().
+     * Group::criterions(); a key criterion (Key::of(), step E2b) one whose
+     * value is the Key (Criterion::byKey()).
      *
      * @return list<Criterion>
      */

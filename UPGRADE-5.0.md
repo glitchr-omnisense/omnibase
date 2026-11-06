@@ -226,6 +226,16 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   and `#[Base\Database\Repository\BackendOnly]` with `UnsupportedQueryException` for the methods one persistence runs
   (the analytics' native SQL, `Redirections::hit()`).
 
+## An association by its key; the repositories' interfaces (steps E2b, E2')
+
+- Nothing to change for a caller: `Comments::findVisible()`/`countVisible()` give the rows they gave.
+- New: `Base\Database\Repository\Finder\Key` (a to-one association compared by its foreign key, no join) and
+  `Base\Repository\User\Complaints`. `Base\Repository\Thread\Comments` gains `findVisible()`, `countVisible()`,
+  `countPending()` and `findPending()`: a class of an application implementing `Comments` itself (none known) adds them.
+- Type on the interfaces, not on the repositories' classes (`Base\Repository\...Repository`, former names removed at 6.0):
+  `Settings`, `Hours\{ScopedWeeks, SpecialDays, WeekDays}`, `Thread\Comments`, `Analytics\Visits`... exist in 4.x as well;
+  `User\Complaints` in 5.0 only.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only
