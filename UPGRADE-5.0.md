@@ -98,6 +98,17 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
 - `Base\Subscriber\SecuritySubscriber` keeps its events and priorities; its access restriction and its word of
   welcome are `Base\Auth\Policy\Restriction` and `Welcome`.
 
+## The request rules are the core's (step F5e, slice 2)
+
+- `Base\Subscriber\{SecuritySubscriber, LocalizerSubscriber, IntegritySubscriber, AnalyticsSubscriber}` keep their
+  names, events, priorities and services; their rules are `Base\Request\Rule\*` (`Accounts`, `Locale`, `Integrity`,
+  `Analytics`, `MaintenancePage`, `LaunchPage`). SecuritySubscriber's service takes two more arguments,
+  `Omnibridge\Persistence\UnitOfWork` and `Omnibridge\Contract\Urls` (both optional).
+- `LocalizerSubscriber::choose()` is `Base\Request\Rule\Locale::choose()`.
+- `MaintenanceProvider::redirectOnDeny()` and `Launcher::redirectOnDeny()` keep working and are deprecated until
+  6.0: ask `Base\Request\Rule\MaintenancePage` and `LaunchPage`.
+- `Base\Service\Redirections::responseFor()` keeps its answer; its rule is `Base\Request\Rule\Redirection`.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

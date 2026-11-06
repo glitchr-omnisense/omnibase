@@ -195,6 +195,7 @@
  * 805 after step E1 (2026-11-04, from 802 at F6, +3): Base\Service\Links, Base\Validator\Constraints\{Unique, UniqueValidator}
  * (optional without symfony/validator).
  * 815 after step F5e, slice 1 (2026-11-04, +10): Base\Auth\Policy\* (see tests/Agnostic.php).
+ * 833 after step F5e, slice 2 (2026-11-05, +18): Base\Request\* (see tests/Agnostic.php).
  */
 
 return [
@@ -711,6 +712,24 @@ return [
     Base\Repository\User\PushSubscriptions::class,
     Base\Repository\User\Tokens::class,
     Base\Repository\Users::class,
+    Base\Request\Decision::class,
+    Base\Request\EventDecisions::class,
+    Base\Request\Page::class,
+    Base\Request\RouterPage::class,
+    Base\Request\Rule\AccessControl::class,
+    Base\Request\Rule\Accounts::class,
+    Base\Request\Rule\Analytics::class,
+    Base\Request\Rule\Approval::class,
+    Base\Request\Rule\EntryPoint::class,
+    Base\Request\Rule\Impersonation::class,
+    Base\Request\Rule\Integrity::class,
+    Base\Request\Rule\Kicked::class,
+    Base\Request\Rule\LaunchPage::class,
+    Base\Request\Rule\Locale::class,
+    Base\Request\Rule\MaintenancePage::class,
+    Base\Request\Rule\Presence::class,
+    Base\Request\Rule\Redirection::class,
+    Base\Request\Rule\Verification::class,
     Base\Routing\AdminRouteNames::class,
     Base\Routing\AdminUrlGeneratorInterface::class,
     Base\Routing\CookieDomain::class,

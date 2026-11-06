@@ -2,10 +2,11 @@
 
 namespace Base\Service;
 
-use Base\Entity\User\Notification;
+use Base\Request\EventDecisions;
+use Base\Request\RouterPage;
+use Base\Request\Rule\LaunchPage;
 use Base\Routing\AdvancedRouterInterface;
 use DateTime;
-use Base\Service\Model\IntlDateTime;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -14,6 +15,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class Launcher implements LauncherInterface
 {
+    use EventDecisions;
+
     /** @var AdvancedRouterInterface */
     protected AdvancedRouterInterface $router;
     /** @var ParameterBagInterface */
@@ -90,68 +93,16 @@ class Launcher implements LauncherInterface
         return self::yearsSince($this->getLaunchdate($locale));
     }
 
+    /**
+     * The launch page's decision applied to a Symfony request event (deprecated until 6.0: the rule is
+     * Base\Request\Rule\LaunchPage, which omnibridge/symfony's SecuritySubscriber asks itself). True when
+     * the request stops there.
+     */
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool
     {
-        if (!$this->settingBag->getScalar("base.settings.launchdate.redirect_on_deny")) {
-            return false;
-        }
-        if (!$this->getLaunchdate()) {
-            return false;
-        }
+        $decision = (new LaunchPage($this, (bool) $this->settingBag->getScalar("base.settings.launchdate.redirect_on_deny"), $this->parameterBag->get("base.site.index")))
+            ->decide(new RouterPage($this->router), fn (string $attribute): bool => $this->authorizationChecker->isGranted($attribute), $locale);
 
-        $redirectOnDeny = "security_launch";
-        if ($this->router->isUX()) {
-            return false;
-        }
-        if ($this->router->isProfiler()) {
-            return false;
-        }
-        if ($this->router->isAdmin()) {
-            return false;
-        }
-        if ($this->router->isSecured()) {
-            return false;
-        }
-
-        if ($this->isLaunched()) {
-            $homepageRoute = $this->parameterBag->get("base.site.index");
-            if ($event && $redirectOnDeny == $this->router->getRouteName()) {
-                $event->setResponse($this->router->redirect($homepageRoute));
-            }
-
-            return false;
-        } elseif ($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
-            $launchdate = $this->getLaunchdate();
-            $notification = new Notification("launcher.banner", [IntlDateTime::createFromDateTime($launchdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($launchdate, $locale)->format("HH:mm")]);
-            $notification->send("warning");
-            return false;
-        }
-
-        if ($this->router->getRouteName() == $redirectOnDeny) {
-            return false;
-        }
-        if ($this->authorizationChecker->isGranted("LAUNCH_ACCESS")) {
-            return false;
-        }
-
-        if ($event) {
-            // Same bug as MaintenanceProvider: the 4th argument of
-            // redirectToRoute() is $headers, so the event ended up in a
-            // RedirectResponse header bag and threw. redirectEvent() is the
-            // one that sets the response on the event.
-            $this->router->redirectEvent($event, $redirectOnDeny, [], 302);
-        }
-
-        $user = match (true) {
-            $this->tokenStorage instanceof Access => $this->tokenStorage->getUser(),
-            null !== $this->tokenStorage => $this->tokenStorage->getToken()?->getUser(),
-            $this->authorizationChecker instanceof Access => $this->authorizationChecker->getUser(),
-            default => null,
-        };
-        if ($user && method_exists($user, 'Logout')) {
-            $user->Logout();
-        }
-
-        return true;
+        return $this->applyDecision($decision, $event);
     }
 }

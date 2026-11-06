@@ -189,6 +189,21 @@ restriction a request meets (SecuritySubscriber) is `Restriction`, the word of w
 sign-in `Welcome`. omnibridge/laravel's gate (`Auth\Policies`) and its `AccessRestriction`
 middleware ask the same policies, so both hosts take the same decisions.
 
+### The request rules
+
+The rules a request meets beside the voters are the core's too, `Base\Request\Rule\*`, each returning a
+`Base\Request\Decision` that the host applies (plan "omnibase agnostic", step F5e, slice 2):
+
+| Rule | What it decides | Symfony | Laravel |
+|---|---|---|---|
+| `AccessControl`, `EntryPoint` | the pages kept for some accounts (`access_control`); a refused visitor sent to the sign-in, the address kept | the firewall; `LoginFormAuthenticator::start()` | `Http\AccessControl` (`omnibridge.access_control`) |
+| `MaintenancePage`, `LaunchPage` | the maintenance and launch pages | `SecuritySubscriber` | `Auth\Middleware\SitePages` |
+| `Accounts`: `Impersonation`, `Kicked`, `Presence`, `Verification`, `Approval` | the account signed in: its reminder, its kick, its presence, its verification's notice, its approval | `SecuritySubscriber` | `Auth\Middleware\AccountRules` |
+| `Locale` | the page's language, LANG, the time zone | `LocalizerSubscriber` | `Http\Localize` |
+| `Redirection` | an address not found led to the site's redirection | `RedirectionSubscriber` (through `Redirections`) | the 404's renderer (`Omnibase\Redirections`) |
+| `Integrity` | the session's secret and connection | `IntegritySubscriber` (registered by nothing) | - |
+| `Analytics` | the back office's figures | `AnalyticsSubscriber` | - |
+
 ### `AccessVoter`
 
 `Base\Security\Voter\AccessVoter` decides who may browse the site, from

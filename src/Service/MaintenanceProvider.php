@@ -2,7 +2,9 @@
 
 namespace Base\Service;
 
-use Base\Entity\User\Notification;
+use Base\Request\EventDecisions;
+use Base\Request\RouterPage;
+use Base\Request\Rule\MaintenancePage;
 use Base\Routing\AdvancedRouterInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -12,6 +14,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
+    use EventDecisions;
+
     /** @var AdvancedRouterInterface */
     protected AdvancedRouterInterface $router;
     /** @var ParameterBagInterface */
@@ -132,52 +136,17 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         return $result;
     }
 
+    /**
+     * The maintenance page's decision applied to a Symfony request event (deprecated until 6.0: the rule is
+     * Base\Request\Rule\MaintenancePage, which omnibridge/symfony's SecuritySubscriber asks itself). True
+     * when the request stops there.
+     */
     public function redirectOnDeny(?RequestEvent $event = null): bool
     {
         $this->parseLockPath();
+        $decision = (new MaintenancePage($this, $this->parameterBag->get("base.site.maintenance.redirect_on_deny"), $this->parameterBag->get("base.site.index")))
+            ->decide(new RouterPage($this->router), fn (string $attribute): bool => $this->authorizationChecker->isGranted($attribute));
 
-        $redirectOnDeny = $this->parameterBag->get("base.site.maintenance.redirect_on_deny") ?? "security_maintenance";
-        if (!$this->isUnderMaintenance()) {
-            $homepageRoute = $this->parameterBag->get("base.site.index");
-            if ($event && $redirectOnDeny == $this->router->getRouteName()) {
-                $event->setResponse($this->router->redirect($homepageRoute));
-            }
-
-            return false;
-        } elseif ($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
-            $notification = new Notification("maintenance.banner");
-            $notification->send("warning");
-            return false;
-        }
-
-        if ($this->router->getRouteName() == $redirectOnDeny) {
-            return true;
-        }
-        if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS")) {
-            return false;
-        }
-
-        if ($event) {
-            // redirectEvent(), not redirectToRoute(): the 4th argument there
-            // is $headers, so passing ["event" => $event] fed a RequestEvent
-            // into new RedirectResponse()'s header bag and threw
-            // "HeaderBag::set(): Argument #2 must be array|string|null".
-            // Every maintenance-deny redirect 500'd instead of redirecting.
-            // redirectEvent() is the method that actually sets the response
-            // on the event.
-            $this->router->redirectEvent($event, $redirectOnDeny, [], 302);
-        }
-
-        $user = match (true) {
-            $this->tokenStorage instanceof Access => $this->tokenStorage->getUser(),
-            null !== $this->tokenStorage => $this->tokenStorage->getToken()?->getUser(),
-            $this->authorizationChecker instanceof Access => $this->authorizationChecker->getUser(),
-            default => null,
-        };
-        if ($user && method_exists($user, 'Logout')) {
-            $user->Logout();
-        }
-
-        return true;
+        return $this->applyDecision($decision, $event);
     }
 }
