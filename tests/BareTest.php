@@ -277,6 +277,26 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The other pages' decisions (plan "omnibase agnostic", step F5e slice 5b): Base\Auth\Account\{SecondFactor,
+     * Devices, MemberSearch}, Base\Thread\{ThreadSearch, ThreadActions}, Base\Notifier\{NotificationCenter,
+     * ContactMessage, TestRecipient}, Base\Request\{TimezoneSwitch, ErrorPage, ShortLinkRedirect, AttachmentDownload,
+     * SitemapPage}, Base\Screen\Welcome, Base\Field\Validation\Autovalidate and Base\Field\Search\ExchangeRate under
+     * bare --strict, their answers, notifications, writes and flashes those of
+     * tests/Request/Pages/pages-without-framework.expected.php.
+     */
+    public function testTheOtherPagesDecideWithoutAFramework(): void
+    {
+        $script = __DIR__.'/Request/Pages/pages-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame(require __DIR__.'/Request/Pages/pages-without-framework.expected.php', $run['result']);
+    }
+
+    /**
      * The core's services are available where there is no framework (plan "omnibase agnostic", step F5a;
      * Marco's answer 3): omnisense/omnibridge's Omnibridge\Container, built from Base\Services::definitions()
      * - the list Symfony's container and Laravel's read - and the host's contracts in plain PHP, resolves

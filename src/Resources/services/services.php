@@ -141,6 +141,17 @@ return [
     ['class' => 'Base\Auth\Account\WaitingPages', 'public' => true, 'autowire' => true],
     ['class' => 'Base\Auth\Account\ProfileAccess', 'public' => true, 'autowire' => true],
     ['class' => 'Base\Request\LocaleSwitch', 'public' => true, 'autowire' => true],
+    // Slice 5b of step F5e: the other controllers' decisions.
+    ['class' => 'Base\Auth\Account\SecondFactor', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Auth\Account\Devices', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Auth\Account\MemberSearch', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Thread\ThreadSearch', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Thread\ThreadActions', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Request\TimezoneSwitch', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Request\ErrorPage', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Request\ShortLinkRedirect', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Request\AttachmentDownload', 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Field\Validation\Autovalidate', 'public' => true, 'autowire' => true],
     [
         'class' => 'Base\Database\Entity\EntityHydrator',
         'public' => true,

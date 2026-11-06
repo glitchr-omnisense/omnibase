@@ -2,7 +2,7 @@
 
 namespace Base\Database\Entity\Extension;
 
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy;
+use Omnibridge\Schema\CamelCaseNaming as NamingStrategy;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\LocaleNormalizer;
 use Doctrine\ORM\Mapping as ORM;

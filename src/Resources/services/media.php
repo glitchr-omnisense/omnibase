@@ -60,6 +60,19 @@ return [
             ],
         ],
     ],
+    // Slice 5b of step F5e: the sitemap's pages, a money field's exchange rate.
+    [
+        'class' => 'Base\Request\SitemapPage',
+        'requires' => [
+            'Base\Routing\AdvancedRouterInterface',
+            'Doctrine\ORM\EntityManager',
+            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
+        ],
+        'public' => true,
+        'autowire' => true,
+    ],
+    // Where the rates' service is (Base\Service\Trading requires an HTTP client's PSR-18 adapter).
+    ['class' => 'Base\Field\Search\ExchangeRate', 'requires' => ['Symfony\Component\HttpClient\Psr18Client'], 'public' => true, 'autowire' => true],
     [
         'class' => 'Base\Service\Model\Wysiwyg\SemanticEnhancer',
         'public' => true,

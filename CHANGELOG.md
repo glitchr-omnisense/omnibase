@@ -10,6 +10,30 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the other pages are the core's too (plan "omnibase agnostic", step F5e, slice 5b)
+
+- The decisions of omnibridge/symfony's other controllers, each a declared service answering what the host turns into
+  its response (an `Outcome`, `Base\Screen\Json`, `Base\Screen\File`, a template): `Base\Auth\Account\{SecondFactor,
+  Devices, MemberSearch}` (UserSettingsController: the authenticator application turned on and off, its QR codes,
+  the sessions and passkeys; UserSearchController), `Base\Thread\{ThreadActions, ThreadSearch}` (Api\ThreadController,
+  ThreadSearchController), `Base\Notifier\{NotificationCenter, ContactMessage, TestRecipient}` (NotificationController,
+  ContactController, ProfilerController), `Base\Request\{TimezoneSwitch, ErrorPage, ShortLinkRedirect,
+  AttachmentDownload, SitemapPage}` (LocalizerController::Timezone(), ErrorController, ShortLinkController,
+  WidgetController, SitemapController), `Base\Screen\Welcome` (MainController), `Base\Field\Validation\Autovalidate`
+  (AutovalidateController) and `Base\Field\Search\ExchangeRate` (AutocompleteController::Forex()).
+- BareTest: each decided under `bare --strict` (tests/Request/Pages/pages-without-framework.php and its expected
+  result). Agnostic 857, Foundation 920.
+- `Base\Database\Entity\Extension\{TranslatableTrait, TranslationTrait}` read the translations' suffix from
+  omnisense/omnibridge's `Omnibridge\Schema\CamelCaseNaming` instead of omnibridge/doctrine's NamingStrategy: a
+  translatable entity no longer loads Doctrine's NamingStrategy to find its translation.
+- Fixed: `/timezone/{_timezone}` read a `_locale` its path never carried (it only went to the index, after a
+  deprecated `setcookie(null)` and a match of an empty referrer): a zone PHP knows is kept in LOCATION/TIMEZONE and as
+  a member's own, then back to the page the visitor came from; its route takes a zone's slash (`Europe/Paris`), and
+  `/timezone` alone forgets the choice. A short link answered 500 (a router method that does not exist); it goes to
+  its address. The profiler's test e-mail looked the technical recipient's account up by its name and handed a
+  query's results on as an account. `/ux/validation/{hashid}` was never wired (500 for every request; now the
+  JSON its rule answers).
+
 ### Changed: the account's pages are the core's (plan "omnibase agnostic", step F5e, slice 5a)
 
 - `Base\Auth\Account\{SignIn, SignOutPage, AlreadySignedIn, Verification, Closing, Passwords, WaitingPages,
