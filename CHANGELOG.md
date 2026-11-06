@@ -10,6 +10,24 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the account's pages are the core's (plan "omnibase agnostic", step F5e, slice 5a)
+
+- `Base\Auth\Account\{SignIn, SignOutPage, AlreadySignedIn, Verification, Closing, Passwords, WaitingPages,
+  ProfileAccess, RescuePage}`, `Base\Demo\DemoSignIn` and `Base\Request\LocaleSwitch`: the decisions of
+  omnibridge/symfony's SecurityController (the sign-in and its link, the sign-out and its confirmation, the pages
+  for visitors only, the e-mail's verification and the approval, the account closed and opened again, the forgotten
+  and the imposed password, the maintenance, launch and waiting pages), UserProfileController (whose profile, who
+  edits it), RescueController (the back office's sign-in page), DemoController (the one-click demonstration
+  account) and LocalizerController (the language menu), each answering a `Base\Auth\Account\Outcome` the host
+  turns into its response; they send the notifications and write as the controllers did. Declared services.
+- BareTest: each decided under `bare --strict` (tests/Auth/Account/account-without-framework.php and its expected
+  result). Agnostic 841, Foundation 904.
+- The sign-in link's token, the e-mail's notification and the sign-out's notifications are made through the App\
+  convention (`App\Entity\User\Token`, `App\Entity\User\Notification`: the core's own where an application has none).
+- Fixed: the sign-in link's page redirected to an address through `redirectToRoute()` (RouteNotFoundException);
+  the verification link with an unknown token answered 500 to a signed-in unverified account; `/account-goodbye`
+  answered 500 to a visitor (403 now).
+
 ### Changed: what is discovered is the core's declaration (plan "omnibase agnostic", step F5e, slice 4c)
 
 - `Base\Discovery`: the registries of what a host discovers among the core's services, as data in

@@ -21,6 +21,7 @@ return [
         ],
         'symfony' => ['arguments' => ['@Omnibridge\Contract\Requests', '@advanced_router']],
     ],
+    ['class' => 'Base\Auth\Account\RescuePage', 'requires' => ['Base\Routing\AdvancedRouterInterface'], 'public' => true, 'autowire' => true],
     ['class' => 'Base\Service\Analytics\UserAgentClassifier', 'public' => true],
     [
         'class' => 'Base\Service\Analytics',
