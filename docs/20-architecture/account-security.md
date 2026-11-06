@@ -157,5 +157,31 @@ controller or route keeps the forms, the firewall and the authenticator, and tur
 | `/profile/{id}`, `/profile/{id}/edit/` | `ProfileAccess::show()`, `edit()` (the twin's editor asks it too) |
 | `/rescue` | `RescuePage` |
 | `/login/demo` | `Base\Demo\DemoSignIn::decide()` |
-| `/locale/{_locale}` | `Base\Request\LocaleSwitch` |
+| `/locale/{_locale}` | `Base\Request\LocaleSwitch` (omnibridge/laravel's `Http\SwitchLocale` asks it too) |
+| `/settings`, its passkeys and sessions | `Devices::sessions()`, `renamePasskey()`, `deletePasskey()`, `signOut()` (slice 5b) |
+| `/settings/2fa`, `/settings/2fa/disable`, `/settings/2fa/qr-code`, `/members/qr/totp` | `SecondFactor::enrolment()`, `pending()`, `confirm()`, `invalidCode()`, `disable()`, `waiting()`, `enabled()`, `png()` |
+| `/search/user` | `MemberSearch::find()` |
+| `/timezone/{_timezone}` | `Base\Request\TimezoneSwitch` |
+
+### The other pages (slice 5b)
+
+The rest of omnibridge/symfony's controllers ask the core the same way; a page that answers JSON gets a
+`Base\Screen\Json` (its data and its status), a download a `Base\Screen\File`.
+
+| Page | Rule |
+|---|---|
+| `/notifications`, `/push/config`, `/push/subscribe`, `/push/unsubscribe`, `/sw.js` | `Base\Notifier\NotificationCenter` |
+| `/api/thread/{slug}/{publish, hide, follow, unfollow, like, unlike}` | `Base\Thread\ThreadActions` (the `api_thread` token, who may act, the writes, the flash) |
+| `/search` | `Base\Thread\ThreadSearch::find()` |
+| `/contact` | `Base\Notifier\ContactMessage::send()` |
+| `/_profiler/email`, `/_profiler/email/send` | `Base\Notifier\TestRecipient::recipient()` |
+| the error page | `Base\Request\ErrorPage::choose()` (the debug page, else the back office's or the site's template) |
+| `s.<host>/{slug}` | `Base\Request\ShortLinkRedirect::follow()` |
+| `/attachment/{slug}` | `Base\Request\AttachmentDownload::file()` |
+| `/sitemap.{xml,txt}` | `Base\Request\SitemapPage::build()` |
+| `/` without a page of the site's | `Base\Screen\Welcome::html()` |
+| `/ux/validation/{hashid}` | `Base\Field\Validation\Autovalidate::answer()` |
+| `/ux/autocomplete/currency/{source}/{target}/{data}` | `Base\Field\Search\ExchangeRate::rate()` |
+
+Each is decided under `bare --strict` (tests/Request/Pages/pages-without-framework.php and its expected result).
 

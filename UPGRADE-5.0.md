@@ -193,6 +193,25 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   e-mail's verification link answered 500 to a signed-in, unverified account when the token was unknown;
   `/account-goodbye` answered 500 to a visitor (now 403).
 
+## The other pages are the core's too (step F5e, slice 5b)
+
+- omnibridge/symfony's UserSettingsController, NotificationController, Api\ThreadController, ThreadSearchController,
+  UserSearchController, ContactController, ProfilerController, ErrorController, AutovalidateController,
+  AutocompleteController, MediaController, WidgetController, ShortLinkController, SitemapController, MainController
+  and LocalizerController::Timezone() keep their routes, names and paths; their decisions are the core's
+  (`Base\Auth\Account\{SecondFactor, Devices, MemberSearch}`, `Base\Thread\{ThreadActions, ThreadSearch}`,
+  `Base\Notifier\{NotificationCenter, ContactMessage, TestRecipient}`, `Base\Request\{TimezoneSwitch, ErrorPage,
+  ShortLinkRedirect, AttachmentDownload, SitemapPage}`, `Base\Screen\Welcome`, `Base\Field\Validation\Autovalidate`,
+  `Base\Field\Search\ExchangeRate`), declared services.
+- Their constructors take the rules. ThreadSearchController keeps its three former arguments (an application's
+  controller may extend it, as lesringostars' does) and takes the rule fourth. A site that extended another one reads
+  the rule instead of its former properties (NotificationController's `$notificationRepository`, `$webPush`,
+  `$csrfTokenManager`, its `serialize()` - the bell's item is `Base\Controller\Action\Notification\Latest::item()`;
+  MediaController's `$mediaService`, `$fileService`, `$flysystem`, `$imageCropRepository`, `$localCache` and its
+  `redirectToRoute()` override - ImageRoute's).
+- `/timezone/{_timezone}` takes a zone with its slash and answers as `/locale/{_locale}` does (see the CHANGELOG): a
+  link that relied on it going to the index whatever it carried now changes the zone.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

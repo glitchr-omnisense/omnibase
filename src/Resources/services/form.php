@@ -115,6 +115,8 @@ return [
             ],
         ],
     ],
+    // Slice 5b of step F5e: the notification center's page and the push subscriptions.
+    ['class' => 'Base\Notifier\NotificationCenter', 'public' => true, 'autowire' => true],
     [
         'class' => 'Base\Notifier\NullNotificationLinker',
         'public' => true,

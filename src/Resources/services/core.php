@@ -124,6 +124,9 @@ return [
             'base.notifier' => ['public' => true, 'target' => 'App\Notifier\Notifier'],
         ],
     ],
+    // Slice 5b of step F5e: the contact page's message and the profiler's test e-mail's recipient.
+    ['class' => 'Base\Notifier\ContactMessage', 'public' => true, 'arguments' => ['@Base\Notifier\NotifierInterface']],
+    ['class' => 'Base\Notifier\TestRecipient', 'public' => true, 'autowire' => true, 'arguments' => ['$notifier' => '@Base\Notifier\NotifierInterface']],
     [
         'class' => 'Base\Notifier\Abstract\BaseNotifier',
         'public' => true,
