@@ -91,6 +91,9 @@
  * 827 after step F5e, slice 4b (2026-11-06, +1): Base\Options, the schema of the base: options as data.
  * 829 after step F5e, slice 4c (2026-11-06, +2): Base\Discovery, what a host discovers among the services as data, and
  * Base\Translation\ApplicationTexts (the application's own texts, read for the politeness).
+ * 841 after step F5e, slice 5a (2026-11-06, +12): the account's pages written once for every host, Base\Auth\Account\{Outcome,
+ * SignIn, SignOutPage, AlreadySignedIn, Verification, Closing, Passwords, WaitingPages, ProfileAccess, RescuePage},
+ * Base\Demo\DemoSignIn and Base\Request\LocaleSwitch (the controllers' rules).
  */
 
 return [
@@ -101,6 +104,16 @@ return [
     Base\Attributes\Attribute\IsGranted::class,
     Base\Attributes\Attribute\Sitemap::class,
     Base\Attributes\Traits\HierarchifyTrait::class,
+    Base\Auth\Account\AlreadySignedIn::class,
+    Base\Auth\Account\Closing::class,
+    Base\Auth\Account\Outcome::class,
+    Base\Auth\Account\Passwords::class,
+    Base\Auth\Account\ProfileAccess::class,
+    Base\Auth\Account\RescuePage::class,
+    Base\Auth\Account\SignIn::class,
+    Base\Auth\Account\SignOutPage::class,
+    Base\Auth\Account\Verification::class,
+    Base\Auth\Account\WaitingPages::class,
     Base\Auth\DemoPasswords::class,
     Base\Auth\EnrolmentPrompt::class,
     Base\Auth\Listener\GuardSignIn::class,
@@ -310,6 +323,7 @@ return [
     Base\Demo\DemoAccountRegistry::class,
     Base\Demo\DemoGuard::class,
     Base\Demo\DemoMode::class,
+    Base\Demo\DemoSignIn::class,
     Base\Discovery::class,
     Base\EntityDispatcher\AbstractEvent::class,
     Base\EntityDispatcher\AbstractEventDispatcher::class,
@@ -662,6 +676,7 @@ return [
     Base\Repository\Users::class,
     Base\Request\Decision::class,
     Base\Request\EventDecisions::class,
+    Base\Request\LocaleSwitch::class,
     Base\Request\Page::class,
     Base\Request\RouterPage::class,
     Base\Request\Rule\AccessControl::class,

@@ -138,3 +138,24 @@ The listeners, `Base\Auth\Listener\*`, each say which events they take
 (the e-mail and the offer of a new device), `UpdateAccount` (unknown roles,
 time zone, language, kick, at each sign-in) and `WelcomeBack` (the e-mail of a
 disabled account).
+
+## The account's pages, written once (`Base\Auth\Account\`)
+
+The decisions of the account's pages are the core's (plan "omnibase agnostic", step F5e, slice 5a); each host's
+controller or route keeps the forms, the firewall and the authenticator, and turns the rule's
+`Base\Auth\Account\Outcome` into its response.
+
+| Page | Rule |
+|---|---|
+| `/login`, `/login/token/{token}` | `SignIn::page()`, `link()`, `linkRequested()` |
+| `/logout` | `SignOutPage::confirms()` (omnibridge/laravel's sign-out page asks it too), `left()`, `after()` |
+| `/register`, `/reset-password` | `AlreadySignedIn::check()` (the twin's sign-up asks it too) |
+| `/verify-email`, `/verify-email/{token}`, `/admin-approval` | `Verification::request()`, `tokenOwner()`, `confirm()`, `approval()` |
+| `/account-goodbye`, `/welcome-back/{token}` | `Closing::close()`, `welcomeBack()` |
+| `/reset-password/{token}`, `/change-password` | `Passwords::resetRequested()`, `resetToken()`, `reset()`, `changeToken()`, `change()` |
+| `/m`, the launch, pending and approval pages | `WaitingPages` |
+| `/profile/{id}`, `/profile/{id}/edit/` | `ProfileAccess::show()`, `edit()` (the twin's editor asks it too) |
+| `/rescue` | `RescuePage` |
+| `/login/demo` | `Base\Demo\DemoSignIn::decide()` |
+| `/locale/{_locale}` | `Base\Request\LocaleSwitch` |
+

@@ -258,6 +258,25 @@ final class BareTest extends TestCase
     }
 
     /**
+     * omnibase's account pages decide where there is no framework (plan "omnibase agnostic", step F5e, slice 5a):
+     * Base\Auth\Account\* - the sign-in and its link, the sign-out, the pages for visitors only, the e-mail's
+     * verification and the approval, the account closed and opened again, the passwords, the waiting pages, whose
+     * profile, the back office's sign-in -, Base\Demo\DemoSignIn and Base\Request\LocaleSwitch, under bare --strict,
+     * their Outcomes, notifications and writes those of tests/Auth/Account/account-without-framework.expected.php.
+     */
+    public function testTheAccountPagesDecideWithoutAFramework(): void
+    {
+        $script = __DIR__.'/Auth/Account/account-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame(require __DIR__.'/Auth/Account/account-without-framework.expected.php', $run['result']);
+    }
+
+    /**
      * The core's services are available where there is no framework (plan "omnibase agnostic", step F5a;
      * Marco's answer 3): omnisense/omnibridge's Omnibridge\Container, built from Base\Services::definitions()
      * - the list Symfony's container and Laravel's read - and the host's contracts in plain PHP, resolves

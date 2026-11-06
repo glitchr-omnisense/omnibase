@@ -11,6 +11,7 @@
 
 return [
     ['class' => 'Base\Demo\DemoMode', 'public' => true, 'autowire' => true, 'autoconfigure' => true],
+    ['class' => 'Base\Demo\DemoSignIn', 'public' => true, 'autowire' => true],
     [
         'class' => 'Base\Demo\DemoAccountRegistry',
         'public' => true,

@@ -175,6 +175,24 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   listener the declaration tags on the events its registries give (an application's `omnibridge.omnibase.entity_dispatchers`
   on the events of `Base\EntityDispatcher\EventDispatcherInterface`); `OmnibaseServices::DISPATCHERS` is deprecated.
 
+## The account's pages are the core's (step F5e, slice 5a)
+
+- `Base\Controller\{SecurityController, LocalizerController, RescueController, DemoController}` and
+  `Base\Controller\Client\UserProfileController` (omnibridge/symfony's since F6) keep their routes, names, paths and
+  answers; their decisions are `Base\Auth\Account\*` - `SignIn`, `SignOutPage`, `AlreadySignedIn`, `Verification`,
+  `Closing`, `Passwords`, `WaitingPages`, `ProfileAccess`, `RescuePage`, each answering a `Base\Auth\Account\Outcome`
+  -, `Base\Demo\DemoSignIn` and `Base\Request\LocaleSwitch`, declared services (`Base\Services`).
+- Their constructors changed: they take the rules. A configuration that wired one by hand (rare: the bridge
+  registers them) gives the new arguments; a site that extended one reads its rule instead of its former
+  properties (`$this->notifier`, `$this->tokenRepository`, `$this->userRepository` are gone from SecurityController).
+- `Base\Auth\Account\Outcome` is what each rule decides (a route, an address, the index, the page the visitor was
+  going to, a page, an account to sign in first, a refusal); omnibridge/symfony's
+  `Omnibridge\Symfony\Omnibase\Response\AnswersOutcomes` answers it in a controller, as the controllers did.
+- Fixed on the way: the sign-in link's page redirected with `redirectToRoute()` to an address (a
+  RouteNotFoundException for every valid link and every address posted where omnibase issues the links); the
+  e-mail's verification link answered 500 to a signed-in, unverified account when the token was unknown;
+  `/account-goodbye` answered 500 to a visitor (now 403).
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only
