@@ -85,6 +85,30 @@ both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md
   SitePages}`, the 404's redirection), whose own copies of the presence and language rules are gone.
   `tests/Agnostic.php` 770, `tests/Foundation.php` 833.
 
+### Added: the console tasks (plan "omnibase agnostic", step F5e, slice 3a, 2026-11-06)
+
+- **`Base\Console\Task\*`**, the logic of omnibridge/symfony's commands, one task per command, its options as a
+  readonly input (`...Input`), what it says in a **`Base\Console\Report`** (a PSR-3 logger - a level is a block -,
+  plus text at a verbosity, a success block, a table; each entry handed to the host's printer as it comes;
+  `text()` plain, as `--no-ansi` prints it; the markup's styles in `Report::STYLES`), tested in `bare`
+  (tests/Console/tasks-without-framework.php, BareTest):
+  - `TranslationCrud`, `TranslationEntities`, `TranslationEnums`, `TranslationControllers`, `TranslationSettings`
+    (on `TranslatorInterface`, `LocalizerInterface` and omnibridge's `Locales`; the classes listed by
+    `Base\Service\Model\ClassFinder::listed()` / `namespaces()`, in the filesystem's order, as the bundle listed them);
+  - `CacheClear` (the lock, omnibase's checks, the counter of clears `CacheClears`, the second clear, around the
+    host's own clear given as a closure; formerly `Base\Traits\CacheClearTrait`, deprecated), `CacheClearSessions`;
+  - `DemoReset` (its refusals, the lock, the host's commands through **`Base\Console\Commands`**);
+  - `UploaderEntities`, `UploaderImages`, `UploaderImagesCrop`.
+- omnibridge/symfony's commands of the same names are adapters (options -> input -> task -> Report printed);
+  omnibridge/laravel registers the same tasks as artisan commands (`omnibase:cache:clear` for cache:clear). The
+  translation keys are the ones recorded (lesringostars' TranslationKeysTest); a task gives the same Report under both.
+- Fixed on the way (each was a failure of the command): `translation:controllers` read a router it was never given;
+  `translation:settings` said "Array to string conversion" on a setting holding lists (shown as JSON now);
+  `uploader:*` asked the bundle for a `getBundleLocation()` it has not, and listed and deleted in the default storage
+  (the cache's) instead of the property's - every file looked orphan -, and a name no file answers is no longer
+  deleted (it named the storage's root). cache:clear's public links throw where they `exit()`ed.
+  `tests/Agnostic.php` 796, `tests/Foundation.php` 859.
+
 ### Changed: the entities reach no service (plan "omnibase agnostic", step E1, 2026-11-04)
 
 - `Widget\{Page, Link, Attachment}::__toLink()` name no routing component: their reference type defaults to

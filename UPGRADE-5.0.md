@@ -109,6 +109,17 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   6.0: ask `Base\Request\Rule\MaintenancePage` and `LaunchPage`.
 - `Base\Service\Redirections::responseFor()` keeps its answer; its rule is `Base\Request\Rule\Redirection`.
 
+## The console's logic is the core's (step F5e, slice 3)
+
+- `Base\Console\Command\{TranslationCrud, TranslationEntities, TranslationEnums, TranslationControllers,
+  TranslationSettings, CacheClear, CacheClearSessions, DemoReset, UploaderEntities, UploaderImages,
+  UploaderImagesCrop}Command` keep their names, options, constructors and services; their logic is
+  `Base\Console\Task\*`, run with an input object and printing a `Base\Console\Report`. A command of the application
+  that extended one keeps working; a script can run the task itself (`(new TranslationEntities(...))->run(new
+  TranslationEntitiesInput())->text()`).
+- `Base\Traits\CacheClearTrait` is deprecated (its checks are `Base\Console\Task\CacheClear`'s); removed at 6.0.
+- Under Laravel (omnibridge/laravel), the same commands are artisan's; cache:clear's is `omnibase:cache:clear`.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only
