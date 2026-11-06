@@ -85,6 +85,30 @@ both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md
   SitePages}`, the 404's redirection), whose own copies of the presence and language rules are gone.
   `tests/Agnostic.php` 770, `tests/Foundation.php` 833.
 
+### Added: the console's other tasks (plan "omnibase agnostic", step F5e, slice 3b, 2026-11-06)
+
+- **`Base\Console\Task\*`** for the 19 commands slice 3a left, each run in `bare` (tests/Console/tasks-without-framework.php):
+  - `BaseMapping`, `IconEnums` (the classes of a folder through `Folders`, as the bundle listed them);
+  - `IconEntities`, `AutocompleteEntities`, `EntityDiscriminator` (on `EntitiesTask`: whether a class is an entity is the
+    unit of work's shapes' answer, Doctrine's `ClassMetadataManipulator::isEntity()` before; the rows its repository's;
+    one input, `EntitiesInput`);
+  - `NotifierOverview` (app:notifier), `NotifierMailTest`, `UserNotification`, `UserCreate` (its token
+    `UserCreate::PASSWORD_CHANGE`, the one omnibridge/symfony's PasswordChangeSubscriber asks; without a Notifier,
+    `--no-email` is asked before anything is read or written), `ThreadPublishable`, `TrashPurge`;
+  - `MailerTrap` (base:mailer:trap; a release goes out through the host's transport, given as a closure);
+  - `TimeMachineStorage`, `TimeMachineSnapshot` (run(), backup(), restore(): timemachine:snapshot and its backup and
+    restore, the confirmations asked by the host's closure). `Base\Service\TimeMachineInterface` declares
+    `getDatabaseList()` and `getStorageList()`, which the TimeMachine had.
+- The Doctrine-typed tasks are **omnibridge/doctrine's** (`Omnibridge\Doctrine\Omnibase\Console\Task\`):
+  `DoctrineDatabaseImport`, `DoctrineSchemaCharset`, `DoctrineArrayUpgrade`.
+- omnibridge/symfony's 19 commands are adapters (no Console class left above an adapter's size); omnibridge/laravel
+  registers 11 of them as artisan commands; base:mailer:trap, timemachine:* and doctrine:* stay Symfony's (see
+  docs/50-reference/commands.md).
+- Fixed on the way: notifier:mail:test handed the notifier the finders' list of accounts instead of the account (the
+  unreachable "first account" branch is gone); timemachine:snapshot:restore ended with the status 1 after a restore
+  (it returned the restoration's `true`); doctrine:database:import left a sheet's entity undefined where its class has
+  no discriminator map. `tests/Agnostic.php` 826, `tests/Foundation.php` 889.
+
 ### Added: the console tasks (plan "omnibase agnostic", step F5e, slice 3a, 2026-11-06)
 
 - **`Base\Console\Task\*`**, the logic of omnibridge/symfony's commands, one task per command, its options as a

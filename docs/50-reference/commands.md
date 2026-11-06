@@ -33,6 +33,21 @@ exit($report->status());
 What a task needs of its host is given to it: the host's clear for `CacheClear` (a closure), its other commands
 for `DemoReset` (`Base\Console\Commands`), its routes for `TranslationControllers`.
 
+Since slice 3b every command of the list below is a task: `Base\Console\Task\*`, or, for the three Doctrine-typed
+ones (`doctrine:database:import`, `doctrine:schema:charset`, `doctrine:array:upgrade`), omnibridge/doctrine's
+`Omnibridge\Doctrine\Omnibase\Console\Task\*`. A question the command asks is the host's, given to the task as a
+closure: the confirmations of `timemachine:snapshot:backup` and `:restore`, the file, the sheets and the confirmation
+of `doctrine:database:import` (and its progress bar), the transport `base:mailer:trap release` sends through.
+
+Under Laravel, artisan has `translation:*`, `omnibase:cache:clear`, `cache:clear:sessions`, `demo:reset`,
+`uploader:*`, `base:mapping`, `icon:enums`, `icon:entities`, `autocomplete:entities`, `entity:discriminator`,
+`app:notifier`, `notifier:mail:test`, `user:notifications`, `thread:publishable`, `trash:purge` and `user:create`.
+These stay Symfony's: `base:mailer:trap` (the trap holds Symfony Mailer's messages at send time and releases them on
+`mailer.transports`; Laravel's mailer never consults it), `timemachine:*` (the TimeMachine is built on DoctrineBundle's
+registry and Symfony's console output, and only the Symfony container registers it), `doctrine:*` (upgrades and
+imports of the database the Symfony site owns: lesringostars' twin reads that database and changes neither its schema
+nor its rows in bulk).
+
 ## Summary
 
 | Command | What it does |

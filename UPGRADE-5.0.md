@@ -119,6 +119,16 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   TranslationEntitiesInput())->text()`).
 - `Base\Traits\CacheClearTrait` is deprecated (its checks are `Base\Console\Task\CacheClear`'s); removed at 6.0.
 - Under Laravel (omnibridge/laravel), the same commands are artisan's; cache:clear's is `omnibase:cache:clear`.
+- Slice 3b: the other commands as well - `AutocompleteEntities`, `BaseMapping`, `EntityDiscriminator`, `IconEntities`,
+  `IconEnums`, `MailTrap` (task `MailerTrap`), `Notifier` (task `NotifierOverview`), `NotifierMailTest`,
+  `ThreadPublishable`, `TimeMachineSnapshot{,Backup,Restore}` (task `TimeMachineSnapshot`), `TimeMachineStorage`,
+  `TrashPurge`, `UserCreate`, `UserNotification`; the tasks of `DoctrineArrayUpgrade`, `DoctrineDatabaseImport` and
+  `DoctrineSchemaCharset` are omnibridge/doctrine's (`Omnibridge\Doctrine\Omnibase\Console\Task\`).
+- `Base\Service\TimeMachineInterface` declares `getDatabaseList()` and `getStorageList()`: an implementation of
+  one's own adds them.
+- Under Laravel, artisan has 11 of them (base:mapping, icon:enums, icon:entities, autocomplete:entities,
+  entity:discriminator, app:notifier, notifier:mail:test, user:notifications, thread:publishable, trash:purge,
+  user:create); base:mailer:trap, timemachine:* and doctrine:* stay Symfony's.
 
 ## Stays in the core, deliberately
 
