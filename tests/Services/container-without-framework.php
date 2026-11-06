@@ -244,7 +244,8 @@ $container = Container::fromDefinitions(Services::definitions(), $values, $hostS
             'lines' => new Omnibridge\Schema\Field('lines', 'lines', 'json', nullable: true),
         ]),
     ])),
-]);
+// What is discovered among them (Base\Discovery, step F5e slice 4c): the obfuscator's compressions are its collection.
+], Base\Discovery::registries());
 
 $obfuscator = $container->get(ObfuscatorInterface::class);
 $media = $container->get(MediaServiceInterface::class);

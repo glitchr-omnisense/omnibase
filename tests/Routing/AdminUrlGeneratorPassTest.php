@@ -2,7 +2,8 @@
 
 namespace Tests\Base\Routing;
 
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\AdminUrlGeneratorPass;
+use Base\Discovery;
+use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\DiscoveryPass;
 use Base\Routing\AdminUrlGeneratorInterface;
 use Base\Routing\NullAdminUrlGenerator;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +17,9 @@ use Symfony\Component\DependencyInjection\Definition;
  * be a boot failure rather than a wrong URL.
  *
  * Pure ContainerBuilder unit test - no kernel, so it also passes in an
- * install that genuinely has no admin.
+ * install that genuinely has no admin. The binding is the core's `fallbacks`
+ * registry (Base\Discovery, plan "omnibase agnostic", step F5e slice 4c),
+ * compiled by omnibridge/symfony's DiscoveryPass (until then AdminUrlGeneratorPass).
  */
 class AdminUrlGeneratorPassTest extends TestCase
 {
@@ -24,7 +27,7 @@ class AdminUrlGeneratorPassTest extends TestCase
 
     private function compile(ContainerBuilder $container): ContainerBuilder
     {
-        (new AdminUrlGeneratorPass())->process($container);
+        (new DiscoveryPass(Discovery::registries(), ['fallbacks']))->process($container);
 
         return $container;
     }

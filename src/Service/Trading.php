@@ -59,7 +59,7 @@ class Trading implements TradingInterface
     /**
      * The providers with a key, in the order Swap asks them: the highest
      * getPriority() first, as for Symfony's tagged services - the order they
-     * were registered in only among equals. TradingPass adds them in the
+     * were registered in only among equals. Base\Discovery's `collect` adds them in the
      * container's order, which puts an application's before the bundles':
      * without this, a keyless fallback (a central bank's rates) would answer
      * before the keyed providers typed in the admin.

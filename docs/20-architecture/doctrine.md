@@ -62,7 +62,7 @@ otherwise include the services' files itself, past the autoloader.
 - An entity's `repositoryClass` may name a repository **interface** of the core
   (`Base\Repository\Thread\Tags`): `Omnibridge\Doctrine\Omnibase\RepositoryFactory::implementation()`
   gives the repository bound to it (`Base\Repository\Aliases::INTERFACES`), and under Symfony
-  `RepositoryInterfacesPass` adds the interfaces to DoctrineBundle's repository locator.
+  `Base\Discovery`'s `repositories` (omnibridge/symfony's `DiscoveryPass`) adds the interfaces to DoctrineBundle's repository locator.
 - The moved services are registered under their new names; their former ids are aliases
   (config/services/database.php).
 - `MetadataSnapshot` names a filter or a type whose class moved by its former name: it compares the
@@ -127,7 +127,7 @@ enumeration of a type's name, whatever persistence registered it.
 
 - Under Symfony an enumeration is still listed in DoctrineBundle's `doctrine.dbal.types` (the core's
   and the application's by `BaseExtension`, a bundle's by its own prepend: omnibase/marketplace);
-  `EnumerationTypesPass` takes them out of it (DoctrineBundle instantiates each type's class) and
+  `Base\Discovery`'s `enumerations` (omnibridge/symfony's `DiscoveryPass`) takes them out of it (DoctrineBundle instantiates each type's class) and
   gives them to `Base\Bridge\Doctrine\EnumerationsMiddleware`, which registers the adapters when
   the connection is made, before any metadata is read - the moment DoctrineBundle registered them.
   The parameter `base.database.enumerations` lists them by name.

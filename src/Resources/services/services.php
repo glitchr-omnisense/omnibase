@@ -45,16 +45,8 @@ return [
         'class' => 'Base\Service\Obfuscator',
         'public' => true,
         'autowire' => false,
-        'arguments' => [
-            '$cacheDir' => '%base.obfuscator.cache_dir%',
-            '$compressions' => [
-                '@Base\Service\Model\Obfuscator\Compression\NullCompression',
-                '@Base\Service\Model\Obfuscator\Compression\ZlibCompression',
-                '@Base\Service\Model\Obfuscator\Compression\GzipCompression',
-                '@Base\Service\Model\Obfuscator\Compression\DeflateCompression',
-                '@Base\Service\Model\Obfuscator\Compression\HashidsCompression',
-            ],
-        ],
+        // Its compressions: the services tagged obfuscator.compression, handed by Base\Discovery's `collect` (step F5e slice 4c).
+        'arguments' => ['$cacheDir' => '%base.obfuscator.cache_dir%'],
         'bind' => ['$cacheDir' => '%base.obfuscator.cache_dir%'],
         'tags' => ['twig.runtime'],
         'contracts' => [

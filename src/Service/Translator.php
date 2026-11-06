@@ -102,7 +102,7 @@ class Translator implements TranslatorInterface, Translations
     /**
      * @param array<string, array<string, list<string>>> $applicationTexts the keys the application wrote in its own
      *                                                                     translations/ directory, by domain and locale
-     *                                                                     (ApplicationTextsPass; read only when a level is set)
+     *                                                                     (Base\Discovery's `texts`; read only when a level is set)
      */
     public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, Environment|KernelInterface $kernel, ParameterBagInterface $parameterBag, ?string $politeness = null, array $applicationTexts = [])
     {

@@ -178,7 +178,7 @@ class and the storages load without either:
   file, image, upload, backup and cache-clear services read) is the core's own class, built from
   a PSR-11 container of storages by name: the services tagged `flysystem.storage`, which the
   bundle tags from the application's `config/packages/flysystem.yaml`. Without the bundle,
-  `FlysystemStoragesPass` gives omnibase's local storages: `local.cache`
+  `Base\Discovery`'s `storages` (compiled by omnibridge/symfony's `DiscoveryPass`) gives omnibase's local storages: `local.cache`
   (`var/cache/<env>/images`), `local.uploads` and `local.wysiwyg` (`var/storage/...`), each
   with its `.public` under `public/`.
 

@@ -100,7 +100,7 @@ boîte. » - keeps its sentence when the bundle brings a polite variant of the
 one it replaced, and still gets the bundle's variants for what it did not
 replace. Nothing in the merged catalogues tells whose a text is: the
 application's keys are read while the container is built
-(`ApplicationTextsPass`, from `translator.default_path`: YAML, PHP and JSON
+(`Base\Discovery`'s `texts`, `Base\Translation\ApplicationTexts`, from `translator.default_path`: YAML, PHP and JSON
 catalogues), and only when a level is set.
 
 ## Where it applies

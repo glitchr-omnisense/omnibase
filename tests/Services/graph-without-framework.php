@@ -100,7 +100,8 @@ $given['Symfony\Contracts\Translation\TranslatorInterface'] = $services[Symfony\
 $given['Symfony\Component\Notifier\NotifierInterface'] = new Symfony\Component\Notifier\Notifier([]);
 $given['Symfony\Component\Notifier\Channel\ChannelPolicyInterface'] = new Symfony\Component\Notifier\Channel\ChannelPolicy([]);
 
-$container = Container::fromDefinitions(Services::definitions(), $values, $given);
+// What is discovered among them (Base\Discovery, step F5e slice 4c): the autoconfigured tags, the collections, the fallbacks.
+$container = Container::fromDefinitions(Services::definitions(), $values, $given, Base\Discovery::registries());
 
 $built = [];
 $failed = [];
@@ -130,7 +131,35 @@ foreach (Services::definitions() as $definition) {
     }
 }
 
+// What the plain container discovered (step F5e slice 4c), to compare with what Symfony's container discovers on a site
+// (tests/Services/discovered-by-symfony.php): each collecting service it builds with the services it was handed, in their
+// order; the admin's links where no back office is installed; the core's enumerations.
+$collected = [];
+foreach (Base\Discovery::registry('collect') as $collection) {
+    if (!isset($built[$collection['service']])) {
+        continue;
+    }
+    $service = $container->get($collection['service']);
+    $handed = match ($collection['method']) {
+        'addCompression' => $service->getCompressions(),
+        'addAdapter' => (fn () => $this->adapters)->call($service),
+        'addProvider' => (fn () => $this->providers)->call($service),
+        default => [],
+    };
+    $collected[$collection['service']] = array_values(array_map(get_class(...), is_array($handed) ? $handed : iterator_to_array($handed)));
+}
+
 return [
+    'discovered' => [
+        'collect' => $collected,
+        'fallbacks' => [Base\Routing\AdminUrlGeneratorInterface::class => get_class($container->get(Base\Routing\AdminUrlGeneratorInterface::class))],
+        'enumerations' => Base\Discovery::enumerations($values['kernel.project_dir']),
+        'autoconfigured' => array_keys(array_filter(
+            Omnibridge\Container\Discovery::autoconfigure($resolved, Base\Discovery::registry('autoconfigure')),
+            static fn (array $definition, string $id): bool => $definition['tags'] !== $resolved[$id]['tags'],
+            ARRAY_FILTER_USE_BOTH,
+        )),
+    ],
     'declared' => count(Services::definitions()),
     'built' => count($built),
     'parents' => $parents,
