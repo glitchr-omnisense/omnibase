@@ -24,6 +24,15 @@ final class RegisteredCommandsTest extends KernelTestCase
         yield ['translation:crud', ['--locale' => 'en']];
         yield ['translation:entities', ['--locale' => 'en']];
         yield ['translation:enums', ['--locale' => 'en']];
+        // Slice 3b of the plan "omnibase agnostic" (F5e): adapters of Base\Console\Task\*, what writes nothing.
+        yield ['base:mapping', []];
+        yield ['icon:entities', []];
+        yield ['entity:discriminator', ['entity' => 'App\\Entity\\User']];
+        yield ['app:notifier', []];
+        yield ['thread:publishable', []];
+        yield ['trash:purge', []];
+        yield ['user:notifications', []];
+        yield ['base:mailer:trap', ['action' => 'list']];
     }
 
     /** @dataProvider commands */

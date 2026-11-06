@@ -9,6 +9,30 @@
 
 use Base\Console\Commands;
 use Base\Console\Report;
+use Base\Console\Task\AutocompleteEntities;
+use Base\Console\Task\BaseMapping;
+use Base\Console\Task\BaseMappingInput;
+use Base\Console\Task\EntitiesInput;
+use Base\Console\Task\EntityDiscriminator;
+use Base\Console\Task\EntityDiscriminatorInput;
+use Base\Console\Task\IconEntities;
+use Base\Console\Task\IconEnums;
+use Base\Console\Task\IconEnumsInput;
+use Base\Console\Task\MailerTrap;
+use Base\Console\Task\MailerTrapInput;
+use Base\Console\Task\NotifierOverview;
+use Base\Console\Task\NotifierOverviewInput;
+use Base\Console\Task\ThreadPublishable;
+use Base\Console\Task\ThreadPublishableInput;
+use Base\Console\Task\TimeMachineSnapshot;
+use Base\Console\Task\TimeMachineSnapshotBackupInput;
+use Base\Console\Task\TimeMachineSnapshotInput;
+use Base\Console\Task\TimeMachineSnapshotRestoreInput;
+use Base\Console\Task\TimeMachineStorage;
+use Base\Console\Task\TrashPurge;
+use Base\Console\Task\TrashPurgeInput;
+use Base\Console\Task\UserCreate;
+use Base\Console\Task\UserCreateInput;
 use Base\Console\Task\CacheClear;
 use Base\Console\Task\CacheClearInput;
 use Base\Console\Task\CacheClears;
@@ -234,6 +258,142 @@ $result['uploader:entities'] = (new UploaderEntities($repositories))->run(new Up
 $result['uploader:images'] = (new UploaderImages($repositories, $media))->run(new UploaderImagesInput($source, 'Nowhere', warmup: true))->text();
 $crop = (new UploaderImagesCrop($repositories, $media))->run(new UploaderImagesInput($source, 'Blog\\Post'));
 $result['uploader:images:crop, not an image'] = [$crop->text(), $crop->status()];
+
+// Slice 3b. base:mapping: the application's classes over the core's (an App\Entity\User of its own), the summary.
+@mkdir($root.'/src/Entity', 0777, true);
+file_put_contents($root.'/src/Entity/User.php', "<?php\n\nnamespace App\\Entity;\n\nclass User\n{\n}\n");
+$lines = explode("\n", trim((new BaseMapping())->run(new BaseMappingInput($source))->text()));
+$result['base:mapping'] = ['first' => $lines[0], 'user' => array_values(array_filter($lines, static fn (string $line): bool => str_contains($line, 'App\\Entity\\User ') || str_ends_with($line, 'App\\Entity\\User (no alias)'))), 'summary' => array_values(array_filter($lines, static fn (string $line): bool => str_starts_with($line, '- ')))];
+$result['base:mapping'] = ['first' => $result['base:mapping']['first'], 'user' => $result['base:mapping']['user'], 'summary' => array_map(static fn (string $line): string => preg_replace('~\d+~', 'N', $line), $result['base:mapping']['summary'])];
+
+// icon:enums, one enumeration of the core's.
+$result['icon:enums'] = (new IconEnums())->run(new IconEnumsInput($source, 'Base\\Enum\\UserRole'))->text();
+
+// The entities' tasks on a unit of work whose shapes know App\Entity\Blog\Post only, its rows none.
+$unitOfWork = $stub(Omnibridge\Persistence\UnitOfWork::class, []);
+$rows = $stub(Base\Database\Repository\Entities::class, ['findAll' => [], 'findBy' => [], 'findOneBy' => static fn (array $criteria) => ($criteria['email'] ?? null) === 'taken@example.org' ? new stdClass() : null]);
+Base\Database\Attribute\Backend\Backends::register($unitOfWork::class, Base\Database\Mapping\EntityShapes::class, static fn () => $stub(Base\Database\Mapping\EntityShapes::class, ['has' => static fn ($class) => 'App\\Entity\\Blog\\Post' === (is_object($class) ? $class::class : $class)]));
+Base\Database\Attribute\Backend\Backends::register($unitOfWork::class, Repositories::class, static fn () => $stub(Repositories::class, ['of' => $rows]));
+require_once $root.'/src/Entity/Blog/Post.php';
+$refused = static function (Closure $task): string {
+    try {
+        $task();
+
+        return 'not refused';
+    } catch (Exception $e) {
+        return $e->getMessage();
+    }
+};
+$result['entity:discriminator'] = [
+    'an entity' => (new EntityDiscriminator($unitOfWork))->run(new EntityDiscriminatorInput('App\\Entity\\Blog\\Post'))->text(),
+    'not one' => $refused(static fn () => (new EntityDiscriminator($unitOfWork))->run(new EntityDiscriminatorInput('App\\Nowhere'))),
+];
+$result['icon:entities'] = [
+    'not an entity' => $refused(static fn () => (new IconEntities($unitOfWork))->run(new EntitiesInput($source, 'App\\Nowhere'))),
+    'no icons' => $refused(static fn () => (new IconEntities($unitOfWork))->run(new EntitiesInput($source, 'App\\Entity\\Blog\\Post'))),
+];
+$result['autocomplete:entities, no picker'] = $refused(static fn () => (new AutocompleteEntities($unitOfWork))->run(new EntitiesInput($source, 'App\\Entity\\Blog\\Post')));
+
+// app:notifier on a notifier of two templates.
+eval('namespace App\\Bare; class Notifier { public function welcome() {} public function goodbye() {} }');
+$result['app:notifier'] = (new NotifierOverview())->run(new NotifierOverviewInput('App\\Bare\\Notifier'))->text();
+
+// thread:publishable with nothing scheduled.
+$result['thread:publishable'] = (new ThreadPublishable($stub(Base\Repository\Threads::class, ['byStateUncached' => []]), $unitOfWork, $translator))->run(new ThreadPublishableInput())->text(Report::VERBOSE);
+
+// trash:purge: empty, then a dry run and a purge of one expired entry.
+$trash = static fn (array $expired) => new class($expired) extends Base\Service\TrashManager {
+    public function __construct(private array $entries)
+    {
+    }
+
+    public function expired(?DateTimeInterface $now = null, ?int $limit = null): array
+    {
+        return $this->entries;
+    }
+
+    public function count(?string $entityClass = null): int
+    {
+        return count($this->entries);
+    }
+
+    public function purge(?DateTimeInterface $now = null, ?int $limit = null): int
+    {
+        return count($this->entries);
+    }
+};
+$ball = new class {
+    public function getEntityData(): array
+    {
+        return ['label' => 'Hello'];
+    }
+
+    public function getEntityClass(): string
+    {
+        return 'App\\Entity\\Blog\\Post';
+    }
+
+    public function getEntityId(): int
+    {
+        return 7;
+    }
+
+    public function getPermanentAfter(): DateTime
+    {
+        return new DateTime('2026-01-02 03:04');
+    }
+};
+$result['trash:purge'] = [
+    'empty' => (new TrashPurge($trash([])))->run(new TrashPurgeInput())->text(),
+    'dry run' => (new TrashPurge($trash([$ball])))->run(new TrashPurgeInput())->text(),
+    'forced' => (new TrashPurge($trash([$ball])))->run(new TrashPurgeInput(true))->text(),
+];
+
+// user:create's refusals (nothing written): an address taken, a role unknown, an e-mail without a notifier.
+$create = static fn (UserCreateInput $input) => (new UserCreate($unitOfWork))->run($input);
+$taken = $create(new UserCreateInput('someone', 'taken@example.org', noEmail: true));
+$role = $create(new UserCreateInput('someone', 'free@example.org', ['ROLE_NOBODY'], noEmail: true));
+$result['user:create'] = [
+    'taken' => [$taken->text(), $taken->status()],
+    'unknown role' => [$role->text(), $role->status()],
+    'no notifier' => $refused(static fn () => $create(new UserCreateInput('someone', 'free@example.org'))),
+    'password change token' => UserCreate::PASSWORD_CHANGE,
+];
+
+// base:mailer:trap on a folder of its own: status, list, show without an id, an unknown action, armed then disarmed.
+$trap = new Base\Mailer\MailTrap($root.'/var/mail-trap');
+$mailer = static fn (string $action, ?string $id = null, ?string $reason = null) => (new MailerTrap($trap))->run(new MailerTrapInput($action, $id, reason: $reason));
+$armed = $mailer('on', reason: 'bare');
+$result['base:mailer:trap'] = [
+    'status' => preg_replace('~since [\d-]+ [\d:]+~', 'since <time>', str_replace($root, '<root>', $mailer('status')->text())),
+    'list' => $mailer('list')->text(),
+    'show' => [$mailer('show')->text(), $mailer('show')->status()],
+    'unknown' => [$mailer('bogus')->text(), $mailer('bogus')->status()],
+    'armed' => [$armed->text(), $trap->isArmed()],
+    'disarmed' => [$mailer('off')->text(), $trap->isArmed()],
+    'release, nothing named' => [$mailer('release')->text(), $mailer('release')->status()],
+];
+
+// The TimeMachine's tasks on a time machine of one storage and one connection, a snapshot taken on 2026-01-02.
+$machine = $stub(Base\Service\TimeMachineInterface::class, ['getStorageList' => ['local' => new stdClass()], 'getDatabaseList' => ['default' => new stdClass()], 'findByCycle' => ['local' => ['20260102' => ['site-20260102.tar.gz']]], 'backup' => true, 'restore' => true]);
+$storages = $stub(Base\Service\Storages::class, ['hasStorage' => true, 'getPublic' => '/backups/', 'isRemote' => false]);
+$snapshot = new TimeMachineSnapshot($machine, $storages);
+$asked = [];
+$confirm = static function (string $question, bool $default) use (&$asked): bool {
+    $asked[] = $question;
+
+    return true;
+};
+$backup = $snapshot->backup(new TimeMachineSnapshotBackupInput(['local'], 'default', 'prod', -1, userlog: true), $confirm);
+$restore = $snapshot->restore(new TimeMachineSnapshotRestoreInput(['local']), $confirm);
+$none = $snapshot->backup(new TimeMachineSnapshotBackupInput(), $confirm);
+$result['timemachine'] = [
+    'storage' => (new TimeMachineStorage($machine))->run()->text(),
+    'snapshot' => $snapshot->run(new TimeMachineSnapshotInput(['local'], 'default', 'prod'))->text(Report::VERBOSE),
+    'backup' => [$backup->text(), $backup->status()],
+    'restore' => [$restore->status(), $asked],
+    'backup, no storage' => [$none->status(), str_contains($none->text(), 'Please select a storage. aborted.')],
+];
 
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $file) {
     $file->isDir() && !$file->isLink() ? rmdir($file->getPathname()) : unlink($file->getPathname());

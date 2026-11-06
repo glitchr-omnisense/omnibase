@@ -25,6 +25,21 @@ interface TimeMachineInterface
         "./.git",
     ];
 
+    /**
+     * The database connections a backup can take, by name (since 5.0, for the console tasks:
+     * Base\Console\Task\TimeMachineSnapshot).
+     *
+     * @return array<string, object>
+     */
+    public function getDatabaseList(): array;
+
+    /**
+     * The storages a snapshot can be written to, by name (since 5.0, as getDatabaseList()).
+     *
+     * @return array<string, object>
+     */
+    public function getStorageList(): array;
+
     public function findOneBy(int $id, int|array $storageNames, ?string $prefix = null, int $cycle = -1);
     public function findBy(int|array $storageNames, ?string $prefix = null, int $cycle = -1);
     public function findByCycle(int|array $storageNames, ?string $prefix = null, int $cycle = -1);

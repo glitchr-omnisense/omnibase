@@ -172,4 +172,144 @@ Cache clear aborted: another process is already clearing the cache.
 ',
     1 => 1,
   ],
+  'base:mapping' => [
+    'first' => 'Complete mapping applied:',
+    'user' => [
+      0 => ' * Application file found: App\\Entity\\User (no alias)',
+      1 => '  * Application file found: App\\Entity\\User (no alias)',
+    ],
+    'summary' => [
+      0 => '- N alias(es) from \\Base to \\App applied.',
+      1 => '- There is/are N overriding exception(s). Exception list below:',
+    ],
+  ],
+  'icon:enums' => 'Enum list: Base\\Enum\\UserRole
+ * Base\\Enum\\UserRole
+	ROLE_ADMIN      : [fa-solid fa-crown,fa-solid fa-star]
+	ROLE_EDITOR     : [fa-solid fa-hard-hat,fa-solid fa-hard-hat]
+	ROLE_SUPERADMIN : [fa-solid fa-cog,fa-solid fa-user-cog]
+	ROLE_USER       : [fa-solid fa-user,fa-solid fa-user-tag]
+',
+  'entity:discriminator' => [
+    'an entity' => '',
+    'not one' => 'Class "App\\Nowhere" is not an entity.',
+  ],
+  'icon:entities' => [
+    'not an entity' => 'Entity "App\\Nowhere" doesn\'t exists',
+    'no icons' => 'Entity "App\\Entity\\Blog\\Post" doesn\'t implement Base\\Service\\Model\\IconizeInterface',
+  ],
+  'autocomplete:entities, no picker' => 'Entity "App\\Entity\\Blog\\Post" doesn\'t implement Base\\Service\\Model\\AutocompleteInterface',
+  'app:notifier' => 'Available templated notifications:
+ * welcome
+ * goodbye
+',
+  'thread:publishable' => '
+                                                            
+ [OK] 0 scheduled thread(s) found: 0 thread(s) publishable. 
+                                                            
+
+',
+  'trash:purge' => [
+    'empty' => 'Nothing to purge. The trash holds 0 entries, none past its grace period.
+',
+    'dry run' => '  would destroy App\\Entity\\Blog\\Post #7 "Hello" (expired 2026-01-02 03:04)
+
+Dry run. 1 entry would be destroyed. Pass --force to do it.
+',
+    'forced' => '  destroying App\\Entity\\Blog\\Post #7 "Hello" (expired 2026-01-02 03:04)
+
+Purged. 1 entity destroyed.
+',
+  ],
+  'user:create' => [
+    'taken' => [
+      0 => '[ERROR] An account already has the username "someone" or the address taken@example.org.
+',
+      1 => 1,
+    ],
+    'unknown role' => [
+      0 => '[ERROR] Unknown role "NOBODY".
+',
+      1 => 1,
+    ],
+    'no notifier' => 'user:create e-mails the account through omnibase\'s Notifier, which this host has not: pass --no-email.',
+    'password change token' => 'change-password',
+  ],
+  'base:mailer:trap' => [
+    'status' => '[WARNING] Trap ARMED since <time> (bare) - no mail is leaving this application.
+ Held messages: 0
+ Directory:     <root>/var/mail-trap
+',
+    'list' => '[SUCCESS] Nothing held.
+',
+    'show' => [
+      0 => '[ERROR] Which one? Pass an id from "base:mailer:trap list".
+',
+      1 => 1,
+    ],
+    'unknown' => [
+      0 => '[ERROR] Unknown action "bogus". Try: status, on, off, list, show, purge, release.
+',
+      1 => 1,
+    ],
+    'armed' => [
+      0 => '[WARNING] Trap ARMED. Nothing will be delivered until "base:mailer:trap off".
+ Already-queued mail is caught too: the trap sits at send time, not at queue time.
+',
+      1 => true,
+    ],
+    'disarmed' => [
+      0 => '[SUCCESS] Trap off - mail is being delivered again.
+',
+      1 => false,
+    ],
+    'release, nothing named' => [
+      0 => '[ERROR] Pass an id from "base:mailer:trap list", or --all.
+',
+      1 => 1,
+    ],
+  ],
+  'timemachine' => [
+    'storage' => 'Available storage place(s):
+ * local (stdClass)
+',
+    'snapshot' => 'Available database connection(s):
+* default (stdClass) <-- selected 
+
+Storage filesystem: 
+* [local] /backups/ <-- selected 
+
+Available snapshot(s) prefixed by "prod" in local
+[Fri, Jan 2, 2026]
+* [0] /backups/site-20260102.tar.gz
+
+',
+    'backup' => [
+      0 => 'Available database connection(s):
+* default (stdClass) <-- selected 
+
+Storage filesystem: 
+* [local] /backups/ <-- selected 
+
+User configuration will be included in the backup
+
+Backup completed successfully.
+
+',
+      1 => 0,
+    ],
+    'restore' => [
+      0 => 0,
+      1 => [
+        0 => 'You are about to backup this application and its database. Do you wish to continue [Y/n] ? ',
+        1 => 'You are about to restore the latest version. Do you wish to continue ? [y/N] ',
+        2 => 'Do you wish to restore application from tarball ? [y/N] ',
+        3 => 'Do you wish to restore database from tarball ? [y/N] ',
+      ],
+    ],
+    'backup, no storage' => [
+      0 => 1,
+      1 => true,
+    ],
+  ],
 ];
