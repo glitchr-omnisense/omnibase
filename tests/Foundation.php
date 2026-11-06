@@ -198,6 +198,7 @@
  * 833 after step F5e, slice 2 (2026-11-05, +18): Base\Request\* (see tests/Agnostic.php).
  * 859 after step F5e, slice 3a (2026-11-06, +26): Base\Console\{Report, Commands}, Base\Console\Task\* (see tests/Agnostic.php).
  * 889 after step F5e, slice 3b (2026-11-06, +30): the console's other tasks, Base\Console\Task\* (see tests/Agnostic.php).
+ * 890 after step F5e, slice 4b (2026-11-06, +1): Base\Options, the schema of the base: options as data.
  */
 
 return [
@@ -742,6 +743,7 @@ return [
     Base\Notifier\Recipient\Recipient::class,
     Base\Notifier\Recipient\TimezoneRecipientInterface::class,
     Base\Notifier\Recipient\TimezoneRecipientTrait::class,
+    Base\Options::class,
     Base\Repository\Aliases::class,
     Base\Repository\Analytics\PageViews::class,
     Base\Repository\Analytics\PageVisits::class,

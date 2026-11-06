@@ -10,6 +10,29 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the options are the core's declaration (plan "omnibase agnostic", step F5e, slice 4b)
+
+- `Base\Options`: the schema of `base:` as data, in `src/Resources/options.php` - each option's type (`bool`, `int`,
+  `float`, `scalar`, `enum`, `mixed`, `array`), default (placeholders such as `%kernel.project_dir%` or
+  `%env(default::DEMO_ADMIN_PASSWORD)%` kept for the host), what it is for, its deprecation (the twelve options read by
+  nothing), `min`/`max` and its nesting (sections completed with their defaults, lists and maps of a prototype, the
+  key attribute, default children, no deep merging) - and `environment`: the variables a service reads through %env()%
+  that need a value where the environment has none (`COLLAB_TICKET_SECRET`, `COLLAB_RELAY_WS_URL`: empty,
+  `BASE_TRADING_LIVE`: `true`), by the group of services that reads them. `Options::schema()`, `environment()`,
+  `process()` (configurations merged, checked and completed by omnisense/omnibridge's `Omnibridge\Options\Processor`),
+  `defaults()`, `parameters()` (every `base.*` parameter by its full name, as Symfony's extension sets them),
+  `environmentParameters()`.
+- omnibridge/symfony compiles the schema into BaseConfiguration's tree: on lesringostars `config:dump-reference base`,
+  `debug:config base` (dev and prod) and the compiled container (its parameters in their order included) are the same
+  before and after. omnibridge/laravel validates `config/base.php` with it when it boots (an option it refuses stops
+  the application with Symfony's own message) and completes it with its defaults. The plain-PHP host takes its
+  parameters from `Options::parameters()`: the generated fixture `tests/Services/base-parameters.php` is gone.
+- `tests/Options/OptionsHostsTest`: 45 configurations (a site's whole `base.yaml`, merges, keyed maps, dashes, nulls,
+  and 23 refused ones) give the same result through Symfony's tree and through the Processor - the same values, the
+  same refusal word for word, the same deprecations -, and the tree compiled from the declaration dumps the reference
+  the former hand-written tree dumped. `tests/Options/OptionsTest`: the declaration's format, its parameters, the
+  environment's groups. Agnostic 826 -> 827, Foundation 889 -> 890.
+
 ### Changed: the services are the core's declaration (plan "omnibase agnostic", step F5e, slice 4a)
 
 - `Base\Services::definitions()` holds every service of the core: the 192 definitions omnibridge/symfony's

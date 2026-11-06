@@ -88,6 +88,7 @@
  * AutocompleteEntities, EntityDiscriminator, NotifierOverview, NotifierMailTest, UserNotification, ThreadPublishable, TrashPurge,
  * UserCreate, MailerTrap, TimeMachineStorage, TimeMachineSnapshot} and their inputs, the console's other tasks (the Doctrine-typed
  * ones, doctrine:array:upgrade, doctrine:schema:charset and doctrine:database:import, are omnibridge/doctrine's).
+ * 827 after step F5e, slice 4b (2026-11-06, +1): Base\Options, the schema of the base: options as data.
  */
 
 return [
@@ -627,6 +628,7 @@ return [
     Base\Notifier\Recipient\Recipient::class,
     Base\Notifier\Recipient\TimezoneRecipientInterface::class,
     Base\Notifier\Recipient\TimezoneRecipientTrait::class,
+    Base\Options::class,
     Base\Repository\Aliases::class,
     Base\Repository\Analytics\PageViews::class,
     Base\Repository\Analytics\PageVisits::class,

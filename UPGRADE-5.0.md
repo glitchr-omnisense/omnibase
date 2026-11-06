@@ -142,6 +142,20 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   (lesringostars-laravel: 142 of 192); an application's own binding still wins. In plain PHP, `Omnibridge\Container`
   builds them all from the declaration (tests/Services/graph-without-framework.php).
 
+## The options are the core's declaration (step F5e, slice 4b)
+
+- The schema of `base:` is `Base\Options` (data in `src/Resources/options.php`), no longer omnibridge/symfony's
+  hand-written tree. A Symfony site changes nothing: the same options, defaults, deprecations and `base.*` parameters
+  (`config:dump-reference base` is the same).
+- A Laravel site's `config/base.php` is validated when omnibridge/laravel boots: an option the schema does not know, or
+  of the wrong type, now stops the application with the message Symfony gives it (`Unrecognized option "x" under
+  "base"...`), where it was silently ignored. Every option the file leaves out takes the core's default, so
+  `config('base.x')` and `Runtime::parameters()` answer for each one; `%kernel.project_dir%` is the application's base
+  path, `%kernel.cache_dir%` omnibridge's cache folder (`omnibridge.cache_dir`, else `storage/framework/cache/omnibase`):
+  the obfuscator's identifier map, when `base.obfuscator.cache_dir` is not set, is kept there (it was
+  `storage/framework/cache/omnibase-obfuscator`).
+- An unset `BASE_TRADING_LIVE` means live under Laravel too, as under Symfony.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

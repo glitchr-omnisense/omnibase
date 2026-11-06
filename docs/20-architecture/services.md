@@ -115,6 +115,34 @@ Laravel's dispatcher as `getSubscribedEvents()` does on Symfony's.
 A notification's e-mail is the Twig bridge's `NotificationEmail` under Symfony; on a host without Symfony's
 Twig bridge (Laravel) it is `EmailComposer::compose()`'s, from `NotificationMessages::composed()`.
 
+## The options, one schema (F5e slice 4b)
+
+The options under `base:` are declared once too: `Base\Options` reads `src/Resources/options.php`, a schema in
+omnisense/omnibridge's `Omnibridge\Options\Processor` format. Each node has a `type` (`bool`, `int`, `float`,
+`scalar`, `enum` with its `values`, `mixed`, `array`), an `info`, a `default`, and may be `deprecated`, bounded
+(`min`, `max`) or nested: an `array` holds named `children` (completed with their defaults when `defaults` is true)
+or a `prototype` (a list, or a map by its `key` attribute; `default_children`, `default`, `deep_merging`).
+
+| Host | Reads it with | Gives |
+|---|---|---|
+| Symfony | omnibridge/symfony's `Options\SchemaTree` | BaseConfiguration's tree: `config:dump-reference base`, `debug:config base`, the `base.*` parameters |
+| Laravel | `Options::process()` on `config/base.php` when omnibridge/laravel boots | the config validated (Symfony's messages) and completed, placeholders resolved by the application |
+| Plain PHP | `Options::parameters()` + `Options::environmentParameters()` | `Omnibridge\Container`'s parameters |
+
+```php
+Base\Options::process(['guard' => ['min_delay' => 5]])['guard']['min_delay']; // 5
+Base\Options::parameters()['base.paginator.page_size'];                       // 10
+Base\Options::process(['guard' => ['min_delay' => -1]]);
+// Omnibridge\Options\InvalidOption: The value -1 is too small for path "base.guard.min_delay". Should be greater than or equal to 0
+```
+
+The defaults keep their placeholders (`%kernel.project_dir%/public/maintenance.lock`, `%env(APP_ENV)%`): each host
+resolves them (omnisense/omnibridge's `Options\Placeholders`). `Options::environment()` holds the variables a service
+reads through `%env()%` that need a value where the environment has none - Symfony's `env(NAME)` parameters, set by
+omnibridge/symfony where the group of services that reads them is compiled, and omnibridge/laravel's `%env()%`
+default. `tests/Options/OptionsHostsTest` gives the same configurations to Symfony's tree and to the Processor and
+expects the same values, refusals and deprecations.
+
 ## Left for later steps
 
 - F5b: the field and form types (the neutral form layer); the services that take Symfony's form factory.
