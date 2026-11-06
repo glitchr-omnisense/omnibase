@@ -10,6 +10,11 @@ use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Process\Process;
 
+/**
+ * @deprecated since 5.0 (plan "omnibase agnostic", step F5e, slice 3): its checks are Base\Console\Task\CacheClear's,
+ * printed through a Base\Console\Report. Kept for omnibridge/symfony's former cache:clear (its Legacy\, which omnibase
+ * 4.x runs); removed at 6.0.
+ */
 trait CacheClearTrait
 {
     protected function checkCache(SymfonyStyle $io): void

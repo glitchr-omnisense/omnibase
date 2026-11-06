@@ -80,6 +80,10 @@
  * 770 after step F5e, slice 2 (2026-11-05, +18): Base\Request\{Decision, Page, RouterPage, EventDecisions} and
  * Base\Request\Rule\{AccessControl, Accounts, Analytics, Approval, EntryPoint, Impersonation, Integrity, Kicked, LaunchPage,
  * Locale, MaintenancePage, Presence, Redirection, Verification}, the request rules of omnibridge/symfony's subscribers.
+ * 796 after step F5e, slice 3a (2026-11-06, +26): Base\Console\{Report, Commands} and Base\Console\Task\{TranslationTask,
+ * TranslationCrud, TranslationEntities, TranslationEnums, TranslationControllers, TranslationSettings, CacheClear, CacheClears,
+ * CacheClearSessions, DemoReset, UploaderEntities, UploaderImages, UploaderImagesCrop} and their inputs, the tasks of
+ * omnibridge/symfony's commands and omnibridge/laravel's artisan commands.
  */
 
 return [
@@ -126,7 +130,33 @@ return [
     Base\Cache\Abstract\AbstractLocalCacheWarmerInterface::class,
     Base\Cache\SimpleCache::class,
     Base\Cache\SimpleCacheInterface::class,
+    Base\Console\Commands::class,
     Base\Console\ConsoleInterface::class,
+    Base\Console\Report::class,
+    Base\Console\Task\CacheClear::class,
+    Base\Console\Task\CacheClearInput::class,
+    Base\Console\Task\CacheClearSessions::class,
+    Base\Console\Task\CacheClearSessionsInput::class,
+    Base\Console\Task\CacheClears::class,
+    Base\Console\Task\DemoReset::class,
+    Base\Console\Task\DemoResetInput::class,
+    Base\Console\Task\TranslationControllers::class,
+    Base\Console\Task\TranslationControllersInput::class,
+    Base\Console\Task\TranslationCrud::class,
+    Base\Console\Task\TranslationCrudInput::class,
+    Base\Console\Task\TranslationEntities::class,
+    Base\Console\Task\TranslationEntitiesInput::class,
+    Base\Console\Task\TranslationEnums::class,
+    Base\Console\Task\TranslationEnumsInput::class,
+    Base\Console\Task\TranslationSettings::class,
+    Base\Console\Task\TranslationSettingsInput::class,
+    Base\Console\Task\TranslationTask::class,
+    Base\Console\Task\UploaderEntities::class,
+    Base\Console\Task\UploaderEntitiesInput::class,
+    Base\Console\Task\UploaderImages::class,
+    Base\Console\Task\UploaderImagesCrop::class,
+    Base\Console\Task\UploaderImagesCropInput::class,
+    Base\Console\Task\UploaderImagesInput::class,
     Base\Contract\Framework::class,
     Base\Contract\Link::class,
     Base\Contract\Media::class,

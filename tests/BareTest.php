@@ -239,6 +239,25 @@ final class BareTest extends TestCase
     }
 
     /**
+     * omnibase's console tasks run where there is no framework (plan "omnibase agnostic", step F5e, slice 3):
+     * Base\Console\Task\* - the translation keys of the CRUD pages, entities, enumerations, controllers and settings,
+     * the sessions killed, cache:clear's lock and counter around the host's clear, demo:reset's refusals, the uploads'
+     * listings - and their Base\Console\Report, under bare --strict, their reports those of
+     * tests/Console/tasks-without-framework.expected.php.
+     */
+    public function testTheConsoleTasksRunWithoutAFramework(): void
+    {
+        $script = __DIR__.'/Console/tasks-without-framework.php';
+        [$status, $report] = self::bare(['--strict', $script]);
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+        self::assertSame(require __DIR__.'/Console/tasks-without-framework.expected.php', $run['result']);
+    }
+
+    /**
      * The core's services are available where there is no framework (plan "omnibase agnostic", step F5a;
      * Marco's answer 3): omnisense/omnibridge's Omnibridge\Container, built from Base\Services::definitions()
      * - the list Symfony's container and Laravel's read - and the host's contracts in plain PHP, resolves

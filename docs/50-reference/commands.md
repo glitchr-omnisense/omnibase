@@ -15,6 +15,24 @@ command, usable from scripts and tests.
 The usages below are `bin/console help <name>` in the harness, Symfony's common
 options (`-h`, `-q`, `-v`, `-e`, `--no-debug`...) left out.
 
+## Tasks and hosts (5.0)
+
+Since 5.0 (plan "omnibase agnostic", step F5e, slice 3) the logic of `translation:*`, `cache:clear`,
+`cache:clear:sessions`, `demo:reset` and `uploader:*` is a task of the core, `Base\Console\Task\*`: its
+options as a readonly input, what it says in a `Base\Console\Report` (a PSR-3 logger plus text, a success block,
+a table). omnibridge/symfony's command prints the Report on Symfony's console; omnibridge/laravel registers the same
+tasks as artisan commands (`php artisan translation:entities`; `cache:clear` is `omnibase:cache:clear` there, Laravel
+keeping its own). A script runs a task without a console:
+
+```php
+$report = (new TranslationEntities($translator, $localizer, $locales))->run(new TranslationEntitiesInput('src'));
+echo $report->text();           // plain, as --no-ansi prints it
+exit($report->status());
+```
+
+What a task needs of its host is given to it: the host's clear for `CacheClear` (a closure), its other commands
+for `DemoReset` (`Base\Console\Commands`), its routes for `TranslationControllers`.
+
 ## Summary
 
 | Command | What it does |
