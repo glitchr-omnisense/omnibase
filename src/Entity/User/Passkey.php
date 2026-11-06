@@ -4,9 +4,6 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Database\Attribute\Timestamp;
-use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Aaguid;
-use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Base64;
-use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\TrustPath;
 use Base\Repository\User\PasskeyRepository;
 
 use DateTimeInterface;
@@ -20,8 +17,9 @@ use Doctrine\ORM\Mapping as ORM;
  * same by any host (the Laravel twin maps it as Symfony does) and the entity
  * loads nothing of webauthn-lib. The columns are those the bundle made
  * (userPasskey, Version20260726133116 on lesringostars): the same names, and
- * the core's types Base\Database\Type\Passkey\{Base64, Aaguid, TrustPath}
- * declare the same SQL and write the same text as the bundle's `base64`,
+ * the types passkey_base64, passkey_aaguid and passkey_trust_path
+ * (omnibridge/doctrine's Passkey\{Base64, Aaguid, TrustPath}; named by their
+ * names, so the attributes read with no persistence installed) declare the same SQL and write the same text as the bundle's `base64`,
  * `aaguid` and `trust_path` - no migration, a row written by either read by
  * the other.
  *
@@ -46,7 +44,7 @@ class Passkey
     }
 
     /** The credential's id: bytes, unique to the authenticator. */
-    #[ORM\Column(type: Base64::NAME)]
+    #[ORM\Column(type: 'passkey_base64')]
     public string $publicKeyCredentialId;
 
     #[ORM\Column(type: "string")]
@@ -60,15 +58,15 @@ class Passkey
     public string $attestationType = 'none';
 
     /** @var array<string, mixed> [] for none, ["x5c" => [...]] for certificates (webauthn-lib's normal form) */
-    #[ORM\Column(type: TrustPath::NAME)]
+    #[ORM\Column(type: 'passkey_trust_path')]
     public array $trustPath = [];
 
     /** The authenticator's model, a UUID's text (all zeros: none said). */
-    #[ORM\Column(type: Aaguid::NAME, length: 36)]
+    #[ORM\Column(type: 'passkey_aaguid', length: 36)]
     public string $aaguid = '00000000-0000-0000-0000-000000000000';
 
     /** The public key, COSE-encoded bytes. */
-    #[ORM\Column(type: Base64::NAME)]
+    #[ORM\Column(type: 'passkey_base64')]
     public string $credentialPublicKey;
 
     /** The account's handle (its id, as text). */

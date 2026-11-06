@@ -102,6 +102,7 @@
  * methods only one persistence runs, Base\Database\Repository\{BackendOnly, UnsupportedQueryException}.
  * 862 after steps E2b and E2' (2026-11-06, +2): a to-one association compared by its key without a join,
  * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
+ * 863 after step F7a (2026-11-07, +1): the entities described with no persistence installed, Base\Database\Schema\EntitySchema.
  */
 
 return [
@@ -319,6 +320,7 @@ return [
     Base\Database\Repository\UnsupportedQueryException::class,
     Base\Database\Schema\Attributes::class,
     Base\Database\Schema\DiscriminatorRule::class,
+    Base\Database\Schema\EntitySchema::class,
     Base\Database\Schema\ExtensionRule::class,
     Base\Database\Schema\OrderColumnRule::class,
     Base\Database\Schema\TargetRule::class,

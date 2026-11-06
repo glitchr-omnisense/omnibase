@@ -10,6 +10,28 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the schema created from the description (plan "omnibase agnostic", step F7a)
+
+- `Base\Database\Schema\EntitySchema`: omnibase's entities and an application's described with no persistence
+  installed (`describe()`, `rules()`, `directories()`), and omnibase's column types as data (`columnTypes()`, an
+  `Omnibridge\Schema\Database\ColumnTypes`: the enumerations' and sets' values, `ALIASES` for `array` and the passkeys'
+  columns). The same description as omnibridge/doctrine's `Describer`, which feeds Doctrine; the same SQL as Doctrine's
+  types (SchemaDescriptionTest compares both).
+- `src/Resources/schema.php`: the schema file of omnisense/omnibridge's plain-PHP `vendor/bin/omnibridge-schema-create`
+  (`omnibridge:schema:create` in plain PHP; omnibridge/symfony's console and omnibridge/laravel's artisan read
+  `EntitySchema` too).
+- `Base\Database\Schema\TranslationRule::{LOCALE, FOREIGN_KEY, COLUMN_NAME, SALT}`: the translations' names, read
+  from omnibridge/doctrine's TranslatableWalker before (TranslationRule and VaultRule loaded it, so the description could
+  not be built without omnibridge/doctrine). `Base\Entity\Layout\Redirection` and `Base\Entity\User\Passkey` name their
+  column types by name (`utc_datetime_immutable`, `passkey_base64`, `passkey_aaguid`, `passkey_trust_path`) instead of
+  omnibridge/doctrine's types' constants, which reading their attributes loaded: the same mapping.
+- The proof: SchemaDescriptionTest - the core's description is the Doctrine bridge's; its column types declare what
+  Doctrine's declare (MySQL and SQLite); the database SchemaCreator makes is the one SchemaTool makes (SQLite in the
+  harness; MySQL on the two empty databases `OMNIBASE_SCHEMA_DATABASES` names: lesringostars, 132 tables, no
+  difference). BareTest - the core installed alone, no Doctrine at all, creates its 108 tables on SQLite and reads them
+  back as the description. SchemaCreateCommandTest - omnibridge/symfony's command prints SchemaCreator's statements and
+  refuses a database that has the tables.
+
 ### Fixed: the core uses no package it does not require (F6 slice 2's defect)
 
 - `Base\Database\Attribute\Hashify` named doctrine/common's `ClassUtils`, which the core 5.x does not require (an

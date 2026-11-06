@@ -4,7 +4,6 @@ namespace Base\Database\Schema;
 
 use Base\Database\Attribute\Vault;
 use Base\Database\Entity\Extension\TranslationInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Walker\TranslatableWalker;
 use Omnibridge\Schema\Builder;
 use Omnibridge\Schema\Builder\Draft;
 use Omnibridge\Schema\Builder\Rule;
@@ -40,7 +39,7 @@ final class VaultRule implements Rule
         }
 
         if (is_subclass_of($class->name, TranslationInterface::class) && $class->isRootEntity()) {
-            $name = $builder->naming()->classToTableName($class->rootEntityName).'_'.TranslatableWalker::SALT;
+            $name = $builder->naming()->classToTableName($class->rootEntityName).'_'.TranslationRule::SALT;
             $class->table['uniqueConstraints'][$name] ??= [];
             $class->table['uniqueConstraints'][$name]['columns'] = array_unique(array_merge($class->table['uniqueConstraints'][$name]['columns'] ?? [], [$column]));
         }

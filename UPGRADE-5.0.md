@@ -236,6 +236,19 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   `Settings`, `Hours\{ScopedWeeks, SpecialDays, WeekDays}`, `Thread\Comments`, `Analytics\Visits`... exist in 4.x as well;
   `User\Complaints` in 5.0 only.
 
+## The schema created from the description (step F7a)
+
+- Nothing to change: `omnibridge:schema:create` is new (`bin/console`, `php artisan`, or
+  `vendor/bin/omnibridge-schema-create --schema=vendor/omnisense/omnibase/src/Resources/schema.php` in plain PHP). It
+  creates the tables of a new site in an empty database and refuses one that has them; an existing database keeps its
+  migrations.
+- An application whose code reads `Omnibridge\Doctrine\Omnibase\Database\Walker\TranslatableWalker`'s constants to
+  build a schema can read `Base\Database\Schema\TranslationRule`'s (the same values) and do without omnibridge/doctrine.
+- An entity of an application that names a column type by a type class's constant
+  (`UtcDateTimeImmutableType::NAME`) loads that class when its attributes are read: name it by its name
+  (`'utc_datetime_immutable'`) for a description built with no persistence installed, as the core's entities now do.
+- doctrine/common is not required by the core: an application that uses its `ClassUtils` itself requires it.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only
