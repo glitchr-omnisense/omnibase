@@ -226,7 +226,7 @@ $views = new ClosureViews([
     EmailComposer::FRAME => static fn (array $c): string => '<p>'.$c['content'].'</p>',
 ]);
 
-$container = Container::fromDefinitions(Services::definitions(), $values, [
+$container = Container::fromDefinitions(Services::definitions(), $values, $hostServices = [
     ParameterBagInterface::class => new ArrayParameterBag($values),
     Views::class => $views,
     Urls::class => new PlainUrls(),
@@ -270,5 +270,8 @@ $result = [
 ];
 
 exec('rm -rf '.escapeshellarg($root));
+
+// What tests/Services/graph-without-framework.php builds the whole graph from: this host's parameters and services.
+$GLOBALS['omnibase_plain_host'] = ['values' => $values, 'services' => $hostServices];
 
 return $result;

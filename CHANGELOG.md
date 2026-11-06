@@ -10,6 +10,25 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the services are the core's declaration (plan "omnibase agnostic", step F5e, slice 4a)
+
+- `Base\Services::definitions()` holds every service of the core: the 192 definitions omnibridge/symfony's
+  `config/omnibase/services/*.php` registered (until 4a the list held 19), as data in `src/Resources/services/<group>.php`,
+  one group per former file (`Services::GROUPS`, `Services::group()`), with their tags, calls, decorations, factories,
+  parents, bindings and contracts (public or not, through which alias), what a host must have installed for each
+  (`requires`: Twig, omniauth, symfony/validator, the Symfony router, the request stack, Doctrine's entity manager... -
+  what its constructor cannot do without, directly or through another service) and the one environment it is for
+  (`environment`: the demonstration's). What only Symfony's container gives a service (its own ids: the router, the
+  cache pools, Twig's environment) is the definition's `symfony` part. `Services::applies()`, `id()`, `contracts()`,
+  `classOf()`, `find()`; the format is omnisense/omnibridge's `Omnibridge\Container\Declarations`
+  (docs/20-architecture/services.md).
+- omnibridge/symfony compiles each group in its place among its own definitions: lesringostars' compiled container is
+  the same before and after (dev and prod, every service's class, arguments, calls and tags, the aliases).
+- `tests/Services/graph-without-framework.php` (BareTest): `Omnibridge\Container` alone builds the whole graph on the core
+  installed alone - every definition that applies there built (91), the abstract parents set apart, each one left out
+  saying what it requires; nothing of the framework loaded. `tests/ServicesTest`: every public service and contract of the
+  declaration under Symfony.
+
 ### Changed
 
 - `composer.json`: `type: library`; `require` is the agnostic core's (§1.4 of the plan): doctrine/orm, dbal,

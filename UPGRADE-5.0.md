@@ -130,6 +130,18 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   entity:discriminator, app:notifier, notifier:mail:test, user:notifications, thread:publishable, trash:purge,
   user:create); base:mailer:trap, timemachine:* and doctrine:* stay Symfony's.
 
+## The services are the core's declaration (step F5e, slice 4a)
+
+- `Base\Services::definitions()` lists every service of the core (192), not only the 19 of step F5a; its definitions
+  are grouped (`Services::group()`), and a definition may give its class through a `parent`, its arguments by position,
+  `requires`, `environment`, `tags`, `calls`, `decorates`, `bind` and a `symfony` part. Code that read the list's
+  `class` and `contracts` as plain values reads them through `Services::classOf()` and `Services::contracts()` (a contract
+  may now carry its options: `'alias' => ['public' => true, 'target' => ...]`).
+- Under Symfony nothing changes: the same services, ids, arguments, tags and aliases (omnibridge/symfony compiles the
+  declaration). Under Laravel, omnibridge/laravel binds every declared service that applies and can be built there
+  (lesringostars-laravel: 142 of 192); an application's own binding still wins. In plain PHP, `Omnibridge\Container`
+  builds them all from the declaration (tests/Services/graph-without-framework.php).
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only
