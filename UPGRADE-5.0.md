@@ -265,6 +265,26 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
 - `EntityHydrator::getOriginalEntityData()` reads a PreUpdate's changes from any lifecycle arguments that give them
   (`getEntityChangeSet()`), as from Doctrine's PreUpdateEventArgs.
 
+## The persistence in one click (step F7d)
+
+- Nothing to change with one persistence installed: it is used.
+- With omnibridge/doctrine and omnibridge/eloquent both installed, name one, or the container refuses to compile (the
+  application refuses to boot under Laravel):
+
+  ```yaml
+  # config/packages/base.yaml (config/base.php under Laravel: 'persistence' => 'doctrine')
+  base:
+      persistence: doctrine     # or eloquent; '%env(OMNIBASE_PERSISTENCE)%' is read when the container is compiled
+  ```
+
+  Where the option names none, the environment variable `OMNIBRIDGE_PERSISTENCE` may.
+- On `eloquent`, what a site's code takes by the core's contracts (`UnitOfWork`, `Backend`, `Repositories`, the
+  repository interfaces, `Users` as the firewall's entity provider) is omnibridge/eloquent's. What it takes by Doctrine's
+  service ids (doctrine.orm.entity_manager, a repository by its class, `App\Repository\*` extending omnibridge/doctrine's)
+  stays Doctrine's: type on the interfaces to follow the switch.
+- An attribute of an application that reads values without the unit of work of its event keeps Doctrine's metadata;
+  pass `$event->unitOfWork` to the helpers (step F7c) to follow the switch.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

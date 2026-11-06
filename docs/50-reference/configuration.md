@@ -99,6 +99,9 @@ base:
 
     # Automatically clear cache in case of integrity issue
     autoclear:            true
+
+    # The persistence: doctrine or eloquent (null: the only one installed; required when both are)
+    persistence:          null
     database:
 
         # Fallback warning disable in case there is no fallback
@@ -630,6 +633,7 @@ base:
 | Option | Type | Default | Effect |
 |---|---|---|---|
 | `autoclear` | bool | `true` | On the first `cache:clear` of an installation, the command runs `cache:clear` a second time in a process of its own (`CacheClearTrait::doubleCacheClear()`); in debug, when webpack's `entrypoints.json` changed during a request, `WebpackTagRenderer` clears the cache instead of throwing "Entrypoint ... got modified". |
+| `persistence` | scalar | `null` | The persistence the core's contracts answer from (plan "omnibase agnostic", step F7d): `doctrine` (omnibridge/doctrine) or `eloquent` (omnibridge/eloquent); null runs on the only one installed. With both installed it must name one (or the environment variable `OMNIBRIDGE_PERSISTENCE`): the container refuses to compile otherwise. Read when the container is compiled. omnibridge/eloquent's docs/hosts.md says what each host wires. |
 
 ## `database`
 

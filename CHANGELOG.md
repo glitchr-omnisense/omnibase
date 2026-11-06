@@ -10,6 +10,22 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the persistence in one click (plan "omnibase agnostic", step F7d)
+
+- The option `base.persistence` (`doctrine`, `eloquent`; null: the only one installed), read by every host through
+  omnisense/omnibridge's `Persistences`: with omnibridge/doctrine and omnibridge/eloquent both installed it must name one
+  (or the environment variable `OMNIBRIDGE_PERSISTENCE`), refused aloud otherwise (risk R8). omnibridge/symfony and
+  omnibridge/laravel answer the core's contracts from omnibridge/eloquent when it is chosen; in plain PHP,
+  `Omnibridge\Container::fromDefinitions()` with the parameter `persistence`.
+- The last behaviours' reads of Doctrine's metadata on the persistence's shapes (`EntityValues::fieldName()`,
+  `declaringEntity()`): `#[OrderColumn]`'s field name (its event's unit of work), `#[Uploader]`'s declaring class and its
+  static readers (`getPublic()`, `get()`: the host's unit of work, `Runtime`), `#[Hashify]` (its hooks' unit of work,
+  `isValid()` the host's) and `#[Countify]` (its hooks'; `getCount()` takes one). On Doctrine, the same answers (the
+  shapes are its metadata's); without any unit of work, ClassMetadataManipulator's, as before.
+- `AttributeReader::classAttributesOf()`: a class's own attributes of a type, the reader's where one was made, read from
+  the class otherwise: the trash and vault scopes (`#[Trasheable]`, `#[Vault]`) work where no reader is (plain PHP).
+- The harness switch (`docker/compose.eloquent.yml`) keeps the harness's kernels on Doctrine (`OMNIBRIDGE_PERSISTENCE`).
+
 ### Changed: the behaviours on any persistence (plan "omnibase agnostic", step F7c, second part)
 
 - `Base\Database\Entity\EntityValues`: an entity's values on the persistence's shapes (what omnibridge/doctrine's

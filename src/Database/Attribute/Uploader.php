@@ -19,6 +19,7 @@ use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Uid\Uuid;
 
 
+use Base\Database\Entity\EntityValues;
 use function is_file;
 
 /**
@@ -247,7 +248,22 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      */
     public function getDeclaringEntity(mixed $entity, string $fieldName)
     {
+        // On the shapes of the unit of work of its hook, else the host's (plan "omnibase agnostic", step F7d);
+        // ClassMetadataManipulator's where there is none.
+        $unitOfWork = $this->unitOfWork ?? self::hostUnitOfWork();
+        if (null !== $unitOfWork) {
+            return null === $entity ? null : EntityValues::of($unitOfWork)->declaringEntity($entity, $fieldName);
+        }
+
         return $this->getClassMetadataManipulator()->getDeclaringEntity($entity, $fieldName);
+    }
+
+    /** The host's unit of work, what the static readers (getPublic(), get()) read the field's value on. */
+    private static function hostUnitOfWork(): ?\Omnibridge\Persistence\UnitOfWork
+    {
+        $unitOfWork = \Omnibridge\Runtime::find(\Omnibridge\Persistence\UnitOfWork::class);
+
+        return $unitOfWork instanceof \Omnibridge\Persistence\UnitOfWork ? $unitOfWork : null;
     }
 
     public function getPath(mixed $entity, string $fieldPath, ?string $uuid = null): ?string
@@ -303,7 +319,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             return null;
         }
 
-        $field = self::getFieldValue($entity, $fieldName);
+        $field = self::getFieldValue($entity, $fieldName, self::hostUnitOfWork());
         if (!$field) {
             return null;
         }
@@ -542,7 +558,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         $drive = $that->getFlysystem()->getDrive($that->storage);
         $local = $drive->capabilities()->local;
 
-        $fieldValue = self::getFieldValue($entity, $fieldName);
+        $fieldValue = self::getFieldValue($entity, $fieldName, self::hostUnitOfWork());
         if (!$fieldValue) {
             return null;
         }

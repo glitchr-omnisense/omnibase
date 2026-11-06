@@ -10,6 +10,7 @@ use Base\Database\Mapping\EntityShape;
 use Base\Database\Type\Enumerations;
 use Base\Database\Type\SetType;
 
+use Base\Database\Entity\EntityValues;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
 use Omnibridge\Persistence\Lifecycle;
@@ -104,7 +105,7 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
         }
         [$isToMany, $set] = $kind;
 
-        $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
+        $property = EntityValues::of($event->unitOfWork)->fieldName($entity, $property) ?? $property;
         $reflProp = self::reflect($shape->className(), $property);
         if (!$reflProp->isInitialized($entity)) {
             return null; // skip if the property is not initialized
@@ -174,7 +175,7 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
             return;
         }
 
-        $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
+        $property = EntityValues::of($event->unitOfWork)->fieldName($entity, $property) ?? $property;
         try {
             $entityValue = self::reflect($shape->className(), $property)->getValue($entity) ?? [];
         }

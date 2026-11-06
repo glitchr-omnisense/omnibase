@@ -530,6 +530,27 @@ class AttributeReader extends AbstractLocalCache
         return $attributes;
     }
 
+    /**
+     * A class's own attributes of a type: the reader's (its cache) where one was made, else read from the class itself -
+     * in plain PHP, where the reader is not made (it is built on Doctrine's metadata), the persistence's scopes still
+     * read #[Trasheable] and #[Vault] (plan "omnibase agnostic", step F7d).
+     *
+     * @template T of object
+     *
+     * @param class-string<T> $attribute
+     *
+     * @return list<T>
+     */
+    public static function classAttributesOf(string $class, string $attribute): array
+    {
+        $reader = self::hasInstance() ? self::getInstance(false) : null;
+        if ($reader instanceof self) {
+            return array_values($reader->getClassAttributes($class, $attribute));
+        }
+
+        return array_map(static fn (\ReflectionAttribute $declared): object => $declared->newInstance(), (new \ReflectionClass($class))->getAttributes($attribute));
+    }
+
     public function getClassAttributes(mixed $classNameOrMetadataOrRefl, mixed $attributeNames = null, array $attributeTargets = []): array
     {
         $attributeNames = $this->normalizeNames($attributeNames);
