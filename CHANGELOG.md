@@ -57,6 +57,34 @@ both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md
   gate (`Omnibridge\Laravel\Auth\Policies`), its `AccessRestriction` middleware and its WelcomeFlash ask them too.
   Under 4.x the bridges keep their former code in `Legacy\` folders.
 
+### Added: the request rules (plan "omnibase agnostic", step F5e, slice 2, 2026-11-05)
+
+- **`Base\Request\Rule\*`**, the rules omnibridge/symfony's subscribers held, one class per rule, each returning a
+  **`Base\Request\Decision`** (go on, redirect to a route or an address, refuse with a status; with notices,
+  cookies, the account signed out, the address kept for after the sign-in, the profiler off), on a
+  **`Base\Request\Page`** (the host's facts: the route and its family, the address; `RouterPage` answers it from
+  omnibase's router); tested in `bare` (tests/Request/rules-without-framework.php, BareTest):
+  - the account rules, in SecuritySubscriber's order (`Accounts`): `Impersonation` (the reminder), `Kicked` (to the
+    sign-out request, the address kept), `Presence` (the poke and its write, before the page and on the answer),
+    `Verification` (its notice), `Approval` (an administrator's account, or every one with
+    `base.user.register.autoapprove`);
+  - `Locale`: the page's language (address, the member's, LANG, the browser's, the site's), LANG remembered, the
+    time zone from its cookie (LocalizerSubscriber's `choose()` is `Locale::choose()`);
+  - `Integrity` (the session's secret and connection checksum; IntegritySubscriber, still registered by nothing),
+    `Analytics` (the back office's figures, Google Analytics' labels), `Redirection` (an address not found looked up
+    in the redirections: `Base\Service\Redirections::responseFor()` asks it);
+  - `MaintenancePage`, `LaunchPage`: the maintenance and launch pages (`MaintenanceProvider::redirectOnDeny()` and
+    `Launcher::redirectOnDeny()` ask them, deprecated until 6.0, through `Base\Request\EventDecisions`);
+  - `AccessControl` and `EntryPoint`: the pages kept for some accounts by path (Symfony's `access_control` as data)
+    and a refused visitor sent to the sign-in (omnibridge/symfony's LoginFormAuthenticator::start() asks it).
+- The redirections written in the former subscriber for an unverified account (to the profile) and an account not
+  approved (to `security_pendingForApproval` and back) are not ported: none could happen (the first was reached
+  only where its own condition chose the notice, the others only on pages their exceptions let through).
+- omnibridge/symfony's SecuritySubscriber, LocalizerSubscriber, IntegritySubscriber and AnalyticsSubscriber ask
+  them; omnibridge/laravel's middleware too (`Http\Localize`, `Http\AccessControl`, `Auth\Middleware\{AccountRules,
+  SitePages}`, the 404's redirection), whose own copies of the presence and language rules are gone.
+  `tests/Agnostic.php` 770, `tests/Foundation.php` 833.
+
 ### Changed: the entities reach no service (plan "omnibase agnostic", step E1, 2026-11-04)
 
 - `Widget\{Page, Link, Attachment}::__toLink()` name no routing component: their reference type defaults to
