@@ -87,7 +87,7 @@ class Timestamp extends AbstractAttribute implements ExtensionOptionInterface
             return;
         }
 
-        $this->setFieldValue($entity, $property, $this->getValue());
+        $this->setFieldValue($entity, $property, $this->getValue(), $event->unitOfWork);
     }
 
     /**
@@ -101,6 +101,6 @@ class Timestamp extends AbstractAttribute implements ExtensionOptionInterface
             return;
         }
 
-        $this->setFieldValue($entity, $property, $this->getValue());
+        $this->setFieldValue($entity, $property, $this->getValue(), $event->unitOfWork);
     }
 }

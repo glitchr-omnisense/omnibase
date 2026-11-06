@@ -46,8 +46,8 @@ class Randomize extends AbstractAttribute implements ExtensionOptionInterface
      */
     public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
     {
-        if ($this->getFieldValue($entity, $property) === null) {
-            $this->setFieldValue($entity, $property, rand_str($this->length, $this->chars));
+        if ($this->getFieldValue($entity, $property, $event->unitOfWork) === null) {
+            $this->setFieldValue($entity, $property, rand_str($this->length, $this->chars), $event->unitOfWork);
 
             if ($event->unitOfWork->changes($entity)) {
                 $event->unitOfWork->recompute($entity);

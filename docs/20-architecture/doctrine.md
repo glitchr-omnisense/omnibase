@@ -186,6 +186,32 @@ for an entity or a class (a `ClassMetadata` being built is read as it stands), a
 defaults and identifiers. `OrderColumnBackend` keeps a lazy collection's positions until it is read
 (Doctrine's PersistentCollection); without it the property is sorted when loaded.
 
+### The entity's values, the old entity and its changes (step F7c)
+
+`AbstractAttribute`'s helpers `getFieldValue()`, `setFieldValue()`, `getPropertyValue()`,
+`setPropertyValue()`, `getEntityChangeSet()`, `getOriginalEntityData()`, `getOldEntity()`,
+`getOldEntityData()`, `getEntityFromData()` and `getPropertyOwnerRepository()` take, last, the unit of
+work of the hook's event. Given one whose persistence registered its shapes, they answer on
+omnisense/omnibridge's contracts, whichever persistence keeps the entity:
+
+- the values through `Base\Database\Entity\EntityValues` (the shapes in place of Doctrine's metadata:
+  a mapped property read and written as it is held, an enumeration field as its backing value, any other
+  through Symfony's property accessor, paths and `translations` followed; what ClassMetadataManipulator
+  does);
+- the changes: `recompute()` then `changes()`; the old entity: `Snapshots::original()`, the identifier
+  beside, the changes' former values over it (a persistence without `Snapshots` is refused with
+  `UnsupportedBehaviourException`);
+- the slug's holder: the persistence's `Repositories`.
+
+`#[Slugify]` and `#[Uploader]` pass their event's unit of work; `#[Timestamp]`, `#[Blameable]`,
+`#[Randomize]` and `#[GenerateUuid]` too. Without one the helpers keep omnibridge/doctrine's
+ClassMetadataManipulator, as before (an application's attribute calling them statically). Still read
+on Doctrine's metadata where Doctrine is installed (step F7d makes them neutral): `#[OrderColumn]`'s
+field name, `#[Uploader]`'s declaring class (its path) and static readers (`getPublic()`, `get()`),
+`#[Hashify]` and `#[Countify]`'s helpers. omnibridge/eloquent runs the behaviours on its unit of work
+(its relay, its parts, its listeners' adapters: its docs/behaviours.md); the core's behaviour tests run on
+both backends (docs/30-operations/harness.md, the harness switch).
+
 ### The core's services on the unit of work
 
 Plan "omnibase agnostic", step F2d. The core's services, listeners, stores, controllers and commands

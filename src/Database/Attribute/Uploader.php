@@ -136,12 +136,19 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     protected array $ancestorEntity = [];
 
     /**
+     * The unit of work of the hook running (plan "omnibase agnostic", step F7c), set as each hook starts: the values
+     * and the old entity are asked of it, whichever persistence keeps the entity. Null when a method is called
+     * outside a hook: Doctrine's metadata, as before.
+     */
+    protected ?\Omnibridge\Persistence\UnitOfWork $unitOfWork = null;
+
+    /**
      * The neutral hook (plan "omnibase agnostic", step F2b): a new entity reached by cascade gets its files
      * stored now; an entity updated keeps what it was, for preUpdate.
      */
     public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
     {
-        $unitOfWork = $event->unitOfWork;
+        $unitOfWork = $this->unitOfWork = $event->unitOfWork;
         if (!$unitOfWork->contains($entity)) {
             return;
         }
@@ -151,7 +158,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             // pictures) is scheduled after preFlush, where uploads happen: its
             // files are still File instances here. Store them now, or the row
             // gets no path and the second-level cache chokes on the File.
-            $value = self::getFieldValue($entity, $property);
+            $value = self::getFieldValue($entity, $property, $this->unitOfWork);
             $pending = array_filter(is_array($value) ? $value : [$value], fn ($file) => $file instanceof \SplFileInfo);
             if ($pending && $this->uploadFiles($entity, null, $property)) {
                 $unitOfWork->recompute($entity);
@@ -160,7 +167,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             return;
         }
 
-        $this->ancestorEntity[spl_object_id($entity)] = $this->getOldEntity($entity);
+        $this->ancestorEntity[spl_object_id($entity)] = $this->getOldEntity($entity, $unitOfWork);
     }
 
     protected function getConfig(): array
@@ -592,7 +599,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      */
     protected function uploadFiles($entity, $oldEntity, ?string $fieldName = null)
     {
-        $new = self::getFieldValue($entity, $fieldName);
+        $new = self::getFieldValue($entity, $fieldName, $this->unitOfWork);
 
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
@@ -604,7 +611,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         // File instances are filtered below, in case of UOW manipulation..
-        $old = array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
+        $old = array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName, $this->unitOfWork) : self::getFieldValue($oldEntity, $fieldName, $this->unitOfWork);
         $oldList = is_array($old) ? $old : [$old];
         //$oldListStringable = array_filter(array_map(fn ($e) => is_stringeable($e), $oldList));
 
@@ -620,7 +627,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
 
         // Nothing to upload, empty field..
         if ($newList === null) {
-            self::setPropertyValue($entity, $fieldName, null);
+            self::setPropertyValue($entity, $fieldName, null, $this->unitOfWork);
             return true;
         }
 
@@ -687,7 +694,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             $fileList[] = basename($path);
         }
 
-        self::setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
+        self::setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList, $this->unitOfWork);
         return true;
     }
 
@@ -700,7 +707,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      */
     protected function deleteFiles($entity, $oldEntity, string $fieldName)
     {
-        $new = self::getFieldValue($entity, $fieldName);
+        $new = self::getFieldValue($entity, $fieldName, $this->unitOfWork);
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
@@ -710,7 +717,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
             return false;
         }
 
-        $old = $entity !== null && array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName) : self::getFieldValue($oldEntity, $fieldName);
+        $old = $entity !== null && array_key_exists(spl_object_id($entity), $this->ancestorEntity) ? self::getFieldValue($this->ancestorEntity[spl_object_id($entity)], $fieldName, $this->unitOfWork) : self::getFieldValue($oldEntity, $fieldName, $this->unitOfWork);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 
@@ -763,11 +770,12 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      */
     public function onPreFlush(Lifecycle\PreFlush $event, object $entity, ?string $property = null): void
     {
+        $this->unitOfWork = $event->unitOfWork;
         try {
             $this->uploadFiles($entity, null, $property);
         } catch (Exception $e) {
             $this->deleteFiles(null, $entity, $property);
-            self::setFieldValue($entity, $property, null);
+            self::setFieldValue($entity, $property, null, $this->unitOfWork);
 
             throw $e;
         }
@@ -781,17 +789,18 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      */
     public function onPreUpdate(Lifecycle\PreUpdate $event, ?string $property = null): void
     {
+        $this->unitOfWork = $event->unitOfWork;
         $entity = $event->entity;
-        $oldEntity = $this->getOldEntity($entity);
+        $oldEntity = $this->getOldEntity($entity, $this->unitOfWork);
         try {
             if ($this->uploadFiles($entity, $oldEntity, $property)) {
                 $this->deleteFiles($entity, $oldEntity, $property);
             }
         } catch (Exception $e) {
             $this->deleteFiles($oldEntity, $entity, $property);
-            $old = self::getFieldValue($oldEntity, $property);
+            $old = self::getFieldValue($oldEntity, $property, $this->unitOfWork);
 
-            self::setFieldValue($entity, $property, $old);
+            self::setFieldValue($entity, $property, $old, $this->unitOfWork);
         }
 
         $event->recompute();
@@ -800,6 +809,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
     /** The neutral hook (plan "omnibase agnostic", step F2b): the files of a removed entity deleted. */
     public function onPostRemove(Lifecycle\PostRemove $event, ?string $property = null): void
     {
+        $this->unitOfWork = $event->unitOfWork;
         $this->deleteFiles(null, $event->entity, $property);
     }
 }

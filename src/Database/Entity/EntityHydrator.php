@@ -811,8 +811,10 @@ class EntityHydrator implements EntityHydratorInterface
 
         $changes = match (true) {
             $eventOrEntity instanceof PreUpdate => $eventOrEntity->changes(),
-            // Doctrine's PreUpdateEventArgs, by name (deprecated until 6.0).
-            is_object($eventOrEntity) && is_a($eventOrEntity, 'Doctrine\ORM\Event\PreUpdateEventArgs') => $eventOrEntity->getEntityChangeSet(),
+            // Doctrine's PreUpdateEventArgs, by name (deprecated until 6.0), and any lifecycle arguments that carry a
+            // PreUpdate's changes the same way (omnibridge/eloquent's, for the entity dispatchers typed on
+            // doctrine/persistence's LifecycleEventArgs; plan "omnibase agnostic", step F7c).
+            is_object($eventOrEntity) && (is_a($eventOrEntity, 'Doctrine\ORM\Event\PreUpdateEventArgs') || (method_exists($eventOrEntity, 'getObject') && method_exists($eventOrEntity, 'getEntityChangeSet'))) => $eventOrEntity->getEntityChangeSet(),
             default => [],
         };
         foreach ($changes as $field => $data) {

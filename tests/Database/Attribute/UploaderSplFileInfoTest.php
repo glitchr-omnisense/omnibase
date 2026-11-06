@@ -6,6 +6,7 @@ use Base\Database\Attribute\Uploader;
 use Base\Entity\Layout\Widget\Page;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\Database\Backend\BothBackends;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -20,6 +21,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 final class UploaderSplFileInfoTest extends KernelTestCase
 {
+    use BothBackends;
+
     /** A 1x1 transparent PNG. */
     private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
@@ -67,15 +70,18 @@ final class UploaderSplFileInfoTest extends KernelTestCase
         self::assertDoesNotMatchRegularExpression('~instanceof File\\b|new File\\(~', $source);
     }
 
-    public function testAPlainSplFileInfoIsUploadedAndComesBackAsAFile(): void
+    /** On both persistences (BothBackends, plan "omnibase agnostic", step F7c).
+     *
+     * @dataProvider backends
+     */
+    public function testAPlainSplFileInfoIsUploadedAndComesBackAsAFile(string $backend): void
     {
         if (!class_exists('App\\Kernel')) {
             self::markTestSkipped('Requires the host application kernel (the omnibase harness, or an application\'s suite).');
         }
 
         self::bootKernel();
-        /** @var EntityManagerInterface $em */
-        $em = static::getContainer()->get('doctrine')->getManager();
+        $em = $this->unitOfWork($backend);
 
         $page = new Page('C3d upload', 'c3d-upload-'.bin2hex(random_bytes(3)));
         $page->setThumbnail(new \SplFileInfo($this->png()));

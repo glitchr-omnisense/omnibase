@@ -103,6 +103,7 @@
  * 862 after steps E2b and E2' (2026-11-06, +2): a to-one association compared by its key without a join,
  * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
  * 863 after step F7a (2026-11-07, +1): the entities described with no persistence installed, Base\Database\Schema\EntitySchema.
+ * 864 after step F7c, second part (2026-11-07, +1): an entity's values on the persistence's shapes, Base\Database\Entity\EntityValues.
  */
 
 return [
@@ -283,6 +284,7 @@ return [
     Base\Database\Entity\EntityExtensionInterface::class,
     Base\Database\Entity\EntityHydrator::class,
     Base\Database\Entity\EntityHydratorInterface::class,
+    Base\Database\Entity\EntityValues::class,
     Base\Database\Entity\Extension\AliasInterface::class,
     Base\Database\Entity\Extension\AliasTrait::class,
     Base\Database\Entity\Extension\TranslatableAliasTrait::class,

@@ -101,12 +101,12 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
                 continue;
             }
 
-            $invalidSlugs[] = $this->getFieldValue($entity2, $property);
+            $invalidSlugs[] = $this->getFieldValue($entity2, $property, $this->unitOfWork);
         }
 
         $firstEntity = begin($candidateEntities);
         if ($firstEntity === $entity) {
-            $firstSlug = $this->getFieldValue($entity, $property);
+            $firstSlug = $this->getFieldValue($entity, $property, $this->unitOfWork);
             $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
@@ -124,7 +124,7 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
     {
         // Check if field already set.. get field value or by default class name
         if (!$input && $this->referenceColumn) {
-            $input = $this->getPropertyValue($entity, $this->referenceColumn) ?? $this->getFieldValue($entity, $this->referenceColumn);
+            $input = $this->getPropertyValue($entity, $this->referenceColumn, $this->unitOfWork) ?? $this->getFieldValue($entity, $this->referenceColumn, $this->unitOfWork);
         }
         if (!$input && $this->nullable) {
             return null;
@@ -166,7 +166,7 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
         /**
          * @var ServiceRepositoryInterface $this
          */
-        $repository = $this->getPropertyOwnerRepository($entity, $property);
+        $repository = $this->getPropertyOwnerRepository($entity, $property, $this->unitOfWork);
         $defaultSlug = $this->slug($entity, $defaultInput);
         $slug = $defaultSlug;
         
@@ -218,6 +218,13 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
     protected ?SlugifyBackend $backend = null;
 
     /**
+     * The unit of work of the running flush (plan "omnibase agnostic", step F7c), set by onOnFlush() with the backend:
+     * the values, the old entity and the repositories are asked of it, whichever persistence keeps the entity. Null
+     * outside a flush (slug() called alone): Doctrine's metadata, as before.
+     */
+    protected ?\Omnibridge\Persistence\UnitOfWork $unitOfWork = null;
+
+    /**
      * Whether the database still holds the unique index of before on the
      * column alone: an application that has not run its migration yet keeps
      * slugs unique for all types (a second "desserts" would be refused by
@@ -255,18 +262,19 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
     public function onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property = null): void
     {
         $this->backend = $this->backend($event, SlugifyBackend::class);
+        $this->unitOfWork = $event->unitOfWork;
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
         if ($this->sync) {
-            $slug = $this->getFieldValue($entity, $property);
+            $slug = $this->getFieldValue($entity, $property, $this->unitOfWork);
 
-            $oldEntity = $this->getOldEntity($entity);
-            $oldSlug = $this->getFieldValue($oldEntity, $property);
+            $oldEntity = $this->getOldEntity($entity, $this->unitOfWork);
+            $oldSlug = $this->getFieldValue($oldEntity, $property, $this->unitOfWork);
 
             if ($slug == $oldSlug) {
                 
                 $labelModified = ! $this->referenceColumn ? null :
-                    $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
+                    $this->getPropertyValue($oldEntity, $this->referenceColumn, $this->unitOfWork) !== $this->getPropertyValue($entity, $this->referenceColumn, $this->unitOfWork);
 
                 if ($labelModified) {
                     $slug = $this->getSlug($entity, $property);
@@ -274,11 +282,11 @@ class Slugify extends AbstractAttribute implements ExtensionOptionInterface
             }
 
         } else {
-            $currentSlug = $this->getFieldValue($entity, $property);
+            $currentSlug = $this->getFieldValue($entity, $property, $this->unitOfWork);
             $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
         }
 
-        $this->setFieldValue($entity, $property, $slug);
+        $this->setFieldValue($entity, $property, $slug, $this->unitOfWork);
         if ($event->unitOfWork->changes($entity)) {
             $event->unitOfWork->recompute($entity);
         }

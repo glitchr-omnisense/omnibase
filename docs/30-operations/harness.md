@@ -212,6 +212,20 @@ F2d: 686 of 898 (`Base\Database\UnitOfWorks`, the backends `RowLocks`, `Conditio
 `EntityCache`, the `Identities` interface); after step F2e: 690 of 902 (the scopes
 `TrashScope` and `VaultScope`, `BulkDeletes`, `Pages`).
 
+## The behaviours on both backends: `compose.eloquent.yml` (step F7c)
+
+```sh
+docker compose -f compose.yml -f compose.checkouts.yml -f compose.eloquent.yml run --rm omnibase test
+```
+
+The overlay mounts omnibridge/eloquent's checkout (`${OMNIBRIDGE:-../../../omnibridge}/eloquent`, with its own
+`vendor/`) and sets `OMNIBASE_ELOQUENT`, the harness switch: each test using `Tests\Base\Database\Backend\BothBackends`
+(OrderColumnLazyTest, SlugifyPerTypeTest, UploaderSplFileInfoTest, EmptyTrashTest, ThreadParticipantsTest,
+BehaviourBackendsTest) runs once on Doctrine and once on omnibridge/eloquent, on the same database, the same calls
+through omnisense/omnibridge's UnitOfWork. Without the overlay the Eloquent cases are skipped, saying so. The package's
+own behaviour parity (every row written on both) runs here too:
+`test --filter WriteParityTest /srv/omnibridge/eloquent/tests/Harness/WriteParityTest.php`.
+
 ## doctrine/orm as released
 
 Since 4.0 the image's doctrine/orm is as released: glitchr/base-plugin, which

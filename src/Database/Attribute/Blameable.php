@@ -65,7 +65,7 @@ class Blameable extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         $user = ($this->impersonator ? $this->getImpersonator() : $this->getUser());
-        $this->setFieldValue($entity, $property, $user);
+        $this->setFieldValue($entity, $property, $user, $event->unitOfWork);
     }
 
     /**
@@ -80,6 +80,6 @@ class Blameable extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         $user = ($this->impersonator ? $this->getImpersonator() : $this->getUser());
-        $this->setFieldValue($entity, $property, $user);
+        $this->setFieldValue($entity, $property, $user, $event->unitOfWork);
     }
 }
