@@ -49,11 +49,10 @@ $values += [
     'kernel.debug' => false,
     'kernel.project_dir' => sys_get_temp_dir().'/omnibase-bare-graph',
     'kernel.cache_dir' => sys_get_temp_dir().'/omnibase-bare-graph/cache',
-    'env(COLLAB_TICKET_SECRET)' => '',
-    'env(COLLAB_RELAY_WS_URL)' => '',
 ];
-// The base.* options a configuration that says nothing gives (base-parameters.php).
-$values += require __DIR__.'/base-parameters.php';
+// The base.* options a configuration that says nothing gives, and the environment's defaults (env(COLLAB_*),
+// env(BASE_TRADING_LIVE)): the core's declaration of its options (Base\Options, step F5e slice 4b).
+$values += Base\Options::parameters() + Base\Options::environmentParameters();
 
 // What the host gives that this one has no use for until a service works: each interface a constructor of the graph asks
 // (by type, or by an argument's id) that the declaration does not define and the host did not give, as a stand-in.
