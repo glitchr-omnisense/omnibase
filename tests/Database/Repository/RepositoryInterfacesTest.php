@@ -78,6 +78,8 @@ final class RepositoryInterfacesTest extends KernelTestCase
         Hours\ScopedWeeks::class => Hours\ScopedWeekRepository::class,
         Hours\SpecialDays::class => Hours\SpecialDayRepository::class,
         Hours\WeekDays::class => Hours\WeekDayHoursRepository::class,
+        // Step E2' (plan "omnibase agnostic").
+        User\Complaints::class => User\ComplaintRepository::class,
     ];
 
     public function testEachRepositoryImplementsItsInterface(): void

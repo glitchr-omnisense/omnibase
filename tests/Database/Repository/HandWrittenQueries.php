@@ -32,9 +32,12 @@ use Doctrine\ORM\Query;
  * give, in order (R12: a rewritten query must not change its rows silently). lesringostars'
  * FinderParityTest holds a copy, run on the site's data.
  *
+ * Since step E2b, Comments::findVisible()/countVisible() too, on the thread compared by its key
+ * (Finder\Key): the thread of the newest comment - in the core's harness, one in the trash - and the
+ * visitors' book.
+ *
  * Not here: the methods declared #[BackendOnly('doctrine')] (native SQL, a bulk UPDATE), which
- * keep their query, and Comments::findVisible()/countVisible(), not rewritten (see the plan's
- * inventory, ~/Sites/.agent-briefs/e2/inventory.md).
+ * keep their query (see the plan's inventory, ~/Sites/.agent-briefs/e2/inventory.md).
  */
 final class HandWrittenQueries
 {
@@ -43,10 +46,11 @@ final class HandWrittenQueries
      *
      * @param \Closure(class-string): EntityRepository $repository
      * @param \Closure(class-string): object|null      $latest     the newest row of a class, null without one
+     * @param Thread|null                             $commented  the thread whose comments are compared (the newest comment's by default)
      *
      * @return array<string, array{\Closure(): mixed, \Closure(): mixed}>
      */
-    public static function scenarios(\Closure $repository, \Closure $latest, string $userClass, ?\DateTimeInterface $now = null): array
+    public static function scenarios(\Closure $repository, \Closure $latest, string $userClass, ?\DateTimeInterface $now = null, ?Thread $commented = null): array
     {
         $now ??= new \DateTime();
         $qb = static fn (string $class, string $alias) => $repository($class)->createQueryBuilder($alias);
@@ -58,6 +62,9 @@ final class HandWrittenQueries
         $passkey = $latest(Passkey::class);
         $redirection = $latest(Redirection::class);
         $scopedWeek = $latest(ScopedWeek::class);
+        // The thread of the newest comment, unless given: a thread in the trash is given by the caller, read with
+        // the trash in view (Doctrine loads a reference to Thread, an inheritance's root, through the filter).
+        $commented ??= $latest(Comment::class)?->getThread();
         $since = \DateTimeImmutable::createFromInterface($now)->modify('-30 days');
 
         $scenarios = [
@@ -124,6 +131,34 @@ final class HandWrittenQueries
             'Comments::countPending' => [
                 fn () => (int) $qb(Comment::class, 'c')->select('COUNT(c.id)')->andWhere('c.state = :pending')->setParameter('pending', CommentState::PENDING)->getQuery()->getSingleScalarResult(),
                 fn () => $repository(Comment::class)->countPending(),
+            ],
+            'Comments::findVisible(thread)' => [
+                fn () => self::visibleComments($qb, $thread),
+                fn () => $repository(Comment::class)->findVisible($thread),
+            ],
+            'Comments::findVisible(the newest comment\'s thread)' => [
+                fn () => self::visibleComments($qb, $commented),
+                fn () => $repository(Comment::class)->findVisible($commented),
+            ],
+            'Comments::findVisible(the newest comment\'s thread, 1)' => [
+                fn () => self::visibleComments($qb, $commented, 1),
+                fn () => $repository(Comment::class)->findVisible($commented, 1),
+            ],
+            'Comments::findVisible(the visitors\' book)' => [
+                fn () => self::visibleComments($qb, null),
+                fn () => $repository(Comment::class)->findVisible(null),
+            ],
+            'Comments::countVisible(thread)' => [
+                fn () => self::countVisibleComments($qb, $thread),
+                fn () => $repository(Comment::class)->countVisible($thread),
+            ],
+            'Comments::countVisible(the newest comment\'s thread)' => [
+                fn () => self::countVisibleComments($qb, $commented),
+                fn () => $repository(Comment::class)->countVisible($commented),
+            ],
+            'Comments::countVisible(the visitors\' book)' => [
+                fn () => self::countVisibleComments($qb, null),
+                fn () => $repository(Comment::class)->countVisible(null),
             ],
             'Threads::byStates' => [
                 fn () => $qb(Thread::class, 'e')->andWhere('e.state IN (:states)')->setParameter('states', [ThreadState::PUBLISH])->getQuery()->getResult(),
@@ -233,6 +268,29 @@ final class HandWrittenQueries
         }
 
         return $scenarios;
+    }
+
+    /** CommentRepository::findVisible() before step E2b, word for word. */
+    private static function visibleComments(\Closure $qb, ?Thread $thread, int $limit = 200): array
+    {
+        $query = $qb(Comment::class, 'c')
+            ->andWhere('c.state = :approved')->setParameter('approved', CommentState::APPROVED)
+            ->andWhere('c.parent IS NULL')
+            ->orderBy('c.createdAt', 'DESC')
+            ->setMaxResults($limit);
+        $query = $thread ? $query->andWhere('c.thread = :thread')->setParameter('thread', $thread) : $query->andWhere('c.thread IS NULL');
+
+        return $query->getQuery()->getResult();
+    }
+
+    /** CommentRepository::countVisible() before step E2b, word for word. */
+    private static function countVisibleComments(\Closure $qb, ?Thread $thread): int
+    {
+        $query = $qb(Comment::class, 'c')->select('COUNT(c.id)')
+            ->andWhere('c.state = :approved')->setParameter('approved', CommentState::APPROVED);
+        $query = $thread ? $query->andWhere('c.thread = :thread')->setParameter('thread', $thread) : $query->andWhere('c.thread IS NULL');
+
+        return (int) $query->getQuery()->getSingleScalarResult();
     }
 
     private static function forAddress(\Closure $qb, string $address): ?Redirection

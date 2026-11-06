@@ -4,6 +4,7 @@ namespace Tests\Base\Database\Repository\Finder;
 
 use Base\Database\Repository\Finder\Criterion;
 use Base\Database\Repository\Finder\Group;
+use Base\Database\Repository\Finder\Key;
 use Base\Database\Repository\Finder\Parser;
 use PHPUnit\Framework\TestCase;
 
@@ -197,6 +198,54 @@ final class ParserTest extends TestCase
                 self::fail($name.' was read');
             } catch (\Exception $e) {
                 self::assertStringContainsString($message, $e->getMessage(), $name);
+            }
+        }
+    }
+
+    public function testAKeyCriterionComparesAnAssociationWithoutAJoin(): void
+    {
+        // Step E2b: the association compared by its own key, in the criteria array or given to a name.
+        $parent = new \stdClass();
+        $query = self::parser()->parse('findByState', ['publish', ['parent' => Key::of($parent), 'tags' => Key::of([3, 4])], ['id' => 'DESC'], 5]);
+        [$byParent, $byTags, $state] = $query->criterions();
+        self::assertTrue($byParent->byKey());
+        self::assertSame($parent, $byParent->value->value);
+        self::assertSame([3, 4], $byTags->value->value);
+        self::assertTrue($byTags->value->isList());
+        self::assertFalse($state->byKey());
+        self::assertEquals([['parent' => Key::of($parent), 'tags' => Key::of([3, 4]), 'state:0' => 'publish'], ['id' => 'DESC'], 5], [$query->arguments[0], $query->arguments[1], $query->arguments[2]]);
+
+        $none = self::parser()->parse('findByParentNotEqualTo', [Key::of(null)])->criterions()[0];
+        self::assertTrue($none->byKey() && $none->value->isNull());
+        self::assertSame([Parser::OPTION_NOT_EQUAL], $none->options);
+        self::assertSame(Key::of(7)->value, self::parser()->parse('count', [['parent' => Key::of(Key::of(7))]])->criterions()[0]->value->value);
+        // In a group too.
+        $group = self::parser()->parse('findBy', [[Group::by('ParentOrState', Key::of(null), 'draft')]])->criterions()[0]->value;
+        self::assertTrue($group->criterions()[0]->byKey());
+    }
+
+    public function testAKeyCriterionComparesForEqualityOnTheEntitysOwnAssociation(): void
+    {
+        foreach ([
+            ['findByParentGreaterThan', [Key::of(5)], 'equality only'],
+            ['findByParentNull', [], null],
+            ['findBy', [['parent.parent' => Key::of(5)]], 'not a path'],
+            ['findBy', [[Group::by('InsensitiveParent', Key::of('a'))]], 'equality only'],
+        ] as [$name, $arguments, $message]) {
+            try {
+                self::parser()->parse($name, $arguments);
+                null === $message || self::fail($name.' was read');
+            } catch (\Exception $e) {
+                self::assertNotNull($message, $name.': '.$e->getMessage());
+                self::assertStringContainsString($message, $e->getMessage(), $name);
+            }
+        }
+        foreach ([1.5, [null, 3], [[1]]] as $value) {
+            try {
+                Key::of($value);
+                self::fail(json_encode($value).' was taken');
+            } catch (\InvalidArgumentException) {
+                self::addToAssertionCount(1);
             }
         }
     }

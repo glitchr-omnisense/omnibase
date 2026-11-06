@@ -26,6 +26,15 @@ final class Criterion
         return \in_array($option, $this->options, true);
     }
 
+    /**
+     * Whether the criterion compares a to-one association by its key, without a join
+     * (its value a Key, step E2b): a persistence compiles it on the row's own foreign key.
+     */
+    public function byKey(): bool
+    {
+        return $this->value instanceof Key;
+    }
+
     /** The key the criterion has in the criteria array the compilers read ("slug:0", or the field itself). */
     public function key(): string
     {

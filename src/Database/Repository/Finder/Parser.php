@@ -18,7 +18,9 @@ use Exception;
  * Last<N>, LastOne, Previous<N>, PreviousOne, Next<N>, NextOne), cache and
  * Eagerly; since step E2, the aggregates sumOf<Column>By, minOf<Column>By and
  * maxOf<Column>By, and the groups (Group::by('AOrB', ...) as an entry of the
- * criteria array: a parenthesised part of the finder, read by this parser).
+ * criteria array: a parenthesised part of the finder, read by this parser); since
+ * step E2b, a to-one association compared by its key without a join (Key::of($x),
+ * a criterion's value, EqualTo or NotEqualTo only).
  *
  * Nothing of an ORM: what it asks of the entity is a Subject (its class, its
  * fields, a Query-by-Example's criteria), and a host's request (WithRoute) is
@@ -166,7 +168,7 @@ final class Parser
         [$internal, $internalArguments] = $this->__parse($method, $arguments);
         $internalArguments = $this->groups($internalArguments, $internal);
 
-        return new Query(
+        $query = new Query(
             method: $internal,
             arguments: $internalArguments,
             criteria: $this->criteria,
@@ -178,6 +180,36 @@ final class Parser
             request: $this->request,
             special: $this->special,
         );
+        $this->keys($query->criterions());
+
+        return $query;
+    }
+
+    /**
+     * The key criteria (Key::of(), step E2b), a group's members included: an association of the
+     * entity itself, compared for equality or its negation - no other word reads a key.
+     *
+     * @param list<Criterion> $criterions
+     *
+     * @throws Exception a key criterion on a path or with another word of the language
+     */
+    private function keys(array $criterions): void
+    {
+        foreach ($criterions as $criterion) {
+            if ($criterion->value instanceof Group) {
+                $this->keys($criterion->value->criterions());
+                continue;
+            }
+            if (!$criterion->byKey()) {
+                continue;
+            }
+            if (str_contains($criterion->field, '.')) {
+                throw new Exception("A key criterion compares an association of the entity itself, not a path (\"" . $criterion->field . "\": it needs the join).");
+            }
+            if ($words = array_diff($criterion->options, Key::OPTIONS)) {
+                throw new Exception("A key criterion compares for equality only (EqualTo, NotEqualTo): \"" . $criterion->field . "\" with " . implode(', ', $words) . ".");
+            }
+        }
     }
 
     /**

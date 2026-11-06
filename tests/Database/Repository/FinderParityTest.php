@@ -4,10 +4,13 @@ namespace Tests\Base\Database\Repository;
 
 use Base\Database\Repository\ServiceEntityParser;
 use Base\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\Finder\Key;
 use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Thread;
+use Base\Entity\Thread\Comment;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
+use Base\Enum\CommentState;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -146,7 +149,8 @@ final class FinderParityTest extends KernelTestCase
      * gives what its query of before gave (HandWrittenQueries, word for word), the same rows in the
      * same order, on rows written here for the purpose - redirections (exact and by prefix, the
      * case of letters), text overrides, special days with and without a scope, a scoped week, page
-     * views and visits - and on the harness's empty tables for the others (the query runs on
+     * views and visits, comments under a live thread, under one in the trash and in the visitors' book
+     * (step E2b) - and on the harness's empty tables for the others (the query runs on
      * SQLite: its groups, aggregates and joins compile). lesringostars' FinderParityTest runs the
      * same on the site's data. The rows are written in a transaction, rolled back after.
      */
@@ -181,6 +185,34 @@ final class FinderParityTest extends KernelTestCase
             }
             $entityManager->flush();
 
+            // Step E2b: comments under a live thread, under a thread in the trash, in the visitors' book (one
+            // with a reply), and one waiting; their dates and states set after the flush (the creation stamp
+            // and the spam check have their say at the persist).
+            $live = new Thread(null, null, 'A thread commented', 'a-thread-commented-'.bin2hex(random_bytes(3)));
+            $trashed = new Thread(null, null, 'A thread in the trash', 'a-thread-in-the-trash-'.bin2hex(random_bytes(3)));
+            $trashed->setDeletedAt(new \DateTime('-1 hour'));
+            $book = (new Comment())->setName('Anne')->setContent('In the book');
+            $written = [
+                [$book, CommentState::APPROVED],
+                [(new Comment())->setName('Bob')->setContent('A reply in the book')->setParent($book), CommentState::APPROVED],
+                [(new Comment($live))->setName('Carl')->setContent('Waiting'), CommentState::PENDING],
+                [(new Comment($live))->setName('Dora')->setContent('On the live thread'), CommentState::APPROVED],
+                [(new Comment($trashed))->setName('Eve')->setContent('Under the trashed thread'), CommentState::APPROVED],
+            ];
+            $entityManager->persist($live);
+            $entityManager->persist($trashed);
+            foreach ($written as [$comment]) {
+                $entityManager->persist($comment);
+            }
+            $entityManager->flush();
+            foreach ($written as $i => [$comment, $state]) {
+                $entityManager->createQuery('UPDATE '.Comment::class.' c SET c.createdAt = :at, c.state = :state WHERE c.id = :id')
+                    ->setParameter('at', $now->modify('-'.(10 - $i).' minutes'))->setParameter('state', $state)->setParameter('id', $comment->getId())
+                    ->execute();
+            }
+            [$bookId, $onLiveId, $onTrashedId] = [$book->getId(), $written[3][0]->getId(), $written[4][0]->getId()];
+            [$liveId, $trashedId] = [$live->getId(), $trashed->getId()];
+
             $views = $entityManager->getRepository(\Base\Entity\Analytics\PageView::class);
             $visits = $entityManager->getRepository(\Base\Entity\Analytics\Visit::class);
             foreach ([['/', 0], ['/', 0], ['/', 40 * 86400], ['/about', 3600]] as [$path, $ago]) {
@@ -198,8 +230,19 @@ final class FinderParityTest extends KernelTestCase
                 return $entityManager->createQueryBuilder()->select('x')->from($class, 'x')->orderBy('x.'.$id, 'DESC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
             };
 
+            // The trashed thread read with the trash in view: Thread being the root of an inheritance, Doctrine
+            // loads a reference to it (no proxy of an unknown subclass), and the filter would make it null.
+            $trashedThreadOf = static function () use ($entityManager, $trashedId): Thread {
+                $entityManager->getFilters()->disable('trash_filter');
+                try {
+                    return $entityManager->find(Thread::class, $trashedId);
+                } finally {
+                    $entityManager->getFilters()->enable('trash_filter');
+                }
+            };
+
             $compared = 0;
-            foreach (HandWrittenQueries::scenarios($repository, $latest, \App\Entity\User::class, new \DateTime()) as $name => [$before, $after]) {
+            foreach (HandWrittenQueries::scenarios($repository, $latest, \App\Entity\User::class, new \DateTime(), $trashedThreadOf()) as $name => [$before, $after]) {
                 self::assertSame(HandWrittenQueries::normalise($before()), HandWrittenQueries::normalise($after()), $name.': the rows of before, in order');
                 ++$compared;
             }
@@ -209,6 +252,25 @@ final class FinderParityTest extends KernelTestCase
             self::assertSame('/new-page', $repository(\Base\Entity\Layout\Redirection::class)->forAddress('/old-page?x=1')?->getTarget(), 'SQLite compares the case of letters, unlike MySQL');
             self::assertCount(3, $repository(\Base\Entity\Layout\TextOverride::class)->map());
             self::assertCount(2, $repository(\Base\Entity\Extension\TrashBall::class)->expired());
+
+            // Step E2b: a thread in the trash keeps its comments, which are not the visitors' book's - the case
+            // the finder's join of the thread got wrong (Doctrine puts the trash filter in the join's ON).
+            self::assertTrue($entityManager->getFilters()->isEnabled('trash_filter'), 'the trash filter is on');
+            $comments = $repository(Comment::class);
+            $ids = static fn (array $rows): array => array_map(static fn (Comment $comment) => $comment->getId(), $rows);
+            $trashedThread = $trashedThreadOf();
+            self::assertSame([$onTrashedId], $ids($comments->findVisible($trashedThread)));
+            self::assertSame(1, $comments->countVisible($trashedThread));
+            self::assertSame([$onLiveId], $ids($comments->findVisible($entityManager->find(Thread::class, $liveId))));
+            self::assertContains($bookId, $ids($comments->findVisible(null)));
+            self::assertNotContains($onTrashedId, $ids($comments->findVisible(null)));
+            self::assertContains($onTrashedId, $ids($comments->findByThreadNullAndParentNull(['state' => CommentState::APPROVED])->getResult()), 'through the join, the trashed thread\'s comment reads as the book\'s');
+            // The key criterion compiled on the comment's own foreign key, with no join.
+            $query = $comments->findByState(CommentState::APPROVED, ['thread' => Key::of($trashedThread), 'parent' => Key::of(null)]);
+            self::assertSame('SELECT e FROM '.Comment::class.' e WHERE e.thread = :key_thread AND e.parent IS NULL AND e.state = :state_0', $query->getDQL());
+            self::assertSame($trashedThread, $query->getParameter('key_thread')?->getValue());
+            self::assertSame('SELECT e FROM '.Comment::class.' e WHERE e.thread IS NOT NULL AND e.thread NOT IN(:key_thread_1)', $comments->findByThreadNotEqualToAndThreadNotEqualTo(Key::of(null), Key::of([$liveId]))->getDQL());
+            self::assertSame(\count($comments->findAll()), \count($comments->findBy(['thread' => Key::of([])])), 'an empty list leaves the criterion out');
         } finally {
             $connection->rollBack();
             $entityManager->clear();

@@ -56,6 +56,15 @@ same interfaces over the same tables (the structure: [schema.md](schema.md)).
 The finder language (`cacheOneBySlug()`...) stays the repositories' own: an
 application calls the interface's methods, never the finder through it.
 
+The interfaces are listed in `Base\Repository\Aliases::INTERFACES` (29 with
+`Repositories`, since step E2' of the plan "omnibase agnostic": `User\Complaints`,
+and `Thread\Comments` answering what omnibase/blog asks - `findVisible()`,
+`countVisible()`, `countPending()`, `findPending()`). A site or a bundle types
+on them, not on a repository's class: since E2' the core's bundles and
+lesringostars do, but for omnibase/admin's dashboard tile of complaints, which
+keeps `ComplaintRepository` while the bundle serves omnibase 4.x as well (4.x has
+no `Complaints`).
+
 ## The finder language, read without Doctrine
 
 A finder's name - `findOneByEmailAndUsername()`, `cacheOneByStateAndSlugStartingWith()`,
@@ -167,6 +176,38 @@ kept word for word in `tests/Database/Repository/HandWrittenQueries.php`) on row
 harness, and lesringostars' FinderParityTest runs them on the site's data. Under omnisense/omnibase
 4.x, whose finder has neither groups nor aggregates, omnibridge/doctrine's methods written on them
 keep their former query (`ServiceEntityRepository::finderReadsGroups()`).
+
+## An association compared by its key, without a join (step E2b)
+
+A criterion on an association is compiled through a join of it (`LEFT JOIN e.thread e_thread`,
+`e_thread = :thread`), and a persistence that scopes the joined entity puts its scope there:
+Doctrine's trash filter on Thread goes into the join's `ON`, so a comment whose thread is in the
+trash reads as a comment without a thread. `Finder\Key::of($value)`, a criterion's value,
+compares the row's own foreign key instead, with no join:
+
+```php
+$comments->findBy([
+    'state' => CommentState::APPROVED,
+    'thread' => Key::of($thread),   // e.thread = :key_thread; null: e.thread IS NULL
+    'parent' => Key::of(null),
+], ['createdAt' => 'DESC'], 200);
+$comments->findByThreadNotEqualTo(Key::of([3, 4]));   // e.thread NOT IN (:key_thread_0)
+```
+
+It takes an entity, its identifier, a list of them (`IN`; an empty list leaves the criterion out,
+as any list of the language) or `null`, with `EqualTo` (the default) or `NotEqualTo` only, on an
+association of the entity itself; the Parser refuses a path (`thread.parent` needs the join) and
+any other word, the compiler a field that is no single-valued association. In the criteria array,
+in a name's arguments or in a group alike; `Criterion::byKey()` tells a compiler.
+omnibridge/doctrine compiles it to `e.<association>` (`=`, `<>`, `IN`, `NOT IN`, `IS NULL`,
+`IS NOT NULL`), omnibridge/eloquent to the foreign-key column. Not a word of the name: "Key" in a
+name would make every field holding the word (Passkey's `publicKeyCredentialId`) one the
+language refuses.
+
+`Comments::findVisible()` and `countVisible()` are written on it: the comments of a thread in the
+trash stay its own, as with their former query (FinderParityTest writes them, beside a live
+thread's and the visitors' book's). Under omnisense/omnibase 4.x, which has no `Key`, the
+methods keep their former query (`ServiceEntityRepository::finderReadsKeys()`).
 
 ## Translations
 
