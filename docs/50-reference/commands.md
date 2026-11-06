@@ -76,6 +76,7 @@ nor its rows in bulk).
 | `doctrine:schema:charset` | Shows or changes the database's and the tables' character set (MySQL) |
 | `doctrine:array:upgrade` | Converts DBAL 3's serialized `array` columns to JSON (MySQL) |
 | `demo:reset` | Reloads the demonstration ([The demo environment](../20-architecture/demo.md)) |
+| `omnibridge:schema:create` | Creates the installed entities' tables in an empty database from their description, no ORM (`--dump-sql`; Symfony's console, artisan, or `vendor/bin/omnibridge-schema-create` in plain PHP: [The data structure](../20-architecture/schema.md#the-schema-created-from-it-step-f7a)) |
 
 The developer's lookups, each listing what it names without changing anything:
 

@@ -84,6 +84,43 @@ suite run from `vendor/`):
   key, index and foreign key read from `information_schema`, nothing of Doctrine
   asked (`doctrine_migration_versions` and `messenger_messages` apart).
 
+## The schema created from it (step F7a)
+
+A new site creates its tables from the description, whatever the persistence; migrations evolve an
+existing database and belong to the persistence chosen (the plan "omnibase agnostic", answer 11).
+
+- `Base\Database\Schema\EntitySchema` is the core's describer, with **no persistence installed**: the
+  same description as `Describer` (omnibridge/doctrine's, which feeds Doctrine; the test compares
+  them), and omnibase's column types as data (`columnTypes()`: the enumerations' and sets' values,
+  `array` and the passkeys' base64 and AAGUID columns as texts, their trust path as JSON - the SQL
+  Doctrine's types declare, the test compares them on MySQL and SQLite).
+- omnisense/omnibridge's `Omnibridge\Schema\Database\SchemaCreator` writes and runs the statements
+  (MySQL, SQLite), no ORM.
+- `omnibridge:schema:create` on every host: `bin/console omnibridge:schema:create` (omnibridge/symfony:
+  the folders, targets and enumerations Doctrine's configuration was given, the connection's PDO and
+  default table options), `php artisan omnibridge:schema:create` (omnibridge/laravel:
+  `omnibridge.doctrine.entities` beside the core's, `omnibridge.doctrine.omnibase`'s options, Laravel's
+  PDO), and in plain PHP `vendor/bin/omnibridge-schema-create --schema=vendor/omnisense/omnibase/src/Resources/schema.php`
+  (the current folder's `src/Entity` beside the core's, or `OMNIBASE_PROJECT_DIR`; `DATABASE_URL` or
+  `--url`/`--dsn`). Each has `--dump-sql`, and refuses a database that already holds a table of the
+  description.
+
+```php
+use Base\Database\Schema\EntitySchema;
+use Omnibridge\Schema\Database\SchemaCreator;
+
+$options = ['project_dir' => $projectDir];
+$description = EntitySchema::describe(EntitySchema::directories($projectDir), $options);
+(new SchemaCreator($pdo, EntitySchema::columnTypes($options)))->create($description);
+```
+
+The proof, in `SchemaDescriptionTest`: the database `SchemaCreator` makes is the one Doctrine's
+SchemaTool makes from the mapping - tables, columns in order (type, nullable, default,
+auto-increment), primary keys, indexes, foreign keys - on SQLite in the harness, and on MySQL where
+`OMNIBASE_SCHEMA_DATABASES` names two empty databases (lesringostars: 132 tables, 552 columns, 144
+indexes, 157 foreign keys, no difference). `BareTest` creates the core's tables on SQLite from the core
+installed alone (no Doctrine at all) and reads them back as the description.
+
 ## How another persistence would read it
 
 An Eloquent (or any other) bridge needs no attribute of Doctrine's and no class

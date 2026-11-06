@@ -4,7 +4,6 @@ namespace Base\Database\Schema;
 
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslationInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Walker\TranslatableWalker;
 use Omnibridge\Schema\Builder;
 use Omnibridge\Schema\Builder\Draft;
 use Omnibridge\Schema\Builder\Rule;
@@ -30,6 +29,16 @@ use Omnibridge\Schema\Declaration\ClassDeclaration;
  */
 final class TranslationRule implements Rule
 {
+    /**
+     * The names the translations are mapped under - omnibridge/doctrine's TranslatableWalker queries them by the same
+     * values (SchemaDescriptionTest compares both) -, here so that the description is built with no persistence
+     * installed (plan "omnibase agnostic", step F7a; they were read from the walker's class).
+     */
+    public const LOCALE = 'locale';
+    public const FOREIGN_KEY = 'translatable_id';
+    public const COLUMN_NAME = 'translations';
+    public const SALT = 'unique_translation';
+
     public function before(Draft $class, ClassDeclaration $declaration, Builder $builder): void
     {
         if (!is_subclass_of($class->name, TranslationInterface::class)) {
@@ -77,12 +86,12 @@ final class TranslationRule implements Rule
             return;
         }
 
-        if (is_subclass_of($class->name, TranslatableInterface::class) && !$class->hasAssociation(TranslatableWalker::COLUMN_NAME)) {
+        if (is_subclass_of($class->name, TranslatableInterface::class) && !$class->hasAssociation(self::COLUMN_NAME)) {
             $class->mapRelation([
-                'fieldName' => TranslatableWalker::COLUMN_NAME,
+                'fieldName' => self::COLUMN_NAME,
                 'type' => 'one_to_many',
                 'mappedBy' => 'translatable',
-                'indexBy' => TranslatableWalker::LOCALE,
+                'indexBy' => self::LOCALE,
                 'targetEntity' => $class->name::getTranslationEntityClass(),
             ]);
         }
@@ -95,23 +104,23 @@ final class TranslationRule implements Rule
             $class->mapRelation([
                 'fieldName' => 'translatable',
                 'type' => 'many_to_one',
-                'inversedBy' => TranslatableWalker::COLUMN_NAME,
-                'joinColumns' => [['name' => TranslatableWalker::FOREIGN_KEY, 'referencedColumnName' => 'id', 'onDelete' => 'CASCADE']],
+                'inversedBy' => self::COLUMN_NAME,
+                'joinColumns' => [['name' => self::FOREIGN_KEY, 'referencedColumnName' => 'id', 'onDelete' => 'CASCADE']],
                 'targetEntity' => $class->name::getTranslatableEntityClass(),
             ]);
         }
 
         if ($class->isRootEntity()) {
-            $name = $builder->naming()->classToTableName($class->rootEntityName).'_'.TranslatableWalker::SALT;
+            $name = $builder->naming()->classToTableName($class->rootEntityName).'_'.self::SALT;
             $class->table['uniqueConstraints'][$name] ??= [];
             $class->table['uniqueConstraints'][$name]['columns'] = array_unique(array_merge(
                 $class->table['uniqueConstraints'][$name]['columns'] ?? [],
-                [TranslatableWalker::FOREIGN_KEY, TranslatableWalker::LOCALE],
+                [self::FOREIGN_KEY, self::LOCALE],
             ));
         }
 
-        if (!$class->hasField(TranslatableWalker::LOCALE) && !$class->hasAssociation(TranslatableWalker::LOCALE)) {
-            $class->mapField(['fieldName' => TranslatableWalker::LOCALE, 'type' => 'string', 'length' => 5]);
+        if (!$class->hasField(self::LOCALE) && !$class->hasAssociation(self::LOCALE)) {
+            $class->mapField(['fieldName' => self::LOCALE, 'type' => 'string', 'length' => 5]);
         }
     }
 }

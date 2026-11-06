@@ -918,6 +918,36 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The schema of the core's entities created with no persistence installed (plan "omnibase agnostic", step F7a):
+     * tests/Database/Schema/schema-without-persistence.php, run by bare --strict on the core installed alone (no Doctrine
+     * but collections), describes the entities (Base\Database\Schema\EntitySchema), creates their tables in SQLite
+     * (omnisense/omnibridge's SchemaCreator) and reads them back as the description.
+     */
+    public function testTheSchemaIsCreatedFromTheDescriptionWithoutAPersistence(): void
+    {
+        $autoload = __DIR__.'/../var/bare-alone/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor of the core alone here (var/bare-alone/vendor): "docker/bin/bare --alone --install" makes it.');
+        }
+        $script = __DIR__.'/Database/Schema/schema-without-persistence.php';
+
+        [$status, $report] = self::bare(['--strict', $script], (string) realpath($autoload));
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework'], 'nothing of Doctrine, Twig nor the framework');
+        self::assertSame([], $run['framework_files']);
+        self::assertSame(0, $status);
+
+        $result = $run['result'];
+        self::assertGreaterThan(90, $result['entities']);
+        self::assertGreaterThan(100, $result['tables'][0]);
+        self::assertSame($result['tables'][0], $result['tables'][1], 'every table created');
+        self::assertSame([], $result['differences'], 'the database is the description');
+        self::assertTrue($result['user']);
+        self::assertSame([true, true], $result['enumerations and sets']);
+    }
+
+    /**
      * The whole graph of the core's services is built by Omnibridge\Container alone (plan "omnibase agnostic", step F5e
      * slice 4), on the core installed alone (var/bare-alone: its require, nothing of Symfony's framework, Doctrine, Twig
      * nor omniauth): every definition of Base\Services that applies there is built, with the plain-PHP host of

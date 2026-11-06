@@ -5,15 +5,27 @@ namespace Tests\Base\Bridge\Doctrine;
 use Base\Bridge\Doctrine\MappingDriver;
 use Base\Database\Schema\Describer;
 use Base\Database\Schema\DiscriminatorRule;
+use Base\Database\Schema\EntitySchema;
+use Base\Database\Schema\TranslationRule;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
+use Doctrine\DBAL\Platforms\MySQL80Platform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Tools\ResolveTargetEntityListener;
+use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Omnibridge\Doctrine\DeclarationDriver;
 use Omnibridge\Doctrine\MetadataDescription;
+use Omnibridge\Doctrine\Omnibase\Database\Walker\TranslatableWalker;
+use Omnibridge\Schema\Column;
 use Omnibridge\Schema\Database\MySqlSchema;
+use Omnibridge\Schema\Database\MySqlStatements;
+use Omnibridge\Schema\Database\SchemaCreator;
+use Omnibridge\Schema\Database\SqliteSchema;
+use Omnibridge\Schema\Database\SqliteStatements;
 use Omnibridge\Schema\Description;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -31,7 +43,14 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  *   table by table;
  * - on MySQL (lesringostars), it is the database's own schema: every table,
  *   column (SQL type, nullable, default, auto-increment), primary key, index
- *   and foreign key read from information_schema, nothing of Doctrine asked.
+ *   and foreign key read from information_schema, nothing of Doctrine asked;
+ * - the core builds the same description with no persistence installed
+ *   (Base\Database\Schema\EntitySchema, plan "omnibase agnostic", step F7a),
+ *   its column types declare what Doctrine's types declare, and the database
+ *   omnisense/omnibridge's SchemaCreator makes from it is the one Doctrine's
+ *   SchemaTool makes from the mapping: on SQLite (the harness) in memory, on
+ *   MySQL in the two empty databases OMNIBASE_SCHEMA_DATABASES names ("a,b",
+ *   on the application's server; skipped without), emptied again afterwards.
  */
 final class SchemaDescriptionTest extends KernelTestCase
 {
@@ -103,6 +122,103 @@ final class SchemaDescriptionTest extends KernelTestCase
         self::assertSame([], $schema->differences($this->describe()), 'the description against information_schema');
     }
 
+    /** The core's description, built with no persistence (EntitySchema), is the Doctrine bridge's (Describer). */
+    public function testTheCoreDescribesTheEntitiesAsTheDoctrineBridgeDoes(): void
+    {
+        $options = $this->options();
+
+        self::assertSame(Describer::describe($options['paths'], $options)->toArray(), EntitySchema::describe($options['paths'], $options)->toArray());
+        self::assertSame([TranslatableWalker::LOCALE, TranslatableWalker::FOREIGN_KEY, TranslatableWalker::COLUMN_NAME, TranslatableWalker::SALT], [TranslationRule::LOCALE, TranslationRule::FOREIGN_KEY, TranslationRule::COLUMN_NAME, TranslationRule::SALT], 'the translations\' names the walker queries');
+    }
+
+    /** omnibase's column types as data (EntitySchema::columnTypes()) are written as Doctrine's types declare them, on MySQL and on SQLite. */
+    public function testTheColumnTypesDeclareWhatDoctrinesTypesDeclare(): void
+    {
+        $options = $this->options();
+        $types = EntitySchema::columnTypes($options);
+        $mysql = new MySQL80Platform();
+        $sqlite = new SQLitePlatform();
+
+        foreach (EntitySchema::ALIASES as $name => $portable) {
+            foreach ([null, 36, 255, 70000] as $length) {
+                $column = $types->resolve(new Column('c', $name, length: $length));
+                self::assertSame(strtolower(Type::getType($name)->getSQLDeclaration(['length' => $length], $mysql)), (new MySqlStatements($types))->sqlType($column), $name.'('.$length.') on MySQL');
+                self::assertSame(Type::getType($name)->getSQLDeclaration(['length' => $length], $sqlite), (new SqliteStatements($types))->sqlType($column), $name.'('.$length.') on SQLite');
+            }
+        }
+
+        $doctrine = Describer::mysqlTypes(Describer::types($options));
+        $ours = $types->mysql();
+        $checked = 0;
+        foreach (array_keys($types->enumerations + $types->sets) as $name) {
+            self::assertSame($doctrine[$name](new Column('c', $name)), $ours[$name](new Column('c', $name)), $name);
+            self::assertSame('CLOB', Type::getType($name)->getSQLDeclaration([], $sqlite), $name.' on SQLite');
+            ++$checked;
+        }
+        self::assertGreaterThan(10, $checked);
+    }
+
+    /**
+     * The database made from the description (SchemaCreator, no ORM) is the one Doctrine's SchemaTool makes from the
+     * mapping: every table, column (type, nullable, default, auto-increment, in order), primary key, index and foreign
+     * key read back from both, nothing differs.
+     */
+    public function testTheSchemaCreatedFromTheDescriptionIsSchemaToolsOne(): void
+    {
+        $entityManager = $this->entityManager();
+        $connection = $entityManager->getConnection();
+        $options = $this->options();
+        $types = EntitySchema::columnTypes($options);
+        $description = EntitySchema::describe($options['paths'], $options);
+        $doctrine = (new SchemaTool($entityManager))->getCreateSchemaSql($entityManager->getMetadataFactory()->getAllMetadata());
+
+        if ($connection->getDatabasePlatform() instanceof SQLitePlatform) {
+            [$tool, $created] = [new \PDO('sqlite::memory:'), new \PDO('sqlite::memory:')];
+            foreach ($doctrine as $statement) {
+                $tool->exec($statement);
+            }
+            (new SchemaCreator($created, $types))->create($description);
+
+            self::assertSame([], SqliteSchema::read($tool, self::FOREIGN_TABLES)->against(SqliteSchema::read($created, self::FOREIGN_TABLES)), 'SchemaTool\'s database against the description\'s');
+            self::assertSame([], SqliteSchema::read($created, [], $types)->differences($description));
+            self::assertGreaterThan(50, \count($description->tables));
+
+            return;
+        }
+
+        $databases = array_values(array_filter(explode(',', (string) getenv('OMNIBASE_SCHEMA_DATABASES'))));
+        if (!$connection->getDatabasePlatform() instanceof AbstractMySQLPlatform || 2 !== \count($databases)) {
+            self::markTestSkipped('On MySQL, OMNIBASE_SCHEMA_DATABASES names two empty databases of the application\'s server ("a,b") the comparison creates its tables in.');
+        }
+
+        $parameters = $connection->getParams();
+        $pdo = static fn (string $database) => new \PDO('mysql:host='.$parameters['host'].';port='.($parameters['port'] ?? 3306).';dbname='.$database.';charset=utf8mb4', $parameters['user'] ?? null, $parameters['password'] ?? null, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
+        [$tool, $created] = [$pdo($databases[0]), $pdo($databases[1])];
+        $tableOptions = $parameters['defaultTableOptions'] ?? [];
+        foreach ([$tool, $created] as $i => $database) {
+            if ([] !== $database->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN)) {
+                self::fail($databases[$i].' holds tables: the comparison runs on two empty databases (nothing was changed).');
+            }
+        }
+        try {
+            foreach ($doctrine as $statement) {
+                $tool->exec($statement);
+            }
+            (new SchemaCreator($created, $types, ['charset' => $tableOptions['charset'] ?? 'utf8mb4', 'collation' => $tableOptions['collate'] ?? $tableOptions['collation'] ?? null]))->create($description);
+
+            self::assertSame([], MySqlSchema::read($tool, null, self::FOREIGN_TABLES)->against(MySqlSchema::read($created, null, self::FOREIGN_TABLES)), 'SchemaTool\'s database against the description\'s');
+            self::assertSame([], MySqlSchema::read($created, null, [], $types->mysql())->differences($description));
+        } finally {
+            foreach ([$tool, $created] as $database) {
+                $database->exec('SET FOREIGN_KEY_CHECKS = 0');
+                foreach ($database->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN) as $table) {
+                    $database->exec('DROP TABLE `'.$table.'`');
+                }
+                $database->exec('SET FOREIGN_KEY_CHECKS = 1');
+            }
+        }
+    }
+
     private function describe(): Description
     {
         $options = $this->options();
@@ -142,6 +258,13 @@ final class SchemaDescriptionTest extends KernelTestCase
         foreach ($container->hasParameter('doctrine.dbal.connection_factory.types') ? $container->getParameter('doctrine.dbal.connection_factory.types') : [] as $name => $type) {
             if (!str_starts_with($type['class'], 'Symfony\\')) {
                 $types[$name] = $type['class'];
+            }
+        }
+        // The enumerations DBAL has, a bundle's among them (omnibase/marketplace's order_state), as omnibridge/symfony's
+        // omnibridge:schema:create reads them.
+        foreach (Type::getTypeRegistry()->getMap() as $name => $type) {
+            if (method_exists($type, 'enumeration')) {
+                $types[$name] ??= $type->enumeration();
             }
         }
 

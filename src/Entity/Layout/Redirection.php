@@ -2,7 +2,6 @@
 
 namespace Base\Entity\Layout;
 
-use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
 use Base\Repository\Layout\RedirectionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Validator\Constraints\Unique;
@@ -57,10 +56,10 @@ class Redirection
     #[ORM\Column(type: 'integer')]
     protected int $hits = 0;
 
-    #[ORM\Column(type: UtcDateTimeImmutableType::NAME, nullable: true)]
+    #[ORM\Column(type: 'utc_datetime_immutable', nullable: true)]
     protected ?\DateTimeImmutable $lastHitAt = null;
 
-    #[ORM\Column(type: UtcDateTimeImmutableType::NAME)]
+    #[ORM\Column(type: 'utc_datetime_immutable')]
     protected \DateTimeImmutable $createdAt;
 
     public function __construct(string $source = '', string $target = '', int $status = self::PERMANENT)
