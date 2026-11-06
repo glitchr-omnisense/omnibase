@@ -898,6 +898,26 @@ final class BareTest extends TestCase
     }
 
     /**
+     * #[Hashify]'s hasher on the core installed alone (F6 slice 2's defect: the core named doctrine/common's ClassUtils,
+     * which it does not require): tests/Database/Attribute/hashify-without-doctrine-common.php, run by bare --strict.
+     */
+    public function testHashifyHashesWithoutDoctrineCommon(): void
+    {
+        $autoload = __DIR__.'/../var/bare-alone/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor of the core alone here (var/bare-alone/vendor): "docker/bin/bare --alone --install" makes it.');
+        }
+        $script = __DIR__.'/Database/Attribute/hashify-without-doctrine-common.php';
+
+        [$status, $report] = self::bare(['--strict', $script], (string) realpath($autoload));
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame([], $run['framework']);
+        self::assertSame(0, $status);
+        self::assertSame(['doctrine/common' => false, 'hasher' => \Symfony\Component\PasswordHasher\Hasher\PlaintextPasswordHasher::class, 'hashed' => 'secret'], $run['result']);
+    }
+
+    /**
      * The whole graph of the core's services is built by Omnibridge\Container alone (plan "omnibase agnostic", step F5e
      * slice 4), on the core installed alone (var/bare-alone: its require, nothing of Symfony's framework, Doctrine, Twig
      * nor omniauth): every definition of Base\Services that applies there is built, with the plain-PHP host of
