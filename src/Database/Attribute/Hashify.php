@@ -6,14 +6,12 @@ use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Omnibridge\Persistence\UnitOfWork;
+use Omnibridge\Runtime;
 use Exception;
 
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
-use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
 
@@ -92,7 +90,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
      */
     public function getMessageHasher($entity)
     {
-        $hasherFactory = new PasswordHasherFactory([ClassUtils::getClass($entity) => [
+        $hasherFactory = new PasswordHasherFactory([self::className($entity) => [
             "algorithm" => $this->algorithm,
             "hash_algorithm" => $this->hashAlgorithm,
             "migrate_from" => $this->migrateFrom,
@@ -105,7 +103,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
             "time_cost" => $this->timeCost
         ]]);
 
-        return $hasherFactory->getPasswordHasher(ClassUtils::getClass($entity)) ?? null;
+        return $hasherFactory->getPasswordHasher(self::className($entity)) ?? null;
     }
 
     /**
@@ -143,7 +141,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
      */
     public static function isValid($entity, $property, $hashedMessage): bool
     {
-        $className = ClassUtils::getClass($entity);
+        $className = self::className($entity);
         $attributes = AttributeReader::getInstance()->getPropertyAttributes($className, Hashify::class);
         $that = $attributes[$property] ?? [];
 
@@ -173,7 +171,7 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
         }
 
         if (!$this->referenceColumn) {
-            throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
+            throw new Exception("Attribute \"reference\" missing for @Hashify in " . self::className($entity));
         }
 
         return $this->getPropertyValue($entity, $this->referenceColumn);
@@ -181,13 +179,13 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
 
     /**
      * @param $entity
-     * @return ClassMetadataManipulator
+     * @return mixed
      * @throws Exception
      */
     private function erasePlainMessage($entity)
     {
         if (!$this->referenceColumn) {
-            throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
+            throw new Exception("Attribute \"reference\" missing for @Hashify in " . self::className($entity));
         }
 
         return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
@@ -252,5 +250,22 @@ class Hashify extends AbstractAttribute implements ExtensionOptionInterface
     {
         $entity = $event->entity;
         $this->erasePlainMessage($entity);
+    }
+
+    /**
+     * The entity's class, a proxy seen through: the unit of work's className() when a persistence is installed,
+     * else the class with Doctrine's proxy marker taken off (doctrine/common's ClassUtils::getClass() did this,
+     * and the core does not require doctrine/common since 5.0).
+     */
+    private static function className(object $entity): string
+    {
+        $unitOfWork = Runtime::find(UnitOfWork::class);
+        if ($unitOfWork instanceof UnitOfWork) {
+            return $unitOfWork->className($entity);
+        }
+
+        $class = $entity::class;
+
+        return false === ($marker = strrpos($class, '\\__CG__\\')) ? $class : substr($class, $marker + 8);
     }
 }

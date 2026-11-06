@@ -10,6 +10,13 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the core uses no package it does not require (F6 slice 2's defect)
+
+- `Base\Database\Attribute\Hashify` named doctrine/common's `ClassUtils`, which the core 5.x does not require (an
+  application without it failed on a sign-up: the twin's FormScenariosTest): the entity's class is the unit of work's
+  proxy-safe `className()` where a persistence is installed, else the class with Doctrine's proxy marker taken off.
+  BareTest hashes through it on the core installed alone (doctrine/common absent).
+
 ### Added: an association compared by its key, without a join; the repositories' interfaces completed (plan "omnibase agnostic", steps E2b and E2')
 
 - `Base\Database\Repository\Finder\Key::of($value)`, a criterion's value: a to-one association of the entity compared
