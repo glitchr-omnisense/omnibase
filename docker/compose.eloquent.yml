@@ -1,0 +1,11 @@
+# omnibridge/eloquent's checkout (with its own vendor/, `composer install` in it) mounted beside the core: the harness
+# switch of the behaviour tests (plan "omnibase agnostic", step F7c). With OMNIBASE_ELOQUENT set, each test using
+# Tests\Base\Database\Backend\BothBackends runs on Eloquent too; without this overlay those cases are skipped.
+#
+#   docker compose -f compose.yml -f compose.checkouts.yml -f compose.eloquent.yml run --rm omnibase test
+services:
+  omnibase:
+    environment:
+      OMNIBASE_ELOQUENT: /srv/omnibridge/eloquent
+    volumes:
+      - ${OMNIBRIDGE:-../../../omnibridge}/eloquent:/srv/omnibridge/eloquent:ro

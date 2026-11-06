@@ -7,6 +7,7 @@ use Base\Bridge\Doctrine\DoctrineUnitOfWork;
 use Base\Database\Attribute\Slugify;
 use Base\Entity\Thread\Taxon;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\Database\Backend\BothBackends;
 
 /**
  * A taxon's slug is unique among the taxa of its type, not on the whole
@@ -15,6 +16,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class SlugifyPerTypeTest extends KernelTestCase
 {
+    use BothBackends;
+
     private function holder(Slugify $slugify, array $rows, object $entity, string $slug): ?object
     {
         $repository = new class($rows) {
@@ -102,14 +105,18 @@ class SlugifyPerTypeTest extends KernelTestCase
         }
     }
 
-    public function testTwoTaxaOfOneTypeStillDiffer(): void
+    /** On both persistences (BothBackends, plan "omnibase agnostic", step F7c): the holder is asked of the backend's repositories.
+     *
+     * @dataProvider backends
+     */
+    public function testTwoTaxaOfOneTypeStillDiffer(string $backend): void
     {
         if (!class_exists('App\\Kernel')) {
             self::markTestSkipped('Requires a host application (the omnibase harness).');
         }
 
         self::bootKernel();
-        $em = static::getContainer()->get('doctrine')->getManager();
+        $em = $this->unitOfWork($backend);
         $label = 'Desserts '.bin2hex(random_bytes(3));
         $first = new Taxon($label);
         $em->persist($first);

@@ -29,6 +29,11 @@ use Omnibridge\Persistence\Lifecycle;
 use Base\Database\Attribute\Backend\Backends;
 use Base\Database\Mapping\EntityShape;
 use Base\Database\Mapping\EntityShapes;
+use Base\Database\Entity\EntityValues;
+use Base\Database\UnitOfWorks;
+use Base\Exception\UnsupportedBehaviourException;
+use Omnibridge\Persistence\Snapshots;
+use Omnibridge\Persistence\UnitOfWork as NeutralUnitOfWork;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -228,11 +233,21 @@ abstract class AbstractAttribute implements AttributeInterface
     }
 
     /**
+     * The entity's changes, computed again first. Given the unit of work of the hook's event (plan "omnibase agnostic",
+     * step F7c), omnisense/omnibridge's contract answers - recompute(), then changes() -, whichever persistence keeps
+     * the entity; without one, Doctrine's unit of work (deprecated until 6.0).
+     *
      * @param $entity
      * @return array[]|PersistentCollection|\mixed[][]
      */
-    public static function getEntityChangeSet($entity): array|PersistentCollection
+    public static function getEntityChangeSet($entity, ?NeutralUnitOfWork $unitOfWork = null): array|PersistentCollection
     {
+        if (null !== $unitOfWork) {
+            $unitOfWork->recompute($entity);
+
+            return $unitOfWork->changes($entity);
+        }
+
         // (NB: /!\ computeChangeSets != recomputeSingleChangeSets)
         self::getUnitOfWork()->recomputeSingleEntityChangeSet(
             self::getClassMetadata($entity),
@@ -276,8 +291,22 @@ abstract class AbstractAttribute implements AttributeInterface
      *                          repository, Base\Database\Repository\ServiceEntityRepository, or any other)
      * @throws NotSupported
      */
-    public function getPropertyOwnerRepository($entity, string $property): EntityRepository
+    public function getPropertyOwnerRepository($entity, string $property, ?NeutralUnitOfWork $unitOfWork = null): EntityRepository|\Base\Database\Repository\Entities
     {
+        if (null !== $unitOfWork) {
+            // The persistence's repositories (plan "omnibase agnostic", step F7c): the same classes asked.
+            $repositories = UnitOfWorks::repositories($unitOfWork);
+            $className = $unitOfWork->className($entity);
+            $repository = $repositories->of($className);
+            while ($className = get_parent_class($className)) {
+                if (property_exists($className, $property)) {
+                    $repository = $repositories->of($className);
+                }
+            }
+
+            return $repository;
+        }
+
         $className = get_class($entity);
         $repository = $this->getEntityManager()->getRepository($className);
 
@@ -295,13 +324,15 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $data
      * @return object|null
      */
-    public static function getEntityFromData($classname, $data): ?object
+    public static function getEntityFromData($classname, $data, ?NeutralUnitOfWork $unitOfWork = null): ?object
     {
         if ($data === null) {
             return null;
         }
 
-        $fieldNames = self::getClassMetadata($classname)->getFieldNames();
+        $fieldNames = null !== $unitOfWork
+            ? UnitOfWorks::shapes($unitOfWork)->shape($classname)->fieldNames()
+            : self::getClassMetadata($classname)->getFieldNames();
         $fields = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
@@ -315,9 +346,9 @@ abstract class AbstractAttribute implements AttributeInterface
      * @return object|null
      * @throws MappingException
      */
-    public static function getOriginalEntity($entity): ?object
+    public static function getOriginalEntity($entity, ?NeutralUnitOfWork $unitOfWork = null): ?object
     {
-        return self::getEntityFromData(get_class($entity), self::getOriginalEntityData($entity));
+        return self::getEntityFromData(get_class($entity), self::getOriginalEntityData($entity, $unitOfWork), $unitOfWork);
     }
 
     /**
@@ -325,8 +356,22 @@ abstract class AbstractAttribute implements AttributeInterface
      * @return array|null
      * @throws MappingException
      */
-    public static function getOriginalEntityData($entity): ?array
+    public static function getOriginalEntityData($entity, ?NeutralUnitOfWork $unitOfWork = null): ?array
     {
+        if (null !== $unitOfWork) {
+            // What the unit of work remembers of the entity (omnisense/omnibridge's Snapshots), its identifier beside.
+            if (!$unitOfWork instanceof Snapshots) {
+                throw UnsupportedBehaviourException::for(Snapshots::class, $unitOfWork);
+            }
+            $primaryKey = UnitOfWorks::shapes($unitOfWork)->shape($entity)->primaryKey();
+            $entityData = $unitOfWork->original($entity);
+            if (null !== $primaryKey) {
+                $entityData[$primaryKey] = self::getFieldValue($entity, $primaryKey, $unitOfWork);
+            }
+
+            return $entityData;
+        }
+
         $primaryKey = self::getClassMetadataManipulator()->getPrimaryKey($entity); // primaryKey information missing
 
         try {
@@ -343,23 +388,23 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $entity
      * @return object|null
      */
-    public static function getOldEntity($entity): ?object
+    public static function getOldEntity($entity, ?NeutralUnitOfWork $unitOfWork = null): ?object
     {
-        return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity));
+        return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity, $unitOfWork), $unitOfWork);
     }
 
     /**
      * @param $entity
      * @return array|null
      */
-    public static function getOldEntityData($entity): ?array
+    public static function getOldEntityData($entity, ?NeutralUnitOfWork $unitOfWork = null): ?array
     {
-        $changeSet = self::getEntityChangeSet($entity);
+        $changeSet = self::getEntityChangeSet($entity, $unitOfWork);
 
         // Replace original entity values by the changeSet
         //   It happens that "original" entity data doesn't mean,
         //   original value before form submission
-        $entityData = self::getOriginalEntityData($entity);
+        $entityData = self::getOriginalEntityData($entity, $unitOfWork);
 
         foreach ($entityData as $key => $_) {
             if (array_key_exists($key, $changeSet)) {
@@ -386,9 +431,13 @@ abstract class AbstractAttribute implements AttributeInterface
      * @return mixed
      * @throws Exception
      */
-    public static function getFieldValue($entity, string $property)
+    public static function getFieldValue($entity, string $property, ?NeutralUnitOfWork $unitOfWork = null)
     {
-	return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
+        if (self::neutral($unitOfWork)) {
+            return EntityValues::of($unitOfWork)->get($entity, $property);
+        }
+
+        return self::getClassMetadataManipulator()->getFieldValue($entity, $property);
     }
 
     /**
@@ -397,8 +446,18 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $value
      * @return ClassMetadataManipulator|false
      */
-    public static function setFieldValue($entity, string $property, $value): false|ClassMetadataManipulator
+    public static function setFieldValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): false|ClassMetadataManipulator|EntityValues
     {
+        if (self::neutral($unitOfWork)) {
+            $values = EntityValues::of($unitOfWork);
+            if (!$values->isEntity($entity)) {
+                return false;
+            }
+            $values->set($entity, $property, $value);
+
+            return $values;
+        }
+
         return self::getClassMetadataManipulator()->setFieldValue($entity, $property, $value);
     }
 
@@ -417,8 +476,12 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param string $property
      * @return mixed|null
      */
-    public static function getPropertyValue($entity, string $property)
+    public static function getPropertyValue($entity, string $property, ?NeutralUnitOfWork $unitOfWork = null)
     {
+        if (self::neutral($unitOfWork)) {
+            return EntityValues::of($unitOfWork)->property($entity, $property);
+        }
+
         return self::getClassMetadataManipulator()->getPropertyValue($entity, $property);
     }
 
@@ -428,9 +491,25 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $value
      * @return ClassMetadataManipulator
      */
-    public static function setPropertyValue($entity, string $property, $value): ClassMetadataManipulator
+    public static function setPropertyValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): ClassMetadataManipulator|EntityValues
     {
+        if (self::neutral($unitOfWork)) {
+            $values = EntityValues::of($unitOfWork);
+            $values->setProperty($entity, $property, $value);
+
+            return $values;
+        }
+
         return self::getClassMetadataManipulator()->setPropertyValue($entity, $property, $value);
+    }
+
+    /**
+     * Whether the values are read on the unit of work's persistence (plan "omnibase agnostic", step F7c): given one
+     * whose persistence registered its entities' shapes (EntityShapes). Otherwise Doctrine's metadata, as before.
+     */
+    private static function neutral(?NeutralUnitOfWork $unitOfWork): bool
+    {
+        return null !== $unitOfWork && Backends::has($unitOfWork, EntityShapes::class);
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void

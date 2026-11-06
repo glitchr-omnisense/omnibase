@@ -4,9 +4,9 @@ namespace Tests\Base\Database\Attribute;
 
 use Base\Entity\Thread;
 use Base\Entity\Thread\Taxon;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\PersistentCollection;
+use Doctrine\Common\Collections\AbstractLazyCollection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\Database\Backend\BothBackends;
 
 /**
  * An #[OrderColumn] association is loaded when it is read, not when its
@@ -16,11 +16,14 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  *
  * Driven on omnibase's Thread and its taxa (#[OrderColumn(orderBy:
  * "taxonPositions")]), in the host application's kernel and database (the
- * harness: a fresh SQLite one).
+ * harness: a fresh SQLite one), on both persistences (BothBackends: Doctrine's PersistentCollection, omnibridge/
+ * eloquent's LazyCollection - plan "omnibase agnostic", step F7c).
  */
 class OrderColumnLazyTest extends KernelTestCase
 {
-    private EntityManagerInterface $em;
+    use BothBackends;
+
+    private string $backend = 'doctrine';
     private array $created = [];
 
     protected function setUp(): void
@@ -30,19 +33,20 @@ class OrderColumnLazyTest extends KernelTestCase
         }
 
         self::bootKernel();
-        $this->em = static::getContainer()->get('doctrine')->getManager();
     }
 
     protected function tearDown(): void
     {
-        if (isset($this->em)) {
-            $this->em->clear();
+        if ([] !== $this->created) {
+            $this->clear($this->backend);
+            $unitOfWork = $this->unitOfWork($this->backend);
             foreach (array_reverse($this->created) as [$class, $id]) {
-                if ($entity = $this->em->find($class, $id)) {
-                    $this->em->remove($entity);
+                if ($entity = $this->find($this->backend, $class, $id)) {
+                    $unitOfWork->remove($entity);
                 }
             }
-            $this->em->flush();
+            $unitOfWork->flush();
+            $this->created = [];
         }
         parent::tearDown();
     }
@@ -50,7 +54,7 @@ class OrderColumnLazyTest extends KernelTestCase
     private function taxon(string $label): Taxon
     {
         $taxon = new Taxon($label.' '.bin2hex(random_bytes(3)));
-        $this->em->persist($taxon);
+        $this->unitOfWork($this->backend)->persist($taxon);
 
         return $taxon;
     }
@@ -59,14 +63,14 @@ class OrderColumnLazyTest extends KernelTestCase
     private function threadWithThreeTaxa(): array
     {
         [$a, $b, $c] = [$this->taxon('A'), $this->taxon('B'), $this->taxon('C')];
-        $this->em->flush();
+        $this->unitOfWork($this->backend)->flush();
 
         $thread = new Thread(null, null, 'Ordered '.bin2hex(random_bytes(3)));
         foreach ([$a, $b, $c] as $taxon) {
             $thread->addTaxon($taxon);
         }
-        $this->em->persist($thread);
-        $this->em->flush();
+        $this->unitOfWork($this->backend)->persist($thread);
+        $this->unitOfWork($this->backend)->flush();
 
         // Removed in the reverse order: the thread, then its taxa.
         foreach ([$a, $b, $c] as $taxon) {
@@ -79,9 +83,9 @@ class OrderColumnLazyTest extends KernelTestCase
 
     private function load(int $id): Thread
     {
-        $this->em->clear();
+        $this->clear($this->backend);
 
-        return $this->em->find(Thread::class, $id);
+        return $this->find($this->backend, Thread::class, $id);
     }
 
     private function ids(iterable $taxa): array
@@ -94,21 +98,25 @@ class OrderColumnLazyTest extends KernelTestCase
         return $ids;
     }
 
-    public function testTheTaxaAreLoadedWhenRead(): void
+    /** @dataProvider backends */
+    public function testTheTaxaAreLoadedWhenRead(string $backend): void
     {
+        $this->backend = $backend;
         [$id, $taxa] = $this->threadWithThreeTaxa();
 
         $thread = $this->load($id);
         $collection = $thread->getTaxa();
-        $this->assertInstanceOf(PersistentCollection::class, $collection);
+        $this->assertInstanceOf(AbstractLazyCollection::class, $collection);
         $this->assertFalse($collection->isInitialized(), 'loading the thread loads none of its ordered associations');
 
         $this->assertSame($taxa, $this->ids($collection));
         $this->assertTrue($collection->isInitialized());
     }
 
-    public function testAReorderSavedIsTheOrderReadAfterTheNextLoad(): void
+    /** @dataProvider backends */
+    public function testAReorderSavedIsTheOrderReadAfterTheNextLoad(string $backend): void
     {
+        $this->backend = $backend;
         [$id, [$a, $b, $c]] = $this->threadWithThreeTaxa();
 
         // As the back office's sortable field does: the same entries, another order.
@@ -121,7 +129,7 @@ class OrderColumnLazyTest extends KernelTestCase
         foreach ([$c, $a, $b] as $taxonId) {
             $thread->addTaxon($byId[$taxonId]);
         }
-        $this->em->flush();
+        $this->unitOfWork($backend)->flush();
 
         $thread = $this->load($id);
         $this->assertFalse($thread->getTaxa()->isInitialized());
@@ -138,12 +146,14 @@ class OrderColumnLazyTest extends KernelTestCase
         // Saved again without the taxa read: the positions are written as they were.
         $thread = $this->load($id);
         $thread->setTitle('Renamed '.bin2hex(random_bytes(3)));
-        $this->em->flush();
+        $this->unitOfWork($backend)->flush();
         $this->assertSame([$c, $a, $b], $this->ids($this->load($id)->getTaxa()));
     }
 
-    public function testAnEntryAddedBeforeTheFirstReadComesLast(): void
+    /** @dataProvider backends */
+    public function testAnEntryAddedBeforeTheFirstReadComesLast(string $backend): void
     {
+        $this->backend = $backend;
         [$id, [$a, $b, $c]] = $this->threadWithThreeTaxa();
 
         $thread = $this->load($id);
@@ -155,20 +165,20 @@ class OrderColumnLazyTest extends KernelTestCase
         foreach ([$b, $c, $a] as $taxonId) {
             $thread->addTaxon($byId[$taxonId]);
         }
-        $this->em->flush();
+        $this->unitOfWork($backend)->flush();
 
         $d = $this->taxon('D');
-        $this->em->flush();
+        $this->unitOfWork($backend)->flush();
         $this->created[] = [Taxon::class, $d->getId()];
         $dId = $d->getId();
 
         $thread = $this->load($id);
-        $d = $this->em->find(Taxon::class, $dId);
-        $thread->getTaxa()->add($d); // before anything read it: Doctrine keeps it while it loads the rest
+        $d = $this->find($backend, Taxon::class, $dId);
+        $thread->getTaxa()->add($d); // before anything read it: the persistence keeps it while it loads the rest
         $this->assertFalse($thread->getTaxa()->isInitialized());
 
         $this->assertSame([$b, $c, $a, $dId], $this->ids($thread->getTaxa()));
-        $this->em->flush();
+        $this->unitOfWork($backend)->flush();
 
         $this->assertSame([$b, $c, $a, $dId], $this->ids($this->load($id)->getTaxa()));
     }

@@ -249,6 +249,22 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   (`'utc_datetime_immutable'`) for a description built with no persistence installed, as the core's entities now do.
 - doctrine/common is not required by the core: an application that uses its `ClassUtils` itself requires it.
 
+## The behaviours on any persistence (step F7c)
+
+- Nothing to change for an application on Doctrine: the behaviours write the same rows.
+- `AbstractAttribute`'s value and change helpers take an optional last argument, the unit of work of the hook's event
+  (`getFieldValue($entity, $property, $event->unitOfWork)`...): an application's own attribute passes it to run on any
+  persistence; without it Doctrine's metadata answers, as before. `setFieldValue()` and `setPropertyValue()` may
+  return a `Base\Database\Entity\EntityValues` then (their result was the manipulator, which nothing read).
+- An attribute of an application or a bundle that overrides a Doctrine-typed hook (`onFlush(OnFlushEventArgs ...)`,
+  `prePersist(LifecycleEventArgs ...)`) is refused under omnibridge/eloquent: move its logic to the neutral hook
+  (`onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property)`). omnibase/marketplace's `OrderReference`
+  is one (step B).
+- An entity dispatcher (`AbstractEventDispatcher`) keeps its Doctrine-typed hooks: under omnibridge/eloquent they get
+  doctrine/persistence's `LifecycleEventArgs` over the unit of work. One overriding `postFlush()` is refused there.
+- `EntityHydrator::getOriginalEntityData()` reads a PreUpdate's changes from any lifecycle arguments that give them
+  (`getEntityChangeSet()`), as from Doctrine's PreUpdateEventArgs.
+
 ## Stays in the core, deliberately
 
 - The symfony/process patch (`extra.omnibridge.patches`, `process-timeout-from-env`): it applies only

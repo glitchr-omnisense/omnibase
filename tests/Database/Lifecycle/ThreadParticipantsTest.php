@@ -9,18 +9,32 @@ use Base\Entity\User\Notification;
 use Base\Notifier\NotifierInterface;
 use Base\Service\Locator;
 use Base\Service\ObfuscatorInterface;
+use Base\Database\UnitOfWorks;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\Database\Backend\BothBackends;
 use Symfony\Component\HttpFoundation\Request;
 use Tests\Base\Http\HttpTestTrait;
 
 /**
  * ThreadSubscriber's Doctrine hooks (prePersist, onFlush), relayed to ThreadParticipants: they were
  * registered nowhere, so no Mention was stored, thread.mentioned never mailed, and no reply was
- * followed by its parent's owners.
+ * followed by its parent's owners. On both persistences (BothBackends, plan "omnibase agnostic", step F7c:
+ * omnibridge/eloquent's ThreadListener and entity dispatchers on the same rule); the users are Doctrine's, read
+ * through the backend.
  */
 final class ThreadParticipantsTest extends KernelTestCase
 {
-    use HttpTestTrait;
+    use HttpTestTrait, BothBackends {
+        HttpTestTrait::entityManager insteadof BothBackends;
+    }
+
+    private string $backend = 'doctrine';
+
+    private function uow(): UnitOfWork
+    {
+        return $this->unitOfWork($this->backend);
+    }
 
     /** @var Thread[] */
     private array $threads = [];
@@ -52,8 +66,10 @@ final class ThreadParticipantsTest extends KernelTestCase
         parent::tearDown();
     }
 
-    public function testAMentionInTheTextIsStoredAtTheFlushAndRemovedWithIt(): void
+    /** @dataProvider backends */
+    public function testAMentionInTheTextIsStoredAtTheFlushAndRemovedWithIt(string $backend): void
     {
+        $this->backend = $backend;
         $author = $this->createUser();
         $mentionee = $this->createUser();
 
@@ -62,41 +78,44 @@ final class ThreadParticipantsTest extends KernelTestCase
 
         // Saved again with the same text, or another mention of the same user: still one.
         $thread->setContent('Re-bonjour '.$this->mention($mentionee).' et '.$this->mention($mentionee));
-        $this->entityManager()->flush();
+        $this->uow()->flush();
         self::assertSame([$mentionee->getId()], $this->mentioneeIds($thread));
 
         $thread->setContent('Plus de mention.');
-        $this->entityManager()->flush();
+        $this->uow()->flush();
         self::assertSame([], $this->mentioneeIds($thread), 'the text no longer mentions them: their Mention is removed');
     }
 
-    public function testTheMentionerIsTheOwner(): void
+    /** @dataProvider backends */
+    public function testTheMentionerIsTheOwner(string $backend): void
     {
+        $this->backend = $backend;
         $author = $this->createUser();
         $mentionee = $this->createUser();
         $thread = $this->thread($author, $this->mention($mentionee));
 
-        $this->entityManager()->clear();
-        $mention = $this->entityManager()->getRepository(Mention::class)->findOneBy(['thread' => $thread->getId()]);
+        $this->clear($backend);
+        $mention = UnitOfWorks::repositories($this->uow())->of(Mention::class)->findOneBy(['thread' => $thread->getId()]);
         self::assertNotNull($mention);
         self::assertSame([$author->getId()], array_map(fn ($user) => $user->getId(), $mention->getMentioners()->toArray()));
     }
 
-    public function testAReplyIsFollowedByItsParentsOwners(): void
+    /** @dataProvider backends */
+    public function testAReplyIsFollowedByItsParentsOwners(string $backend): void
     {
+        $this->backend = $backend;
         $author = $this->createUser();
         $replier = $this->createUser();
         $parent = $this->thread($author, 'Le fil');
 
-        $reply = $this->thread($replier, 'Une réponse', $this->entityManager()->find(Thread::class, $parent->getId()));
+        $reply = $this->thread($replier, 'Une réponse', $this->find($backend, Thread::class, $parent->getId()));
         self::assertSame([$author->getId()], $this->followerIds($reply));
 
         // Moved under another parent: its owners follow it too.
         $owner = $this->createUser();
         $other = $this->thread($owner, 'Un autre fil');
-        $em = $this->entityManager();
-        $em->find(Thread::class, $reply->getId())->setParent($em->find(Thread::class, $other->getId()));
-        $em->flush();
+        $this->find($backend, Thread::class, $reply->getId())->setParent($this->find($backend, Thread::class, $other->getId()));
+        $this->uow()->flush();
 
         $followers = $this->followerIds($reply);
         sort($followers);
@@ -105,8 +124,10 @@ final class ThreadParticipantsTest extends KernelTestCase
         self::assertSame($expected, $followers);
     }
 
-    public function testThePublicationMailsTheMentioneeAndNotAnAuthorMentionedInTheirOwnThread(): void
+    /** @dataProvider backends */
+    public function testThePublicationMailsTheMentioneeAndNotAnAuthorMentionedInTheirOwnThread(string $backend): void
     {
+        $this->backend = $backend;
         $author = $this->createUser();
         $mentionee = $this->createUser();
 
@@ -121,8 +142,10 @@ final class ThreadParticipantsTest extends KernelTestCase
         self::assertSame($expected, $sent, 'the author is told of the publication, not of their own mention; the mentionee of theirs');
     }
 
-    public function testAThreadWrittenBeforeItsMentionsWereStoredMailsThemOnceAtItsPublication(): void
+    /** @dataProvider backends */
+    public function testAThreadWrittenBeforeItsMentionsWereStoredMailsThemOnceAtItsPublication(string $backend): void
     {
+        $this->backend = $backend;
         $author = $this->createUser();
         $mentionee = $this->createUser();
 
@@ -130,7 +153,7 @@ final class ThreadParticipantsTest extends KernelTestCase
         // Its Mention taken out, as for a thread written while the hooks were registered nowhere.
         $metadata = $this->entityManager()->getClassMetadata(Mention::class);
         $this->entityManager()->getConnection()->executeStatement(sprintf('DELETE FROM %s WHERE %s = ?', $metadata->getTableName(), $metadata->getSingleAssociationJoinColumnName('thread')), [$thread->getId()]);
-        $this->entityManager()->clear();
+        $this->clear($backend);
         self::assertSame([], $this->mentioneeIds($thread));
 
         $sent = $this->publish($thread, again: true);
@@ -160,8 +183,8 @@ final class ThreadParticipantsTest extends KernelTestCase
         $property->setValue(null, $notifier);
 
         try {
-            $em = $this->entityManager();
-            $thread = $em->find(Thread::class, $thread->getId());
+            $em = $this->uow();
+            $thread = $this->find($this->backend, Thread::class, $thread->getId());
             $thread->setState(ThreadState::FUTURE);
             $thread->setPublishedAt(new \DateTime('-1 hour'));
             $em->flush();
@@ -181,10 +204,11 @@ final class ThreadParticipantsTest extends KernelTestCase
 
     private function thread(object $owner, string $content, ?Thread $parent = null): Thread
     {
+        $owner = $this->find($this->backend, $owner::class, $owner->getId());
         $thread = new Thread($owner, $parent, 'Fil '.bin2hex(random_bytes(3)), 'fil-'.bin2hex(random_bytes(4)));
         $thread->setContent($content);
 
-        $em = $this->entityManager();
+        $em = $this->uow();
         $em->persist($thread);
         $em->flush();
 

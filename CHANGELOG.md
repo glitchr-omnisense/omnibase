@@ -10,6 +10,30 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the behaviours on any persistence (plan "omnibase agnostic", step F7c, second part)
+
+- `Base\Database\Entity\EntityValues`: an entity's values on the persistence's shapes (what omnibridge/doctrine's
+  ClassMetadataManipulator does on Doctrine's metadata: a mapped property as it is held, an enumeration field as its
+  backing value, any other through the property accessor, paths and translations), one per unit of work.
+- `AbstractAttribute`'s `getFieldValue()`, `setFieldValue()`, `getPropertyValue()`, `setPropertyValue()`,
+  `getEntityChangeSet()`, `getOriginalEntityData()`, `getOriginalEntity()`, `getOldEntity()`, `getOldEntityData()`,
+  `getEntityFromData()` and `getPropertyOwnerRepository()` take the unit of work last: given one whose persistence
+  registered its shapes, they read on omnisense/omnibridge's `UnitOfWork` (`recompute()`, `changes()`) and `Snapshots`
+  (`original()`), the shapes and the persistence's `Repositories`; without one, Doctrine's, as before.
+- `#[Slugify]` and `#[Uploader]` pass the unit of work of their event (kept for the methods their hooks call), so their
+  old entity, change set, values and slug holder no longer need Doctrine's unit of work; `#[Timestamp]`,
+  `#[Blameable]`, `#[Randomize]`, `#[GenerateUuid]` pass it too. On Doctrine the same values (the shapes are its
+  metadata's).
+- `EntityHydrator::getOriginalEntityData()` reads a PreUpdate's changes from lifecycle arguments that give them by
+  `getEntityChangeSet()` (omnibridge/eloquent's, for the entity dispatchers), as from Doctrine's PreUpdateEventArgs.
+- Tests: the behaviour tests run on both backends with the harness switch (`Tests\Base\Database\Backend\BothBackends`,
+  `docker/compose.eloquent.yml`, OMNIBASE_ELOQUENT): OrderColumnLazyTest, SlugifyPerTypeTest (the taxa),
+  UploaderSplFileInfoTest (the upload), EmptyTrashTest (the bin), ThreadParticipantsTest (mentions, followers, the
+  publication's mails) through omnisense/omnibridge's UnitOfWork; BehaviourBackendsTest checks omnibridge/eloquent's
+  parts and that the values on Doctrine's shapes are the manipulator's. Without the overlay the Eloquent cases skip.
+- Docs: docs/20-architecture/doctrine.md (the entity's values), docs/30-operations/harness.md (the switch),
+  UPGRADE-5.0.md.
+
 ### Added: the schema created from the description (plan "omnibase agnostic", step F7a)
 
 - `Base\Database\Schema\EntitySchema`: omnibase's entities and an application's described with no persistence
