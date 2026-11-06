@@ -79,8 +79,8 @@ form:
   `criterions()` gives them as `Finder\Criterion` objects (field, index, value,
   options), `extras()` the specials' numbers and keys;
 - `separator` (`And` or `Or`), `column` (`countFor<Column>By`,
-  `lengthOf<Column>By`), `cacheable`, `eagerly`, `request` (find, count,
-  lengthOf) and `special` (One, All, Randomly, AtMost, Last, LastOne, Previous,
+  `lengthOf<Column>By`, `sumOf<Column>By`...), `cacheable`, `eagerly`, `request` (find, count,
+  lengthOf, sumOf, minOf, maxOf) and `special` (One, All, Randomly, AtMost, Last, LastOne, Previous,
   PreviousOne, Next, NextOne).
 
 What the parser asks of the entity is a `Finder\Subject`: its class, its fields
@@ -118,6 +118,55 @@ ends with (`NotStartingWith`, `NotEndingWith`, `NotInstanceOf`, `NotClassOf`, `N
 gives each entity's number of members (`SIZE()`), `lengthOf<Field>By` its length (`LENGTH()`); a
 `DateTimeImmutable` compared with a field of a mutable type is bound as the same moment; `Null` and
 `NotNull` bind no parameter.
+
+## Groups, aggregates, and the queries one persistence runs (step E2)
+
+A repository's method is written in the finder language wherever it can be, so that every
+persistence compiles it (plan "omnibase agnostic", step E2; the inventory of the repositories'
+hand-written queries, each sorted, is in the plan). Two features were added for it:
+
+- **Groups.** A name joins its criteria with one separator, `And` or `Or`. The parentheses a
+  name cannot say are an entry of the criteria array, `Finder\Group::by(<name>, ...values)`, read
+  by the same parser as the criteria part of `findBy<name>`, its own separator inside:
+
+  ```php
+  $notifications->count(['user' => $user, 'isRead' => false,
+      Group::by('TitleNotEmptyOrSubjectNotEmptyOrContentNotEmpty')]);
+  $translations->findByTranslatableNotNull([
+      Group::by('InsensitivePartialTitleOrInsensitivePartialExcerpt', '%word%', '%word%'),
+      'translatable.state' => ['STATE_PUBLISH'],
+  ]);
+  ```
+
+  Every word of a criterion is allowed in a group; not what is no condition (`ClosestTo`,
+  `FarestTo`, `Model`), `WithRoute`, nor a criteria array or any argument after the named values.
+  `Query::criterions()` gives a group as one criterion whose value is the `Group` read
+  (`Group::criterions()`, `Group::separator()`); omnibridge/doctrine compiles it into a
+  parenthesised expression whose parameters and options are its own.
+- **Aggregates.** `sumOf<Column>By...`, `minOf<Column>By...` and `maxOf<Column>By...` give `SUM()`,
+  `MIN()` or `MAX()` of a field over the rows the criteria select (`sumOfViewsByDateGreaterEqualTo($since,
+  ['path' => '/'])`, `minOfDate()`): the database's value as it gives it, `null` without a row
+  (`Query::$request` `sumOf`, `minOf`, `maxOf`; internal `__sumOfBy`...).
+
+omnibridge/doctrine's compiler also binds an equality on one value with the field's type when
+that type converts it (`ConvertedInCriteria`: the passkeys' base64 and AAGUID columns), as
+Doctrine's own `findBy()` does: `findOneBy(['publicKeyCredentialId' => $bytes])` finds the row.
+
+What the language does not say stays the backend's, declared so:
+`#[Base\Database\Repository\BackendOnly('doctrine', reason)]` on the core's interface method and
+on the implementation that runs it - the analytics' native SQL (upserts, `INSERT IGNORE`, `DATE()`
+groupings, correlated subqueries) and `Redirections::hit()`'s bulk `UPDATE`. `BackendOnly::declared()`
+lists them (14, kept in `tests/Database/Repository/BackendOnlyTest`), `BackendOnly::runs()` tells
+whether a persistence runs one, and another persistence's implementation answers
+`BackendOnly::refuse()` - an `UnsupportedQueryException` that names the method, the backend it is
+written for and why - until it writes the query in its own terms, never a silent wrong answer.
+
+Each rewritten method gives the rows of its former query, in the same order:
+`FinderParityTest::testTheRewrittenQueriesGiveTheRowsOfBefore` runs both (the former queries
+kept word for word in `tests/Database/Repository/HandWrittenQueries.php`) on rows it writes in the
+harness, and lesringostars' FinderParityTest runs them on the site's data. Under omnisense/omnibase
+4.x, whose finder has neither groups nor aggregates, omnibridge/doctrine's methods written on them
+keep their former query (`ServiceEntityRepository::finderReadsGroups()`).
 
 ## Translations
 

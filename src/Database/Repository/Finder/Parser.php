@@ -16,7 +16,9 @@ use Exception;
  * ClassOf, MemberOf, But, WithRoute, Model), the separator (And, Or), the column
  * (countFor...By, lengthOf...By), the specials (One, All, Randomly, AtMost<N>,
  * Last<N>, LastOne, Previous<N>, PreviousOne, Next<N>, NextOne), cache and
- * Eagerly.
+ * Eagerly; since step E2, the aggregates sumOf<Column>By, minOf<Column>By and
+ * maxOf<Column>By, and the groups (Group::by('AOrB', ...) as an entry of the
+ * criteria array: a parenthesised part of the finder, read by this parser).
  *
  * Nothing of an ORM: what it asks of the entity is a Subject (its class, its
  * fields, a Query-by-Example's criteria), and a host's request (WithRoute) is
@@ -35,6 +37,10 @@ final class Parser
     public const REQUEST_COUNT = "count";
     public const REQUEST_DISTINCT = "distinctCount";
     public const REQUEST_LENGTH = "lengthOf";
+    // The aggregates of a column (step E2): one value, the database's, null without rows.
+    public const REQUEST_SUM = "sumOf";
+    public const REQUEST_MIN = "minOf";
+    public const REQUEST_MAX = "maxOf";
 
     public const LOAD_EAGERLY = "Eagerly";
 
@@ -158,6 +164,7 @@ final class Parser
         $this->special = null;
 
         [$internal, $internalArguments] = $this->__parse($method, $arguments);
+        $internalArguments = $this->groups($internalArguments, $internal);
 
         return new Query(
             method: $internal,
@@ -171,6 +178,47 @@ final class Parser
             request: $this->request,
             special: $this->special,
         );
+    }
+
+    /**
+     * The groups of the criteria array (Group::by(...)), each read as the criteria part of
+     * findBy<name>: by a parser of its own, so that the call's criteria, options and
+     * separator stay the call's.
+     *
+     * @param list<mixed> $arguments the internal request's arguments, the criteria first
+     *
+     * @return list<mixed>
+     *
+     * @throws Exception a group with a word that is no condition, or with more arguments than its name reads
+     */
+    private function groups(array $arguments, string $internal): array
+    {
+        if (str_starts_with($internal, '__'.self::REQUEST_FIND.self::SPECIAL_ALL) || !\is_array($arguments[0] ?? null)) {
+            return $arguments;
+        }
+
+        foreach ($arguments[0] as $key => $value) {
+            if (!$value instanceof Group) {
+                continue;
+            }
+            if (str_contains($value->name, self::OPTION_WITH_ROUTE)) {
+                throw new Exception("A finder group cannot read a route parameter (\"" . $value->name . "\").");
+            }
+
+            $query = (new self($this->subject, $this->routeParameters))->parse(self::REQUEST_FIND . self::SEPARATOR_BY . $value->name, $value->arguments);
+            if (\count($query->arguments) > 1 || array_diff_key($query->arguments[0] ?? [], $query->criteria)) {
+                throw new Exception("A finder group reads the values of its name only (\"" . $value->name . "\": " . \count($value->arguments) . " given).");
+            }
+            foreach ($query->options as $id => $options) {
+                if (str_starts_with($id, lcfirst(self::OPTION_MODEL) . self::SEPARATOR) || array_intersect($options, [self::OPTION_CLOSESTTO, self::OPTION_FARESTTO])) {
+                    throw new Exception("A finder group holds conditions only: \"" . $value->name . "\" orders the rows or expands a model.");
+                }
+            }
+
+            $arguments[0][$key] = $value->read($query);
+        }
+
+        return $arguments;
     }
 
     /**
@@ -453,6 +501,7 @@ final class Parser
             self::REQUEST_CACHE . ucfirst(self::REQUEST_COUNT);
 
         $lengthRequest = self::REQUEST_LENGTH;
+        $aggregateRequest = self::REQUEST_SUM . "|" . self::REQUEST_MIN . "|" . self::REQUEST_MAX;
         $specials = implode("|", self::getSpecials());
 
         $eagerly = self::LOAD_EAGERLY;
@@ -492,6 +541,14 @@ final class Parser
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
             $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
+        } elseif (preg_match('/^(?P<fn>' . $aggregateRequest . ')(?P<column>[A-Z][A-Za-z0-9_]*?)(?:' . $by . '(?P<names>.*))?$/', $method, $magicExtra)) {
+            // sumOfViewsBy..., minOfDate (step E2): the column, then the criteria as for find...By.
+            $requestType = array_pop_key("fn", $magicExtra);
+            $byNames = array_pop_key("names", $magicExtra) ?? "";
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)));
+
+            $magicFn = $requestType;
+            $magicExtra = [];
         } elseif (preg_match('/^(?P<fn>(?:' . $findRequest . ')(?P<special>' . $specials . ')?(?P<eagerly>' . $eagerly . ')?' . $by . ')(?P<names>.*)/', $method, $magicExtra)) {
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
             $byNames = array_pop_key("names", $magicExtra);
@@ -511,7 +568,7 @@ final class Parser
         } else {
             throw new Exception(sprintf(
                 'Undefined method "%s". The method name must start with ' .
-                'either cache[PreviousOne|NextOne|One|Randomly|AtMost|Next|Previous|Last|LastOne|All][By], find[PreviousOne|NextOne|One|Randomly|AtMost|Next|Previous|Last|LastOne][By], distinctCount, count, lengthOf!',
+                'either cache[PreviousOne|NextOne|One|Randomly|AtMost|Next|Previous|Last|LastOne|All][By], find[PreviousOne|NextOne|One|Randomly|AtMost|Next|Previous|Last|LastOne][By], distinctCount, count, lengthOf, sumOf, minOf, maxOf!',
                 $method
             ));
         }

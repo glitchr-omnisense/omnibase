@@ -112,7 +112,10 @@ final class PasskeyRepositoryTest extends KernelTestCase
         self::assertNotInstanceOf(Passkey::class, $found);
         self::assertEquals($record, $found, 'the same 13 fields, the objects of webauthn-lib made again');
         self::assertNull($this->repository()->findOneByCredentialId(random_bytes(32)));
-        self::assertNull($this->repository()->findOneBy(['publicKeyCredentialId' => $record->publicKeyCredentialId]), 'omnibase\'s finder binds the raw id: why findOneByCredential() exists');
+        // Since step E2 the finder binds an equality on a converting type with the type (omnibridge/doctrine's
+        // ConvertedInCriteria), as Doctrine's findBy() does: findOneByCredential() is a finder too.
+        self::assertSame($this->repository()->findOneByCredential($record->publicKeyCredentialId)?->getId(), $this->repository()->findOneBy(['publicKeyCredentialId' => $record->publicKeyCredentialId])?->getId());
+        self::assertNotNull($this->repository()->findOneBy(['publicKeyCredentialId' => $record->publicKeyCredentialId]));
 
         $account = PublicKeyCredentialUserEntity::create('someone', (string) $user->getId(), 'Someone');
         self::assertEquals([$record], $this->repository()->findAllForUserEntity($account));

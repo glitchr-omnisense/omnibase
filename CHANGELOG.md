@@ -10,6 +10,33 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the repositories' hand-written queries sorted, most of them finders now (plan "omnibase agnostic", step E2)
+
+- The finder language reads **groups**: `Base\Database\Repository\Finder\Group::by('TitleNotEmptyOrSubjectNotEmpty')`,
+  an entry of the criteria array, parenthesised, its own separator inside (read by the same Parser as
+  `findBy<name>`; no ClosestTo, FarestTo, Model, WithRoute nor extra argument inside). `Query::criterions()` gives it
+  as one criterion whose value is the Group read.
+- And the **aggregates** `sumOf<Column>By...`, `minOf<Column>By...`, `maxOf<Column>By...` (`Parser::REQUEST_SUM`,
+  `REQUEST_MIN`, `REQUEST_MAX`; internal `__sumOfBy`...): the database's value, null without a row. PHPStan's
+  FinderMethodsExtension knows them.
+- `#[Base\Database\Repository\BackendOnly('doctrine', reason)]` declares a method only one persistence runs, on
+  the core's interface: the analytics' native SQL (`PageViews::{incrementView, dailyBreakdown, dailyBreakdownBySource,
+  hourlyBreakdown, hourlyBreakdownBySource}`, `PageVisits::{recordPresence, countUnique, dailyBreakdown,
+  hourlyBreakdown}`, `Visits::{recordPresence, returning, dailyBreakdown, hourlyBreakdown}`) and `Redirections::hit()`
+  (a bulk UPDATE). `BackendOnly::declared()`, `runs()`, `refuse()` (`UnsupportedQueryException`): another persistence
+  refuses them aloud. tests/Database/Repository/BackendOnlyTest keeps the 14.
+- omnibridge/doctrine (1.x) compiles both and writes 29 of its repositories' methods on the finder (TrashBalls,
+  Revisions, ScopedWeeks, SpecialDays, Redirections::forAddress, TextOverrides::map, Comments::countPending,
+  Threads::byStates, the three findByInsensitiveIdentifier, ThreadTranslations::search, Complaints::newest,
+  Connections::countFor, Identities, Notifications::{countUnreadFor, findVisibleFor}, Passkeys::findOneByCredential,
+  PushSubscriptions::countDistinctUsers, PageViews::{countViews, earliestDate}, Visits::countUnique,
+  Users::{byUsernameContaining, findActiveAdmins}); see its CHANGELOG and the plan's inventory.
+- FinderParityTest::testTheRewrittenQueriesGiveTheRowsOfBefore: each rewritten method against its former query,
+  kept word for word in tests/Database/Repository/HandWrittenQueries.php, on rows the test writes (redirections, text
+  overrides, special days, a scoped week, trash, page views, visits) and on the harness's other tables; the same rows,
+  in the same order. tests/Database/Repository/Finder/ParserTest reads the groups and the aggregates.
+- Agnostic 860, Foundation 923 (+3: Finder\Group, BackendOnly, UnsupportedQueryException).
+
 ### Changed: the other pages are the core's too (plan "omnibase agnostic", step F5e, slice 5b)
 
 - The decisions of omnibridge/symfony's other controllers, each a declared service answering what the host turns into

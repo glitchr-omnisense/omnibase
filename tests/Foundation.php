@@ -208,6 +208,8 @@
  * Devices, MemberSearch}, Base\Thread\{ThreadSearch, ThreadActions}, Base\Notifier\{NotificationCenter, ContactMessage,
  * TestRecipient}, Base\Request\{TimezoneSwitch, ErrorPage, ShortLinkRedirect, AttachmentDownload, SitemapPage},
  * Base\Screen\Welcome, Base\Field\Validation\Autovalidate, Base\Field\Search\ExchangeRate (the controllers' rules).
+ * 923 after step E2 (2026-11-06, +3): the finder language's groups, Base\Database\Repository\Finder\Group, and the
+ * methods only one persistence runs, Base\Database\Repository\{BackendOnly, UnsupportedQueryException}.
  */
 
 return [
@@ -415,12 +417,15 @@ return [
     Base\Database\Mapping\EntityFields::class,
     Base\Database\Mapping\EntityShape::class,
     Base\Database\Mapping\EntityShapes::class,
+    Base\Database\Repository\BackendOnly::class,
     Base\Database\Repository\Entities::class,
     Base\Database\Repository\Finder\Criterion::class,
+    Base\Database\Repository\Finder\Group::class,
     Base\Database\Repository\Finder\Parser::class,
     Base\Database\Repository\Finder\Query::class,
     Base\Database\Repository\Finder\Subject::class,
     Base\Database\Repository\Repositories::class,
+    Base\Database\Repository\UnsupportedQueryException::class,
     Base\Database\Schema\Attributes::class,
     Base\Database\Schema\DiscriminatorRule::class,
     Base\Database\Schema\ExtensionRule::class,

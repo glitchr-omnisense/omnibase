@@ -23,8 +23,8 @@ use PHPStan\Reflection\MethodsClassReflectionExtension;
  */
 final class FinderMethodsExtension implements MethodsClassReflectionExtension
 {
-    /** The requests Finder\Parser recognises (find, cache, count, distinctCount, lengthOf), then the rest of the name. */
-    public const PATTERN = '/^(?:find|cache|count|distinctCount|lengthOf)[A-Z]/';
+    /** The requests Finder\Parser recognises (find, cache, count, distinctCount, lengthOf, sumOf, minOf, maxOf), then the rest of the name. */
+    public const PATTERN = '/^(?:find|cache|count|distinctCount|lengthOf|sumOf|minOf|maxOf)[A-Z]/';
 
     public function hasMethod(ClassReflection $classReflection, string $methodName): bool
     {
