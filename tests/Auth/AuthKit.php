@@ -76,7 +76,7 @@ final class AuthKit
     public array $dispatched = [];
 
     /** @param \Base\Notifier\Notifier|null $notifier the host's (its welcome-back e-mail) */
-    public function __construct(EntityManagerInterface $entityManager, SecurityPolicy $security, string $now = 'now', ?\Base\Notifier\Notifier $notifier = null)
+    public function __construct(EntityManagerInterface|\Omnibridge\Persistence\UnitOfWork $entityManager, SecurityPolicy $security, string $now = 'now', ?\Base\Notifier\Notifier $notifier = null)
     {
         $this->clock = new FixedClock((new \DateTimeImmutable($now))->format('Y-m-d H:i:s').' UTC');
         $this->sender = new RecordingSender();

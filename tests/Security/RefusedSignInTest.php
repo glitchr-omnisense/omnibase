@@ -56,15 +56,15 @@ class RefusedSignInTest extends KernelTestCase
 
     public function testAWrongPasswordIsStillNotedOnItsAccount(): void
     {
-        $user = $this->createUser();
+        $user = $this->hostUser($this->createUser());
         $request = Request::create('/login', 'POST');
         $request->setSession(static::getContainer()->get('session.factory')->createSession());
         static::getContainer()->get('request_stack')->push($request);
 
         static::getContainer()->get(ConnectionSubscriber::class)->onLoginFailure($this->failure(new BadCredentialsException(), new UserBadge($user->getUserIdentifier(), static fn () => $user)));
 
-        $this->entityManager()->clear();
-        $connections = $this->entityManager()->getRepository(\Base\Entity\User\Connection::class)->findBy(['user' => $user->getId()]);
+        $this->hostClear();
+        $connections = $this->hostRepositories()->of(\Base\Entity\User\Connection::class)->findBy(['user' => $user->getId()]);
         $this->assertNotEmpty($connections, 'the failed attempt is on the account\'s connections');
     }
 }

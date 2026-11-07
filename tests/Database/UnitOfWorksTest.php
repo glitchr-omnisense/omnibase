@@ -18,15 +18,21 @@ use Base\Repository\User\Tokens;
 use Base\Service\SettingBag;
 use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
+use Omnibridge\Persistence\Backend;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\Database\Backend\HostPersistence;
 
 /**
  * The unit of work the core's services take (plan "omnibase agnostic", step
  * F2d): made from the entity manager they were handed, or the container's;
  * the repositories, the shapes and what only Doctrine does reached from it.
+ * The container's is the persistence's the host chose (HostPersistence, step
+ * F7f): Doctrine's in the harness, omnibridge/eloquent's in a site on eloquent.
  */
 final class UnitOfWorksTest extends KernelTestCase
 {
+    use HostPersistence;
+
     public function testAUnitOfWorkIsMadeFromTheEntityManagerOrTakenAsItIs(): void
     {
         $entityManager = $this->createMock(EntityManagerInterface::class);
@@ -49,15 +55,19 @@ final class UnitOfWorksTest extends KernelTestCase
         self::assertSame($given, UnitOfWorks::of($manager));
     }
 
-    public function testTheContainersUnitOfWorkIsDoctrinesOverItsEntityManager(): void
+    public function testTheContainersUnitOfWorkIsThePersistencesChosen(): void
     {
         self::bootKernel();
         $container = static::getContainer();
         $unitOfWork = $container->get(UnitOfWork::class);
 
-        self::assertInstanceOf(DoctrineUnitOfWork::class, $unitOfWork);
-        self::assertSame($container->get('doctrine')->getManager(), $unitOfWork->entityManager());
+        self::assertSame($container->get(Backend::class)->unitOfWork(), $unitOfWork, 'the backend\'s');
         self::assertSame($unitOfWork, $container->get('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork'), 'the union a deprecated constructor is autowired with');
+        if ('doctrine' === $this->hostPersistence()) {
+            // Doctrine's over its entity manager.
+            self::assertInstanceOf(DoctrineUnitOfWork::class, $unitOfWork);
+            self::assertSame($container->get('doctrine')->getManager(), $unitOfWork->entityManager());
+        }
     }
 
     public function testTheRepositoriesAndTheShapesThroughTheUnitOfWork(): void
@@ -91,20 +101,21 @@ final class UnitOfWorksTest extends KernelTestCase
     public function testARowLockedThenAFieldComparedAndSet(): void
     {
         self::bootKernel();
-        $unitOfWork = static::getContainer()->get(UnitOfWork::class);
+        $unitOfWork = $this->hostUnitOfWork();
         $setting = new Setting('f2d.unit_of_work.'.bin2hex(random_bytes(4)));
         $unitOfWork->persist($setting);
         $unitOfWork->flush();
-        $connection = $unitOfWork->entityManager()->getConnection();
+        // The database's own transaction state: the persistences share the connection.
+        $connection = $this->hostPdo();
 
         try {
             $result = Backends::of($unitOfWork, RowLocks::class)->locked($setting, static function () use ($connection): string {
-                self::assertTrue($connection->isTransactionActive());
+                self::assertTrue($connection->inTransaction());
 
                 return 'done';
             });
             self::assertSame('done', $result);
-            self::assertFalse($connection->isTransactionActive(), 'committed');
+            self::assertFalse($connection->inTransaction(), 'committed');
 
             try {
                 Backends::of($unitOfWork, RowLocks::class)->locked($setting, static fn () => throw new \RuntimeException('refused'));
@@ -112,13 +123,14 @@ final class UnitOfWorksTest extends KernelTestCase
             } catch (\RuntimeException $e) {
                 self::assertSame('refused', $e->getMessage());
             }
-            self::assertFalse($connection->isTransactionActive(), 'rolled back');
+            self::assertFalse($connection->inTransaction(), 'rolled back');
 
             $updates = Backends::of($unitOfWork, ConditionalUpdates::class);
             $path = $setting->getPath();
             self::assertTrue($updates->compareAndSet($setting, 'path', $path, $path.'.set'));
             self::assertFalse($updates->compareAndSet($setting, 'path', $path, $path.'.again'), 'the field no longer holds the value');
-            self::assertSame($path.'.set', $connection->fetchOne(sprintf('SELECT %s FROM %s WHERE id = ?', ($metadata = $unitOfWork->entityManager()->getClassMetadata(Setting::class))->getColumnName('path'), $metadata->getTableName()), [$setting->getId()]));
+            $unitOfWork->refresh($setting);
+            self::assertSame($path.'.set', $setting->getPath(), 'the row read again');
         } finally {
             $unitOfWork->refresh($setting);
             $unitOfWork->remove($setting);

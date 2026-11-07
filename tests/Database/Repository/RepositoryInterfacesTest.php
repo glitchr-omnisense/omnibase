@@ -42,13 +42,15 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  *   query and the same result cache: checked on the repository with its
  *   finder recorded instead of run (no database).
  * - Under Symfony each interface is the repository service the container
- *   hands out (read only: nothing written, the suite runs against an
+ *   hands out, of the persistence the host chose (step F7f) (read only: nothing written, the suite runs against an
  *   application's database too).
  * - Nothing of Doctrine in a signature: no QueryBuilder, Query, Criteria nor
  *   Collection taken or given back.
  */
 final class RepositoryInterfacesTest extends KernelTestCase
 {
+    use \Tests\Base\Database\Backend\HostPersistence;
+
     private const INTERFACES = [
         Entities::class => ServiceEntityRepository::class,
         Threads::class => ThreadRepository::class,
@@ -234,13 +236,21 @@ final class RepositoryInterfacesTest extends KernelTestCase
 
         self::bootKernel();
         $container = static::getContainer();
-        $entityManager = $container->get('doctrine')->getManager();
         $repositories = $container->get(Repositories::class);
-
-        self::assertSame($entityManager->getRepository(Thread::class), $repositories->of(Thread::class));
         $plain = $repositories->of(\Base\Entity\Thread\TagIntl::class);
-        self::assertInstanceOf(\Base\Bridge\Doctrine\DoctrineEntities::class, $plain);
-        self::assertSame($entityManager->getRepository(\Base\Entity\Thread\TagIntl::class)->count([]), $plain->count());
+        if ('doctrine' === $this->hostPersistence()) {
+            $entityManager = $container->get('doctrine')->getManager();
+            self::assertSame($entityManager->getRepository(Thread::class), $repositories->of(Thread::class));
+            self::assertInstanceOf(\Base\Bridge\Doctrine\DoctrineEntities::class, $plain);
+        } else {
+            // Another persistence's repositories (omnibridge/eloquent's in a site on eloquent): one per class.
+            self::assertInstanceOf(Entities::class, $repositories->of(Thread::class));
+            self::assertSame($repositories->of(Thread::class), $repositories->of(Thread::class));
+            self::assertInstanceOf(Entities::class, $plain);
+        }
+        if ($container->has('doctrine')) {
+            self::assertSame($container->get('doctrine')->getManager()->getRepository(\Base\Entity\Thread\TagIntl::class)->count([]), $plain->count(), 'the rows Doctrine counts');
+        }
         self::assertSame([], $repositories->byIds(Thread::class, [-1]));
         self::assertNull($repositories->oneById(Thread::class, -1));
         self::assertNull($repositories->oneById(\Base\Entity\Thread\TagIntl::class, -1));
@@ -255,16 +265,26 @@ final class RepositoryInterfacesTest extends KernelTestCase
         self::bootKernel();
         $container = static::getContainer();
         // Every interface Base\Repository\Aliases lists (R15, R27, R28) is its repository's service; Repositories,
-        // which is no repository, is Doctrine's answer over the same entity manager.
+        // which is no repository, is Doctrine's answer over the same entity manager. On another persistence (a site on
+        // eloquent, HostPersistence) each interface is that persistence's repository implementing it.
         $services = Aliases::INTERFACES;
         unset($services[Repositories::class]);
-        self::assertInstanceOf(\Base\Bridge\Doctrine\DoctrineRepositories::class, $container->get(Repositories::class));
+        $doctrine = 'doctrine' === $this->hostPersistence();
+        if ($doctrine) {
+            self::assertInstanceOf(\Base\Bridge\Doctrine\DoctrineRepositories::class, $container->get(Repositories::class));
+        }
         foreach ($services as $interface => $service) {
             $repository = $container->get($interface);
             self::assertInstanceOf($interface, $repository);
-            self::assertSame($container->get($service), $repository, "$interface is the service $service");
+            if ($doctrine) {
+                self::assertSame($container->get($service), $repository, "$interface is the service $service");
+            } else {
+                self::assertSame($repository, $container->get($interface), "$interface is one service");
+            }
         }
-        self::assertSame($container->get('doctrine')->getManager()->getRepository('App\\Entity\\User'), $container->get(Users::class));
+        if ($doctrine) {
+            self::assertSame($container->get('doctrine')->getManager()->getRepository('App\\Entity\\User'), $container->get(Users::class));
+        }
     }
 }
 

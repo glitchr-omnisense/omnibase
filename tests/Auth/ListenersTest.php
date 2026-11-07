@@ -5,8 +5,7 @@ namespace Tests\Base\Auth;
 use Base\Auth\Listener\GuardSignIn;
 use Base\Auth\Listener\TrackConnections;
 use Base\Auth\Listener\WarnNewDevice;
-use Base\Entity\User\Connection;
-use Base\Repository\User\ConnectionRepository;
+use Base\Repository\User\Connections;
 use Base\Security\SignInGuard;
 use Base\Security\UserTracker;
 use Base\Service\FormGuard;
@@ -38,7 +37,8 @@ use Tests\Base\Http\HttpTestTrait;
  * omnibase's listeners on omniauth's events (plan "omniauth", AU4): the
  * sign-in's captcha after failures from an address (SignInGuard), the
  * browsers' connections (UserTracker) and the e-mail of a new device - each
- * what its Symfony subscriber does, through the conductor.
+ * what its Symfony subscriber does, through the conductor. The accounts are
+ * the persistence's the host chose (HostPersistence), as the tracker's are.
  */
 final class ListenersTest extends KernelTestCase
 {
@@ -104,7 +104,7 @@ final class ListenersTest extends KernelTestCase
 
     public function testASignInMarksItsBrowsersConnectionAndANewOneIsWarnedOf(): void
     {
-        $user = $this->createUser();
+        $user = $this->hostUser($this->createUser());
         $requests = static::getContainer()->get(RequestStack::class);
         $session = new Session(new MockArraySessionStorage());
         $request = Request::create('/login', 'POST', server: ['REMOTE_ADDR' => '203.0.113.7', 'HTTP_USER_AGENT' => 'PHPUnit']);
@@ -113,13 +113,12 @@ final class ListenersTest extends KernelTestCase
 
         try {
             $tracker = static::getContainer()->get(UserTracker::class);
-            $connections = $this->entityManager()->getRepository(Connection::class);
-            \assert($connections instanceof ConnectionRepository);
+            $connections = static::getContainer()->get(Connections::class);
             $bag = $this->createStub(SettingBagInterface::class);
             $bag->method('getScalar')->willReturnCallback(static fn ($path) => [SecurityPolicy::NEW_DEVICE_PROMPT => '1'][$path] ?? null);
             $state = [];
             $events = new EventDispatcher();
-            $track = new TrackConnections($tracker, $this->entityManager(), new \Base\Auth\UserAccounts($this->entityManager()));
+            $track = new TrackConnections($tracker, $this->hostUnitOfWork(), new \Base\Auth\UserAccounts($this->hostUnitOfWork()));
             $warn = new WarnNewDevice(new SecurityPolicy($bag), $tracker, $connections, new ArrayState($state), static fn (): bool => false);
             foreach ([$track, $warn] as $listener) {
                 foreach ($listener::events() as $event => $method) {
@@ -127,7 +126,7 @@ final class ListenersTest extends KernelTestCase
                 }
             }
 
-            $kit = new AuthKit($this->entityManager(), new SecurityPolicy($bag));
+            $kit = new AuthKit($this->hostUnitOfWork(), new SecurityPolicy($bag));
             $omniauth = new Omniauth($kit->accounts, $kit->methods, new ArrayState(), events: $events);
             $context = new Context('https://localhost', 'localhost', '203.0.113.7');
 
@@ -146,7 +145,7 @@ final class ListenersTest extends KernelTestCase
             self::assertSame(2, $connections->countFor($user));
             self::assertTrue($state[SecurityPolicy::SESSION_NEW_DEVICE_PROMPT] ?? false, 'the offer to set up a code, once, on the next page');
         } finally {
-            $this->entityManager()->getConnection()->executeStatement('DELETE FROM userConnection WHERE user_id = ?', [$user->getId()]);
+            $this->hostPdo()->prepare('DELETE FROM userConnection WHERE user_id = ?')->execute([$user->getId()]);
             $requests->pop();
         }
     }

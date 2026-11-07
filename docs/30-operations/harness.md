@@ -222,7 +222,11 @@ The overlay mounts omnibridge/eloquent's checkout (`${OMNIBRIDGE:-../../../omnib
 `vendor/`) and sets `OMNIBASE_ELOQUENT`, the harness switch: each test using `Tests\Base\Database\Backend\BothBackends`
 (OrderColumnLazyTest, SlugifyPerTypeTest, UploaderSplFileInfoTest, EmptyTrashTest, ThreadParticipantsTest,
 BehaviourBackendsTest) runs once on Doctrine and once on omnibridge/eloquent, on the same database, the same calls
-through omnisense/omnibridge's UnitOfWork. Without the overlay the Eloquent cases are skipped, saying so. The package's
+through omnisense/omnibridge's UnitOfWork. Without the overlay the Eloquent cases are skipped, saying so. In an
+application's suite on `base.persistence: eloquent` they run on the application's own persistence instead (the switch
+unneeded), and the tests writing what the code under test reads write through the persistence the host chose
+(`Tests\Base\Database\Backend\HostPersistence`, used by `HttpTestTrait` - `hostUser()` - and `DemoKernelTestCase`); a test of Doctrine
+itself says so and is skipped there. The package's
 own behaviour parity (every row written on both) runs here too:
 `test --filter WriteParityTest /srv/omnibridge/eloquent/tests/Harness/WriteParityTest.php`.
 
