@@ -3,7 +3,6 @@
 namespace Base\Console\Task;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Base\Console\Report;
 use Base\Database\UnitOfWorks;
 use Base\Entity\User\Notification;
@@ -26,14 +25,11 @@ final class UserNotification
         $report = new Report($sink);
         $notificationRepository = UnitOfWorks::repositories($this->unitOfWork)->of(Notification::class);
         $userRepository = UnitOfWorks::repositories($this->unitOfWork)->of(User::class);
-        if (!$userRepository instanceof UserRepository) {
-            throw new \LogicException(\sprintf('The repository of %s is not a %s.', User::class, UserRepository::class));
-        }
 
         $notificationExpiry = $input->expiry ?? $this->parameterBag->get('base.user.notifications.expiry');
 
-        // Every account's without an identifier (loadUserByIdentifier() throws on an identifier nobody has).
-        $user = null !== $input->user ? $userRepository->loadUserByIdentifier($input->user) : null;
+        // Every account's without an identifier; an identifier nobody has is refused.
+        $user = null !== $input->user ? self::account($userRepository, $input->user) : null;
         if ($user) {
             $notifications = $notificationRepository->findByUser($user)->getResult();
             $toErase = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry)->getResult();
@@ -70,5 +66,20 @@ final class UserNotification
         }
 
         return $report;
+    }
+
+    /**
+     * The account an identifier names, as signing in reads it (e-mail address or username, the application's rule),
+     * through the persistence's users repository - the security layer's user loader on Doctrine and on
+     * omnibridge/eloquent alike (plan "omnibase agnostic", step B4: it had to be Doctrine's App\Repository\UserRepository).
+     * An identifier nobody has is refused by the loader.
+     */
+    private static function account(object $users, string $identifier): object
+    {
+        if (!method_exists($users, 'loadUserByIdentifier')) {
+            throw new \LogicException(\sprintf('The repository of %s, a %s, loads no account by its identifier (loadUserByIdentifier()).', User::class, get_debug_type($users)));
+        }
+
+        return $users->loadUserByIdentifier($identifier);
     }
 }
