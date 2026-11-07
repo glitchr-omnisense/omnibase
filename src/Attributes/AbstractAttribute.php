@@ -6,8 +6,8 @@ use App\Entity\User;
 use Base\Database\Entity\EntityHydratorInterface;
 use Omnibridge\Doctrine\Omnibase\Database\Event\DoctrineQueryEventArgs;
 use Omnibridge\Doctrine\Omnibase\Database\Event\ResolveDiscriminatorEventArgs;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataCompletor;
+use Base\Database\Mapping\Completor;
+use Base\Database\Mapping\MetadataManipulator;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
@@ -110,12 +110,16 @@ abstract class AbstractAttribute implements AttributeInterface
         return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);
     }
 
-    public static function getClassMetadataManipulator(): ?ClassMetadataManipulator
+    /**
+     * The reader's manipulator: omnisense/omnibase's MetadataManipulator on the persistence's shapes (plan "omnibase
+     * agnostic", step E3), omnibridge/doctrine's ClassMetadataManipulator where a reader was made with that one.
+     */
+    public static function getClassMetadataManipulator(): null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator
     {
         return AttributeReader::getInstance()->getClassMetadataManipulator();
     }
 
-    public static function getClassMetadataCompletor(mixed $entityOrClassOrMetadata): ?ClassMetadataCompletor
+    public static function getClassMetadataCompletor(mixed $entityOrClassOrMetadata): null|Completor|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataCompletor
     {
         return AttributeReader::getInstance()->getClassMetadataManipulator()->getClassMetadataCompletor($entityOrClassOrMetadata);
     }
@@ -449,9 +453,9 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $entity
      * @param string $property
      * @param $value
-     * @return ClassMetadataManipulator|false
+     * @return MetadataManipulator|false
      */
-    public static function setFieldValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): false|ClassMetadataManipulator|EntityValues
+    public static function setFieldValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): false|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator|EntityValues
     {
         if (self::neutral($unitOfWork)) {
             $values = EntityValues::of($unitOfWork);
@@ -494,9 +498,9 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $entity
      * @param string $property
      * @param $value
-     * @return ClassMetadataManipulator
+     * @return MetadataManipulator
      */
-    public static function setPropertyValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): ClassMetadataManipulator|EntityValues
+    public static function setPropertyValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator|EntityValues
     {
         if (self::neutral($unitOfWork)) {
             $values = EntityValues::of($unitOfWork);
@@ -518,6 +522,15 @@ abstract class AbstractAttribute implements AttributeInterface
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
+    {
+    }
+
+    /**
+     * What the attribute adds to its class's completor (plan "omnibase agnostic", step E3: #[Alias]'s names,
+     * #[Hierarchify]'s hierarchy), on no ORM: Base\Database\Mapping\Completors calls it for each attribute of the class,
+     * its methods and its properties - the target and the class, method or property it is on.
+     */
+    public function complete(Completor $completor, string $target, ?string $targetValue = null): void
     {
     }
 

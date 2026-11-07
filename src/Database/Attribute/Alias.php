@@ -3,6 +3,8 @@
 namespace Base\Database\Attribute;
 
 use Base\Attributes\AbstractAttribute;
+use Base\Attributes\AttributeReader;
+use Base\Database\Mapping\Completor;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Closure;
@@ -54,10 +56,25 @@ class Alias extends AbstractAttribute implements ExtensionOptionInterface
         } elseif ($classMetadata->hasField($alias)) {
             throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
         }
+    }
 
-        $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
-        $classMetadataCompletor->aliasNames ??= [];
-        $classMetadataCompletor->aliasNames[$alias] = $this->column;
+    /**
+     * The alias's name, bound to its column (plan "omnibase agnostic", step E3): the property it is on, or the class's
+     * #[Alias(column:, alias:)]. Doctrine checked here, as it loaded the class, that neither is mapped already; that
+     * check stays in loadClassMetadata().
+     */
+    public function complete(Completor $completor, string $target, ?string $targetValue = null): void
+    {
+        $class = (string) $completor->getName();
+        $alias = AttributeReader::TARGET_PROPERTY === $target ? (string) $targetValue : $this->alias;
+        if (!property_exists($class, $alias)) {
+            throw new Exception("Invalid alias property \"$alias\" provided in metadata of class " . $class);
+        } elseif (!property_exists($class, $this->column)) {
+            throw new Exception("Invalid column property \"$this->column\" provided in metadata of class " . $class);
+        }
+
+        $completor->aliasNames ??= [];
+        $completor->aliasNames[$alias] = $this->column;
     }
 
     /**

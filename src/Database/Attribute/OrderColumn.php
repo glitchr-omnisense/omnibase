@@ -6,6 +6,7 @@ use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionInlineInterface;
 use Base\Database\Attribute\Backend\OrderColumnBackend;
+use Base\Database\Mapping\EntityFields;
 use Base\Database\Mapping\EntityShape;
 use Base\Database\Type\Enumerations;
 use Base\Database\Type\SetType;
@@ -47,12 +48,13 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
     {
         if ($object instanceof ClassMetadata) {
 
-            // field/type checks
-            $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
-            $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
+            // field/type checks, on the metadata Doctrine is building (the reader's manipulator reads the shapes,
+            // plan "omnibase agnostic", step E3): a set's column, or a to-many association.
+            $field = EntityFields::aliases($object->getName())[$targetValue] ?? $targetValue;
+            $type = $object->hasField($field) ? $object->getTypeOfField($field) : null;
 
-            $isSet    = is_instanceof($doctrineType, SetType::class);
-            $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
+            $isSet    = is_subclass_of((string) Enumerations::classOf($type), SetType::class);
+            $isToMany = $object->hasAssociation($field) && $object->isCollectionValuedAssociation($field);
 
             if (!$isSet && !$isToMany) {
                 return false;

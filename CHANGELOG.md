@@ -10,6 +10,29 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the attribute reader reads the mapping from the entities' shapes (plan "omnibase agnostic", step E3)
+
+`Base\Database\Mapping\MetadataManipulator`: what the `AttributeReader` and the attributes ask of the mapping (an entity,
+its names and aliases, a field's type and target, an association's kind and side, a path, the declaring entity, the
+values), answered from the persistence's `EntityShapes` - the Description (`Omnibridge\Schema`) - and from
+`Base\Database\Mapping\Completors`, on no ORM. omnibridge/doctrine's `ClassMetadataManipulator` answered them from
+Doctrine's ClassMetadataFactory, so a reader, the behaviours on writes and the aliases needed doctrine/orm installed
+whatever the persistence; it extends `MetadataManipulator` now. The reader takes it (declared on the persistence's unit
+of work, whichever it is) and its entity manager is optional (`?EntityManager`, given only where Doctrine is there;
+`getRepository()` refused aloud without one); `AbstractAttribute::getClassMetadataManipulator()` and
+`getClassMetadataCompletor()` are typed on the core's classes.
+
+`Base\Database\Mapping\Completors` and `Completor`: what omnibase's attributes add to a class's mapping - #[Alias]'s
+names, #[Hierarchify]'s hierarchy - read from the class itself through a new hook, `AbstractAttribute::complete()`, once
+per class and process. It was written into a completor by `loadClassMetadata()` as Doctrine loaded each class, then
+cached: a manipulator made again over an empty cache answered without the aliases (in eloquent mode, after lesringostars'
+RepositoryInterfacesTest, EntityHydratorTest found `App\Entity\Article\Tag::$articles` missing). `Alias` and
+`Hierarchify` keep in `loadClassMetadata()` only the checks Doctrine's metadata answers. `OrderColumn::supports()` reads
+the metadata Doctrine is building itself. Test: `MetadataManipulatorTest` - the completors, the manipulator on a
+Description, Doctrine's made again keeping the aliases, and for every class Doctrine maps the same answers from Doctrine's
+metadata, its shapes, the Description and the reader's manipulator (`METADATA_SNAPSHOT_FILE` writes them: lesringostars'
+115 classes give the same file in doctrine and eloquent mode).
+
 ### Added: the entities' shapes list their classes (plan "omnibase agnostic", step B1d)
 
 `DescriptionShapes::classes()`: the mapped entities' classes, those `has()` counts (no mapped superclass, no embeddable);

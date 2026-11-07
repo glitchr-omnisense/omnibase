@@ -4,6 +4,7 @@ namespace Base\Database\Attribute;
 
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
+use Base\Database\Mapping\Completor;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -48,10 +49,17 @@ class Hierarchify extends AbstractAttribute implements ExtensionOptionInterface
         if (!method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree') && !$this->parent_method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree')) {
             throw new \Exception("Did you forgot to use \"Base\Metadata\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
         }
+    }
 
-        $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
-        $classMetadataCompletor->entityHierarchy ??= $this->hierarchy;
-        $classMetadataCompletor->entityHierarchySeparator ??= $this->separator;
+    /** The hierarchy and its separator, on the class (plan "omnibase agnostic", step E3). */
+    public function complete(Completor $completor, string $target, ?string $targetValue = null): void
+    {
+        if (AttributeReader::TARGET_CLASS !== $target) {
+            return;
+        }
+
+        $completor->entityHierarchy ??= $this->hierarchy;
+        $completor->entityHierarchySeparator ??= $this->separator;
     }
 
     /**

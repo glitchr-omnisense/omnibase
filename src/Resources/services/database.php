@@ -10,12 +10,16 @@
  */
 
 return [
+    // What the reader and the attributes ask of the mapping, on the persistence's shapes - the Description -, whatever
+    // the persistence (plan "omnibase agnostic", step E3): no Doctrine required any more, the entity manager the
+    // reader keeps (deprecated accessors) given only where Doctrine is there.
+    [
+        'class' => 'Base\Database\Mapping\MetadataManipulator',
+        'public' => true,
+        'arguments' => ['@Omnibridge\Persistence\UnitOfWork'],
+    ],
     [
         'class' => 'Base\Attributes\AttributeReader',
-        'requires' => [
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
-        ],
         'public' => true,
         'arguments' => [4 => '@flysystem', 7 => '@base.database.entity_hydrator'],
         'bind' => [
@@ -28,13 +32,13 @@ return [
             'arguments' => [
                 '@event_dispatcher',
                 '@advanced_router',
-                '@doctrine.orm.entity_manager',
+                '@?doctrine.orm.entity_manager',
                 '@parameter_bag',
                 '@flysystem',
                 '@request_stack',
                 '@security.token_storage',
                 '@base.database.entity_hydrator',
-                '@base.database.metadata_manipulator',
+                '@Base\Database\Mapping\MetadataManipulator',
             ],
         ],
     ],

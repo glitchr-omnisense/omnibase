@@ -14,7 +14,7 @@ use App\Entity\User;
 use Base\Service\Model\ClassFinder;
 use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Entity\EntityHydratorInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Mapping\MetadataManipulator;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
@@ -74,7 +74,7 @@ class AttributeReader extends AbstractLocalCache
      */
     public function getRepository($entity)
     {
-        return $this->entityManager->getRepository($entity);
+        return ($this->entityManager ?? throw new \LogicException('The attribute reader has no entity manager: Doctrine is not the persistence here. Ask Base\Database\UnitOfWorks::repositories() instead.'))->getRepository($entity);
     }
 
     public function isEntity(mixed $entity): bool
@@ -93,11 +93,15 @@ class AttributeReader extends AbstractLocalCache
     }
 
     /**
-     * @var ClassMetadataManipulator|null
+     * What the reader and the attributes ask of the entities' mapping (plan "omnibase agnostic", step E3): omnisense/
+     * omnibase's MetadataManipulator on the persistence's shapes - the Description -, or omnibridge/doctrine's
+     * ClassMetadataManipulator, which extends it (an older omnibridge/doctrine's, which does not, still accepted).
+     *
+     * @var MetadataManipulator|null
      */
-    protected ?ClassMetadataManipulator $classMetadataManipulator = null;
+    protected null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
 
-    public function getClassMetadataManipulator(): ClassMetadataManipulator
+    public function getClassMetadataManipulator(): MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator
     {
         return $this->classMetadataManipulator;
     }
@@ -169,18 +173,20 @@ class AttributeReader extends AbstractLocalCache
      * The event dispatcher, the router, the filesystem, the request stack and the token storage are the
      * framework's, and may be null: an entity manager built by hand (Base\Bridge\Doctrine\Mapping) reads the
      * attributes of its entities with none of them - what needs one (an asset's base path, the user signed in,
-     * the routes' attributes) answers without it.
+     * the routes' attributes) answers without it. The entity manager too (plan "omnibase agnostic", step E3): the
+     * mapping is read through the manipulator, on the persistence's shapes, so a reader is made where doctrine/orm is
+     * not installed.
      */
     public function __construct(
         ?EventDispatcherInterface $eventDispatcher,
         ?AdvancedRouterInterface          $router,
-        EntityManager            $entityManager,
+        ?EntityManager           $entityManager,
         ParameterBagInterface    $parameterBag,
         ?Storages       $flysystem,
         ?RequestStack             $requestStack,
         ?TokenStorageInterface    $tokenStorage,
         EntityHydrator           $entityHydrator,
-        ClassMetadataManipulator $classMetadataManipulator,
+        MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator,
         string                   $projectDir,
         string                   $environment,
         string                   $cacheDir
@@ -272,7 +278,13 @@ class AttributeReader extends AbstractLocalCache
         // Kept: getPaths() answered [] whatever was added.
         $this->paths[] = $path;
         foreach (ClassFinder::classes($path) as $attribute) {
-            $this->addAttributeName($attribute);
+            // An attribute of a package not installed (#[Route] without symfony/routing): ignored, as PHP ignores it
+            // until it is instantiated - the reader is made where no framework is (plan "omnibase agnostic", step E3).
+            try {
+                $this->addAttributeName($attribute);
+            } catch (\Error) {
+                continue;
+            }
         }
 
         return $this;

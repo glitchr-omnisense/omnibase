@@ -21,8 +21,13 @@ final class FormerNamesTest extends TestCase
         // A class that only loads with a package the core suggests: checked where that package is installed.
         $needs = ['Base\\Security\\OAuthUserProvider' => 'HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface'];
 
+        // Back in the core (plan "omnibase agnostic", step E3): omnibridge/doctrine's ClassMetadataCompletor is the core's
+        // Completor under its former name, so the former name is the core's class.
+        $back = ['Base\\Database\\Mapping\\ClassMetadataCompletor' => 'Base\\Database\\Mapping\\Completor'];
+
         $wrong = [];
         foreach ($moved as $former => $new) {
+            $new = isset($back[$former]) && class_exists($back[$former]) ? $back[$former] : $new;
             if (isset($needs[$former]) && !interface_exists($needs[$former])) {
                 continue;
             }
