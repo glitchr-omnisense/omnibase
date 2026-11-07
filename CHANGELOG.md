@@ -10,6 +10,13 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the entities' shapes list their classes (plan "omnibase agnostic", step B1d)
+
+`DescriptionShapes::classes()`: the mapped entities' classes, those `has()` counts (no mapped superclass, no embeddable);
+omnibridge/doctrine's `DoctrineShapes` answers the same. omnibase/admin's pickable pages listed them from Doctrine's
+metadata itself. Not declared on `EntityShapes` yet - an implementation written against the interface before would no
+longer load -: at 6.0. Test: `EntityShapeTest` (both).
+
 ### Added: a finder group built from its members (plan "omnibase agnostic", step B1b)
 
 `Base\Database\Repository\Finder\Group::of($separator, ...$members)`: the parentheses of the finder language said with

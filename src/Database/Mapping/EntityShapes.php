@@ -5,6 +5,9 @@ namespace Base\Database\Mapping;
 /**
  * The entities' shapes (plan "omnibase agnostic", step F2c): from a Description (DescriptionShapes), or
  * from the installed persistence (Base\Bridge\Doctrine\DoctrineShapes on Doctrine).
+ *
+ * Both list the mapped entities' classes as well, classes(): list<string> (step B1d). Not declared here yet: an
+ * implementation written against this interface before would no longer load; it is at 6.0 (step S done).
  */
 interface EntityShapes
 {

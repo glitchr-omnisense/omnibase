@@ -41,6 +41,7 @@ final class EntityShapeTest extends KernelTestCase
         self::assertTrue($shapes->has('App\Entity\Article'));
         self::assertFalse($shapes->has('App\Entity\Base'), 'a mapped superclass is no entity');
         self::assertFalse($shapes->has('App\Entity\Nothing'));
+        self::assertSame(['App\Entity\Article'], $shapes->classes(), 'the entities listed, not the mapped superclass (step B1d)');
 
         $shape = $shapes->shape('App\Entity\Article');
         self::assertSame('App\Entity\Thread', $shape->rootClass());
@@ -103,6 +104,10 @@ final class EntityShapeTest extends KernelTestCase
         DoctrineBehaviours::register();
 
         self::assertInstanceOf(DoctrineShapes::class, Backends::of($unitOfWork, EntityShapes::class));
+        // The entities listed (step B1d): every entity the metadata factory loads, no mapped superclass.
+        $classes = Backends::of($unitOfWork, EntityShapes::class)->classes();
+        self::assertContains(\Base\Entity\Thread::class, $classes);
+        self::assertSame(array_values(array_filter($classes, static fn (string $class) => Backends::of($unitOfWork, EntityShapes::class)->has($class))), $classes);
         self::assertSame($entityManager->getClassMetadata(\Base\Entity\Thread::class)->rootEntityName, Backends::of($unitOfWork, EntityShapes::class)->shape(\Base\Entity\Thread::class)->rootClass());
     }
 }

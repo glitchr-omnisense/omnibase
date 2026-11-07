@@ -26,6 +26,24 @@ final class DescriptionShapes implements EntityShapes
         return null !== $entity && Entity::ENTITY === $entity->kind;
     }
 
+    /**
+     * The mapped entities' classes, those has() counts (step B1d: what a listing of the entities asks - the back office's
+     * pickable pages -, where it read Doctrine's metadata).
+     *
+     * @return list<string>
+     */
+    public function classes(): array
+    {
+        $classes = [];
+        foreach ($this->description->entities as $name => $entity) {
+            if (Entity::ENTITY === $entity->kind) {
+                $classes[] = (string) $name;
+            }
+        }
+
+        return $classes;
+    }
+
     public function shape(string|object $class): EntityShape
     {
         $name = $this->name($class);
