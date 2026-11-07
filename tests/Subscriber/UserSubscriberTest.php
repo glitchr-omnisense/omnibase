@@ -16,7 +16,9 @@ use Tests\Base\Http\HttpTestTrait;
  * its address, an approval confirmed, a closing said goodbye to. No configuration registered the
  * subscriber since the back office left the core (80088b2d), so none of these was ever sent;
  * and its calls named notifier methods that do not exist (sendUserWelcomeBack($user) without
- * its token) and read the token storage's token without checking there was one.
+ * its token) and read the token storage's token without checking there was one. The
+ * accounts are changed through the persistence the host chose (HostPersistence), whose
+ * lifecycle relays the events.
  */
 final class UserSubscriberTest extends KernelTestCase
 {
@@ -66,7 +68,7 @@ final class UserSubscriberTest extends KernelTestCase
 
     public function testAVerifiedRegistrationIsNotAskedAgain(): void
     {
-        $em = $this->entityManager();
+        $unitOfWork = $this->hostUnitOfWork();
         $class = 'App\\Entity\\User';
         $user = new $class();
         $name = 'test'.bin2hex(random_bytes(4));
@@ -76,24 +78,24 @@ final class UserSubscriberTest extends KernelTestCase
         $user->setEmail($name.'@example.org');
         $user->setPlainPassword('test-'.$name);
         $user->verify();
-        $em->persist($user);
-        $em->flush();
-        $em->remove($user);
-        $em->flush();
+        $unitOfWork->persist($user);
+        $unitOfWork->flush();
+        $unitOfWork->remove($user);
+        $unitOfWork->flush();
 
         $this->assertNull($user->getToken('verify-email'));
     }
 
     public function testAnApprovalIsConfirmedAndItsRequestRevoked(): void
     {
-        $user = $this->createUser();
+        $user = $this->hostUser($this->createUser());
         $user->approve(false);
         $request = new Token('admin-approval');
         $user->addToken($request);
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
 
         $user->approve();
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
         $this->settle();
 
         $this->assertTrue($request->isRevoked(), 'the approval request is revoked');
@@ -106,11 +108,11 @@ final class UserSubscriberTest extends KernelTestCase
 
     public function testClosingOnesAccountSaysGoodbye(): void
     {
-        $user = $this->createUser();
+        $user = $this->hostUser($this->createUser());
         static::getContainer()->get('security.token_storage')->setToken(new UsernamePasswordToken($user, 'main', $user->getRoles()));
 
         $user->disable();
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
 
         $this->assertContains(
             static::getContainer()->get('translator')->trans('@notifications.accountGoodbye.success'),
@@ -120,12 +122,12 @@ final class UserSubscriberTest extends KernelTestCase
 
     public function testAnAccountChangedWithNobodySignedInDoesNotFail(): void
     {
-        $user = $this->createUser();
+        $user = $this->hostUser($this->createUser());
 
         $user->disable();
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
         $user->enable();
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
 
         $this->assertFalse($user->isDisabled());
     }

@@ -6,6 +6,7 @@ use Base\Bridge\Doctrine\DoctrineBackend;
 use Base\Bridge\Doctrine\QueryPages;
 use Base\Database\Scope\TrashScope;
 use Base\Database\Scope\VaultScope;
+use Base\Database\UnitOfWorks;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Entity\Thread;
@@ -16,13 +17,18 @@ use Omnibridge\Persistence\Backend;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Routing\RouterInterface;
+use Tests\Base\Database\Backend\HostPersistence;
 
 /**
  * The trash and vault filters as scopes, the paginator on Pages (plan "omnibase
- * agnostic", step F2e).
+ * agnostic", step F2e). The container's backend is the persistence's the host
+ * chose (HostPersistence, step F7f); a Doctrine query is paged on Doctrine's
+ * entity manager, wherever it is installed.
  */
 final class ScopesTest extends KernelTestCase
 {
+    use HostPersistence;
+
     public function testTheScopesSayWhatTheyKeep(): void
     {
         $trash = new TrashScope();
@@ -61,8 +67,10 @@ final class ScopesTest extends KernelTestCase
         self::bootKernel();
         $container = static::getContainer();
         $backend = $container->get(Backend::class);
-        self::assertInstanceOf(DoctrineBackend::class, $backend);
-        self::assertSame('doctrine', $backend->name());
+        $doctrine = 'doctrine' === $backend->name();
+        if ($doctrine) {
+            self::assertInstanceOf(DoctrineBackend::class, $backend);
+        }
         self::assertSame($container->get(UnitOfWork::class), $backend->unitOfWork());
         self::assertTrue($backend->supports(Backend::TRANSACTIONS));
 
@@ -72,7 +80,10 @@ final class ScopesTest extends KernelTestCase
         self::assertTrue($backend->isScopeEnabled(TrashScope::NAME), 'and hidden again after');
 
         $backend->disableScope(TrashScope::NAME);
-        self::assertFalse($container->get('doctrine')->getManager()->getFilters()->isEnabled('trash_filter'));
+        self::assertFalse($backend->isScopeEnabled(TrashScope::NAME));
+        if ($doctrine) {
+            self::assertFalse($container->get('doctrine')->getManager()->getFilters()->isEnabled('trash_filter'), 'Doctrine\'s filter');
+        }
         $backend->enableScope(TrashScope::NAME);
         self::assertTrue($backend->isScopeEnabled(TrashScope::NAME));
 
@@ -107,7 +118,11 @@ final class ScopesTest extends KernelTestCase
     public function testADoctrineQueryIsPagedAsBefore(): void
     {
         self::bootKernel();
-        $unitOfWork = static::getContainer()->get(UnitOfWork::class);
+        if (!static::getContainer()->has('doctrine')) {
+            self::markTestSkipped('Doctrine is not installed: no Doctrine query to page.');
+        }
+        // Doctrine's entity manager, whichever persistence the host chose: the query is its own.
+        $unitOfWork = UnitOfWorks::of(static::getContainer()->get('doctrine')->getManager());
         $prefix = 'f2e.pages.'.bin2hex(random_bytes(3)).'.';
         $settings = [];
         foreach (['a', 'b', 'c'] as $name) {

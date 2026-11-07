@@ -26,7 +26,7 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->bootIn(DemoMode::ENVIRONMENT);
         $this->loadDemoAccounts();
         $this->createUser(self::ROOT, ['ROLE_SUPERADMIN'], self::ROOT_STORED_PASSWORD);
-        $this->entityManager()->clear();
+        $this->hostClear();
     }
 
     public function testTheSignInPageListsTheDeclaredAccountsAndNotTheBackOffice(): void

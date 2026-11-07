@@ -3,6 +3,7 @@
 namespace Tests\Base\Http;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Tests\Base\Database\Backend\HostPersistence;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -19,10 +20,16 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  *
  * The signed-in user is carried by a session, as after a real sign-in (the
  * firewall of the address reads it back and refreshes the user from the database).
- * Users created here are removed by removeUsers(), to call from tearDown().
+ * Users created here are removed by removeUsers(), to call from tearDown(). They
+ * are written through Doctrine's entity manager, as the tests using them write; a
+ * test handing one to code that writes through the persistence the host chose (a
+ * site on eloquent) hands it hostUser($user), the same row as that persistence
+ * manages it (HostPersistence).
  */
 trait HttpTestTrait
 {
+    use HostPersistence;
+
     /** @var object[] */
     private array $createdUsers = [];
 
@@ -64,12 +71,21 @@ trait HttpTestTrait
         return $this->createdUsers[] = $user;
     }
 
+    /** The user as the persistence the host chose manages it (Doctrine's own object on doctrine). */
+    protected function hostUser(object $user): object
+    {
+        return $this->hostFind($user::class, $user->getId()) ?? throw new \LogicException(sprintf('No %s #%s.', $user::class, $user->getId()));
+    }
+
     protected function removeUsers(): void
     {
         if (!$this->createdUsers) {
             return;
         }
+        // Read again: what the host's persistence wrote for them meanwhile (connections, notifications, tokens) is in
+        // their collections, which the removal cascades to.
         $em = $this->entityManager();
+        $em->clear();
         foreach ($this->createdUsers as $user) {
             $managed = $em->find($user::class, $user->getId());
             if ($managed) {

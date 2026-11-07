@@ -20,8 +20,9 @@ use Tests\Base\Http\HttpTestTrait;
  * ThreadSubscriber's Doctrine hooks (prePersist, onFlush), relayed to ThreadParticipants: they were
  * registered nowhere, so no Mention was stored, thread.mentioned never mailed, and no reply was
  * followed by its parent's owners. On both persistences (BothBackends, plan "omnibase agnostic", step F7c:
- * omnibridge/eloquent's ThreadListener and entity dispatchers on the same rule); the users are Doctrine's, read
- * through the backend.
+ * omnibridge/eloquent's ThreadListener and entity dispatchers on the same rule); the users are the host's, read
+ * through the backend. In a host on eloquent, Doctrine's case is skipped (the mentions resolve their users through
+ * the host's services).
  */
 final class ThreadParticipantsTest extends KernelTestCase
 {
@@ -70,6 +71,7 @@ final class ThreadParticipantsTest extends KernelTestCase
     public function testAMentionInTheTextIsStoredAtTheFlushAndRemovedWithIt(string $backend): void
     {
         $this->backend = $backend;
+        $this->doctrineCaseOnADoctrineHost($backend);
         $author = $this->createUser();
         $mentionee = $this->createUser();
 
@@ -90,6 +92,7 @@ final class ThreadParticipantsTest extends KernelTestCase
     public function testTheMentionerIsTheOwner(string $backend): void
     {
         $this->backend = $backend;
+        $this->doctrineCaseOnADoctrineHost($backend);
         $author = $this->createUser();
         $mentionee = $this->createUser();
         $thread = $this->thread($author, $this->mention($mentionee));
@@ -104,6 +107,7 @@ final class ThreadParticipantsTest extends KernelTestCase
     public function testAReplyIsFollowedByItsParentsOwners(string $backend): void
     {
         $this->backend = $backend;
+        $this->doctrineCaseOnADoctrineHost($backend);
         $author = $this->createUser();
         $replier = $this->createUser();
         $parent = $this->thread($author, 'Le fil');
@@ -128,6 +132,7 @@ final class ThreadParticipantsTest extends KernelTestCase
     public function testThePublicationMailsTheMentioneeAndNotAnAuthorMentionedInTheirOwnThread(string $backend): void
     {
         $this->backend = $backend;
+        $this->doctrineCaseOnADoctrineHost($backend);
         $author = $this->createUser();
         $mentionee = $this->createUser();
 
@@ -146,6 +151,7 @@ final class ThreadParticipantsTest extends KernelTestCase
     public function testAThreadWrittenBeforeItsMentionsWereStoredMailsThemOnceAtItsPublication(string $backend): void
     {
         $this->backend = $backend;
+        $this->doctrineCaseOnADoctrineHost($backend);
         $author = $this->createUser();
         $mentionee = $this->createUser();
 

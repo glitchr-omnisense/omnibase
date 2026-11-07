@@ -8,15 +8,20 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Base\Database\Backend\HostPersistence;
 use Tests\Base\Demo\Fixtures\DemoTestKernel;
 
 /**
  * The host application booted in `demo` or in `prod` (Fixtures\DemoTestKernel)
  * and asked whole requests, cookies kept from one to the next as a browser
  * keeps them: the sign-in page read, its button clicked, the next page asked.
+ * The accounts are written and removed through the persistence the host chose
+ * (HostPersistence): DemoAccountFactory persists them in its unit of work.
  */
 abstract class DemoKernelTestCase extends KernelTestCase
 {
+    use HostPersistence;
+
     /** @var array<string, string> */
     private array $cookies = [];
 
@@ -59,20 +64,21 @@ abstract class DemoKernelTestCase extends KernelTestCase
     protected function tearDown(): void
     {
         if (static::$booted && $this->created) {
-            $em = $this->entityManager();
-            $em->clear();
+            $unitOfWork = $this->hostUnitOfWork();
+            $this->hostClear();
+            $metadata = static::getContainer()->has('doctrine') ? static::getContainer()->get('doctrine')->getManager() : null;
             $rows = [];
             foreach ($this->created as $entity) {
-                if ($entity->getId() && ($managed = $em->find($entity::class, $entity->getId()))) {
-                    $rows[] = [$em->getClassMetadata($entity::class)->getTableName(), $entity->getId()];
-                    $em->remove($managed);
+                if ($entity->getId() && ($managed = $this->hostFind($entity::class, $entity->getId()))) {
+                    $metadata && $rows[] = [$metadata->getClassMetadata($entity::class)->getTableName(), $entity->getId()];
+                    $unitOfWork->remove($managed);
                 }
             }
-            $em->flush();
+            $unitOfWork->flush();
             // A joined subclass's own row goes with its parent's through the foreign key - which SQLite
             // (the harness) does not enforce: the row stayed, and its unique username with it.
             foreach ($rows as [$table, $id]) {
-                $em->getConnection()->executeStatement('DELETE FROM '.$table.' WHERE id = ?', [$id]);
+                $this->hostPdo()->prepare('DELETE FROM '.$table.' WHERE id = ?')->execute([$id]);
             }
         }
         $this->created = [];
@@ -91,7 +97,7 @@ abstract class DemoKernelTestCase extends KernelTestCase
     protected function loadDemoAccounts(): array
     {
         $users = static::getContainer()->get(DemoAccountFactory::class)->load();
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
         foreach ($users as $user) {
             $this->created[] = $user;
         }
@@ -110,8 +116,8 @@ abstract class DemoKernelTestCase extends KernelTestCase
         $user->setEmail($email);
         $user->setPlainPassword($password);
         $user->setRoles($roles);
-        $this->entityManager()->persist($user);
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->persist($user);
+        $this->hostUnitOfWork()->flush();
 
         return $this->created[] = $user;
     }

@@ -4,6 +4,7 @@ namespace Tests\Base\Database\Backend;
 
 use Base\Database\UnitOfWorks;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\Backend;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
@@ -13,7 +14,9 @@ use Omnibridge\Persistence\UnitOfWork;
  * attaches them) - the same calls through omnisense/omnibridge's UnitOfWork, the same assertions.
  *
  * The Eloquent run is the harness switch: OMNIBASE_ELOQUENT names omnibridge/eloquent's checkout (with its own
- * vendor/), mounted by docker/compose.eloquent.yml; without it the Eloquent cases are skipped, saying so.
+ * vendor/), mounted by docker/compose.eloquent.yml; without it the Eloquent cases are skipped, saying so. In a host
+ * on eloquent (a site's base.persistence, step F7f) the Eloquent cases run on the host's own persistence, the switch
+ * unneeded; a Doctrine case whose code under test reaches the host's services asks doctrineCaseOnADoctrineHost().
  *
  *     docker compose -f compose.yml -f compose.checkouts.yml -f compose.eloquent.yml run --rm omnibase test
  */
@@ -79,11 +82,29 @@ trait BothBackends
         gc_collect_cycles();
     }
 
-    /** omnibridge/eloquent's persistence on the harness's database, with omnibase's lifecycle (OmnibaseHarness). */
+    /**
+     * Doctrine's case skipped where the host is on another persistence: the code under test resolves entities through
+     * the host's services (users, mentions), which would hand Doctrine's lifecycle entities it does not manage.
+     */
+    protected function doctrineCaseOnADoctrineHost(string $backend): void
+    {
+        if ('doctrine' === $backend && 'doctrine' !== ($host = static::getContainer()->get(Backend::class)->name())) {
+            self::markTestSkipped(sprintf('Doctrine\'s case: this host is on %s (base.persistence), whose services would hand Doctrine\'s lifecycle entities it does not manage; the %1$s case runs.', $host));
+        }
+    }
+
+    /**
+     * omnibridge/eloquent's persistence on the harness's database, with omnibase's lifecycle (OmnibaseHarness); the
+     * host's own where the host is on eloquent.
+     */
     protected function eloquent(): object
     {
         if (null !== $this->eloquentPersistence) {
             return $this->eloquentPersistence;
+        }
+        $persistence = 'Omnibridge\Eloquent\Omnibase\EloquentPersistence';
+        if ('eloquent' === static::getContainer()->get(Backend::class)->name() && static::getContainer()->has($persistence)) {
+            return $this->eloquentPersistence = static::getContainer()->get($persistence);
         }
         $package = getenv('OMNIBASE_ELOQUENT');
         if (!$package || !is_file($package.'/tests/Site/autoload.php')) {

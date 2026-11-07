@@ -9,7 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 /**
  * The redirections as a visitor meets them: an old address answers 301 (or
  * 302) to the new one and is counted; an address the site answers is left
- * alone; an unknown one is still not found.
+ * alone; an unknown one is still not found. Redirections writes through the
+ * persistence the host chose: the test changes and reads them through it too.
  */
 class RedirectionHttpTest extends KernelTestCase
 {
@@ -44,8 +45,8 @@ class RedirectionHttpTest extends KernelTestCase
         $this->assertSame(301, $response->getStatusCode());
         $this->assertSame('/savoir-faire/enseigne?utm_source=mail', $response->headers->get('Location'));
 
-        $this->entityManager()->clear();
-        $redirection = $this->entityManager()->getRepository(Redirection::class)->findOneBy(['source' => '/produit/enseigne-lumineuse']);
+        $this->hostClear();
+        $redirection = $this->hostRepositories()->of(Redirection::class)->findOneBy(['source' => '/produit/enseigne-lumineuse']);
         $this->assertSame(2, $redirection->getHits());
         $this->assertNotNull($redirection->getLastHitAt());
     }
@@ -71,7 +72,7 @@ class RedirectionHttpTest extends KernelTestCase
 
         $disabled = $this->redirections->add('/ferme', '/ouvert');
         $disabled->setEnabled(false);
-        $this->entityManager()->flush();
+        $this->hostUnitOfWork()->flush();
         $this->assertSame(404, $this->request('/ferme')->getStatusCode());
     }
 

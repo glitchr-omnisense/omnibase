@@ -21,7 +21,7 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
     {
         $this->bootIn('prod');
         $this->loadDemoAccounts();
-        $this->entityManager()->clear();
+        $this->hostClear();
     }
 
     public function testTheSignInPageOffersNoDemonstrationAccount(): void
@@ -84,8 +84,7 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
     public function testADeclaredAccountIsAnOrdinaryOne(): void
     {
         $policy = static::getContainer()->get(SecurityPolicy::class);
-        $em = $this->entityManager();
-        $staff = $em->getRepository('App\\Entity\\User')->findOneBy(['email' => TestDemoAccounts::STAFF]);
+        $staff = $this->hostRepositories()->of('App\\Entity\\User')->findOneBy(['email' => TestDemoAccounts::STAFF]);
 
         $this->assertFalse($policy->isDemoAccount($staff));
         $this->assertTrue($policy->canChangeCredentials($staff));
@@ -93,12 +92,12 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
 
         // Its password changes as anyone's does, during a request too.
         $hash = $staff->getPassword();
-        $this->duringARequest('/mon-compte', function () use ($staff, $em): void {
+        $this->duringARequest('/mon-compte', function () use ($staff): void {
             $staff->setPlainPassword('A-new-password-nobody-else-knows-1!');
-            $em->flush();
+            $this->hostUnitOfWork()->flush();
         });
-        $em->clear();
-        $this->assertNotSame($hash, $em->find('App\\Entity\\User', $staff->getId())->getPassword());
+        $this->hostClear();
+        $this->assertNotSame($hash, $this->hostFind('App\\Entity\\User', $staff->getId())->getPassword());
     }
 
     public function testDemoResetRefuses(): void

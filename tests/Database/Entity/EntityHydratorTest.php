@@ -108,15 +108,23 @@ final class EntityHydratorTest extends KernelTestCase
     {
         self::bootKernel();
         $container = static::getContainer();
+        if (!$container->has('doctrine')) {
+            self::markTestSkipped('Doctrine is not installed: no mapping of its to compare.');
+        }
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get('doctrine')->getManager();
         /** @var ClassMetadataManipulator $manipulator */
         $manipulator = $container->get(ClassMetadataManipulator::class);
 
+        // The container's hydrator is on the persistence the host chose (Doctrine's, or omnibridge/eloquent's in a
+        // site on eloquent); what it reads of the mapping is compared below on Doctrine's, wherever it is installed.
         $hydrator = $container->get(EntityHydratorInterface::class);
         self::assertInstanceOf(EntityHydrator::class, $hydrator);
-        self::assertInstanceOf(DoctrineUnitOfWork::class, $hydrator->getUnitOfWork());
+        self::assertSame($container->get(UnitOfWork::class), $hydrator->getUnitOfWork());
         self::assertInstanceOf(Snapshots::class, $hydrator->getUnitOfWork());
+        if ('doctrine' === $container->get(\Omnibridge\Persistence\Backend::class)->name()) {
+            self::assertInstanceOf(DoctrineUnitOfWork::class, $hydrator->getUnitOfWork());
+        }
 
         $fields = new EntityFields($manipulator->getShapes());
         $columnTypes = Backends::of(new DoctrineUnitOfWork($entityManager), ColumnTypes::class);

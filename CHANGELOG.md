@@ -10,6 +10,28 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the tests run against the persistence the host chose (plan "omnibase agnostic", step F7f-3)
+
+An application's suite runs the core's tests in its vendor/; on `base.persistence: eloquent` sixteen of them asserted
+Doctrine's container or wrote through Doctrine's entity manager what the code under test read through Eloquent:
+
+- `Tests\Base\Database\Backend\HostPersistence`: the host's persistence (its name, unit of work, repositories, a find,
+  a clear, the shared PDO), as the container hands them to the core; `requireDoctrineHost()` for what tests Doctrine
+  itself. `HttpTestTrait` uses it: `hostUser($user)` is a user `createUser()` wrote, as the host's persistence manages
+  it (Doctrine's own object on Doctrine: nothing changes in the harness); `removeUsers()` reads them again first, so the
+  removal cascades to what the host wrote for them meanwhile (connections, tokens, notifications).
+- Persistence-aware: UnitOfWorksTest (the container's unit of work is the backend's, Doctrine's entity manager
+  asserted on Doctrine - renamed `testTheContainersUnitOfWorkIsThePersistencesChosen` -; the row lock on the shared PDO's
+  transaction, the compared-and-set field read again by `refresh()`), ScopesTest (the backend's scope switched; a
+  Doctrine query paged on Doctrine's entity manager wherever it is installed), EntityHydratorTest (the hydrator on the
+  host's unit of work; Doctrine's mapping compared wherever Doctrine is installed), RepositoryInterfacesTest (each
+  interface the host's repository; the entity manager's identity asserted on Doctrine); ListenersTest, RefusedSignInTest,
+  UserSubscriberTest, RedirectionHttpTest and the demo/prod environment tests (DemoKernelTestCase: the declared accounts
+  flushed, created and removed through the host) hand the code the host's entities and write and read through it. `AuthKit` takes a unit of work too.
+- `BothBackends`: in a host on eloquent the Eloquent cases run on the host's persistence (no harness switch needed);
+  `doctrineCaseOnADoctrineHost()` skips, saying why, a Doctrine case whose code under test resolves entities through
+  the host's services (ThreadParticipantsTest: the mentions' users).
+
 ### Changed: the methods no finder compiles are written by both persistences (plan "omnibase agnostic", step F7f)
 
 - The 14 repository methods declared `#[BackendOnly]` on the core's interfaces - `PageViews::incrementView()` and the
