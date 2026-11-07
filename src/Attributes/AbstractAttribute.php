@@ -11,7 +11,6 @@ use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
@@ -39,6 +38,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Exception;
+use Omnibridge\Persistence\Persistences;
 
 abstract class AbstractAttribute implements AttributeInterface
 {
@@ -376,7 +376,12 @@ abstract class AbstractAttribute implements AttributeInterface
 
         try {
             $entityData = self::getUnitOfWork()->getOriginalEntityData($entity);
-        } catch (EntityNotFoundException $e) {
+        } catch (\Throwable $e) {
+            // An entity whose row is gone, whichever persistence says it (omnisense/omnibridge's Persistences).
+            if (!Persistences::isNotFound($e)) {
+                throw $e;
+            }
+
             return null;
         }
 

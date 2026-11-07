@@ -13,9 +13,9 @@ use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use InvalidArgumentException;
+use Omnibridge\Persistence\Persistences;
 
 /**
  * The settings stored in the database (the back office's), compiled into one
@@ -443,9 +443,15 @@ class SettingBag implements SettingBagInterface
 
         try {
             $settings = $this->settingRepository->under($path, $onlyLinkedBag, $useCache);
-        } catch (EntityNotFoundException $e) {
+        } catch (\Throwable $e) {
+            // A cached setting whose row is gone, whichever persistence says it (omnisense/omnibridge's Persistences):
+            // read again without the cache.
+            if (!Persistences::isNotFound($e)) {
+                throw $e;
+            }
+
             return $useCache ? $this->getRaw($path, false) : [];
-        } // Cache fallback
+        }
 
         $values = $this->normalize($path, $settings);
         // get formatted values
