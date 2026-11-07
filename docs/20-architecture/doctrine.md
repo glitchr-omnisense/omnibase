@@ -243,6 +243,15 @@ the union is aliased to it, so that an autowired constructor gets the same insta
 `DoctrineUnitOfWork` registers Doctrine's backends when it is made (`DoctrineBehaviours::ensureRegistered()`),
 before any Doctrine event.
 
+With `base.persistence: eloquent` (step F7d) every service that takes the unit of work or a repository interface
+answers from omnibridge/eloquent. The declarations therefore name the core's repository interfaces, never a Doctrine
+repository class (Analytics, SettingBag, the connections' tracker and listeners, FormGuard, the enhancers, the push and
+notification services: step F7d-3), and `ConnectionSubscriber`, `DemoAccountFactory` and `UniqueEntityValidator` work on
+the unit of work. What is still Doctrine's under Eloquent: Doctrine's metadata where it is read (field types, the
+AttributeReader), the TimeMachine, the console commands named after Doctrine, the back office, and the repositories
+without an interface (`Layout\Widget\PageRepository`, `TextOverrideRepository`, `User\GroupRepository`,
+`User\PermissionRepository`).
+
 What keeps the entity manager, on purpose: the mapping (`ClassMetadataManipulator`,
 `ClassMetadataFactory`, `EntityHydrator`), `ServiceEntityRepository`, the Doctrine listeners, the
 Doctrine commands (`doctrine:database:import`, `doctrine:array:upgrade`, the schema's charset), the

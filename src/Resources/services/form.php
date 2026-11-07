@@ -63,6 +63,7 @@ return [
         'parent' => 'Base\Validator\ConstraintEntityValidator',
         'requires' => ['Symfony\Component\Validator\ConstraintValidator'],
         'tags' => ['validator.constraint_validator'],
+        'calls' => [['setUnitOfWork', ['@?Omnibridge\Persistence\UnitOfWork']]],
     ],
     [
         'id' => 'Base\Validator\Constraints\StringCaseEntityValidator',
@@ -107,7 +108,7 @@ return [
         'symfony' => [
             'arguments' => [
                 '@Omnibridge\Persistence\UnitOfWork',
-                '@Base\Repository\User\PushSubscriptionRepository',
+                '@Base\Repository\User\PushSubscriptions',
                 '@?logger',
                 '%env(default::VAPID_PUBLIC_KEY)%',
                 '%env(default::VAPID_PRIVATE_KEY)%',
@@ -138,7 +139,7 @@ return [
                 '@Omnibridge\Persistence\UnitOfWork',
                 '@request_stack',
                 '@advanced_router',
-                '@Base\Repository\User\ConnectionRepository',
+                '@Base\Repository\User\Connections',
             ],
         ],
     ],
@@ -146,13 +147,11 @@ return [
         'class' => 'Base\EntitySubscriber\ConnectionSubscriber',
         'requires' => [
             'Symfony\Component\EventDispatcher\EventSubscriberInterface',
-            'Doctrine\ORM\EntityManagerInterface',
             'Symfony\Component\HttpFoundation\RequestStack',
             'Base\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
-        'arguments' => ['@Base\Security\UserTracker'],
+        'arguments' => ['@Base\Security\UserTracker', '@Omnibridge\Persistence\UnitOfWork'],
         'tags' => ['kernel.event_subscriber'],
-        'symfony' => ['arguments' => ['@Base\Security\UserTracker', '@doctrine.orm.entity_manager']],
     ],
 ];

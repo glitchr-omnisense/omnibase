@@ -2,9 +2,11 @@
 
 namespace Base\Demo;
 
+use Base\Database\UnitOfWorks;
 use Base\Entity\User\Group;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -18,6 +20,10 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * An account the database already has is returned as it is: fixtures that
  * create theirs themselves keep them, identifier included. Nothing is
  * flushed here - the fixture does.
+ *
+ * Read and written through omnisense/omnibridge's unit of work, the persistence chosen's (plan "omnibase agnostic",
+ * step F7d-3: on Eloquent, the account a one-click sign-in gives is the one its connections are written for), or
+ * through Doctrine's registry (deprecated until 6.0); a fixture's ObjectManager given to a call is used as it is.
  */
 class DemoAccountFactory
 {
@@ -30,7 +36,7 @@ class DemoAccountFactory
     /** @param class-string $userClass */
     public function __construct(
         private readonly DemoAccountRegistry $registry,
-        private readonly ManagerRegistry $doctrine,
+        private readonly UnitOfWork|ManagerRegistry $doctrine,
         #[Autowire('App\Entity\User')] private readonly string $userClass = 'App\Entity\User',
     ) {
     }
@@ -38,13 +44,13 @@ class DemoAccountFactory
     /** The row of a declared account, null when the database has none. */
     public function find(string $identifier, ?ObjectManager $manager = null): ?object
     {
-        $manager ??= $this->doctrine->getManagerForClass($this->userClass);
+        $manager = $this->manager($manager);
         $pending = $this->users[$identifier] ?? null;
         if ($pending && $manager->contains($pending)) {
             return $pending;
         }
 
-        return $manager->getRepository($this->userClass)->findOneBy([$this->identifierField() => $identifier]);
+        return $this->repository($manager, $this->userClass)->findOneBy([$this->identifierField() => $identifier]);
     }
 
     /**
@@ -59,8 +65,8 @@ class DemoAccountFactory
             throw new \InvalidArgumentException(sprintf('No demonstration account "%s" is declared (declared: %s).', $identifier, implode(', ', array_keys($this->registry->all())) ?: 'none'));
         }
 
-        $manager ??= $this->doctrine->getManagerForClass($this->userClass);
-        $user = $this->find($identifier, $manager);
+        $manager = $this->manager($manager);
+        $user = $this->find($identifier, $manager instanceof ObjectManager ? $manager : null);
         if (null === $user) {
             $user = new ($this->userClass)();
             $field = $this->identifierField();
@@ -117,11 +123,11 @@ class DemoAccountFactory
     }
 
     /** @param string[] $roles */
-    private function group(ObjectManager $manager, string $name, array $roles): object
+    private function group(ObjectManager|UnitOfWork $manager, string $name, array $roles): object
     {
         $group = $this->groups[$name] ?? null;
         if (!$group || !$manager->contains($group)) {
-            $group = $manager->getRepository(Group::class)->findOneBy(['name' => $name]);
+            $group = $this->repository($manager, Group::class)->findOneBy(['name' => $name]);
         }
         if (!$group) {
             $group = (new Group())->setName($name)->setRoles($roles);
@@ -131,6 +137,17 @@ class DemoAccountFactory
         }
 
         return $this->groups[$name] = $group;
+    }
+
+    /** The fixture's manager when one is given, else the unit of work (or the registry's manager of the users). */
+    private function manager(?ObjectManager $manager): ObjectManager|UnitOfWork
+    {
+        return $manager ?? ($this->doctrine instanceof UnitOfWork ? $this->doctrine : $this->doctrine->getManagerForClass($this->userClass));
+    }
+
+    private function repository(ObjectManager|UnitOfWork $manager, string $class): object
+    {
+        return $manager instanceof UnitOfWork ? UnitOfWorks::repositories($manager)->of($class) : $manager->getRepository($class);
     }
 
     private function identifierField(): string

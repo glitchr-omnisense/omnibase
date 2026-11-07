@@ -52,7 +52,7 @@ return [
         'symfony' => [
             'arguments' => [
                 '$registry' => '@?Omnishield\Registry',
-                '$comments' => '@?Base\Repository\Thread\CommentRepository',
+                '$comments' => '@?Base\Repository\Thread\Comments',
                 '$logger' => '@?logger',
                 '$cache' => '@?cache.app',
             ],

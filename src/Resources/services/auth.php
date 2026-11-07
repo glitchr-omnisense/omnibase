@@ -145,7 +145,7 @@ return [
             'arguments' => [
                 '@Base\Service\SecurityPolicy',
                 '@Base\Security\UserTracker',
-                '@Base\Repository\User\ConnectionRepository',
+                '@Base\Repository\User\Connections',
                 '@request_stack',
                 '@?Omniauth\Contract\State',
             ],

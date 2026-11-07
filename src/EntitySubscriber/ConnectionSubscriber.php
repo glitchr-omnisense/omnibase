@@ -6,7 +6,9 @@ use App\Entity\User;
 use Base\Enum\ConnectionState;
 use Base\Security\SignInGuard;
 use Base\Security\UserTracker;
+use Base\Database\UnitOfWorks;
 use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -24,14 +26,26 @@ class ConnectionSubscriber implements EventSubscriberInterface
     protected UserTracker $userTracker;
 
     /**
-     * @var EntityManagerInterface
+     * The entity manager when one was given (deprecated until 6.0: the unit of work below writes).
+     *
+     * @var EntityManagerInterface|null
      */
-    protected EntityManagerInterface $entityManager;
+    protected ?EntityManagerInterface $entityManager = null;
 
-    public function __construct(UserTracker $userTracker, EntityManagerInterface $entityManager)
+    /**
+     * Where the connections are written: omnisense/omnibridge's unit of work, the persistence chosen's (plan
+     * "omnibase agnostic", step F7d-3: UserTracker's own, so that what it records is what is flushed - on Eloquent
+     * too); an entity manager is adapted (UnitOfWorks).
+     */
+    protected UnitOfWork $unitOfWork;
+
+    public function __construct(UserTracker $userTracker, UnitOfWork|EntityManagerInterface $unitOfWork)
     {
         $this->userTracker = $userTracker;
-        $this->entityManager = $entityManager;
+        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        if ($unitOfWork instanceof EntityManagerInterface) {
+            $this->entityManager = $unitOfWork;
+        }
     }
 
     public static function getSubscribedEvents(): array
@@ -80,7 +94,7 @@ class ConnectionSubscriber implements EventSubscriberInterface
         $connection = $this->userTracker->getCurrentConnection($user);
         $connection->markAsFailed();
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     public function onLoginSuccess(LoginSuccessEvent $event)
@@ -92,7 +106,7 @@ class ConnectionSubscriber implements EventSubscriberInterface
         $connection = $this->userTracker->getCurrentConnection($user);
         $connection->markAsSucceeded();
 
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 
     public function onLogout(LogoutEvent $event)
@@ -104,6 +118,6 @@ class ConnectionSubscriber implements EventSubscriberInterface
         $connection = $this->userTracker->getCurrentConnection($user, false);
         if($connection) $connection->markAsLogout();
         
-        $this->entityManager->flush();
+        $this->unitOfWork->flush();
     }
 }

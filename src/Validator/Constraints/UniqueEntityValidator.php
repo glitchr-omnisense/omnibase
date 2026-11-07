@@ -2,6 +2,9 @@
 
 namespace Base\Validator\Constraints;
 
+use Base\Contract\Runtime;
+use Base\Database\UnitOfWorks;
+use Omnibridge\Persistence\UnitOfWork;
 use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
 use Base\Validator\ConstraintEntity;
 use Countable;
@@ -17,6 +20,14 @@ use function is_array;
 
 class UniqueEntityValidator extends ConstraintEntityValidator
 {
+    /** The persistence chosen's unit of work (omnisense/omnibridge's), else the runtime's; none: Doctrine's alone. */
+    protected ?UnitOfWork $unitOfWork = null;
+
+    public function setUnitOfWork(?UnitOfWork $unitOfWork): void
+    {
+        $this->unitOfWork = $unitOfWork;
+    }
+
     /**
      * @param $value
      * @param Constraint $constraint
@@ -33,6 +44,12 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         }
 
         $classMetadata = $this->getClassMetadata($constraint->entityClass ?? $entity);
+
+        // An entity another persistence read (omnisense/omnibridge's unit of work, Eloquent's: plan "omnibase agnostic",
+        // step F7d-3) is looked up there: Doctrine's repository gives another instance of its row, which made every
+        // account's own name "already used". Doctrine's metadata still names the fields.
+        $unitOfWork = $this->unitOfWork ?? Runtime::find(UnitOfWork::class);
+        $other = null !== $unitOfWork && !$em->contains($entity) && $unitOfWork->contains($entity) ? $unitOfWork : null;
 
         $criteria = [];
         $hasNullValue = false;
@@ -88,7 +105,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             }
 
             $criteria[$fieldName] = $fieldValue;
-            if (null !== $criteria[$fieldName] && $classMetadata->hasAssociation($fieldName)) {
+            if (null === $other && null !== $criteria[$fieldName] && $classMetadata->hasAssociation($fieldName)) {
                 /* Ensure the Proxy is initialized before using reflection to
                  * read its identifiers. This is necessary because the wrapped
                  * getter methods in the Proxy are being bypassed.
@@ -113,17 +130,17 @@ class UniqueEntityValidator extends ConstraintEntityValidator
              * We ensure the retrieved repository can handle the entity
              * by checking the entity is the same, or subclass of the supported entity.
              */
-            $repository = $em->getRepository($constraint->entityClass);
+            $repository = null !== $other ? UnitOfWorks::repositories($other)->of($constraint->entityClass) : $em->getRepository($constraint->entityClass);
 
             if (!$repository) {
                 throw new ConstraintDefinitionException(sprintf('No corresponding "%s" entity repository found.', $constraint->entityClass));
             }
         } else {
-            $repository = $em->getRepository(get_class($entity));
+            $repository = null !== $other ? UnitOfWorks::repositories($other)->of(get_class($entity)) : $em->getRepository(get_class($entity));
         }
 
-        // Find duplicates among the submitted entities
-        $identityMap = $this->em->getUnitOfWork()->getIdentityMap()[get_root_class($entity)] ?? [];
+        // Find duplicates among the submitted entities (Doctrine's identity map; none on another persistence)
+        $identityMap = null !== $other ? [] : ($this->em->getUnitOfWork()->getIdentityMap()[get_root_class($entity)] ?? []);
         $siblingEntities = array_filter(
             $identityMap ?? null,
             fn($k) => ($k != $entity->getId()) && $identityMap[$k] instanceof $entity,
