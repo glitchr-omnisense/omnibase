@@ -3,6 +3,7 @@
 namespace Tests\Base\Console;
 
 use Base\Entity\User\Notification;
+use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -47,6 +48,25 @@ final class UserNotificationCommandTest extends KernelTestCase
         $this->entityManager()->persist($notification);
 
         return $notification;
+    }
+
+    /**
+     * The command reads and writes through the persistence the host chose (plan "omnibase agnostic", step B4): it was
+     * given Doctrine's entity manager and asked Doctrine's App\Repository\UserRepository, also on eloquent.
+     * notifier:mail:test, which reads the accounts the same way, too.
+     */
+    public function testItRunsOnThePersistenceTheHostChose(): void
+    {
+        $application = new Application(static::$kernel);
+        $chosen = static::getContainer()->get(UnitOfWork::class);
+        foreach (['user:notifications', 'notifier:mail:test'] as $name) {
+            $command = $application->find($name);
+            if ($command instanceof \Symfony\Component\Console\Command\LazyCommand) {
+                $command = $command->getCommand();
+            }
+            $unitOfWork = (new \ReflectionProperty(\Omnibridge\Symfony\Omnibase\Console\Command::class, 'unitOfWork'))->getValue($command);
+            $this->assertSame($chosen, $unitOfWork, $name);
+        }
     }
 
     public function testItCountsAnAccountsNotifications(): void

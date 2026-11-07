@@ -10,6 +10,16 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: user:notifications on the persistence chosen (plan "omnibase agnostic", step B4)
+
+`Base\Console\Task\UserNotification` asked for Doctrine's `App\Repository\UserRepository` (`instanceof`) and refused any
+other users repository: on eloquent, under Laravel's artisan or Symfony's console, user:notifications --user stopped
+there. It now reads the account through the persistence's users repository as signing in does (its
+`loadUserByIdentifier()`, which Doctrine's and omnibridge/eloquent's both have), refused aloud when the repository loads
+no account. `UserNotificationCommandTest::testItRunsOnThePersistenceTheHostChose`: user:notifications and
+notifier:mail:test hold the container's `Omnibridge\Persistence\UnitOfWork` (omnibridge/symfony gives every command
+the persistence chosen).
+
 ### Changed: an entity whose row is gone, whichever persistence says it (plan "omnibase agnostic", step B6)
 
 `AbstractAttribute::getOldEntityData()` and `SettingBag::getRaw()` caught Doctrine's `EntityNotFoundException` only:
