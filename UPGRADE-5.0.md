@@ -265,6 +265,17 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
 - `EntityHydrator::getOriginalEntityData()` reads a PreUpdate's changes from any lifecycle arguments that give them
   (`getEntityChangeSet()`), as from Doctrine's PreUpdateEventArgs.
 
+## The methods no finder compiles (step F7f)
+
+- Nothing to change for a caller. `#[BackendOnly]` on the core's 14 analytics and redirection methods now names
+  `['doctrine', 'eloquent']`: on eloquent the page views are counted, the unique views and the breakdowns answered,
+  a redirection's hits counted. `BackendOnly::runs($interface, $method, 'eloquent')` is true for them.
+- An application's own repositories follow the switch when it gives them an Eloquent implementation and registers it
+  for its entity (`Omnibridge\Eloquent\Omnibase\EloquentRepositories::register()`, from the persistence's
+  configurator under Symfony - a compiler pass reading the parameter `base.persistence` -, or once the persistence is
+  made under Laravel); see lesringostars' `App\Persistence\Eloquent` and `App\DependencyInjection\EloquentRepositoriesPass`.
+  A method of its own that no finder expresses can carry `#[BackendOnly([...], reason)]` too.
+
 ## The persistence in one click (step F7d)
 
 - Nothing to change with one persistence installed: it is used.

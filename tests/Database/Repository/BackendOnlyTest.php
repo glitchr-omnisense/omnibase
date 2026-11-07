@@ -10,14 +10,15 @@ use Base\Repository\Layout\Redirections;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The repository methods only one persistence runs (plan "omnibase agnostic", step E2): declared on
- * the core's interfaces, listed here as the inventory recorded them (~/Sites/.agent-briefs/e2), so
- * that a method added to the list or taken off it is a decision, not a drift; another persistence
- * refuses them aloud.
+ * The repository methods no finder compiles (plan "omnibase agnostic", step E2): declared on the
+ * core's interfaces, listed here as the inventory recorded them (~/Sites/.agent-briefs/e2), so that
+ * a method added to the list or taken off it is a decision, not a drift. Since step F7f each is
+ * written by both persistences, omnibridge/doctrine and omnibridge/eloquent; a persistence not
+ * named refuses them aloud.
  */
 final class BackendOnlyTest extends TestCase
 {
-    public function testTheMethodsDeclaredForDoctrineOnly(): void
+    public function testTheMethodsEachPersistenceWritesItself(): void
     {
         $declared = BackendOnly::declared(array_keys(Aliases::INTERFACES));
 
@@ -39,19 +40,20 @@ final class BackendOnlyTest extends TestCase
         ], array_keys($declared));
 
         foreach ($declared as $method => $declaration) {
-            self::assertSame(['doctrine'], $declaration->backends, $method);
+            self::assertSame(['doctrine', 'eloquent'], $declaration->backends, $method);
             self::assertNotSame('', $declaration->reason, $method);
         }
     }
 
-    public function testAnotherPersistenceRefusesThemAloud(): void
+    public function testAPersistenceNotNamedRefusesThemAloud(): void
     {
         self::assertTrue(BackendOnly::runs(PageViews::class, 'dailyBreakdown', 'doctrine'));
-        self::assertFalse(BackendOnly::runs(PageViews::class, 'dailyBreakdown', 'eloquent'));
-        self::assertTrue(BackendOnly::runs(PageViews::class, 'countViews', 'eloquent'), 'a finder: every persistence compiles it');
+        self::assertTrue(BackendOnly::runs(PageViews::class, 'dailyBreakdown', 'eloquent'));
+        self::assertFalse(BackendOnly::runs(PageViews::class, 'dailyBreakdown', 'cycle'));
+        self::assertTrue(BackendOnly::runs(PageViews::class, 'countViews', 'cycle'), 'a finder: every persistence compiles it');
 
         $this->expectException(UnsupportedQueryException::class);
-        $this->expectExceptionMessage('Base\Repository\Layout\Redirections::hit() is written for doctrine only (a bulk DQL UPDATE');
-        BackendOnly::refuse(Redirections::class, 'hit', 'eloquent');
+        $this->expectExceptionMessage('Base\Repository\Layout\Redirections::hit() is written for doctrine, eloquent only (a bulk UPDATE');
+        BackendOnly::refuse(Redirections::class, 'hit', 'cycle');
     }
 }

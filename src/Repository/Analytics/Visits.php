@@ -15,20 +15,20 @@ use Base\Entity\Analytics\Visit;
  */
 interface Visits extends Entities
 {
-    #[BackendOnly('doctrine', 'native SQL: INSERT IGNORE (INSERT OR IGNORE, ON CONFLICT DO NOTHING)')]
+    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: INSERT IGNORE (INSERT OR IGNORE, ON CONFLICT DO NOTHING)')]
     public function recordPresence(string $subjectType, string $subjectId, \DateTimeImmutable $date): void;
 
     public function countUnique(string $subjectType, ?\DateTimeImmutable $since = null): int;
 
     /** @return array<mixed> */
-    #[BackendOnly('doctrine', 'native SQL: COUNT(DISTINCT CASE WHEN EXISTS (correlated subquery))')]
+    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: COUNT(DISTINCT CASE WHEN EXISTS (correlated subquery))')]
     public function returning(string $subjectType, \DateTimeImmutable $previousSince, \DateTimeImmutable $currentSince): array;
 
     /** @return array<mixed> */
-    #[BackendOnly('doctrine', 'native SQL: COUNT(DISTINCT) grouped by DATE()')]
+    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: COUNT(DISTINCT) grouped by DATE()')]
     public function dailyBreakdown(string $subjectType, \DateTimeImmutable $since): array;
 
     /** @return array<mixed> */
-    #[BackendOnly('doctrine', 'native SQL: COUNT(DISTINCT) grouped by the hour bucket')]
+    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: COUNT(DISTINCT) grouped by the hour bucket')]
     public function hourlyBreakdown(string $subjectType, \DateTimeImmutable $since): array;
 }

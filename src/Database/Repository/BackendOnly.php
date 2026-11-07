@@ -3,16 +3,16 @@
 namespace Base\Database\Repository;
 
 /**
- * A repository method that only one persistence runs (plan "omnibase agnostic", step E2): its
- * query is no finder (Base\Database\Repository\Finder) but the backend's own language - native
- * SQL with an upsert or a DATE() grouping, a bulk DQL UPDATE -, so another persistence does not
- * compile it from the core: it writes the method again in its own terms, or refuses it aloud
- * with refuse(), never answers it silently wrong.
+ * A repository method that only the persistences named run (plan "omnibase agnostic", step E2):
+ * its query is no finder (Base\Database\Repository\Finder) but the backend's own language - native
+ * SQL with an upsert or a DATE() grouping, a bulk UPDATE -, so no persistence compiles it from the
+ * core: each one named writes the method in its own terms, any other refuses it aloud with
+ * refuse(), never answers it silently wrong.
  *
- * Declared on the core's interface method (Base\Repository\Analytics\PageViews::dailyBreakdown())
- * and on the implementation that runs it (omnibridge/doctrine's PageViewRepository): declared()
- * lists them, the inventory omnibridge/eloquent works from (F7b), and the core's
- * BackendOnlyTest keeps that list as recorded.
+ * Declared on the core's interface method (Base\Repository\Analytics\PageViews::dailyBreakdown(),
+ * for doctrine and eloquent since step F7f) and on an implementation that runs it
+ * (omnibridge/doctrine's PageViewRepository, for doctrine): declared() lists them, the inventory a
+ * new persistence works from, and the core's BackendOnlyTest keeps that list as recorded.
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
 final class BackendOnly
