@@ -10,6 +10,14 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: an entity whose row is gone, whichever persistence says it (plan "omnibase agnostic", step B6)
+
+`AbstractAttribute::getOldEntityData()` and `SettingBag::getRaw()` caught Doctrine's `EntityNotFoundException` only:
+omnibridge/eloquent's `EntityNotFound` (a cached setting, a reference whose row is gone) went through them. Both now
+ask omnisense/omnibridge's `Persistences::isNotFound()` (each persistence's exception declared there as data) and let
+any other failure through; neither imports Doctrine any more. Test: `Tests\Base\Service\SettingBagRowGoneTest` (bare:
+a registered persistence's exception read again without the cache, another failure thrown).
+
 ### Changed: the tests run against the persistence the host chose (plan "omnibase agnostic", step F7f-3)
 
 An application's suite runs the core's tests in its vendor/; on `base.persistence: eloquent` sixteen of them asserted
