@@ -36,8 +36,8 @@ use Doctrine\ORM\Query;
  * (Finder\Key): the thread of the newest comment - in the core's harness, one in the trash - and the
  * visitors' book.
  *
- * Not here: the methods declared #[BackendOnly('doctrine')] (native SQL, a bulk UPDATE), which
- * keep their query (see the plan's inventory, ~/Sites/.agent-briefs/e2/inventory.md).
+ * Not here: the methods declared #[BackendOnly] (native SQL, a bulk UPDATE), which each
+ * persistence writes in its own terms, so they keep their query (see the plan's inventory, ~/Sites/.agent-briefs/e2/inventory.md).
  */
 final class HandWrittenQueries
 {

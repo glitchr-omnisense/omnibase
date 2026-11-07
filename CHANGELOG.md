@@ -10,6 +10,17 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the methods no finder compiles are written by both persistences (plan "omnibase agnostic", step F7f)
+
+- The 14 repository methods declared `#[BackendOnly]` on the core's interfaces - `PageViews::incrementView()` and the
+  four breakdowns, `PageVisits::recordPresence()`, `countUnique()` and the two breakdowns, `Visits::recordPresence()`,
+  `returning()` and the two breakdowns, `Redirections::hit()` - name `['doctrine', 'eloquent']`: omnibridge/eloquent
+  runs them on Eloquent's connection (omnibridge/doctrine's statements; `hit()` one `UPDATE ... SET hits = hits + 1`),
+  the same rows on lesringostars' data. None stays Doctrine's alone: plain SQL a connection runs, an UPDATE whose
+  `hits + 1` the database computes (no DQL-only construct, no Doctrine locking). `Redirections::hit()`'s reason no longer
+  says DQL. A persistence not named still refuses them aloud (`BackendOnly::refuse()`), the list stays the inventory a
+  new persistence writes from (BackendOnlyTest).
+
 ### Changed: what still named Doctrine under Eloquent (plan "omnibase agnostic", step F7d-3)
 
 lesringostars' Symfony suite run with `base.persistence: eloquent` showed services that stayed on Doctrine's

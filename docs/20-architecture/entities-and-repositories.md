@@ -161,14 +161,19 @@ omnibridge/doctrine's compiler also binds an equality on one value with the fiel
 that type converts it (`ConvertedInCriteria`: the passkeys' base64 and AAGUID columns), as
 Doctrine's own `findBy()` does: `findOneBy(['publicKeyCredentialId' => $bytes])` finds the row.
 
-What the language does not say stays the backend's, declared so:
-`#[Base\Database\Repository\BackendOnly('doctrine', reason)]` on the core's interface method and
-on the implementation that runs it - the analytics' native SQL (upserts, `INSERT IGNORE`, `DATE()`
-groupings, correlated subqueries) and `Redirections::hit()`'s bulk `UPDATE`. `BackendOnly::declared()`
-lists them (14, kept in `tests/Database/Repository/BackendOnlyTest`), `BackendOnly::runs()` tells
-whether a persistence runs one, and another persistence's implementation answers
-`BackendOnly::refuse()` - an `UnsupportedQueryException` that names the method, the backend it is
+What the language does not say stays the backends', declared so:
+`#[Base\Database\Repository\BackendOnly(['doctrine', 'eloquent'], reason)]` on the core's interface
+method - the analytics' native SQL (upserts, `INSERT IGNORE`, `DATE()` groupings, correlated
+subqueries) and `Redirections::hit()`'s bulk `UPDATE`. No finder compiles them: each persistence
+writes them in its own terms, omnibridge/doctrine through DBAL (its implementation declares
+`BackendOnly('doctrine', ...)` too), omnibridge/eloquent the same statements through Illuminate's
+connection (step F7f; `Redirections::hit()` as one `UPDATE ... SET hits = hits + 1`).
+`BackendOnly::declared()` lists them (14, kept in `tests/Database/Repository/BackendOnlyTest`),
+`BackendOnly::runs()` tells whether a persistence runs one, and a persistence not named answers
+`BackendOnly::refuse()` - an `UnsupportedQueryException` that names the method, the backends it is
 written for and why - until it writes the query in its own terms, never a silent wrong answer.
+None of the 14 is tied to Doctrine itself: plain SQL a connection runs, and an `UPDATE` whose
+`hits + 1` the database computes (no DQL-only construct, no Doctrine locking).
 
 Each rewritten method gives the rows of its former query, in the same order:
 `FinderParityTest::testTheRewrittenQueriesGiveTheRowsOfBefore` runs both (the former queries
