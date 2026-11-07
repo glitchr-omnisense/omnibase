@@ -21,6 +21,15 @@ final class Criterion
     ) {
     }
 
+    /**
+     * A member of a group built from its members (Group::of(), step B1b): a field, its value and the words that say
+     * how it compares (Parser::OPTION_*: EqualTo when none says it), numbered by the group.
+     */
+    public static function of(string $field, mixed $value, string ...$words): self
+    {
+        return new self($field, null, $value, array_values($words));
+    }
+
     public function is(string $option): bool
     {
         return \in_array($option, $this->options, true);

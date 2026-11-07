@@ -202,6 +202,48 @@ final class ParserTest extends TestCase
         }
     }
 
+    public function testAGroupBuiltFromItsMembersIsReadAlready(): void
+    {
+        // Step B1b: the parentheses said with criteria, without a name - a field holding a word of the language
+        // ("sortOrder" holds "Or") stays a field, the members of one field are numbered, a group nests.
+        $search = Group::of(
+            Parser::SEPARATOR_OR,
+            Criterion::of('username', '%a%', Parser::OPTION_INSENSITIVE, Parser::OPTION_PARTIAL),
+            Criterion::of('sortOrder', 3, Parser::OPTION_GREATER),
+            Criterion::of('sortOrder', 9, Parser::OPTION_LOWER_EQUAL),
+            Group::of(Parser::SEPARATOR_AND, Criterion::of('parent', Key::of(null)), Criterion::of('state', 'draft')),
+        );
+        self::assertTrue($search->isRead());
+        self::assertSame(Parser::SEPARATOR_OR, $search->separator());
+        [$username, $above, $below, $nested] = $search->criterions();
+        self::assertEquals(new Criterion('username', 0, '%a%', [Parser::OPTION_PARTIAL, Parser::OPTION_INSENSITIVE, Parser::OPTION_EQUAL]), $username);
+        self::assertEquals(new Criterion('sortOrder', 0, 3, [Parser::OPTION_GREATER]), $above);
+        self::assertEquals(new Criterion('sortOrder', 1, 9, [Parser::OPTION_LOWER_EQUAL]), $below);
+        self::assertSame(Parser::SEPARATOR_AND, $nested->value->separator());
+        self::assertTrue($nested->value->criterions()[0]->byKey());
+
+        // The parser leaves it as it is, beside the call's own criteria.
+        $query = self::parser()->parse('findByState', ['publish', [$search]]);
+        self::assertSame($search, $query->criterions()[0]->value);
+        self::assertSame(['state:0' => 'publish'], $query->criteria);
+
+        foreach ([
+            [fn () => Group::of('Xor'), 'And or Or'],
+            [fn () => Group::of(Parser::SEPARATOR_AND, Criterion::of('id', 5, Parser::OPTION_CLOSESTTO)), 'conditions only'],
+            [fn () => Group::of(Parser::SEPARATOR_AND, Criterion::of('id', 5, Parser::OPTION_GREATER, Parser::OPTION_LOWER)), 'one way'],
+            [fn () => Group::of(Parser::SEPARATOR_AND, Criterion::of('id:0', 5)), 'a field or a path'],
+            [fn () => Group::of(Parser::SEPARATOR_AND, Group::by('SlugOrEmail', 'a', 'b')), 'not read'],
+            [fn () => self::parser()->parse('findBy', [[Group::of(Parser::SEPARATOR_AND, Criterion::of('parent', Key::of(5), Parser::OPTION_GREATER))]]), 'equality only'],
+        ] as [$build, $message]) {
+            try {
+                $build();
+                self::fail($message.': built');
+            } catch (\Exception $e) {
+                self::assertStringContainsString($message, $e->getMessage());
+            }
+        }
+    }
+
     public function testAKeyCriterionComparesAnAssociationWithoutAJoin(): void
     {
         // Step E2b: the association compared by its own key, in the criteria array or given to a name.

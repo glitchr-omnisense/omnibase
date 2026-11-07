@@ -10,6 +10,19 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: a finder group built from its members (plan "omnibase agnostic", step B1b)
+
+`Base\Database\Repository\Finder\Group::of($separator, ...$members)`: the parentheses of the finder language said with
+criteria (`Criterion::of($field, $value, ...$words)`) and nested groups instead of a name, for code that holds its fields at
+run time - omnibase/admin's list: its search, an OR of `Insensitive Partial` over the text fields, and its filters. A
+member's words are those a group's name may say (the comparisons, Partial, Insensitive, StartingWith, EndingWith, Null,
+Empty, True, False and their Not..., the dates' words), EqualTo when none compares; the members of one field are numbered
+as the Parser numbers them; a field holding a word of the language ("sortOrder" holds "Or") stays a field. The group is
+read already: the Parser leaves it as it is (`Group::isRead()`), a key criterion in it checked as in any group, and
+omnibridge/doctrine and omnibridge/eloquent compile it as a named group, unchanged. Test:
+`ParserTest::testAGroupBuiltFromItsMembersIsReadAlready`; the compilers' parity in omnibridge/eloquent's FinderParityTest
+(harness and site).
+
 ### Changed: user:notifications on the persistence chosen (plan "omnibase agnostic", step B4)
 
 `Base\Console\Task\UserNotification` asked for Doctrine's `App\Repository\UserRepository` (`instanceof`) and refused any

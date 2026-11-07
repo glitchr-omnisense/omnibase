@@ -18,7 +18,8 @@ use Exception;
  * Last<N>, LastOne, Previous<N>, PreviousOne, Next<N>, NextOne), cache and
  * Eagerly; since step E2, the aggregates sumOf<Column>By, minOf<Column>By and
  * maxOf<Column>By, and the groups (Group::by('AOrB', ...) as an entry of the
- * criteria array: a parenthesised part of the finder, read by this parser); since
+ * criteria array: a parenthesised part of the finder, read by this parser; since
+ * step B1b also Group::of() from its members, read already); since
  * step E2b, a to-one association compared by its key without a join (Key::of($x),
  * a criterion's value, EqualTo or NotEqualTo only).
  *
@@ -230,7 +231,8 @@ final class Parser
         }
 
         foreach ($arguments[0] as $key => $value) {
-            if (!$value instanceof Group) {
+            // A group built from its members (Group::of(), step B1b) is read already.
+            if (!$value instanceof Group || $value->isRead()) {
                 continue;
             }
             if (str_contains($value->name, self::OPTION_WITH_ROUTE)) {
