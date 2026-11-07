@@ -10,6 +10,27 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: what still named Doctrine under Eloquent (plan "omnibase agnostic", step F7d-3)
+
+lesringostars' Symfony suite run with `base.persistence: eloquent` showed services that stayed on Doctrine's
+repositories or entity manager while the rest read and wrote through Eloquent - mixed reads, writes nobody flushed:
+
+- The declarations name the repositories by the core's interfaces, so the persistence chosen answers them (on Doctrine
+  the same services, the interfaces being their aliases): `Analytics` (`PageViews`, `Visits`, `PageVisits`),
+  `SettingBag` (`Layout\Settings`), `WarnNewDevice` and `UserTracker` (`User\Connections`), `FormGuard`
+  (`Thread\Comments`), `SemanticEnhancer` (`Layout\Semantics`), `WebPushService` (`User\PushSubscriptions`),
+  `NotificationTwigExtension` (`User\Notifications`), `MentionEnhancer`'s users (`Users`).
+- `ConnectionSubscriber` writes through omnisense/omnibridge's unit of work (UserTracker's), not Doctrine's entity
+  manager (still accepted, adapted, deprecated until 6.0): a sign-in's connection is flushed on Eloquent too.
+- `DemoAccountFactory` reads and writes through the unit of work (Doctrine's registry still accepted): a one-click
+  demonstration sign-in gives the account its connection is written for.
+- `UniqueEntityValidator` looks an entity another persistence read up through that persistence's repositories
+  (`setUnitOfWork()`, the declaration's call): on Eloquent, Doctrine's repository gave another instance of the same row
+  and every account's own name and address were "already used".
+- Left on Doctrine by design: what reads its metadata only (CropperType, FieldValueResolver, the AttributeReader), the
+  TimeMachine's dumps, the console commands named after it, the back office (step B); the repositories with no interface
+  yet (`Layout\Widget\PageRepository`, `TextOverrideRepository`, `GroupRepository`, `PermissionRepository`).
+
 ### Added: the persistence in one click (plan "omnibase agnostic", step F7d)
 
 - The option `base.persistence` (`doctrine`, `eloquent`; null: the only one installed), read by every host through

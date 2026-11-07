@@ -25,7 +25,7 @@ return [
         'public' => true,
         'autowire' => true,
         'autoconfigure' => true,
-        'symfony' => ['arguments' => ['$doctrine' => '@doctrine']],
+        'symfony' => ['arguments' => ['$doctrine' => '@Omnibridge\Persistence\UnitOfWork']],
     ],
     [
         'class' => 'Base\Demo\DemoGuard',

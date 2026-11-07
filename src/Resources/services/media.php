@@ -81,7 +81,7 @@ return [
             'semantic_enhancer' => ['public' => true],
             'Base\Service\Model\Wysiwyg\SemanticEnhancerInterface' => ['public' => true, 'target' => 'semantic_enhancer'],
         ],
-        'symfony' => ['arguments' => ['@Base\Repository\Layout\SemanticRepository']],
+        'symfony' => ['arguments' => ['@Base\Repository\Layout\Semantics']],
     ],
     [
         'class' => 'Base\Service\Model\Wysiwyg\MentionEnhancer',
@@ -95,7 +95,7 @@ return [
         'symfony' => [
             'arguments' => [
                 '@App\Repository\Thread\MentionRepository',
-                '@App\Repository\UserRepository',
+                '@Base\Repository\Users',
                 '@Base\Database\Repository\Repositories',
                 '@obfuscator',
             ],

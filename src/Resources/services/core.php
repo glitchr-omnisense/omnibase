@@ -29,10 +29,10 @@ return [
         'arguments' => [2 => '@Base\Service\Analytics\UserAgentClassifier'],
         'symfony' => [
             'arguments' => [
-                '@Base\Repository\Analytics\PageViewRepository',
-                '@Base\Repository\Analytics\VisitRepository',
+                '@Base\Repository\Analytics\PageViews',
+                '@Base\Repository\Analytics\Visits',
                 '@Base\Service\Analytics\UserAgentClassifier',
-                '@Base\Repository\Analytics\PageVisitRepository',
+                '@Base\Repository\Analytics\PageVisits',
             ],
         ],
     ],
@@ -50,7 +50,7 @@ return [
             'arguments' => [
                 '@parameter_bag',
                 '@Omnibridge\Persistence\UnitOfWork',
-                '@Base\Repository\Layout\SettingRepository',
+                '@Base\Repository\Layout\Settings',
                 '@localizer',
                 '@cache.adapter',
             ],

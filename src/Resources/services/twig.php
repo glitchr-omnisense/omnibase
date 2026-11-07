@@ -167,7 +167,7 @@ return [
         'symfony' => [
             'arguments' => [
                 '@Omnibridge\Contract\Access',
-                '@Base\Repository\User\NotificationRepository',
+                '@Base\Repository\User\Notifications',
                 '@Base\Service\Push\WebPushService',
                 '@Omnibridge\Contract\Tokens',
                 '@Base\Notifier\NotificationLinkerInterface',
