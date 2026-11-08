@@ -26,7 +26,7 @@ class TicketSignerTest extends TestCase
     {
         $ticket = TicketSigner::sign(['room' => 'lobby', 'exp' => time() + 60], 'secret');
         self::assertNull(TicketSigner::verify($ticket, 'other', 'lobby'));
-        self::assertNull(TicketSigner::verify($ticket, 'secret', 'arena'));
+        self::assertNull(TicketSigner::verify($ticket, 'secret', 'other-room'));
         self::assertNull(TicketSigner::verify($ticket, '', 'lobby'));
         self::assertNull(TicketSigner::verify(TicketSigner::sign(['room' => 'lobby', 'exp' => time() - 1], 'secret'), 'secret', 'lobby'));
         self::assertNull(TicketSigner::verify('no-dot', 'secret', 'lobby'));
