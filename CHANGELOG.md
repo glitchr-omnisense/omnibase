@@ -10,6 +10,13 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the form types' mapping compared with Doctrine's (plan "omnibase agnostic", step B, leftover (1))
+
+- `tests/Bridge/Symfony/FormMappingTest`: omnibridge/symfony's `Form\FormMapping` (what its form and field types read of
+  the mapping, on this core's MetadataManipulator) answers as omnibridge/doctrine's ClassMetadataManipulator did - the form
+  fields of getFields(), getMapping()'s `nullable` and `orderBy` for each name, the field and association names - for every
+  entity Doctrine maps, on Doctrine's shapes and on the Description. Skipped without Doctrine or without that class.
+
 ### Changed: the entity dispatchers on omnisense/omnibridge's Lifecycle events (plan "omnibase agnostic", step B, leftover (a))
 
 `AbstractEventDispatcher::lifecycle(Omnibridge\Persistence\Lifecycle\EntityEvent)`: a persistence other than Doctrine's
