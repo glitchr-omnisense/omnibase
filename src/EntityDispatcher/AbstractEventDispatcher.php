@@ -20,10 +20,42 @@ use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Contracts\Service\ResetInterface;
+use Omnibridge\Persistence\Lifecycle;
 use Omnibridge\Persistence\UnitOfWork;
 
+/**
+ * An entity dispatcher notes events before a write (persisting(), updating(), removing(): addEvent()) and dispatches them
+ * once the write is done, through any PSR-14 dispatcher (user.register, thread.published...).
+ *
+ * It is called at a persistence's moments in two ways (plan "omnibase agnostic", step B leftover (a)):
+ *  - lifecycle(), with omnisense/omnibridge's Lifecycle events (Omnibridge\Persistence\Lifecycle\PrePersist...): what a
+ *    persistence other than Doctrine calls (omnibridge/eloquent), so that no Doctrine package is needed there;
+ *  - prePersist() ... postRemove(), with doctrine/persistence's LifecycleEventArgs: Doctrine's event manager, where the
+ *    dispatchers are its listeners (omnibridge/symfony's doctrine.event_listener tags, omnibridge/laravel's).
+ * Both reach the same hooks, persisting(PrePersist), updating(PreUpdate), removing(PreRemove). The former hooks, typed on
+ * doctrine/persistence (onPersist(), onUpdate(), onRemove() and the entries above), are deprecated until 6.0: a dispatcher
+ * that still overrides one is given it under Doctrine as before; on another persistence lifecycle() refuses it aloud, and
+ * a host that can build doctrine/persistence's arguments calls it the former way (formerHooks()).
+ */
 abstract class AbstractEventDispatcher implements EventDispatcherInterface, ResetInterface
 {
+    /** The former hooks, typed on doctrine/persistence's LifecycleEventArgs => their neutral counterpart (null: none). */
+    public const FORMER_HOOKS = [
+        'onPersist' => 'persisting',
+        'onUpdate' => 'updating',
+        'onRemove' => 'removing',
+        'prePersist' => null,
+        'preUpdate' => null,
+        'preRemove' => null,
+        'postPersist' => null,
+        'postUpdate' => null,
+        'postRemove' => null,
+        'dispatchEvents' => null,
+    ];
+
+    /** @var array<class-string, list<string>> formerHooks() by class */
+    private static array $formerHooks = [];
+
     protected array $events;
 
     /**
@@ -138,9 +170,21 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
         }
     }
 
+    /**
+     * @deprecated since omnisense/omnibase 5.x, removed at 6.0: the events are dispatched by lifecycle() or by the former
+     *             entries postPersist(), postUpdate(), postRemove()
+     */
     public function dispatchEvents(LifecycleEventArgs $event)
     {
-        $object = $event->getObject();
+        $this->dispatchFor($event->getObject(), $event);
+    }
+
+    /**
+     * The events noted for an entity, dispatched once; each carries the persistence's own arguments of the moment
+     * (omnisense/omnibridge's Lifecycle event, or Doctrine's LifecycleEventArgs under Doctrine's event manager).
+     */
+    private function dispatchFor(?object $object, LifecycleEventArgs|Lifecycle\EntityEvent $eventArgs): void
+    {
         if ($object == null) {
             return;
         }
@@ -161,7 +205,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
             }
 
             $this->events[$id][$eventName] = false;
-            $dispatched = new $eventClass($event, $request);
+            $dispatched = new $eventClass($eventArgs, $request);
             if ($dispatched instanceof AbstractEvent) {
                 $dispatched->setEventName($eventName);
             }
@@ -172,6 +216,71 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
         if ($reflush) {
             $this->flushPending = true;
         }
+    }
+
+    /**
+     * A persistence's moment, as omnisense/omnibridge's Lifecycle event (plan "omnibase agnostic", step B leftover (a)):
+     * before a write the dispatcher notes its events (persisting(), updating(), removing(), for an entity it supports),
+     * after it dispatches them. The other moments (a flush, a load) are not the dispatchers'. Nothing of doctrine/persistence
+     * is needed. A dispatcher still overriding a former hook is refused aloud: it is called with doctrine/persistence's
+     * arguments, by a host that can build them (formerHooks()).
+     */
+    public function lifecycle(Lifecycle\EntityEvent $event): void
+    {
+        if ([] !== $former = self::formerHooks($this)) {
+            throw new \LogicException(sprintf('%s overrides %s, typed on doctrine/persistence\'s LifecycleEventArgs: this persistence calls an entity dispatcher with omnisense/omnibridge\'s Lifecycle events (persisting(), updating(), removing()).', static::class, implode('(), ', $former).'()'));
+        }
+
+        $entity = $event->entity;
+        if ($event instanceof Lifecycle\PrePersist) {
+            if ($this->supports($entity)) {
+                $this->persisting($event);
+            }
+        } elseif ($event instanceof Lifecycle\PreUpdate) {
+            if ($this->supports($entity)) {
+                $this->updating($event);
+            }
+        } elseif ($event instanceof Lifecycle\PreRemove) {
+            if ($this->supports($entity)) {
+                $this->removing($event);
+            }
+        } elseif ($event instanceof Lifecycle\PostPersist || $event instanceof Lifecycle\PostUpdate || $event instanceof Lifecycle\PostRemove) {
+            $this->dispatchFor($entity, $event);
+        }
+    }
+
+    /**
+     * The former hooks a dispatcher overrides (FORMER_HOOKS), each without its neutral counterpart overridden at the same
+     * level or below: what only doctrine/persistence's LifecycleEventArgs can call. [] for a dispatcher on the neutral hooks.
+     *
+     * @return list<string>
+     */
+    public static function formerHooks(string|self $dispatcher): array
+    {
+        $class = \is_string($dispatcher) ? $dispatcher : $dispatcher::class;
+        if (isset(self::$formerHooks[$class])) {
+            return self::$formerHooks[$class];
+        }
+
+        $former = [];
+        foreach (self::FORMER_HOOKS as $hook => $counterpart) {
+            $declarer = (new \ReflectionMethod($class, $hook))->getDeclaringClass()->getName();
+            if (self::class === $declarer) {
+                continue;
+            }
+            $counterpartDeclarer = null === $counterpart ? self::class : (new \ReflectionMethod($class, $counterpart))->getDeclaringClass()->getName();
+            if (self::class === $counterpartDeclarer || is_subclass_of($declarer, $counterpartDeclarer)) {
+                $former[] = $hook;
+            }
+        }
+
+        return self::$formerHooks[$class] = $former;
+    }
+
+    /** Whether a former hook is the one to give this dispatcher (FORMER_HOOKS, formerHooks()). */
+    private function isFormer(string $hook): bool
+    {
+        return \in_array($hook, self::formerHooks($this), true);
     }
 
     /** Nothing is flushed here any more: see $flushPending. */
@@ -266,6 +375,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
         return $collection->getOwner()->getInsertDiff();
     }
 
+    /** Doctrine's event manager's prePersist (deprecated until 6.0 for any other caller: lifecycle()). */
     public function prePersist(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
@@ -273,9 +383,14 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
             return;
         }
 
-        $this->onPersist($event);
+        if ($this->isFormer('onPersist')) {
+            $this->onPersist($event);
+        } else {
+            $this->persisting(new Lifecycle\PrePersist($object, $this->unitOfWork));
+        }
     }
 
+    /** Doctrine's event manager's preUpdate, its changes (PreUpdateEventArgs) given to updating(). */
     public function preUpdate(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
@@ -283,9 +398,14 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
             return;
         }
 
-        $this->onUpdate($event);
+        if ($this->isFormer('onUpdate')) {
+            $this->onUpdate($event);
+        } else {
+            $this->updating(new Lifecycle\PreUpdate($object, $this->unitOfWork, method_exists($event, 'getEntityChangeSet') ? $event->getEntityChangeSet() : []));
+        }
     }
 
+    /** Doctrine's event manager's preRemove. */
     public function preRemove(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
@@ -293,32 +413,54 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
             return;
         }
 
-        $this->onRemove($event);
+        if ($this->isFormer('onRemove')) {
+            $this->onRemove($event);
+        } else {
+            $this->removing(new Lifecycle\PreRemove($object, $this->unitOfWork));
+        }
     }
 
     public function postPersist(LifecycleEventArgs $event)
     {
-        $this->dispatchEvents($event);
+        $this->isFormer('dispatchEvents') ? $this->dispatchEvents($event) : $this->dispatchFor($event->getObject(), $event);
     }
 
     public function postUpdate(LifecycleEventArgs $event)
     {
-        $this->dispatchEvents($event);
+        $this->isFormer('dispatchEvents') ? $this->dispatchEvents($event) : $this->dispatchFor($event->getObject(), $event);
     }
 
     public function postRemove(LifecycleEventArgs $event)
     {
-        $this->dispatchEvents($event);
+        $this->isFormer('dispatchEvents') ? $this->dispatchEvents($event) : $this->dispatchFor($event->getObject(), $event);
     }
 
+    /** Before a supported entity is inserted: the events to dispatch once it is (addEvent()). */
+    public function persisting(Lifecycle\PrePersist $event): void
+    {
+    }
+
+    /** Before a supported entity is updated, its changes in the event (the original entity: EntityHydrator::getOriginalEntity($event)). */
+    public function updating(Lifecycle\PreUpdate $event): void
+    {
+    }
+
+    /** Before a supported entity is removed. */
+    public function removing(Lifecycle\PreRemove $event): void
+    {
+    }
+
+    /** @deprecated since omnisense/omnibase 5.x, removed at 6.0: persisting() */
     public function onPersist(LifecycleEventArgs $event)
     {
     }
 
+    /** @deprecated since omnisense/omnibase 5.x, removed at 6.0: updating() */
     public function onUpdate(LifecycleEventArgs $event)
     {
     }
 
+    /** @deprecated since omnisense/omnibase 5.x, removed at 6.0: removing() */
     public function onRemove(LifecycleEventArgs $event)
     {
     }

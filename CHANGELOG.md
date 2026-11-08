@@ -10,6 +10,18 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the entity dispatchers on omnisense/omnibridge's Lifecycle events (plan "omnibase agnostic", step B, leftover (a))
+
+`AbstractEventDispatcher::lifecycle(Omnibridge\Persistence\Lifecycle\EntityEvent)`: a persistence other than Doctrine's
+(omnibridge/eloquent) calls a dispatcher with its own lifecycle events; before a write the dispatcher notes its events in
+the new hooks `persisting(PrePersist)`, `updating(PreUpdate)`, `removing(PreRemove)`, after it dispatches them. Its hooks
+were typed on doctrine/persistence's `LifecycleEventArgs`, which omnibridge/eloquent built over the unit of work, so
+doctrine/persistence had to be installed without Doctrine. Doctrine's entries (`prePersist()` ... `postRemove()`) reach the
+same new hooks. `UserEventDispatcher` and `ThreadEventDispatcher` are on them. The former hooks (`onPersist()`,
+`onUpdate()`, `onRemove()`, `dispatchEvents()`) are deprecated: a dispatcher overriding one is given it under Doctrine,
+refused aloud by `lifecycle()` (`formerHooks()` lists what only doctrine/persistence's arguments can call). `AbstractEvent`
+carries either persistence's arguments (`getObject()`, new `getUnitOfWork()`).
+
 ### Changed: the declarations need no Doctrine where they do not use it (plan "omnibase agnostic", step B3)
 
 The services whose only Doctrine requirement was the attribute reader's (AppVariable, IconProvider, Sitemapper,

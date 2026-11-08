@@ -262,8 +262,25 @@ extending `Base\Bundle\AbstractBaseBundle` keeps working unchanged.
   is one (step B).
 - An entity dispatcher (`AbstractEventDispatcher`) keeps its Doctrine-typed hooks: under omnibridge/eloquent they get
   doctrine/persistence's `LifecycleEventArgs` over the unit of work. One overriding `postFlush()` is refused there.
+  Since step B's leftover (a), see below: the neutral hooks need no Doctrine package.
 - `EntityHydrator::getOriginalEntityData()` reads a PreUpdate's changes from any lifecycle arguments that give them
   (`getEntityChangeSet()`), as from Doctrine's PreUpdateEventArgs.
+
+## The entity dispatchers on the neutral lifecycle (step B, leftover (a))
+
+- Nothing to change for a dispatcher on Doctrine: Doctrine's event manager calls `prePersist()` ... `postRemove()` with
+  its arguments as before, and a dispatcher overriding a former hook is given it.
+- `AbstractEventDispatcher` has neutral hooks typed on omnisense/omnibridge's Lifecycle events - `persisting(PrePersist)`,
+  `updating(PreUpdate)`, `removing(PreRemove)` - and an entry, `lifecycle(EntityEvent)`, which omnibridge/eloquent calls:
+  doctrine/persistence is no longer needed without Doctrine. Move a dispatcher's `onPersist(LifecycleEventArgs)`,
+  `onUpdate()`, `onRemove()` to them (`$event->entity` for `$event->getObject()`; `getOriginalEntity($event)` reads a
+  PreUpdate's changes): the former hooks are deprecated and leave at 6.0. Until then a dispatcher overriding one is called
+  the former way under omnibridge/eloquent where doctrine/persistence is installed, and refused aloud where it is not
+  (`AbstractEventDispatcher::formerHooks()` lists them). The core's `UserEventDispatcher` and `ThreadEventDispatcher` are
+  on the neutral hooks.
+- `AbstractEvent` (user.*, thread.*) carries either persistence's arguments: `getObject()` reads both, `getUnitOfWork()` is
+  new, `getLifecycle()` may return omnisense/omnibridge's event and `getObjectManager()` (deprecated) the unit of work
+  when it was not Doctrine's event manager that called the dispatcher.
 
 ## The methods no finder compiles (step F7f)
 

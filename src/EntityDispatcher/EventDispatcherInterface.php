@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Base\EntityDispatcher;
 
-use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
+/**
+ * An entity dispatcher (AbstractEventDispatcher). The methods typed on doctrine/persistence's LifecycleEventArgs are
+ * deprecated since omnisense/omnibase 5.x and leave at 6.0: AbstractEventDispatcher's neutral hooks (persisting(),
+ * updating(), removing()) and its entry lifecycle() need no Doctrine package (plan "omnibase agnostic", step B leftover (a)).
+ */
 interface EventDispatcherInterface
 {
     public function supports(mixed $subject): bool;

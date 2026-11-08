@@ -918,6 +918,40 @@ final class BareTest extends TestCase
     }
 
     /**
+     * The core's entity dispatchers where doctrine/persistence is not installed (plan "omnibase agnostic", step B, leftover
+     * (a)): tests/EntityDispatcher/dispatchers-without-doctrine.php, run by bare --strict on the core installed alone, calls
+     * AbstractEventDispatcher::lifecycle() with omnisense/omnibridge's Lifecycle events: user.register after the account's
+     * insert, user.verified after the update that verifies it (the original entity read from the PreUpdate), thread.published
+     * after a published thread's insert, each dispatched once through a plain PSR-14 dispatcher and carrying the entity and
+     * the unit of work, the listeners' changes flushed after; a dispatcher still overriding onPersist() (typed on
+     * doctrine/persistence) refused aloud. Outside the kept list only the property accessor's extraction (property-info,
+     * type-info), as for the services' list.
+     */
+    public function testTheEntityDispatchersRunWithoutDoctrinePersistence(): void
+    {
+        $autoload = __DIR__.'/../var/bare-alone/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor of the core alone here (var/bare-alone/vendor): "docker/bin/bare --alone --install" makes it.');
+        }
+        $script = __DIR__.'/EntityDispatcher/dispatchers-without-doctrine.php';
+
+        [, $report] = self::bare(['--strict', $script], (string) realpath($autoload));
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        // bare exits 1 for those two (outside the kept list): what the script loaded is what is asserted.
+        self::assertSame([], array_values(preg_grep('~^Symfony\\\\Component\\\\(?:PropertyInfo|TypeInfo)\\\\~', array_keys($run['framework']), PREG_GREP_INVERT)), 'nothing of Doctrine, Twig nor the framework');
+        self::assertSame([
+            'doctrine/persistence' => false,
+            'former hooks' => [[], [], ['onPersist']],
+            'user' => [[], ['user.register'], ['user.verified']],
+            'user.register carries' => [true, true, true],
+            'flushed after the events' => 1,
+            'thread' => ['thread.published'],
+            'former refused' => true,
+        ], $run['result']);
+    }
+
+    /**
      * The schema of the core's entities created with no persistence installed (plan "omnibase agnostic", step F7a):
      * tests/Database/Schema/schema-without-persistence.php, run by bare --strict on the core installed alone (no Doctrine
      * but collections), describes the entities (Base\Database\Schema\EntitySchema), creates their tables in SQLite

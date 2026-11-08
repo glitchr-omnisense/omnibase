@@ -5,7 +5,7 @@ namespace Base\EntityDispatcher\Event;
 use Base\Entity\Thread;
 use Base\EntityDispatcher\AbstractEventDispatcher;
 use DateTime;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Omnibridge\Persistence\Lifecycle;
 
 class ThreadEventDispatcher extends AbstractEventDispatcher
 {
@@ -14,9 +14,9 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
         return $subject instanceof Thread;
     }
 
-    public function onPersist(LifecycleEventArgs $event)
+    public function persisting(Lifecycle\PrePersist $event): void
     {
-        $thread = $event->getObject();
+        $thread = $event->entity;
 
         if ($thread->isScheduled()) {
             $this->addEvent(ThreadEvent::SCHEDULED, $thread);
@@ -29,12 +29,10 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
         }
     }
 
-    public function onUpdate(LifecycleEventArgs $event)
+    public function updating(Lifecycle\PreUpdate $event): void
     {
-        /**
-         * @var Thread $event
-         */
-        $thread = $event->getObject();
+        /** @var Thread $thread */
+        $thread = $event->entity;
 
         if ($thread->isPublishedAt() > new DateTime("now") && $thread->isPublished()) {
             $this->addEvent(ThreadEvent::SCHEDULED, $thread);

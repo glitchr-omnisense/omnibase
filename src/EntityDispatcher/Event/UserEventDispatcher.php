@@ -4,7 +4,7 @@ namespace Base\EntityDispatcher\Event;
 
 use App\Entity\User;
 use Base\EntityDispatcher\AbstractEventDispatcher;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Omnibridge\Persistence\Lifecycle;
 
 class UserEventDispatcher extends AbstractEventDispatcher
 {
@@ -13,15 +13,14 @@ class UserEventDispatcher extends AbstractEventDispatcher
         return $subject instanceof User;
     }
 
-    public function onPersist(LifecycleEventArgs $event)
+    public function persisting(Lifecycle\PrePersist $event): void
     {
-        $user = $event->getObject();
-        $this->addEvent(UserEvent::REGISTER, $user);
+        $this->addEvent(UserEvent::REGISTER, $event->entity);
     }
 
-    public function onUpdate(LifecycleEventArgs $event)
+    public function updating(Lifecycle\PreUpdate $event): void
     {
-        $user = $event->getObject();
+        $user = $event->entity;
         $oldUser = $this->entityHydrator->getOriginalEntity($event);
     
         if ($user->isApproved() && !$oldUser->isApproved()) {
