@@ -2,6 +2,9 @@
 
 namespace Base\Service\Collab;
 
+use Base\Contract\Tickets;
+use Base\Service\Ticket\TicketSigner;
+
 /**
  * This class creates a short-lived, signed ticket. A browser presents
  * this ticket to the collab relay (relay/src/server.js in editorjs-yjs), to join a
@@ -10,12 +13,11 @@ namespace Base\Service\Collab;
  * session store. Because of this, this class is the only place on this
  * side that uses the shared secret.
  *
- * Ticket format: base64url(payload) . "." . hex(hmac_sha256(payload,
- * secret)). This format matches the relay's own verifyTicket() method
- * exactly. To confirm this match, read the relay code first. Do not
- * design each side separately.
+ * Signed by Base\Service\Ticket\TicketSigner, the format the relay's own
+ * verifyTicket() reads (base64url(payload) . "." . hex(hmac_sha256)); the
+ * contract it answers is Base\Contract\Tickets.
  */
-class CollabTicketFactory
+class CollabTicketFactory implements Tickets
 {
     protected string $secret;
     protected string $wsUrl;
@@ -77,10 +79,7 @@ class CollabTicketFactory
             "exp"    => time() + $this->ttl,
         ];
 
-        $payloadB64 = $this->base64urlEncode((string) json_encode($payload));
-        $signature = hash_hmac("sha256", $payloadB64, $this->secret);
-
-        return $payloadB64 . "." . $signature;
+        return TicketSigner::sign($payload, $this->secret);
     }
 
     /**
@@ -100,38 +99,6 @@ class CollabTicketFactory
         // service call needs only the shared secret. The public wsUrl
         // value controls a different, stricter condition: readiness to
         // advertise the collab_live option to a browser.
-        if ($this->secret === "") {
-            return false;
-        }
-
-        $dot = strrpos($token, ".");
-        if ($dot === false) {
-            return false;
-        }
-
-        $payloadB64 = substr($token, 0, $dot);
-        $signature = substr($token, $dot + 1);
-
-        $expected = hash_hmac("sha256", $payloadB64, $this->secret);
-        if (!hash_equals($expected, $signature)) {
-            return false;
-        }
-
-        $payload = json_decode($this->base64urlDecode($payloadB64), true);
-        if (!is_array($payload) || ($payload["exp"] ?? 0) < time()) {
-            return false;
-        }
-
-        return ($payload["room"] ?? null) === $room;
-    }
-
-    protected function base64urlEncode(string $data): string
-    {
-        return rtrim(strtr(base64_encode($data), "+/", "-_"), "=");
-    }
-
-    protected function base64urlDecode(string $data): string
-    {
-        return (string) base64_decode(strtr($data, "-_", "+/"), false);
+        return TicketSigner::verify($token, $this->secret, $room) !== null;
     }
 }
