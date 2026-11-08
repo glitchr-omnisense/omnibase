@@ -26,8 +26,6 @@ return [
         'requires' => [
             'Twig\Environment',
             'Base\Routing\AdvancedRouterInterface',
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
         ],
         'public' => true,
         'arguments' => [
@@ -74,8 +72,6 @@ return [
         'requires' => [
             'Twig\Environment',
             'Base\Routing\AdvancedRouterInterface',
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
         ],
         'public' => true,
         'arguments' => ['@Base\Routing\AdminUrlGeneratorInterface'],

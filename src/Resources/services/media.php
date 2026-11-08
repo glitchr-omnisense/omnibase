@@ -41,8 +41,6 @@ return [
         'class' => 'Base\Service\Sitemapper',
         'requires' => [
             'Base\Routing\AdvancedRouterInterface',
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
         ],
         'public' => true,
         'arguments' => [0 => '@Omnibridge\Contract\Views', 1 => '@base.attribute_reader', 3 => '@localizer'],
@@ -65,8 +63,6 @@ return [
         'class' => 'Base\Request\SitemapPage',
         'requires' => [
             'Base\Routing\AdvancedRouterInterface',
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
         ],
         'public' => true,
         'autowire' => true,
@@ -94,7 +90,7 @@ return [
         ],
         'symfony' => [
             'arguments' => [
-                '@App\Repository\Thread\MentionRepository',
+                '@Base\Repository\Thread\Mentions',
                 '@Base\Repository\Users',
                 '@Base\Database\Repository\Repositories',
                 '@obfuscator',
@@ -233,8 +229,6 @@ return [
         'class' => 'Base\Service\IconProvider',
         'requires' => [
             'Base\Routing\AdvancedRouterInterface',
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
         ],
         'public' => true,
         'arguments' => ['@base.attribute_reader', '@base.service.image', '@localizer'],

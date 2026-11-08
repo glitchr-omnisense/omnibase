@@ -20,8 +20,9 @@ return [
         'symfony' => ['arguments' => ['$roleHierarchy' => '@?security.role_hierarchy']],
     ],
     [
+        // On the persistence's unit of work (Doctrine's registry still accepted): no Doctrine required (plan "omnibase
+        // agnostic", step B3).
         'class' => 'Base\Demo\DemoAccountFactory',
-        'requires' => ['Doctrine\Persistence\ManagerRegistry'],
         'public' => true,
         'autowire' => true,
         'autoconfigure' => true,

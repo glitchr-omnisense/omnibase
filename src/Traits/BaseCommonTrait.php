@@ -2,7 +2,7 @@
 
 namespace Base\Traits;
 
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Mapping\MetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\BaseService;
 use Base\Service\Obfuscator;
@@ -200,7 +200,7 @@ trait BaseCommonTrait
      */
     protected static ?ManagerRegistry $doctrine = null;
 
-    public static function setDoctrine(ManagerRegistry $doctrine)
+    public static function setDoctrine(?ManagerRegistry $doctrine)
     {
         self::$doctrine = $doctrine;
     }
@@ -268,9 +268,9 @@ trait BaseCommonTrait
     /**
      * @var ClassMetadataManipulator|null
      */
-    protected static ?ClassMetadataManipulator $classMetadataManipulator = null;
+    protected static null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
 
-    public static function setClassMetadataManipulator(?ClassMetadataManipulator $classMetadataManipulator)
+    public static function setClassMetadataManipulator(null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator)
     {
         self::$classMetadataManipulator = $classMetadataManipulator;
     }

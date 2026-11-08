@@ -15,8 +15,6 @@ return [
         'requires' => [
             'Twig\Environment',
             'Base\Routing\AdvancedRouterInterface',
-            'Doctrine\ORM\EntityManager',
-            'Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator',
             'Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface',
         ],
         'public' => true,

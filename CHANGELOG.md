@@ -10,6 +10,16 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: the declarations need no Doctrine where they do not use it (plan "omnibase agnostic", step B3)
+
+The services whose only Doctrine requirement was the attribute reader's (AppVariable, IconProvider, Sitemapper,
+SitemapPage, SiteVariable and the e-mails') no longer list `Doctrine\ORM\EntityManager` and omnibridge/doctrine's
+manipulator among their requirements; DemoAccountFactory (on the unit of work) no longer requires Doctrine's registry;
+MentionEnhancer takes the mentions' repository by its interface (`Base\Repository\Thread\Mentions`) under Symfony.
+`BaseCommonTrait::setDoctrine()` accepts null and `setClassMetadataManipulator()` the core's MetadataManipulator. With
+omnibridge/symfony's commit of the same step, a Symfony site installs omnibridge/eloquent alone, doctrine/orm not
+installed.
+
 ### Changed: the attribute reader reads the mapping from the entities' shapes (plan "omnibase agnostic", step E3)
 
 `Base\Database\Mapping\MetadataManipulator`: what the `AttributeReader` and the attributes ask of the mapping (an entity,
