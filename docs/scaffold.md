@@ -5,7 +5,7 @@ order: 15
 
 # Scaffolding a site
 
-A new omnibase site starts as a copy of **another site** (`~/Sites/another site`),
+A new omnibase site starts as a copy of an existing site (`~/Sites/<site>`),
 the reference application: Symfony 8, PHP 8.4, Docker, omnisense/omnibase 3.x with
 omnibase/admin, omnibase/marketplace and the `omnibase/*` bundles of its trade.
 This page is the exact list: what is copied and then adapted, and what is no
@@ -46,7 +46,7 @@ package. Without it Flex takes every package of the first `composer install`
 for a new one and **plays every recipe again**: it rewrites
 `config/bundles.php`, drops its default `config/packages/*.yaml`,
 `config/routes/*.yaml`, `.env` blocks, `src/Kernel.php`, `public/index.php`
-and `bin/console` over the files just copied from another site - the site then
+and `bin/console` over the files just copied from the reference site - the site then
 boots on Symfony's defaults instead of omnibase's configuration (or does not
 boot: two Doctrine configurations, a second security firewall).
 
@@ -56,7 +56,7 @@ change under `config/`; a package added later is a `composer require`, whose
 recipe adds its entry to the lock - commit it with the rest.
 
 A copy made without it is repaired before the first install: take
-another site's `symfony.lock`, remove the entries of the packages the new site
+the reference site's `symfony.lock`, remove the entries of the packages the new site
 does not require (or leave them: an entry without its package is ignored).
 If the recipes already ran, `git checkout -- config/ .env src/Kernel.php
 public/index.php bin/console` on a copy that was committed first, else copy
@@ -455,7 +455,7 @@ docker exec <app>-web-1 php vendor/bin/phpunit
 composer's `assets:install` links the bundles' assets
 (`public/bundles/*`). A stack started first - `make up`, a bare `docker compose
 up` - creates the volume with the `public/assets` mountpoint alone: not empty,
-so never seeded, and every page answers "File not found". another site's
+so never seeded, and every page answers "File not found". The reference site's
 Makefile repairs that case itself since 2026-10-04 (`seed-public`, run by `make
 build`: a volume that exists without `index.php` gets `./public`); with an
 older Makefile, by hand:
@@ -484,13 +484,13 @@ network". `-v` deletes the volumes: the database with them.
    Makefile's `DOCKER_WEB`, `DOCKER_DATABASE`, `DOCKER_PROXY` and `DOCKER_ASSETS`
    pass `docker exec` the `TTY_FLAG` (`-ti` when standard input is a terminal,
    `-i` otherwise), and so do `make shell` / `make shell-debug` given `ARGS`.
-   another site's `DOCKER_DATABASE` and `DOCKER_PROXY` used a bare `-ti`, and
+   The reference site's `DOCKER_DATABASE` and `DOCKER_PROXY` used a bare `-ti`, and
    `make database-test` stopped on "the input device is not a TTY" outside a
    terminal (fixed 2026-10-04): a site copied from an older Makefile changes
    those two lines the same way.
 4. Write the site's `SettingsSectionInterface` classes for its own settings and keys.
 5. `docker exec <app>-web-1 php vendor/bin/phpunit`: green before the first commit.
 
-another site moved onto the shared bricks in `migrations/Version20261004090000.php`
+The reference site moved onto the shared bricks in `migrations/Version20261004090000.php`
 (textOverride → layoutTextOverride, blog_comment → threadComment, the hours
 tables): the model for the existing sites when they are attached one by one.

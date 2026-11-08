@@ -11,7 +11,7 @@ use Tests\Base\Http\HttpTestTrait;
 
 /**
  * After signing in, the visitor goes back to the last page they read - not
- * to the last thing their browser asked: the sign-in sent a site's
+ * to the last thing their browser asked: the sign-in sent one site's
  * visitors to an avatar's SVG, served by a controller and asked after the
  * page. ReferrerSubscriber read base.access_restrictions.route_exceptions,
  * a parameter that does not exist (base.access_restriction...), and

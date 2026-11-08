@@ -13,7 +13,7 @@ linked by the partial.
 ```twig
 {% include '@Base/partials/_credits.html.twig' %}                                   {# black #}
 {% include '@Base/partials/_credits.html.twig' with {color: 'white', outline: true} %}
-{% include '@Base/partials/_credits.html.twig' with {mirror: true, rule: true, site_name: 'another site'} %}
+{% include '@Base/partials/_credits.html.twig' with {mirror: true, rule: true, site_name: 'My site'} %}
 ```
 
 | Parameter | Values | |

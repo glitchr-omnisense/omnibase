@@ -191,7 +191,7 @@ class RouterSchemeTest extends KernelTestCase
 
     public function testAnHttpSiteOnAPortOfItsOwnKeepsItsPortAndScheme(): void
     {
-        // a shop site's tests: http on 8081 (HTTP_PORT='[8081]', no
+        // A site's tests: http on 8081 (HTTP_PORT='[8081]', no
         // HTTPS_PORT), its fallbacks' port that one. Filtered by HTTPS_PORT
         // ([443]) the fallback port was 443, so the IP restriction's
         // redirection went to https://localhost/, port and scheme lost.

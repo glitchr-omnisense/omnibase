@@ -16,7 +16,7 @@ use Omnibridge\Persistence\UnitOfWork;
  * Everything up to here computes and grants nothing: Group::isOpenTo() says
  * whether somebody qualifies and Group::awardsFor() says what they would get,
  * both without touching them. Something has to close the gap, and in
- * fr.example.www that something is a single service -
+ * the marketplace that something is a single service -
  * MarketplaceManager - which evaluates every candidate's scopes and rules,
  * then applies what its actions return. This is the same thing for people.
  *

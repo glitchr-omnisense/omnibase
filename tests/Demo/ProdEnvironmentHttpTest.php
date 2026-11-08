@@ -53,7 +53,7 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
     /**
      * Where debug is off (prod, demo) an error is omnibase's own page, in the
      * site's layout - layout1 when it has no layout3, as the harness and the
-     * sites scaffolded from another site: the page could not be rendered, and
+     * sites scaffolded from the reference site: the page could not be rendered, and
      * an unknown address answered 500.
      */
     public function testAnUnknownAddressAnswers404(): void

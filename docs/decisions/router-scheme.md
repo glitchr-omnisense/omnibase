@@ -61,11 +61,11 @@ On every site served over https (all of them, behind a proxy that terminates
 TLS, in development and in production) nothing changes: the request is
 https, as the router said. Where a site is answered over plain http - the
 harness (`http://localhost:8000`), the sites' tests (`http://localhost`),
-A shop site's tests on 8081 - the router now says http:
+a site's tests on 8081 - the router now says http:
 
 - an address of `_profiler` or `_wdt` is http, as the page is;
 - the fallbacks' ports of an http request are filtered by `HTTP_PORT`, as
-  `getPort()` already judged the visited port: a shop site's
+  `getPort()` already judged the visited port: that site's
   (`HTTP_PORT='[8081]'`, no `HTTPS_PORT`) is 8081, where `HTTPS_PORT`'s
   `[443]` made it 443 and the IP restriction sent to `https://localhost/`;
 - `AdvancedUrlGenerator::generate()` no longer forces an absolute address

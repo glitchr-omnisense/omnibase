@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * An address has no empty segment: a variable given empty (path("app_wishlist",
- * {store: null}) in a shop site) made /boutique//wishlist where the router
+ * {store: null}) in a site's shop) made /boutique//wishlist where the router
  * does not check requirements (strict_requirements: null, the sites' dev and test),
  * once sanitize_url() no longer cleaned the first address of a route (4bf08f94),
  * and every later address had it already. The empty segment is dropped
