@@ -10,6 +10,20 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the currency rates' service without florianv/swap (plan "omnibase agnostic", step S)
+
+- `Base\Service\Trading` was declared on symfony/http-client's `Psr18Client` alone, though florianv/swap is a suggestion
+  since 5.0: an application with the HTTP client and without florianv/swap (nor php-http/discovery, which it brings) built
+  Trading at boot and stopped on Psr18Client's "no PSR-17 factories" (composer's post-update `assets:install` included).
+  Trading now requires `Swap\Builder` too. Where it is not declared, `trading_market` and `TradingInterface` are the new
+  `Base\Service\NullTrading` (Base\Discovery's `fallbacks`), so the Twig filters, the money field, the facade and an
+  autowired service are still built: it knows no rate - an amount is formatted in its own currency, converted only into
+  itself (another currency refused as Trading refuses without a rate), and a rate handed to it (`addFallback()`,
+  omnibase/marketplace's table) refused aloud with "Require florianv/swap", never dropped. An application that converts
+  between currencies requires florianv/swap, as UPGRADE-5.0.md says. `tests/Service/TradingWithoutSwapTest` (Symfony's
+  container) and `BareTest::testTheRatesServiceIsNullTradingWithoutFlorianvSwap` (the core alone, where neither florianv/swap
+  nor the HTTP client is installed); DiscoveryTest accepts a fallback keyed by a service id the core declares.
+
 ### Added: the form types' mapping compared with Doctrine's (plan "omnibase agnostic", step B, leftover (1))
 
 - `tests/Bridge/Symfony/FormMappingTest`: omnibridge/symfony's `Form\FormMapping` (what its form and field types read of

@@ -40,7 +40,12 @@ final class DiscoveryTest extends KernelTestCase
             self::assertNotSame([], $entry['tags']);
         }
         foreach (Discovery::registry('fallbacks') as $id => $fallback) {
-            self::assertTrue(interface_exists($id), $id);
+            self::assertTrue(class_exists($fallback['default']), $fallback['default']);
+            // A contract the default answers, or a service id the core's declaration names (`trading_market`).
+            if (!interface_exists($id)) {
+                self::assertArrayHasKey($id, $declared, $id.': a service the core declares');
+                continue;
+            }
             self::assertTrue(is_a($fallback['default'], $id, true), $fallback['default']);
         }
         foreach (Discovery::registry('arguments') as $entry) {

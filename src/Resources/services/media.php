@@ -67,7 +67,7 @@ return [
         'public' => true,
         'autowire' => true,
     ],
-    // Where the rates' service is (Base\Service\Trading requires an HTTP client's PSR-18 adapter).
+    // A money field's stored rate: TradingInterface's, Base\Service\Trading or, without florianv/swap, NullTrading.
     ['class' => 'Base\Field\Search\ExchangeRate', 'requires' => ['Symfony\Component\HttpClient\Psr18Client'], 'public' => true, 'autowire' => true],
     [
         'class' => 'Base\Service\Model\Wysiwyg\SemanticEnhancer',
@@ -257,9 +257,13 @@ return [
         ],
         'tags' => ['base.service.icon'],
     ],
+    // The currency rates through florianv/swap (a suggestion since 5.0) and the PSR-18 adapter of symfony/http-client it
+    // is handed: declared only where both are installed, the constructor building that adapter (which wants the PSR-17
+    // factories php-http/discovery finds, florianv/swap's requirement). Elsewhere `trading_market` and TradingInterface
+    // are Base\Service\NullTrading, which knows no rate (Base\Discovery's `fallbacks`).
     [
         'class' => 'Base\Service\Trading',
-        'requires' => ['Symfony\Component\HttpClient\Psr18Client'],
+        'requires' => ['Symfony\Component\HttpClient\Psr18Client', 'Swap\Builder'],
         'public' => true,
         'bind' => ['$cacheDir' => '%kernel.cache_dir%', '$live' => '%env(bool:BASE_TRADING_LIVE)%'],
         'contracts' => [

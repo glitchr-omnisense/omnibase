@@ -66,6 +66,11 @@ return [
     // a front-end-only install - whatever the bundles' order. An application binding its own is never overridden.
     'fallbacks' => [
         'Base\Routing\AdminUrlGeneratorInterface' => ['candidates' => ['Base\Admin\Router\AdminUrlGenerator'], 'default' => 'Base\Routing\NullAdminUrlGenerator'],
+        // The currency rates: Base\Service\Trading where florianv/swap is installed (its declaration requires it), else
+        // NullTrading, which knows no rate - so the Twig filters, the money field and the facade, which ask
+        // `trading_market`, are still built. The service id first, the contract then aliased to it.
+        'trading_market' => ['candidates' => ['Base\Service\Trading'], 'default' => 'Base\Service\NullTrading'],
+        'Base\Service\TradingInterface' => ['candidates' => ['trading_market'], 'default' => 'Base\Service\NullTrading'],
     ],
 
     // An alias moved to a better service where the application defines it: the rewritten texts

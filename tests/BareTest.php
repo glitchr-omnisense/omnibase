@@ -1038,6 +1038,34 @@ final class BareTest extends TestCase
         self::assertSame([], array_values(preg_grep('~^Symfony\\\\Component\\\\(?:EventDispatcher|PropertyInfo|TypeInfo)\\\\~', $outside, PREG_GREP_INVERT)), 'only symfony/event-dispatcher, property-info and type-info outside the kept list');
     }
 
+    /**
+     * Base\Service\Trading where florianv/swap is not installed (plan "omnibase agnostic", step S): the core alone has
+     * neither florianv/swap nor symfony/http-client. Omnibridge\Container, from the core's whole declaration and its
+     * registries, declares no Trading; `trading_market` and TradingInterface are NullTrading (the `fallbacks`), on which
+     * an amount is formatted in its own currency. tests/Service/TradingWithoutSwapTest: the same in Symfony's container.
+     */
+    public function testTheRatesServiceIsNullTradingWithoutFlorianvSwap(): void
+    {
+        $autoload = __DIR__.'/../var/bare-alone/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            self::markTestSkipped('No vendor of the core alone here (var/bare-alone/vendor): "docker/bin/bare --alone --install" makes it.');
+        }
+        $script = __DIR__.'/Service/trading-without-swap.php';
+
+        [$status, $report] = self::bare([$script], (string) realpath($autoload));
+        $run = $report['classes'][$script];
+        self::assertNull($run['error']);
+        self::assertSame(0, $status);
+        self::assertSame([
+            'installed' => ['florianv/swap' => false, 'symfony/http-client' => false],
+            'declared' => false,
+            'trading_market' => \Base\Service\NullTrading::class,
+            'contract' => true,
+            'formatted' => true,
+            'converted' => 12.5,
+        ], $run['result']);
+    }
+
     private static function withoutTheFramework(): string
     {
         $autoload = __DIR__.'/../var/bare/vendor/autoload.php';
