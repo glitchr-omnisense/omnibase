@@ -10,6 +10,14 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: the contact form by its moved type, with `use_model` (plan "omnibase agnostic", step S)
+
+- `tests/Form/ContactFormModelHttpTest`: each form type moved to omnibridge/symfony whose model of the core the option
+  `use_model` can take finds it, by its new name as by its former one, and a contact page naming ContactType by its new name
+  (`PagesTestKernel`'s /base-test/contact, what the bridge's ContactController does) is shown, then sent, its model the
+  core's ContactModel. On omnibridge/symfony before its fix (`Form\Common\FormModels`) the page answered 500, "Form model
+  Omnibridge\Symfony\Omnibase\Form\Model\ContactModel not found".
+
 ### Fixed: the currency rates' service without florianv/swap (plan "omnibase agnostic", step S)
 
 - `Base\Service\Trading` was declared on symfony/http-client's `Psr18Client` alone, though florianv/swap is a suggestion

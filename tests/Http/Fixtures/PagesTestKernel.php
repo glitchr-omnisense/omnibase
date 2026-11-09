@@ -15,7 +15,8 @@ use Symfony\Component\Routing\RouteCollection;
  * runs in) with the pages a test of the core needs and no host has to
  * carry (PagesController, under /base-test/): a page at an address per
  * language and one at a single address (PageLanguageHttpTest), a page with
- * the core's emoji field (NothingFromElsewhereHttpTest). The tests asked
+ * the core's emoji field (NothingFromElsewhereHttpTest), a contact page
+ * (ContactFormModelHttpTest). The tests asked
  * them of the harness's own App\DemoController - /welcome, /language,
  * /fields -, which an application does not have: there one path segment may
  * be anything of its own (lesringostars: a destination).
@@ -47,6 +48,8 @@ final class PagesTestKernel extends Kernel
         foreach ($pages as $name => $route) {
             $collection->add($name, $route->setMethods(['GET']), 1);
         }
+        // The contact form, shown then sent (ContactFormModelHttpTest).
+        $collection->add('base_test_contact', (new Route('/base-test/contact', ['_controller' => $controller.'::contact']))->setMethods(['GET', 'POST']), 1);
 
         return $collection;
     }
