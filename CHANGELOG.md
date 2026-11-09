@@ -10,6 +10,21 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the threads' search page (plan "omnibase agnostic", step S)
+
+- `client/thread/search.html.twig` answered 500 on a site's /search (/rechercher), its layout printing block main (the
+  harness's prints none): with nothing searched yet, each field's `value` was read from the form's data, null then
+  ("Impossible to access an attribute ("generic") on a null variable" where Twig's variables are strict); the fields now
+  print the form's own values, the same once something is searched. With a thread found whose class has no hierarchy
+  (`Base\Entity\Thread`'s `#[Hierarchify(null)]`, or a class without the attribute), its repository threw "Missing
+  @Hierarchify" for the section the page groups it under: `HierarchifyTrait` now answers an empty tree, a depth of 0 and no
+  level for it (the search's order puts such threads first, as for any hierarchy compared with none).
+- `#[Hierarchify]` keeps a hierarchy given as several levels (`["store", "products"]`): only a single level (a string) was
+  kept, so omnibase/marketplace's Store, Product, Variant, Review and Channel had none and threw as above;
+  tests/Bridge/Doctrine/fixtures/doctrine-metadata.json records their levels.
+- `tests/Thread/ThreadSearchPageTest`: the page with nothing searched, with a thread of `Base\Entity\Thread` found and shown,
+  and the levels of a hierarchy.
+
 ### Added: embedded forms, lists and attributes on every host (plan "omnibase agnostic", step F5d, slice 7, 2026-11-03)
 
 - **`Base\Field\Behaviour\Association`** (`association`, an embedded record's form): what omnibridge/symfony's

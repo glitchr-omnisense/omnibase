@@ -28,7 +28,8 @@ class Hierarchify extends AbstractAttribute implements ExtensionOptionInterface
 
     public function __construct(string|array|null $hierarchy = null, ?string $separator = "/")
     {
-        $this->hierarchy = is_string($hierarchy) ? [$hierarchy] : [];
+        // Its levels, from the first: one ("articles") or several (["articles", "comments"], which were dropped).
+        $this->hierarchy = is_string($hierarchy) ? [$hierarchy] : array_values($hierarchy ?? []);
         $this->separator = $separator ?? null;
     }
 

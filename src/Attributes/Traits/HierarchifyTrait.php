@@ -40,9 +40,12 @@ trait HierarchifyTrait
      */
     public function getHierarchyTree(?string $separator = null)
     {
+        // A class without #[Hierarchify], or with no level (Base\Entity\Thread's #[Hierarchify(null)]), has no hierarchy:
+        // an empty tree, a depth of 0 and no level - the search page lists its threads under no section, where it
+        // answered 500 ("Missing @Hierarchify").
         $entityHierarchy = $this->getClassMetadataCompletor()->entityHierarchy;
         if (empty($entityHierarchy)) {
-            throw new Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
+            return [];
         }
 
         $entityHierarchySeparator = $this->getClassMetadataCompletor()->entityHierarchySeparator;
