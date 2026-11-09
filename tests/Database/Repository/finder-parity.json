@@ -682,7 +682,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0",
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0 ESCAPE '!'",
             "parameters": {
                 "slug_0": "a-%"
             },
@@ -712,7 +712,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0",
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug LIKE :slug_0 ESCAPE '!'",
             "parameters": {
                 "slug_0": "%-slug"
             },
@@ -742,7 +742,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug NOT LIKE :slug_0",
+            "dql": "SELECT e FROM Base\\Entity\\Thread e WHERE e.slug NOT LIKE :slug_0 ESCAPE '!'",
             "parameters": {
                 "slug_0": "a-%"
             },

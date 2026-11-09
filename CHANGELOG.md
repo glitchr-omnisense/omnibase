@@ -10,6 +10,14 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: StartingWith and EndingWith read literally, on SQLite and MySQL (plan "omnibase agnostic", step S)
+
+- `tests/Database/Repository/LikeEscapeTest`: a finder's StartingWith, EndingWith and their Not read their value literally
+  (an "_" an underscore, a "%" a percent sign) on the harness's SQLite, Doctrine writes `LIKE ? ESCAPE '!'` for MySQL, and the
+  escaped patterns read the same on SQLite and on a MySQL named by `OMNIBASE_TEST_MYSQL_URL` (with pdo_mysql). On
+  omnibridge/doctrine before its fix (ESCAPE '!'), "_" was escaped as "\_" with no ESCAPE clause, which SQLite does not
+  read: `findByTitleStartingWith('esc_')` found nothing.
+
 ### Fixed: the threads' search page (plan "omnibase agnostic", step S)
 
 - `client/thread/search.html.twig` answered 500 on a site's /search (/rechercher), its layout printing block main (the
