@@ -6,11 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * What an envelope keeps (Base\Entity\Signature\Envelope): what it is
- * about - any entity, by its class and id -, the glitchr/omnisign gateway
+ * about - any entity, by its class and id -, the omnisense/omnisign gateway
  * it went through and that gateway's reference, where it stands, its
  * signers, and the signed document and its evidence once kept in the
  * private storage. A mapped superclass: no table of its own; Envelope is
- * an entity only when glitchr/omnisign is installed.
+ * an entity only when omnisense/omnisign is installed.
  */
 #[ORM\MappedSuperclass]
 abstract class AbstractEnvelope

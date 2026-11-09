@@ -34,7 +34,7 @@ class SignInGuardTest extends TestCase
     protected function setUp(): void
     {
         if (!class_exists(Registry::class)) {
-            self::markTestSkipped('glitchr/omnishield is not installed.');
+            self::markTestSkipped('omnisense/omnishield is not installed.');
         }
         $this->requests = new RequestStack();
         $this->cache = new ArrayAdapter();

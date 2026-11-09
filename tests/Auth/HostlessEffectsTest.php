@@ -122,7 +122,7 @@ final class HostlessEffectsTest extends KernelTestCase
     public function testTheCaptchaWidgetIsPrintedWithoutTheSymfonyForm(): void
     {
         if (!class_exists(Registry::class)) {
-            self::markTestSkipped('glitchr/omnishield is not installed.');
+            self::markTestSkipped('omnisense/omnishield is not installed.');
         }
         $captcha = new SignInCaptcha(new FormGuard('secret', ['sign_in_after' => 2], new Registry([new FixedGatewayFactory()], ['forms' => ['factory' => 'fixed']]), null, 'forms'), new ArrayAdapter());
 

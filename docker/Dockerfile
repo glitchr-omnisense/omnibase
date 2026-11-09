@@ -68,8 +68,8 @@ ARG TWIG_EXTRAS="twig/cache-extra twig/intl-extra twig/inky-extra twig/cssinline
 # overlay ships every config file the demo needs; the container is compiled
 # at first run instead. (symfony/translation, which the bundle's Translator
 # needs, is one of its requirements since 2026-10-09.)
-# The shop pays through glitchr/omnitrade (its Stripe provider here) and
-# ships through glitchr/omnibus (two carriers here): the sibling families,
+# The shop pays through omnisense/omnitrade (its Stripe provider here) and
+# ships through omnisense/omnibus (two carriers here): the sibling families,
 # from Packagist, their development branches - the marketplace follows
 # omnitrade's 1.x (its catalogue: Model\Product, Stock, Registry::options()).
 # The sign-in's family, omnisense/omniauth (identity providers included) and
@@ -92,11 +92,11 @@ RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families a
         "omnisense/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \
         omnipay/stripe symfony/translation symfony/messenger symfony/lock "glitchr/backup-manager:4.0.*-dev" \
         dompdf/dompdf horstoeko/zugferd --no-interaction --no-progress --no-scripts \
-    # The guard of the forms (Base\Service\FormGuard): glitchr/omnishield and three of its gateways,
+    # The guard of the forms (Base\Service\FormGuard): omnisense/omnishield and three of its gateways,
     # from their repositories - not on Packagist yet; cloned over https (no-api: no GitHub token here).
     && for r in omnishield omnishield-akismet omnishield-altcha omnishield-disposable; do composer config "repositories.$r" "{\"type\": \"vcs\", \"url\": \"https://github.com/glitchr-studio/$r.git\", \"no-api\": true}"; done \
     && composer require "glitchr/omnishield:1.x-dev" "omnishield/akismet:1.x-dev" "omnishield/altcha:1.x-dev" "omnishield/disposable:1.x-dev" --no-interaction --no-progress --no-scripts \
-    # Documents signed (Base\Service\Signatures): glitchr/omnisign and its DocuSeal gateway, the same way.
+    # Documents signed (Base\Service\Signatures): omnisense/omnisign and its DocuSeal gateway, the same way.
     && for r in omnisign omnisign-docuseal; do composer config "repositories.$r" "{\"type\": \"vcs\", \"url\": \"https://github.com/glitchr-studio/$r.git\", \"no-api\": true}"; done \
     && composer require "glitchr/omnisign:1.x-dev" "omnisign/docuseal:1.x-dev" --no-interaction --no-progress --no-scripts \
     # PHPUnit, for `demo test <plugin>`: a plugin's suite run against this

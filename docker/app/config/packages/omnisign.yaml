@@ -1,4 +1,4 @@
-# Documents signed (glitchr/omnisign, Base\Service\Signatures): a DocuSeal instance of one's own.
+# Documents signed (omnisense/omnisign, Base\Service\Signatures): a DocuSeal instance of one's own.
 # The address and keys are the harness's, known to everyone: no instance answers there, the suite
 # asks DocuSeal through its recorded answers (Tests\Base\Service\SignaturesTest).
 omnisign:

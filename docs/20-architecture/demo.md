@@ -219,7 +219,7 @@ the same checkout.
 | **The back office** | Its accounts (`base.demo.admin_roles`) are offered to nobody and sign in with `base.demo.admin_password` (the `DEMO_ADMIN_PASSWORD` secret) or not at all; it answers 403 to every other account. |
 | **The super-administrator** | Signs in with `base.demo.superadmin_password` (the `DEMO_SUPERADMIN_PASSWORD` secret) or not at all. |
 | **Starting** | Refused in debug, and on the production database. |
-| **Payments** | omnibase/marketplace offers its `dev` gateway and none of glitchr/omnitrade's (its `docs/dev-gateway-and-keys.md`). |
+| **Payments** | omnibase/marketplace offers its `dev` gateway and none of omnisense/omnitrade's (its `docs/dev-gateway-and-keys.md`). |
 
 ### E-mail: refused, not looped back
 

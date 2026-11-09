@@ -567,7 +567,7 @@ base:
         extra:                []
     guard:
 
-        # The captcha: a gateway of omnishield.gateways. Null: omnishield.challenge.gateway when glitchr/omnishield is installed; false: none.
+        # The captcha: a gateway of omnishield.gateways. Null: omnishield.challenge.gateway when omnisense/omnishield is installed; false: none.
         challenge:            null
 
         # The captcha shown to a visitor who refused the third party the captcha reaches (consent): a gateway that reaches nobody, ALTCHA.

@@ -124,7 +124,7 @@ return [
     // Arguments a service takes from another package's configuration, read once every package is configured, rather
     // than named in its definition: `parameter` (resolved when `resolve`), cast to `type`; `default` when the package
     // says nothing (no `default`: the argument is left as it is). FormGuard's default captcha and whether an
-    // unreachable provider lets a form through are glitchr/omnishield's (omnishield.challenge.*); where
+    // unreachable provider lets a form through are omnisense/omnishield's (omnishield.challenge.*); where
     // glitchr/ux-google's reCAPTCHA guards the sign-in, the sign-in asks no second captcha. `symfony`: where Symfony's
     // container has it (omnishield's bundle gives its validator the option, it sets no parameter).
     'arguments' => [

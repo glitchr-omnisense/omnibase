@@ -6,7 +6,7 @@ order: 47
 # Documents signed: `Base\Service\Signatures`
 
 A document sent to be signed - a lease, a quote, a surety - for **any entity** of the application,
-through [glitchr/omnisign](https://github.com/glitchr-omnisense/omnisign) (Yousign, DocuSign, a DocuSeal
+through [omnisense/omnisign](https://github.com/glitchr-omnisense/omnisign) (Yousign, DocuSign, a DocuSeal
 instance of one's own): signed by the provider's e-mail or in the site's own page, followed until
 it is over, and once completed the signed document and its evidence kept in the site's **private
 storage**.
@@ -31,7 +31,7 @@ $signatures->of($quote);                               // the envelopes about th
 
 ## Only with the family
 
-`glitchr/omnisign` is **suggested, not required**. Without it nothing of this exists in a site:
+`omnisense/omnisign` is **suggested, not required**. Without it nothing of this exists in a site:
 
 - `Base\Service\Signatures` is not registered;
 - `Base\Entity\Signature\Envelope` is not an entity - no `signature_envelope` table, nothing in the
@@ -39,7 +39,7 @@ $signatures->of($quote);                               // the envelopes about th
   `AbstractEnvelope`, which has no table);
 - `POST /signatures/{gateway}/webhook` answers 404.
 
-With it: `composer require glitchr/omnisign omnisign/docuseal` (or `omnisign/yousign`,
+With it: `composer require omnisense/omnisign omnisign/docuseal` (or `omnisign/yousign`,
 `omnisign/docusign`; not on Packagist yet: the `vcs` repositories of `omnisense/omnibase`'s
 `composer.json`), register `Omnisign\Bridge\Symfony\OmnisignBundle`, configure a gateway, then
 `make:migration` and `doctrine:migrations:migrate` for the table:
@@ -98,7 +98,7 @@ public function onSigned(SignatureEvent $event): void
 
 ## Tests
 
-`tests/Service/SignaturesTest.php`, in the harness (which installs `glitchr/omnisign` and
+`tests/Service/SignaturesTest.php`, in the harness (which installs `omnisense/omnisign` and
 `omnisign/docuseal` and registers a DocuSeal gateway): a lease sent for a member, signed in the
 page, followed to completion, its files kept and read back, its events, the webhook's signature -
 DocuSeal answering as an instance of its open-source edition answered (`omnisign/docuseal`'s

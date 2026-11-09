@@ -216,7 +216,7 @@ class RegisterAfterLoginHttpTest extends KernelTestCase
     public function testTheSignUpIsGuarded(): void
     {
         if (!class_exists(\Omnishield\Registry::class)) {
-            self::markTestSkipped('glitchr/omnishield is not installed.');
+            self::markTestSkipped('omnisense/omnishield is not installed.');
         }
         $translator = static::getContainer()->get('translator');
 

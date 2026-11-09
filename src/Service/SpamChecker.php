@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Is what a visitor wrote spam? The classifier of glitchr/omnishield behind
+ * Is what a visitor wrote spam? The classifier of omnisense/omnishield behind
  * omnibase's SpamCheckerInterface (check, score), which the forms
  * (spam_protection), the comments and omnibase/faq's questions ask:
  *

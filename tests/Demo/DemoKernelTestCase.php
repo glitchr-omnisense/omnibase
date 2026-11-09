@@ -53,7 +53,7 @@ abstract class DemoKernelTestCase extends KernelTestCase
         // would: the suite's own refused sign-ins all come from one address (Request::create()'s
         // 127.0.0.1) and SignInGuard counts them in cache.app, kept between tests and between runs
         // (a quarter of an hour), so from base.guard.sign_in_after of them on (3) a host whose guard
-        // has a captcha (glitchr/omnishield: lesringostars) asked it of the tests that then sign in
+        // has a captcha (omnisense/omnishield: lesringostars) asked it of the tests that then sign in
         // with the right password, and refused them. Within a test, the failures still count.
         if (!$this->afresh && static::getContainer()->has(SignInGuard::class)) {
             static::getContainer()->get(SignInGuard::class)->forget('127.0.0.1');

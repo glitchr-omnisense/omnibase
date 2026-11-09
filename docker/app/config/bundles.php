@@ -18,9 +18,9 @@ return [
     Google\GoogleBundle::class => ['all' => true],
     ApiPlatform\Symfony\Bundle\ApiPlatformBundle::class => ['all' => true],
     Symfony\UX\TwigComponent\TwigComponentBundle::class => ['all' => true],
-    // The guard of the forms: captchas, address lists, content classifiers (glitchr/omnishield).
+    // The guard of the forms: captchas, address lists, content classifiers (omnisense/omnishield).
     Omnishield\Bridge\Symfony\OmnishieldBundle::class => ['all' => true],
-    // Documents signed for any entity: Base\Service\Signatures through glitchr/omnisign.
+    // Documents signed for any entity: Base\Service\Signatures through omnisense/omnisign.
     Omnisign\Bridge\Symfony\OmnisignBundle::class => ['all' => true],
     // omnibase's bundle, omnibridge/symfony's since 5.0 (Base\BaseBundle until then).
     Omnibridge\Symfony\Omnibase\BaseBundle::class => ['all' => true],

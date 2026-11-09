@@ -18,7 +18,7 @@ use Omnibridge\Container\Declarations;
  *
  * - `class` (the parent's when left out under a `parent`), `id` (the class by default), `parent`
  *   (another definition of the list, whose arguments it inherits);
- * - `requires`: the classes or interfaces a host must have for it (Twig, omniauth, glitchr/omnisign,
+ * - `requires`: the classes or interfaces a host must have for it (Twig, omniauth, omnisense/omnisign,
  *   glitchr/backup-manager...), `environment`: the one environment it is registered in (applies());
  * - `arguments` by position (0, 1, `index_N` over a parent's) or by name (`$name`), in
  *   Omnibridge\Container's syntax: '@id' a service, '@?id' a service or null where there is none

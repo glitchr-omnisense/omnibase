@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Documents signed through glitchr/omnisign, for any entity of the
+ * Documents signed through omnisense/omnisign, for any entity of the
  * application: an envelope sent (send()), signed by e-mail or in the
  * site's page (signingUrl()), followed (refresh(), or the provider's
  * webhook: notify()), and once completed its signed document and evidence
@@ -40,7 +40,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  *     $signatures->refresh($envelope);          // on the way back; the webhook does it too
  *     $signatures->signed($envelope);           // the signed PDF, once completed
  *
- * Registered only when glitchr/omnisign is installed (its bundle gives the
+ * Registered only when omnisense/omnisign is installed (its bundle gives the
  * gateways: omnisign.gateways.<name>); the entity is mapped only then too.
  */
 class Signatures

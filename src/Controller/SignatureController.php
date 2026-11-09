@@ -8,10 +8,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * A signing provider's callback (glitchr/omnisign: Yousign, DocuSign,
+ * A signing provider's callback (omnisense/omnisign: Yousign, DocuSign,
  * DocuSeal...): its signature checked by the gateway, the envelope it
  * names asked again and kept (Base\Service\Signatures::notify()). Without
- * glitchr/omnisign there is nothing to update: 404.
+ * omnisense/omnisign there is nothing to update: 404.
  */
 final class SignatureController
 {

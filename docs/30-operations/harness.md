@@ -7,8 +7,8 @@ order: 50
 
 `docker/` builds this checkout into one Symfony application with every
 `omnibase/*` plugin (admin, marketplace, forge, forum, mailbox, docs), paying
-through `glitchr/omnitrade`, shipping through `glitchr/omnibus` and signing through
-`glitchr/omnisign` (a DocuSeal gateway, its recorded answers in the tests), on SQLite.
+through `omnisense/omnitrade`, shipping through `omnisense/omnibus` and signing through
+`omnisense/omnisign` (a DocuSeal gateway, its recorded answers in the tests), on SQLite.
 It is where the bundles' suites run: there is no PHP on the host.
 
 ```sh
@@ -257,8 +257,8 @@ DISTINCT` subquery rather than MySQL's `COUNT(DISTINCT a, b, c)`.
 ## Rebuilding the image
 
 The image installs the plugins and the sibling families from Packagist, their
-development branches (`glitchr/omnitrade` 1.x with its catalogue,
-`omnitrade/stripe`, `glitchr/omnibus` 2.x and two carriers). Docker keeps that
+development branches (`omnisense/omnitrade` 1.x with its catalogue,
+`omnitrade/stripe`, `omnisense/omnibus` 2.x and two carriers). Docker keeps that
 layer until this checkout changes; to fetch the families' latest commits:
 
 ```sh

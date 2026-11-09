@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
  *   3. the lists - whoever sends it (address, e-mail, name) asked of the
  *      gateways of base.guard.reputation: disposable e-mail domains,
  *      StopForumSpam;
- *   4. the captcha - a field of glitchr/omnishield (ChallengeType) on the
+ *   4. the captcha - a field of omnisense/omnishield (ChallengeType) on the
  *      gateway of base.guard.challenge, checked by the guard - shown and asked
  *      only from base.guard.captcha_after refused tries of this form from
  *      this visitor (counted in cache.app for 15 minutes, forgotten after a
@@ -33,7 +33,7 @@ use Symfony\Component\HttpFoundation\Request;
  *   5. what was written - the classifier behind SpamChecker (Akismet), for
  *      the data that implement SpamProtectionInterface.
  *
- * Without glitchr/omnishield, or without a gateway, the trap and the time
+ * Without omnisense/omnishield, or without a gateway, the trap and the time
  * alone. The option `guard` of a form asks for it
  * (Base\Form\Extension\FormTypeGuardExtension); CommentGuard is the comment
  * forms' face of it, with their flood interval.
@@ -58,7 +58,7 @@ class FormGuard
     public const CHALLENGE_FAILED = 'challenge_failed';
     public const CHALLENGE_UNREACHABLE = 'challenge_unreachable';
 
-    /** What they say: glitchr/omnishield's own sentences (PassesChallenge), translated in the "validators" domain. */
+    /** What they say: omnisense/omnishield's own sentences (PassesChallenge), translated in the "validators" domain. */
     public const CHALLENGE_MESSAGES = [
         self::CHALLENGE_MISSING => 'Please confirm that you are not a robot.',
         self::CHALLENGE_FAILED => 'The check that you are not a robot did not pass. Please try again.',
@@ -77,7 +77,7 @@ class FormGuard
 
     /**
      * @param array{challenge?: string|bool|null, fallback?: ?string, reputation?: list<string>, classifier?: ?string, unreachable?: string, min_delay?: int, sign_in_after?: int, captcha_after?: int} $config base.guard
-     * @param string|null $defaultChallenge omnishield.challenge.gateway, when glitchr/omnishield is installed (Base\Discovery's `arguments`)
+     * @param string|null $defaultChallenge omnishield.challenge.gateway, when omnisense/omnishield is installed (Base\Discovery's `arguments`)
      * @param CacheItemPoolInterface|null $cache where a form's refused tries are counted; without it, the captcha is always asked
      * @param ClockInterface|null $clock what "now" is for the stamp and the delays: the framework's clock (Symfony's
      *                                   `clock`, autowired), else the clock contract of the Foundation (Runtime::clock(),
@@ -102,7 +102,7 @@ class FormGuard
         return ($this->clock ?? Runtime::clock())->now()->getTimestamp();
     }
 
-    /** Whether glitchr/omnishield is here, with its gateways. */
+    /** Whether omnisense/omnishield is here, with its gateways. */
     public function hasOmnishield(): bool
     {
         return null !== $this->registry;
@@ -303,7 +303,7 @@ class FormGuard
             }
         }
 
-        // No list to ask - none configured, or glitchr/omnishield (suggested, not required) not installed:
+        // No list to ask - none configured, or omnisense/omnishield (suggested, not required) not installed:
         // the trap and the time alone. Its Identity is not even built then: without the family the class
         // does not exist, and the first guarded form sent answered 500.
         if (!$lists || [] === $this->reputationGateways()) {

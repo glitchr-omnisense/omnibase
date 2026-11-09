@@ -52,7 +52,7 @@ use Symfony\Component\Validator\Validation;
 /**
  * The option `guard` of a form, as a browser and a robot send it: the trap,
  * the time, the lists, the captcha - in a form factory of its own, on
- * glitchr/omnishield's real pieces (its registry, ALTCHA, the disposable
+ * omnisense/omnishield's real pieces (its registry, ALTCHA, the disposable
  * domains, the fixed gateway, the captcha's field and constraint).
  */
 class FormGuardTest extends TestCase
@@ -66,7 +66,7 @@ class FormGuardTest extends TestCase
     protected function setUp(): void
     {
         if (!class_exists(Registry::class) || !class_exists(AltchaGatewayFactory::class)) {
-            self::markTestSkipped('glitchr/omnishield and omnishield/altcha are not installed.');
+            self::markTestSkipped('omnisense/omnishield and omnishield/altcha are not installed.');
         }
         $this->requests = new RequestStack();
         $this->replays = new InMemoryReplayStore();
@@ -322,8 +322,8 @@ class FormGuardTest extends TestCase
     public function testAViewBuiltAndThrownAwayLeavesTheScriptsToTheOneShown(): void
     {
         if (!class_exists(\Omnishield\WidgetHtml::class)) {
-            // The widget printed when the page shows it is glitchr/omnishield 76dd63a's: an older one prints at buildView.
-            self::markTestSkipped('Requires glitchr/omnishield with Omnishield\WidgetHtml (76dd63a or later).');
+            // The widget printed when the page shows it is omnisense/omnishield 76dd63a's: an older one prints at buildView.
+            self::markTestSkipped('Requires omnisense/omnishield with Omnishield\WidgetHtml (76dd63a or later).');
         }
 
         $altcha =['factory' => 'altcha', 'options' => ['hmac_key' => self::SECRET, 'cost' => 10]];

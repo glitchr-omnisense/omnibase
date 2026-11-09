@@ -23,7 +23,7 @@ use Psr\Log\LoggerInterface;
  * Base\Security\SignInGuard is it under Symfony (its security events, the
  * sign-in page's form); Base\Auth\Listener\GuardSignIn is it on omniauth's
  * events, under any host. Nothing where glitchr/ux-google's reCAPTCHA
- * already guards the sign-in ($google), nor without glitchr/omnishield and a
+ * already guards the sign-in ($google), nor without omnisense/omnishield and a
  * captcha.
  */
 class SignInCaptcha

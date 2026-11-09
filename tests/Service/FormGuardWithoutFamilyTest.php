@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\Validation;
 
 /**
- * glitchr/omnishield is suggested, not required: on a site without the family,
+ * omnisense/omnishield is suggested, not required: on a site without the family,
  * a guarded form keeps its trap and its time and asks nothing else - no list,
  * no captcha -, whatever base.guard says (here reputation: [emails], the
  * configuration a site copies), and never answers 500.
@@ -53,7 +53,7 @@ final class FormGuardWithoutFamilyTest extends TestCase
         // Only in a process of its own: where a class of the family is loaded already, it cannot be taken away,
         // and the loaders are not to be changed under the other tests.
         if (class_exists(\Omnishield\Registry::class, false) || class_exists(\Omnishield\Model\Identity::class, false)) {
-            self::markTestSkipped('Not in a process of its own: glitchr/omnishield is loaded already.');
+            self::markTestSkipped('Not in a process of its own: omnisense/omnishield is loaded already.');
         }
         // The family removed from the autoload: every loader asked for one of its classes answers nothing.
         $this->loaders = spl_autoload_functions();

@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * SpamChecker on glitchr/omnishield's classifier: a gateway named by
+ * SpamChecker on omnisense/omnishield's classifier: a gateway named by
  * base.guard.classifier, else Akismet with the site's key - what it is told
  * (texts, the site's home page, a date), what its answer becomes (a comment
  * kept aside as SPAM), and what happens when it does not answer.
@@ -35,7 +35,7 @@ class SpamCheckerTest extends TestCase
     protected function setUp(): void
     {
         if (!class_exists(Registry::class) || !class_exists(AkismetGatewayFactory::class)) {
-            self::markTestSkipped('glitchr/omnishield and omnishield/akismet are not installed.');
+            self::markTestSkipped('omnisense/omnishield and omnishield/akismet are not installed.');
         }
     }
 

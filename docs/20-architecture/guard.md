@@ -17,7 +17,7 @@ $this->createForm(ContactType::class, $model, ['guard' => ['action' => 'contact'
 | 1. the trap | `guard_website`, a field off-screen for people, filled by robots | refused, on the form (`guard.trapped`) |
 | 2. the time | `guard_opened`, when the form was shown, signed with the application's secret | refused when sent faster than `min_delay` (`guard.too_fast`), or with a stamp that is not the site's (`guard.stale`) |
 | 3. the lists | whoever sends it - the address, the e-mail, the name - asked of the gateways of `base.guard.reputation` | a disposable e-mail on its field (`guard.disposable`); anything else known on the form (`guard.known`) |
-| 4. the captcha | `guard_captcha`, glitchr/omnishield's `ChallengeType` on the gateway of `base.guard.challenge` - shown and asked only from `captcha_after` refused tries (below) | on its field |
+| 4. the captcha | `guard_captcha`, omnisense/omnishield's `ChallengeType` on the gateway of `base.guard.challenge` - shown and asked only from `captcha_after` refused tries (below) | on its field |
 | 5. what was written | data implementing `SpamProtectionInterface`, classified by `SpamChecker` (Akismet) | told to the data (`getSpamCallback()`); blatant spam refused (`guard.spam`) |
 
 Step 5 is `spam_protection`, on by default outside the back office as it always was: it runs
@@ -61,9 +61,9 @@ captcha is always shown, as it was before the threshold. `captcha_after: 0`, on 
 | omnibase/newsletter's sign-up | 1: one refusal and the captcha shows |
 | the sign-in | 0: `SignInGuard` decides when it carries the captcha (`sign_in_after`) |
 
-## Without glitchr/omnishield
+## Without omnisense/omnishield
 
-glitchr/omnishield is suggested, not required (it is not on Packagist yet). Without it - or
+omnisense/omnishield is suggested, not required. Without it - or
 without a gateway configured - the trap and the time alone, and no error. With it:
 
 ```php

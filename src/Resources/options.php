@@ -291,7 +291,7 @@ return [
 
         // The forms' guard (Base\Service\FormGuard, the option `guard` of a form; docs/20-architecture/guard.md).
         'guard' => $section([
-            'challenge' => $scalar(null, 'The captcha: a gateway of omnishield.gateways. Null: omnishield.challenge.gateway when glitchr/omnishield is installed; false: none.'),
+            'challenge' => $scalar(null, 'The captcha: a gateway of omnishield.gateways. Null: omnishield.challenge.gateway when omnisense/omnishield is installed; false: none.'),
             'fallback' => $scalar(null, 'The captcha shown to a visitor who refused the third party the captcha reaches (consent): a gateway that reaches nobody, ALTCHA.'),
             'reputation' => $strings([], 'The lists asked about whoever submits (IP address, e-mail, name): gateways of omnishield.gateways - disposable, stopforumspam.'),
             'classifier' => $scalar(null, 'The classifier of what is written (SpamChecker): a gateway of omnishield.gateways. Null: Akismet with the key api.spam.akismet (base.spam.akismet) when omnishield/akismet is installed.'),
@@ -301,7 +301,7 @@ return [
             'captcha_after' => ['min' => 0] + $int(3, 'Refused tries of a guarded form from a visitor (address, else session; 15 minutes) before its captcha is shown and asked. 0: always shown. A form sets its own with the option guard.captcha_after.'),
         ]),
 
-        // Documents signed through glitchr/omnisign (Base\Service\Signatures): only with that family.
+        // Documents signed through omnisense/omnisign (Base\Service\Signatures): only with that family.
         'signatures' => $section([
             'gateway' => $scalar(null, 'The gateway envelopes go through: one of omnisign.gateways. Null: the only one configured.'),
             'storage' => $scalar(null, 'The private Flysystem storage the signed documents and their evidence are kept in. Null: the uploads\' (base.uploader.storage).'),

@@ -1,4 +1,4 @@
-# The guard of the forms (glitchr/omnishield, Base\Service\FormGuard): ALTCHA as the captcha -
+# The guard of the forms (omnisense/omnishield, Base\Service\FormGuard): ALTCHA as the captcha -
 # issued and checked by the site, its widget's script served by the site too
 # (/omnishield/altcha/3.3.0/altcha.min.js, from omnishield/altcha: no CDN) - and the disposable
 # e-mail domains asked at sign-up.

@@ -69,7 +69,7 @@ final class ListenersTest extends KernelTestCase
     public function testTheCaptchaAfterFailuresFromAnAddressAndOnlyThere(): void
     {
         if (!class_exists(Registry::class)) {
-            self::markTestSkipped('glitchr/omnishield is not installed.');
+            self::markTestSkipped('omnisense/omnishield is not installed.');
         }
         $guard = new SignInGuard(new FormGuard('secret', ['sign_in_after' => 2], new Registry([new FixedGatewayFactory()], ['forms' => ['factory' => 'fixed']]), null, 'forms'), new ArrayAdapter());
         $posted = [];

@@ -17,13 +17,13 @@ use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
 /**
- * Documents signed for any entity through glitchr/omnisign, on a real
+ * Documents signed for any entity through omnisense/omnisign, on a real
  * database: a lease sent for a member, signed in the site's page, followed
  * until completed, its signed PDF and its evidence kept in the private
  * storage, its events dispatched, the provider's webhook checked. DocuSeal
  * answers as it answered an instance of its open-source edition (the
  * recorded answers of omnisign/docuseal's tests). Skipped without
- * glitchr/omnisign and omnisign/docuseal.
+ * omnisense/omnisign and omnisign/docuseal.
  */
 final class SignaturesTest extends KernelTestCase
 {
@@ -35,7 +35,7 @@ final class SignaturesTest extends KernelTestCase
     protected function setUp(): void
     {
         if (!class_exists('App\\Kernel') || !class_exists(Registry::class) || !class_exists(DocusealGatewayFactory::class)) {
-            self::markTestSkipped('Requires the host application kernel and glitchr/omnisign with omnisign/docuseal (the omnibase harness).');
+            self::markTestSkipped('Requires the host application kernel and omnisense/omnisign with omnisign/docuseal (the omnibase harness).');
         }
         self::bootKernel();
         $this->em = static::getContainer()->get('doctrine')->getManager();
