@@ -1,5 +1,6 @@
 # Level 6, and phpstan-baseline.neon lists the violations there were when the CI started (2026-10-21,
-# written by glitchr-studio/ci's baseline workflow): the CI fails on any other. Fix one, then drop its entry.
+# written by glitchr-studio/ci's baseline workflow), re-generated on 2026-11-09 with the debt left by the moves of
+# the plan "omnibase agnostic", to be paid down gradually: the CI fails on any other. Fix one, then drop its entry.
 # extension.neon: what PHPStan must know of omnibase, as an application includes it (the finder language).
 # tests/phpstan-bootstrap.php: the App\ classes the core names are the Base\ ones, aliased as at run time.
 includes:

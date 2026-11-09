@@ -17,8 +17,9 @@ name: ci
 
 on:
   push:
-    # 5.x since the sites moved to it (omnibase's plan "omnibase agnostic", step S); 4.x while it is served.
-    branches: ['4.x', '5.x']
+    # 5.x since the sites moved to it (omnibase's plan "omnibase agnostic", step S). 4.x's own ci.yml runs by
+    # hand only since 2026-11-09: no site runs 4.x any more.
+    branches: ['5.x']
   pull_request:
   workflow_dispatch:
 
