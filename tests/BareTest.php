@@ -1028,7 +1028,13 @@ final class BareTest extends TestCase
             self::assertSame($symfony['collect'][$service], $handed, $service.' is handed what Symfony hands it');
         }
         self::assertCount(5, $discovered['collect'][\Base\Service\Obfuscator::class]);
-        self::assertSame($symfony['enumerations'], $discovered['enumerations']);
+        // The enumerations by their names, in any order: Base\Discovery::enumerations() lists each folder as the
+        // filesystem does (APFS where discovered-by-symfony.php was written; ext4's hashed directories, whose order
+        // follows each disk's hash seed, on the CI's runner), and a name is one type wherever it comes in the list.
+        $enumerations = $symfony['enumerations'];
+        ksort($enumerations);
+        ksort($discovered['enumerations']);
+        self::assertSame($enumerations, $discovered['enumerations']);
         self::assertSame([\Base\Routing\AdminUrlGeneratorInterface::class => \Base\Routing\NullAdminUrlGenerator::class], $discovered['fallbacks']);
         self::assertContains('Base\EntityDispatcher\Event\UserEventDispatcher', $discovered['autoconfigured']);
         self::assertContains('Base\EntityDispatcher\Event\ThreadEventDispatcher', $discovered['autoconfigured']);

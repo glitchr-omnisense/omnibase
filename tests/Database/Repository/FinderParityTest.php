@@ -139,6 +139,8 @@ final class FinderParityTest extends KernelTestCase
             if (!$harness) {
                 $before['query'] = $observed[$key]['query'] = 'not compared: the application\'s mapping and rows';
             }
+            $before['query'] = self::subclassesSorted($before['query']);
+            $observed[$key]['query'] = self::subclassesSorted($observed[$key]['query']);
             self::assertSame($before['parse'], $observed[$key]['parse'], $key.': the same parse');
             self::assertSame($before['query'], $observed[$key]['query'], $key.': the same query or result');
         }
@@ -360,6 +362,34 @@ final class FinderParityTest extends KernelTestCase
     private static function message(\Throwable $e): string
     {
         return strtr((string) preg_replace('~, called in \S+ on line \d+~', '', $e->getMessage()), array_flip(\Base\Database\FormerNames::moved()));
+    }
+
+    /**
+     * A query's DQL with ClassOf's subclasses in alphabetical order: the finder lists them as the root's discriminator
+     * map does, in the order the mapping driver read the entity folders - the filesystem's, which differs from one disk
+     * to another (APFS where the fixture was recorded; ext4's hashed directories, whose order follows each disk's hash
+     * seed, on the CI's runner). The terms stay the same, only their order within the one AND (or OR) moves, which
+     * changes nothing of what the query selects: each run of `AND NOT(e INSTANCE OF ...)` (ClassOf) or
+     * `OR e INSTANCE OF ...` (^ClassOf, NotClassOf) is sorted, the class itself kept first.
+     *
+     * @param array<string, mixed>|string $query
+     *
+     * @return array<string, mixed>|string
+     */
+    private static function subclassesSorted(array|string $query): array|string
+    {
+        if (!\is_array($query) || !\is_string($query['dql'] ?? null)) {
+            return $query;
+        }
+        $query['dql'] = preg_replace_callback('~(?: AND NOT\(e INSTANCE OF [\w\\\\]+\))+|(?: OR e INSTANCE OF [\w\\\\]+)+~', static function (array $run): string {
+            preg_match_all('~ (?:AND NOT\(e INSTANCE OF [\w\\\\]+\)|OR e INSTANCE OF [\w\\\\]+)~', $run[0], $terms);
+            $terms = $terms[0];
+            sort($terms);
+
+            return implode('', $terms);
+        }, $query['dql']);
+
+        return $query;
     }
 
     private static function normalise(mixed $value): mixed
