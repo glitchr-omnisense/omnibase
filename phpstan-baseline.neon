@@ -967,12 +967,6 @@ parameters:
 			path: src/Attributes/AttributeReader.php
 
 		-
-			message: '#^Trait Base\\Attributes\\Traits\\HierarchifyTrait is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Attributes/Traits/HierarchifyTrait.php
-
-		-
 			message: '#^Parameter \#1 \$array \(list\<object\>\) of array_values is already a list, call has no effect\.$#'
 			identifier: arrayValues.list
 			count: 1
@@ -18823,8 +18817,26 @@ parameters:
 			path: src/Thread/ThreadSearch.php
 
 		-
-			message: '#^Trait Base\\Traits\\CacheClearTrait is used zero times and is not analysed\.$#'
-			identifier: trait.unused
+			message: '#^Call to function class_exists\(\) with ''Symfony\\\\WebpackEncoreBundle\\\\Asset\\\\EntrypointLookupInterface'' will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Traits/CacheClearTrait.php
+
+		-
+			message: '#^Call to function method_exists\(\) with Base\\Service\\Flysystem and ''getStorageNames'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Traits/CacheClearTrait.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Traits/CacheClearTrait.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: src/Traits/CacheClearTrait.php
 
@@ -21021,12 +21033,6 @@ parameters:
 		-
 			message: '#^Method Tests\\Base\\Bridge\\Symfony\\FormMappingTest\:\:sorted\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: tests/Bridge/Symfony/FormMappingTest.php
-
-		-
-			message: '#^Parameter \#1 \$manipulator of class Omnibridge\\Symfony\\Omnibase\\Form\\FormMapping constructor expects Omnibridge\\Symfony\\Omnibase\\Database\\MetadataManipulator, Base\\Database\\Mapping\\MetadataManipulator given\.$#'
-			identifier: argument.type
 			count: 1
 			path: tests/Bridge/Symfony/FormMappingTest.php
 

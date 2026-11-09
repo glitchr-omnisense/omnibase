@@ -22,3 +22,11 @@ Base\Service\Model\ClassAliases::register();
 foreach (['SecurityUser', 'TwoFactorUser', 'SecurityUserLoader', 'SecurityUserProvider', 'PasskeyRecords', 'PasskeyUsers'] as $seam) {
     interface_exists('Base\\Contract\\'.$seam);
 }
+
+/*
+ * The bridges' src/Omnibase, analysed with the core (phpstan.neon's paths from vendor/): omnibridge/symfony
+ * types its form and field types on Omnibridge\Symfony\Omnibase\Database\MetadataManipulator, an alias its
+ * BaseBundle defines when it loads (the core's manipulator on 5.x). Defined here the same way, so PHPStan
+ * reads the class it stands for.
+ */
+class_exists('Omnibridge\\Symfony\\Omnibase\\Database\\MetadataManipulator');

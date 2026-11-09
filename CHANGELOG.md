@@ -10,6 +10,16 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: PHPStan analyses the bridges' src/Omnibase (2026-11-09)
+
+- `phpstan.neon` adds `vendor/omnibridge/symfony/src/Omnibase` and `vendor/omnibridge/doctrine/src/Omnibase` to its paths,
+  at the core's level 6: those folders extend the core's classes, so the bridges' own PHPStan leaves them out, and no job
+  analysed them since they moved there. Their violations of 2026-11-09 are in `phpstan-bridges-baseline.neon` (1,472
+  entries), apart from the core's; any other fails the CI's package job. `tests/phpstan-bootstrap.php` defines
+  omnibridge/symfony's `Database\MetadataManipulator` alias, as its BaseBundle does at load, so PHPStan reads the class it
+  stands for. The core's own baseline changes by its traits the bridges use (CacheClearTrait, HierarchifyTrait: analysed
+  now) and the alias (an argument.type entry gone).
+
 ### Added: StartingWith and EndingWith read literally, on SQLite and MySQL (plan "omnibase agnostic", step S)
 
 - `tests/Database/Repository/LikeEscapeTest`: a finder's StartingWith, EndingWith and their Not read their value literally
