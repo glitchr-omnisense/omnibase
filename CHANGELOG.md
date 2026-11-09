@@ -10,6 +10,15 @@ The core requires its Foundation alone (plan "omnibase agnostique", step C7; dec
 D11): what `tests/Foundation.php` loads and what it stands on. 3.x stays as it was, for the
 applications still locked on it. See [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Added: StartingWith and EndingWith read literally, on SQLite and MySQL (plan "omnibase agnostic", step S)
+
+- `tests/Database/Repository/LikeEscapeTest`: a finder's StartingWith, EndingWith and their Not read their value literally
+  (an "_" an underscore, a "%" a percent sign) on the harness's SQLite, Doctrine writes `LIKE ? ESCAPE '!'` for MySQL, and the
+  escaped patterns read the same on SQLite and on a MySQL named by `OMNIBASE_TEST_MYSQL_URL` (with pdo_mysql). On
+  omnibridge/doctrine before its fix (ESCAPE '!'), "_" was escaped as "\_" with no ESCAPE clause, which SQLite does not
+  read: `findByTitleStartingWith('esc_')` found nothing. `tests/Database/Repository/finder-parity.json`: the DQL of
+  StartingWith, EndingWith and NotStartingWith says `ESCAPE '!'`.
+
 ### Fixed: the threads' search page (plan "omnibase agnostic", step S)
 
 - `client/thread/search.html.twig` answered 500 on a site's /search (/rechercher), its layout printing block main (the
