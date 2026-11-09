@@ -15,10 +15,10 @@
 #   patch checked against what omnibridge/composer generates.
 name: ci
 
+# By hand only (Actions > ci > Run workflow, branch 4.x): no site runs 4.x any more, every one is on 5.x,
+# whose own ci.yml is the one that runs on its pushes. The jobs are kept as they were, for a run when
+# a 4.x fix is still wanted.
 on:
-  push:
-    branches: ['4.x']
-  pull_request:
   workflow_dispatch:
 
 permissions:
