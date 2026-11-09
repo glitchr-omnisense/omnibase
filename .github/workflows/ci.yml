@@ -7,9 +7,9 @@
 #   (omnibridge/composer stays optional), and the Foundation loaded there
 #   with the autoloader alone (docker/bin/bare: no framework class loaded).
 # - harness: the harness of docker/ (the core with every omnibase/* plugin
-#   as one Symfony application, docker/Dockerfile as it is), each plugin and
-#   omnibridge/react, omnibridge/doctrine and omnisense/omnibridge from its repository as
-#   compose.checkouts.yml mounts them: the core's suite (its BareTest on the
+#   as one Symfony application, docker/Dockerfile as it is), each plugin,
+#   omnischolar and omnibridge/react, doctrine, twig, symfony and omnisense/omnibridge
+#   from its repository as compose.checkouts.yml mounts them: the core's suite (its BareTest on the
 #   --no-dev vendor, AppClassOverAliasTest, StubsTest among them), each
 #   plugin's suite, the container and templates linted, the stubs and the
 #   patch checked against what omnibridge/composer generates.
@@ -17,7 +17,8 @@ name: ci
 
 on:
   push:
-    branches: ['4.x']
+    # 5.x since the sites moved to it (omnibase's plan "omnibase agnostic", step S); 4.x while it is served.
+    branches: ['4.x', '5.x']
   pull_request:
   workflow_dispatch:
 
@@ -40,6 +41,7 @@ jobs:
     env:
       OMNIBASE_PLUGINS: ${{ github.workspace }}/plugins
       OMNIBRIDGE: ${{ github.workspace }}/omnibridge
+      OMNISCHOLAR: ${{ github.workspace }}/omnischolar
       COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ github.token }}"}}'
       COMPOSE: docker compose -f core/docker/compose.yml -f core/docker/compose.checkouts.yml
     steps:
@@ -61,6 +63,18 @@ jobs:
         with: {repository: glitchr-omnisense/omnibase-blog, path: plugins/blog}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibase-classroom, path: plugins/classroom}
+      # Every folder compose.checkouts.yml mounts: one left out is an empty folder over the image's package, and
+      # its suite (or the whole container, for omnibridge/symfony on 5.x) stops at the first class.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-omnisense/omnibase-agenda, path: plugins/agenda}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-omnisense/omnibase-scholar, path: plugins/scholar}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-omnisense/omnibase-press, path: plugins/press}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-omnisense/omnibase-consulting, path: plugins/consulting}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-omnisense/omnischolar, path: omnischolar/core}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-react, path: omnibridge/react}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -73,6 +87,10 @@ jobs:
       # it the mount is an empty folder, and the autoloader's files (src/Contract/Urls.php) are not there.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-twig, path: omnibridge/twig}
+      # omnibridge/symfony, the Symfony host of 5.x (BaseBundle, the controllers, the service configuration): mounted
+      # over the image's, as the other bridges.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {repository: glitchr-omnisense/omnibridge-symfony, path: omnibridge/symfony}
 
       - name: Build the harness
         run: DOCKER_BUILDKIT=1 docker build -f core/docker/Dockerfile -t omnisense/omnibase-harness --secret id=composer_auth,env=COMPOSER_AUTH core
@@ -103,6 +121,18 @@ jobs:
       - name: classroom suite
         if: success() || failure()
         run: $COMPOSE run --rm omnibase test classroom
+      - name: agenda suite
+        if: success() || failure()
+        run: $COMPOSE run --rm omnibase test agenda
+      - name: scholar suite
+        if: success() || failure()
+        run: $COMPOSE run --rm omnibase test scholar
+      - name: press suite
+        if: success() || failure()
+        run: $COMPOSE run --rm omnibase test press
+      - name: consulting suite
+        if: success() || failure()
+        run: $COMPOSE run --rm omnibase test consulting
       - name: Container and templates linted
         if: success() || failure()
         run: $COMPOSE run --rm omnibase check
