@@ -10,6 +10,21 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Fixed: the threads' search page (plan "omnibase agnostic", step S)
+
+- `client/thread/search.html.twig` answered 500 on a site's /search (/rechercher), its layout printing block main (the
+  harness's prints none): with nothing searched yet, each field's `value` was read from the form's data, null then
+  ("Impossible to access an attribute ("generic") on a null variable" where Twig's variables are strict); the fields now
+  print the form's own values, the same once something is searched. With a thread found whose class has no hierarchy
+  (`Base\Entity\Thread`'s `#[Hierarchify(null)]`, or a class without the attribute), its repository threw "Missing
+  @Hierarchify" for the section the page groups it under: `HierarchifyTrait` now answers an empty tree, a depth of 0 and no
+  level for it (the search's order puts such threads first, as for any hierarchy compared with none).
+- `#[Hierarchify]` keeps a hierarchy given as several levels (`["store", "products"]`): only a single level (a string) was
+  kept, so omnibase/marketplace's Store, Product, Variant, Review and Channel had none and threw as above;
+  tests/Bridge/Doctrine/fixtures/doctrine-metadata.json records their levels.
+- `tests/Thread/ThreadSearchPageTest`: the page with nothing searched, with a thread of `Base\Entity\Thread` found and shown,
+  and the levels of a hierarchy.
+
 ### Added: the contact form by its moved type, with `use_model` (plan "omnibase agnostic", step S)
 
 - `tests/Form/ContactFormModelHttpTest`: each form type moved to omnibridge/symfony whose model of the core the option
