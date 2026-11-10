@@ -4,7 +4,7 @@ All notable changes to this bundle are documented here, per release tag.
 Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 `3.1.0`, … (the next major continues on `4.x`).
 
-## [5.0] — branch `5.x`, unreleased
+## [5.0.0] — 2026-11-10
 
 The core is a library that imposes no framework, no persistence and no view engine (plan "omnibase
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
