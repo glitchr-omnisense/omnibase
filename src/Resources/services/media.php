@@ -29,7 +29,8 @@ return [
                 '@setting_bag',
                 '@parameter_bag',
                 '@translator',
-                '@monolog.http_client',
+                // MonologBundle's HttpClient::create(); without it, SpamChecker makes the same one (or has no Akismet).
+                '@?monolog.http_client',
                 '%kernel.debug%',
                 '@Base\Service\FormGuard',
                 '@?advanced_router',

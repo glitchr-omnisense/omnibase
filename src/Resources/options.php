@@ -145,7 +145,8 @@ return [
 
         'uploader' => $section([
             'warmup' => ['deprecated' => $unread] + $bool(true, 'Automatic image uploader warmup'),
-            'storage' => $scalar(null, 'Upload storage location'),
+            // The storage the core declares for the uploads (discovery.php's `storages`), each host's where none is configured.
+            'storage' => $scalar('local.uploads', 'Upload storage location'),
             'formats' => $items($formats, 'Specific formats'),
         ]),
 
@@ -223,7 +224,8 @@ return [
             'default_path' => $scalar(\dirname(__DIR__, 2).'/templates', 'Default twig path: the templates/ of this package, wherever Composer installed it (vendor/omnisense/omnibase, a path repository, a checkout)'),
             'form_themes' => ['type' => 'array', 'default_children' => true, 'prototype' => $scalar('./form/form_div_layout.html.twig')],
             'editor' => $section([
-                'storage' => $scalar(null),
+                // The storage the core declares for the editor's files (discovery.php's `storages`).
+                'storage' => $scalar('local.wysiwyg', 'The editor\'s files\' storage'),
             ]),
             'paths' => $items(['path' => $bare, 'namespace' => $bare]),
         ]),

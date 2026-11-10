@@ -40,13 +40,14 @@ The suites run there in the test environment on a fresh SQLite database: see
 The package is resolved from Packagist (repository: https://github.com/glitchr-omnisense/omnibase).
 
 **Symfony** (4.0, branch `4.x`): the core and the framework packages, which `omnibridge/symfony`
-carries (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, MonologBundle, Form...),
+carries (FrameworkBundle, SecurityBundle, TwigBundle, Form...; DoctrineBundle and MonologBundle are its suggestions),
 then the bundles your `config/bundles.php` registers - the core suggests them, and works with
 all of them:
 
 ```bash
 composer require omnisense/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
-composer require scheb/2fa league/flysystem-bundle hwi/oauth-bundle web-auth/webauthn-symfony-bundle \
+composer require doctrine/doctrine-bundle omnibridge/doctrine:1.x-dev symfony/monolog-bundle \
+    scheb/2fa league/flysystem-bundle hwi/oauth-bundle web-auth/webauthn-symfony-bundle \
     api-platform/symfony api-platform/doctrine-orm symfony/webpack-encore-bundle symfony/ux-twig-component \
     glitchr/ux-google glitchr/well-known nelmio/cors-bundle nelmio/security-bundle
 ```

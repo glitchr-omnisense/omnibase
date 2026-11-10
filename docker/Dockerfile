@@ -56,8 +56,9 @@ COPY . /srv/omnibase
 ARG PLUGINS="omnibase/admin omnibase/marketplace omnibase/forge omnibase/forum omnibase/mailbox omnibase/docs"
 # The bundles the core suggests, all registered by the demo (app/config/bundles.php); scheb/2fa
 # and league/flysystem-bundle are required de facto under Symfony (Base\Entity\User implements
-# scheb's interfaces, Base\Service\Flysystem extends the bundle's LazyFactory).
-ARG BUNDLES="doctrine/doctrine-bundle florianv/swap:^4.0 league/flysystem-ftp omnibridge/doctrine:1.x-dev scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelmio/security-bundle nelmio/cors-bundle hwi/oauth-bundle symfony/webpack-encore-bundle glitchr/ux-google:1.0.*-dev api-platform/symfony api-platform/doctrine-orm symfony/ux-twig-component web-auth/webauthn-symfony-bundle"
+# scheb's interfaces, Base\Service\Flysystem extends the bundle's LazyFactory). symfony/monolog-bundle, which
+# omnibridge/symfony only suggests since 1.0: the demo registers MonologBundle.
+ARG BUNDLES="doctrine/doctrine-bundle symfony/monolog-bundle florianv/swap:^4.0 league/flysystem-ftp omnibridge/doctrine:1.x-dev scheb/2fa league/flysystem-bundle glitchr/well-known:1.0.*-dev nelmio/security-bundle nelmio/cors-bundle hwi/oauth-bundle symfony/webpack-encore-bundle glitchr/ux-google:1.0.*-dev api-platform/symfony api-platform/doctrine-orm symfony/ux-twig-component web-auth/webauthn-symfony-bundle"
 # The Twig extras the core suggests for its templates ({% cache %} in breakpoints.css.twig and the
 # widgets, the e-mail frame's inky_to_html and inline_css, format_date()...), required here as a
 # Twig site using those templates requires them (lesringostars does): since step F4 of the plan

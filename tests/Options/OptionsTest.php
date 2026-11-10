@@ -49,6 +49,10 @@ final class OptionsTest extends TestCase
         self::assertSame('%kernel.project_dir%/public/maintenance.lock', $parameters['base.site.maintenance.lockpath'], 'the placeholders are the host\'s');
         self::assertSame(\dirname(__DIR__, 2).'/templates', $parameters['base.twig.default_path']);
         self::assertSame('polite', Options::parameters(['translator' => ['politeness' => 'polite']])['base.translator.politeness']);
+        // The storages the core declares (discovery.php's `storages`), where the configuration names none: a host
+        // without base.yaml no longer stops on a null storage (Base\Database\Attribute\Uploader::$storage).
+        self::assertSame('local.uploads', $parameters['base.uploader.storage']);
+        self::assertSame('local.wysiwyg', $parameters['base.twig.editor.storage']);
     }
 
     public function testTheEnvironmentsDefaultsBelongToAGroupOfServices(): void

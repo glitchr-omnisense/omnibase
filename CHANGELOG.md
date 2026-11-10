@@ -10,6 +10,27 @@ The core is a library that imposes no framework, no persistence and no view engi
 agnostic", step F6). 4.x stays as it was for the applications still on it; the bridges' 1.x serve
 both. See [UPGRADE-5.0.md](UPGRADE-5.0.md) and [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
+### Changed: what a Symfony host must give omnibase, fewer (2026-11-10)
+
+omnibridge/parity's "What each host needs", the items the core held:
+
+- `Base\Service\SpamChecker`'s HTTP client is optional: its Symfony declaration takes `@?monolog.http_client`, and
+  without one (no MonologBundle) the checker makes the same client itself (symfony/http-client's `HttpClient::create()`,
+  what MonologBundle's service is) the first time Akismet is asked; without symfony/http-client, no Akismet, nothing
+  asked (NOT_SPAM). A Symfony host without MonologBundle no longer stops on "non-existent service monolog.http_client".
+- The options `uploader.storage` and `twig.editor.storage` default to the storages the core declares (`local.uploads`,
+  `local.wysiwyg`, discovery.php's `storages`): a host without them stopped on `Base\Database\Attribute\Uploader::$storage`
+  (a TypeError). Every site sets both: no change there.
+- `Base\Twig\Loader\FilesystemLoader` reads `base.twig.use_custom` left unset as off, as the switch's other readers do
+  (it was a TypeError at boot), and adds the application's `templates/`, `src/`, `src/Controller/`, `public/` and
+  twig-bridge's views where they are there (a missing one stopped every page: "The .../src/Controller directory does not
+  exist").
+- The harness requires symfony/monolog-bundle itself (docker/Dockerfile): omnibridge/symfony only suggests it since 1.0,
+  and the demo registers MonologBundle.
+- Tests: `tests/Twig/ApplicationFoldersTest`, `SpamCheckerTest::testWithoutAClientGivenSymfonysDefaultOneIsMade`,
+  `OptionsTest` (the two storages' defaults); `tests/Http/MethodNotAllowedHttpTest` (a method the route does not allow is
+  405 with `Allow` through the whole kernel, omnibridge/symfony's matcher fix; 404 before it).
+
 ### Changed: PHPStan analyses the bridges' src/Omnibase (2026-11-09)
 
 - `phpstan.neon` adds `vendor/omnibridge/symfony/src/Omnibase` and `vendor/omnibridge/doctrine/src/Omnibase` to its paths,

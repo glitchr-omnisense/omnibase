@@ -23,7 +23,8 @@ see below.
 The framework itself is not required by the core (since 4.0, see
 [What the core requires](20-architecture/packages.md)): under Symfony it comes with
 **omnibridge/symfony** (FrameworkBundle, SecurityBundle, TwigBundle,
-DoctrineBundle, MonologBundle, Messenger, Form, 6.1 to 8). The sites run MySQL 8;
+Messenger, Form, 6.1 to 8; DoctrineBundle and MonologBundle are its suggestions, which an
+application that registers them requires). The sites run MySQL 8;
 the core's harness runs on SQLite. The commands `doctrine:schema:charset` and
 `doctrine:array:upgrade`, and the backups, are MySQL's.
 

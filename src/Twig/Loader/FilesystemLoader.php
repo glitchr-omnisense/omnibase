@@ -19,7 +19,8 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%}
         $this->inner = $inner;
-        $this->useCustomLoader = $parameterBag->get('base.twig.use_custom');
+        // Unset (base.twig.use_custom has no default) is off, as every other reader of the use_custom switches takes it.
+        $this->useCustomLoader = true === $parameterBag->get('base.twig.use_custom');
 
         $bundlePath = $parameterBag->get('base.twig.default_path');
         // A path that is not there is the package's own templates: an
@@ -54,12 +55,13 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->prependPath($bundlePath . '/notifier');
         $this->prependPath($bundlePath);
 
-        $this->prependPath($projectDir . '/src', 'App');
-        $this->prependPath($projectDir . '/src/Controller', 'Controller');
-        $this->prependPath($projectDir . '/public', 'Public');
+        // The application's folders, where it has them (a host with no templates/ nor src/Controller/ of its own).
+        $this->prependExisting($projectDir . '/src', 'App');
+        $this->prependExisting($projectDir . '/src/Controller', 'Controller');
+        $this->prependExisting($projectDir . '/public', 'Public');
 
-        $this->prependPath($projectDir . '/vendor/symfony/twig-bridge/Resources/views', 'Twig');
-        $this->prependPath($projectDir . '/templates');
+        $this->prependExisting($projectDir . '/vendor/symfony/twig-bridge/Resources/views', 'Twig');
+        $this->prependExisting($projectDir . '/templates');
 
         // Allow to override the default bundle path for any bundle but base-bundle
         $bundlesPath = $bundlePath . '/bundles';
@@ -90,6 +92,14 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
                 throw new \Exception('Missing path variable for @' . $namespace . ' in "base.twig.paths"');
             }
 
+            $this->prependPath($path, $namespace);
+        }
+    }
+
+    /** prependPath() for a folder the application may not have: none, nothing added. */
+    protected function prependExisting(string $path, string $namespace = self::MAIN_NAMESPACE): void
+    {
+        if (is_dir($path)) {
             $this->prependPath($path, $namespace);
         }
     }

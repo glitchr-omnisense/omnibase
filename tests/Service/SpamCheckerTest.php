@@ -40,7 +40,7 @@ class SpamCheckerTest extends TestCase
     }
 
     /** @param array<string, mixed> $guard base.guard */
-    private function checker(array $guard = [], ?Registry $registry = null, ?string $key = null, ?HttpClientInterface $http = null): SpamChecker
+    private function checker(array $guard = [], ?Registry $registry = null, ?string $key = null, ?HttpClientInterface $http = null, bool $noClient = false): SpamChecker
     {
         $requests = new RequestStack();
         $requests->push(Request::create('https://site.example/blog/un-billet', 'POST', [], [], [], ['REMOTE_ADDR' => '203.0.113.7', 'HTTP_USER_AGENT' => 'Firefox', 'HTTP_REFERER' => 'https://site.example/blog']));
@@ -55,7 +55,7 @@ class SpamCheckerTest extends TestCase
         $router = $this->createMock(AdvancedRouterInterface::class);
         $router->method('getUrlIndex')->willReturn('/');
 
-        return new SpamChecker($requests, $settings, $parameters, $translator, $http ?? new MockHttpClient(), false, new FormGuard('secret', $guard, $registry), $router);
+        return new SpamChecker($requests, $settings, $parameters, $translator, $noClient ? null : ($http ?? new MockHttpClient()), false, new FormGuard('secret', $guard, $registry), $router);
     }
 
     private function comment(string $text = 'Un commentaire.'): CommentModel
@@ -120,6 +120,26 @@ class SpamCheckerTest extends TestCase
         $this->assertSame('203.0.113.7', $fields['user_ip']);
         $this->assertMatchesRegularExpression('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/', $fields['comment_date_gmt'], 'a date, as text');
         $this->assertSame('fr', $fields['blog_lang']);
+    }
+
+    /**
+     * No client given (a Symfony host without MonologBundle, whose monolog.http_client was the one given): the one
+     * MonologBundle made, symfony/http-client's default (HttpClient::create()), made by the checker itself; without
+     * symfony/http-client, no Akismet, and nothing is asked (NOT_SPAM).
+     */
+    public function testWithoutAClientGivenSymfonysDefaultOneIsMade(): void
+    {
+        $checker = $this->checker(key: 'the-site-key', noClient: true);
+        $client = (new \ReflectionMethod($checker, 'client'))->invoke($checker);
+
+        if (class_exists(\Symfony\Component\HttpClient\HttpClient::class)) {
+            $this->assertInstanceOf(HttpClientInterface::class, $client);
+            $this->assertSame($client, (new \ReflectionMethod($checker, 'client'))->invoke($checker), 'made once');
+        } else {
+            $this->assertNull($client);
+            $this->assertSame(SpamScore::__toInt()[SpamScore::NOT_SPAM], $checker->score($this->comment()));
+        }
+        $this->assertSame(SpamScore::__toInt()[SpamScore::NOT_SPAM], $this->checker(noClient: true)->score($this->comment()), 'no key: nothing asked, no client needed');
     }
 
     public function testAKeyAkismetRefusesIsLetThroughNotTakenForTheVisitors(): void

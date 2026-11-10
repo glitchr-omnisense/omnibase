@@ -18,6 +18,7 @@ use Base\Http\RequestsOf;
 use Omnibridge\Contract\Requests;
 use Omnibridge\Contract\Urls;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -53,13 +54,16 @@ class SpamChecker implements SpamCheckerInterface
     /**
      * @param Requests|RequestStack|null           $requests Symfony's RequestStack is deprecated (until 6.0)
      * @param AdvancedRouterInterface|Urls|null    $router   the home page's address
+     * @param HttpClientInterface|null             $client   Akismet's client; null: symfony/http-client's default one
+     *                                                       (HttpClient::create(), MonologBundle's monolog.http_client)
+     *                                                       where it is installed, else no Akismet
      */
     public function __construct(
         #[Autowire(service: Requests::class)] Requests|RequestStack|null $requests,
         protected SettingBagInterface $settingBag,
         protected ParameterBagInterface $parameterBag,
         protected TranslatorInterface $translator,
-        protected HttpClientInterface $client,
+        protected ?HttpClientInterface $client,
         protected bool $debug,
         protected ?FormGuard $guard = null,
         protected AdvancedRouterInterface|Urls|null $router = null,
@@ -125,8 +129,8 @@ class SpamChecker implements SpamCheckerInterface
 
                 return $this->classifier = $gateway instanceof ClassifierInterface ? $gateway : null;
             }
-            if (class_exists(AkismetGatewayFactory::class) && null !== $key = $this->getKey()) {
-                $gateway = (new AkismetGatewayFactory($this->client))->create(['api_key' => $key, 'site' => $this->getUrl(), 'language' => $this->getLang(), 'test' => $this->debug]);
+            if (class_exists(AkismetGatewayFactory::class) && null !== ($client = $this->client()) && null !== $key = $this->getKey()) {
+                $gateway = (new AkismetGatewayFactory($client))->create(['api_key' => $key, 'site' => $this->getUrl(), 'language' => $this->getLang(), 'test' => $this->debug]);
 
                 return $this->classifier = $gateway instanceof ClassifierInterface ? $gateway : null;
             }
@@ -135,6 +139,12 @@ class SpamChecker implements SpamCheckerInterface
         }
 
         return null;
+    }
+
+    /** Akismet's HTTP client: the one given, else symfony/http-client's default one where it is installed. */
+    private function client(): ?HttpClientInterface
+    {
+        return $this->client ??= class_exists(HttpClient::class) ? HttpClient::create() : null;
     }
 
     /**
