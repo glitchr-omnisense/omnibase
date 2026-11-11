@@ -10,6 +10,7 @@ use Base\Repository\Hours\WeekDayHoursRepository;
 use Base\Service\OpeningHours;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * Opening hours per place: for('store:12') answers for that place - its own
@@ -18,6 +19,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class OpeningHoursScopeTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private const SITE = [3 => [['09:00', '13:00']], 6 => [['09:00', '18:00']]];
 
     private ?EntityManagerInterface $em = null;
@@ -31,6 +34,7 @@ class OpeningHoursScopeTest extends KernelTestCase
             }
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function day(string $day): \DateTimeImmutable

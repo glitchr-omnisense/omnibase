@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * Documents signed for any entity through omnisense/omnisign, on a real
@@ -27,6 +28,8 @@ use Symfony\Component\HttpClient\Response\MockResponse;
  */
 final class SignaturesTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private EntityManagerInterface $em;
 
     /** @var list<string> */

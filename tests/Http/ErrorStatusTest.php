@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * omnibase's error controller (framework.error_controller:
@@ -18,6 +19,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 class ErrorStatusTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private ErrorController $controller;
 
     protected function setUp(): void

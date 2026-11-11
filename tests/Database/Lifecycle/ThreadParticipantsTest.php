@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\Database\Backend\BothBackends;
 use Symfony\Component\HttpFoundation\Request;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * ThreadSubscriber's Doctrine hooks (prePersist, onFlush), relayed to ThreadParticipants: they were
@@ -26,6 +27,7 @@ use Tests\Base\Http\HttpTestTrait;
  */
 final class ThreadParticipantsTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use HttpTestTrait, BothBackends {
         HttpTestTrait::entityManager insteadof BothBackends;
     }
@@ -65,6 +67,7 @@ final class ThreadParticipantsTest extends KernelTestCase
 
         $this->removeUsers();
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     /** @dataProvider backends */

@@ -38,6 +38,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\RawMessage;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The effects of a sign-in written without Symfony (plan "omniauth", step
@@ -55,6 +56,7 @@ use Tests\Base\Http\HttpTestTrait;
  */
 final class HostlessEffectsTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use HttpTestTrait;
     use KeepsServerGlobals;
 
@@ -80,6 +82,7 @@ final class HostlessEffectsTest extends KernelTestCase
         $this->removeUsers();
         $this->restoreServerGlobals();
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     public function testAConnectionIsTheRowUserTrackerWritesWithTheHostsOwnBrowserAndHost(): void

@@ -7,6 +7,7 @@ use Base\Repository\Analytics\VisitRepository;
 use Base\Service\Analytics;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * End-to-end coverage of Base\Service\Analytics against a real database -
@@ -19,6 +20,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class AnalyticsTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     // A random-suffixed path/subject namespace per test RUN (not per test
     // method) keeps this test isolated from real traffic and from any
     // previous run's leftover rows without needing transactional rollback
@@ -51,6 +54,9 @@ class AnalyticsTest extends KernelTestCase
         $connection = $this->em->getConnection();
         $connection->executeStatement("DELETE FROM analytics_page_view WHERE path LIKE :p", ["p" => "/test-" . self::$runId . "%"]);
         $connection->executeStatement("DELETE FROM analytics_visit WHERE subject_id LIKE :s", ["s" => "test-" . self::$runId . "%"]);
+
+        parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function path(string $suffix = ""): string

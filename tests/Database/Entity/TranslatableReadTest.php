@@ -6,6 +6,7 @@ use Base\Entity\Layout\Setting;
 use Base\Service\Localizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * TranslatableTrait::translate(): a read in a language creates nothing, the
@@ -23,6 +24,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class TranslatableReadTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private EntityManagerInterface $em;
     private string $default;
 
@@ -50,6 +53,7 @@ class TranslatableReadTest extends KernelTestCase
             $this->em->flush();
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function pageIn(string $locale): void

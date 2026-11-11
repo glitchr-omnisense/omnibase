@@ -6,6 +6,7 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\TextOverride;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The finder's YoungerThan and OlderThan compare a date with now moved by the
@@ -24,6 +25,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class DateFinderTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private const DOMAIN = 'date-finder-test';
 
     private EntityManagerInterface $em;
@@ -45,6 +48,7 @@ class DateFinderTest extends KernelTestCase
             $this->purge();
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function purge(): void

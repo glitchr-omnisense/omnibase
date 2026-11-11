@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The threads' search page (ThreadSearch::TEMPLATE, block main, as a site's layout prints it - the harness's layout
@@ -23,6 +24,7 @@ use Tests\Base\Http\HttpTestTrait;
  */
 class ThreadSearchPageTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use HttpTestTrait;
 
     /** @var list<Thread> */
@@ -47,6 +49,7 @@ class ThreadSearchPageTest extends KernelTestCase
         }
         $this->removeUsers();
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     public function testThePageWithNothingSearched(): void

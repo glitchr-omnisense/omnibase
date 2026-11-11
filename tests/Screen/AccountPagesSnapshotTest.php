@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The account's pages, as the host's kernel answers them, equal to the HTML
@@ -30,6 +31,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  */
 final class AccountPagesSnapshotTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private const SNAPSHOTS = __DIR__.'/snapshots';
     private const TOPIC = 'Base\\Forum\\Entity\\Topic';
 
@@ -74,6 +77,7 @@ final class AccountPagesSnapshotTest extends KernelTestCase
         }
         $this->created = [];
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     public function testTheAccountPagesAreThoseRecorded(): void

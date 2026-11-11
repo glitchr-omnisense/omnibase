@@ -6,6 +6,7 @@ use Base\Entity\Hours\WeekDayHours;
 use Base\Repository\Hours\WeekDayHoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * WeekDayHoursRepository::save() on a real database: a first week is
@@ -14,6 +15,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class WeekDayHoursRepositoryTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private EntityManagerInterface $em;
 
     protected function setUp(): void
@@ -34,6 +37,7 @@ class WeekDayHoursRepositoryTest extends KernelTestCase
             $this->em->createQuery('DELETE FROM '.WeekDayHours::class.' d')->execute();
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     public function testAWeekIsSavedThenChanged(): void

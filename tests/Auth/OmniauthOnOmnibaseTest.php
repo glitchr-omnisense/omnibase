@@ -21,6 +21,7 @@ use Omniauth\Status;
 use Omniauth\WebAuthn\Testing\SoftwareAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * omniauth on omnibase's tables (plan "omniauth", step AU4): every method of
@@ -31,6 +32,7 @@ use Tests\Base\Http\HttpTestTrait;
  */
 final class OmniauthOnOmnibaseTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use HttpTestTrait;
     use KeepsServerGlobals;
 
@@ -63,6 +65,7 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
         unset($this->kit); // PHPUnit keeps every test case to the end of the run: not its entity manager
         $this->restoreServerGlobals();
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     /** @param array<string, mixed> $settings */

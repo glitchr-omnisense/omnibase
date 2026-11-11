@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * StartingWith, EndingWith and their Not read their value literally: omnibridge/doctrine escaped its "_" as "\_" with
@@ -23,6 +24,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 final class LikeEscapeTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     /** @var list<int> */
     private array $threads = [];
 
@@ -43,6 +46,7 @@ final class LikeEscapeTest extends KernelTestCase
             $em->createQuery('DELETE FROM '.Thread::class.' t WHERE t.id = :thread')->setParameter('thread', $id)->execute();
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     public function testTheFinderReadsTheValueLiterally(): void

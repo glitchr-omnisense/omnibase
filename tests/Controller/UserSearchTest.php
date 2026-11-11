@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The members' search (user_search): its template read `threads` and
@@ -17,6 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class UserSearchTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     /** @var array<string, string> */
     private array $cookies = [];
 
@@ -43,6 +46,7 @@ final class UserSearchTest extends KernelTestCase
         }
         $em->flush();
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function member(string $username): object

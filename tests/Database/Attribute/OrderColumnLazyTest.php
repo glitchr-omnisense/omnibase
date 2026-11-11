@@ -7,6 +7,7 @@ use Base\Entity\Thread\Taxon;
 use Doctrine\Common\Collections\AbstractLazyCollection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\Database\Backend\BothBackends;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * An #[OrderColumn] association is loaded when it is read, not when its
@@ -21,6 +22,7 @@ use Tests\Base\Database\Backend\BothBackends;
  */
 class OrderColumnLazyTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use BothBackends;
 
     private string $backend = 'doctrine';
@@ -49,6 +51,7 @@ class OrderColumnLazyTest extends KernelTestCase
             $this->created = [];
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function taxon(string $label): Taxon

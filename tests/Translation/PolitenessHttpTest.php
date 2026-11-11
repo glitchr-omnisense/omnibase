@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Tests\Base\Http\HttpTestTrait;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The site's level of politeness (base.translator.politeness) on the ways a
@@ -17,6 +18,7 @@ use Tests\Base\Http\HttpTestTrait;
  */
 class PolitenessHttpTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use HttpTestTrait;
 
     private Translator $translator;

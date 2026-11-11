@@ -15,6 +15,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * SelectType on an entity whose repository is a plain Doctrine one
@@ -28,6 +29,8 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
  */
 class SelectTypePlainRepositoryTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private ?SelectType $type = null;
     private ?\Base\Database\Repository\Repositories $original = null;
     /** @var object[] */
@@ -98,6 +101,7 @@ class SelectTypePlainRepositoryTest extends KernelTestCase
         $this->type = null;
 
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function form(object $data, string $field, array $options = []): FormInterface

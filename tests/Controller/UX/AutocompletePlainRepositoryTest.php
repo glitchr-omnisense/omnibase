@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * A picker on an entity whose repository is a plain Doctrine one - a bundle's
@@ -25,6 +26,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class AutocompletePlainRepositoryTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private Session $session;
 
     protected function setUp(): void

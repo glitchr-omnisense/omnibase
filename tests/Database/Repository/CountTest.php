@@ -6,6 +6,7 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\TextOverride;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * ServiceEntityRepository::count() is Doctrine's: an int. Its query used to
@@ -18,6 +19,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class CountTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
+
     private const DOMAIN = 'count-test';
 
     private EntityManagerInterface $em;
@@ -39,6 +42,7 @@ class CountTest extends KernelTestCase
             $this->purge();
         }
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     private function purge(): void

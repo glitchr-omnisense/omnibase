@@ -5,6 +5,7 @@ namespace Tests\Base\Http;
 use Base\Entity\Layout\Redirection;
 use Base\Service\Redirections;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Tests\Base\ReleasesWhatItHolds;
 
 /**
  * The redirections as a visitor meets them: an old address answers 301 (or
@@ -14,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class RedirectionHttpTest extends KernelTestCase
 {
+    use ReleasesWhatItHolds;
     use HttpTestTrait;
 
     private Redirections $redirections;
@@ -30,6 +32,7 @@ class RedirectionHttpTest extends KernelTestCase
         $this->entityManager()->clear();
         $this->entityManager()->createQuery('DELETE FROM '.Redirection::class.' r')->execute();
         parent::tearDown();
+        $this->releaseWhatItHolds();
     }
 
     public function testAnOldAddressLeadsToTheNewOneAndIsCounted(): void
