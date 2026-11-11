@@ -43,6 +43,15 @@ the default (detail on the left) for a signature on the right of its footer,
 opens outwards, over the page's margin. Without a pointer the detail is always
 shown and part of the block.
 
+Where the site sets something on that side (a column of links beside the
+signature, as on Nakaya's site map), the detail would lie over it. The partial's
+script (once per page) checks, when the signature is pointed at or focused and
+before the detail shows, that no text, image or control of the page lies under
+the detail's lines and that they stay inside the page; if the side is taken, it
+sets `data-ga-credits-side="below"` (or `"above"`, whichever is free first) on
+`.ga-credits`, and the detail opens under (over) the signature, against its own
+edge, out of the flow: nothing moves. A site has nothing to declare for it.
+
 Nothing else is customisable: neither the font nor the colours.
 
 # `Base.boot()`

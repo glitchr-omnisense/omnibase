@@ -35,6 +35,27 @@ class CreditsStylesheetTest extends TestCase
         $this->assertMatchesRegularExpression('/@media \(hover: none\) \{\s*\.ga-credits-detail \{ opacity: 1; \}/', $css);
     }
 
+    /**
+     * Where its side is taken (Nakaya's site map: a column of links on the
+     * signature's left), the detail lay over the site's footer. The partial's
+     * script then sets data-ga-credits-side, and the detail opens under or
+     * over the signature, out of the flow, against the signature's own edge.
+     */
+    public function testTheDetailOpensUnderOrOverTheSignatureWhenItsSideIsTaken(): void
+    {
+        $css = self::css('public/css/credits.css');
+        preg_match('/@media \(hover: hover\) \{(.*?)\n\}/s', $css, $block);
+
+        $this->assertStringContainsString('.ga-credits[data-ga-credits-side] .ga-credits-detail { position: absolute; left: auto; right: 0; width: auto; }', $block[1]);
+        $this->assertStringContainsString('.ga-credits--mirror[data-ga-credits-side] .ga-credits-detail { left: 0; right: auto; }', $block[1]);
+        $this->assertStringContainsString('.ga-credits[data-ga-credits-side="below"] .ga-credits-detail { top: 100%;', $block[1]);
+        $this->assertStringContainsString('.ga-credits[data-ga-credits-side="above"] .ga-credits-detail { bottom: 100%;', $block[1]);
+        // Nothing moves: no transform, no transition but the fade.
+        $this->assertDoesNotMatchRegularExpression('/translate|transform/', $css);
+        preg_match_all('/transition: ([^;]+);/', $css, $transitions);
+        $this->assertSame(['opacity .25s ease', 'none'], $transitions[1]);
+    }
+
     public function testTheSignatureKeepsItsFontAndItsTwoInks(): void
     {
         $css = self::css('public/css/credits.css');

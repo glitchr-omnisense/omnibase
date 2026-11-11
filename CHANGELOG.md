@@ -4,6 +4,25 @@ All notable changes to this bundle are documented here, per release tag.
 Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 `3.1.0`, … (the next major continues on `4.x`).
 
+## [Unreleased]
+
+### Fixed
+
+- **Glitch Art's signature: its detail line no longer lies over the site's footer.** Where it fades in on hover
+  (`@media (hover: hover)`), the detail (the address, the time the page took, the site's name or saying) opened on the
+  signature's side and overflowed there, over whatever the site sets beside it: on Nakaya's site map, "LOCALHOST:8443
+  [0.65s]" covered the end of the column "Access and hours". The partial now carries a short script, once per page,
+  that reads, when the signature is pointed at or focused and before the detail shows, whether that side is free (no
+  text, image or control of the page under the detail's lines, nothing outside the page); if not, it sets
+  `data-ga-credits-side` on `.ga-credits` to `below` or `above`, the first that is free, and credits.css opens the
+  detail there, out of the flow, against the signature's own edge (its right; its left with `mirror`). Every layout
+  where the side was free keeps it, unchanged; nothing moves, at rest or on hover; without a pointer the detail stays
+  in the flow, always shown; `detail: false` leaves the script out. The signature itself - font, size, inks, monkey,
+  text - is untouched, and no site changes its template. Why not CSS alone: no single side is free everywhere - under
+  the signature leaves the page where it closes it (Solstay, Nextup, Meyers), over it crosses the footer's rule
+  (Solstay, Nextup, Nakaya's site map), beside it covers Nakaya's links. Tests: `CreditsStylesheetTest::
+  testTheDetailOpensUnderOrOverTheSignatureWhenItsSideIsTaken`, `CreditsTemplateTest::testTheDetailFindsAFreeSideOncePerPage`.
+
 ## [5.0.0] — 2026-11-10
 
 The core is a library that imposes no framework, no persistence and no view engine (plan "omnibase

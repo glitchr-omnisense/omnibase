@@ -27,9 +27,21 @@ class CreditsTemplateTest extends TestCase
         $this->assertStringContainsString('EXAMPLE.ORG', self::render(['detail' => true]));
     }
 
+    public function testTheDetailFindsAFreeSideOncePerPage(): void
+    {
+        $html = self::render([]);
+
+        $this->assertStringContainsString('window.gaCreditsSide || (window.gaCreditsSide =', $html);
+        $this->assertStringContainsString("['below', 'above']", $html);
+        $this->assertStringContainsString("addEventListener('pointerover', place)", $html);
+        $this->assertStringContainsString("addEventListener('focusin', place)", $html);
+    }
+
     public function testDetailFalseLeavesItOut(): void
     {
         $html = self::render(['detail' => false]);
+
+        $this->assertStringNotContainsString('gaCreditsSide', $html);
 
         $this->assertStringNotContainsString('ga-credits-detail', $html);
         $this->assertStringContainsString('ga-credits-monkey', $html);

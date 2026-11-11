@@ -16,7 +16,9 @@
  #
  # The detail line beside it (the address, the time the page took, and the
  # site's name) is hidden until the signature is pointed at or focused, always
- # shown without a pointer (@media (hover: none)). An app fills it with embed:
+ # shown without a pointer (@media (hover: none)). Where the site sets something on
+ # its side, it opens under the signature, or over it (the script at the end).
+ # An app fills it with embed:
  #
  #   {% embed '@Base/partials/_credits.html.twig' %}
  #       {% block credits_detail %}{{ parent() }}<span class="ga-credits-line" lang="de">Ein Apfel am Tag</span>{% endblock %}
@@ -92,3 +94,37 @@
     </svg>
     </a>
 </div>
+{%- if detail is not defined or detail %}
+{#- Where the detail opens (credits.css, data-ga-credits-side): on the signature's side as
+ # it always has, unless what the site sets there lies under it (text, an image, a control)
+ # or it would leave the page; then under the signature, or over it. Read when the signature
+ # is pointed at or focused, before it shows; once per page, however many signatures. #}
+<script>window.gaCreditsSide || (window.gaCreditsSide = (function () {
+    var meets = function (a, b) { return a.width && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; };
+    var free = function (c, d) {
+        var rs = [].map.call(d.querySelectorAll('.ga-credits-line'), function (s) { return s.getBoundingClientRect(); });
+        var doc = document.documentElement, w = doc.clientWidth, h = doc.scrollHeight;
+        if (rs.some(function (r) { return r.left < 0 || r.right > w || r.top + scrollY < 0 || r.bottom + scrollY > h; })) return false;
+        var hit = function (b) { return rs.some(function (r) { return meets(b, r); }); };
+        var t = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n, range = document.createRange();
+        while ((n = t.nextNode())) {
+            if (c.contains(n) || !n.data.trim() || !n.parentElement.getClientRects().length) continue;
+            range.selectNodeContents(n);
+            if ([].some.call(range.getClientRects(), hit)) return false;
+        }
+        return ![].some.call(document.body.querySelectorAll('img, svg, video, canvas, iframe, input, button, select, textarea'), function (e) {
+            return !c.contains(e) && !e.contains(c) && hit(e.getBoundingClientRect());
+        });
+    };
+    var place = function (e) {
+        var c = e.target.closest && e.target.closest('.ga-credits'), d = c && c.querySelector('.ga-credits-detail');
+        if (!d || c.contains(e.relatedTarget)) return;
+        c.removeAttribute('data-ga-credits-side');
+        if (d.getBoundingClientRect().width > 1 || free(c, d)) return; /* in the flow, or its side is free */
+        if (!['below', 'above'].some(function (s) { c.setAttribute('data-ga-credits-side', s); return free(c, d); })) c.removeAttribute('data-ga-credits-side');
+    };
+    document.addEventListener('pointerover', place);
+    document.addEventListener('focusin', place);
+    return true;
+})());</script>
+{%- endif %}

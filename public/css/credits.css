@@ -77,6 +77,16 @@
     .ga-credits-detail { position: relative; left: -.75rem; width: 0; min-width: 0; flex: none; pointer-events: none; }
     .ga-credits--mirror .ga-credits-detail { left: .75rem; }
     .ga-credits:hover .ga-credits-detail, .ga-credits:focus-within .ga-credits-detail { pointer-events: auto; }
+    /* Its side taken (a column of links beside the signature, as on Nakaya's
+       site map), the detail opens under the signature, or over it at the end
+       of the page, against the signature's own edge: the partial's script
+       (data-ga-credits-side) reads which of the three is free when the
+       signature is pointed at or focused. Out of the flow, it moves nothing;
+       its padding bridges the pointer's way from the signature to it. */
+    .ga-credits[data-ga-credits-side] .ga-credits-detail { position: absolute; left: auto; right: 0; width: auto; }
+    .ga-credits--mirror[data-ga-credits-side] .ga-credits-detail { left: 0; right: auto; }
+    .ga-credits[data-ga-credits-side="below"] .ga-credits-detail { top: 100%; padding-top: .25rem; }
+    .ga-credits[data-ga-credits-side="above"] .ga-credits-detail { bottom: 100%; padding-bottom: .25rem; }
 }
 .ga-credits-line { display: block; }
 .ga-credits-time { opacity: .6; font-weight: normal; }
