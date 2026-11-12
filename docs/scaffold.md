@@ -432,7 +432,7 @@ follow whichever environment cleared its cache last.
 | `src/Twig/ImageExtension.php` | omnisense/omnibase's `\|picture` filter |
 | `src/Entity/TextOverride.php`, `src/Repository/TextOverrideRepository.php`, `src/Translation/OverridingTranslator.php`, `src/Translation/TextOverrideCacheListener.php`, `src/Controller/Admin/Crud/TextOverrideCrudController.php` | `Base\Entity\Layout\TextOverride` (table `layoutTextOverride`), `Base\Translation\*`, omnibase/admin's `TextOverrideCrudController` |
 | `src/Market/DevGateway.php` | omnibase/marketplace's `DevGateway`, registered in debug only |
-| `templates/partials/_credits.html.twig` and its SCSS (`.as-credits`, `.nk-credits`, `.mh-credits`, `.gl-credits`…) | `@Base/partials/_credits.html.twig` (`color: black\|white`, `outline`, `mirror`, `rule`, a `credits_detail` block) |
+| `templates/partials/_credits.html.twig` and its SCSS (`.as-credits`, `.nk-credits`, `.mh-credits`, `.gl-credits`…) | `@Base/partials/_credits.html.twig` (`color: black\|white`, `outline`, `mirror`, `rule`, `open`, a `credits_detail` block) |
 | The boot code of `assets/app-defer.js` (closestScrollable guard, `<style>` headlock, nest-frame escape, `Sticky.ready`, `StickyStops.attach`, `Transparent.ready`, the current link) | `Base.boot()` from `vendor/omnisense/omnibase/assets/boot.js` |
 | A copy of opening hours, ICS / Google Calendar, invitations, signed downloads, QR sheets, allergens, comments, URL embeds, a polling script | omnisense/omnibase's shared bricks: [docs/40-commons](40-commons/index.md) |
 | A hand-written `LocalBusiness` JSON-LD around `opening_hours().schema()` | `{{ local_business_jsonld() }}` ([LocalBusiness JSON-LD](40-commons/local-business.md)) |

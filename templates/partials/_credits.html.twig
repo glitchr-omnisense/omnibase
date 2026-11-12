@@ -12,12 +12,15 @@
  #   mirror   true: the detail line on the right of the signature instead of the left
  #   rule     true: a dotted rule between the detail's two lines
  #   detail   false: no detail line at all
+ #   open     true: the detail line always shown, in the flow beside the signature (its left; its right with mirror)
  #   site_name the detail's second line (none by default)
  #
  # The detail line beside it (the address, the time the page took, and the
  # site's name) is hidden until the signature is pointed at or focused, always
  # shown without a pointer (@media (hover: none)). Where the site sets something on
  # its side, it opens under the signature, or over it (the script at the end).
+ # With open, it is always shown and takes its room beside the signature, as
+ # without a pointer: the script leaves it where it is.
  # An app fills it with embed:
  #
  #   {% embed '@Base/partials/_credits.html.twig' %}
@@ -27,7 +30,7 @@
 {%- set year = 'now'|date('Y') -%}
 {%- set color = (color|default('black')) == 'white' ? 'white' : 'black' -%}
 <link rel="stylesheet" href="{{ asset('bundles/base/css/credits.css') }}">
-<div class="ga-credits ga-credits--{{ color }}{{ outline|default(false) ? ' ga-credits--outline' }}{{ mirror|default(false) ? ' ga-credits--mirror' }}{{ rule|default(false) ? ' ga-credits--rule' }}">
+<div class="ga-credits ga-credits--{{ color }}{{ outline|default(false) ? ' ga-credits--outline' }}{{ mirror|default(false) ? ' ga-credits--mirror' }}{{ rule|default(false) ? ' ga-credits--rule' }}{{ open|default(false) ? ' ga-credits--open' }}">
     {%- if detail is not defined or detail %}
     <p class="ga-credits-detail">
         {%- block credits_detail -%}
@@ -94,11 +97,13 @@
     </svg>
     </a>
 </div>
-{%- if detail is not defined or detail %}
+{%- if (detail is not defined or detail) and not open|default(false) %}
 {#- Where the detail opens (credits.css, data-ga-credits-side): on the signature's side as
  # it always has, unless what the site sets there lies under it (text, an image, a control)
  # or it would leave the page; then under the signature, or over it. Read when the signature
- # is pointed at or focused, before it shows; once per page, however many signatures. #}
+ # is pointed at or focused, before it shows; once per page, however many signatures. An
+ # open detail (open: true) is always in the flow: no script for it, and the script another
+ # signature of the page brings leaves it alone. #}
 <script>window.gaCreditsSide || (window.gaCreditsSide = (function () {
     var meets = function (a, b) { return a.width && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; };
     var free = function (c, d) {
@@ -118,7 +123,7 @@
     };
     var place = function (e) {
         var c = e.target.closest && e.target.closest('.ga-credits'), d = c && c.querySelector('.ga-credits-detail');
-        if (!d || c.contains(e.relatedTarget)) return;
+        if (!d || c.classList.contains('ga-credits--open') || c.contains(e.relatedTarget)) return;
         c.removeAttribute('data-ga-credits-side');
         if (d.getBoundingClientRect().width > 1 || free(c, d)) return; /* in the flow, or its side is free */
         if (!['below', 'above'].some(function (s) { c.setAttribute('data-ga-credits-side', s); return free(c, d); })) c.removeAttribute('data-ga-credits-side');

@@ -6,6 +6,18 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 
 ## [Unreleased]
 
+### Added
+
+- **Glitch Art's signature: `open: true` shows its detail line always, in the flow.** A footer that lays the detail
+  out as part of its own (gitbud's: the signature mirrored, a ×, the site's mark and two lines) had to write it in
+  its stylesheet - the detail's opacity, `position: static`, its width and the gap. `@Base/partials/_credits.html.twig`
+  with `open: true` puts `ga-credits--open` on `.ga-credits`, and credits.css shows the detail, pointer or not, beside
+  the signature (its left; its right with `mirror`), taking its room at the gap it keeps without a pointer. The
+  partial brings no side-finding script for it, and the script another signature of the page brings leaves it alone
+  (`data-ga-credits-side` is never set on it). Without `open`, nothing changes; the signature's face - font, size,
+  inks, monkey - is untouched either way. Tests: `CreditsTemplateTest::testOpenShowsTheDetailWithoutTheScript`,
+  `CreditsStylesheetTest::testAnOpenDetailIsAlwaysShownInTheFlow`.
+
 ### Changed
 
 - **The attribute reader is made when first asked, and its attributes are a list compiled with the container.**

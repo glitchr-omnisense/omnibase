@@ -88,6 +88,12 @@
     .ga-credits[data-ga-credits-side="below"] .ga-credits-detail { top: 100%; padding-top: .25rem; }
     .ga-credits[data-ga-credits-side="above"] .ga-credits-detail { bottom: 100%; padding-bottom: .25rem; }
 }
+/* open: true - the detail always shown, in the flow beside the signature (its
+   left; its right with mirror), at the gap it keeps without a pointer: it
+   takes its room, pointer or not, and the partial's script leaves it there. */
+.ga-credits--open { gap: .75rem; }
+.ga-credits.ga-credits--open .ga-credits-detail { position: static; width: auto; opacity: 1; pointer-events: auto; }
+
 .ga-credits-line { display: block; }
 .ga-credits-time { opacity: .6; font-weight: normal; }
 .ga-credits--rule .ga-credits-line + .ga-credits-line { margin-top: .15rem; padding-top: .15rem; border-top: 1px dotted currentColor; }

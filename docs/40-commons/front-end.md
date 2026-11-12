@@ -23,6 +23,7 @@ linked by the partial.
 | `mirror` | `false`, `true` | the detail line on the right of the signature instead of the left: for a signature set on the left of its footer |
 | `rule` | `false`, `true` | a dotted rule between the detail's two lines |
 | `detail` | `true`, `false` | the detail line at all |
+| `open` | `false`, `true` | the detail line always shown, in the flow beside the signature (left; right with `mirror`) |
 | `site_name` | text | its second line |
 
 The detail line (the address, the time the page took, the site's name) fades
@@ -51,6 +52,20 @@ the detail's lines and that they stay inside the page; if the side is taken, it
 sets `data-ga-credits-side="below"` (or `"above"`, whichever is free first) on
 `.ga-credits`, and the detail opens under (over) the signature, against its own
 edge, out of the flow: nothing moves. A site has nothing to declare for it.
+
+A footer that shows the detail as part of its layout passes `open: true`: the
+detail is always shown, pointer or not, and takes its room beside the signature
+(on its left; on its right with `mirror`), at the gap it keeps without a
+pointer. Nothing is out of the flow, so the script has nothing to place: an open
+signature brings none, and the one another signature of the page brings leaves
+it alone. A site lays out what it puts in `credits_detail` (gitbud's ×, mark and
+two lines, in a row) and nothing else:
+
+```twig
+{% embed '@Base/partials/_credits.html.twig' with {mirror: true, open: true} %}
+    {% block credits_detail %}<span class="ga-credits-line">My site</span>{% endblock %}
+{% endembed %}
+```
 
 Nothing else is customisable: neither the font nor the colours.
 

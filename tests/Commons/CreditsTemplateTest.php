@@ -10,6 +10,7 @@ use Twig\TwigFunction;
 /**
  * Glitch Art's signature (templates/partials/_credits.html.twig). `detail: false`
  * leaves the detail line out: `default(true)` read false as empty and showed it.
+ * `open: true` shows it always, in the flow.
  */
 class CreditsTemplateTest extends TestCase
 {
@@ -35,6 +36,24 @@ class CreditsTemplateTest extends TestCase
         $this->assertStringContainsString("['below', 'above']", $html);
         $this->assertStringContainsString("addEventListener('pointerover', place)", $html);
         $this->assertStringContainsString("addEventListener('focusin', place)", $html);
+    }
+
+    /**
+     * `open: true`: the detail always shown, in the flow beside the signature
+     * (mirror puts it on the right as before). Its signature brings no script,
+     * and the script another signature of the page brings leaves it alone.
+     */
+    public function testOpenShowsTheDetailWithoutTheScript(): void
+    {
+        $html = self::render(['open' => true, 'mirror' => true]);
+
+        $this->assertStringContainsString('class="ga-credits ga-credits--black ga-credits--mirror ga-credits--open"', $html);
+        $this->assertStringContainsString('EXAMPLE.ORG', $html);
+        $this->assertStringNotContainsString('gaCreditsSide', $html);
+
+        $closed = self::render([]);
+        $this->assertStringContainsString('class="ga-credits ga-credits--black">', $closed);
+        $this->assertStringContainsString("c.classList.contains('ga-credits--open')", $closed);
     }
 
     public function testDetailFalseLeavesItOut(): void

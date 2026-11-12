@@ -56,6 +56,25 @@ class CreditsStylesheetTest extends TestCase
         $this->assertSame(['opacity .25s ease', 'none'], $transitions[1]);
     }
 
+    /**
+     * `open: true` (gitbud's footer): the detail always shown, in the flow beside
+     * the signature, pointer or not - what a site wrote in its own stylesheet
+     * (opacity, position: static, width). After the block for pointers that
+     * hover, so that it wins there; nothing of the signature's face changes.
+     */
+    public function testAnOpenDetailIsAlwaysShownInTheFlow(): void
+    {
+        $css = self::css('public/css/credits.css');
+
+        $this->assertStringContainsString('.ga-credits--open { gap: .75rem; }', $css);
+        $this->assertSame(1, preg_match('/\.ga-credits\.ga-credits--open \.ga-credits-detail \{([^}]*)\}/', $css, $rule));
+        foreach (['position: static;', 'width: auto;', 'opacity: 1;', 'pointer-events: auto;'] as $declaration) {
+            $this->assertStringContainsString($declaration, $rule[1]);
+        }
+        $this->assertGreaterThan(strpos($css, '@media (hover: hover)'), strpos($css, '.ga-credits--open {'), 'after the block for pointers that hover');
+        $this->assertDoesNotMatchRegularExpression('/font|color|#/', $rule[1]);
+    }
+
     public function testTheSignatureKeepsItsFontAndItsTwoInks(): void
     {
         $css = self::css('public/css/credits.css');
