@@ -99,7 +99,7 @@ own `ClassMetadataFactory` is used; the class names are the core's (D6).
 
 | What | Symfony (the bundle) | By hand (`Mapping::register()`) |
 |---|---|---|
-| Column types: `datetime`/`datetimetz` in UTC, `array`, `utc_datetime(_immutable)`, the enumerations | `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()` → `Base\Bridge\Doctrine\Types::register()` | `Types::register()` |
+| Column types: `datetime`/`datetimetz` in UTC, `array`, `utc_datetime(_immutable)`, the enumerations | `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()` → `Base\Bridge\Doctrine\Types::register()`, then `registerEnumerations()` of the list omnibridge/symfony's `EnumerationsPass` compiles (parameter `omnibridge.doctrine.enumerations`) | `Types::register()` |
 | Filters (`trash_filter`, `vault_filter`), DQL functions (RAND, FIELD, JSON_*), the default hint | `DoctrineConfigurationPass` → `Base\Bridge\Doctrine\Configuration`'s lists; filters enabled at boot (`Configuration::enableFilters()`) | `Configuration::apply()`, `enableFilters()` |
 | The driver: discriminator maps generated, the `resolveDiscriminator` event, the table names checked | `DoctrineConfigurationPass` wraps every entity manager's driver in `Base\Bridge\Doctrine\MappingDriver` | the same wrapper |
 | Naming | `naming_strategy: Base\Database\Mapping\NamingStrategy` | set on the configuration |
