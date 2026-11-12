@@ -116,6 +116,9 @@ return [
             'Base\Field\Upload\Dropzone',
             // An editor's routes (F5d, slice 6): EditorType hands their payload and its pictures' addresses.
             'Base\Field\Editor\EditorJs',
+            // The attribute reader, made when first asked (AttributeReader::getInstance(): Doctrine's SQL filters,
+            // the attributes, the persistence's scopes), no longer at each kernel's boot.
+            'Base\Attributes\AttributeReader',
         ],
         'services' => ['Base\Service\ParameterBagInterface' => 'parameter_bag'],
         'former' => [],

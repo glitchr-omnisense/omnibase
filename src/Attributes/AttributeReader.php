@@ -13,6 +13,7 @@ use Exception;
 use App\Entity\User;
 use Base\Service\Model\ClassFinder;
 use Base\Cache\Abstract\AbstractLocalCache;
+use Base\Contract\Runtime;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\MetadataManipulator;
 use Base\Routing\AdvancedRouterInterface;
@@ -41,6 +42,13 @@ class AttributeReader extends AbstractLocalCache
         self::TARGET_PROPERTY
     ];
 
+    /**
+     * The parameter holding the attributes of the folders searchedPaths() names, discover()'s list, where the host
+     * compiles it (omnibridge/symfony's AttributesPass: the container's, rebuilt in debug when a file of those
+     * folders changes).
+     */
+    public const NAMES = "base.attributes.names";
+
     // Attribute pass..
     protected array $attributes = [];
 
@@ -52,6 +60,42 @@ class AttributeReader extends AbstractLocalCache
     {
         $this->attributes[get_class($attributes)] = $attributes;
         return $this;
+    }
+
+    /** Whether the container's reader is being made: what that builds is answered no reader, as before it was made. */
+    private static bool $resolving = false;
+
+    /**
+     * The reader: the one made last (each reader made becomes it), else the container's, made when first asked -
+     * through the contracts' registry (Base\Contract\Runtime, whose locator lists this class), as Doctrine's SQL
+     * filters, the attributes and the persistence's scopes ask it. A kernel's boot no longer makes it (with the
+     * router, the entity manager and the rest it is given) for a command or a request that reads no attribute.
+     * Null where there is none: no registry's container, or none that holds a reader (a plain PHP host).
+     */
+    public static function getInstance(bool $instantiateIfNotFound = true): ?self
+    {
+        if (null !== self::$_instance || self::$resolving || !class_exists(Runtime::class)) {
+            return self::$_instance;
+        }
+
+        self::$resolving = true;
+        try {
+            $reader = Runtime::find(self::class);
+        } finally {
+            self::$resolving = false;
+        }
+
+        return self::$_instance ?? $reader;
+    }
+
+    /**
+     * Whether there is a reader: the one made last, or one the container makes when asked (getInstance()).
+     *
+     * @return bool
+     */
+    public static function hasInstance()
+    {
+        return null !== self::getInstance(false);
     }
 
     /**
@@ -208,9 +252,23 @@ class AttributeReader extends AbstractLocalCache
         $this->enabled = $parameterBag->get("base.attributes.use_custom") ?? false;
 
         // Paths to look for attributes: the core's own, then base.attributes.paths (an application's
-        // src/Attribute, a bundle's: MarketplaceExtension prepends its own).
-        foreach ([__DIR__ . "/Attribute", __DIR__ . "/../Database/Attribute", ...self::configuredPaths($parameterBag)] as $path) {
+        // src/Attribute, a bundle's: MarketplaceExtension prepends its own). The attributes they hold are the
+        // list base.attributes.names gives where the host compiled it (omnibridge/symfony's AttributesPass, with
+        // discover()): no folder read, no attribute class loaded while the reader is made. Without it (a
+        // reader built by hand, an older host), the folders are read here, as before.
+        $parameters = $parameterBag->all();
+        $names = $parameters[self::NAMES] ?? null;
+        foreach (self::searchedPaths($parameters) as $path) {
+            if (\is_array($names)) {
+                if (!in_array($path, $this->paths) && file_exists($path)) {
+                    $this->paths[] = $path;
+                }
+                continue;
+            }
             $this->addPath($path);
+        }
+        if (\is_array($names)) {
+            $this->attributeNames = array_values($names);
         }
 
         $this->entityManager = $entityManager;
@@ -277,17 +335,57 @@ class AttributeReader extends AbstractLocalCache
         }
         // Kept: getPaths() answered [] whatever was added.
         $this->paths[] = $path;
-        foreach (ClassFinder::classes($path) as $attribute) {
-            // An attribute of a package not installed (#[Route] without symfony/routing): ignored, as PHP ignores it
-            // until it is instantiated - the reader is made where no framework is (plan "omnibase agnostic", step E3).
-            try {
-                $this->addAttributeName($attribute);
-            } catch (\Error) {
-                continue;
-            }
+        foreach (self::discover([$path]) as $attribute) {
+            $this->addAttributeName($attribute);
         }
 
         return $this;
+    }
+
+    /**
+     * The attributes the folders (or files) hold, in their order: each class found there (ClassFinder) that
+     * extends AbstractAttribute, loaded to be asked. An attribute of a package not installed (#[Route] without
+     * symfony/routing) is left out, as PHP ignores it until it is instantiated - the reader is made where no
+     * framework is (plan "omnibase agnostic", step E3). What the reader's constructor finds in the folders of
+     * searchedPaths(); a host compiles it once into the parameter self::NAMES (omnibridge/symfony's AttributesPass),
+     * which the constructor reads instead.
+     *
+     * @param list<string> $paths
+     *
+     * @return list<class-string<AbstractAttribute>>
+     */
+    public static function discover(array $paths): array
+    {
+        $names = [];
+        foreach (array_unique($paths) as $path) {
+            if (!file_exists($path)) {
+                continue;
+            }
+            foreach (ClassFinder::classes($path) as $class) {
+                try {
+                    if (is_subclass_of($class, AbstractAttribute::class) && !in_array($class, $names, true)) {
+                        $names[] = $class;
+                    }
+                } catch (\Error) {
+                    continue;
+                }
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * The folders the reader looks in for attributes, given the parameters: the core's own (src/Attributes/
+     * Attribute, src/Database/Attribute), then those base.attributes.paths names (configuredPaths()).
+     *
+     * @param array<string, mixed> $parameters
+     *
+     * @return list<string>
+     */
+    public static function searchedPaths(array $parameters): array
+    {
+        return array_values(array_unique([__DIR__ . "/Attribute", __DIR__ . "/../Database/Attribute", ...self::pathsIn($parameters)]));
     }
 
     /**
@@ -302,7 +400,16 @@ class AttributeReader extends AbstractLocalCache
      */
     public static function configuredPaths(ParameterBagInterface $parameterBag): array
     {
-        $all = $parameterBag->all();
+        return self::pathsIn($parameterBag->all());
+    }
+
+    /**
+     * @param array<string, mixed> $all
+     *
+     * @return list<string>
+     */
+    private static function pathsIn(array $all): array
+    {
         $paths = \is_array($all['base.attributes.paths'] ?? null) ? array_values($all['base.attributes.paths']) : [];
         foreach (array_keys($all) as $key) {
             if (preg_match('/^base\.attributes\.paths\.\d+$/', (string) $key)) {
@@ -555,7 +662,7 @@ class AttributeReader extends AbstractLocalCache
      */
     public static function classAttributesOf(string $class, string $attribute): array
     {
-        $reader = self::hasInstance() ? self::getInstance(false) : null;
+        $reader = self::getInstance(false);
         if ($reader instanceof self) {
             return array_values($reader->getClassAttributes($class, $attribute));
         }
