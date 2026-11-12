@@ -33,6 +33,24 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 
 ### Fixed
 
+- **A container compiled before the reader, the router and the enumerations were left to the compile step boots
+  again.** Production runs its compiled container as it is (without debug Symfony never rebuilds it) and deploys new
+  code over its `var/cache/prod` before `cache:clear`, which boots that container first. With this version and
+  omnibridge/symfony 0fcc078 over a cache compiled by 9b33abb and 3144602, the boot no longer made the reader while
+  the old contracts' locator did not list it: `AttributeReader::getInstance()` answered none, and `cache:clear
+  --env=prod` stopped on "Call to a member function getParameterBag() on null" (`AbstractAttribute`, from
+  `Uploader`'s constructor); routing went through Symfony's own matcher and generator, the old router's options not
+  naming omnibase's. omnibridge/symfony's boot now makes both where the container lacks what the compile step adds
+  (`AttributeReader::NAMES`, `AdvancedRouterPass::PARAMETER`), as before; the enumerations' list already fell back to
+  reading the folders, and the metadata warmer of such a container is DoctrineBundle's, as before. Tests:
+  `StaleContainerTest` (a kernel whose compiled container has those parameters, the reader's locator entry, the
+  router's options and the warmer taken out again: the reader and the router made by the boot, the attributes' bag,
+  a request and a command), `RouterMadeOnDemandTest` (the pass's parameter). Checked in the omnibase harness: the
+  prod cache compiled with 9b33abb and 3144602 mounted over the vendor, then `cache:clear --env=prod`, `about --env=prod`
+  and a request through the kernel on the new code; `cache:warmup --env=prod` on that old container stops on
+  DoctrineBundle's warmer ("must load metadata first") exactly as the old code does, and passes once `cache:clear` has
+  compiled the new one.
+
 - **`cache:warmup` and `cache:clear` without debug no longer stop on DoctrineBundle's metadata warmer** ("must load
   metadata first": the settings read at each command's start and the reader's own warmers load metadata before it).
   omnibridge/symfony puts its own `DoctrineMetadataCacheWarmer` in its place; `DoctrineMetadataWarmupTest` checks

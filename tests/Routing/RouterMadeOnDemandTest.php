@@ -27,6 +27,12 @@ final class RouterMadeOnDemandTest extends KernelTestCase
         $container->register('router.default')->setArguments([null, 'kernel::loadRoutes', ['cache_dir' => '%router.cache_dir%', 'matcher_class' => 'Symfony\Bundle\FrameworkBundle\Routing\RedirectableCompiledUrlMatcher']]);
         (new AdvancedRouterPass())->process($container);
         self::assertSame('Symfony\Bundle\FrameworkBundle\Routing\RedirectableCompiledUrlMatcher', $container->getDefinition('router.default')->getArgument(2)['matcher_class'], 'no omnibase router: Symfony\'s');
+        // Where it named them, the pass says so: a container compiled before it, without the parameter, has the boot
+        // make the router as before (StaleContainerTest).
+        $marked = \defined(AdvancedRouterPass::class.'::PARAMETER');
+        if ($marked) {
+            self::assertFalse($container->hasParameter(AdvancedRouterPass::PARAMETER));
+        }
 
         $container->register('Base\Routing\AdvancedRouter');
         $container->setAlias('advanced_router', 'Base\Routing\AdvancedRouter');
@@ -35,6 +41,9 @@ final class RouterMadeOnDemandTest extends KernelTestCase
         self::assertSame(AdvancedUrlMatcher::class, $options['matcher_class']);
         self::assertSame(AdvancedUrlGenerator::class, $options['generator_class']);
         self::assertSame('%router.cache_dir%', $options['cache_dir'], 'the other options kept');
+        if ($marked) {
+            self::assertTrue($container->getParameter(AdvancedRouterPass::PARAMETER));
+        }
     }
 
     public function testTheRouterIsMadeWhenRoutingFirstNeedsIt(): void
