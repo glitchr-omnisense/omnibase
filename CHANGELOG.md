@@ -6,8 +6,25 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 
 ## [Unreleased]
 
+### Changed
+
+- **The attribute reader is made when first asked, and its attributes are a list compiled with the container.**
+  `AttributeReader::getInstance()` (and `hasInstance()`) answer the reader made last, else the container's, asked
+  through the contracts' registry (`Base\Contract\Runtime`, whose locator lists `Base\Attributes\AttributeReader`
+  now): Doctrine's SQL filters, the attributes and the persistence's scopes reach it so, and omnibridge/symfony's boot
+  no longer makes it - with the router, the entity manager and the rest it is given - for a command or a request that
+  reads no attribute. While the container's reader is being made, what that builds is answered none, as before it was
+  made. `AttributeReader::discover()` gives the attributes of the folders `searchedPaths()` names; the constructor
+  reads that list from the parameter `AttributeReader::NAMES` (`base.attributes.names`) where the host compiled it
+  (omnibridge/symfony's `AttributesPass`, rebuilt in debug when a file of those folders changes), and reads the
+  folders itself otherwise, as before. Tests: `AttributeNamesTest`.
+
 ### Fixed
 
+- **`cache:warmup` and `cache:clear` without debug no longer stop on DoctrineBundle's metadata warmer** ("must load
+  metadata first": the settings read at each command's start and the reader's own warmers load metadata before it).
+  omnibridge/symfony puts its own `DoctrineMetadataCacheWarmer` in its place; `DoctrineMetadataWarmupTest` checks
+  that it writes every entity's metadata once some is loaded, where DoctrineBundle's refuses.
 - **Glitch Art's signature: its detail line no longer lies over the site's footer.** Where it fades in on hover
   (`@media (hover: hover)`), the detail (the address, the time the page took, the site's name or saying) opened on the
   signature's side and overflowed there, over whatever the site sets beside it: on Nakaya's site map, "LOCALHOST:8443
