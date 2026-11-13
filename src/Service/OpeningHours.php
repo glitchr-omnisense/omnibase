@@ -17,7 +17,7 @@ use Symfony\Contracts\Service\ResetInterface;
  * The usual week is the one saved (Base\Entity\Hours\WeekDayHours), else the
  * one configured (base.opening_hours.week); special days
  * (Base\Entity\Hours\SpecialDay) close a date or open it at other hours.
- * Generalised from Nakaya's App\Service\OpeningHours.
+ * Generalised from a shop site's App\Service\OpeningHours.
  *
  * A site with several places asks for one of them: for('store:12'), or
  * for($store), is the same service for that place - its own week

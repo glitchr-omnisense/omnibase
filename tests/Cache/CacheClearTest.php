@@ -11,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * Kept in pools of the application's (filesystem, default clearer), they
  * outlived it: a column added to an entity was "not found" until
  * cache:pool:clear --all (genealogist), a route added "No valid route found"
- * (nakaya).
+ * (a shop site).
  */
 final class CacheClearTest extends KernelTestCase
 {
