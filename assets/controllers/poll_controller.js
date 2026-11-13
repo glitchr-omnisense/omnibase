@@ -3,7 +3,7 @@ import { Controller } from '@hotwired/stimulus';
 /*
  * poll: ask a JSON address every few seconds and say when what it answers
  * changes - a kitchen board waiting for orders, a queue, a status. Generalised
- * from Nakaya's kitchen board (assets/nakaya/kitchen.js).
+ * from a shop site's kitchen board.
  *
  *     <div data-controller="poll"
  *          data-poll-url-value="{{ path('app_kitchen_state') }}"

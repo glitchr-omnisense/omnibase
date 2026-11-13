@@ -77,8 +77,8 @@
     .ga-credits-detail { position: relative; left: -.75rem; width: 0; min-width: 0; flex: none; pointer-events: none; }
     .ga-credits--mirror .ga-credits-detail { left: .75rem; }
     .ga-credits:hover .ga-credits-detail, .ga-credits:focus-within .ga-credits-detail { pointer-events: auto; }
-    /* Its side taken (a column of links beside the signature, as on Nakaya's
-       site map), the detail opens under the signature, or over it at the end
+    /* Its side taken (a column of links beside the signature, as on a shop
+       site's map), the detail opens under the signature, or over it at the end
        of the page, against the signature's own edge: the partial's script
        (data-ga-credits-side) reads which of the three is free when the
        signature is pointed at or focused. Out of the flow, it moves nothing;

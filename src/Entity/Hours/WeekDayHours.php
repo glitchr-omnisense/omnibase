@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * (SpecialDay) override a date.
  *
  * Its own table (hoursWeekDay): an application that still keeps a copy of its
- * own (Nakaya's weekDayHours) is not disturbed; moving onto this one is a
+ * own (a shop site's weekDayHours) is not disturbed; moving onto this one is a
  * RENAME TABLE.
  */
 #[ORM\Entity(repositoryClass: WeekDayHoursRepository::class)]

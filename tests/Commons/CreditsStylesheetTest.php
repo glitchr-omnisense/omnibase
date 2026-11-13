@@ -36,7 +36,7 @@ class CreditsStylesheetTest extends TestCase
     }
 
     /**
-     * Where its side is taken (Nakaya's site map: a column of links on the
+     * Where its side is taken (a shop site's map: a column of links on the
      * signature's left), the detail lay over the site's footer. The partial's
      * script then sets data-ga-credits-side, and the detail opens under or
      * over the signature, out of the flow, against the signature's own edge.
