@@ -29,38 +29,6 @@
             "Tests\\Base\\": "./tests"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/glitchr-omnisense/omnishield.git",
-            "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/glitchr-omnisense/omnishield-akismet.git",
-            "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/glitchr-omnisense/omnishield-altcha.git",
-            "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/glitchr-omnisense/omnishield-disposable.git",
-            "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/glitchr-omnisense/omnisign.git",
-            "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/glitchr-omnisense/omnisign-docuseal.git",
-            "no-api": true
-        }
-    ],
     "require": {
         "php": "^8.4",
         "ext-bcmath": "*",
@@ -76,9 +44,9 @@
         "imagine/imagine": "^1.2",
         "jaybizzle/crawler-detect": "^1.2",
         "league/flysystem": "^3.0",
-        "omnibridge/composer": "1.x-dev",
-        "omnisense/omnibridge": "1.x-dev",
-        "omnisense/omnidrive": "1.x-dev",
+        "omnibridge/composer": "^1.0",
+        "omnisense/omnibridge": "^1.0",
+        "omnisense/omnidrive": "^1.0",
         "psr/cache": "^1.0|^2.0|^3.0",
         "psr/clock": "^1.0",
         "psr/container": "^1.1|^2.0",
@@ -110,9 +78,9 @@
         "glitchr/omnibase": "self.version"
     },
     "suggest": {
-        "omnibridge/symfony": "The core under Symfony: since 5.0 the bundle itself (Omnibridge\\Symfony\\Omnibase\\BaseBundle, registered in config/bundles.php), its configuration (base:), its container extension and compiler passes, the Symfony controllers (their routes imported with `type: omnibase`), the adapters of the host's contracts and the framework packages (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, Form, Routing, HttpKernel, Validator, Cache, Process, Workflow...) (1.x-dev)",
-        "omnibridge/doctrine": "The persistence on Doctrine: since 5.0 the core requires no Doctrine package but doctrine/collections; omnibridge/doctrine brings doctrine/orm and dbal, the DQL functions (beberlei/doctrineextensions, scienta/doctrine-json-functions), the repositories, the mapping and the types of the core's entities (1.x-dev)",
-        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (1.x-dev)",
+        "omnibridge/symfony": "The core under Symfony: since 5.0 the bundle itself (Omnibridge\\Symfony\\Omnibase\\BaseBundle, registered in config/bundles.php), its configuration (base:), its container extension and compiler passes, the Symfony controllers (their routes imported with `type: omnibase`), the adapters of the host's contracts and the framework packages (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, Form, Routing, HttpKernel, Validator, Cache, Process, Workflow...) (^1.1)",
+        "omnibridge/doctrine": "The persistence on Doctrine: since 5.0 the core requires no Doctrine package but doctrine/collections; omnibridge/doctrine brings doctrine/orm and dbal, the DQL functions (beberlei/doctrineextensions, scienta/doctrine-json-functions), the repositories, the mapping and the types of the core's entities (^1.0)",
+        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (^1.0)",
         "symfony/validator": "The validation of the entities' #[Assert\\...] attributes under Symfony (omnibridge/symfony requires it), and its `validators` catalogue (^6.0|^7.0|^8.0)",
         "symfony/http-client": "An HTTP client behind the core's HTTP contract (symfony/http-client-contracts): the currency rates (Trading), the remote classifiers, embeds (^6.0|^7.0|^8.0)",
         "florianv/swap": "The currency rates of Base\\Service\\Trading (^4.0)",
@@ -135,20 +103,20 @@
         "doctrine/doctrine-fixtures-bundle": "demo:reset reloads the fixtures (the demo environment)",
         "dompdf/dompdf": "Base\\Response\\PdfResponse: an HTML page answered as a PDF (^3.0)",
         "symfony/lock": "demo:reset runs under a lock (the demo environment)",
-        "omnisense/omnishield": "Base\\Service\\FormGuard's captcha, address lists and content classifier (the option `guard` of a form, Akismet behind SpamChecker): register Omnishield\\Bridge\\Symfony\\OmnishieldBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-omnisense/omnishield",
+        "omnisense/omnishield": "Base\\Service\\FormGuard's captcha, address lists and content classifier (the option `guard` of a form, Akismet behind SpamChecker): register Omnishield\\Bridge\\Symfony\\OmnishieldBundle",
         "omnishield/altcha": "ALTCHA, the default captcha of FormGuard: a proof of work served and checked by the site, no third party, no cookie, no consent",
         "omnishield/akismet": "Akismet behind Base\\Service\\SpamChecker (base.guard.classifier)",
         "omnishield/disposable": "Disposable e-mail domains refused at sign-up (base.guard.reputation)",
-        "omnisense/omnisign": "Base\\Service\\Signatures: documents signed for any entity (Base\\Entity\\Signature\\Envelope, mapped only with it), the signed file and its evidence kept in the private storage; register Omnisign\\Bridge\\Symfony\\OmnisignBundle; not on Packagist yet - a vcs repository, https://github.com/glitchr-omnisense/omnisign",
+        "omnisense/omnisign": "Base\\Service\\Signatures: documents signed for any entity (Base\\Entity\\Signature\\Envelope, mapped only with it), the signed file and its evidence kept in the private storage; register Omnisign\\Bridge\\Symfony\\OmnisignBundle",
         "omnisign/docuseal": "A DocuSeal instance of one's own: nothing leaves for a third party (omnisign/yousign, omnisign/docusign for the providers)",
-        "omnisense/omniauth": "Signing in under any host (Symfony, Laravel, plain PHP): Base\\Auth\\ fills omniauth's stores on omnibase's tables (the accounts, user.password, the sign-in links of userToken hashed, the e-mailed codes hashed, the backup codes, the trusted devices' version, the identities of userIdentity), Base\\Auth\\Policy is SecurityPolicy on its second-factor rule, Base\\Auth\\Listener\\* listen to its events; nothing is wired without it (1.x-dev)",
-        "omniauth/webauthn": "Passkeys through omniauth: Base\\Auth\\UserPasskeys, the userPasskey table as omniauth/webauthn's records (formerly omniauth/passkey) (1.x-dev)",
-        "omniauth/otp": "Authenticator applications through omniauth, on user.secret (Base\\Auth\\UserTotpSecrets), sealed at rest when omniauth.yaml sets totp.secret_key (formerly omniauth/totp) (1.x-dev)",
-        "omniauth/google": "Google sign-in through omniauth, linked by its subject in userIdentity (Base\\Auth\\UserIdentities; Base\\Auth\\PolicyLinking: never by the address an account with a second factor or an administration role); the providers' mechanics are omnisense/omniauth's own (1.x-dev)",
+        "omnisense/omniauth": "Signing in under any host (Symfony, Laravel, plain PHP): Base\\Auth\\ fills omniauth's stores on omnibase's tables (the accounts, user.password, the sign-in links of userToken hashed, the e-mailed codes hashed, the backup codes, the trusted devices' version, the identities of userIdentity), Base\\Auth\\Policy is SecurityPolicy on its second-factor rule, Base\\Auth\\Listener\\* listen to its events; nothing is wired without it (^1.0)",
+        "omniauth/webauthn": "Passkeys through omniauth: Base\\Auth\\UserPasskeys, the userPasskey table as omniauth/webauthn's records (formerly omniauth/passkey) (^1.0)",
+        "omniauth/otp": "Authenticator applications through omniauth, on user.secret (Base\\Auth\\UserTotpSecrets), sealed at rest when omniauth.yaml sets totp.secret_key (formerly omniauth/totp) (^1.0)",
+        "omniauth/google": "Google sign-in through omniauth, linked by its subject in userIdentity (Base\\Auth\\UserIdentities; Base\\Auth\\PolicyLinking: never by the address an account with a second factor or an administration role); the providers' mechanics are omnisense/omniauth's own (^1.0)",
         "glitchr/backup-manager": "The TimeMachine, the backups of the database and the application to the storages (Base\\Service\\TimeMachine, which extends its Manager, and the commands timemachine:snapshot, timemachine:snapshot:backup, timemachine:snapshot:restore and timemachine:storage); without it, neither the service nor the commands are registered, and base.time_machine is read by nothing (4.0.*-dev)",
-        "omnisense/omnimap": "Maps through omnimap (config/packages/omnimap.yaml): BaseBundle registers omnibridge/symfony's OmnimapExtension where both are installed - the providers, the map cache, omnimap() in Twig, the cache's routes (1.x-dev)",
+        "omnisense/omnimap": "Maps through omnimap (config/packages/omnimap.yaml): BaseBundle registers omnibridge/symfony's OmnimapExtension where both are installed - the providers, the map cache, omnimap() in Twig, the cache's routes (^1.0)",
         "twig/twig": "Twig as the application's view engine (since step F4 of the plan \"omnibase agnostic\": the view engine is the application's choice). Installed, omnibase's Twig layer is registered - its environment, loader, variables and the extensions of src/Twig (|thumbnail, |wysiwyg, render_locale()...), thin wrappers over the neutral helpers Base\\View\\*, which need no Twig and serve Blade and React as well -, and the core's templates (@Base/...) can be rendered; without it nothing of src/Twig is registered or loaded (^3.0)",
-        "omnibridge/twig": "Twig's generic helpers beside omnibase's (|at, |emoji_only, html_attributes()...: Omnibridge\\Twig\\HelperExtension, registered with the Twig layer); omnibridge/symfony and omnibridge/laravel require it (1.x-dev)",
+        "omnibridge/twig": "Twig's generic helpers beside omnibase's (|at, |emoji_only, html_attributes()...: Omnibridge\\Twig\\HelperExtension, registered with the Twig layer); omnibridge/symfony and omnibridge/laravel require it (^1.0)",
         "twig/intl-extra": "Twig's format_date(), format_number()... in a Twig application's templates; omnibase's |datetime and |format_currency no longer need it (Base\\View\\Dates, Money) (^3.0)",
         "twig/inky-extra": "inky_to_html in the core's e-mail frame (@Base/notifier/email.html.twig) (^3.0)",
         "twig/cssinliner-extra": "inline_css in the core's e-mail frame, and |inline_css_email (MailTwigExtension) (^3.0)",
@@ -170,7 +138,7 @@
         "omniauth/otp": "1.x-dev",
         "omniauth/webauthn": "1.x-dev",
         "omnibridge/doctrine": "1.x-dev",
-        "omnibridge/symfony": "1.x-dev",
+        "omnibridge/symfony": "^1.1",
         "omnibridge/twig": "1.x-dev",
         "omnisense/omniauth": "1.x-dev",
         "omnisense/omnishield": "1.x-dev",
@@ -202,7 +170,6 @@
         "web-auth/webauthn-lib": "^5.3",
         "web-auth/webauthn-symfony-bundle": "^5.3"
     },
-    "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
@@ -259,7 +226,7 @@
             }
         },
         "branch-alias": {
-            "dev-5.x": "5.0.x-dev"
+            "dev-5.x": "5.1.x-dev"
         }
     }
 }

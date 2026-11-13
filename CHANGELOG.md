@@ -6,6 +6,8 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 
 ## [Unreleased]
 
+## [5.1.0] — 2026-11-13
+
 ### Added
 
 - **Glitch Art's signature: `open: true` shows its detail line always, in the flow.** A footer that lays the detail
@@ -20,6 +22,11 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 
 ### Changed
 
+- **Installs with the default minimum-stability.** `omnibridge/composer`, `omnisense/omnibridge` and
+  `omnisense/omnidrive` are required as `^1.0` (they were `1.x-dev`, which only a project with `minimum-stability:
+  dev` could install), and the root composer.json no longer sets `minimum-stability: dev` nor lists vcs repositories
+  (omnishield and omnisign are on Packagist). The suite's `omnibridge/symfony` is `^1.1`: `RouterMadeOnDemandTest`
+  reads `AdvancedRouterPass::PARAMETER`, which 1.1.0 brings.
 - **The attribute reader is made when first asked, and its attributes are a list compiled with the container.**
   `AttributeReader::getInstance()` (and `hasInstance()`) answer the reader made last, else the container's, asked
   through the contracts' registry (`Base\Contract\Runtime`, whose locator lists `Base\Attributes\AttributeReader`

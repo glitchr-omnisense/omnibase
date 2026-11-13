@@ -75,7 +75,12 @@ class SuggestedBundlesTest extends KernelTestCase
             $this->assertArrayHasKey($package, $composer['suggest'], $package.' is suggested');
             $this->assertArrayHasKey($package, $composer['require-dev'], $package.' is there for the core\'s own suite');
         }
-        $this->assertSame('5.0.x-dev', $composer['extra']['branch-alias']['dev-5.x']);
+        $this->assertSame('5.1.x-dev', $composer['extra']['branch-alias']['dev-5.x']);
+        // Since 5.1 the core installs with the default minimum-stability: every requirement is a stable version.
+        $this->assertArrayNotHasKey('minimum-stability', $composer);
+        foreach ($composer['require'] as $package => $constraint) {
+            $this->assertStringNotContainsString('dev', $constraint, $package.' is required as a stable version');
+        }
     }
 
     public function testTheUserProviderNamesNoInterfaceOfHwi(): void

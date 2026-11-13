@@ -282,10 +282,20 @@ function install_bare_vendor(string $core, bool $alone = false): int
     // omnibridge/doctrine as checked out beside the core (the harness's compose.checkouts.yml mounts it
     // over the application's vendor): the core's Doctrine classes live there since the plan "omnibase
     // agnostic"'s step F3, and what is measured is the code being worked on, not the last release.
+    // A checkout is presented as the version the core requires when that is one (1.x-dev), else as its own
+    // branch alias (1.x-dev for ^1.0, since 5.1 requires stable versions): a dev version, which the stability
+    // below lets in - the core's composer.json no longer sets minimum-stability: dev since 5.1.
     foreach (['omnibridge/doctrine', 'omnisense/omnibridge'] as $package) {
         $checkout = dirname($core, 2).'/'.$package;
         if ('vendor' === basename(dirname($core, 2)) && is_file($checkout.'/composer.json') && is_dir($checkout.'/.git')) {
-            $composer['repositories'][] = ['type' => 'path', 'url' => $checkout, 'options' => ['symlink' => true, 'versions' => [$package => $composer['require'][$package] ?? 'dev-main']]];
+            $presented = $composer['require'][$package] ?? 'dev-main';
+            if (preg_match('/[\^~*|<>, ]/', $presented)) {
+                $own = json_decode((string) file_get_contents($checkout.'/composer.json'), true);
+                $presented = array_values($own['extra']['branch-alias'] ?? [])[0] ?? 'dev-main';
+            }
+            $composer['repositories'][] = ['type' => 'path', 'url' => $checkout, 'options' => ['symlink' => true, 'versions' => [$package => $presented]]];
+            $composer['minimum-stability'] = 'dev';
+            $composer['prefer-stable'] = true;
         }
     }
     $json = json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)."\n";

@@ -39,34 +39,45 @@ The suites run there in the test environment on a fresh SQLite database: see
 
 The package is resolved from Packagist (repository: https://github.com/glitchr-omnisense/omnibase).
 
-**Symfony** (4.0, branch `4.x`): the core and the framework packages, which `omnibridge/symfony`
+The core alone, under any PHP host (5.x: no framework, no persistence, no view engine imposed):
+
+```bash
+composer require omnisense/omnibase
+```
+
+**Symfony** (6, 7 or 8): the core and the framework packages, which `omnibridge/symfony`
 carries (FrameworkBundle, SecurityBundle, TwigBundle, Form...; DoctrineBundle and MonologBundle are its suggestions),
 then the bundles your `config/bundles.php` registers - the core suggests them, and works with
 all of them:
 
 ```bash
-composer require omnisense/omnibase:4.0.*-dev omnibridge/symfony:1.x-dev
-composer require doctrine/doctrine-bundle omnibridge/doctrine:1.x-dev symfony/monolog-bundle \
+composer require omnisense/omnibase omnibridge/symfony
+composer require doctrine/doctrine-bundle omnibridge/doctrine symfony/monolog-bundle \
     scheb/2fa league/flysystem-bundle hwi/oauth-bundle web-auth/webauthn-symfony-bundle \
     api-platform/symfony api-platform/doctrine-orm symfony/webpack-encore-bundle symfony/ux-twig-component \
-    glitchr/ux-google glitchr/well-known nelmio/cors-bundle nelmio/security-bundle
+    glitchr/ux-google:1.0.*-dev glitchr/well-known:1.0.*-dev nelmio/cors-bundle nelmio/security-bundle
 ```
 
 Without any one of them the container still compiles: since step C7b `Base\Entity\User`
 declares Security's and scheb/2fa's interfaces where they are installed (`Base\Contract\SecurityUser`,
 `TwoFactorUser`), and `Base\Service\Flysystem` is the core's own class, on omnibase's local storages
 without league/flysystem-bundle. An application coming from 3.x adds `omnibridge/symfony` and
-the bundles it did not require itself, and updates those alone. The 3.x branch
+the bundles it did not require itself, and updates those alone. An application on 4.x keeps
+`omnisense/omnibase:4.0.*-dev`; from 4.x to 5.x, see [UPGRADE-5.0.md](UPGRADE-5.0.md). The 3.x branch
 (`omnisense/omnibase:3.0.*-dev`) still requires the framework itself. See
 [docs/20-architecture/packages.md](docs/20-architecture/packages.md).
 
-**Laravel**: later, with `omnibridge/laravel`, which fills the core's contracts with Laravel's
-services; no Symfony framework package is installed then.
+**Laravel** (12 or 13): `omnibridge/laravel` fills the core's contracts with Laravel's services; no Symfony
+framework package is installed then:
 
-Enable in `config/bundles.php` (Flex usually does it):
+```bash
+composer require omnisense/omnibase omnibridge/laravel
+```
+
+Under Symfony, enable in `config/bundles.php` (Flex usually does it):
 
 ```php
-Base\BaseBundle::class => ['all' => true],
+Omnibridge\Symfony\Omnibase\BaseBundle::class => ['all' => true],
 ```
 
 Bundle configuration lives under the `base:` key; the tree is defined in
