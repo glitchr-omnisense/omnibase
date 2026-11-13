@@ -10,7 +10,7 @@ use Twig\TwigFunction;
 use Base\View\Widgets;
 
 /**
- * @author Marco Meyer <marco.meyerconde@gmail.com>
+ * @author Marco Meyer <37673095+meiyasan@users.noreply.github.com>
  */
 final class WidgetTwigExtension extends AbstractExtension
 {

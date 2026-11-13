@@ -59,7 +59,7 @@ class RedirectionTest extends TestCase
 
     public function testATargetMayBeAnotherSite(): void
     {
-        $this->assertSame('https://pano-group.com/charte', (new Redirection('/charte', 'https://pano-group.com/charte', Redirection::TEMPORARY))->getTarget());
+        $this->assertSame('https://example.org/charte', (new Redirection('/charte', 'https://example.org/charte', Redirection::TEMPORARY))->getTarget());
     }
 
     public function testOnly301And302(): void

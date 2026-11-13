@@ -7,7 +7,7 @@ use Twig\TwigFunction;
 use Base\View\Formats;
 
 /**
- * @author Marco Meyer <marco.meyerconde@gmail.com>
+ * @author Marco Meyer <37673095+meiyasan@users.noreply.github.com>
  */
 final class ClassTwigExtension extends AbstractExtension
 {
