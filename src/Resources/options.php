@@ -288,7 +288,7 @@ return [
             ]),
             'same_as' => $strings([], 'The business elsewhere: its Facebook, Instagram, LinkedIn pages.'),
             'area_served' => $strings([]),
-            'extra' => ['type' => 'mixed', 'default' => [], 'info' => 'Any other schema.org property, merged as it is: {parentOrganization: {"@type": Organization, name: PANO}}.'],
+            'extra' => ['type' => 'mixed', 'default' => [], 'info' => 'Any other schema.org property, merged as it is: {parentOrganization: {"@type": Organization, name: Exemple Groupe}}.'],
         ]),
 
         // The forms' guard (Base\Service\FormGuard, the option `guard` of a form; docs/20-architecture/guard.md).

@@ -563,7 +563,7 @@ base:
         same_as:              []
         area_served:          []
 
-        # Any other schema.org property, merged as it is: {parentOrganization: {"@type": Organization, name: PANO}}.
+        # Any other schema.org property, merged as it is: {parentOrganization: {"@type": Organization, name: Exemple Groupe}}.
         extra:                []
     guard:
 
