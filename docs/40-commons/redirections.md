@@ -18,7 +18,7 @@ $this->redirections->add('/produit/enseigne-lumineuse/', '/savoir-faire/enseigne
 $this->redirections->add('/soldes', '/boutique', Redirection::TEMPORARY);                    // 302
 $this->redirections->add('/?p=123', '/actualites/ouverture');                                // a WordPress address
 $this->redirections->add('/categorie-produit/*', '/savoir-faire/*');                         // everything beneath
-$this->redirections->add('/charte', 'https://pano-group.com/charte', flush: false);          // another site; flushed by the caller
+$this->redirections->add('/charte', 'https://example.org/charte', flush: false);          // another site; flushed by the caller
 ```
 
 ## When

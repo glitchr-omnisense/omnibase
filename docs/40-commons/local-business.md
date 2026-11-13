@@ -15,7 +15,7 @@ hours - the days off too - from there.
 ```
 
 ```html
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://soifdepub.com/#business","name":"PANO Strasbourg","url":"https://soifdepub.com/","telephone":"03 55 40 13 81","address":{"@type":"PostalAddress","streetAddress":"1 rue des Exemples","postalCode":"67300","addressLocality":"Schiltigheim","addressCountry":"FR"},"openingHoursSpecification":[…],"specialOpeningHoursSpecification":[…]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://example.com/#business","name":"Atelier Exemple","url":"https://example.com/","telephone":"03 00 00 00 01","address":{"@type":"PostalAddress","streetAddress":"1 rue des Exemples","postalCode":"67000","addressLocality":"Strasbourg","addressCountry":"FR"},"openingHoursSpecification":[…],"specialOpeningHoursSpecification":[…]}</script>
 ```
 
 ## Where each property comes from
@@ -45,12 +45,12 @@ base:
     local_business:
         type: LocalBusiness
         image: assets/ico/android-chrome-512x512.png
-        address: { street: '1 rue des Exemples', postal_code: '67300', locality: Schiltigheim, country: FR }
+        address: { street: '1 rue des Exemples', postal_code: '67000', locality: Strasbourg, country: FR }
         geo: { latitude: 48.6071, longitude: 7.7399 }
-        same_as: ['https://www.facebook.com/panostrasbourg/', 'https://www.instagram.com/pano_strasbourg']
-        area_served: [Strasbourg, Schiltigheim, Bas-Rhin]
+        same_as: ['https://www.facebook.com/atelierexemple/', 'https://www.instagram.com/atelierexemple']
+        area_served: [Strasbourg, Bas-Rhin]
         extra:
-            parentOrganization: { '@type': Organization, name: PANO, url: 'https://pano-group.com' }
+            parentOrganization: { '@type': Organization, name: Exemple Groupe, url: 'https://example.org' }
 ```
 
 omnibase/admin's settings page has the phone and the address

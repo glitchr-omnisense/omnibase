@@ -61,7 +61,7 @@ base:
             3: [['09:00', '13:00'], ['16:30', '19:00']]
             6: [['09:00', '18:00']]
     local_business:                  # see LocalBusiness JSON-LD
-        address: { street: '1 rue des Exemples', postal_code: '67300', locality: Schiltigheim, country: FR }
+        address: { street: '1 rue des Exemples', postal_code: '67000', locality: Strasbourg, country: FR }
     comments:
         min_delay: 4                 # seconds: a form sent faster is a robot
         flood_interval: 60           # seconds between two comments from one address
