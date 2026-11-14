@@ -6,6 +6,7 @@ use Base\Auth\EnrolmentPrompt;
 use Base\Service\SecurityPolicy;
 use Base\Service\SettingBagInterface;
 use PHPUnit\Framework\TestCase;
+use Omnibridge\Symfony\Contract\HierarchyRoles;
 use Symfony\Component\Security\Core\Role\RoleHierarchy;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 
@@ -22,7 +23,7 @@ class EnrolmentPromptTest extends TestCase
         $bag = $this->createStub(SettingBagInterface::class);
         $bag->method('getScalar')->willReturn(null);
 
-        return new EnrolmentPrompt(new SecurityPolicy($bag, new RoleHierarchy(['ROLE_STAFF' => ['ROLE_USER']]), $requiredRoles, $postpone));
+        return new EnrolmentPrompt(new SecurityPolicy($bag, new HierarchyRoles(new RoleHierarchy(['ROLE_STAFF' => ['ROLE_USER']])), $requiredRoles, $postpone));
     }
 
     public function testOnlyAPlainPageIsInterrupted(): void

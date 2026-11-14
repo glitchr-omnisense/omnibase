@@ -2,10 +2,8 @@
 
 namespace Base\Notifier\Channel;
 
-use Base\Http\RequestsOf;
 use Omnibridge\Contract\Requests;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Notifier\Channel\ChannelInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
@@ -20,10 +18,9 @@ final class BrowserPlusChannel implements ChannelInterface
 {
     private ?Requests $requests;
 
-    /** @param Requests|RequestStack|null $requests Symfony's RequestStack is deprecated (until 6.0) */
-    public function __construct(#[Autowire(service: Requests::class)] Requests|RequestStack|null $requests)
+    public function __construct(#[Autowire(service: Requests::class)] ?Requests $requests)
     {
-        $this->requests = RequestsOf::of($requests);
+        $this->requests = $requests;
     }
 
     public function supports(Notification $notification, RecipientInterface $recipient): bool

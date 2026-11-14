@@ -4,7 +4,7 @@ namespace Tests\Base\Attributes;
 
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
-use Base\Service\ParameterBag;
+use Omnibridge\Symfony\Omnibase\Service\ParameterBag;
 use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface as SymfonyParameterBagInterface;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface as 
  * The attributes read the parameters through omnibase's contract,
  * Base\Service\ParameterBagInterface, no longer DependencyInjection's (plan
  * "omnibase agnostique", step C3c). The contract extends nothing of the
- * framework; Base\Service\ParameterBag is its Symfony adapter, and still
+ * framework; Omnibridge\Symfony\Omnibase\Service\ParameterBag is its Symfony adapter, and still
  * DependencyInjection's bag for the code typing it; the reader is given
  * `parameter_bag` (HotParameterBag over it, C9).
  */
@@ -26,8 +26,8 @@ final class AttributeParameterBagTest extends KernelTestCase
             self::assertTrue(method_exists(ParameterBagInterface::class, $method), $method);
         }
 
-        self::assertTrue(is_subclass_of(ParameterBag::class, ParameterBagInterface::class));
-        self::assertTrue(is_subclass_of(ParameterBag::class, SymfonyParameterBagInterface::class));
+        self::assertContains(ParameterBagInterface::class, class_implements(ParameterBag::class));
+        self::assertContains(SymfonyParameterBagInterface::class, class_implements(ParameterBag::class));
 
         $type = (new \ReflectionMethod(AbstractAttribute::class, 'getParameterBag'))->getReturnType();
         self::assertSame(ParameterBagInterface::class, $type instanceof \ReflectionNamedType ? $type->getName() : null);

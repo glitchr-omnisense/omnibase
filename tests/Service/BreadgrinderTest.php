@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service;
 
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\Breadgrinder;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;

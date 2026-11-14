@@ -36,10 +36,10 @@ pass: name `Omnibridge\Contract\*`.
 | `Omnibridge\Contract\Sessions` (formerly `Base\Contract\Sessions`) (step C4b) | a user signed out when it is the visitor signed in (`signOut()`), false otherwise | omnibridge/symfony's `Omnibridge\Symfony\Contract\SecuritySessions` (formerly `Base\Bridge\Symfony\SecuritySessions`): the token storage, the `REMEMBERME` cookie on the path and the site's domain |
 | `Omnibridge\Contract\Locales` (formerly `Base\Contract\Locales`) | the current locale, the default, the available ones (`fr-FR`) | `Base\Bridge\Symfony\LocalizerLocales`: the `localizer` |
 | `Omnibridge\Contract\Files` (formerly `Base\Contract\Files`) | a stored file's public path and web address, its local path, whether its storage is remote | `Base\Bridge\Symfony\FlysystemFiles`: `flysystem`, and the image route for a remote storage, as the uploader resolves it |
-| `Base\Contract\Media` (step C4b) | the image route for a stored image: the extension it is served with, its obfuscated `data`, the route's address | `Base\Bridge\Symfony\ServiceMedia`: `MediaService` (`getExtension()`, `obfuscate()`, `generate()`) |
+| `Base\Contract\Media` (step C4b) | the image route for a stored image: the extension it is served with, its obfuscated `data`, the route's address | `Omnibridge\Symfony\Omnibase\ServiceMedia`: `MediaService` (`getExtension()`, `obfuscate()`, `generate()`) |
 | `Base\Contract\MediaRouter` (audit R6) | what the media rule asks a router: a named route's address, an address's route and parameters, its name, a public file's address, an address as it is - `FileService`, `MediaService` and `Base\Service\ImageRoute` (the image route's answers, `ROUTES`) take it | `advanced_router` (`AdvancedRouterInterface` extends it); omnibridge/laravel's over Laravel's router |
-| `Base\Contract\Pictures` (step C5) | an image's address at a size, what `\|picture` answers | `Base\Bridge\Symfony\MediaPictures`: `CommonsTwigExtension::picture()` (MediaService's thumbnails) |
-| `Base\Contract\Texts` (step C5) | a stored text rendered (Editor.js or HTML), its table of contents, whether it is Editor.js | `Base\Bridge\Symfony\WysiwygTexts`: the pipeline of `\|wysiwyg` and `\|wysiwyg_toc` |
+| `Base\Contract\Pictures` (step C5) | an image's address at a size, what `\|picture` answers | `Omnibridge\Symfony\Omnibase\MediaPictures`: `CommonsTwigExtension::picture()` (MediaService's thumbnails) |
+| `Base\Contract\Texts` (step C5) | a stored text rendered (Editor.js or HTML), its table of contents, whether it is Editor.js | `Omnibridge\Symfony\Omnibase\WysiwygTexts`: the pipeline of `\|wysiwyg` and `\|wysiwyg_toc` |
 | `Omnibridge\Contract\Tokens` (formerly `Base\Contract\Tokens`) (step C5) | the token a form carries for an intent (`csrf()`), what a screen's actions send back | omnibridge/symfony's `Omnibridge\Symfony\Contract\CsrfTokens` (formerly `Base\Bridge\Symfony\CsrfTokens`): the CSRF token manager - Twig's `csrf_token()` |
 | `Psr\Clock\ClockInterface` (PSR-20) | `now()` | the framework's `clock` (symfony/clock); the machine's (`Omnibridge\SystemClock`) when there is none |
 | `Psr\EventDispatcher\EventDispatcherInterface` (PSR-14) | `dispatch()` | `event_dispatcher` |
@@ -138,10 +138,10 @@ They moved to `Base\Traits\FrameworkAccessorsTrait`, which BaseTrait still uses:
 same null where the host has no such service, and an `E_USER_DEPRECATED` on each call naming
 what to call instead (`Link::to()` for `getRouter()->generate()`, the unit of work and the
 repositories for Doctrine's, `Runtime::access()` / `::sessions()` / `::routes()` for the
-security and request ones, `Omnibridge\Contract\Views` for Twig). They are removed with the
-former names at 6.0, after the sites have moved (step S). The core's host code - BaseService,
+security and request ones, `Omnibridge\Contract\Views` for Twig). They were removed with the
+former names at 6.0, after the sites had moved (step S). The core's host code - BaseService,
 the validators, `EditorController`, `Notification`'s mails until they render through Views
-(F5a) - asks the same services of `Base\Bridge\Symfony\FrameworkLocator`, without the
+(F5a) - asks the same services of `Omnibridge\Symfony\Omnibase\FrameworkLocator`, without the
 deprecation; it moves with the host code (Doctrine's part at F3, Symfony's at F5c). The bundles,
 which still accept the core 3.x, call no FrameworkLocator: their entities link through `Link::to()`
 (in 3.x too), and marketplace's `Product` and `Review::__autocomplete()` keep the deprecated
@@ -198,7 +198,7 @@ are one object (`ParameterBagServicesTest`). Elsewhere:
 
 `Base\Service\SettingBag` (the settings themselves) keeps its snapshot in a PSR-6 pool
 (`Psr\Cache\CacheItemPoolInterface`, no longer Symfony's `CacheInterface`); its cache warmer
-is `Base\Bridge\Symfony\SettingBagWarmer`. It is in the Foundation: Doctrine and psr/cache.
+is `Omnibridge\Symfony\Omnibase\SettingBagWarmer`. It is in the Foundation: Doctrine and psr/cache.
 
 ## The registry
 
@@ -294,7 +294,7 @@ it was and compares both paths with it.
 
 A controller hands a template and a view model (`Base\Screen\View`: template,
 `Base\Screen\Screen`, the React component's name, the status) to
-`Base\Bridge\Symfony\ScreenResponder` - Symfony's adapter of the framework-free
+`Omnibridge\Symfony\Omnibase\ScreenResponder` - Symfony's adapter of the framework-free
 `Base\Screen\Negotiation` (step R10; omnibridge/laravel's `Screen\Responder` is
 Laravel's), which also answers what an action written once for every host hands back:
 a `Template` (its data in JSON too when it allows it), `Json` (its templates rendered),

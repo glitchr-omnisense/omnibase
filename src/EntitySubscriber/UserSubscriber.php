@@ -8,7 +8,6 @@ use Base\EntityDispatcher\Event\UserEvent;
 use Base\Notifier\Notifier;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Omnibridge\Contract\Access;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Service\ResetInterface;
 
@@ -30,13 +29,10 @@ class UserSubscriber implements EventSubscriberInterface, ResetInterface
     /** @var list<Token> the approval requests to revoke at the next flush */
     private array $revoke = [];
 
-    /**
-     * @param Access|TokenStorageInterface $access who is signed in (plan "omnibase agnostic", F5c); Symfony's
-     *                                             token storage is deprecated (until 6.0)
-     */
+    /** @param Access $access who is signed in (plan "omnibase agnostic", F5c) */
     public function __construct(
         protected Notifier $notifier,
-        #[Autowire(service: Access::class)] protected Access|TokenStorageInterface $access,
+        #[Autowire(service: Access::class)] protected Access $access,
     ) {
     }
 
@@ -87,7 +83,7 @@ class UserSubscriber implements EventSubscriberInterface, ResetInterface
     /** Whether someone other than $user is signed in. */
     private function byAnotherUser(object $user): bool
     {
-        $signedIn = $this->access instanceof Access ? $this->access->getUser() : $this->access->getToken()?->getUser();
+        $signedIn = $this->access->getUser();
 
         return null !== $signedIn && $signedIn !== $user;
     }

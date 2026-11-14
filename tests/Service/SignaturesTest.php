@@ -60,7 +60,7 @@ final class SignaturesTest extends KernelTestCase
         });
         $registry = new Registry([new DocusealGatewayFactory($http)], ['contracts' => ['factory' => 'docuseal', 'options' => ['url' => 'http://localhost:13300/api', 'api_key' => 'k', 'webhook_secret' => 'whsec_test']]]);
 
-        return new Signatures($this->em, static::getContainer()->get('flysystem'), $registry, $dispatcher, null, null, null, static::getContainer()->getParameter('base.uploader.storage'));
+        return new Signatures(\Base\Database\UnitOfWorks::of($this->em), static::getContainer()->get('flysystem'), $registry, $dispatcher, null, null, null, static::getContainer()->getParameter('base.uploader.storage'));
     }
 
     private function member(): object

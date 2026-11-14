@@ -7,7 +7,6 @@ use Omnibridge\Contract\ViewSources;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\File;
-use Twig\Environment;
 
 /**
  * The `email` an e-mail's template is given where Symfony's Twig bridge is
@@ -21,10 +20,9 @@ final class InlineImages
 {
     private readonly Views $views;
 
-    /** @param Views|Environment $views Twig's environment is deprecated (until 6.0) */
-    public function __construct(Views|Environment $views, private readonly Email $message)
+    public function __construct(Views $views, private readonly Email $message)
     {
-        $this->views = EmailComposer::views($views);
+        $this->views = $views;
     }
 
     public function image(string $image, ?string $contentType = null, ?string $name = null): string

@@ -8,19 +8,15 @@ use Base\Database\Repository\Repositories;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
- * omnisense/omnibridge's UnitOfWork for what a service of the core was given
- * (plan "omnibase agnostic", step F2d): the unit of work itself, or a
- * persistence's own manager - Doctrine's entity manager, which the hosts and
- * the applications still hand to the core's services (omnibridge/laravel, the
- * tests, a bundle's own wiring) - adapted once.
+ * omnisense/omnibridge's UnitOfWork for a persistence's own manager (plan
+ * "omnibase agnostic", step F2d): the unit of work itself, or Doctrine's entity
+ * manager adapted once - what a host or a test hands to the core's services.
  *
  * And, from a unit of work, the parts of its persistence registered in
  * Backends: its repositories by class (Repositories), its entities' shapes
  * (EntityShapes), and what only that persistence does (Base\Database\Backend\*).
- * A service of the core takes a UnitOfWork and asks nothing else of the ORM.
- *
- * The entity manager accepted in place of a unit of work is deprecated: it goes
- * at 6.0, with the Doctrine-typed hooks.
+ * A service of the core takes a UnitOfWork and asks nothing else of the ORM; since
+ * 6.0 none accepts the entity manager in its place: of() is what makes one of it.
  */
 final class UnitOfWorks
 {

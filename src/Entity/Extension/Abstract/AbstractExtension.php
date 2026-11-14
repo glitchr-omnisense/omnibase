@@ -6,7 +6,7 @@ use Base\Database\Attribute\Blameable;
 use Base\Database\Attribute\Timestamp;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\User;
-use Base\Repository\Extension\Abstract\AbstractExtensionRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Extension\Abstract\AbstractExtensionRepository;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Locator;
 use Base\Traits\BaseTrait;

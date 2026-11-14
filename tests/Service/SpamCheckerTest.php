@@ -6,7 +6,7 @@ use Base\Entity\Thread\Comment;
 use Base\Enum\CommentState;
 use Base\Enum\SpamScore;
 use Base\Form\Model\CommentModel;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\FormGuard;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
@@ -55,7 +55,7 @@ class SpamCheckerTest extends TestCase
         $router = $this->createMock(AdvancedRouterInterface::class);
         $router->method('getUrlIndex')->willReturn('/');
 
-        return new SpamChecker($requests, $settings, $parameters, $translator, $noClient ? null : ($http ?? new MockHttpClient()), false, new FormGuard('secret', $guard, $registry), $router);
+        return new SpamChecker(new \Omnibridge\Symfony\Contract\StackRequests($requests), $settings, $parameters, $translator, $noClient ? null : ($http ?? new MockHttpClient()), false, new FormGuard('secret', $guard, $registry), $router);
     }
 
     private function comment(string $text = 'Un commentaire.'): CommentModel

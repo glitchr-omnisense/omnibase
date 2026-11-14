@@ -3,8 +3,8 @@
 namespace Tests\Base\Database\Type;
 
 use Base\Database\Type\Utc;
-use Base\Database\Type\UtcDateTimeImmutableType;
-use Base\Database\Type\UtcDateTimeType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Types\DateTimeImmutableType;

@@ -4,7 +4,6 @@ namespace Base\Demo;
 
 use Base\Database\UnitOfWorks;
 use Base\Entity\User\Group;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -22,8 +21,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * flushed here - the fixture does.
  *
  * Read and written through omnisense/omnibridge's unit of work, the persistence chosen's (plan "omnibase agnostic",
- * step F7d-3: on Eloquent, the account a one-click sign-in gives is the one its connections are written for), or
- * through Doctrine's registry (deprecated until 6.0); a fixture's ObjectManager given to a call is used as it is.
+ * step F7d-3: on Eloquent, the account a one-click sign-in gives is the one its connections are written for); a
+ * fixture's ObjectManager given to a call is used as it is.
  */
 class DemoAccountFactory
 {
@@ -36,7 +35,7 @@ class DemoAccountFactory
     /** @param class-string $userClass */
     public function __construct(
         private readonly DemoAccountRegistry $registry,
-        private readonly UnitOfWork|ManagerRegistry $doctrine,
+        private readonly UnitOfWork $doctrine,
         #[Autowire('App\Entity\User')] private readonly string $userClass = 'App\Entity\User',
     ) {
     }
@@ -139,10 +138,10 @@ class DemoAccountFactory
         return $this->groups[$name] = $group;
     }
 
-    /** The fixture's manager when one is given, else the unit of work (or the registry's manager of the users). */
+    /** The fixture's manager when one is given, else the unit of work. */
     private function manager(?ObjectManager $manager): ObjectManager|UnitOfWork
     {
-        return $manager ?? ($this->doctrine instanceof UnitOfWork ? $this->doctrine : $this->doctrine->getManagerForClass($this->userClass));
+        return $manager ?? $this->doctrine;
     }
 
     private function repository(ObjectManager|UnitOfWork $manager, string $class): object

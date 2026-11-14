@@ -6,9 +6,9 @@ use Base\Database\Attribute\DiscriminatorEntry;
 
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
 use Base\Database\Attribute\Cache;
-use Base\Field\Type\CountryType;
+use Omnibridge\Symfony\Omnibase\Field\Type\CountryType;
 
 #[ORM\Entity(repositoryClass: CountryAdapterRepository::class)]
 #[Cache(usage: "NONSTRICT_READ_WRITE", associations: "ALL")]

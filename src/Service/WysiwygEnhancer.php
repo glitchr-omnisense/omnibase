@@ -8,9 +8,7 @@ use Base\Service\Model\Wysiwyg\MentionEnhancerInterface;
 use Base\Service\Model\Wysiwyg\LinkEnhancerInterface;
 use Base\Service\Model\Wysiwyg\SemanticEnhancerInterface;
 use Base\Service\Model\Wysiwyg\MediaEnhancerInterface;
-use Base\View\ViewsAdapter;
 use Omnibridge\Contract\Views;
-use Twig\Environment;
 
 class WysiwygEnhancer implements WysiwygEnhancerInterface
 {
@@ -43,14 +41,14 @@ class WysiwygEnhancer implements WysiwygEnhancerInterface
     protected $mediaEnhancer;
 
     public function __construct(
-        Views|Environment $views,
+        Views $views,
         HeadingEnhancerInterface $headingEnhancer,
         SemanticEnhancerInterface $semanticEnhancer,
         MentionEnhancerInterface $mentionEnhancer,
         LinkEnhancerInterface $linkEnhancer,
         MediaEnhancerInterface $mediaEnhancer)
     {
-        $this->views = ViewsAdapter::of($views);
+        $this->views = $views;
 
         $this->headingEnhancer = $headingEnhancer;
         $this->semanticEnhancer = $semanticEnhancer;

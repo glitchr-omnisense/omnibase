@@ -3,7 +3,7 @@
 namespace Base\Contract;
 
 /*
- * What Base\Repository\UserRepository declares to a framework's security
+ * What Omnibridge\Doctrine\Omnibase\Repository\UserRepository declares to a framework's security
  * (audit "lesringostars face au master plan", R2; the pattern of
  * Base\Contract\SecurityUser, C7b): with symfony/security-core installed,
  * Base\Bridge\Symfony\SecurityUserProvider - Security's user provider and its

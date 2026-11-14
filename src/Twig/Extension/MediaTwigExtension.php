@@ -2,9 +2,9 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Controller\UX\MediaController;
-use Base\Routing\AdvancedRouter;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Controller\UX\MediaController;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\MediaService;
 use Base\Service\Obfuscator;
 use Base\Twig\Environment;

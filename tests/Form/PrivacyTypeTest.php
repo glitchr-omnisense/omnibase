@@ -3,8 +3,8 @@
 namespace Tests\Base\Form;
 
 use Base\Form\Model\ContactModel;
-use Base\Form\Type\ContactType;
-use Base\Form\Type\PrivacyType;
+use Omnibridge\Symfony\Omnibase\Form\Type\ContactType;
+use Omnibridge\Symfony\Omnibase\Form\Type\PrivacyType;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\Validator\Validation;

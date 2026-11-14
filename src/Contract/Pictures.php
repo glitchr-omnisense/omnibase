@@ -9,7 +9,7 @@ namespace Base\Contract;
  * no image.
  *
  * The Foundation's own contract, reached by Runtime::pictures() or given to a
- * screen's builder. Under Symfony, Base\Bridge\Symfony\MediaPictures: the
+ * screen's builder. Under Symfony, Omnibridge\Symfony\Omnibase\MediaPictures: the
  * filter's own answers (MediaService's thumbnails).
  */
 interface Pictures

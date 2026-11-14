@@ -45,7 +45,7 @@
  * 696 after step F3 (2026-11-02): -12, moved to omnibridge/doctrine (a decision of the plan: --strict refuses the
  * bridge) - Base\DatabaseSubscriber\{AttributeSubscriber, IntlSubscriber, InverseCollectionCacheSubscriber,
  * TrackingPolicySubscriber}, Base\Database\Mapping\{ClassMetadataCompletor, ClassMetadataManipulator},
- * Base\Database\Repository\ServiceEntityParser, Base\Database\Schema\Describer, Base\EntitySubscriber\
+ * Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityParser, Omnibridge\Doctrine\Omnibase\Database\Schema\Describer, Base\EntitySubscriber\
  * {ExtensionSubscriber, SettingSubscriber, TrasheableSubscriber, VersionableSubscriber}, which loaded nothing of
  * Doctrine themselves -; +17, the classes that passed --strict and were listed nowhere (see tests/Foundation.php),
  * Base\Database\FormerNames among them.
@@ -104,6 +104,8 @@
  * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
  * 863 after step F7a (2026-11-07, +1): the entities described with no persistence installed, Base\Database\Schema\EntitySchema.
  * 864 after step F7c, second part (2026-11-07, +1): an entity's values on the persistence's shapes, Base\Database\Entity\EntityValues.
+ * 859 at 6.0 (2026-11-14, -5): what only the deprecated paths used, removed with them - Base\Http\RequestsOf,
+ * Base\View\ViewsAdapter, Base\Request\EventDecisions, Base\Traits\{FrameworkAccessorsTrait, CacheClearTrait}.
  */
 
 return [
@@ -613,7 +615,6 @@ return [
     Base\Form\Model\UserEditModel::class,
     Base\Form\Model\UserProfileModel::class,
     Base\Form\Model\UserSearchModel::class,
-    Base\Http\RequestsOf::class,
     Base\Imagine\FilterInterface::class,
     Base\Imagine\Filter\Advanced\SanitizeFilter::class,
     Base\Imagine\Filter\Basic\BackgroundFilter::class,
@@ -702,7 +703,6 @@ return [
     Base\Request\AttachmentDownload::class,
     Base\Request\Decision::class,
     Base\Request\ErrorPage::class,
-    Base\Request\EventDecisions::class,
     Base\Request\LocaleSwitch::class,
     Base\Request\Page::class,
     Base\Request\RouterPage::class,
@@ -934,9 +934,7 @@ return [
     Base\Traits\BagTrait::class,
     Base\Traits\BaseCommonTrait::class,
     Base\Traits\BaseTrait::class,
-    Base\Traits\CacheClearTrait::class,
     Base\Traits\CacheableTrait::class,
-    Base\Traits\FrameworkAccessorsTrait::class,
     Base\Traits\ProxyTrait::class,
     Base\Traits\SimpleCacheTrait::class,
     Base\Traits\SingletonTrait::class,
@@ -968,7 +966,6 @@ return [
     Base\View\Money::class,
     Base\View\Pagination::class,
     Base\View\Pictures::class,
-    Base\View\ViewsAdapter::class,
     Base\View\Widgets::class,
     Base\View\Wysiwyg::class,
 ];

@@ -7,7 +7,7 @@ use Omniauth\Contract\Passwords;
 
 /**
  * The passwords in a demonstration (the `demo` environment, plan "omniauth"
- * AU7): Base\Subscriber\DemoBackOfficeSubscriber's rule where omniauth checks
+ * AU7): Omnibridge\Symfony\Omnibase\Subscriber\DemoBackOfficeSubscriber's rule where omniauth checks
  * the password - the super-administrator signs in with
  * base.demo.superadmin_password, an account that opens the back office with
  * base.demo.admin_password, never with the password the database holds (a

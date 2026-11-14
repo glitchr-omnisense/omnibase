@@ -13,7 +13,7 @@ use Twig\TwigFilter;
  * contract.
  *
  * Framework-free (audit "lesringostars face au master plan", R24): Symfony
- * registers it with Base\Bridge\Symfony\WysiwygTexts (HtmlTwigExtension's
+ * registers it with Omnibridge\Symfony\Omnibase\WysiwygTexts (HtmlTwigExtension's
  * own pipeline, the HTML of before), Laravel (omnibridge/laravel) with its
  * WysiwygTexts on the page's environment - the same filters, under the same
  * names (they were HtmlTwigExtension's).

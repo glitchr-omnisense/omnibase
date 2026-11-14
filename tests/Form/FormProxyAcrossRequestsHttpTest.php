@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Form;
 
-use Base\Form\FormProxy;
-use Base\Form\Type\SecurityLoginType;
-use Base\Form\Type\SecurityRegistrationType;
+use Omnibridge\Symfony\Omnibase\Form\FormProxy;
+use Omnibridge\Symfony\Omnibase\Form\Type\SecurityLoginType;
+use Omnibridge\Symfony\Omnibase\Form\Type\SecurityRegistrationType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Tests\Base\Http\HttpTestTrait;

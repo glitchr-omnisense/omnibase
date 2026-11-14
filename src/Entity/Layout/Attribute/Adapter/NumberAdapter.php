@@ -4,10 +4,10 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
-use Base\Field\Type\NumberType;
+use Omnibridge\Symfony\Omnibase\Field\Type\NumberType;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Adapter\NumberAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\NumberAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: NumberAdapterRepository::class)]

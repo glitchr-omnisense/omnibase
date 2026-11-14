@@ -5,7 +5,7 @@ namespace Base\Service\Model;
 /**
  * The classes a folder of PHP files declares, read from the files: each
  * file's namespace and its name, the interfaces (*Interface.php) and the
- * empty files left out - what Base\Bundle\AbstractBaseBundle::getAllClasses()
+ * empty files left out - what Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle::getAllClasses()
  * answers, without loading the bundle (and with it the framework) to ask.
  */
 final class ClassFinder

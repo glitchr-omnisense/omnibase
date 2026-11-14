@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Contract;
 
-use Base\Bridge\Symfony\FrameworkLocator;
-use Base\Bridge\Symfony\ServiceMedia;
+use Omnibridge\Symfony\Omnibase\FrameworkLocator;
+use Omnibridge\Symfony\Omnibase\ServiceMedia;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\Image;

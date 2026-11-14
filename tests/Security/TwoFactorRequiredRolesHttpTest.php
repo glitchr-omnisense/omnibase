@@ -4,6 +4,7 @@ namespace Tests\Base\Security;
 
 use Base\Service\SecurityPolicy;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Omnibridge\Symfony\Contract\HierarchyRoles;
 use Symfony\Component\Security\Core\Role\RoleHierarchy;
 use Tests\Base\Http\HttpTestTrait;
 
@@ -30,7 +31,7 @@ class TwoFactorRequiredRolesHttpTest extends KernelTestCase
         $container = static::getContainer();
         $container->set(SecurityPolicy::class, new SecurityPolicy(
             $container->get('setting_bag'),
-            new RoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER']]),
+            new HierarchyRoles(new RoleHierarchy(['ROLE_ADMIN' => ['ROLE_USER']])),
             $roles,
             $postpone,
         ));

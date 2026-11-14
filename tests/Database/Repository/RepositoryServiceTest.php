@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Database\Repository;
 
-use Base\Database\Repository\ServiceEntityRepository;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\TextOverride;
-use Base\Repository\Layout\TextOverrideRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\TextOverrideRepository;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

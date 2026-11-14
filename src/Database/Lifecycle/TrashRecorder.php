@@ -14,7 +14,7 @@ use Throwable;
  * F2b): which removal becomes a trashing, and the trash entry the trash listing and the purge read.
  *
  * The persistence's part - the deletion cancelled, the stamp written, what the removal cascaded to
- * rescued, the second-level cache evicted - is Base\EntitySubscriber\TrasheableSubscriber's on
+ * rescued, the second-level cache evicted - is Omnibridge\Doctrine\Omnibase\EntitySubscriber\TrasheableSubscriber's on
  * Doctrine (moves to omnibridge/doctrine at step F3).
  */
 final class TrashRecorder

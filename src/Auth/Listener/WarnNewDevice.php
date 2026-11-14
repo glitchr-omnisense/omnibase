@@ -16,7 +16,7 @@ use Omniauth\Event\SignedIn;
  * sign-in made, TrackConnections running first): the e-mail "a new device"
  * when the administrator turned it on, and - on an account with no second
  * factor that has not declined it - the flag of the session that makes the
- * next page offer, once, to set up a code. Base\Subscriber\NewDeviceSubscriber's
+ * next page offer, once, to set up a code. Omnibridge\Symfony\Omnibase\Subscriber\NewDeviceSubscriber's
  * rule on omniauth's SignedIn event: never at the account's very first
  * sign-in (nothing to compare with), nothing that blocks the sign-in.
  *

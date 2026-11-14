@@ -16,8 +16,8 @@ use UnexpectedValueException;
  * An enumeration of omnibase: its values are its constants (UserRole::ADMIN = "ROLE_ADMIN"), with
  * their icons, colours and texts, grouped by the "_" of their values. A plain PHP class, no type
  * of an ORM (plan "omnibase agnostic", step F2a): a persistence maps a column named by
- * getStaticName() to it - on Doctrine Base\Bridge\Doctrine\EnumTypeAdapter, registered under that
- * name for each enumeration (Base\Bridge\Doctrine\Types), with the values converted by
+ * getStaticName() to it - on Doctrine Omnibridge\Doctrine\Omnibase\EnumTypeAdapter, registered under that
+ * name for each enumeration (Omnibridge\Doctrine\Omnibase\Types), with the values converted by
  * toDatabaseValue() and toPHPValue(). Base\Database\Type\Enumerations knows them by name. Until
  * F2a it was Doctrine's Type itself.
  */

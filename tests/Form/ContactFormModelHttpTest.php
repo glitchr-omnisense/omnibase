@@ -33,7 +33,7 @@ class ContactFormModelHttpTest extends KernelTestCase
         }
     }
 
-    /** Each moved type with a model of the core finds it with `use_model`, by its new name as by its former one. */
+    /** Each moved type with a model of the core finds it with `use_model`, by its name (6.0: no former one any more). */
     public function testTheMovedTypesFindTheirModelsInTheCore(): void
     {
         $forms = static::getContainer()->get('form.factory');
@@ -45,7 +45,7 @@ class ContactFormModelHttpTest extends KernelTestCase
             if (!class_exists($model) || !is_subclass_of($model, FormModelInterface::class)) {
                 continue;
             }
-            foreach (['Omnibridge\\Symfony\\Omnibase\\Form\\Type\\'.$short.'Type', 'Base\\Form\\Type\\'.$short.'Type'] as $type) {
+            foreach (['Omnibridge\\Symfony\\Omnibase\\Form\\Type\\'.$short.'Type'] as $type) {
                 $form = $forms->create($type, null, ['use_model' => true, 'csrf_protection' => false]);
                 self::assertInstanceOf($model, $form->getData(), $type);
             }

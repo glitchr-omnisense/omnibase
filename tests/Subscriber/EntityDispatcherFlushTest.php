@@ -4,11 +4,10 @@ namespace Tests\Base\Subscriber;
 
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\EntityDispatcher\AbstractEventDispatcher;
-use Base\Subscriber\EntityDispatcherFlushSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\EntityDispatcherFlushSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * What the entity dispatchers' listeners changed is flushed when a command
@@ -23,7 +22,7 @@ final class EntityDispatcherFlushTest extends TestCase
 {
     private function dispatcher(EntityManagerInterface $entityManager): AbstractEventDispatcher
     {
-        return new class($this->createStub(EventDispatcherInterface::class), $this->createStub(EntityHydratorInterface::class), $entityManager, new RequestStack()) extends AbstractEventDispatcher {
+        return new class($this->createStub(EventDispatcherInterface::class), $this->createStub(EntityHydratorInterface::class), \Base\Database\UnitOfWorks::of($entityManager)) extends AbstractEventDispatcher {
             public function supports(mixed $subject): bool
             {
                 return false;

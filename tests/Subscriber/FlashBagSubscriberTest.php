@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Subscriber;
 
-use Base\Subscriber\FlashBagSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\FlashBagSubscriber;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

@@ -10,7 +10,7 @@ use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\RouteRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\RouteRepository;
 use Exception;
 use Base\Database\Attribute\Cache;
 

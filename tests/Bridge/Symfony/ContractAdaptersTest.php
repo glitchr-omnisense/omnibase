@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Bridge\Symfony;
 
-use Base\Bridge\Symfony\FrameworkLocator;
-use Base\Bridge\Symfony\FlysystemFiles;
-use Base\Bridge\Symfony\LocalizerLocales;
+use Omnibridge\Symfony\Omnibase\FrameworkLocator;
+use Omnibridge\Symfony\Omnibase\FlysystemFiles;
+use Omnibridge\Symfony\Omnibase\LocalizerLocales;
 use Omnibridge\Symfony\RouterUrls;
 use Omnibridge\Symfony\Contract\SecurityAccess;
 use Omnibridge\Symfony\TranslatorTranslations;

@@ -23,7 +23,7 @@
     {% set text %}
         <div class="sf-toolbar-info-piece">
             <b>Base version</b>
-            <span class="sf-toolbar-status">{{ constant('Base\\BaseBundle::VERSION') }}</span>
+            <span class="sf-toolbar-status">{{ constant('Omnibridge\\Symfony\\Omnibase\\BaseBundle::VERSION') }}</span>
         </div>
     {% endset %}
 
@@ -40,7 +40,7 @@
 
 {% block panel %}
     <h2>EasyAdmin <small>({{ constant('EasyCorp\\Bundle\\EasyAdminBundle\\EasyAdminBundle::VERSION') }})</small></h2>
-    <h2>Base <small>({{ constant('Base\\BaseBundle::VERSION') }})</small></h2>
+    <h2>Base <small>({{ constant('Omnibridge\\Symfony\\Omnibase\\BaseBundle::VERSION') }})</small></h2>
 
     {% if not collector.isEasyAdminRequest %}
         <div class="empty">

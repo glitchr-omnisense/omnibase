@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Subscriber;
 
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Subscriber\RouterSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\RouterSubscriber;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleEvent;

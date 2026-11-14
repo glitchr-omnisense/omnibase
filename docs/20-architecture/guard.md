@@ -126,7 +126,7 @@ groups (the sign-up validates in `new` alone, where a field's constraint is not 
 Symfony's `login_throttling` is the first line (five tries a minute). From
 `base.guard.sign_in_after` failed sign-ins from an address (3, counted for 15 minutes in
 `cache.app`, forgotten after a success), the sign-in form carries the captcha and a sign-in
-without a valid token is refused before its password is checked (`Base\Security\SignInGuard`).
+without a valid token is refused before its password is checked (`Omnibridge\Symfony\Omnibase\Security\SignInGuard`).
 Not the rescue door, not the demonstration's one click; nothing where ux-google's reCAPTCHA is on.
 
 ## Consent

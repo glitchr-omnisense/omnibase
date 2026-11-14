@@ -5,9 +5,11 @@ namespace Base\Database;
 /**
  * The former names of the core's classes that moved to omnibridge/doctrine and
  * omnibridge/symfony (plan "omnibase agnostic", steps F3 and F5b), as data: former =>
- * new, read from src/Resources/former-names.{doctrine,symfony}.php, whose lists
- * src/Resources/former-names.php aliases. For what names a moved class the way it was named before - MetadataSnapshot,
- * which compares the mapping and not where a class lives, and the tests.
+ * new, read from src/Resources/former-names.{doctrine,symfony}.php. Since 6.0 no class
+ * answers to a former name (5.x aliased them): this is the record of the renames, for what
+ * compares a mapping across the move - MetadataSnapshot names a moved class the way it was
+ * named before, so that a snapshot recorded on 5.x still reads the same - and for the tools
+ * that tell a site what to rename (UPGRADE-6.0.md is generated from it).
  */
 final class FormerNames
 {

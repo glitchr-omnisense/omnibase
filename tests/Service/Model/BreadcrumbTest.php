@@ -3,7 +3,7 @@
 namespace Tests\Base\Service\Model;
 
 use Base\Attributes\AttributeReader;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\Model\Breadcrumb;
 use Base\Service\TranslatorInterface;
 use PHPUnit\Framework\TestCase;

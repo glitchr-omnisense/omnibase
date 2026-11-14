@@ -3,7 +3,7 @@
 namespace Tests\Base\Commons;
 
 use Base\Entity\Hours\WeekDayHours;
-use Base\Repository\Hours\WeekDayHoursRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Hours\WeekDayHoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\ReleasesWhatItHolds;

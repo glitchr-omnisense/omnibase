@@ -7,7 +7,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Adapter\DateTimeAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\DateTimeAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: DateTimeAdapterRepository::class)]

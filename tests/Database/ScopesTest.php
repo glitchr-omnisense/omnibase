@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Database;
 
-use Base\Bridge\Doctrine\DoctrineBackend;
-use Base\Bridge\Doctrine\QueryPages;
+use Omnibridge\Doctrine\Omnibase\DoctrineBackend;
+use Omnibridge\Doctrine\Omnibase\QueryPages;
 use Base\Database\Scope\TrashScope;
 use Base\Database\Scope\VaultScope;
 use Base\Database\UnitOfWorks;

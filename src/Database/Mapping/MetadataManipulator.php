@@ -416,9 +416,7 @@ class MetadataManipulator extends AbstractLocalCache
     /** @return list<string> the mapped entities' classes */
     public function getAllClassNames()
     {
-        $shapes = $this->getShapes();
-
-        return method_exists($shapes, 'classes') ? $shapes->classes() : [];
+        return $this->getShapes()->classes();
     }
 
     /** The completor of a mapped class (its attributes' additions: aliases, hierarchy), null for any other. */

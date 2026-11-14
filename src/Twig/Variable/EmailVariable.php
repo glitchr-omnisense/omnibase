@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Variable;
 
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\LauncherInterface;
 use Base\Service\SettingBagInterface;
 

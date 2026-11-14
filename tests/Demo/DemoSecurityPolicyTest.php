@@ -9,6 +9,7 @@ use Base\Demo\DemoMode;
 use Base\Service\SecurityPolicy;
 use Base\Service\SettingBagInterface;
 use PHPUnit\Framework\TestCase;
+use Omnibridge\Symfony\Contract\HierarchyRoles;
 use Symfony\Component\Security\Core\Role\RoleHierarchy;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 
@@ -33,7 +34,7 @@ class DemoSecurityPolicyTest extends TestCase
 
         return new SecurityPolicy(
             $settings,
-            new RoleHierarchy(['ROLE_PRACTITIONER' => ['ROLE_STAFF']]),
+            new HierarchyRoles(new RoleHierarchy(['ROLE_PRACTITIONER' => ['ROLE_STAFF']])),
             ['ROLE_STAFF'],
             false,
             new DemoMode($environment),

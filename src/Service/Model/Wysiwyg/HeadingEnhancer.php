@@ -2,8 +2,6 @@
 
 namespace Base\Service\Model\Wysiwyg;
 
-use Base\Database\UnitOfWorks;
-use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -17,10 +15,9 @@ class HeadingEnhancer implements HeadingEnhancerInterface
      */
     protected SluggerInterface $slugger;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork, SluggerInterface $slugger)
+    public function __construct(UnitOfWork $unitOfWork, SluggerInterface $slugger)
     {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork); 
+        $this->unitOfWork = $unitOfWork; 
         $this->slugger = $slugger;
     }
 

@@ -4,7 +4,7 @@
  * An entity manager built by hand over an omnibase site's database: no kernel,
  * no container, no DoctrineBundle - Composer's autoloader, a DBAL connection,
  * omnibridge/doctrine's EntityManagers::create() and the core's
- * Base\Bridge\Doctrine\Mapping::register() (plan "omnibase agnostique", C6).
+ * Omnibridge\Doctrine\Omnibase\Mapping::register() (plan "omnibase agnostique", C6).
  *
  *   php hand-built.php <options.json> <answer.json>
  *
@@ -17,7 +17,7 @@
  * and the fields asked (a getter's name each, or "getTranslations.getTitle":
  * a getter's collection, then a getter on each item, by its key).
  *
- * The answer: the metadata (Base\Bridge\Doctrine\MetadataSnapshot), the rows
+ * The answer: the metadata (Omnibridge\Doctrine\Omnibase\MetadataSnapshot), the rows
  * read, and the classes of the framework PHP loaded on the way (informative).
  */
 
@@ -28,16 +28,16 @@ $options = json_decode((string) file_get_contents($argv[1]), true, 512, JSON_THR
 require $options['autoload'];
 
 $configuration = new Doctrine\DBAL\Configuration();
-$configuration->setMiddlewares([new Base\Database\Middleware\PlatformMiddleware()]);
-$configuration->setSchemaManagerFactory(new Base\Bridge\Doctrine\SchemaManagerFactory());
+$configuration->setMiddlewares([new Omnibridge\Doctrine\Omnibase\Database\Middleware\PlatformMiddleware()]);
+$configuration->setSchemaManagerFactory(new Omnibridge\Doctrine\Omnibase\SchemaManagerFactory());
 $connection = Doctrine\DBAL\DriverManager::getConnection($options['connection'], $configuration);
 
 // The metadata cached in memory: EntityManagers::create() without a cache takes ORMSetup's default, which
 // is APCu, else a Memcached or a Redis server on 127.0.0.1 - none in an application's web container.
 // The repository factory set before the entity manager exists: its own getRepository() builds the repositories
 // from the registry (omnibridge/doctrine's configure:, 4d2436d).
-$entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $options['paths'], false, new Symfony\Component\Cache\Adapter\ArrayAdapter(), Base\Bridge\Doctrine\Mapping::configure(...));
-$mapping = Base\Bridge\Doctrine\Mapping::register($entityManager, [
+$entityManager = Omnibridge\Doctrine\EntityManagers::create($connection, $options['paths'], false, new Symfony\Component\Cache\Adapter\ArrayAdapter(), Omnibridge\Doctrine\Omnibase\Mapping::configure(...));
+$mapping = Omnibridge\Doctrine\Omnibase\Mapping::register($entityManager, [
     'project_dir' => $options['project_dir'],
     'environment' => $options['environment'] ?? 'prod',
     'cache_dir' => $options['cache_dir'] ?? null,
@@ -48,12 +48,12 @@ $mapping = Base\Bridge\Doctrine\Mapping::register($entityManager, [
 ]);
 
 $answer = ['factory' => $entityManager->getMetadataFactory()::class, 'repository factory' => $entityManager->getConfiguration()->getRepositoryFactory()::class];
-$answer += Base\Bridge\Doctrine\MetadataSnapshot::of($entityManager, $options['classes'] ?? null);
+$answer += Omnibridge\Doctrine\Omnibase\MetadataSnapshot::of($entityManager, $options['classes'] ?? null);
 
 $answer['reads'] = [];
 foreach ($options['reads'] ?? [] as $name => $read) {
     if (isset($read['repository'])) {
-        // A repository's findBy(), built by Base\Bridge\Doctrine\RepositoryFactory through the entity manager's own getRepository().
+        // A repository's findBy(), built by Omnibridge\Doctrine\Omnibase\RepositoryFactory through the entity manager's own getRepository().
         $repository = $entityManager->getRepository($read['repository']);
         $answer['same repository'][$name] = $repository === $mapping->getRepository($read['repository']);
         $answer['repositories'][$name] = $repository::class;

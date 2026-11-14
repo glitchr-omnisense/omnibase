@@ -4,7 +4,7 @@ namespace Tests\Base\Field;
 
 use Base\Entity\Thread\Comment;
 use Base\Enum\CommentState;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;

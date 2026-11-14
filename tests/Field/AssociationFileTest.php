@@ -33,7 +33,7 @@ final class AssociationFileTest extends KernelTestCase
 
     public function testItsOptionsAreTheTypes(): void
     {
-        $options = AssociationFile::options(['class' => 'App\\Entity\\Gallery\\Photo', 'entity_file' => 'image.source', 'form_type' => 'Base\\Field\\Type\\ImageType']);
+        $options = AssociationFile::options(['class' => 'App\\Entity\\Gallery\\Photo', 'entity_file' => 'image.source', 'form_type' => 'Omnibridge\\Symfony\\Omnibase\\Field\\Type\\ImageType']);
         self::assertSame(Upload::IMAGE, AssociationFile::variant($options), 'the upload its form type names, by its former name');
         self::assertSame(Kind::IMAGE, AssociationFile::kind($options));
         self::assertSame('image', AssociationFile::child($options), 'the upload field: the first part of the path');
@@ -44,7 +44,7 @@ final class AssociationFileTest extends KernelTestCase
         self::assertSame(['class' => 'X', 'allow_delete' => true, 'required' => false, 'multiple' => true, 'href' => null, 'max_size' => 10, 'max_files' => null, 'mime_types' => ['image/*'], 'sortable' => true],
             AssociationFile::childOptions(['class' => 'X', 'allow_delete' => true, 'multiple' => true, 'max_size' => 10, 'max_files' => null, 'mime_types' => ['image/*'], 'sortable' => true], false));
 
-        foreach ([['entity_file' => 'source'], ['class' => 'X'], ['class' => 'X', 'entity_file' => 'source', 'form_type' => 'Base\\Field\\Type\\SelectType']] as $refused) {
+        foreach ([['entity_file' => 'source'], ['class' => 'X'], ['class' => 'X', 'entity_file' => 'source', 'form_type' => 'Omnibridge\\Symfony\\Omnibase\\Field\\Type\\SelectType']] as $refused) {
             try {
                 AssociationFile::options($refused);
                 self::fail('refused: '.json_encode($refused));
@@ -105,7 +105,7 @@ final class AssociationFileTest extends KernelTestCase
 
     public function testTheUploadFieldIsDrawnInsideIt(): void
     {
-        $form = FormDefinition::new('crud_form')->setCsrf(false)->add(FormDefinition::field('image', Kind::ASSOCIATION_FILE)->setFormTypeOptions(['class' => \Base\Entity\Layout\Image::class, 'entity_file' => 'source', 'form_type' => 'Base\\Field\\Type\\ImageType', 'mime_types' => ['image/*']]));
+        $form = FormDefinition::new('crud_form')->setCsrf(false)->add(FormDefinition::field('image', Kind::ASSOCIATION_FILE)->setFormTypeOptions(['class' => \Base\Entity\Layout\Image::class, 'entity_file' => 'source', 'form_type' => 'Omnibridge\\Symfony\\Omnibase\\Field\\Type\\ImageType', 'mime_types' => ['image/*']]));
         $view = FormView::of($form);
         self::assertSame('associationfile', $view['image']->vars['widget']);
         self::assertSame('[]', $view['image']->vars['entityId']);

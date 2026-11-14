@@ -25,7 +25,7 @@ return [
         'class' => 'Base\Twig\Variable\SiteVariable',
         'requires' => [
             'Twig\Environment',
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'arguments' => [
@@ -52,7 +52,7 @@ return [
     ],
     [
         'class' => 'Base\Twig\Variable\EmailVariable',
-        'requires' => ['Twig\Environment', 'Base\Routing\AdvancedRouterInterface'],
+        'requires' => ['Twig\Environment', 'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface'],
         'public' => true,
         'arguments' => [1 => '@setting_bag', 2 => '@base.service.launcher'],
         'tags' => ['twig.runtime'],
@@ -71,7 +71,7 @@ return [
         'parent' => 'Base\Twig\Variable\SiteVariable',
         'requires' => [
             'Twig\Environment',
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'arguments' => ['@Base\Routing\AdminUrlGeneratorInterface'],
@@ -83,8 +83,8 @@ return [
         'requires' => [
             'Twig\Environment',
             'Twig\Extension\AbstractExtension',
-            'Base\Routing\AdvancedRouterInterface',
-            'Base\Controller\UX\MediaController',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Controller\UX\MediaController',
         ],
         'public' => true,
         'arguments' => [1 => '@base.service.image'],
@@ -126,7 +126,7 @@ return [
         'requires' => [
             'Twig\Environment',
             'Symfony\Component\HttpFoundation\RequestStack',
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'tags' => ['twig.runtime', ['name' => 'kernel.reset', 'method' => 'reset'], 'twig.tag_renderer'],
@@ -217,7 +217,7 @@ return [
             'Twig\Environment',
             'Twig\Extension\AbstractExtension',
             'Symfony\Component\HttpFoundation\RequestStack',
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'arguments' => ['@twig.html_renderer', '@wysiwyg_enhancer', '@editor_enhancer'],
@@ -293,7 +293,7 @@ return [
     ],
     [
         'class' => 'Base\Twig\Extension\FormTwigExtension',
-        'requires' => ['Twig\Environment', 'Twig\Extension\AbstractExtension', 'Base\Form\FormProxyInterface'],
+        'requires' => ['Twig\Environment', 'Twig\Extension\AbstractExtension', 'Omnibridge\Symfony\Omnibase\Form\FormProxyInterface'],
         'public' => true,
         'tags' => ['twig.extension'],
         'symfony' => ['arguments' => ['@form.proxy']],

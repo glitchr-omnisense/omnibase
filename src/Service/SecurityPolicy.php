@@ -6,7 +6,6 @@ use Base\Demo\DemoAccountRegistry;
 use Base\Demo\DemoMode;
 use Omnibridge\Contract\Roles;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 
 /**
  * The site-wide account-security policy an administrator sets, and the single
@@ -75,12 +74,12 @@ class SecurityPolicy
     /**
      * @param string[] $requiredRoles roles whose holders must have a second factor (base.security.two_factor.required_roles)
      * @param bool     $postpone      whether the enrolment prompt offers a "not now" (base.security.two_factor.postpone)
-     * @param Roles|RoleHierarchyInterface|null $roleHierarchy the host's hierarchy; Security's RoleHierarchyInterface is deprecated (until 6.0)
+     * @param Roles|null $roleHierarchy the host's hierarchy
      * @param (\Closure(string[]): string[])|null $reachableRoles the roles some roles reach, where the host gives no Roles (omnibridge/laravel: config/omniauth.php's role_hierarchy)
      */
     public function __construct(
         private SettingBagInterface $settingBag,
-        #[Autowire(service: Roles::class)] private Roles|RoleHierarchyInterface|null $roleHierarchy = null,
+        #[Autowire(service: Roles::class)] private ?Roles $roleHierarchy = null,
         #[Autowire('%base.security.two_factor.required_roles%')] private array $requiredRoles = [],
         #[Autowire('%base.security.two_factor.postpone%')] private bool $postpone = true,
         private ?DemoMode $demoMode = null,
@@ -192,11 +191,8 @@ class SecurityPolicy
     {
         $roles = array_map(static fn ($role) => $role instanceof \BackedEnum ? (string) $role->value : (string) $role, $user->getRoles());
 
-        if ($this->roleHierarchy instanceof Roles) {
-            return $this->roleHierarchy->reachable($roles);
-        }
         if (null !== $this->roleHierarchy) {
-            return $this->roleHierarchy->getReachableRoleNames($roles);
+            return $this->roleHierarchy->reachable($roles);
         }
         if (null !== $this->reachableRoles) {
             return ($this->reachableRoles)($roles);

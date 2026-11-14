@@ -4,8 +4,8 @@ namespace Tests\Base\Field;
 
 use Base\Entity\Thread\Comment;
 use Base\Enum\CommentState;
-use Base\Field\Type\CurrencyType;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\CurrencyType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Base\Service\Model\SelectInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;

@@ -35,7 +35,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * Without omnisense/omnishield, or without a gateway, the trap and the time
  * alone. The option `guard` of a form asks for it
- * (Base\Form\Extension\FormTypeGuardExtension); CommentGuard is the comment
+ * (Omnibridge\Symfony\Omnibase\Form\Extension\FormTypeGuardExtension); CommentGuard is the comment
  * forms' face of it, with their flood interval.
  *
  * Each answer is a reason, a translation key of the "forms" domain
@@ -379,7 +379,7 @@ class FormGuard
     }
 
     /**
-     * The comment forms' check (Base\Form\Type\CommentType: its `url` trap,
+     * The comment forms' check (Omnibridge\Symfony\Omnibase\Form\Type\CommentType: its `url` trap,
      * its `opened` time; or the fields the option `guard` adds), and a second
      * comment from the same address within $floodInterval. Null when the
      * comment may go on to its classifier.

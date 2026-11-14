@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Bridge\Doctrine;
 
-use Base\Bridge\Doctrine\MappingDriver;
-use Base\Database\Schema\Describer;
+use Omnibridge\Doctrine\Omnibase\MappingDriver;
+use Omnibridge\Doctrine\Omnibase\Database\Schema\Describer;
 use Base\Database\Schema\DiscriminatorRule;
 use Base\Database\Schema\EntitySchema;
 use Base\Database\Schema\TranslationRule;
@@ -36,7 +36,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  *
  * - Doctrine reads it: the entity manager's driver is omnibridge/doctrine's
  *   DeclarationDriver, under omnibase's MappingDriver;
- * - the description Base\Database\Schema\Describer builds without any ORM
+ * - the description Omnibridge\Doctrine\Omnibase\Database\Schema\Describer builds without any ORM
  *   from the entities' folders (their declarations, omnibase's naming and
  *   rules) is the description of what Doctrine maps (MetadataDescription:
  *   its metadata, the tables its SchemaTool creates), entity by entity and

@@ -13,7 +13,6 @@ use Base\Entity\Extension\TrashBall;
 use Base\Repository\Extension\TrashBalls;
 use Closure;
 use DateTimeInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\Backend;
 use Omnibridge\Persistence\UnitOfWork;
 use Throwable;
@@ -34,12 +33,11 @@ class TrashManager
 
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected TrashBalls $trashBalls,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /** The trash by its interface (step R28), where it asked the entity manager's repository. */

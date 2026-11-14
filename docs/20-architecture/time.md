@@ -18,7 +18,7 @@ What a column holds depends on its Doctrine type:
 
 | Type | Column | Written | Read back |
 |---|---|---|---|
-| `datetime`, `datetimetz` | DATETIME | in UTC (`Base\Database\Type\DateTimeTypeUTC`, with `base.database.use_custom`) | as UTC |
+| `datetime`, `datetimetz` | DATETIME | in UTC (`Omnibridge\Doctrine\Omnibase\Database\Type\DateTimeTypeUTC`, with `base.database.use_custom`) | as UTC |
 | `datetime_immutable` | DATETIME | the wall clock of the object's zone | in the **request's** zone |
 | **`utc_datetime_immutable`** | DATETIME | in UTC | as UTC |
 | **`utc_datetime`** | DATETIME | in UTC | as UTC |
@@ -33,7 +33,7 @@ wrong for a **moment** (when a message was sent, when a link expires).
 ## A moment: `utc_datetime_immutable`
 
 ```php
-use Base\Database\Type\UtcDateTimeImmutableType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
 
 #[ORM\Column(type: UtcDateTimeImmutableType::NAME)]   // 'utc_datetime_immutable'
 private \DateTimeImmutable $sentAt;

@@ -3,10 +3,10 @@
 namespace Tests\Base\Bridge\Symfony;
 
 use Omnibridge\Symfony\Contract\CsrfTokens;
-use Base\Bridge\Symfony\MediaPictures;
-use Base\Bridge\Symfony\ScreenResponder;
-use Base\Bridge\Symfony\SymfonyScreenContext;
-use Base\Bridge\Symfony\WysiwygTexts;
+use Omnibridge\Symfony\Omnibase\MediaPictures;
+use Omnibridge\Symfony\Omnibase\ScreenResponder;
+use Omnibridge\Symfony\Omnibase\SymfonyScreenContext;
+use Omnibridge\Symfony\Omnibase\WysiwygTexts;
 use Base\Contract\Pictures;
 use Base\Contract\Runtime;
 use Base\Contract\Texts;

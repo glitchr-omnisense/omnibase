@@ -3,7 +3,7 @@
 namespace Tests\Base\Attributes;
 
 use Base\Attributes\AbstractAttribute;
-use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Attribute\Alias;
 use Base\Database\Attribute\Associate;
 use Base\Database\Attribute\Blameable;

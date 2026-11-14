@@ -9,7 +9,7 @@ namespace Base\Contract;
  * omnibase's `|wysiwyg` and `|wysiwyg_toc` filters answer.
  *
  * The Foundation's own contract, reached by Runtime::texts() or given to a
- * screen's builder. Under Symfony, Base\Bridge\Symfony\WysiwygTexts: the
+ * screen's builder. Under Symfony, Omnibridge\Symfony\Omnibase\WysiwygTexts: the
  * filters' own pipeline, so a screen's HTML is the page's of before.
  */
 interface Texts

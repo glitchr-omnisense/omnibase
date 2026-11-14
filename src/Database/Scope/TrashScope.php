@@ -10,7 +10,7 @@ use Omnibridge\Persistence\Scope;
  * F2e): an entity whose class, or a parent's, is #[Trasheable] is read only
  * while its deletion field is null. Base\Service\TrashManager::withTrash()
  * disables it to look at the trash. Doctrine compiles it as its SQL filter
- * "trash_filter" (Base\Database\Filter\TrashFilter).
+ * "trash_filter" (Omnibridge\Doctrine\Omnibase\Database\Filter\TrashFilter).
  */
 final class TrashScope implements Scope
 {

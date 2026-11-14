@@ -5,7 +5,7 @@ namespace Base\Twig\Variable;
 use Base\Admin\Controller\AbstractCrudController;
 use Base\Admin\Controller\AbstractDashboardController;
 use Base\Routing\AdminUrlGeneratorInterface;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\LauncherInterface;
 use Base\Service\LocalizerInterface;
 use Base\Service\MaintenanceProviderInterface;

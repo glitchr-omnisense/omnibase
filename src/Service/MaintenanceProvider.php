@@ -2,41 +2,31 @@
 
 namespace Base\Service;
 
-use Base\Request\EventDecisions;
-use Base\Request\RouterPage;
-use Base\Request\Rule\MaintenancePage;
-use Base\Routing\AdvancedRouterInterface;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Omnibridge\Contract\Access;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
-    use EventDecisions;
-
     /** @var AdvancedRouterInterface */
     protected AdvancedRouterInterface $router;
     /** @var ParameterBagInterface */
     protected ParameterBagInterface $parameterBag;
     /** @var SettingBagInterface */
     protected SettingBagInterface $settingBag;
-    /** @var AuthorizationCheckerInterface */
-    /** Who may pass (plan "omnibase agnostic", F5c: Omnibridge\Contract\Access; Security's checker deprecated until 6.0). */
-    protected AuthorizationCheckerInterface|Access $authorizationChecker;
+    /** Who may pass (plan "omnibase agnostic", F5c: Omnibridge\Contract\Access). */
+    protected Access $authorizationChecker;
     /** @var LocalizerInterface */
     protected LocalizerInterface $localizer;
-    /** @var TokenStorageInterface */
-    /** Who is signed in: Access, or Security's token storage (deprecated until 6.0). */
-    protected TokenStorageInterface|Access|null $tokenStorage;
+    /** Who is signed in. */
+    protected ?Access $tokenStorage;
 
     protected int $remainingTime = 0;
     protected int $percentage = -1;
     protected int $uptime = 0;
     protected int $downtime = 0;
 
-    public function __construct(AdvancedRouterInterface $router, SettingBagInterface $settingBag, #[Autowire(service: Access::class)] AuthorizationCheckerInterface|Access $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, #[Autowire(service: Access::class)] TokenStorageInterface|Access|null $tokenStorage = null)
+    public function __construct(AdvancedRouterInterface $router, SettingBagInterface $settingBag, #[Autowire(service: Access::class)] Access $authorizationChecker, ParameterBagInterface $parameterBag, LocalizerInterface $localizer, #[Autowire(service: Access::class)] ?Access $tokenStorage = null)
     {
         $this->router = $router;
 
@@ -134,19 +124,5 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         // Cache the result for the duration of the request
         $this->maintenanceStatusCache = $result;
         return $result;
-    }
-
-    /**
-     * The maintenance page's decision applied to a Symfony request event (deprecated until 6.0: the rule is
-     * Base\Request\Rule\MaintenancePage, which omnibridge/symfony's SecuritySubscriber asks itself). True
-     * when the request stops there.
-     */
-    public function redirectOnDeny(?RequestEvent $event = null): bool
-    {
-        $this->parseLockPath();
-        $decision = (new MaintenancePage($this, $this->parameterBag->get("base.site.maintenance.redirect_on_deny"), $this->parameterBag->get("base.site.index")))
-            ->decide(new RouterPage($this->router), fn (string $attribute): bool => $this->authorizationChecker->isGranted($attribute));
-
-        return $this->applyDecision($decision, $event);
     }
 }

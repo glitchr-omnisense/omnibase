@@ -7,9 +7,9 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 use Base\Entity\User;
 use Base\Entity\User\Group;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\Attribute\Scope\GroupAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Scope\GroupAdapterRepository;
 
 /**
  * Narrows something to the members of another group.

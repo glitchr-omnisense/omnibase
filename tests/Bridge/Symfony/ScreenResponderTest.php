@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Bridge\Symfony;
 
-use Base\Bridge\Symfony\ScreenResponder;
+use Omnibridge\Symfony\Omnibase\ScreenResponder;
 use Base\Screen\Card;
 use Base\Screen\ContextProvider;
 use Base\Screen\Frame;

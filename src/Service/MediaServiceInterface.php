@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\Imagine\FilterInterface;
 
-use Base\Controller\UX\MediaController;
+use Omnibridge\Symfony\Omnibase\Controller\UX\MediaController;
 
 interface MediaServiceInterface extends FileServiceInterface
 {

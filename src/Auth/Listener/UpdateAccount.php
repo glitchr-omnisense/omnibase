@@ -3,15 +3,13 @@
 namespace Base\Auth\Listener;
 
 use App\Enum\UserRole;
-use Base\Database\UnitOfWorks;
 use Base\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Event\SignedIn;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The account brought up to date at its sign-in, what
- * Base\Security\LoginFormAuthenticator::onAuthenticationSuccess() does under
+ * Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator::onAuthenticationSuccess() does under
  * Symfony: a role the application's UserRole enum no longer knows dropped
  * from the account's own roles (never those of its groups), its time zone and
  * its language kept (the visitor's when it had none), its kick lifted.
@@ -20,10 +18,9 @@ class UpdateAccount
 {
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork)
+    public function __construct(UnitOfWork $unitOfWork)
     {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     public function onSignedIn(SignedIn $event): void

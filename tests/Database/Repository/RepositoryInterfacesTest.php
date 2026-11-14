@@ -3,18 +3,18 @@
 namespace Tests\Base\Database\Repository;
 
 use Base\Database\Repository\Entities;
-use Base\Database\Repository\ServiceEntityRepository;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Thread;
 use Base\Enum\ThreadState;
-use Base\Repository\Layout\SettingRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository;
 use Base\Repository\Layout\Settings;
-use Base\Repository\Thread\TagRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository;
 use Base\Repository\Thread\Tags;
-use Base\Repository\ThreadRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository;
 use Base\Repository\Threads;
-use Base\Repository\User\NotificationRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\NotificationRepository;
 use Base\Repository\User\Notifications;
-use Base\Repository\UserRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\UserRepository;
 use Base\Repository\Users;
 use Base\Database\Repository\Repositories;
 use Base\Repository\Aliases;
@@ -22,12 +22,12 @@ use Base\Repository\Analytics;
 use Base\Repository\Extension;
 use Base\Repository\Hours;
 use Base\Repository\Layout;
-use Base\Repository\Layout\Widget\SlotRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\SlotRepository;
 use Base\Repository\Layout\Widget\Slots;
-use Base\Repository\Layout\WidgetRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\WidgetRepository;
 use Base\Repository\Layout\Widgets;
 use Base\Repository\Thread as ThreadRepositories;
-use Base\Repository\ThreadIntlRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\ThreadIntlRepository;
 use Base\Repository\ThreadTranslations;
 use Base\Repository\User;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -60,28 +60,28 @@ final class RepositoryInterfacesTest extends KernelTestCase
         Settings::class => SettingRepository::class,
         // Step R28.
         ThreadTranslations::class => ThreadIntlRepository::class,
-        Extension\TrashBalls::class => Extension\TrashBallRepository::class,
-        Extension\Revisions::class => Extension\RevisionRepository::class,
+        Extension\TrashBalls::class => \Omnibridge\Doctrine\Omnibase\Repository\Extension\TrashBallRepository::class,
+        Extension\Revisions::class => \Omnibridge\Doctrine\Omnibase\Repository\Extension\RevisionRepository::class,
         Widgets::class => WidgetRepository::class,
         Slots::class => SlotRepository::class,
-        Layout\ImageCrops::class => Layout\ImageCropRepository::class,
-        Layout\Redirections::class => Layout\RedirectionRepository::class,
-        Layout\Semantics::class => Layout\SemanticRepository::class,
-        ThreadRepositories\Likes::class => ThreadRepositories\LikeRepository::class,
-        ThreadRepositories\Comments::class => ThreadRepositories\CommentRepository::class,
-        ThreadRepositories\Mentions::class => ThreadRepositories\MentionRepository::class,
-        User\Connections::class => User\ConnectionRepository::class,
-        User\Passkeys::class => User\PasskeyRepository::class,
-        User\Tokens::class => User\TokenRepository::class,
-        User\PushSubscriptions::class => User\PushSubscriptionRepository::class,
-        Analytics\PageViews::class => Analytics\PageViewRepository::class,
-        Analytics\Visits::class => Analytics\VisitRepository::class,
-        Analytics\PageVisits::class => Analytics\PageVisitRepository::class,
-        Hours\ScopedWeeks::class => Hours\ScopedWeekRepository::class,
-        Hours\SpecialDays::class => Hours\SpecialDayRepository::class,
-        Hours\WeekDays::class => Hours\WeekDayHoursRepository::class,
+        Layout\ImageCrops::class => \Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository::class,
+        Layout\Redirections::class => \Omnibridge\Doctrine\Omnibase\Repository\Layout\RedirectionRepository::class,
+        Layout\Semantics::class => \Omnibridge\Doctrine\Omnibase\Repository\Layout\SemanticRepository::class,
+        ThreadRepositories\Likes::class => \Omnibridge\Doctrine\Omnibase\Repository\Thread\LikeRepository::class,
+        ThreadRepositories\Comments::class => \Omnibridge\Doctrine\Omnibase\Repository\Thread\CommentRepository::class,
+        ThreadRepositories\Mentions::class => \Omnibridge\Doctrine\Omnibase\Repository\Thread\MentionRepository::class,
+        User\Connections::class => \Omnibridge\Doctrine\Omnibase\Repository\User\ConnectionRepository::class,
+        User\Passkeys::class => \Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class,
+        User\Tokens::class => \Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository::class,
+        User\PushSubscriptions::class => \Omnibridge\Doctrine\Omnibase\Repository\User\PushSubscriptionRepository::class,
+        Analytics\PageViews::class => \Omnibridge\Doctrine\Omnibase\Repository\Analytics\PageViewRepository::class,
+        Analytics\Visits::class => \Omnibridge\Doctrine\Omnibase\Repository\Analytics\VisitRepository::class,
+        Analytics\PageVisits::class => \Omnibridge\Doctrine\Omnibase\Repository\Analytics\PageVisitRepository::class,
+        Hours\ScopedWeeks::class => \Omnibridge\Doctrine\Omnibase\Repository\Hours\ScopedWeekRepository::class,
+        Hours\SpecialDays::class => \Omnibridge\Doctrine\Omnibase\Repository\Hours\SpecialDayRepository::class,
+        Hours\WeekDays::class => \Omnibridge\Doctrine\Omnibase\Repository\Hours\WeekDayHoursRepository::class,
         // Step E2' (plan "omnibase agnostic").
-        User\Complaints::class => User\ComplaintRepository::class,
+        User\Complaints::class => \Omnibridge\Doctrine\Omnibase\Repository\User\ComplaintRepository::class,
     ];
 
     public function testEachRepositoryImplementsItsInterface(): void
@@ -185,22 +185,22 @@ final class RepositoryInterfacesTest extends KernelTestCase
             [WidgetRepository::class, fn ($r) => $r->oneByPath('footer', false), [['findOneByPath', ['footer']]]],
             [WidgetRepository::class, fn ($r) => $r->every(), [['cacheAll', []]]],
             [SlotRepository::class, fn ($r) => $r->oneByPath('footer.left'), [['cacheOneByPath', ['footer.left']]]],
-            [Layout\SettingRepository::class, fn ($r) => $r->under('base.settings', true, true), [['cacheByInsensitivePathStartingWithAndBagNotEmpty', ['base.settings']]]],
-            [Layout\SettingRepository::class, fn ($r) => $r->under(null, true, false), [['findByBagNotEmpty', []]]],
-            [Layout\SettingRepository::class, fn ($r) => $r->under('base.settings', false, false), [['findByInsensitivePathStartingWith', ['base.settings']]]],
-            [Layout\SettingRepository::class, fn ($r) => $r->under(null), [['cacheAll', []]]],
-            [Layout\SettingRepository::class, fn ($r) => $r->oneByInsensitivePath('base.settings.title'), [['findOneByInsensitivePath', ['base.settings.title']]]],
-            [Layout\ImageCropRepository::class, fn ($r) => $r->oneBySlugOfImage('square', 'uuid'), [['cacheOneBySlug', ['square', ['image.source' => 'uuid']]]]],
-            [Layout\ImageCropRepository::class, fn ($r) => $r->oneClosestToRatio(1.5, 'uuid'), [['cacheOneByRatio0ClosestTo', [1.5, ['image.source' => 'uuid'], [], null, [], ['ratio0' => 'e.width0/e.height0']]]]],
-            [Layout\ImageCropRepository::class, fn ($r) => $r->oneClosestToRatioAndSize(1.5, 0.5, 0.25, 'uuid'), [['findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo', [1.5, 0.5, 0.25, ['image.source' => 'uuid'], [], null, [], ['ratio0' => 'e.width0/e.height0']]]]],
-            [Layout\SemanticRepository::class, fn ($r) => $r->every(), [['cacheAll', []]]],
-            [ThreadRepositories\LikeRepository::class, fn ($r) => $r->oneByThreadAndUser($thread, $user), [['findOneByThreadAndUser', [$thread, $user]]]],
-            [ThreadRepositories\MentionRepository::class, fn ($r) => $r->byThread($thread), [['cacheByThread', [$thread]]]],
-            [User\ConnectionRepository::class, fn ($r) => $r->oneByUniqidAndUser('abc', $user), [['findOneByUniqidAndUser', ['abc', ['user' => $user]]]]],
-            [User\TokenRepository::class, fn ($r) => $r->oneByValueAndName('v', 'verify-email'), [['findOneByValueAndName', ['v', 'verify-email']]]],
-            [User\TokenRepository::class, fn ($r) => $r->oneByValue('v'), [['findOneByValue', ['v']]]],
-            [User\TokenRepository::class, fn ($r) => $r->oneSigningInByNameAndValue('login-token', 'v'), [['findOneByNameAndValueAndIsLogginable', ['login-token', 'v', true]]]],
-            [User\TokenRepository::class, fn ($r) => $r->oneSigningInByValue('v'), [['findOneByValueAndIsLogginable', ['v']]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository::class, fn ($r) => $r->under('base.settings', true, true), [['cacheByInsensitivePathStartingWithAndBagNotEmpty', ['base.settings']]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository::class, fn ($r) => $r->under(null, true, false), [['findByBagNotEmpty', []]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository::class, fn ($r) => $r->under('base.settings', false, false), [['findByInsensitivePathStartingWith', ['base.settings']]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository::class, fn ($r) => $r->under(null), [['cacheAll', []]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository::class, fn ($r) => $r->oneByInsensitivePath('base.settings.title'), [['findOneByInsensitivePath', ['base.settings.title']]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository::class, fn ($r) => $r->oneBySlugOfImage('square', 'uuid'), [['cacheOneBySlug', ['square', ['image.source' => 'uuid']]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository::class, fn ($r) => $r->oneClosestToRatio(1.5, 'uuid'), [['cacheOneByRatio0ClosestTo', [1.5, ['image.source' => 'uuid'], [], null, [], ['ratio0' => 'e.width0/e.height0']]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository::class, fn ($r) => $r->oneClosestToRatioAndSize(1.5, 0.5, 0.25, 'uuid'), [['findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo', [1.5, 0.5, 0.25, ['image.source' => 'uuid'], [], null, [], ['ratio0' => 'e.width0/e.height0']]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Layout\SemanticRepository::class, fn ($r) => $r->every(), [['cacheAll', []]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Thread\LikeRepository::class, fn ($r) => $r->oneByThreadAndUser($thread, $user), [['findOneByThreadAndUser', [$thread, $user]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\Thread\MentionRepository::class, fn ($r) => $r->byThread($thread), [['cacheByThread', [$thread]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\User\ConnectionRepository::class, fn ($r) => $r->oneByUniqidAndUser('abc', $user), [['findOneByUniqidAndUser', ['abc', ['user' => $user]]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository::class, fn ($r) => $r->oneByValueAndName('v', 'verify-email'), [['findOneByValueAndName', ['v', 'verify-email']]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository::class, fn ($r) => $r->oneByValue('v'), [['findOneByValue', ['v']]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository::class, fn ($r) => $r->oneSigningInByNameAndValue('login-token', 'v'), [['findOneByNameAndValueAndIsLogginable', ['login-token', 'v', true]]]],
+            [\Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository::class, fn ($r) => $r->oneSigningInByValue('v'), [['findOneByValueAndIsLogginable', ['v']]]],
         ];
         foreach ($cases as $n => [$class, $call, $finders]) {
             $repository = self::recorded($class);
@@ -241,7 +241,7 @@ final class RepositoryInterfacesTest extends KernelTestCase
         if ('doctrine' === $this->hostPersistence()) {
             $entityManager = $container->get('doctrine')->getManager();
             self::assertSame($entityManager->getRepository(Thread::class), $repositories->of(Thread::class));
-            self::assertInstanceOf(\Base\Bridge\Doctrine\DoctrineEntities::class, $plain);
+            self::assertInstanceOf(\Omnibridge\Doctrine\Omnibase\DoctrineEntities::class, $plain);
         } else {
             // Another persistence's repositories (omnibridge/eloquent's in a site on eloquent): one per class.
             self::assertInstanceOf(Entities::class, $repositories->of(Thread::class));
@@ -271,7 +271,7 @@ final class RepositoryInterfacesTest extends KernelTestCase
         unset($services[Repositories::class]);
         $doctrine = 'doctrine' === $this->hostPersistence();
         if ($doctrine) {
-            self::assertInstanceOf(\Base\Bridge\Doctrine\DoctrineRepositories::class, $container->get(Repositories::class));
+            self::assertInstanceOf(\Omnibridge\Doctrine\Omnibase\DoctrineRepositories::class, $container->get(Repositories::class));
         }
         foreach ($services as $interface => $service) {
             $repository = $container->get($interface);

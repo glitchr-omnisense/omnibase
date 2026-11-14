@@ -9,7 +9,7 @@ namespace Base\Database\Repository;
  * by hierarchy - asks, where it called the entity manager's getRepository()
  * before. Nothing of the ORM in or out.
  *
- * Base\Bridge\Doctrine\DoctrineRepositories answers it with the entity
+ * Omnibridge\Doctrine\Omnibase\DoctrineRepositories answers it with the entity
  * manager's repositories: omnibase's (ServiceEntityRepository, every
  * Base\Repository\ and App\Repository\ class) as they are, Doctrine's plain
  * EntityRepository behind an Entities adapter. Another persistence answers

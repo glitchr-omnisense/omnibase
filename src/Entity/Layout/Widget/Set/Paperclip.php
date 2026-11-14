@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\Set\PaperclipRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\Set\PaperclipRepository;
 
 use Base\Database\Attribute\Cache;
 

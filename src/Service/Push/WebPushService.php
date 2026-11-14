@@ -3,10 +3,8 @@
 namespace Base\Service\Push;
 
 use App\Entity\User;
-use Base\Database\UnitOfWorks;
 use Base\Entity\User\PushSubscription;
 use Base\Repository\User\PushSubscriptions;
-use Doctrine\ORM\EntityManagerInterface;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\VAPID;
 use Minishlink\WebPush\WebPush;
@@ -30,16 +28,15 @@ class WebPushService
 
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected readonly PushSubscriptions $repository,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly ?string $publicKey = null,
         protected readonly ?string $privateKey = null,
         protected readonly ?string $subject = null,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     public function isConfigured(): bool

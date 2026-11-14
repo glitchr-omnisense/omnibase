@@ -24,10 +24,9 @@ abstract class UserStore
 {
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|\Doctrine\ORM\EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(UnitOfWork|\Doctrine\ORM\EntityManagerInterface $unitOfWork)
+    public function __construct(UnitOfWork $unitOfWork)
     {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /**

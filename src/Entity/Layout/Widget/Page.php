@@ -11,7 +11,7 @@ use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\PageRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\PageRepository;
 
 use Base\Database\Attribute\Cache;
 use Base\Entity\Layout\Widget\Set\Book;

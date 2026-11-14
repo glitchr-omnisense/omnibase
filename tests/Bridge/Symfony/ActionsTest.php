@@ -4,8 +4,8 @@ namespace Tests\Base\Bridge\Symfony;
 
 use Base\Controller\Action\Notification\Latest;
 use Base\Controller\Action\Widget\Page;
-use Base\Bridge\Symfony\ActionArguments;
-use Base\Bridge\Symfony\ActionResults;
+use Omnibridge\Symfony\Omnibase\ActionArguments;
+use Omnibridge\Symfony\Omnibase\ActionResults;
 use Omnibridge\Symfony\Omnibase\Controller\Client\NotificationController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;

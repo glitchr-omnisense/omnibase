@@ -8,7 +8,7 @@ use Omnibridge\Composer\Stub\StubContext;
 /**
  * The App\ stubs of one folder of the core: for each plain class
  * Base\<Name>\X that the application does not define in src/<Name>/, a stub
- * of App\<Name>\X - the alias Base\Bundle\AbstractBaseBundle declares at run
+ * of App\<Name>\X - the alias Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle declares at run
  * time - for an IDE and static analysis.
  *
  * Run by omnibridge/composer alone, on post-autoload-dump (the core declares

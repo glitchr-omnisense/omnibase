@@ -2,7 +2,7 @@
 
 namespace Base\Controller\Action\Widget;
 
-use Base\Repository\Layout\Widget\PageRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\PageRepository;
 use Base\Screen\Template;
 use Symfony\Component\Routing\Attribute\Route;
 

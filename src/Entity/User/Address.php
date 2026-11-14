@@ -8,7 +8,7 @@ use Base\Service\Model\HtmlizeInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\AddressRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\AddressRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]

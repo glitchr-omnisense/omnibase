@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Cache;
 
-use Base\Cache\Warmer\WebpackCacheWarmer;
+use Omnibridge\Symfony\Omnibase\Cache\Warmer\WebpackCacheWarmer;
 use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Filesystem\Filesystem;

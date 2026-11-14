@@ -3,7 +3,7 @@
 namespace Base\Contract;
 
 /*
- * What Base\Repository\UserRepository declares to Doctrine's entity user
+ * What Omnibridge\Doctrine\Omnibase\Repository\UserRepository declares to Doctrine's entity user
  * provider (audit "lesringostars face au master plan", R2): with
  * symfony/doctrine-bridge installed, Base\Bridge\Symfony\SecurityUserLoader -
  * its UserLoaderInterface, a user loaded by its identifier -, under this name;

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Demo;
 
-use Base\Console\Command\DemoResetCommand;
+use Omnibridge\Symfony\Omnibase\Console\Command\DemoResetCommand;
 use Base\Demo\DemoAccountFactory;
 use Base\Demo\DemoAccountRegistry;
 use Base\Demo\DemoGuard;

@@ -10,7 +10,7 @@ use Base\Service\WysiwygEnhancerInterface;
  * A stored text rendered (plan "omnibase agnostic", step F4): an Editor.js document or the HTML of
  * the older editor, its mentions and links enhanced, its semantics if asked, its media, its
  * headings anchored - the pipeline of |wysiwyg and |wysiwyg_toc (HtmlTwigExtension::renderWysiwyg()
- * under Twig, the Texts contract of the screens: Base\Bridge\Symfony\WysiwygTexts), the same code
+ * under Twig, the Texts contract of the screens: Omnibridge\Symfony\Omnibase\WysiwygTexts), the same code
  * for Blade and a React page's props.
  */
 final class Wysiwyg

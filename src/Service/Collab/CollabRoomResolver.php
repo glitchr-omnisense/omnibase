@@ -3,7 +3,6 @@
 namespace Base\Service\Collab;
 
 use Base\Database\UnitOfWorks;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
@@ -17,10 +16,9 @@ class CollabRoomResolver
 {
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork)
+    public function __construct(UnitOfWork $unitOfWork)
     {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /**

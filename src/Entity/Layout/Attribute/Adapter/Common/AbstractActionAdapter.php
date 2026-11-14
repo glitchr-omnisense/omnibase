@@ -3,7 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Adapter\Common;
 
 use Base\Database\Attribute\DiscriminatorEntry;
-use Base\Repository\Layout\Attribute\Adapter\Common\AbstractActionAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\Common\AbstractActionAdapterRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Attribute\Cache;
 use InvalidArgumentException;

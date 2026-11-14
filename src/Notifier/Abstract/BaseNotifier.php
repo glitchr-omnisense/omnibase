@@ -9,16 +9,13 @@ use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBagInterface;
 use DateTime;
 use Doctrine\DBAL\Exception as DoctrineException;
 use Base\Service\SettingBag;
 use Base\Service\LocalizerInterface;
 use Base\Service\ParameterBagInterface;
-use Doctrine\ORM\EntityManagerInterface;
-use Base\Database\UnitOfWorks;
-use Base\Notifier\Mail\EmailComposer;
 use Omnibridge\Contract\Requests;
 use Omnibridge\Contract\Urls;
 use Omnibridge\Contract\Views;
@@ -34,7 +31,6 @@ use Symfony\Component\Notifier\Exception\TransportExceptionInterface as Notifier
 use Symfony\Component\Notifier\Notification\Notification as SymfonyNotification;
 use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
 use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
-use Twig\Environment;
 
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
@@ -106,18 +102,12 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
     /** The views the mails and pages render through (plan "omnibase agnostic", F5a). */
     protected Views $views;
 
-    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: $views (null when the views are not Twig's) */
-    protected ?Environment $twig = null;
-
     /**
      * @var ChannelPolicyInterface
      */
     protected ChannelPolicyInterface $policy;
 
     protected UnitOfWork $unitOfWork;
-
-    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: $unitOfWork (null when it is not Doctrine's) */
-    protected ?EntityManagerInterface $entityManager = null;
 
     /**
      * @var ParameterBagInterface
@@ -191,16 +181,6 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         return $this->views;
     }
 
-    /** @deprecated since omnisense/omnibase 4.x, removed at 6.0: getViews() */
-    public function getEnvironment(): Environment
-    {
-        @trigger_error(sprintf('Since omnisense/omnibase 4.x: %s::getEnvironment() is deprecated, use getViews().', static::class), E_USER_DEPRECATED);
-
-        $this->twig ??= method_exists($this->views, 'environment') ? $this->views->environment() : null;
-
-        return $this->twig ?? throw new \LogicException(static::class.'\'s views are not Twig\'s: getViews().');
-    }
-
     /** The accounts by their interface (step R28): the administrators to notify. */
     protected ?Users $users = null;
 
@@ -211,14 +191,9 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         return $this;
     }
 
-    /**
-     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
-     * @param Views|Environment                 $views      Twig's environment is deprecated (until 6.0): wrapped in omnibridge/twig's TwigViews
-     */
-    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork|EntityManagerInterface $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, #[Autowire(service: 'advanced_router')] AdvancedRouterInterface|Urls $router, Views|Environment $views, SettingBag $settingBag, bool $debug = false)
+    public function __construct(SymfonyNotifierInterface $notifier, ChannelPolicyInterface $policy, UnitOfWork $unitOfWork, ParameterBagInterface $parameterBag, TranslatorInterface $translator, LocalizerInterface $localizer, #[Autowire(service: 'advanced_router')] AdvancedRouterInterface|Urls $router, Views $views, SettingBag $settingBag, bool $debug = false)
     {
-        $this->views = EmailComposer::views($views);
-        $this->twig = $views instanceof Environment ? $views : null;
+        $this->views = $views;
         $this->notifier = $notifier;
 
         $this->policy = $policy;
@@ -235,8 +210,7 @@ abstract class BaseNotifier implements BaseNotifierInterface, LoggerAwareInterfa
         $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
         $this->technicalLoopback  = $parameterBag->get("base.notifier.technical_loopback");
 
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
-        $this->entityManager = $unitOfWork instanceof EntityManagerInterface ? $unitOfWork : (method_exists($this->unitOfWork, 'entityManager') ? $this->unitOfWork->entityManager() : null);
+        $this->unitOfWork = $unitOfWork;
         $this->settingBag = $settingBag;
         $this->localizer = $localizer;
         $this->translator = $translator;

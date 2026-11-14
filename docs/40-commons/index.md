@@ -19,12 +19,12 @@ An application or an `omnibase/*` bundle uses these; it does not keep a copy.
 | Signed download links | `Base\Service\DownloadLinks` | [Downloads and QR codes](downloads-and-qr.md) |
 | QR codes, A4 and Avery sheets | `Base\Service\Qr\{QrCode, QrSheet}` | [Downloads and QR codes](downloads-and-qr.md) |
 | Documents signed for any entity (omnisense/omnisign, suggested) | `Base\Service\Signatures`, `Base\Entity\Signature\Envelope`, `SignatureEvent` | [Signatures](signatures.md) |
-| An HTML page answered as a PDF | `Base\Response\PdfResponse` (dompdf/dompdf, suggested) | [PDF responses](pdf.md) |
+| An HTML page answered as a PDF | `Omnibridge\Symfony\Omnibase\Response\PdfResponse` (dompdf/dompdf, suggested) | [PDF responses](pdf.md) |
 | The e-mail frame, a subject written in the template | `@Base/notifier/email.html.twig`, `{% block subject %}` | [E-mails](emails.md) |
 | EU allergens | `Base\Enum\Allergen` | [Allergens](allergens.md) |
 | Comments | `Base\Entity\Thread\Comment`, `CommentGuard`, `CommentType` | [Comments](comments.md) |
 | Framing an address | Twig `embed_url()` | [Pages and texts](pages-and-texts.md) |
-| Contact form, data-protection notice and consent box | `Base\Form\Type\ContactType`, `ContactModel`, `PrivacyType` | [Pages and texts](pages-and-texts.md) |
+| Contact form, data-protection notice and consent box | `Omnibridge\Symfony\Omnibase\Form\Type\ContactType`, `ContactModel`, `PrivacyType` | [Pages and texts](pages-and-texts.md) |
 | Pictures, texts rewritten in the back office | Twig `picture`, `Base\Entity\Layout\TextOverride` | [Pages and texts](pages-and-texts.md) |
 | Glitch Art's signature | `@Base/partials/_credits.html.twig` | [Front end](front-end.md) |
 | `Base.boot()`, Stimulus `poll` | `assets/boot.js`, `assets/controllers/poll_controller.js` | [Front end](front-end.md) |

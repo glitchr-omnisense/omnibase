@@ -13,7 +13,7 @@ use Base\Service\Qr\QrCode;
  * can frame of an address (Embeds), a QR code as an SVG data: URI, the opening hours (of the site
  * or of one place), and a stored picture to its URL - CommonsTwigExtension's embed_url(),
  * qr_code(), opening_hours() and |picture under Twig, the same code for Blade and a React page's
- * props. The Pictures contract of the screens (Base\Bridge\Symfony\MediaPictures) is its picture().
+ * props. The Pictures contract of the screens (Omnibridge\Symfony\Omnibase\MediaPictures) is its picture().
  */
 final class Commons implements PicturesContract
 {

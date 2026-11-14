@@ -4,10 +4,8 @@ namespace Base\EntitySubscriber;
 
 use App\Entity\User;
 use Base\Enum\ConnectionState;
-use Base\Security\SignInGuard;
+use Omnibridge\Symfony\Omnibase\Security\SignInGuard;
 use Base\Security\UserTracker;
-use Base\Database\UnitOfWorks;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
@@ -26,26 +24,16 @@ class ConnectionSubscriber implements EventSubscriberInterface
     protected UserTracker $userTracker;
 
     /**
-     * The entity manager when one was given (deprecated until 6.0: the unit of work below writes).
-     *
-     * @var EntityManagerInterface|null
-     */
-    protected ?EntityManagerInterface $entityManager = null;
-
-    /**
      * Where the connections are written: omnisense/omnibridge's unit of work, the persistence chosen's (plan
      * "omnibase agnostic", step F7d-3: UserTracker's own, so that what it records is what is flushed - on Eloquent
-     * too); an entity manager is adapted (UnitOfWorks).
+     * too).
      */
     protected UnitOfWork $unitOfWork;
 
-    public function __construct(UserTracker $userTracker, UnitOfWork|EntityManagerInterface $unitOfWork)
+    public function __construct(UserTracker $userTracker, UnitOfWork $unitOfWork)
     {
         $this->userTracker = $userTracker;
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
-        if ($unitOfWork instanceof EntityManagerInterface) {
-            $this->entityManager = $unitOfWork;
-        }
+        $this->unitOfWork = $unitOfWork;
     }
 
     public static function getSubscribedEvents(): array

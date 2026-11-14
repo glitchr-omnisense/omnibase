@@ -100,7 +100,7 @@ return [
         'symfony' => [
             'arguments' => [
                 '@.inner',
-                ['!service_closure' => '@Base\Repository\Layout\TextOverrideRepository'],
+                ['!service_closure' => '@Omnibridge\Doctrine\Omnibase\Repository\Layout\TextOverrideRepository'],
                 '@base.text_override.cache',
             ],
             'decorates' => ['id' => 'translator', 'priority' => 1],

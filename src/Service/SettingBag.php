@@ -4,7 +4,6 @@ namespace Base\Service;
 
 use Base\Database\Attribute\Backend\Backends;
 use Base\Database\Backend\EntityCache;
-use Base\Database\UnitOfWorks;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Repository\Layout\Settings;
@@ -12,7 +11,6 @@ use Omnibridge\Persistence\UnitOfWork;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use InvalidArgumentException;
 use Omnibridge\Persistence\Persistences;
@@ -21,7 +19,7 @@ use Omnibridge\Persistence\Persistences;
  * The settings stored in the database (the back office's), compiled into one
  * snapshot kept in a PSR-6 cache pool (plan "omnibase agnostique", C9: on
  * psr/cache, no longer on Symfony's CacheInterface; its cache warmer is
- * Base\Bridge\Symfony\SettingBagWarmer, which calls warmUp()).
+ * Omnibridge\Symfony\Omnibase\SettingBagWarmer, which calls warmUp()).
  */
 class SettingBag implements SettingBagInterface
 {
@@ -108,11 +106,10 @@ class SettingBag implements SettingBagInterface
         return Backends::of($this->unitOfWork, EntityCache::class);
     }
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(ParameterBagInterface $parameterBag, UnitOfWork|EntityManagerInterface $unitOfWork, Settings $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
+    public function __construct(ParameterBagInterface $parameterBag, UnitOfWork $unitOfWork, Settings $settingRepository, LocalizerInterface $localizer, CacheItemPoolInterface $cache, string $environment)
     {
         $this->parameterBag = $parameterBag;
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
         $this->settingRepository = $settingRepository;
 
         $this->cache = $cache;

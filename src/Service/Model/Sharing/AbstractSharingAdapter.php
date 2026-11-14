@@ -3,9 +3,7 @@
 namespace Base\Service\Model\Sharing;
 
 use Base\Service\Model\IconizeInterface;
-use Base\View\ViewsAdapter;
 use Omnibridge\Contract\Views;
-use Twig\Environment;
 
 abstract class AbstractSharingAdapter implements SharingAdapterInterface, IconizeInterface
 {
@@ -17,10 +15,9 @@ abstract class AbstractSharingAdapter implements SharingAdapterInterface, Iconiz
         return null;
     }
 
-    /** @param Views|Environment $views Twig's environment is deprecated (until 6.0) */
-    public function __construct(Views|Environment $views)
+    public function __construct(Views $views)
     {
-        $this->views = ViewsAdapter::of($views);
+        $this->views = $views;
     }
 
     public function getTemplate(): string

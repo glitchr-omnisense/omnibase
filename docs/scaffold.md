@@ -142,7 +142,7 @@ bundle, and the rest as they are.
 |---|---|
 | `src/Entity/User.php`, `src/Repository/UserRepository.php` | the account. **In a site with a shop, `User` implements `Base\Marketplace\Model\MerchantInterface`** (see below) |
 | `src/Site/Identity.php` | the Twig global `site` (name, town, e-mail, legal notice) |
-| `src/Controller/MainController.php` | home, about, contact (on `Base\Form\Type\ContactType`, see below), legal pages |
+| `src/Controller/MainController.php` | home, about, contact (on `Omnibridge\Symfony\Omnibase\Form\Type\ContactType`, see below), legal pages |
 | `src/Controller/AccountController.php` | "Mon compte" |
 | `src/Controller/Admin/DashboardController.php` | the back office's menu and tiles |
 | `src/DataFixtures/` | the site's fixtures (a `dev` payment method for the marketplace's DevGateway) |
@@ -427,8 +427,8 @@ follow whichever environment cleared its cache last.
 |---|---|
 | `src/EventSubscriber/NestHeaderSubscriber.php` | omnibase/admin's `NestHeaderSubscriber`: every page under `/admin` (the site's own screens there included), and any route with `defaults: ['_nest' => true]` |
 | `src/Controller/Admin/SystemController.php` | omnibase/admin's `SystemController` (`admin_settings`, `admin_apikey`, `admin_settings_quick`); the site's own fields in a class implementing `Base\Admin\Settings\SettingsSectionInterface` |
-| `src/Form/ContactType.php`, `src/Model/ContactMessage.php` | `Base\Form\Type\ContactType` with `['phone' => true, 'subject' => false, 'attachments' => false, 'buttons' => false, 'trap' => true]`, `Base\Form\Model\ContactModel` (`isRobot()`) - created with `createNamed('contact', …)` to keep the field names |
-| A consent checkbox and a data-protection sentence under a form | `ContactType`'s `privacy`, `privacy_consent`, `privacy_parameters` options, or `Base\Form\Type\PrivacyType` in any form ([Pages and texts](40-commons/pages-and-texts.md)) |
+| `src/Form/ContactType.php`, `src/Model/ContactMessage.php` | `Omnibridge\Symfony\Omnibase\Form\Type\ContactType` with `['phone' => true, 'subject' => false, 'attachments' => false, 'buttons' => false, 'trap' => true]`, `Base\Form\Model\ContactModel` (`isRobot()`) - created with `createNamed('contact', …)` to keep the field names |
+| A consent checkbox and a data-protection sentence under a form | `ContactType`'s `privacy`, `privacy_consent`, `privacy_parameters` options, or `Omnibridge\Symfony\Omnibase\Form\Type\PrivacyType` in any form ([Pages and texts](40-commons/pages-and-texts.md)) |
 | `src/Twig/ImageExtension.php` | omnisense/omnibase's `\|picture` filter |
 | `src/Entity/TextOverride.php`, `src/Repository/TextOverrideRepository.php`, `src/Translation/OverridingTranslator.php`, `src/Translation/TextOverrideCacheListener.php`, `src/Controller/Admin/Crud/TextOverrideCrudController.php` | `Base\Entity\Layout\TextOverride` (table `layoutTextOverride`), `Base\Translation\*`, omnibase/admin's `TextOverrideCrudController` |
 | `src/Market/DevGateway.php` | omnibase/marketplace's `DevGateway`, registered in debug only |

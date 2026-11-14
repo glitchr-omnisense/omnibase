@@ -3,7 +3,7 @@
 namespace Tests\Base\Contract;
 
 use Base\Contract\Runtime;
-use Base\DependencyInjection\Compiler\Pass\ContractsPass;
+use Omnibridge\Symfony\Omnibase\Legacy\DependencyInjection\Compiler\Pass\ContractsPass;
 use Omnibridge\Runtime as HostRuntime;
 use PHPUnit\Framework\TestCase;
 

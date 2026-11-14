@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use Base\Repository\User\PushSubscriptionRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\PushSubscriptionRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;

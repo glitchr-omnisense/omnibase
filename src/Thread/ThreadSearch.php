@@ -56,4 +56,28 @@ final class ThreadSearch
 
         return [$data, array_values($threads)];
     }
+
+    /**
+     * The section of each thread found, in the same order: its hierarchy's depth, its last level and its levels, as
+     * its class's repository gives them (#[Hierarchify]) - what the search page titles a group of results with. The
+     * page asked the thread for its repository through BaseTrait until 5.x (getRepository(), gone at 6.0).
+     *
+     * @param list<object> $threads
+     *
+     * @return list<array{depth: int, hierarchy: mixed, tree: array<mixed>}>
+     */
+    public function sections(array $threads): array
+    {
+        return array_map(function (object $thread): array {
+            $repository = $this->repositories->of($thread::class);
+            \assert($repository instanceof Threads);
+
+            // getHierarchyDepth() and getHierarchyTree() are HierarchifyTrait's, which the Doctrine repository uses.
+            return [
+                'depth' => method_exists($repository, 'getHierarchyDepth') ? (int) $repository->getHierarchyDepth() : 0,
+                'hierarchy' => $repository->getHierarchy(),
+                'tree' => method_exists($repository, 'getHierarchyTree') ? (array) $repository->getHierarchyTree() : [],
+            ];
+        }, $threads);
+    }
 }

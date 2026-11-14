@@ -32,7 +32,7 @@ localized paths of `config/routes_paths.yaml`. A route with paths per language
 is several routes, `<name>.<lang>` (`thread_search.en` is `/search`,
 `thread_search.fr` is `/rechercher`). To have the route cache rebuilt when
 that file changes alone, import it with the loader `base_route_paths`
-(`Base\Routing\Loader\RouteTranslationsResourceLoader`, which registers the file
+(`Omnibridge\Symfony\Omnibase\Routing\Loader\RouteTranslationsResourceLoader`, which registers the file
 as a resource and declares no route).
 
 The actions of `src/Controller/Action/` are plain classes whose `#[Route]` the
@@ -206,7 +206,7 @@ The rules a request meets beside the voters are the core's too, `Base\Request\Ru
 
 ### `AccessVoter`
 
-`Base\Security\Voter\AccessVoter` decides who may browse the site, from
+`Omnibridge\Symfony\Omnibase\Security\Voter\AccessVoter` decides who may browse the site, from
 `base.access_restriction` ([Configuration reference](configuration.md#access_restriction)).
 `SecuritySubscriber` asks it on each request.
 

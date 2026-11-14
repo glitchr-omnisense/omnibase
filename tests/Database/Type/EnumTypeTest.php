@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Database\Type;
 
-use Base\Bridge\Doctrine\EnumTypeAdapter;
+use Omnibridge\Doctrine\Omnibase\EnumTypeAdapter;
 use Base\Database\Type\EnumType;
 use Base\Enum\ThreadState;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
@@ -10,7 +10,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Its conversions and SQL declaration through Base\Bridge\Doctrine\EnumTypeAdapter, the enumeration's
+ * Its conversions and SQL declaration through Omnibridge\Doctrine\Omnibase\EnumTypeAdapter, the enumeration's
  * Doctrine type since step F2a.
  *
  * Exercised through a real concrete subclass (ThreadState) rather than a

@@ -6,7 +6,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Extension\RevisionRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Extension\RevisionRepository;
 
 use Base\Database\Attribute\Cache;
 

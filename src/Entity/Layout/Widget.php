@@ -16,7 +16,7 @@ use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Repository\Layout\WidgetRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\WidgetRepository;
 use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;

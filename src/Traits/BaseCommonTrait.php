@@ -7,7 +7,7 @@ use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\BaseService;
 use Base\Service\Obfuscator;
 use Base\Service\TradingInterface;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\MediaServiceInterface;

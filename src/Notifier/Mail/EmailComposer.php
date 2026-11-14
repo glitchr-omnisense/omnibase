@@ -5,7 +5,6 @@ namespace Base\Notifier\Mail;
 use Omnibridge\Contract\Views;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Twig\Environment;
 use Twig\Error\LoaderError;
 
 /**
@@ -51,22 +50,16 @@ final class EmailComposer
      * @param (\Closure(string $to): bool)|null      $isTest whether an e-mail to that address goes to the technical address instead (the Notifier's isTest(): base.notifier.technical_loopback, test_recipients)
      * @param (\Closure(string $id): string)|null    $trans  the words of a test e-mail (@emails.fake_test.*)
      * @param (\Closure(): array<string, mixed>)|null $globals what the templates read as globals where the host's Twig has none of omnibase's (`app`: MailVariables)
-     * @param Views|Environment                      $views  the views; Twig's environment is deprecated (until 6.0), wrapped in omnibridge/twig's TwigViews
+     * @param Views                      $views  the views
      */
     public function __construct(
-        Views|Environment $views,
+        Views $views,
         private readonly string|\Closure|null $from,
         private readonly ?\Closure $isTest = null,
         private readonly ?\Closure $trans = null,
         private readonly ?\Closure $globals = null,
     ) {
-        $this->views = self::views($views);
-    }
-
-    /** The views, Twig's environment (deprecated) wrapped in omnibridge/twig's TwigViews. */
-    public static function views(Views|Environment $views): Views
-    {
-        return \Base\View\ViewsAdapter::of($views);
+        $this->views = $views;
     }
 
     /**
@@ -140,9 +133,8 @@ final class EmailComposer
      *
      * @return array{html: string, subject: ?string}
      */
-    public static function render(Views|Environment $views, ?string $template, array $parameters): array
+    public static function render(Views $views, ?string $template, array $parameters): array
     {
-        $views = self::views($views);
         // A notification without an HTML template of its own is written in the e-mail frame, as one whose
         // template is not found: "" was given to Twig, which refused it ("Failed to render template \"\"").
         $template = $template ?: self::FRAME;

@@ -4,7 +4,6 @@ namespace Tests\Base\Traits;
 
 use Base\Service\Locator;
 use Base\Traits\BaseTrait;
-use Base\Traits\FrameworkAccessorsTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -18,9 +17,8 @@ use PHPUnit\Framework\TestCase;
  *   core (tests/Agnostic.php);
  * - each service comes in two forms: getX(), never null (MissingContractException when the host has
  *   none), and findX(), its optional form, null when the host has none;
- * - the framework's accessors it handed out before are Base\Traits\FrameworkAccessorsTrait's, each
- *   deprecated, and no class of src/ calls them through BaseTrait any more (the core's host code
- *   asks Base\Bridge\Symfony\FrameworkLocator).
+ * - the framework's accessors it handed out before (5.x's FrameworkAccessorsTrait) are gone since
+ *   6.0 (the core's host code asks Omnibridge\Symfony\Omnibase\FrameworkLocator).
  *
  * That a missing service throws is BaseTraitMissingContractTest's, and BareTest's without the
  * framework (tests/Contract/basetrait-seams-without-framework.php).
@@ -103,60 +101,13 @@ final class BaseTraitContractsTest extends TestCase
         self::assertGreaterThanOrEqual(11, $services);
     }
 
-    public function testTheFrameworkAccessorsAreDeprecated(): void
+    /** The framework's accessors BaseTrait handed out before (5.x's FrameworkAccessorsTrait) are gone since 6.0. */
+    public function testTheFrameworkAccessorsAreGone(): void
     {
-        $accessors = self::ownMethods(FrameworkAccessorsTrait::class, \ReflectionMethod::IS_PUBLIC);
-        self::assertCount(12, $accessors, 'getService, getDoctrine, getObjectManager, getEntityManager, getRepository, getClassMetadataManipulator, getTokenStorage, getRequestStack, getFirewallMap, getTwig, getSlugger, getRouter');
-
-        foreach ($accessors as $method) {
-            self::assertStringContainsString('@deprecated', (string) $method->getDocComment(), $method->getName());
-            self::assertTrue(method_exists(Locator::class, $method->getName()), 'BaseTrait still answers '.$method->getName().'()');
-
-            $deprecations = [];
-            set_error_handler(static function (int $level, string $message) use (&$deprecations): bool {
-                $deprecations[] = $message;
-
-                return true;
-            }, \E_USER_DEPRECATED);
-            try {
-                $arguments = $method->getNumberOfRequiredParameters() > 0 ? [\stdClass::class] : [];
-                Locator::{$method->getName()}(...$arguments);
-            } catch (\Throwable) {
-                // What the host answers does not matter here, only that the call is deprecated.
-            } finally {
-                restore_error_handler();
-            }
-            self::assertCount(1, $deprecations, $method->getName().'() is deprecated when called');
-            self::assertStringContainsString('BaseTrait::'.$method->getName().'() is deprecated', $deprecations[0]);
+        self::assertFalse(trait_exists('Base\\Traits\\FrameworkAccessorsTrait'));
+        foreach (['getService', 'getDoctrine', 'getObjectManager', 'getEntityManager', 'getRepository', 'getClassMetadataManipulator', 'getTokenStorage', 'getRequestStack', 'getFirewallMap', 'getTwig', 'getSlugger', 'getRouter'] as $accessor) {
+            self::assertFalse(method_exists(Locator::class, $accessor), 'BaseTrait no longer answers '.$accessor.'()');
         }
-    }
-
-    public function testNoClassOfTheCoreCallsThemThroughBaseTrait(): void
-    {
-        $deprecated = array_map(static fn (\ReflectionMethod $method): string => $method->getName(), self::ownMethods(FrameworkAccessorsTrait::class, \ReflectionMethod::IS_PUBLIC));
-        $directory = self::src('');
-        $calls = [];
-        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)) as $file) {
-            if ('php' !== $file->getExtension() || str_ends_with($file->getPathname(), '/Traits/FrameworkAccessorsTrait.php')) {
-                continue;
-            }
-            $tokens = array_values(array_filter(\PhpToken::tokenize((string) file_get_contents($file->getPathname())), static fn (\PhpToken $token): bool => !$token->isIgnorable()));
-            $class = self::declaredClass($tokens);
-            foreach ($tokens as $i => $token) {
-                if (!$token->is(\T_STRING) || !\in_array($token->text, $deprecated, true) || '(' !== ($tokens[$i + 1]->text ?? null)) {
-                    continue;
-                }
-                $operator = $tokens[$i - 1]->text ?? '';
-                $receiver = $tokens[$i - 2]->text ?? '';
-                $where = substr($file->getPathname(), \strlen($directory)).":{$token->line} {$receiver}{$operator}{$token->text}()";
-                if ('::' === $operator && \in_array(ltrim($receiver, '\\'), ['Locator', 'BaseService', 'Base\\Service\\Locator', 'Base\\Service\\BaseService'], true)) {
-                    $calls[] = $where;
-                } elseif ((('->' === $operator && '$this' === $receiver) || ('::' === $operator && \in_array($receiver, ['self', 'static', 'parent'], true))) && null !== $class && self::usesBaseTrait($class)) {
-                    $calls[] = $where;
-                }
-            }
-        }
-        self::assertSame([], $calls, 'the core asks Base\Bridge\Symfony\FrameworkLocator, or a contract');
     }
 
     /** @return list<\ReflectionMethod> the methods the trait declares in its own file, not those of the traits it uses */
@@ -178,42 +129,6 @@ final class BaseTraitContractsTest extends TestCase
         }
 
         return array_merge(...array_map(self::names(...), $type instanceof \ReflectionUnionType || $type instanceof \ReflectionIntersectionType ? $type->getTypes() : []));
-    }
-
-    /** @param list<\PhpToken> $tokens */
-    private static function declaredClass(array $tokens): ?string
-    {
-        $namespace = '';
-        foreach ($tokens as $i => $token) {
-            if ($token->is(\T_NAMESPACE)) {
-                $namespace = $tokens[$i + 1]->text.'\\';
-            }
-            if ($token->is([\T_CLASS, \T_TRAIT]) && $tokens[$i + 1]->is(\T_STRING) && !(($tokens[$i - 1] ?? null)?->is(\T_DOUBLE_COLON))) {
-                return $namespace.$tokens[$i + 1]->text;
-            }
-        }
-
-        return null;
-    }
-
-    /** Whether the class, a parent of it or a trait of theirs uses BaseTrait. */
-    private static function usesBaseTrait(string $class): bool
-    {
-        if (!class_exists($class) && !trait_exists($class)) {
-            return false;
-        }
-        $traits = [];
-        $pending = [$class, ...array_values(class_parents($class) ?: [])];
-        while ($pending) {
-            foreach (class_uses(array_shift($pending)) ?: [] as $trait) {
-                if (!isset($traits[$trait])) {
-                    $traits[$trait] = true;
-                    $pending[] = $trait;
-                }
-            }
-        }
-
-        return isset($traits[BaseTrait::class]) || BaseTrait::class === $class;
     }
 
     private static function src(string $path): string

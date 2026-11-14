@@ -10,7 +10,7 @@
  * of the bundle. Returns what it found.
  */
 
-use Base\Bridge\Doctrine\Types;
+use Omnibridge\Doctrine\Omnibase\Types;
 use Base\Entity\User\Passkey;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Types\Type;

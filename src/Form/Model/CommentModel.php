@@ -9,7 +9,7 @@ use Base\Service\Model\SpamProtectionInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * What the comment form (Base\Form\Type\CommentType) edits - not the entity
+ * What the comment form (Omnibridge\Symfony\Omnibase\Form\Type\CommentType) edits - not the entity
  * (omnibase's FormFactory refuses an entity as form data): the name, the
  * e-mail, the site, the text. It implements SpamProtectionInterface so
  * omnibase's FormTypeSpamExtension sends it to Akismet; the score lands

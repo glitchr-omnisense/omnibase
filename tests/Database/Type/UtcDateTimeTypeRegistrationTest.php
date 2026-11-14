@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Database\Type;
 
-use Base\Database\Type\UtcDateTimeImmutableType;
-use Base\Database\Type\UtcDateTimeType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeType;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

@@ -29,7 +29,7 @@ security:
             # authenticator, as in an application; it is asked before
             # form_login, which stays the entry point.
             custom_authenticator:
-                - Base\Security\LoginFormAuthenticator
+                - Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator
             entry_point: form_login
 
     # The demo signs you in without a login form (see DemoController::index);

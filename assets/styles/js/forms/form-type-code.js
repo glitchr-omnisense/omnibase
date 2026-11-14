@@ -1,5 +1,5 @@
 /*
- * One box per character (Base\Field\Type\CodeType). The boxes feed the
+ * One box per character (Omnibridge\Symfony\Omnibase\Field\Type\CodeType). The boxes feed the
  * wrapper's hidden input, which is the real field value: typing moves to
  * the next box, backspace to the previous, a paste of the whole code
  * spreads over the boxes, and data-code-submit submits the form once

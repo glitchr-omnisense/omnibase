@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\Set\BookRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\Set\BookRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:BookRepository::class)]

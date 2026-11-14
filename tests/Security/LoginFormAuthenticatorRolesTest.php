@@ -4,8 +4,8 @@ namespace Tests\Base\Security;
 
 use Base\Entity\User;
 use Base\Entity\User\Group;
-use Base\Routing\AdvancedRouterInterface;
-use Base\Security\LoginFormAuthenticator;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator;
 use Base\Service\ReferrerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

@@ -7,7 +7,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Common\AbstractRule;
 use Base\Entity\User\Group;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\Attribute\GroupRuleRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\GroupRuleRepository;
 
 /**
  * A condition a user must satisfy for a group to be open to them.

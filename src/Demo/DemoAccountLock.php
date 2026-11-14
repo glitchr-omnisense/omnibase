@@ -9,7 +9,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * A demonstration account stays what its declaration says (plan "omnibase
- * agnostic", step F5a: the logic of Base\DatabaseSubscriber\DemoAccountLockSubscriber,
+ * agnostic", step F5a: the logic of Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\DemoAccountLockSubscriber,
  * on no persistence nor host): its identifier, its address, its password,
  * its second factor are put back as the database had them, it is not
  * disabled. The persistence's listener gives each account's original row and

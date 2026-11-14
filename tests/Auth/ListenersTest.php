@@ -6,7 +6,7 @@ use Base\Auth\Listener\GuardSignIn;
 use Base\Auth\Listener\TrackConnections;
 use Base\Auth\Listener\WarnNewDevice;
 use Base\Repository\User\Connections;
-use Base\Security\SignInGuard;
+use Omnibridge\Symfony\Omnibase\Security\SignInGuard;
 use Base\Security\UserTracker;
 use Base\Service\FormGuard;
 use Base\Service\SecurityPolicy;

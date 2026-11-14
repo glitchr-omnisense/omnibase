@@ -16,7 +16,7 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Contract\Runtime;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\MetadataManipulator;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\SingletonTrait;
@@ -162,7 +162,7 @@ class AttributeReader extends AbstractLocalCache
 
     /**
      * omnibase's contract (Base\Service\ParameterBagInterface), the container's
-     * `parameter_bag` under Symfony, which Base\Service\ParameterBag decorates.
+     * `parameter_bag` under Symfony, which Omnibridge\Symfony\Omnibase\Service\ParameterBag decorates.
      *
      * @var ParameterBagInterface
      */
@@ -215,7 +215,7 @@ class AttributeReader extends AbstractLocalCache
 
     /**
      * The event dispatcher, the router, the filesystem, the request stack and the token storage are the
-     * framework's, and may be null: an entity manager built by hand (Base\Bridge\Doctrine\Mapping) reads the
+     * framework's, and may be null: an entity manager built by hand (Omnibridge\Doctrine\Omnibase\Mapping) reads the
      * attributes of its entities with none of them - what needs one (an asset's base path, the user signed in,
      * the routes' attributes) answers without it. The entity manager too (plan "omnibase agnostic", step E3): the
      * mapping is read through the manipulator, on the persistence's shapes, so a reader is made where doctrine/orm is
@@ -392,7 +392,7 @@ class AttributeReader extends AbstractLocalCache
      * The folders base.attributes.paths names. The configuration's list is in
      * the bag whole (base.attributes.paths) and item by item
      * (base.attributes.paths.0, .1...: omnibase's flattened parameters, and
-     * what Base\Bridge\Doctrine\Mapping gives an entity manager built by
+     * what Omnibridge\Doctrine\Omnibase\Mapping gives an entity manager built by
      * hand); the pattern that read them wanted a dot after the number
      * (paths.0.), which no key has, so none was ever read.
      *

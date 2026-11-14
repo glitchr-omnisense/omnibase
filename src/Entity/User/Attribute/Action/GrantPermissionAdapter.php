@@ -6,9 +6,9 @@ use Base\Database\Attribute\Cache;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractActionAdapter;
 use Base\Entity\User;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\Attribute\Action\GrantPermissionAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Action\GrantPermissionAdapterRepository;
 
 /**
  * Awards one or more fine-grained permission tags.

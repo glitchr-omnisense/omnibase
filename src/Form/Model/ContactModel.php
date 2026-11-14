@@ -8,7 +8,7 @@ use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * What the contact form (Base\Form\Type\ContactType) sends: a name, an
+ * What the contact form (Omnibridge\Symfony\Omnibase\Form\Type\ContactType) sends: a name, an
  * e-mail, a message, and as the form is set up a phone, a subject,
  * attachments. `website` is the trap: left empty by people, filled by the
  * robots that fill every field (isRobot()).

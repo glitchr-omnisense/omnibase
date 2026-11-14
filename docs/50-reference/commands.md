@@ -7,7 +7,7 @@ order: 20
 
 The commands the core registers (`config/services/core.php`, `config/services/demo.php`,
 `services-decoration.php`), as `bin/console list` shows them in the core's
-harness. Most extend `Base\Console\Command`, which needs a `ConsoleOutput` (it
+harness. Most extend `Omnibridge\Symfony\Omnibase\Console\Command`, which needs a `ConsoleOutput` (it
 throws `LogicException` on any other output, a `BufferedOutput` included) and
 adds a `--purpose` option to some of them; `user:create` is a plain Symfony
 command, usable from scripts and tests.
@@ -102,7 +102,7 @@ Options:
       --no-optional-warmers  Skip optional cache warmers (faster)
 ```
 
-`Base\Console\Command\CacheClearCommand` runs Symfony's own command
+`Omnibridge\Symfony\Omnibase\Console\Command\CacheClearCommand` runs Symfony's own command
 (`console.command.cache_clear`) between omnibase's steps:
 
 1. It takes a lock, `var/cache/<env>/.lock` (a lock file older than 120 seconds

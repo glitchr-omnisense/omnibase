@@ -3,7 +3,7 @@
 namespace Base\Contract;
 
 /*
- * What Base\Repository\User\PasskeyRepository declares to
+ * What Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository declares to
  * web-auth/webauthn-symfony-bundle (plan "omniauth", AU1; the pattern of
  * Base\Contract\SecurityUserLoader, R2): with the bundle installed,
  * Base\Bridge\Symfony\PasskeyRecords - its CredentialRecordRepositoryInterface

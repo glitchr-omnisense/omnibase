@@ -12,7 +12,7 @@ use Omnibridge\Schema\Relation;
  *
  * The behaviours and ClassMetadataManipulator ask it in place of Doctrine's ClassMetadata, through
  * EntityShapes: built from a Description (DescriptionShapes), or from what the installed persistence
- * resolved (Base\Bridge\Doctrine\DoctrineShapes, omnibridge/doctrine's MetadataDescription of each
+ * resolved (Omnibridge\Doctrine\Omnibase\DoctrineShapes, omnibridge/doctrine's MetadataDescription of each
  * class - the same description, SchemaDescriptionTest proves it).
  */
 final class EntityShape

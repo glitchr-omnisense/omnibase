@@ -15,7 +15,7 @@ use Omnibridge\Schema\Declaration\ClassDeclaration;
  * Doctrine: on a to-many relation or a set column, the field named by orderBy
  * is mapped if nothing maps it - a nullable json column, where the positions
  * are kept; a property that is an #[Alias] of a relation counts as that relation. The set types by name, to know a set column (omnibase's
- * enumerations: Base\Bridge\Doctrine\Types::enumerations()).
+ * enumerations: Omnibridge\Doctrine\Omnibase\Types::enumerations()).
  */
 final class OrderColumnRule implements Rule
 {

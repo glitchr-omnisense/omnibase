@@ -15,7 +15,6 @@ use Imagine\Image\Palette\RGB;
 use League\Flysystem\UnableToCreateDirectory;
 use LogicException;
 use Omnibridge\Contract\Views;
-use Twig\Environment;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -28,7 +27,7 @@ use Imagine\Image\ImagineInterface;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
-use Base\Controller\UX\MediaController;
+use Omnibridge\Symfony\Omnibase\Controller\UX\MediaController;
 
 class MediaService extends FileService implements MediaServiceInterface
 {
@@ -80,7 +79,7 @@ class MediaService extends FileService implements MediaServiceInterface
     protected array $mountStorages = [];
 
     public function __construct(
-        Views|Environment|null  $views,
+        ?Views  $views,
         MediaRouter             $router,
         ObfuscatorInterface     $obfuscator,
         Storages                $flysystem,

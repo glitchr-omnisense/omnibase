@@ -13,7 +13,7 @@ use Base\Notifier\Mail\EmailComposer;
 use Base\Notifier\Mail\SignInMails;
 use Base\Notifier\Notifier;
 use Base\Notifier\Recipient\Recipient;
-use Base\Repository\User\ConnectionRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\ConnectionRepository;
 use Base\Security\ConnectionTracker;
 use Base\Security\SignInCaptcha;
 use Base\Service\FormGuard;
@@ -93,11 +93,11 @@ final class HostlessEffectsTest extends KernelTestCase
         $connections = $this->entityManager()->getRepository(Connection::class);
         \assert($connections instanceof ConnectionRepository);
         $browser = 'browser-of-another-host';
-        $tracker = new ConnectionTracker($this->entityManager(), $connections, static fn (): string => $browser, static fn (): string => 'twin.example.org');
+        $tracker = new ConnectionTracker(\Base\Database\UnitOfWorks::of($this->entityManager()), $connections, static fn (): string => $browser, static fn (): string => 'twin.example.org');
 
         try {
             $events = new EventDispatcher();
-            $track = new TrackConnections($tracker, $this->entityManager(), new UserAccounts($this->entityManager()));
+            $track = new TrackConnections($tracker, \Base\Database\UnitOfWorks::of($this->entityManager()), new UserAccounts(\Base\Database\UnitOfWorks::of($this->entityManager())));
             foreach (TrackConnections::events() as $event => $method) {
                 $events->addListener($event, [$track, $method]);
             }
@@ -204,7 +204,7 @@ final class HostlessEffectsTest extends KernelTestCase
         $connections = $this->entityManager()->getRepository(Connection::class);
         \assert($connections instanceof ConnectionRepository);
         $browser = 'first-browser';
-        $tracker = new ConnectionTracker($this->entityManager(), $connections, static function () use (&$browser): string {
+        $tracker = new ConnectionTracker(\Base\Database\UnitOfWorks::of($this->entityManager()), $connections, static function () use (&$browser): string {
             return $browser;
         }, static fn (): string => 'twin.example.org');
         $settings = [SecurityPolicy::NEW_DEVICE_EMAIL => true, SecurityPolicy::NEW_DEVICE_PROMPT => '1'];
@@ -213,7 +213,7 @@ final class HostlessEffectsTest extends KernelTestCase
 
         try {
             $events = new EventDispatcher();
-            $track = new TrackConnections($tracker, $this->entityManager(), new UserAccounts($this->entityManager()));
+            $track = new TrackConnections($tracker, \Base\Database\UnitOfWorks::of($this->entityManager()), new UserAccounts(\Base\Database\UnitOfWorks::of($this->entityManager())));
             $warn = new WarnNewDevice($policy, $tracker, $connections, new ArrayState($state), static fn (): bool => false, $this->mails());
             foreach ([$track, $warn] as $listener) {
                 foreach ($listener::events() as $event => $method) {
@@ -293,7 +293,7 @@ final class HostlessEffectsTest extends KernelTestCase
 
         // The addresses as the Notifier's router writes them in this kernel (no request: a path); a host's Urls
         // gives them whole, as the router does on a request.
-        $router = $container->get(\Base\Routing\AdvancedRouterInterface::class);
+        $router = $container->get(\Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface::class);
         $urls = new class($router, $container->get(Urls::class)) implements Urls {
             public function __construct(private readonly object $router, private readonly Urls $urls)
             {

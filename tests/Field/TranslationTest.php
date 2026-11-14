@@ -88,7 +88,7 @@ final class TranslationTest extends KernelTestCase
                 self::assertSame($kind, $neutral[$name]['kind'] ?? (isset($neutral[$name]['form_type']) ? RecordFields::kindOf($neutral[$name]['form_type']) : null), $name);
             }
         }
-        self::assertSame(Kind::CHOICE, RecordFields::kindOf('Base\Field\Type\SelectType'));
+        self::assertSame(Kind::CHOICE, RecordFields::kindOf('Omnibridge\Symfony\Omnibase\Field\Type\SelectType'));
         self::assertSame(Kind::TEXTAREA, RecordFields::kindOf('Symfony\Component\Form\Extension\Core\Type\TextareaType'));
         self::assertSame(Kind::EDITOR, RecordFields::kindOf('Some\Other\Host\EditorType'), 'read by its name where no map knows it');
         self::assertSame(Kind::CUSTOM, RecordFields::kindOf('Symfony\Component\Form\Extension\Core\Type\RangeType'));

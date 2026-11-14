@@ -10,7 +10,7 @@ An application hands its errors to omnibase:
 ```yaml
 # config/packages/framework.yaml
 framework:
-    error_controller: Base\Controller\ErrorController::Main
+    error_controller: Omnibridge\Symfony\Omnibase\Controller\ErrorController::Main
 ```
 
 - **In debug** (dev, and the test environment): Symfony's debug page
@@ -46,7 +46,7 @@ a site's Makefile writes in `.env.local`) is mapped from `kernel.project_dir` wi
 Symfony's own format, `vscode://file/%f:%l&/srv/app/>/Users/me/site/`
 (omnibridge/symfony's `Omnibridge\Symfony\FileLinks`, formerly `Base\Bridge\Symfony\FileLinks`). `debug.file_link_formatter` is decorated with
 Symfony's `FileLinkFormatter` on that format (the HTML error renderer and the
-profiler receive it), and `SYMFONY_IDE` is set to it when `Base\BaseBundle` is
+profiler receive it), and `SYMFONY_IDE` is set to it when `Omnibridge\Symfony\Omnibase\BaseBundle` is
 constructed, for the page Symfony's `ErrorHandler` renders by itself before a
 request is handled (a container that does not compile). A site's own
 `framework.ide` or `SYMFONY_IDE` is kept; one that already maps (`&...>`) too; with
@@ -68,8 +68,8 @@ exists:
 - **While access is restricted** (the `base.settings.access_restriction.*`
   settings: a site not open yet, or under maintenance), the back office and
   the profiler answer 404 to whoever is not granted `BACKEND`
-  (`Base\Subscriber\SecuritySubscriber`).
-- **The profiler outside debug** answers 404 (`Base\Subscriber\ProfilerSubscriber`).
+  (`Omnibridge\Symfony\Omnibase\Subscriber\SecuritySubscriber`).
+- **The profiler outside debug** answers 404 (`Omnibridge\Symfony\Omnibase\Subscriber\ProfilerSubscriber`).
 
 An application that wants a record to stay unknown to those who may not see
 it (a private order, another customer's file) throws

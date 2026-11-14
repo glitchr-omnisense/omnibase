@@ -14,11 +14,11 @@ a name, an e-mail (never shown), a site, a text, a reply to another comment
 - Akismet: the form's model (`Base\Form\Model\CommentModel`) implements
   `SpamProtectionInterface`; the score decides the state (`toComment($thread,
   $autoApprove)`).
-- Robots: `Base\Form\Type\CommentType` adds a trap field (`url`) and the time the
+- Robots: `Omnibridge\Symfony\Omnibase\Form\Type\CommentType` adds a trap field (`url`) and the time the
   form was opened (`opened`); `Base\Service\CommentGuard::check($form,
   $request)` answers `trapped` (thank it, save nothing), `too_fast`, `flood`
   or null (`base.comments.min_delay`, `base.comments.flood_interval`).
-- Reading: `Base\Repository\Thread\CommentRepository::findVisible($thread)`,
+- Reading: `Omnibridge\Doctrine\Omnibase\Repository\Thread\CommentRepository::findVisible($thread)`,
   `countVisible()`, `findPending()`, `countPending()`.
 
 ```php

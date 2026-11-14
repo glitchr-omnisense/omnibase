@@ -119,8 +119,8 @@ final class EditorTest extends KernelTestCase
         static::getContainer()->get('request_stack')->push($request);
         $document = '{"time":1,"blocks":[{"id":"a","type":"paragraph","data":{"text":"Help!"}}]}';
         $view = static::getContainer()->get('form.factory')->createNamedBuilder('crud_form', \Symfony\Component\Form\Extension\Core\Type\FormType::class, ['content' => $document, 'html' => '<p>Help!</p>'], ['csrf_protection' => false])
-            ->add('content', 'Base\\Field\\Type\\EditorType')
-            ->add('html', 'Base\\Field\\Type\\WysiwygType')
+            ->add('content', 'Omnibridge\\Symfony\\Omnibase\\Field\\Type\\EditorType')
+            ->add('html', 'Omnibridge\\Symfony\\Omnibase\\Field\\Type\\WysiwygType')
             ->getForm()->createView();
 
         $editorJs = static::getContainer()->get(EditorJs::class);

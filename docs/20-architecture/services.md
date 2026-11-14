@@ -66,10 +66,9 @@ environment (`config/services/twig.php`, omnibridge/laravel's provider); an appl
 to render them with another engine. The e-mail's text part is written in PHP (`EmailComposer::text()`,
 what Twig wrote from `EmailComposer::TEXT`).
 
-Each of these constructors still accepts Twig's environment, deprecated until 6.0
-(`Base\View\ViewsAdapter` wraps it in a `TwigViews`, with an `E_USER_DEPRECATED`).
-`BaseNotifier::getEnvironment()` is deprecated for `getViews()`; `BaseNotifierInterface` declares
-`getViews()` in its place.
+Since 6.0 these constructors take `Views` only (5.x still accepted Twig's environment, wrapped by
+`Base\View\ViewsAdapter`): give omnibridge/twig's `TwigViews` over it. `BaseNotifier::getEnvironment()`
+is gone; `getViews()` answers.
 
 ## On contracts
 
@@ -92,7 +91,7 @@ session's `session()`, `remember()`, `forget()`, its flashes `flash()`, `flashes
 that still needs the host's own object. Symfony answers it with omnibridge/symfony's `StackRequests`,
 Laravel with omnibridge/laravel's `LaravelRequests`; outside a request nothing is read or written.
 
-| Service | Reads now | Former argument (deprecated until 6.0) |
+| Service | Reads now | Former argument (removed at 6.0) |
 |---|---|---|
 | `AbstractEventDispatcher` (user.*, thread.*, an application's) | `Requests` (the event's request), any PSR-14 dispatcher | `RequestStack`, Symfony's dispatcher contract |
 | `SpamChecker` | `Requests` (address, browser, referrer, page), the home page through the router or `Urls` | `RequestStack` |

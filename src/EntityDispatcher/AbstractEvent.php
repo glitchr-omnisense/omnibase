@@ -4,7 +4,6 @@ namespace Base\EntityDispatcher;
 
 use Base\Database\UnitOfWorks;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\Persistence\ObjectManager;
 use Omnibridge\Event\NamedEvent;
 use Omnibridge\Persistence\Lifecycle\EntityEvent;
 use Omnibridge\Persistence\UnitOfWork;
@@ -61,18 +60,6 @@ abstract class AbstractEvent extends Event implements EventInterface, NamedEvent
     public function getRequest(): ?Request
     {
         return $this->request;
-    }
-
-    /**
-     * Doctrine's object manager under Doctrine's event manager; the unit of work otherwise.
-     *
-     * @deprecated since omnisense/omnibase 5.x, removed at 6.0: getUnitOfWork()
-     *
-     * @return ObjectManager|UnitOfWork
-     */
-    public function getObjectManager()
-    {
-        return $this->eventArgs instanceof EntityEvent ? $this->eventArgs->unitOfWork : $this->eventArgs->getObjectManager();
     }
 
     public function getObjectClass(): string

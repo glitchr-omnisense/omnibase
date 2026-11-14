@@ -142,7 +142,7 @@ passkey:
     serverError: "Le serveur a refusé l'opération : {reason}"
     generic: "La clé d'accès n'a pas pu être utilisée ({reason})."
 
-# Base\Form\Type\CommentType and Base\Service\CommentGuard.
+# Omnibridge\Symfony\Omnibase\Form\Type\CommentType and Base\Service\CommentGuard.
 comment:
     fields:
         name: "Votre nom ou pseudo"
@@ -156,7 +156,7 @@ comment:
 
 # La mention de protection des données sous un formulaire qui recueille des
 # données personnelles, et la case à cocher quand le consentement est demandé
-# (Base\Form\Type\PrivacyType).
+# (Omnibridge\Symfony\Omnibase\Form\Type\PrivacyType).
 privacy:
     notice: "Les informations transmises servent uniquement à vous répondre et ne sont communiquées à personne. Vous pouvez à tout moment en demander la rectification ou la suppression."
     consent: "J'accepte que ces informations servent à me répondre."

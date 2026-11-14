@@ -69,7 +69,7 @@ class SymfonyAdapterTest extends TestCase
     {
         $definition = FormDefinition::new('x')->add(BooleanField::new('notify'))->setCsrf(false);
 
-        self::assertSame('Base\Field\Type\BooleanType', $definition->get('notify')->getFormType());
+        self::assertSame('Omnibridge\Symfony\Omnibase\Field\Type\BooleanType', $definition->get('notify')->getFormType());
         self::assertSame('Omnibridge\Symfony\Omnibase\Field\Type\BooleanType', (new \ReflectionClass($definition->get('notify')->getFormType()))->getName());
     }
 

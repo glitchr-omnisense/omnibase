@@ -2,13 +2,13 @@
 
 namespace Tests\Base\Bridge\Doctrine;
 
-use Base\Bridge\Doctrine\MySQLSchemaManager;
-use Base\Bridge\Doctrine\SchemaManagerFactory;
-use Base\Database\Type\ArrayType;
+use Omnibridge\Doctrine\Omnibase\MySQLSchemaManager;
+use Omnibridge\Doctrine\Omnibase\SchemaManagerFactory;
+use Omnibridge\Doctrine\Omnibase\Database\Type\ArrayType;
 use Base\Database\Type\EnumType;
-use Base\Database\Type\MySQLSetType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\MySQLSetType;
 use Base\Database\Type\SetType;
-use Base\Database\Type\UtcDateTimeImmutableType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQL84Platform;
@@ -58,7 +58,7 @@ final class SchemaManagerTestReader extends MySQLSchemaManager
  * its mapping while nothing changed, and differs once an enumeration's values
  * change - without the "(DC2Type:...)" comments the plugin read and
  * EnumSubscriber wrote, which a database of before still has and which are
- * left out. On MySQL (the sites' database: Base\Bridge\Doctrine\MySQLSchemaManager)
+ * left out. On MySQL (the sites' database: Omnibridge\Doctrine\Omnibase\MySQLSchemaManager)
  * and on SQLite (the harness's: a schema created, read back and compared).
  */
 final class SchemaManagerTest extends TestCase
@@ -67,7 +67,7 @@ final class SchemaManagerTest extends TestCase
     {
         $name = strtolower(substr($class, strrpos($class, '\\') + 1));
         // An enumeration is registered as an EnumTypeAdapter of it (plan "omnibase agnostic", step F2a).
-        \Base\Bridge\Doctrine\Types::registerEnumerations([$name => $class]);
+        \Omnibridge\Doctrine\Omnibase\Types::registerEnumerations([$name => $class]);
 
         return Type::getType($name);
     }

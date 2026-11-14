@@ -4,7 +4,7 @@ namespace Tests\Base\Database\Entity\Extension;
 
 use Base\Entity\Extension\TrashBall;
 use Base\Entity\Thread;
-use Base\EntitySubscriber\TrasheableSubscriber;
+use Omnibridge\Doctrine\Omnibase\EntitySubscriber\TrasheableSubscriber;
 use Base\Database\UnitOfWorks;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Base\Database\Backend\BothBackends;

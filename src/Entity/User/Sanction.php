@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use Base\Entity\User;
-use Base\Repository\User\SanctionRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\SanctionRepository;
 use Base\Service\Model\IconizeInterface;
 use DateTime;
 use DateTimeInterface;

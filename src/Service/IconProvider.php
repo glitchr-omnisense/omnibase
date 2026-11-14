@@ -9,7 +9,7 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Database\Type\EnumType;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use ErrorException;
 
 class IconProvider extends AbstractLocalCache

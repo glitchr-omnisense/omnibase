@@ -10,7 +10,7 @@ use Omnibridge\Persistence\Lifecycle;
 /**
  * The SettingBag's snapshot emptied at every Setting or SettingIntl written, whatever writes it (the
  * admin CRUD's plain flush included), on omnisense/omnibridge's neutral lifecycle events (plan
- * "omnibase agnostic", step F2b). Base\EntitySubscriber\SettingSubscriber relays Doctrine's to it.
+ * "omnibase agnostic", step F2b). Omnibridge\Doctrine\Omnibase\EntitySubscriber\SettingSubscriber relays Doctrine's to it.
  */
 final class SettingsInvalidation
 {

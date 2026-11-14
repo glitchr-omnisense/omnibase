@@ -43,7 +43,7 @@ the site's when it has one.
 ## The subject is written in the template
 
 `{% block subject %}` of a `TemplatedEmail`'s template is the message's
-subject (`Base\Subscriber\TemplatedEmailSubjectSubscriber`, before the body
+subject (`Omnibridge\Symfony\Omnibase\Subscriber\TemplatedEmailSubjectSubscriber`, before the body
 is rendered): rendered with the e-mail's context, tags removed, entities
 decoded. It was only printed in the body, and the message left without a
 subject.

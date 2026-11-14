@@ -5,7 +5,7 @@ namespace Tests\Base\Field;
 use Base\Entity\Thread;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\User\PushSubscription;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Doctrine\ORM\Decorator\EntityManagerDecorator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -65,7 +65,7 @@ class SelectTypePlainRepositoryTest extends KernelTestCase
         $this->type = static::getContainer()->get('form.registry')->getType(SelectType::class)->getInnerType();
         $property = new \ReflectionProperty(SelectType::class, 'repositories');
         $this->original = $property->getValue($this->type);
-        $property->setValue($this->type, new \Base\Bridge\Doctrine\DoctrineRepositories(new class($em) extends EntityManagerDecorator {
+        $property->setValue($this->type, new \Omnibridge\Doctrine\Omnibase\DoctrineRepositories(new class($em) extends EntityManagerDecorator {
             /**
              * @template T of object
              *

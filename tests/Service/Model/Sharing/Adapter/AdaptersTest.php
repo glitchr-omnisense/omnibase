@@ -33,7 +33,7 @@ class AdaptersTest extends TestCase
 
     private function makeAdapter(string $class): SharingAdapterInterface
     {
-        return new $class(new Environment(new ArrayLoader([])));
+        return new $class(new \Omnibridge\Twig\TwigViews(new Environment(new ArrayLoader([]))));
     }
 
     public function testIdentifiersAreUniqueAndStable(): void

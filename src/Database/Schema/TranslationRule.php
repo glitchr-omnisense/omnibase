@@ -11,7 +11,7 @@ use Omnibridge\Schema\CamelCaseNaming;
 use Omnibridge\Schema\Declaration\ClassDeclaration;
 
 /**
- * The translations' mapping, as Base\DatabaseSubscriber\IntlSubscriber gives it
+ * The translations' mapping, as Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\IntlSubscriber gives it
  * to Doctrine, on the description built without it:
  *
  * - before its declaration is read, a translation class (ThreadIntl, the

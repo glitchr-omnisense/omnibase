@@ -4,10 +4,9 @@ namespace Base\Database\Mapping;
 
 /**
  * The entities' shapes (plan "omnibase agnostic", step F2c): from a Description (DescriptionShapes), or
- * from the installed persistence (Base\Bridge\Doctrine\DoctrineShapes on Doctrine).
+ * from the installed persistence (Omnibridge\Doctrine\Omnibase\DoctrineShapes on Doctrine).
  *
- * Both list the mapped entities' classes as well, classes(): list<string> (step B1d). Not declared here yet: an
- * implementation written against this interface before would no longer load; it is at 6.0 (step S done).
+ * Both list the mapped entities' classes as well, classes() (step B1d; declared here since 6.0).
  */
 interface EntityShapes
 {
@@ -21,4 +20,11 @@ interface EntityShapes
      * @throws \OutOfBoundsException for a class that is not mapped
      */
     public function shape(string|object $class): EntityShape;
+
+    /**
+     * The mapped entities' classes.
+     *
+     * @return list<string>
+     */
+    public function classes(): array;
 }

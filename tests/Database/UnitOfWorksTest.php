@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Database;
 
-use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Attribute\Backend\Backends;
 use Base\Database\Backend\ConditionalUpdates;
 use Base\Database\Backend\EntityCache;
@@ -62,7 +62,7 @@ final class UnitOfWorksTest extends KernelTestCase
         $unitOfWork = $container->get(UnitOfWork::class);
 
         self::assertSame($container->get(Backend::class)->unitOfWork(), $unitOfWork, 'the backend\'s');
-        self::assertSame($unitOfWork, $container->get('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork'), 'the union a deprecated constructor is autowired with');
+        self::assertFalse($container->has('Doctrine\ORM\EntityManagerInterface|Omnibridge\Persistence\UnitOfWork'), 'no union of a deprecated constructor any more (6.0)');
         if ('doctrine' === $this->hostPersistence()) {
             // Doctrine's over its entity manager.
             self::assertInstanceOf(DoctrineUnitOfWork::class, $unitOfWork);
@@ -91,7 +91,7 @@ final class UnitOfWorksTest extends KernelTestCase
     /** Laravel's container resolves no union type: the repositories' constructor takes the entity manager alone. */
     public function testTheRepositoriesAreAutowiredByAnyContainer(): void
     {
-        $parameters = (new \ReflectionMethod(\Base\Bridge\Doctrine\DoctrineRepositories::class, '__construct'))->getParameters();
+        $parameters = (new \ReflectionMethod(\Omnibridge\Doctrine\Omnibase\DoctrineRepositories::class, '__construct'))->getParameters();
 
         self::assertCount(1, $parameters);
         self::assertInstanceOf(\ReflectionNamedType::class, $parameters[0]->getType());
@@ -138,15 +138,18 @@ final class UnitOfWorksTest extends KernelTestCase
         }
     }
 
-    public function testTheServicesTakeTheEntityManagerStill(): void
+    /** Since 6.0 a service of the core takes the unit of work only: an entity manager is made one by UnitOfWorks::of(). */
+    public function testTheServicesTakeTheUnitOfWorkOnly(): void
     {
         self::bootKernel();
         $container = static::getContainer();
-        $settings = $container->get(SettingBag::class);
-
-        self::assertInstanceOf(SettingBag::class, $settings);
         $entityManager = $container->get('doctrine')->getManager();
-        $tracker = new \Base\Security\ConnectionTracker($entityManager, $container->get(\Base\Repository\User\Connections::class));
-        self::assertInstanceOf(\Base\Security\ConnectionTracker::class, $tracker, 'the deprecated entity manager is adapted');
+        $connections = $container->get(\Base\Repository\User\Connections::class);
+
+        $tracker = new \Base\Security\ConnectionTracker(UnitOfWorks::of($entityManager), $connections);
+        self::assertInstanceOf(\Base\Security\ConnectionTracker::class, $tracker);
+
+        $this->expectException(\TypeError::class);
+        $tracker = new \Base\Security\ConnectionTracker($entityManager, $connections);
     }
 }

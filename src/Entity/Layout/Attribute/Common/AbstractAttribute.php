@@ -7,7 +7,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Common\AbstractAttributeRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Common\AbstractAttributeRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:AbstractAttributeRepository::class)]

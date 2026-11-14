@@ -11,7 +11,7 @@ use Base\Validator\Constraints as AssertBase;
 use Base\Database\Attribute\Slugify;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\SlotRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\SlotRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: SlotRepository::class)]

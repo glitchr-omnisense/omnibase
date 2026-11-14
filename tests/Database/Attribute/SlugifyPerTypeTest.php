@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Database\Attribute;
 
-use Base\Bridge\Doctrine\Behaviour\DoctrineSlugifyBackend;
-use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineSlugifyBackend;
+use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Attribute\Slugify;
 use Base\Entity\Thread\Taxon;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

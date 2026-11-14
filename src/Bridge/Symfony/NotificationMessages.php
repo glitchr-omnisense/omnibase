@@ -19,7 +19,6 @@ use Symfony\Component\Notifier\Recipient\NoRecipient;
 use Throwable;
 use Omnibridge\Contract\Views;
 use Omnibridge\Twig\TwigViews;
-use Twig\Environment;
 use UnexpectedValueException;
 
 /**
@@ -62,17 +61,16 @@ final class NotificationMessages
         return new Response($html);
     }
 
-    public static function email(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views|Environment $views, string $projectDir): EmailMessage
+    public static function email(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views $views, string $projectDir): EmailMessage
     {
         // Without Symfony's Twig bridge (a host that is not Symfony: Laravel), or views that are not Twig's: the
         // e-mail EmailComposer writes the same way under every host (plan "omnibase agnostic", F5c).
-        if (!class_exists(TemplatedEmail::class) || !($views instanceof Environment || $views instanceof TwigViews)) {
+        if (!class_exists(TemplatedEmail::class) || !$views instanceof TwigViews) {
             return self::composed($notification, $recipient, $notifier, $views);
         }
 
         // Symfony's templated e-mail is Twig's (WrappedTemplatedEmail): the environment behind the views (step F5a).
-        $twig = $views instanceof Environment ? $views : ($views instanceof TwigViews ? $views->environment() : throw new \LogicException('Symfony\'s notification e-mail is rendered by Twig: the views are '.get_debug_type($views).', not omnibridge/twig\'s TwigViews.'));
-        $views = $views instanceof Views ? $views : new TwigViews($views);
+        $twig = $views->environment();
         $message = EmailMessage::fromNotification($notification, $recipient);
 
         /**
@@ -210,7 +208,7 @@ final class NotificationMessages
      * address, to the recipient or the technical address for a test one, a plain symfony/mime Email in
      * the Notifier's EmailMessage. Forwarded to the administrators, it says so as Symfony's does.
      */
-    public static function composed(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views|Environment $views): EmailMessage
+    public static function composed(Notification $notification, EmailRecipientInterface $recipient, BaseNotifierInterface $notifier, Views $views): EmailMessage
     {
         $technical = $notifier->getTechnicalRecipient();
         if ($technical instanceof NoRecipient || !$technical instanceof EmailRecipientInterface) {

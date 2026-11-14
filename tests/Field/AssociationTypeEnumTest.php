@@ -4,8 +4,8 @@ namespace Tests\Base\Field;
 
 use Base\Entity\Thread\Comment;
 use Base\Enum\CommentState;
-use Base\Field\Type\AssociationType;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\AssociationType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +36,7 @@ class AssociationTypeEnumTest extends KernelTestCase
 
     public function testAnEnumOfTheEmbeddedRecordIsASelect(): void
     {
-        $fields = static::getContainer()->get(\Base\Database\Mapping\ClassMetadataManipulator::class)->getFields(Comment::class);
+        $fields = static::getContainer()->get(\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator::class)->getFields(Comment::class);
         $this->assertSame(SelectType::class, $fields['state']['form_type']);
         $this->assertSame(CommentState::class, $fields['state']['class']);
     }

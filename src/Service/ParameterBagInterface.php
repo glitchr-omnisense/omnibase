@@ -9,7 +9,7 @@ use UnitEnum;
  * as omnibase's code asks for them: the core's contract, with no class of the
  * framework (plan "omnibase agnostique", step C3c).
  *
- * Under Symfony it is the container's parameters: Base\Service\ParameterBag (and
+ * Under Symfony it is the container's parameters: Omnibridge\Symfony\Omnibase\Service\ParameterBag (and
  * HotParameterBag, with the settings stored in the database) is the adapter - it
  * extends DependencyInjection's ContainerBag, decorates `parameter_bag` and so
  * is DependencyInjection's ParameterBagInterface as well, its other methods

@@ -51,7 +51,7 @@ final class StoresTest extends KernelTestCase
     public function testAnAccountIsFoundByItsAddressThenByTheApplicationsIdentifier(): void
     {
         $user = $this->createUser();
-        $accounts = new UserAccounts($this->entityManager());
+        $accounts = new UserAccounts(\Base\Database\UnitOfWorks::of($this->entityManager()));
 
         self::assertSame($user, $accounts->byIdentifier(' '.strtoupper($user->getEmail()).' '));
         if ('email' === AppUser::getUserIdentifierField()) {
@@ -83,7 +83,7 @@ final class StoresTest extends KernelTestCase
 
         $ringo = $this->createUser();
         $paul = $this->createUser();
-        $identities = new UserIdentities($this->entityManager());
+        $identities = new UserIdentities(\Base\Database\UnitOfWorks::of($this->entityManager()));
         $identities->link($ringo, 'google', 'sub-'.$ringo->getId(), 'Ringo@Example.org', true);
         $identities->link($ringo, 'google', 'sub-'.$ringo->getId());
         self::assertCount(1, $identities->of($ringo), 'linked again: nothing changes');
@@ -119,7 +119,7 @@ final class StoresTest extends KernelTestCase
     {
         $ringo = $this->createUser();
         $paul = $this->createUser();
-        $passkeys = new UserPasskeys($this->entityManager());
+        $passkeys = new UserPasskeys(\Base\Database\UnitOfWorks::of($this->entityManager()));
         $record = new PasskeyRecord(base64_encode(random_bytes(32)), credentialPublicKey: base64_encode(random_bytes(77)), userHandle: (string) $ringo->getId());
 
         try {

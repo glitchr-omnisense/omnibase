@@ -5,10 +5,10 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Service\Model\Color\Intl\Colors;
 use Base\Database\Attribute\DiscriminatorEntry;
-use Base\Field\Type\ColorType;
+use Omnibridge\Symfony\Omnibase\Field\Type\ColorType;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Adapter\ColorAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ColorAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:ColorAdapterRepository::class)]

@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Service;
 
-use Base\Form\Extension\FormTypeGuardExtension;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Form\Extension\FormTypeGuardExtension;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\FormGuard;
 use Base\Service\SpamCheckerInterface;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;

@@ -23095,25 +23095,25 @@ parameters:
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$container with no type specified\.$#'
+			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$container with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$fallbacks with no value type specified in iterable type array\.$#'
+			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$fallbacks with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) has parameter \$bag with no value type specified in iterable type array\.$#'
+			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) has parameter \$bag with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php

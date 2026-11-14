@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Database\Mapping;
 
-use Base\Database\Mapping\NamingStrategy;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy;
 use Omnibridge\Schema\CamelCaseNaming;
 use PHPUnit\Framework\TestCase;
 

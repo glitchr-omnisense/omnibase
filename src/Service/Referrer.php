@@ -2,13 +2,11 @@
 
 namespace Base\Service;
 
-use Base\Routing\AdvancedRouterInterface;
-use Base\Http\RequestsOf;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Omnibridge\Contract\Requests;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\RequestStack;
-use  Base\Security\LoginFormAuthenticator;
-use  Base\Security\RescueFormAuthenticator;
+use  Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator;
+use  Omnibridge\Symfony\Omnibase\Security\RescueFormAuthenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -28,10 +26,9 @@ class Referrer implements ReferrerInterface
         return $this->getUrl() ?? "";
     }
 
-    /** @param Requests|RequestStack|null $requests Symfony's RequestStack is deprecated (until 6.0) */
-    public function __construct(#[Autowire(service: Requests::class)] Requests|RequestStack|null $requests, AdvancedRouterInterface $router)
+    public function __construct(#[Autowire(service: Requests::class)] ?Requests $requests, AdvancedRouterInterface $router)
     {
-        $this->requests = RequestsOf::of($requests);
+        $this->requests = $requests;
         $this->router = $router;
     }
 

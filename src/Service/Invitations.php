@@ -5,7 +5,6 @@ namespace Base\Service;
 use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Invitation;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
@@ -24,12 +23,11 @@ class Invitations
 
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected readonly string $userClass = 'App\Entity\User',
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /** A new token: 48 hexadecimal characters. */

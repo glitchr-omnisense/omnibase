@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Base\Repository\Layout\RedirectionRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\RedirectionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Validator\Constraints\Unique;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * An address the site no longer answers, and where it leads now: the pages
  * of a site taken over (/produit/enseigne-lumineuse/ -> /savoir-faire/enseigne),
  * a page renamed. Asked only when a request ends in "not found"
- * (Base\Subscriber\RedirectionSubscriber): a page that exists is never
+ * (Omnibridge\Symfony\Omnibase\Subscriber\RedirectionSubscriber): a page that exists is never
  * shadowed, and a page that is found costs nothing.
  *
  * The source is a path, kept without its trailing slash ("/produit/enseigne");

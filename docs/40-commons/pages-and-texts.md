@@ -24,7 +24,7 @@ kept. `embed_url(link, false)` never asks.
 
 # Contact form
 
-`Base\Form\Type\ContactType` on `Base\Form\Model\ContactModel`, as it is:
+`Omnibridge\Symfony\Omnibase\Form\Type\ContactType` on `Base\Form\Model\ContactModel`, as it is:
 
 ```php
 $form = $this->createForm(ContactType::class, $message = new ContactModel(), ['phone' => true, 'subject' => false, 'attachments' => false, 'buttons' => false, 'trap' => true]);
@@ -42,7 +42,7 @@ validates the name, the e-mail and the message.
 
 A form that collects personal data says what they are used for (GDPR, art.
 13), and may ask for a box to be ticked before it is sent. One brick for every
-site and bundle, `Base\Form\Type\PrivacyType`, which `ContactType` adds
+site and bundle, `Omnibridge\Symfony\Omnibase\Form\Type\PrivacyType`, which `ContactType` adds
 through three options:
 
 | Option | Default | |
@@ -137,7 +137,7 @@ document (an e-mail, a feed, a search index).
 
 ## A page's language
 
-`Base\Subscriber\LocalizerSubscriber` decides it on each main request, in this order
+`Omnibridge\Symfony\Omnibase\Subscriber\LocalizerSubscriber` decides it on each main request, in this order
 (`LocalizerSubscriber::choose()`):
 
 1. the page's address, when its route has one language (`/en/...`, `app_legal.de`);

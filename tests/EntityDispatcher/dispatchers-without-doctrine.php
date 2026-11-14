@@ -5,7 +5,7 @@
  * (a)): run by docker/bin/bare --strict on the core installed alone for tests/BareTest.php. A persistence other than
  * Doctrine's calls AbstractEventDispatcher::lifecycle() with omnisense/omnibridge's Lifecycle events: UserEventDispatcher
  * and ThreadEventDispatcher note their events in persisting() / updating() and dispatch them after the write, through a
- * plain PSR-14 dispatcher; a dispatcher still overriding a former hook (typed on doctrine/persistence) is refused aloud.
+ * plain PSR-14 dispatcher; the former hooks typed on doctrine/persistence are gone (6.0).
  */
 
 namespace {
@@ -167,31 +167,12 @@ namespace {
     $threads->lifecycle(new Lifecycle\PrePersist($user, $unitOfWork));
     $threads->lifecycle(new Lifecycle\PostPersist($user, $unitOfWork));
 
-    // A dispatcher still on a former hook (typed on doctrine/persistence's LifecycleEventArgs): refused aloud.
-    $former = new class($events, $hydrator, $unitOfWork) extends AbstractEventDispatcher {
-        public function supports(mixed $subject): bool
-        {
-            return true;
-        }
-
-        public function onPersist(Doctrine\Persistence\Event\LifecycleEventArgs $event)
-        {
-        }
-    };
-    try {
-        $former->lifecycle(new Lifecycle\PrePersist($user, $unitOfWork));
-        $refused = null;
-    } catch (\LogicException $e) {
-        $refused = str_contains($e->getMessage(), 'onPersist()');
-    }
-
     return [
         'doctrine/persistence' => class_exists('Doctrine\\Persistence\\Event\\LifecycleEventArgs'),
-        'former hooks' => [AbstractEventDispatcher::formerHooks($users), AbstractEventDispatcher::formerHooks(ThreadEventDispatcher::class), AbstractEventDispatcher::formerHooks($former)],
+        'former hooks gone' => !method_exists(AbstractEventDispatcher::class, 'onPersist') && !method_exists(AbstractEventDispatcher::class, 'formerHooks'),
         'user' => [$beforeInsert, $registered, $verified],
         'user.register carries' => [$register?->getObject() === $user, $register?->getUnitOfWork() === $unitOfWork, $register?->getLifecycle() instanceof Lifecycle\PostPersist],
         'flushed after the events' => $unitOfWork->flushes,
         'thread' => $names(),
-        'former refused' => $refused,
     ];
 }

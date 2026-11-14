@@ -41,7 +41,7 @@ return [
     [
         'class' => 'Base\Service\Sitemapper',
         'requires' => [
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'arguments' => [0 => '@Omnibridge\Contract\Views', 1 => '@base.attribute_reader', 3 => '@localizer'],
@@ -63,7 +63,7 @@ return [
     [
         'class' => 'Base\Request\SitemapPage',
         'requires' => [
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'autowire' => true,
@@ -229,7 +229,7 @@ return [
     [
         'class' => 'Base\Service\IconProvider',
         'requires' => [
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'arguments' => ['@base.attribute_reader', '@base.service.image', '@localizer'],

@@ -2,11 +2,11 @@
 
 namespace Tests\Base\Database\Mapping;
 
-use Base\Bridge\Doctrine\Behaviour\DoctrineBehaviours;
-use Base\Bridge\Doctrine\DoctrineShapes;
-use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineBehaviours;
+use Omnibridge\Doctrine\Omnibase\DoctrineShapes;
+use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Attribute\Backend\Backends;
-use Base\Database\Mapping\ClassMetadataManipulator;
+use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\DescriptionShapes;
 use Base\Database\Mapping\EntityShapes;
 use Doctrine\ORM\EntityManagerInterface;

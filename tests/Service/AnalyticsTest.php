@@ -3,7 +3,7 @@
 namespace Tests\Base\Service;
 
 use Base\Entity\Analytics\PageView;
-use Base\Repository\Analytics\VisitRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Analytics\VisitRepository;
 use Base\Service\Analytics;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

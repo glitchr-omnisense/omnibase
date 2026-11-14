@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service;
 
-use Base\Bridge\Symfony\FrameworkLocator;
+use Omnibridge\Symfony\Omnibase\FrameworkLocator;
 use Base\Service\BaseService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;

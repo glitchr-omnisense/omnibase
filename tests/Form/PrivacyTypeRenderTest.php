@@ -3,7 +3,7 @@
 namespace Tests\Base\Form;
 
 use Base\Form\Model\ContactModel;
-use Base\Form\Type\ContactType;
+use Omnibridge\Symfony\Omnibase\Form\Type\ContactType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 

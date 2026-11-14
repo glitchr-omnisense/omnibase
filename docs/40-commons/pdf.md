@@ -5,7 +5,7 @@ order: 52
 
 # PDF responses
 
-`Base\Response\PdfResponse` answers an HTML page as a PDF: an invoice, a rent
+`Omnibridge\Symfony\Omnibase\Response\PdfResponse` answers an HTML page as a PDF: an invoice, a rent
 receipt, a quote. It renders with [Dompdf](https://github.com/dompdf/dompdf),
 a **suggested** package - omnibase does not require it:
 
@@ -18,7 +18,7 @@ Without it, `PdfResponse` throws a `LogicException` that says so
 `Class "Dompdf\Dompdf" not found`.
 
 ```php
-use Base\Response\PdfResponse;
+use Omnibridge\Symfony\Omnibase\Response\PdfResponse;
 
 return new PdfResponse($this->renderView('invoice.pdf.twig', ['order' => $order]));
 

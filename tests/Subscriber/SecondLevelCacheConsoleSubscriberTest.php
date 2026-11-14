@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Subscriber;
 
-use Base\Subscriber\SecondLevelCacheConsoleSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\SecondLevelCacheConsoleSubscriber;
 use Doctrine\ORM\Cache;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;

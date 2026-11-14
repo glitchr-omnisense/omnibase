@@ -3,8 +3,8 @@
 namespace Tests\Base\Bridge\Doctrine;
 
 use Base\Attributes\AttributeReader;
-use Base\Bridge\Doctrine\MappingDriver;
-use Base\Bridge\Doctrine\MetadataSnapshot;
+use Omnibridge\Doctrine\Omnibase\MappingDriver;
+use Omnibridge\Doctrine\Omnibase\MetadataSnapshot;
 use Base\Entity\Thread;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
@@ -19,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * The Doctrine mapping omnibase assembles at runtime (plan "omnibase agnostique", C6).
  *
  * - An entity manager built by hand - no kernel: Composer's autoloader, a DBAL connection,
- *   omnibridge/doctrine's EntityManagers::create() and Base\Bridge\Doctrine\Mapping::register(), in a
+ *   omnibridge/doctrine's EntityManagers::create() and Omnibridge\Doctrine\Omnibase\Mapping::register(), in a
  *   PHP process of its own (hand-built.php) - gives the metadata Symfony's gives, class by class
  *   (table, inheritance, discriminator map and value, fields and their types, associations, cache,
  *   the filters' SQL, the completors), on the same database, and reads what Symfony wrote.
@@ -140,7 +140,7 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
         self::assertSame($answer['reads']['thread'], $answer['reads']['repository'], 'and through its repository');
         self::assertSame(get_class($entityManager->getRepository(Thread::class)), $answer['repositories']['repository'], 'the same repository class');
         // omnibridge/doctrine's since step F3, the class its former name stands for.
-        self::assertSame((new \ReflectionClass(\Base\Bridge\Doctrine\RepositoryFactory::class))->getName(), $answer['repository factory'], 'set before the entity manager existed (Mapping::configure())');
+        self::assertSame((new \ReflectionClass(\Omnibridge\Doctrine\Omnibase\RepositoryFactory::class))->getName(), $answer['repository factory'], 'set before the entity manager existed (Mapping::configure())');
         self::assertTrue($answer['same repository']['repository'], 'Mapping::getRepository(), deprecated, hands the same one');
     }
 

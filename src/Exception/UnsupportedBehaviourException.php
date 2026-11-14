@@ -14,7 +14,7 @@ final class UnsupportedBehaviourException extends \LogicException
     {
         return new self(sprintf(
             'No %s for the unit of work %s: the persistence installed does not implement this behaviour\'s part. '
-            .'omnibridge/doctrine registers its own (Base\Bridge\Doctrine\Behaviour\DoctrineBehaviours until step F3); another persistence registers its implementation with Base\Database\Attribute\Backend\Backends::register().',
+            .'omnibridge/doctrine registers its own (Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineBehaviours until step F3); another persistence registers its implementation with Base\Database\Attribute\Backend\Backends::register().',
             $behaviour,
             get_debug_type($unitOfWork)
         ));

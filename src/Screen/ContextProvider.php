@@ -5,7 +5,7 @@ namespace Base\Screen;
 /**
  * What a screen needs of the request it answers (plan "omnibase agnostique",
  * C5): the frame around the page, the visitor signed in, the messages left for
- * the page. Under Symfony Base\Bridge\Symfony\SymfonyScreenContext; a site
+ * the page. Under Symfony Omnibridge\Symfony\Omnibase\SymfonyScreenContext; a site
  * decorates it to add its own frame fields; another framework fills it the
  * same.
  *

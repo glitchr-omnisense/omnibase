@@ -5,7 +5,6 @@ namespace Base\Service;
 use Base\Database\UnitOfWorks;
 use Base\Entity\Signature\Envelope;
 use Base\Event\SignatureEvent;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 use Omnisign\Exception\InvalidNotificationException;
 use Omnisign\GatewayInterface;
@@ -47,9 +46,8 @@ class Signatures
 {
     private readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         private readonly Storages $flysystem,
         private readonly ?Registry $registry = null,
         private readonly ?EventDispatcherInterface $dispatcher = null,
@@ -58,7 +56,7 @@ class Signatures
         #[Autowire('%base.signatures.storage%')] private readonly ?string $storage = null,
         #[Autowire('%base.uploader.storage%')] private readonly ?string $uploads = null,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /** The gateway envelopes go through by default: base.signatures.gateway, or the only one configured. */

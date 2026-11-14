@@ -57,17 +57,19 @@
             {% set lastSection = null %}
             {% for thread in threads %}
 
-                {% set depth = thread.getRepository().getHierarchyDepth() %}
+                {# Its section (Base\Thread\ThreadSearch::sections()): its class's hierarchy. #}
+                {% set section = (sections|default([]))[loop.index0] ?? {depth: 0, hierarchy: null, tree: []} %}
+                {% set depth = section.depth %}
 
-                {% if lastSection != thread.getRepository().getHierarchy() %}
+                {% if lastSection != section.hierarchy %}
                     <article class="wrapper extended hierarchy">
                     <h1 class="title">
-                        {% for section in thread.getRepository().getHierarchyTree() %}
-                        > {{ section|capitalize }}
+                        {% for level in section.tree %}
+                        > {{ level|capitalize }}
                         {% endfor %}
                     </h1>
                     </article>
-                    {% set lastSection = thread.getRepository().getHierarchy() %}
+                    {% set lastSection = section.hierarchy %}
                 {% endif %}
 
                 <article class="wrapper extended">

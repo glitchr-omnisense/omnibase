@@ -3,10 +3,8 @@
 namespace Base\Notifier\Channel;
 
 use App\Entity\User;
-use Base\Database\UnitOfWorks;
 use Base\Repository\Users;
 use Base\Entity\User\Notification;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Notifier\Channel\ChannelInterface;
@@ -31,12 +29,11 @@ class InAppChannel implements ChannelInterface
 {
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected readonly Users $users,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /**

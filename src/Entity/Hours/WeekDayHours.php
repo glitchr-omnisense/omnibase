@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Hours;
 
-use Base\Repository\Hours\WeekDayHoursRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Hours\WeekDayHoursRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

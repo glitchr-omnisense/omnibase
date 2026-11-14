@@ -9,7 +9,7 @@ use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\ThreadIntlRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\ThreadIntlRepository;
 
 #[ORM\Entity(repositoryClass: ThreadIntlRepository::class)]
 class ThreadIntl implements TranslationInterface

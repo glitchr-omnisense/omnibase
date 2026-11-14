@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use Base\Field\Type\EmojiPickerType;
+use Omnibridge\Symfony\Omnibase\Field\Type\EmojiPickerType;
 use Base\Marketplace\Entity\Order\Method\PaymentMethod;
 use Base\Marketplace\Entity\Product;
 use Base\Marketplace\Entity\Store;

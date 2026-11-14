@@ -6,7 +6,7 @@ namespace Base\Database\Type;
  * omnibase's enumerations by the name a column's type gives them (user_role => Base\Enum\UserRole,
  * or the application's App\Enum\UserRole): what code that holds a column's type asks to reach its
  * enumeration, whatever persistence maps it (plan "omnibase agnostic", step F2a). Filled by the
- * persistence when it registers them (Base\Bridge\Doctrine\Types on Doctrine).
+ * persistence when it registers them (Omnibridge\Doctrine\Omnibase\Types on Doctrine).
  */
 final class Enumerations
 {

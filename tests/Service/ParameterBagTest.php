@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Service;
 
-use Base\Service\HotParameterBag;
-use Base\Service\ParameterBag;
+use Omnibridge\Symfony\Omnibase\Service\HotParameterBag;
+use Omnibridge\Symfony\Omnibase\Service\ParameterBag;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\Exception\LogicException;

@@ -30,21 +30,21 @@
  * omnibase's xx-XX form, which the translatable entities apply with the Locales contract).
  * 694 after step C3f (+1: Base\Bridge\Symfony\NotificationMessages, Notification's Symfony half, which
  * names the framework and loads none of it).
- * 695 with step C6's measure (+1: Base\Bridge\Doctrine\MetadataSnapshot, an entity manager's mapping as data).
+ * 695 with step C6's measure (+1: Omnibridge\Doctrine\Omnibase\MetadataSnapshot, an entity manager's mapping as data).
  * 712 after step C6's seams (+17: what an entity manager built by hand reads its mapping through -
  * Base\Service\ArrayParameterBag, Base\Service\Model\ClassFinder, ClassAliases -, and the fourteen services
  * of omnibase's own caches, Base\Cache\Abstract\AbstractLocalCacheInterface no longer extending HttpKernel's
  * WarmableInterface: AttributeReader, ClassMetadataManipulator, AbstractLocalCache and its interface,
  * SimpleCache and its interface, IconProvider, Localizer, AbstractIconAdapter, BootstrapTwitterAdapter,
  * FontAwesomeAdapter, Obfuscator, Themizer, WebpackTagRenderer).
- * 715 after step C6's move (+3: Base\Bridge\Doctrine\MappingDriver, Types, Configuration - the discriminator maps,
+ * 715 after step C6's move (+3: Omnibridge\Doctrine\Omnibase\MappingDriver, Types, Configuration - the discriminator maps,
  * the resolveDiscriminator event, the column types, the filters and the DQL functions, for Symfony and by hand).
- * 718 after step C6 (+3: Base\Bridge\Doctrine\Mapping, Registry, RepositoryFactory - the mapping on an entity
+ * 718 after step C6 (+3: Omnibridge\Doctrine\Omnibase\Mapping, Registry, RepositoryFactory - the mapping on an entity
  * manager built by hand, without DoctrineBundle).
  * 741 after step C5's screens (+23: the view models Base\Screen\* - Frame, Site, Viewer, Author, Tag, Link,
  * StoryText, Card, Story, Comment, Reply, Discussion, the Screen interface, Shape, View, ContextProvider -, their
  * builder Base\Screen\Builder\Stories, the contracts Base\Contract\Pictures and Texts, and their Symfony side,
- * Base\Bridge\Symfony\MediaPictures, WysiwygTexts, SymfonyScreenContext, ScreenResponder, which name the
+ * Omnibridge\Symfony\Omnibase\MediaPictures, WysiwygTexts, SymfonyScreenContext, ScreenResponder, which name the
  * framework and load none of it).
  * 743 with the Tokens contract (+2: Base\Contract\Tokens, a form's token for an intent, and its Symfony side,
  * Base\Bridge\Symfony\CsrfTokens, which names the CSRF token manager and loads none of it).
@@ -64,16 +64,16 @@
  * 768 after step C4b's durations (+1: Base\Service\Model\Duration, a number of seconds in words over the
  * Translations contract, which Translator::transTime() answers by).
  * 770 after step C4b's media (+2: Base\Contract\Media, the image route's addresses, and its Symfony side
- * Base\Bridge\Symfony\ServiceMedia, MediaService's answers, which names the framework and loads none of it).
+ * Omnibridge\Symfony\Omnibase\ServiceMedia, MediaService's answers, which names the framework and loads none of it).
  * 772 after step C4b's routes (+2: Base\Contract\Routes, a route's declared path, an address's route, a route's
- * icons, and its Symfony side Base\Bridge\Symfony\RouterRoutes, the router's and the IconProvider's answers).
+ * icons, and its Symfony side Omnibridge\Symfony\Omnibase\RouterRoutes, the router's and the IconProvider's answers).
  * 774 after step C4b's environment (+2: Base\Contract\Environment, the environment's name, debug, the secret, and
  * its Symfony side Base\Bridge\Symfony\KernelEnvironment, the kernel's).
  * 776 after step C4b's sessions (+2: Base\Contract\Sessions, a user signed out, and its Symfony side
  * Base\Bridge\Symfony\SecuritySessions, the token storage and the remember-me cookie).
  * 778 after step C6b (doctrine/dbal as published, without glitchr/doctrine-dc2type): +3, Base\Bridge\Doctrine\
  * SchemaManagerFactory and MySQLSchemaManager (a SET column read with its values, the "(DC2Type:...)" comments of
- * before left out) and Base\Database\Type\MySQLSetType (a SET column as the database has it); -1, Base\
+ * before left out) and Omnibridge\Doctrine\Omnibase\Database\Type\MySQLSetType (a SET column as the database has it); -1, Base\
  * DatabaseSubscriber\EnumSubscriber, removed from the core (it wrote those comments; CHANGELOG [4.0], plan C6b).
  * 777 after step P3 (glitchr/base-plugin replaced by omnibridge/composer): +1, Base\Bridge\Symfony\FileLinks (the
  * file links of the error pages mapped to the host with Symfony's own FileLinkFormatter, which it builds and does not
@@ -84,7 +84,7 @@
  * 781 after step C9's parameters (+3: Base\Service\DottedParameterBag, the parameters by a dotted path that
  * ArrayParameterBag and the Symfony ParameterBag read through; Base\Service\HotParameters, the settings stored
  * in the database laid over any parameters, HotParameterBag's logic; Base\Service\SettingBag, on psr/cache since
- * its cache warmer moved to Base\Bridge\Symfony\SettingBagWarmer).
+ * its cache warmer moved to Omnibridge\Symfony\Omnibase\SettingBagWarmer).
  * 781 after step A2, unchanged: the host's contracts moved to omnisense/omnibridge (Omnibridge\Contract\*, with
  * Omnibridge\Runtime, SystemClock and MissingContractException); their former names listed here - Base\Contract\
  * {Urls, Translations, Locales, Access, Sessions, Tokens, Files, Routes, Environment, SystemClock} and Base\Exception\
@@ -96,14 +96,14 @@
  * which the Foundation does not install; their former names (Base\Bridge\Symfony\*) are aliases declared only where
  * omnibridge/symfony is (src/Resources/Aliases.php). The moved classes load nothing of the framework either.
  * omnibase's own adapters (LocalizerLocales, FlysystemFiles, RouterRoutes, MediaPictures...) stay listed.
- * 777 after step R2 of the audit "lesringostars face au master plan" (+3: Base\Repository\UserRepository, which
+ * 777 after step R2 of the audit "lesringostars face au master plan" (+3: Omnibridge\Doctrine\Omnibase\Repository\UserRepository, which
  * declares Security's user provider and doctrine-bridge's user loader through Base\Contract\SecurityUserProvider
  * and SecurityUserLoader - those interfaces when they are installed, empty ones otherwise, as
  * Base\Contract\SecurityUser for the user -, and those two contracts).
  * 779 after step R6 of the same audit (+2: Base\Contract\MediaRouter, the five questions omnibase's media rule asks a
  * router, which AdvancedRouterInterface extends and FileService and MediaService now take; Base\Service\ImageRoute,
  * the image route's answers moved out of MediaController for any host, with the routes' list).
- * 786 after step AU1 of the plan "omniauth" (+7: the passkeys described by the core - Base\Repository\User\PasskeyRepository
+ * 786 after step AU1 of the plan "omniauth" (+7: the passkeys described by the core - Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository
  * and Base\Security\WebauthnUserEntityRepository, which declare WebauthnBundle's repositories through
  * Base\Contract\PasskeyRecords and PasskeyUsers, those interfaces when the bundle is installed, empty ones otherwise -,
  * those two contracts, and Base\Database\Type\Passkey\{Base64, Aaguid, TrustPath}, the columns of
@@ -115,7 +115,7 @@
  * 807 after step AU4 of the plan "omniauth" (+19: Base\Auth\, omniauth's stores on omnibase's tables - UserStore,
  * UserAccounts, UserPasswords, UserLinkTokens, UserTotpSecrets, UserEmailCodes, UserBackupCodes, UserTrustedVersion,
  * UserPasskeys, UserIdentities -, Policy and PolicyLinking, the listeners Listener\{GuardSignIn, TrackConnections,
- * WarnNewDevice, UpdateAccount, WelcomeBack}; Base\Entity\User\Identity and Base\Repository\User\IdentityRepository,
+ * WarnNewDevice, UpdateAccount, WelcomeBack}; Base\Entity\User\Identity and Omnibridge\Doctrine\Omnibase\Repository\User\IdentityRepository,
  * the userIdentity table). They load with omniauth and its methods, which var/bare installs beside the core
  * (composer.json, extra.omnibase.bare: suggested, not required), and without the framework.
  * 816 after step R10 of the audit "lesringostars face au master plan" (+9: Base\Screen\Negotiation, how an action's
@@ -180,7 +180,7 @@
  * Base\Database\FormerNames.
  * 796 after step F5a (2026-11-02, +3): Base\Services, Base\View\ViewsAdapter, Base\Demo\DemoAccountLock.
  * 807 after step F5b's first part (2026-11-02, +11): the neutral form layer (the ten of tests/Agnostic.php) and
- * Base\Bridge\Symfony\Form\SymfonyKinds, the Symfony form type of each kind (strings only).
+ * Omnibridge\Symfony\Omnibase\Form\SymfonyKinds, the Symfony form type of each kind (strings only).
  * 799 after step F5b's move (2026-11-02, -8): the seven of tests/Agnostic.php and SymfonyKinds, moved to omnibridge/symfony.
  * 799 after step F5c's first part (2026-11-02, -3 +1 on F5b group 5's 801): Base\Subscriber\{AnalyticsSubscriber, TemplatedEmailSubjectSubscriber,
  * TwigSubscriber} moved to omnibridge/symfony (with FrameworkLocator and WebpackCacheWarmer, listed nowhere); Base\Http\RequestsOf.
@@ -214,6 +214,8 @@
  * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
  * 926 after step F7a (2026-11-07, +1): the entities described with no persistence installed, Base\Database\Schema\EntitySchema.
  * 927 after step F7c, second part (2026-11-07, +1): an entity's values on the persistence's shapes, Base\Database\Entity\EntityValues.
+ * 922 at 6.0 (2026-11-14, -5): what only the deprecated paths used, removed with them - Base\Http\RequestsOf,
+ * Base\View\ViewsAdapter, Base\Request\EventDecisions, Base\Traits\{FrameworkAccessorsTrait, CacheClearTrait}.
  */
 
 return [
@@ -728,7 +730,6 @@ return [
     Base\Form\Model\UserEditModel::class,
     Base\Form\Model\UserProfileModel::class,
     Base\Form\Model\UserSearchModel::class,
-    Base\Http\RequestsOf::class,
     Base\Imagine\FilterInterface::class,
     Base\Imagine\Filter\Advanced\SanitizeFilter::class,
     Base\Imagine\Filter\Basic\BackgroundFilter::class,
@@ -817,7 +818,6 @@ return [
     Base\Request\AttachmentDownload::class,
     Base\Request\Decision::class,
     Base\Request\ErrorPage::class,
-    Base\Request\EventDecisions::class,
     Base\Request\LocaleSwitch::class,
     Base\Request\Page::class,
     Base\Request\RouterPage::class,
@@ -1050,9 +1050,7 @@ return [
     Base\Traits\BagTrait::class,
     Base\Traits\BaseCommonTrait::class,
     Base\Traits\BaseTrait::class,
-    Base\Traits\CacheClearTrait::class,
     Base\Traits\CacheableTrait::class,
-    Base\Traits\FrameworkAccessorsTrait::class,
     Base\Traits\ProxyTrait::class,
     Base\Traits\SimpleCacheTrait::class,
     Base\Traits\SingletonTrait::class,
@@ -1141,7 +1139,6 @@ return [
     Base\View\Money::class,
     Base\View\Pagination::class,
     Base\View\Pictures::class,
-    Base\View\ViewsAdapter::class,
     Base\View\Widgets::class,
     Base\View\Wysiwyg::class,
 ];

@@ -2,10 +2,8 @@
 
 namespace Base\Auth\Listener;
 
-use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Security\ConnectionTracker;
-use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Contract\Accounts;
 use Omniauth\Event\SignedIn;
 use Omniauth\Event\SignInFailed;
@@ -25,13 +23,12 @@ class TrackConnections
 {
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
         protected readonly ConnectionTracker $tracker,
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected readonly ?Accounts $accounts = null,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     public function onSignedIn(SignedIn $event): void

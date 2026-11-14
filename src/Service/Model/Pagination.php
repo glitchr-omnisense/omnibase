@@ -32,7 +32,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     /**
      * A query is paged by what runs it (step F2e): Pages, which a Doctrine Query is adapted to
-     * (Base\Bridge\Doctrine\QueryPages, by name: nothing of Doctrine is loaded here).
+     * (Omnibridge\Doctrine\Omnibase\QueryPages, by name: nothing of Doctrine is loaded here).
      */
     public const ADAPTERS = [
         'Doctrine\ORM\Query' => 'Omnibridge\Doctrine\Omnibase\QueryPages',
@@ -70,7 +70,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
     }
 
     /**
-     * @deprecated since step F2e of the plan "omnibase agnostic": Base\Bridge\Doctrine\QueryPages::countQuery()
+     * @deprecated since step F2e of the plan "omnibase agnostic": Omnibridge\Doctrine\Omnibase\QueryPages::countQuery()
      */
     public function getCountQuery(Query $query, bool $bHint = true): Query
     {

@@ -9,7 +9,7 @@ use UnitEnum;
  * The application's parameters by their full names ("base.attributes.use_custom"
  * => true), read by a dotted path (plan "omnibase agnostique", C9): the
  * framework-free source both Base\Service\ArrayParameterBag (an array) and
- * Base\Service\ParameterBag (the Symfony container's parameters) read through.
+ * Omnibridge\Symfony\Omnibase\Service\ParameterBag (the Symfony container's parameters) read through.
  *
  * A path names a value or the values under it ("base.attributes" is
  * ['use_custom' => true, ...]); a $bag given to get() is laid over the

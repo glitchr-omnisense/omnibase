@@ -17,7 +17,7 @@ use Doctrine\Common\Collections\Collection;
 use Base\Database\Attribute\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Thread\TaxonRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Thread\TaxonRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;

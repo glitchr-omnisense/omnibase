@@ -29,7 +29,7 @@ any other keeps its path below `Omnibridge\Doctrine\Omnibase\`.
 | `Base\Bridge\Doctrine\*` (the unit of work, backend, shapes, repositories, mapping, types, configuration, snapshot, `Behaviour\*`) | `Omnibridge\Doctrine\Omnibase\*` |
 | `Base\Database\Mapping\{ClassMetadataManipulator, ClassMetadataCompletor, ClassMetadataFactory, NamingStrategy}` | `Omnibridge\Doctrine\Omnibase\Database\Mapping\*` |
 | `Base\Database\Type\{ArrayType, DateTimeTypeUTC, MySQLSetType, UtcDateTimeType, UtcDateTimeImmutableType, Passkey\*}` | `Omnibridge\Doctrine\Omnibase\Database\Type\*` |
-| `Base\Database\{Walker, Function, Filter, Middleware, Event}\*`, `Base\Database\Schema\Describer` | `Omnibridge\Doctrine\Omnibase\Database\...` |
+| `Base\Database\{Walker, Function, Filter, Middleware, Event}\*`, `Omnibridge\Doctrine\Omnibase\Database\Schema\Describer` | `Omnibridge\Doctrine\Omnibase\Database\...` |
 | `Base\Database\Repository\{ServiceEntityRepository, ServiceEntityParser}` (the finder's Doctrine compiler) | `Omnibridge\Doctrine\Omnibase\Database\Repository\*` |
 | the 81 repositories `Base\Repository\**\*Repository` | `Omnibridge\Doctrine\Omnibase\Repository\**\*Repository` |
 | `Base\DatabaseSubscriber\{Attribute, Intl, InverseCollectionCache, TrackingPolicy}Subscriber`, `Base\EntitySubscriber\{Extension, Trasheable, Versionable, Setting}Subscriber` | `Omnibridge\Doctrine\Omnibase\{DatabaseSubscriber, EntitySubscriber}\*` |
@@ -39,32 +39,27 @@ What stays in the core: the neutral parts - the finder language (`Base\Database\
 `Aliases`, the shapes (`EntityShape`, `EntityShapes`, `DescriptionShapes`), the schema rules, the
 enumerations (`EnumType`, `SetType`, `Enumerations`), `Utc`, the behaviours' attributes and their
 neutral backends' contracts, the listeners' logic (`Base\Database\Lifecycle\*`). The Doctrine half of
-`Base\Bridge\Symfony\FrameworkLocator` is `Omnibridge\Doctrine\Omnibase\DoctrineLocator` (FrameworkLocator's
+`Omnibridge\Symfony\Omnibase\FrameworkLocator` is `Omnibridge\Doctrine\Omnibase\DoctrineLocator` (FrameworkLocator's
 methods call it). `#[Cache]`'s regions, `#[Vault]`'s unique constraints and `#[OrderColumn]`'s order field -
 the attributes' `loadClassMetadata()`, typed on Doctrine's `ClassMetadata` - are
 `Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineMappingHooks`, which `AttributeSubscriber` and the
 manipulator call for each attribute before its own (deprecated) Doctrine-typed hook.
 
-**The former names keep working**, until 6.0: `src/Resources/former-names.php` (required by
-`Functions.php`) aliases each one, from `src/Resources/former-names.doctrine.php` (former => new;
-`Base\Database\FormerNames` reads it). The alias is declared whichever name is loaded first - asked
-by its former name, the moved class is loaded and aliased; loaded by its new name (or as a parent),
-its file is included by the core's autoloader and the former name aliased at once, because PHP checks
-an `instanceof` or a type written with a name without autoloading it. For the same reason the core's
-extension sets `.container.dumper.inline_class_loader` to false: Symfony's debug container would
-otherwise include the services' files itself, past the autoloader.
+**The former names are gone since 6.0.** 5.x aliased each one (`src/Resources/former-names.php`,
+required by `Functions.php`); 6.0 declares no class under a former name. `src/Resources/former-names.doctrine.php`
+(former => new) stays as the record of the renames, read by `Base\Database\FormerNames`: `UPGRADE-6.0.md`
+lists it, and `MetadataSnapshot` compares a mapping across the move with it.
 
-- The entities still name their repositories by their former names (`repositoryClass:
-  UserRepository::class`, `Base\Repository\UserRepository`): Doctrine's metadata, and
-  `MetadataSnapshot`, are those of before. BaseBundle maps the moved repositories
-  `Base\Repository\X` => `App\Repository\X` from omnibridge/doctrine's folder, and registers them
-  under their former ids, as before.
+- The entities name their repositories by their own names since 6.0 (`repositoryClass:
+  ThreadRepository::class`, `Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository`); `MetadataSnapshot`
+  records a repository, a filter or a type by its former name, so that the mapping compares with one recorded on 5.x.
+  BaseBundle maps the moved repositories `Omnibridge\Doctrine\Omnibase\Repository\X` => `App\Repository\X` from
+  omnibridge/doctrine's folder, and registers them under their names.
 - An entity's `repositoryClass` may name a repository **interface** of the core
   (`Base\Repository\Thread\Tags`): `Omnibridge\Doctrine\Omnibase\RepositoryFactory::implementation()`
   gives the repository bound to it (`Base\Repository\Aliases::INTERFACES`), and under Symfony
   `Base\Discovery`'s `repositories` (omnibridge/symfony's `DiscoveryPass`) adds the interfaces to DoctrineBundle's repository locator.
-- The moved services are registered under their new names; their former ids are aliases
-  (config/services/database.php).
+- The moved services are registered under their names (5.x kept their former ids as aliases).
 - `MetadataSnapshot` names a filter or a type whose class moved by its former name: it compares the
   mapping, not where a class lives.
 - The core still requires omnibridge/doctrine (and doctrine/*) until the composer.json switch (F6), so
@@ -99,13 +94,13 @@ own `ClassMetadataFactory` is used; the class names are the core's (D6).
 
 | What | Symfony (the bundle) | By hand (`Mapping::register()`) |
 |---|---|---|
-| Column types: `datetime`/`datetimetz` in UTC, `array`, `utc_datetime(_immutable)`, the enumerations | `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()` → `Base\Bridge\Doctrine\Types::register()`, then `registerEnumerations()` of the list omnibridge/symfony's `EnumerationsPass` compiles (parameter `omnibridge.doctrine.enumerations`) | `Types::register()` |
-| Filters (`trash_filter`, `vault_filter`), DQL functions (RAND, FIELD, JSON_*), the default hint | `DoctrineConfigurationPass` → `Base\Bridge\Doctrine\Configuration`'s lists; filters enabled at boot (`Configuration::enableFilters()`) | `Configuration::apply()`, `enableFilters()` |
-| The driver: discriminator maps generated, the `resolveDiscriminator` event, the table names checked | `DoctrineConfigurationPass` wraps every entity manager's driver in `Base\Bridge\Doctrine\MappingDriver` | the same wrapper |
-| Naming | `naming_strategy: Base\Database\Mapping\NamingStrategy` | set on the configuration |
-| The factory | `class_metadata_factory_name: Base\Database\Mapping\ClassMetadataFactory` (kept: the naming strategy of a cached ClassMetadata, `isEntity()`, `getAllClassNames()`) | Doctrine's own |
+| Column types: `datetime`/`datetimetz` in UTC, `array`, `utc_datetime(_immutable)`, the enumerations | `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()` → `Omnibridge\Doctrine\Omnibase\Types::register()`, then `registerEnumerations()` of the list omnibridge/symfony's `EnumerationsPass` compiles (parameter `omnibridge.doctrine.enumerations`) | `Types::register()` |
+| Filters (`trash_filter`, `vault_filter`), DQL functions (RAND, FIELD, JSON_*), the default hint | `DoctrineConfigurationPass` → `Omnibridge\Doctrine\Omnibase\Configuration`'s lists; filters enabled at boot (`Configuration::enableFilters()`) | `Configuration::apply()`, `enableFilters()` |
+| The driver: discriminator maps generated, the `resolveDiscriminator` event, the table names checked | `DoctrineConfigurationPass` wraps every entity manager's driver in `Omnibridge\Doctrine\Omnibase\MappingDriver` | the same wrapper |
+| Naming | `naming_strategy: Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy` | set on the configuration |
+| The factory | `class_metadata_factory_name: Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory` (kept: the naming strategy of a cached ClassMetadata, `isEntity()`, `getAllClassNames()`) | Doctrine's own |
 | Listeners: `AttributeSubscriber`, `IntlSubscriber`, the targets resolved, the entity listeners attached, `TrackingPolicySubscriber`, `ExtensionSubscriber`; on flush `TrasheableSubscriber`, `VersionableSubscriber`, `InverseCollectionCacheSubscriber` | tags `doctrine.event_listener` (config/services/media.php), in their priorities' order | added in that order |
-| Repositories | DoctrineBundle's `ContainerRepositoryFactory` (the services) | `Base\Bridge\Doctrine\RepositoryFactory`, set by `Mapping::configure()` as omnibridge/doctrine's `configure:` (from 4d2436d), before the entity manager exists: its own `getRepository()` builds a repository taking a `ManagerRegistry` from `Base\Bridge\Doctrine\Registry`. `$mapping->getRepository()` (deprecated) hands the same one, and is the way for an entity manager built without `configure:` (Doctrine's default factory) |
+| Repositories | DoctrineBundle's `ContainerRepositoryFactory` (the services) | `Omnibridge\Doctrine\Omnibase\RepositoryFactory`, set by `Mapping::configure()` as omnibridge/doctrine's `configure:` (from 4d2436d), before the entity manager exists: its own `getRepository()` builds a repository taking a `ManagerRegistry` from `Omnibridge\Doctrine\Omnibase\Registry`. `$mapping->getRepository()` (deprecated) hands the same one, and is the way for an entity manager built without `configure:` (Doctrine's default factory) |
 | `App\Entity\X` = `Base\Entity\X` | `BaseBundle::warmUp()`'s aliases, `AbstractBaseBundle`'s fallback autoloader | `Base\Service\Model\ClassAliases::register()` (the same convention) |
 
 What the hand-built side does not have: the framework's services. The
@@ -120,7 +115,7 @@ doctrine-bridge types (`uuid`, `ulid`, `date_point`...) are Symfony's alone.
 An enumeration of omnibase (`Base\Database\Type\EnumType`, `SetType`: `ThreadState`, `UserRole`,
 an application's or a bundle's) is a plain PHP class since step F2a of the plan "omnibase agnostic":
 its constants are its values, `toDatabaseValue()` and `toPHPValue()` its conversions (a SetType's
-values joined by commas). On Doctrine each is a `Base\Bridge\Doctrine\EnumTypeAdapter` registered
+values joined by commas). On Doctrine each is a `Omnibridge\Doctrine\Omnibase\EnumTypeAdapter` registered
 under its `getStaticName()` (`thread_state`, `user_role`): an `ENUM(...)` column, `SET(...)` for a
 SetType, a CLOB on SQLite. `Base\Database\Type\Enumerations::classOf('user_role')` gives the
 enumeration of a type's name, whatever persistence registered it.
@@ -128,7 +123,7 @@ enumeration of a type's name, whatever persistence registered it.
 - Under Symfony an enumeration is still listed in DoctrineBundle's `doctrine.dbal.types` (the core's
   and the application's by `BaseExtension`, a bundle's by its own prepend: omnibase/marketplace);
   `Base\Discovery`'s `enumerations` (omnibridge/symfony's `DiscoveryPass`) takes them out of it (DoctrineBundle instantiates each type's class) and
-  gives them to `Base\Bridge\Doctrine\EnumerationsMiddleware`, which registers the adapters when
+  gives them to `Omnibridge\Doctrine\Omnibase\EnumerationsMiddleware`, which registers the adapters when
   the connection is made, before any metadata is read - the moment DoctrineBundle registered them.
   The parameter `base.database.enumerations` lists them by name.
 - By hand, `Types::register()` registers them (the folders' enumerations, and those given by name).
@@ -143,7 +138,7 @@ omnibase's behaviours (`#[Timestamp]`, `#[Slugify]`, `#[Uploader]`...: `Base\Att
 answer the moments of an entity's life. Since step F2b of the plan "omnibase agnostic" they have
 neutral hooks (`onPrePersist(Lifecycle\PrePersist $event, ?string $property)`, ...,
 `onOnFlush(Lifecycle\OnFlush $event, object $entity, ?string $property)`) taking omnisense/omnibridge's
-events, which carry the entity and the unit of work (`Base\Bridge\Doctrine\DoctrineUnitOfWork` on
+events, which carry the entity and the unit of work (`Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork` on
 Doctrine). `AttributeSubscriber` relays Doctrine's events: the neutral hook first, then the
 Doctrine-typed hook of before (`prePersist(LifecycleEventArgs, ClassMetadata, $entity, ?string)`),
 kept for the applications' and bundles' attributes that override it. Another persistence dispatches
@@ -167,7 +162,7 @@ event carries, or an `UnsupportedBehaviourException` when the persistence has no
 | `OrderColumnBackend` | a lazy to-many association keeps its stored positions until read (step F2c) | the PersistentCollection's inner collection swapped |
 
 `AttributeSubscriber` registers Doctrine's (`DoctrineBehaviours::register()`) when it is made, under
-Symfony and in `Base\Bridge\Doctrine\Mapping` alike. `#[Uploader]` needs none: the unit of work's
+Symfony and in `Omnibridge\Doctrine\Omnibase\Mapping` alike. `#[Uploader]` needs none: the unit of work's
 contract covers it (`contains()`, `isNew()`, `recompute()`). The mapping hooks
 (`loadClassMetadata()`: `#[Cache]`'s regions, `#[Vault]`'s unique constraints) stay Doctrine's. At step
 F3 the Doctrine implementations move to omnibridge/doctrine as they are; omnibridge/eloquent brings its
@@ -256,8 +251,8 @@ What keeps the entity manager, on purpose: the mapping (`ClassMetadataManipulato
 `ClassMetadataFactory`, `EntityHydrator`), `ServiceEntityRepository`, the Doctrine listeners, the
 Doctrine commands (`doctrine:database:import`, `doctrine:array:upgrade`, the schema's charset), the
 validators and `CropperType` (the form layer, F5b), `AbstractEventDispatcher` and `BaseNotifier` (F5a),
-`DemoAccountFactory` (Doctrine's fixtures), `Base\Console\Command` (omnibridge/symfony's `Omnibase\Console\Command` since F5c; its deprecated `$entityManager`, read
-by the applications' commands, beside its `$unitOfWork`), `Base\Bridge\Symfony\FrameworkLocator` (since F2f: the entity
+`DemoAccountFactory` (Doctrine's fixtures), `Omnibridge\Symfony\Omnibase\Console\Command` (omnibridge/symfony's `Omnibase\Console\Command` since F5c; its deprecated `$entityManager`, read
+by the applications' commands, beside its `$unitOfWork`), `Omnibridge\Symfony\Omnibase\FrameworkLocator` (since F2f: the entity
 manager and the registry BaseTrait handed out, now deprecated there). `tests/Database/UnitOfWorkPathTest`
 keeps the converted files off the entity manager.
 
@@ -267,13 +262,13 @@ Step F2e. The trash and the vault are scopes (omnisense/omnibridge's `Scope`):
 `Base\Database\Scope\TrashScope` keeps a `#[Trasheable]` entity while its deletion field is null,
 `VaultScope` a `#[Vault]` entity whose vault field is null or names the environment it was enabled with.
 Doctrine compiles them as its SQL filters `trash_filter` and `vault_filter` (`TrashFilter`, `VaultFilter`,
-same SQL as before); `Base\Bridge\Doctrine\DoctrineBackend` (omnibridge's `Backend`, the service
+same SQL as before); `Omnibridge\Doctrine\Omnibase\DoctrineBackend` (omnibridge's `Backend`, the service
 `Omnibridge\Persistence\Backend` and in `Backends`) enables and disables them by the scope's name.
 `TrashManager::withTrash()` asks the Backend; the extension rows of a destroyed entity go through
 `Base\Database\Backend\BulkDeletes`.
 
 `Pagination` pages an array, or `Base\Service\Model\Pages` (a count and a slice). A Doctrine `Query` is
-adapted to `Base\Bridge\Doctrine\QueryPages`, which keeps what Pagination did with it: the rows grouped by
+adapted to `Omnibridge\Doctrine\Omnibase\QueryPages`, which keeps what Pagination did with it: the rows grouped by
 id through Doctrine's Paginator, the translations joined, the total counted on a clone by CountWalker.
 Both move to omnibridge/doctrine at F3; an Eloquent backend brings its own Backend and Pages at F7.
 
@@ -322,7 +317,7 @@ application's vendor suite):
 - an entity manager built by hand in a PHP process of its own
   (`tests/Bridge/Doctrine/hand-built.php`: Composer's autoloader, a DBAL
   connection, `EntityManagers::create()`, `Mapping::register()`) gives the
-  metadata Symfony's gives, class by class - `Base\Bridge\Doctrine\MetadataSnapshot`:
+  metadata Symfony's gives, class by class - `Omnibridge\Doctrine\Omnibase\MetadataSnapshot`:
   every public property of each ClassMetadata (table, inheritance,
   discriminator map and value, fields and their types, associations, cache,
   callbacks, entity listeners, repository), what each filter adds to a query of

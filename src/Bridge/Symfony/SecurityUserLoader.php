@@ -8,7 +8,7 @@ use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
  * Base\Contract\SecurityUserLoader under Symfony (audit "lesringostars face au
  * master plan", R2): doctrine-bridge's UserLoaderInterface - the repository an
  * entity user provider loads a user by its identifier from -, which
- * Base\Repository\UserRepository implemented itself up to 4.0 and which the
+ * Omnibridge\Doctrine\Omnibase\Repository\UserRepository implemented itself up to 4.0 and which the
  * contract is an alias of when symfony/doctrine-bridge is installed. Apart
  * from Base\Bridge\Symfony\SecurityUserProvider: an interface cannot extend
  * both (loadUserByIdentifier() answers ?UserInterface here, UserInterface

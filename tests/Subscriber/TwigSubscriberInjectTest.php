@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Subscriber;
 
-use Base\Routing\AdvancedRouterInterface;
-use Base\Service\ParameterBag;
-use Base\Subscriber\TwigSubscriber;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Service\ParameterBag;
+use Omnibridge\Symfony\Omnibase\Subscriber\TwigSubscriber;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Base\Twig\Renderer\Adapter\WebpackTagRenderer;
 use PHPUnit\Framework\TestCase;

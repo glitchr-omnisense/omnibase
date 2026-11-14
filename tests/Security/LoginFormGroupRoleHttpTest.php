@@ -3,7 +3,7 @@
 namespace Tests\Base\Security;
 
 use Base\Entity\User\Group;
-use Base\Security\LoginFormAuthenticator;
+use Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +30,7 @@ class LoginFormGroupRoleHttpTest extends KernelTestCase
 
         $firewall = static::getContainer()->get('security.firewall.map')->getFirewallConfig(Request::create('/login', 'POST'));
         if (!in_array(LoginFormAuthenticator::class, $firewall?->getAuthenticators() ?? [], true)) {
-            self::markTestSkipped('The host application\'s firewall does not sign /login in with Base\Security\LoginFormAuthenticator (the harness does: docker/app/config/packages/security.yaml, to rebuild the image after changing it).');
+            self::markTestSkipped('The host application\'s firewall does not sign /login in with Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator (the harness does: docker/app/config/packages/security.yaml, to rebuild the image after changing it).');
         }
     }
 

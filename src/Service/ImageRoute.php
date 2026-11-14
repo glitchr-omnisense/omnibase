@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * omnibase's image route, answered for any host (audit "lesringostars face
- * au master plan", R6): what Base\Controller\UX\MediaController answered under
+ * au master plan", R6): what Omnibridge\Symfony\Omnibase\Controller\UX\MediaController answered under
  * Symfony, moved here as it was, so that a host without the framework serves
  * the same images and thumbnails from the same addresses - an obfuscated
  * `data` resolved by MediaService, its file filtered by Imagine (a format, a

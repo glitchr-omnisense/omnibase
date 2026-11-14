@@ -121,7 +121,7 @@ line under its form:
 Each button is a **POST form with a CSRF token** to `security_loginDemo`
 (`/login/demo`) - never a link: a GET that signs in is followed by a prefetch,
 a crawler, a link preview. The route is declared for the `demo` environment
-only. `Base\Controller\DemoController` signs in an account that is offered
+only. `Omnibridge\Symfony\Omnibase\Controller\DemoController` signs in an account that is offered
 and nothing else: an identifier nobody declared, an account of the back
 office, or one promoted to it since, is sent back to the sign-in page.
 
@@ -212,7 +212,7 @@ the same checkout.
 
 | | In `demo` |
 |---|---|
-| **E-mail** | None leaves. `Base\Subscriber\DemoSubscriber` refuses every message where the mailer hands it over (`MessageEvent::reject()`), as it is queued and as it is sent, **whatever `MAILER_DSN` says**; recipients and subject go to the `demo` log channel. |
+| **E-mail** | None leaves. `Omnibridge\Symfony\Omnibase\Subscriber\DemoSubscriber` refuses every message where the mailer hands it over (`MessageEvent::reject()`), as it is queued and as it is sent, **whatever `MAILER_DSN` says**; recipients and subject go to the `demo` log channel. |
 | **Indexing** | `X-Robots-Tag: noindex, nofollow` on every response. |
 | **A demonstration account's credentials** | Its identifier, address, password, one-time code, e-mail code and backup codes do not change; it is not disabled nor deleted. |
 | **The staff's second factor** | `base.security.two_factor.required_roles` and the administrator's "mandatory for everyone" are lifted **for the demonstration accounts**; any other account is asked as usual. |
@@ -252,7 +252,7 @@ would lock the next one out until the night's reset.
   page says so first. They ask `SecurityPolicy::isDemoAccount($user)` /
   `canChangeCredentials($user)`: use the same in a page of your own.
 - For every other form - the application's "my account" page, the back
-  office's users - `Base\DatabaseSubscriber\DemoAccountLockSubscriber` puts
+  office's users - `Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\DemoAccountLockSubscriber` puts
   the values back before the row is written (and flashes the same message),
   and answers 403 to a deletion. Only during a request: the fixtures and
   `demo:reset` write these accounts from the console.
@@ -310,7 +310,7 @@ to it: name it in `admin_roles` when those pages are not for everyone.
 
 The fixtures give Glitch Art's account a password everyone knows
 ("glitchr" / "glitchr"); a demonstration is public. In `demo`,
-`Base\Subscriber\DemoBackOfficeSubscriber` compares what is typed with
+`Omnibridge\Symfony\Omnibase\Subscriber\DemoBackOfficeSubscriber` compares what is typed with
 `base.demo.superadmin_password` - by default
 `%env(default::DEMO_SUPERADMIN_PASSWORD)%` - and never looks at the stored
 password. Unset or empty, an account whose roles reach `ROLE_SUPERADMIN`
@@ -413,5 +413,5 @@ base:
 | `Base\Demo\DemoAccountFactory` | the rows: `account()`, `load()`, `missing()` |
 | `Base\Demo\DemoMode` | `isActive()`: the `demo` environment, and no other |
 | `Base\Demo\DemoGuard` | what demo refuses to start on |
-| `Base\Console\Command\DemoResetCommand` (omnibridge/symfony's `Omnibase\Console\Command\DemoResetCommand` since F5c, former name aliased) | `demo:reset` |
+| `Omnibridge\Symfony\Omnibase\Console\Command\DemoResetCommand` (omnibridge/symfony's since F5c; `Base\Console\Command\DemoResetCommand` until 5.x) | `demo:reset` |
 | `tests/Demo/` | the suite; `Fixtures\DemoTestKernel` boots a host application in `demo` or `prod` |

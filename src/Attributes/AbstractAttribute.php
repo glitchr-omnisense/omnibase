@@ -239,7 +239,7 @@ abstract class AbstractAttribute implements AttributeInterface
     /**
      * The entity's changes, computed again first. Given the unit of work of the hook's event (plan "omnibase agnostic",
      * step F7c), omnisense/omnibridge's contract answers - recompute(), then changes() -, whichever persistence keeps
-     * the entity; without one, Doctrine's unit of work (deprecated until 6.0).
+     * the entity; without one, Doctrine's unit of work (the attributes on Doctrine's metadata: until the vocabulary step, E3).
      *
      * @param $entity
      * @return array[]|PersistentCollection|\mixed[][]
@@ -292,7 +292,7 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $entity
      * @param string $property
      * @return EntityRepository the repository of the class declaring $property (an omnibase
-     *                          repository, Base\Database\Repository\ServiceEntityRepository, or any other)
+     *                          repository, Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository, or any other)
      * @throws NotSupported
      */
     public function getPropertyOwnerRepository($entity, string $property, ?NeutralUnitOfWork $unitOfWork = null): EntityRepository|\Base\Database\Repository\Entities
@@ -593,7 +593,7 @@ abstract class AbstractAttribute implements AttributeInterface
     /*
      * The neutral hooks (plan "omnibase agnostic", step F2b): the same moments as the hooks above, with
      * omnisense/omnibridge's lifecycle events - the entity and its unit of work, no ORM type - in place of
-     * Doctrine's arguments. A persistence dispatches them (Base\DatabaseSubscriber\AttributeSubscriber
+     * Doctrine's arguments. A persistence dispatches them (Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\AttributeSubscriber
      * relays Doctrine's: the neutral hook first, then the Doctrine-typed one, kept for the attributes of
      * the applications and bundles that override it, deprecated). An attribute of the core answers here;
      * an entity's property hook receives its property, a class hook null.

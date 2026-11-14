@@ -3,8 +3,8 @@
 namespace Tests\Base\Demo;
 
 use Base\Demo\DemoAccountRegistry;
-use Base\Subscriber\DemoBackOfficeSubscriber;
-use Base\Subscriber\DemoSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\DemoBackOfficeSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\DemoSubscriber;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

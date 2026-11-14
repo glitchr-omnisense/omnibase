@@ -9,7 +9,7 @@ use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\ImageCropRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository;
 use Base\Service\Model\SaltInterface;
 use Base\Database\Attribute\Cache;
 

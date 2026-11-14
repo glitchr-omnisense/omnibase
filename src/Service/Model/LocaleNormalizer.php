@@ -21,7 +21,7 @@ use Symfony\Component\Intl\Locales as IntlLocales;
  *
  * here() is what the entities ask (TranslatableTrait, TranslationTrait):
  * the default and available locales of the Locales contract
- * (Runtime::locales(); under Symfony Base\Bridge\Symfony\LocalizerLocales,
+ * (Runtime::locales(); under Symfony Omnibridge\Symfony\Omnibase\LocalizerLocales,
  * the Localizer's own), none when the registry has no Locales, as the
  * Localizer's statics are empty before it is built. Not a contract: a rule
  * over one.

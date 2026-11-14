@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
  * Each answers with a reason the controller turns into a form error - except
  * the trap, which should be thanked and dropped so the robot learns nothing.
  *
- * Reads the form Base\Form\Type\CommentType builds: its `url` trap and its
+ * Reads the form Omnibridge\Symfony\Omnibase\Form\Type\CommentType builds: its `url` trap and its
  * `opened` time - or the fields the option `guard` adds.
  */
 class CommentGuard

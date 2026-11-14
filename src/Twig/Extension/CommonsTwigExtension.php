@@ -38,7 +38,7 @@ class CommonsTwigExtension extends AbstractExtension
 
     private readonly Commons $commons;
 
-    /** The neutral helper behind this extension (the screens' Pictures contract: Base\Bridge\Symfony\MediaPictures). */
+    /** The neutral helper behind this extension (the screens' Pictures contract: Omnibridge\Symfony\Omnibase\MediaPictures). */
     public function commons(): Commons
     {
         return $this->commons;

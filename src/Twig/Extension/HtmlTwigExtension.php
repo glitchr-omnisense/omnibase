@@ -26,7 +26,7 @@ final class HtmlTwigExtension extends AbstractExtension
 
     private readonly Wysiwyg $wysiwyg;
 
-    /** The neutral pipeline behind |wysiwyg (the screens' Texts contract: Base\Bridge\Symfony\WysiwygTexts). */
+    /** The neutral pipeline behind |wysiwyg (the screens' Texts contract: Omnibridge\Symfony\Omnibase\WysiwygTexts). */
     public function wysiwyg(): Wysiwyg
     {
         return $this->wysiwyg;
@@ -34,7 +34,7 @@ final class HtmlTwigExtension extends AbstractExtension
 
     /**
      * The pipeline of `|wysiwyg` (Base\View\Wysiwyg; TextsTwigExtension, through the Texts
-     * contract: Base\Bridge\Symfony\WysiwygTexts under Symfony).
+     * contract: Omnibridge\Symfony\Omnibase\WysiwygTexts under Symfony).
      *
      * @param string|null $htmlOrJson
      * @param array $options

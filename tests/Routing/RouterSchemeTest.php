@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Routing;
 
-use Base\Routing\AdvancedRouter;
-use Base\Routing\AdvancedRouterInterface;
-use Base\Service\ParameterBag;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Service\ParameterBag;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

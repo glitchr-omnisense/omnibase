@@ -3,20 +3,18 @@
 namespace Base\Auth\Listener;
 
 use Base\Auth\UserAccounts;
-use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\Notifier\Mail\SignInMails;
 use Base\Notifier\Notifier;
-use Doctrine\ORM\EntityManagerInterface;
 use Omniauth\Event\AccountRefused;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * A disabled account that proved who it is: the "welcome back" e-mail, with
  * a token good an hour - its next sign-in within that hour enables the
- * account again (UserAccounts::check()). Base\Security\UserChecker's
+ * account again (UserAccounts::check()). Omnibridge\Symfony\Omnibase\Security\UserChecker's
  * checkPostAuth() under Symfony, on omniauth's AccountRefused event.
  */
 class WelcomeBack
@@ -26,16 +24,15 @@ class WelcomeBack
     protected readonly UnitOfWork $unitOfWork;
 
     /**
-     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
      * @param Notifier|null    $notifier its welcome-back e-mail (Notifier::userWelcomeBack()); without it, the same e-mail, bare
      * @param SignInMails|null $mails    the e-mail written and sent without Symfony's Notifier (a host without it: omnibridge/laravel)
      */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected readonly ?Notifier $notifier = null,
         protected readonly ?SignInMails $mails = null,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     public function onAccountRefused(AccountRefused $event): void

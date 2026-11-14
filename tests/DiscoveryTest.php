@@ -50,7 +50,7 @@ final class DiscoveryTest extends KernelTestCase
         }
         foreach (Discovery::registry('arguments') as $entry) {
             // The core's services (FormGuard) or a host's adapter of a core rule (Symfony's SignInGuard).
-            self::assertStringStartsWith('Base\\', $entry['service']);
+            self::assertMatchesRegularExpression('/^(Base|Omnibridge\\\\Symfony\\\\Omnibase)\\\\/', $entry['service']);
             self::assertContains($entry['type'], ['bool', 'string']);
         }
         $texts = Discovery::registry('texts');

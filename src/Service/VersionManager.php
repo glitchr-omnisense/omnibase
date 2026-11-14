@@ -3,10 +3,8 @@
 namespace Base\Service;
 
 use Base\Database\Attribute\Versionable;
-use Base\Database\UnitOfWorks;
 use Base\Entity\Extension\Revision;
 use Base\Repository\Extension\Revisions;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
@@ -30,13 +28,12 @@ class VersionManager
 
     protected readonly UnitOfWork $unitOfWork;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
     public function __construct(
-        UnitOfWork|EntityManagerInterface $unitOfWork,
+        UnitOfWork $unitOfWork,
         protected Revisions $revisions,
         protected int $maxRevisions = 5,
     ) {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
     }
 
     /** The revisions by their interface (step R28), where it asked the entity manager's repository. */

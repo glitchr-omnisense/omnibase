@@ -134,7 +134,7 @@ return [
         ['service' => 'Base\Service\FormGuard', 'argument' => '$defaultChallenge', 'parameter' => 'omnishield.challenge.gateway', 'type' => 'string', 'default' => null],
         ['service' => 'Base\Service\FormGuard', 'argument' => '$acceptUnreachableChallenge', 'option' => 'omnishield.challenge.unreachable', 'type' => 'bool',
             'symfony' => ['definition' => ['Omnishield\Bridge\Symfony\Validator\PassesChallengeValidator', 3]]],
-        ['service' => 'Base\Security\SignInGuard', 'argument' => '$google', 'parameter' => 'google.recaptcha.enable', 'resolve' => true, 'type' => 'bool', 'default' => false],
+        ['service' => 'Omnibridge\Symfony\Omnibase\Security\SignInGuard', 'argument' => '$google', 'parameter' => 'google.recaptcha.enable', 'resolve' => true, 'type' => 'bool', 'default' => false],
     ],
 
     // The texts the application wrote itself (its own translations folder), for the level of politeness

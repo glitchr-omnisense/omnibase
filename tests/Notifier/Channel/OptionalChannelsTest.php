@@ -5,8 +5,6 @@ namespace Tests\Base\Notifier\Channel;
 use Base\Notifier\Channel\InAppChannel;
 use Base\Notifier\Channel\PushChannel;
 use Base\Service\Push\WebPushService;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Notifier;
@@ -36,18 +34,13 @@ class OptionalChannelsTest extends TestCase
 
     private function inAppWithNoMatchingUser(): InAppChannel
     {
-        // EntityManagerInterface::getRepository() is typed EntityRepository in ORM 3.
-        $repository = $this->createMock(EntityRepository::class);
-        $repository->method('findOneBy')->willReturn(null);
-
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->method('getRepository')->willReturn($repository);
-        $entityManager->expects($this->never())->method('persist');
+        $unitOfWork = $this->createMock(\Omnibridge\Persistence\UnitOfWork::class);
+        $unitOfWork->expects($this->never())->method('persist');
 
         $users = $this->createMock(\Base\Repository\Users::class);
         $users->method('findOneBy')->willReturn(null);
 
-        return new InAppChannel($entityManager, $users);
+        return new InAppChannel($unitOfWork, $users);
     }
 
     public function testANotifyPolicySendDoesNotThrowWithoutVapidKeys(): void

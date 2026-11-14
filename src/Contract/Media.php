@@ -13,7 +13,7 @@ use Base\Imagine\FilterInterface;
  * ask it instead of BaseTrait's MediaService.
  *
  * The Foundation's own contract, reached by Runtime::media(). Under Symfony,
- * Base\Bridge\Symfony\ServiceMedia: MediaService's answers. A host without
+ * Omnibridge\Symfony\Omnibase\ServiceMedia: MediaService's answers. A host without
  * the framework that serves omnibase's images gives its own (the obfuscation
  * is Base\Service\Obfuscator's, a class of the Foundation).
  */

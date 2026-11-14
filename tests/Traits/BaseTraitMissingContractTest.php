@@ -143,24 +143,4 @@ final class BaseTraitMissingContractTest extends TestCase
         self::assertNull($entity::getParameterBag('base.user.no_such_key'), 'a key the parameters lack is null, the parameters are there');
         self::assertInstanceOf(ArrayParameterBag::class, $entity::findParameterBag());
     }
-
-    public function testTheDeprecatedFrameworkAccessorsStillAnswerNull(): void
-    {
-        $entity = new class {
-            use BaseTrait;
-        };
-
-        set_error_handler(static fn (): bool => true, \E_USER_DEPRECATED);
-        try {
-            self::assertNull($entity::getRouter());
-            self::assertNull($entity::getTwig());
-            self::assertNull($entity::getRequestStack());
-            self::assertNull($entity::getTokenStorage());
-            self::assertNull($entity::getEntityManager());
-            self::assertNull($entity::getDoctrine());
-            self::assertNull($entity::getService());
-        } finally {
-            restore_error_handler();
-        }
-    }
 }

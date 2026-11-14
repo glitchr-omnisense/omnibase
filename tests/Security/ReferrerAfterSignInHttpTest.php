@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Security;
 
-use Base\Security\LoginFormAuthenticator;
-use Base\Subscriber\ReferrerSubscriber;
+use Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator;
+use Omnibridge\Symfony\Omnibase\Subscriber\ReferrerSubscriber;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,7 +30,7 @@ class ReferrerAfterSignInHttpTest extends KernelTestCase
 
         $firewall = static::getContainer()->get('security.firewall.map')->getFirewallConfig(Request::create('/login', 'POST'));
         if (!in_array(LoginFormAuthenticator::class, $firewall?->getAuthenticators() ?? [], true)) {
-            self::markTestSkipped('The host application\'s firewall does not sign /login in with Base\Security\LoginFormAuthenticator.');
+            self::markTestSkipped('The host application\'s firewall does not sign /login in with Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator.');
         }
     }
 

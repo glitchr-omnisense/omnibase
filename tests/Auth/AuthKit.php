@@ -80,6 +80,8 @@ final class AuthKit
     {
         $this->clock = new FixedClock((new \DateTimeImmutable($now))->format('Y-m-d H:i:s').' UTC');
         $this->sender = new RecordingSender();
+        // The services take the unit of work only since omnisense/omnibase 6.0.
+        $entityManager = $entityManager instanceof \Omnibridge\Persistence\UnitOfWork ? $entityManager : \Base\Database\UnitOfWorks::of($entityManager);
         $this->accounts = new UserAccounts($entityManager);
         $this->passwords = new UserPasswords($entityManager);
         $this->links = new UserLinkTokens($entityManager);

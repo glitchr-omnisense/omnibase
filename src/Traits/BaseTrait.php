@@ -41,10 +41,10 @@ use Omnibridge\Exception\MissingContractException;
  *
  * The framework's services it handed out before (the router, Twig, Doctrine's
  * registry and entity manager, the request stack, the token storage, the
- * firewall map, the slugger, the BaseService facade) are in
- * Base\Traits\FrameworkAccessorsTrait, which this trait still uses: deprecated,
- * typed and nullable as they were, removed at 6.0. The core's host code asks
- * them of Base\Bridge\Symfony\FrameworkLocator.
+ * firewall map, the slugger, the BaseService facade: 5.x's
+ * FrameworkAccessorsTrait) are gone since 6.0 (UPGRADE-6.0.md lists what to
+ * call instead). The core's host code asks them of
+ * Omnibridge\Symfony\Omnibase\FrameworkLocator.
  *
  * An accessor whose answer a contract gives asks the registry first, so it
  * answers wherever the registry is filled, Symfony or not: getParameterBag()
@@ -58,8 +58,6 @@ use Omnibridge\Exception\MissingContractException;
  */
 trait BaseTrait
 {
-    use FrameworkAccessorsTrait;
-
     public static function findAttributeReader(): ?AttributeReader
     {
         return AttributeReader::getInstance();

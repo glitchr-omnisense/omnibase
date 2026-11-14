@@ -12,7 +12,7 @@ use Base\Service\Model\LinkableInterface;
 use Base\Database\Attribute\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\ShortLinkRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\ShortLinkRepository;
 use Base\Contract\Link;
 use Base\Database\Attribute\Cache;
 

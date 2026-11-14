@@ -6,9 +6,9 @@ order: 10
 # Configuration reference
 
 Everything under the `base:` key of `config/packages/base.yaml`, as
-`Base\DependencyInjection\BaseConfiguration` declares it, with its type, its
+`Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration` declares it, with its type, its
 default and what reads it. The values are processed once, when the container is
-built, by `Base\DependencyInjection\BaseExtension::load()`.
+built, by `Omnibridge\Symfony\Omnibase\DependencyInjection\BaseExtension::load()`.
 
 ## How the values are read
 
@@ -22,7 +22,7 @@ is set both whole and leaf by leaf: `base.time_machine.excludes` is the list,
 `Base\Contract\Runtime::parameters()` where there is no container (an entity's
 getter).
 
-Under Symfony the parameter bag is `Base\Service\HotParameterBag`: the settings
+Under Symfony the parameter bag is `Omnibridge\Symfony\Omnibase\Service\HotParameterBag`: the settings
 stored in the database are laid over the container's parameters (see
 [The parameters and the settings over them](../20-architecture/contracts.md#the-parameters-and-the-settings-over-them-step-c9)).
 A path the configuration does not declare reads as `null`.
@@ -74,7 +74,7 @@ require '/srv/demo/vendor/autoload.php';
 
 use Symfony\Component\Config\Definition\Dumper\YamlReferenceDumper;
 
-echo (new YamlReferenceDumper())->dump(new Base\DependencyInjection\BaseConfiguration());
+echo (new YamlReferenceDumper())->dump(new Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration());
 ```
 
 ```bash
@@ -663,7 +663,7 @@ adapters tagged `base.service.sharing` (`Base\Service\Model\Sharing\SharingAdapt
 
 ## `access_restriction`
 
-Who may see the site, checked by `Base\Security\Voter\AccessVoter` (see
+Who may see the site, checked by `Omnibridge\Symfony\Omnibase\Security\Voter\AccessVoter` (see
 [Routes and access](routes-and-access.md#accessvoter)).
 
 | Option | Type | Default | Effect |
@@ -890,5 +890,5 @@ Besides the parameters, `BaseExtension`:
 | `Base\Twig\Renderer\TagRendererInterface` | `twig.tag_renderer` |
 | `Symfony\Component\Workflow\WorkflowInterface` | `workflow` |
 | `Base\Demo\DemoAccountProviderInterface` | `base.demo_account_provider` |
-| `Base\Database\Repository\ServiceEntityRepository` | `doctrine.repository_service` |
+| `Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository` | `doctrine.repository_service` |
 | `Base\EntityDispatcher\EventDispatcherInterface` | `doctrine.event_listener` on `prePersist`, `postPersist`, `preUpdate`, `postUpdate`, `preRemove`, `postRemove`, `postFlush`; `base.entity_dispatcher`; `kernel.reset` (method `reset`) |

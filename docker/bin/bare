@@ -9,7 +9,7 @@
  * a PHP process of its own over tests/Foundation.php.
  *
  *   docker compose run --rm omnibase bare                       # the Foundation (tests/Foundation.php); exits 1 when a class of the framework was loaded
- *   docker compose run --rm omnibase bare 'Base\BaseBundle'     # the classes named
+ *   docker compose run --rm omnibase bare 'Omnibridge\Symfony\Omnibase\BaseBundle'     # the classes named
  *   docker compose run --rm omnibase bare --all --each          # every class of src/, each in a PHP process of its own
  *   docker compose run --rm omnibase bare --json                # the same, whole, as JSON
  *   docker compose run --rm omnibase bare --names               # informative: the classes of the Foundation that name the framework

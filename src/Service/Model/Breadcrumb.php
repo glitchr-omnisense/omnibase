@@ -5,7 +5,7 @@ namespace Base\Service\Model;
 use ArrayAccess;
 use Base\Attributes\Attribute\Iconize;
 use Base\Attributes\AttributeReader;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\TranslatorInterface;
 use Countable;
 use Exception;

@@ -7,8 +7,8 @@ use Omnibridge\Composer\Stub\StubContext;
 /**
  * The stubs of App\Form\ (see AbstractBaseStub): the core's folder, and the form types, extensions
  * and services omnibridge/symfony holds since the plan "omnibase agnostic"'s step F5b
- * (Omnibridge\Symfony\Omnibase\Form\X), which extend them by their former names, Base\Form\X
- * (src/Resources/former-names.php).
+ * (Omnibridge\Symfony\Omnibase\Form\X), which extend them by that name (5.x: by their former
+ * names, Base\Form\X, aliased by the core until 6.0).
  */
 final class FormStub extends AbstractBaseStub
 {
@@ -47,10 +47,5 @@ final class FormStub extends AbstractBaseStub
         }
 
         return $context->vendorDir.'/omnibridge/symfony/src/Omnibase/Form';
-    }
-
-    protected function render(string $namespace, string $name, string $class): string
-    {
-        return parent::render($namespace, $name, $this->bridge ? 'Base\\Form'.substr($class, \strlen(self::BRIDGE)) : $class);
     }
 }

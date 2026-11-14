@@ -2,11 +2,11 @@
 
 namespace Tests\Base\Attributes;
 
-use Base\Bridge\Doctrine\Behaviour\DoctrineBehaviours;
-use Base\Bridge\Doctrine\Behaviour\DoctrineCacheBackend;
-use Base\Bridge\Doctrine\Behaviour\DoctrineSlugifyBackend;
-use Base\Bridge\Doctrine\Behaviour\DoctrineVaultBackend;
-use Base\Bridge\Doctrine\DoctrineUnitOfWork;
+use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineBehaviours;
+use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineCacheBackend;
+use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineSlugifyBackend;
+use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineVaultBackend;
+use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Attribute\Backend\Backends;
 use Base\Database\Attribute\Backend\CacheBackend;
 use Base\Database\Attribute\Backend\SlugifyBackend;

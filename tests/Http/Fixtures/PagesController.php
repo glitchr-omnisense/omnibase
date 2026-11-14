@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Http\Fixtures;
 
-use Base\Field\Type\EmojiPickerType;
-use Base\Form\FormProcessorInterface;
-use Base\Form\FormProxy;
+use Omnibridge\Symfony\Omnibase\Field\Type\EmojiPickerType;
+use Omnibridge\Symfony\Omnibase\Form\FormProcessorInterface;
+use Omnibridge\Symfony\Omnibase\Form\FormProxy;
 use Base\Form\Model\ContactModel;
 use Base\Notifier\ContactMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

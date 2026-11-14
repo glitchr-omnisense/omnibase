@@ -2,7 +2,7 @@
 
 namespace Base\Translation;
 
-use Base\Repository\Layout\TextOverrideRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\TextOverrideRepository;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Translation\Formatter\IntlFormatter;
 use Symfony\Component\Translation\MessageCatalogueInterface;

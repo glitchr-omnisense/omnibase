@@ -30,7 +30,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\NotificationRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\NotificationRepository;
 
 /**
  * A notification: its subject, content, importance, channels, recipients,
@@ -675,7 +675,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
      * The e-mail: Base\Bridge\Symfony\NotificationMessages::email(), with the notifier and the
      * project's directory this notification reaches through Runtime (step E1; BaseTrait before), and the views through
      * omnibridge's Views (Runtime::views(), since step F5a; Twig's environment through
-     * Base\Bridge\Symfony\FrameworkLocator before).
+     * Omnibridge\Symfony\Omnibase\FrameworkLocator before).
      */
     public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): ?EmailMessage
     {

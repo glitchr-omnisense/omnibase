@@ -6,7 +6,7 @@ namespace Base\Service\Model;
  * Rows to page through, counted and sliced by whatever runs the query (plan
  * "omnibase agnostic", step F2e): what Base\Service\Model\Pagination asks in
  * place of Doctrine's Query and Paginator. Doctrine's is
- * Base\Bridge\Doctrine\QueryPages (a DQL query, with omnibase's walkers); a
+ * Omnibridge\Doctrine\Omnibase\QueryPages (a DQL query, with omnibase's walkers); a
  * plain array is paged by Pagination itself.
  */
 interface Pages

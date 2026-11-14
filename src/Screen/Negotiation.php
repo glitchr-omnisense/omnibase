@@ -8,7 +8,7 @@ use Omnibridge\React\Protocol;
 /**
  * How an action's result is answered, whichever framework hosts it (step R10
  * of the audit "lesringostars face au master plan"; formerly the body of
- * Base\Bridge\Symfony\ScreenResponder, which is now Symfony's adapter of it,
+ * Omnibridge\Symfony\Omnibase\ScreenResponder, which is now Symfony's adapter of it,
  * as omnibridge/laravel's Screen\Responder is Laravel's). Framework-free: the
  * host gives what the client asked (a Visit) and a way to render a template,
  * and makes its response of the Answer.

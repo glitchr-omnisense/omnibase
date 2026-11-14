@@ -47,6 +47,6 @@ class SignOutTest extends TestCase
         self::assertSame(['_csrf_token' => 'token-of-logout'], SignOut::parameters($tokens));
         self::assertSame('/security_logout?_csrf_token=token-of-logout', SignOut::path($urls, $tokens));
         self::assertSame(['security_logout', 'security_logoutRequest'], [SignOut::ROUTE, SignOut::REQUEST_ROUTE], 'the routes of SecurityController');
-        self::assertSame([SignOut::ROUTE, SignOut::REQUEST_ROUTE], [\Base\Security\LoginFormAuthenticator::LOGOUT_ROUTE, \Base\Security\LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE]);
+        self::assertSame([SignOut::ROUTE, SignOut::REQUEST_ROUTE], [\Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator::LOGOUT_ROUTE, \Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE]);
     }
 }

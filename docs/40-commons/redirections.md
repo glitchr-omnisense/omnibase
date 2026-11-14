@@ -24,7 +24,7 @@ $this->redirections->add('/charte', 'https://example.org/charte', flush: false);
 ## When
 
 Only when a request ends in "not found" - no route matched, or a controller
-found no record (`Base\Subscriber\RedirectionSubscriber`, on the kernel's
+found no record (`Omnibridge\Symfony\Omnibase\Subscriber\RedirectionSubscriber`, on the kernel's
 exception). A page the site answers is never redirected, whatever the table
 says, and costs no query. GET and HEAD only: a form sent to an old address is
 not replayed elsewhere.

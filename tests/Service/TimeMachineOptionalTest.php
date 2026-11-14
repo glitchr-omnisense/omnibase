@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
  */
 final class TimeMachineOptionalTest extends TestCase
 {
-    private const SERVICES = ['Base\\Service\\TimeMachine', 'time_machine', TimeMachineInterface::class, 'Backup\\Manager\\Manager', 'Base\\Console\\Command\\TimeMachineSnapshotCommand', 'Base\\Console\\Command\\TimeMachineSnapshotBackupCommand', 'Base\\Console\\Command\\TimeMachineSnapshotRestoreCommand', 'Base\\Console\\Command\\TimeMachineStorageCommand'];
+    private const SERVICES = ['Base\\Service\\TimeMachine', 'time_machine', TimeMachineInterface::class, 'Backup\\Manager\\Manager', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineSnapshotCommand', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineSnapshotBackupCommand', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineSnapshotRestoreCommand', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineStorageCommand'];
 
     private const CHECKS = <<<'PHP'
         $tree = (new Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration())->getConfigTreeBuilder()->buildTree();

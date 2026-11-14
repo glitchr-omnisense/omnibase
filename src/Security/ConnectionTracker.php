@@ -2,11 +2,9 @@
 
 namespace Base\Security;
 
-use Base\Database\UnitOfWorks;
 use Base\Entity\User;
 use Base\Entity\User\Connection;
 use Base\Repository\User\Connections;
-use Doctrine\ORM\EntityManagerInterface;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**
@@ -33,11 +31,10 @@ class ConnectionTracker
     /**
      * @param (\Closure(): string)|null  $uniqid the browser's PHPUSERID (made and kept by the host when it has none)
      * @param (\Closure(): ?string)|null $host   the host the request reached
-     * @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks
      */
-    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork, Connections $connectionRepository, private readonly ?\Closure $uniqid = null, private readonly ?\Closure $host = null)
+    public function __construct(UnitOfWork $unitOfWork, Connections $connectionRepository, private readonly ?\Closure $uniqid = null, private readonly ?\Closure $host = null)
     {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
+        $this->unitOfWork = $unitOfWork;
         $this->connectionRepository = $connectionRepository;
     }
 

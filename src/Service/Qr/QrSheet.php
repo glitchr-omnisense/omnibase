@@ -2,9 +2,7 @@
 
 namespace Base\Service\Qr;
 
-use Base\View\ViewsAdapter;
 use Omnibridge\Contract\Views;
-use Twig\Environment;
 
 /**
  * QR codes laid out on A4 pages to print: one big code per page (a poster
@@ -36,9 +34,9 @@ class QrSheet
 
     public function __construct(
         protected readonly QrCode $qr,
-        Views|Environment|null $views = null,
+        ?Views $views = null,
     ) {
-        $this->views = ViewsAdapter::ofNullable($views);
+        $this->views = $views;
     }
 
     /** The views the sheet renders through (plan "omnibase agnostic", F5a; Twig's environment before, deprecated until 6.0). */

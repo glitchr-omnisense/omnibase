@@ -3,11 +3,11 @@
 namespace Tests\Base\Database\Repository;
 
 use Base\Database\Repository\Finder\Parser;
-use Base\Database\Repository\ServiceEntityParser;
-use Base\Database\Repository\ServiceEntityRepository;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityParser;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Thread;
-use Base\Repository\Layout\ImageCropRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

@@ -19,7 +19,7 @@ use Base\View\Menus;
  *
  * Framework-free (plan "omnibase agnostique", step R9 of the audit
  * "lesringostars face au master plan"): Symfony registers it with omnibase's
- * Localizer (Base\Bridge\Symfony\LocalizerLocales) and Themizer, Laravel
+ * Localizer (Omnibridge\Symfony\Omnibase\LocalizerLocales) and Themizer, Laravel
  * with omnibridge/laravel's AppLocales and Theme - the same menus from the
  * same code. Formerly in LocalizerTwigExtension and ThemizerTwigExtension,
  * under the same names and defaults.

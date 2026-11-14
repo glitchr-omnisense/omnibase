@@ -41,7 +41,7 @@ class Localizer extends AbstractLocalCache implements LocalizerInterface
      * (LocalizerSubscriber::onKernelRequest). As a static it outlives that request
      * in any long-running process - FrankenPHP worker mode, a messenger consumer -
      * and would claim "already resolved" for every request after the first. Cleared
-     * at the start of each main request by Base\Subscriber\RequestScopedStateSubscriber.
+     * at the start of each main request by Omnibridge\Symfony\Omnibase\Subscriber\RequestScopedStateSubscriber.
      */
     public static function forgetRequestState(): void
     {

@@ -9,7 +9,7 @@ use PHPStan\Reflection\MethodsClassReflectionExtension;
 
 /**
  * The finder language of omnibase's repositories for PHPStan: a repository
- * extending Base\Database\Repository\ServiceEntityRepository answers, through
+ * extending Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository answers, through
  * __call() and ServiceEntityParser, every method its name describes -
  * findOneBySlug(), cacheByParentAndState(), countByDomainAndUpdatedAtYoungerThan(),
  * distinctCountBy...(), lengthOf...() - which no declaration can list. Each is

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Contract;
 
-use Base\Bridge\Symfony\FrameworkLocator;
+use Omnibridge\Symfony\Omnibase\FrameworkLocator;
 use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Entity\Layout\Semantic;
@@ -57,7 +57,7 @@ final class EntityGettersTest extends KernelTestCase
 
     /**
      * Semantic::__toLink() and getUrl(), ShortLink::__toLink() and Link::to() give the router's
-     * strings for the four reference types (BaseTrait's getRouter() is the same advanced_router).
+     * strings for the four reference types. (BaseTrait's getRouter() is gone since 6.0.)
      */
     public function testLinksAreTheRoutersAddresses(): void
     {
@@ -76,7 +76,6 @@ final class EntityGettersTest extends KernelTestCase
             foreach ($types as $type) {
                 self::assertSame($router->generate($route, $parameters, $type), $semantic->__toLink($type), $route.', type '.$type);
                 self::assertSame($router->generate($route, $parameters, $type), Link::to($route, $parameters, $type), $route.', Link::to(), type '.$type);
-                self::assertSame($semantic->getRouter()->generate($route, $parameters, $type), $semantic->__toLink($type), $route.', BaseTrait\'s router');
             }
             self::assertSame($router->generate($route, $parameters), $semantic->getUrl(), $route);
             self::assertSame($router->generate($route, $parameters), $semantic->__toLink(), $route);

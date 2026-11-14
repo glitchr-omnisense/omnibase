@@ -136,8 +136,8 @@ event manager:
 
 | Event | Arguments | Dispatched by | When |
 |---|---|---|---|
-| `resolveDiscriminator` | `Base\Database\Event\ResolveDiscriminatorEventArgs` (a `LoadClassMetadataEventArgs`) | `Base\Bridge\Doctrine\MappingDriver` | While a class's metadata is loaded, to complete its discriminator map |
-| `preQuery` | `Base\Database\Event\DoctrineQueryEventArgs` (`getQueryBuilder()`, `setQueryBuilder()`) | `ServiceEntityParser::getQuery()` (omnibase's repositories' magic finders) | Before the query is built: a listener may replace the query builder |
+| `resolveDiscriminator` | `Omnibridge\Doctrine\Omnibase\Database\Event\ResolveDiscriminatorEventArgs` (a `LoadClassMetadataEventArgs`) | `Omnibridge\Doctrine\Omnibase\MappingDriver` | While a class's metadata is loaded, to complete its discriminator map |
+| `preQuery` | `Omnibridge\Doctrine\Omnibase\Database\Event\DoctrineQueryEventArgs` (`getQueryBuilder()`, `setQueryBuilder()`) | `ServiceEntityParser::getQuery()` (omnibase's repositories' magic finders) | Before the query is built: a listener may replace the query builder |
 | `onQuery` | `DoctrineQueryEventArgs` (`getQuery()`, `setQuery()`) | the same | Once the query is built |
 | `postQuery` | `DoctrineQueryEventArgs` (`getQuery()`) | the same | After the cache settings are applied |
 
@@ -168,7 +168,7 @@ entity is queried. Each is dispatched only when a listener exists.
 | | `SecuritySubscriber::onKernelRequest` | 3 |
 | | `NotifierSubscriber::onKernelRequest` | 0 |
 | `kernel.controller_arguments` | `IsGrantedSubscriber::onKernelControllerArguments` | 0 |
-| `kernel.view` | `Base\Bridge\Symfony\ActionResults::__invoke` (an action's `View`, `Template`, `Json`... answered by the `ScreenResponder`) | 0 |
+| `kernel.view` | `Omnibridge\Symfony\Omnibase\ActionResults::__invoke` (an action's `View`, `Template`, `Json`... answered by the `ScreenResponder`) | 0 |
 | `kernel.response` | `EntityDispatcherFlushSubscriber::onResponse` | 64 |
 | | `ProfilerSubscriber::onKernelResponse` | 0 |
 | | `TwigSubscriber::onKernelResponse` | 0 |
@@ -206,7 +206,7 @@ sign the user out when its checks fail.
 
 | Event | Listener | Priority |
 |---|---|---|
-| `CheckPassportEvent` | `Base\Security\SignInGuard::onCheckPassport` (the captcha after failed sign-ins, see [The forms' guard](../20-architecture/guard.md#the-sign-in)) | 300 |
+| `CheckPassportEvent` | `Omnibridge\Symfony\Omnibase\Security\SignInGuard::onCheckPassport` (the captcha after failed sign-ins, see [The forms' guard](../20-architecture/guard.md#the-sign-in)) | 300 |
 | | `Base\EntitySubscriber\ConnectionSubscriber::onCheckPassport` | 10 |
 | `LoginSuccessEvent` | `SignInGuard::onLoginSuccess` | 0 |
 | | `NewDeviceSubscriber::onLoginSuccess` | 0 |
@@ -248,5 +248,5 @@ The `Omniauth\Event\*` listeners exist where omnisense/omniauth is installed (se
 `InverseCollectionCacheSubscriber` are `Base\DatabaseSubscriber\`;
 `TrasheableSubscriber`, `VersionableSubscriber`, `ExtensionSubscriber`,
 `SettingSubscriber` are `Base\EntitySubscriber\`. Outside Symfony,
-`Base\Bridge\Doctrine\Mapping` adds the same listeners to an entity manager built
+`Omnibridge\Doctrine\Omnibase\Mapping` adds the same listeners to an entity manager built
 by hand (see [The Doctrine mapping](../20-architecture/doctrine.md)).

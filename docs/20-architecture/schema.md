@@ -53,15 +53,15 @@ technique goes to omnibridge, what reads omnibase's own models stays in the core
 ## How Doctrine uses it
 
 Under Symfony `DoctrineConfigurationPass` wraps every entity manager's driver in
-omnibridge/doctrine's `DeclarationDriver`, then in `Base\Bridge\Doctrine\MappingDriver`;
-`Base\Bridge\Doctrine\Mapping::register()` does the same on an entity manager
+omnibridge/doctrine's `DeclarationDriver`, then in `Omnibridge\Doctrine\Omnibase\MappingDriver`;
+`Omnibridge\Doctrine\Omnibase\Mapping::register()` does the same on an entity manager
 built by hand. Doctrine thus no longer reads the attributes itself: its metadata
 are built from the declarations - the same source the ORM-free description is
 built from - and they are those its attribute driver built, to the property
 (`MetadataSnapshot`, every class, on both hosts).
 
 ```php
-use Base\Database\Schema\Describer;
+use Omnibridge\Doctrine\Omnibase\Database\Schema\Describer;
 
 $description = Describer::describe([$vendor.'/omnisense/omnibase/src/Entity', $projectDir.'/src/Entity'], ['project_dir' => $projectDir]);
 $description->table('thread')->column('slug');                    // string(255), not null

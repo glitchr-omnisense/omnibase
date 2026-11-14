@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\Enum\SpamApi;
 use Base\Enum\SpamScore;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SpamProtectionInterface;
 use Omnishield\Akismet\AkismetGatewayFactory;
 use Omnishield\ClassifierInterface;
@@ -14,12 +14,10 @@ use Omnishield\Exception\ProviderException;
 use Omnishield\Model\Label;
 use Omnishield\Model\Submission;
 use Psr\Log\LoggerInterface;
-use Base\Http\RequestsOf;
 use Omnibridge\Contract\Requests;
 use Omnibridge\Contract\Urls;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -52,14 +50,13 @@ class SpamChecker implements SpamCheckerInterface
     protected ?Requests $requests;
 
     /**
-     * @param Requests|RequestStack|null           $requests Symfony's RequestStack is deprecated (until 6.0)
      * @param AdvancedRouterInterface|Urls|null    $router   the home page's address
      * @param HttpClientInterface|null             $client   Akismet's client; null: symfony/http-client's default one
      *                                                       (HttpClient::create(), MonologBundle's monolog.http_client)
      *                                                       where it is installed, else no Akismet
      */
     public function __construct(
-        #[Autowire(service: Requests::class)] Requests|RequestStack|null $requests,
+        #[Autowire(service: Requests::class)] ?Requests $requests,
         protected SettingBagInterface $settingBag,
         protected ParameterBagInterface $parameterBag,
         protected TranslatorInterface $translator,
@@ -69,7 +66,7 @@ class SpamChecker implements SpamCheckerInterface
         protected AdvancedRouterInterface|Urls|null $router = null,
         protected ?LoggerInterface $logger = null,
     ) {
-        $this->requests = RequestsOf::of($requests);
+        $this->requests = $requests;
     }
 
     public function getLang(): ?string

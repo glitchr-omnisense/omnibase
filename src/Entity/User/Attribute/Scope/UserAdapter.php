@@ -6,9 +6,9 @@ use Base\Database\Attribute\Cache;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 use Base\Entity\User;
-use Base\Field\Type\SelectType;
+use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\Attribute\Scope\UserAdapterRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Scope\UserAdapterRepository;
 
 /**
  * Narrows something to named people.

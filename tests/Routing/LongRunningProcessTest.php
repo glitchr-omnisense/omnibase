@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Routing;
 
-use Base\Routing\AdvancedRouter;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter;
 use Base\Twig\Renderer\Adapter\HtmlTagRenderer;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;

@@ -15,7 +15,7 @@ Texts are translated by `Base\Service\Translator`. A key may name its domain
 (`@mailbox.form.subject`), or be looked up in the field's `translation_domain`.
 
 Every field has the domain **`fields`** by default
-(`Base\Form\Extension\FormTypeExtension`), where omnibase's own field types
+(`Omnibridge\Symfony\Omnibase\Form\Extension\FormTypeExtension`), where omnibase's own field types
 keep their words. A form type that declares its own domain is followed by its
 fields:
 
@@ -49,7 +49,7 @@ in every key to go around it; they no longer need to.)
 
 ## A PHP enum in a select
 
-`Base\Field\Type\SelectType` bound to a property that holds a PHP enum finds
+`Omnibridge\Symfony\Omnibase\Field\Type\SelectType` bound to a property that holds a PHP enum finds
 its choices by itself - the cases - and hands the case back to the record:
 
 ```php
@@ -248,7 +248,7 @@ return view('comment', ['form' => $submission->createView()]);   // the values s
 The Symfony half of the form layer lives in `Omnibridge\Symfony\Omnibase\` since F5b, each class under its
 former path: `Field\Type\*`, `Form\Type\*`, `Form\Extension\*`, `Form\Transformer\*`, `Form\Traits\*`,
 `Form\Common\{AbstractType, FormTypeInterface}`, `Form\{FormFactory, FormProxy, FormProcessor}` and their
-interfaces (78 classes). Their `Base\` names keep working until 6.0: `src/Resources/former-names.symfony.php`.
+interfaces (78 classes). Their `Base\` names worked until 5.x; since 6.0 only the new ones do (`UPGRADE-6.0.md`).
 Sites keep `createForm()`, their themes and `Base\Field\Type\X::class` everywhere. Because `::class` of a former
 name is a plain string while Symfony's registry asks a type's extensions by its declared name,
 `FormerFormTypesPass` gives the type locator both names and files the extensions under the declared one. A

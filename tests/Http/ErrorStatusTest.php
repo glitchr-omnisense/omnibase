@@ -66,11 +66,11 @@ class ErrorStatusTest extends KernelTestCase
 
     /**
      * The controller moved to omnibridge/symfony at 5.0 (plan "omnibase agnostic", step F6): its former service id
-     * is the same service, as a site's `framework.error_controller: Base\Controller\ErrorController::Main` names it.
+     * is the same service, as a site's `framework.error_controller: Omnibridge\Symfony\Omnibase\Controller\ErrorController::Main` names it.
      */
     public function testTheFormerIdIsTheMovedController(): void
     {
-        $this->assertSame($this->controller, static::getContainer()->get('Base\Controller\ErrorController'));
-        $this->assertSame(static::getContainer()->get(\Omnibridge\Symfony\Omnibase\Controller\UX\MediaController::class), static::getContainer()->get('Base\Controller\UX\MediaController'));
+        $this->assertSame($this->controller, static::getContainer()->get('Omnibridge\Symfony\Omnibase\Controller\ErrorController'));
+        $this->assertSame(static::getContainer()->get(\Omnibridge\Symfony\Omnibase\Controller\UX\MediaController::class), static::getContainer()->get('Omnibridge\Symfony\Omnibase\Controller\UX\MediaController'));
     }
 }

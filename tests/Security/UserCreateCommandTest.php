@@ -3,7 +3,7 @@
 namespace Tests\Base\Security;
 
 use Base\Entity\User\Token;
-use Base\Subscriber\PasswordChangeSubscriber;
+use Omnibridge\Symfony\Omnibase\Subscriber\PasswordChangeSubscriber;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;

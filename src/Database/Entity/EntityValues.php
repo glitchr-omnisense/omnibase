@@ -27,7 +27,7 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
  * - A lazy object is loaded before it is read (PHP 8.4's lazy ghosts, and Doctrine's proxies by name).
  *
  * AbstractAttribute's helpers use it when they are given the unit of work their hook's event carries (Slugify,
- * Uploader); without one they keep omnibridge/doctrine's ClassMetadataManipulator, deprecated until 6.0.
+ * Uploader); without one they keep omnibridge/doctrine's ClassMetadataManipulator (Doctrine's metadata: until the vocabulary step, E3).
  */
 final class EntityValues
 {

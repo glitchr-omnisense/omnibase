@@ -39,14 +39,14 @@ final class EmailComposerTest extends TestCase
         self::assertSame(['html' => '<title>Frame</title>Hi', 'subject' => 'Frame'], EmailComposer::render($views, null, ['content' => 'Hi']));
     }
 
-    /** @group legacy */
-    public function testTwigsEnvironmentIsStillAccepted(): void
+    /** Twig's environment through omnibridge/twig's TwigViews (since 6.0 the composer takes Views only). */
+    public function testTwigsEnvironmentThroughTwigViews(): void
     {
         $twig = new Environment(new ArrayLoader([
             'mail' => '<title>Hi {{ recipient }}</title>',
             EmailComposer::BODY => '{{ html|raw }}',
         ]));
-        $email = (new EmailComposer($twig, 'Support <support@example.org>'))->compose('anne@example.org', 'mail', [], 'Hello');
+        $email = (new EmailComposer(new \Omnibridge\Twig\TwigViews($twig), 'Support <support@example.org>'))->compose('anne@example.org', 'mail', [], 'Hello');
         self::assertSame('Hi anne@example.org', $email->getSubject());
         self::assertSame("Hi anne@example.org\n\nHello\n\n\n", $email->getTextBody());
     }

@@ -2,10 +2,10 @@
 
 namespace Tests\Base\Database\Type;
 
-use Base\Database\Type\DateTimeTypeUTC;
+use Omnibridge\Doctrine\Omnibase\Database\Type\DateTimeTypeUTC;
 use Base\Database\Type\Utc;
-use Base\Database\Type\UtcDateTimeImmutableType;
-use Base\Database\Type\UtcDateTimeType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
+use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeType;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;

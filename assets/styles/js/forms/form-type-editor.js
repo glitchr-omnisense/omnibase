@@ -59,7 +59,7 @@ function randid(length)
 // This code uses no WebSocket relay. This code sends plain POST requests
 // to ux_editorjs_autosave. Each field controls this feature through
 // EditorType's "collab_autosave" option. The default value of this
-// option is false. Refer to Base\Controller\UX\EditorController::
+// option is false. Refer to Omnibridge\Symfony\Omnibase\Controller\UX\EditorController::
 // Autosave() for the server-side code.
 function collabAutosave(editor, holder, collab) {
     if (!collab || !collab.autosave) return null;

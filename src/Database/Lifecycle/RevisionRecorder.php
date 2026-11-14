@@ -18,7 +18,7 @@ use Throwable;
  *
  * The persistence's part - which entities the flush updates, the to-many collections' snapshots, the
  * revision inserted in the running flush, the oldest ones trimmed - is
- * Base\EntitySubscriber\VersionableSubscriber's on Doctrine (moves to omnibridge/doctrine at step F3).
+ * Omnibridge\Doctrine\Omnibase\EntitySubscriber\VersionableSubscriber's on Doctrine (moves to omnibridge/doctrine at step F3).
  */
 final class RevisionRecorder
 {

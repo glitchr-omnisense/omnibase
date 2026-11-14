@@ -19,10 +19,8 @@ use Base\Service\Localizer;
 use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use InvalidArgumentException;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
 use Omnibridge\Persistence\Lifecycle\EntityEvent;
 use Omnibridge\Persistence\Lifecycle\PreUpdate;
 use Omnibridge\Persistence\Snapshots;
@@ -42,10 +40,6 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
  * (EntityFields); what it asks of the persistence goes through the unit of work (references), its
  * repositories (UnitOfWorks::repositories(): an association by id, uuid or slug), its Snapshots (the
  * original values) and its ColumnTypes where it registers one (which types hold an array).
- *
- * Doctrine's entity manager and ClassMetadataManipulator are still accepted in place of the unit of work
- * and the shapes, deprecated until 6.0 (the entity manager made a unit of work by UnitOfWorks::of(), the
- * manipulator's shapes taken).
  */
 class EntityHydrator implements EntityHydratorInterface
 {
@@ -109,14 +103,11 @@ class EntityHydrator implements EntityHydratorInterface
         return $this->propertyAccessor ??= PropertyAccess::createPropertyAccessorBuilder()->enableMagicCall()->getPropertyAccessor();
     }
 
-    /**
-     * @param UnitOfWork|EntityManagerInterface                 $unitOfWork the entity manager deprecated until 6.0
-     * @param EntityShapes|ClassMetadataManipulator|null $shapes     the unit of work's persistence's by default (UnitOfWorks::shapes()); the manipulator deprecated until 6.0
-     */
-    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork, EntityShapes|ClassMetadataManipulator|null $shapes = null)
+    /** @param EntityShapes|null $shapes the unit of work's persistence's by default (UnitOfWorks::shapes()) */
+    public function __construct(UnitOfWork $unitOfWork, ?EntityShapes $shapes = null)
     {
-        $this->unitOfWork = UnitOfWorks::of($unitOfWork);
-        $this->shapes = $shapes instanceof EntityShapes ? $shapes : ($shapes?->getShapes() ?? UnitOfWorks::shapes($this->unitOfWork));
+        $this->unitOfWork = $unitOfWork;
+        $this->shapes = $shapes ?? UnitOfWorks::shapes($this->unitOfWork);
         $this->fields = new EntityFields($this->shapes);
     }
 
@@ -773,7 +764,7 @@ class EntityHydrator implements EntityHydratorInterface
 
     /**
      * The entity as it was read or last flushed (its original values hydrated into a new one): of an
-     * entity, of a lifecycle event's (omnisense/omnibridge's, or Doctrine's - deprecated until 6.0), a
+     * entity, of a lifecycle event's (omnisense/omnibridge's, or Doctrine's), a
      * PreUpdate's changes read as the values before.
      *
      * @param $eventOrEntity
@@ -811,7 +802,7 @@ class EntityHydrator implements EntityHydratorInterface
 
         $changes = match (true) {
             $eventOrEntity instanceof PreUpdate => $eventOrEntity->changes(),
-            // Doctrine's PreUpdateEventArgs, by name (deprecated until 6.0), and any lifecycle arguments that carry a
+            // Doctrine's PreUpdateEventArgs, by name, and any lifecycle arguments that carry a
             // PreUpdate's changes the same way (omnibridge/eloquent's, for the entity dispatchers typed on
             // doctrine/persistence's LifecycleEventArgs; plan "omnibase agnostic", step F7c).
             is_object($eventOrEntity) && (is_a($eventOrEntity, 'Doctrine\ORM\Event\PreUpdateEventArgs') || (method_exists($eventOrEntity, 'getObject') && method_exists($eventOrEntity, 'getEntityChangeSet'))) => $eventOrEntity->getEntityChangeSet(),

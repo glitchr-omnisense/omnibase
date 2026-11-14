@@ -5,6 +5,7 @@ namespace Tests\Base\Security;
 use Base\Service\SecurityPolicy;
 use Base\Service\SettingBagInterface;
 use PHPUnit\Framework\TestCase;
+use Omnibridge\Symfony\Contract\HierarchyRoles;
 use Symfony\Component\Security\Core\Role\RoleHierarchy;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 
@@ -20,7 +21,7 @@ class SecurityPolicyTest extends TestCase
         $bag = $this->createStub(SettingBagInterface::class);
         $bag->method('getScalar')->willReturnCallback(static fn ($path) => $settings[$path] ?? null);
 
-        return new SecurityPolicy($bag, new RoleHierarchy(['ROLE_ADMIN' => ['ROLE_STAFF'], 'ROLE_STAFF' => ['ROLE_USER']]), $requiredRoles, $postpone);
+        return new SecurityPolicy($bag, new HierarchyRoles(new RoleHierarchy(['ROLE_ADMIN' => ['ROLE_STAFF'], 'ROLE_STAFF' => ['ROLE_USER']])), $requiredRoles, $postpone);
     }
 
     public function testWithoutRequiredRolesTheAdministratorsSettingAloneDecides(): void
@@ -83,8 +84,8 @@ class SecurityPolicyTest extends TestCase
     }
 
     /**
-     * The hierarchy is omnisense/omnibridge's Contract\Roles (plan "omnibase agnostic", step F5c): any host's,
-     * Security's RoleHierarchyInterface still accepted (until 6.0), the same answers.
+     * The hierarchy is omnisense/omnibridge's Contract\Roles (plan "omnibase agnostic", step F5c): any host's;
+     * Security's RoleHierarchyInterface through omnibridge/symfony's HierarchyRoles, the same answers.
      */
     public function testTheHierarchyIsTheHostsRolesContract(): void
     {

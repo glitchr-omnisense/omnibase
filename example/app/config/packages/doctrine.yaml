@@ -4,8 +4,8 @@ doctrine:
     orm:
         # Base ships its own naming strategy and metadata factory: they resolve
         # the App\ <-> Base\ mirrored entities and the Set/Enum column types.
-        naming_strategy: Base\Database\Mapping\NamingStrategy
-        class_metadata_factory_name: Base\Database\Mapping\ClassMetadataFactory
+        naming_strategy: Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy
+        class_metadata_factory_name: Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory
         # auto_mapping picks up the bundle's own entities (Base\Entity\*).
         auto_mapping: true
         mappings:

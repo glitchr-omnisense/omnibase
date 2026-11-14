@@ -7,68 +7,51 @@ use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The core's Doctrine classes moved to omnibridge/doctrine (plan "omnibase agnostic", step
- * F3): each keeps its former name, the moved class itself (src/Resources/former-names.php),
- * whichever of the two names is asked first.
+ * The core's classes moved to omnibridge/doctrine and omnibridge/symfony (plan "omnibase agnostic", steps F3, F5b,
+ * F5c, F6) answered to their former names until 5.x (src/Resources/former-names.php aliased them). Since 6.0 no class
+ * answers to a former name: FormerNames is the record of the renames (former => new), which UPGRADE-6.0.md lists and
+ * MetadataSnapshot reads.
  */
 final class FormerNamesTest extends TestCase
 {
-    public function testEachFormerNameIsTheMovedClass(): void
+    public function testTheRecordOfTheRenames(): void
     {
         $moved = FormerNames::moved();
-        self::assertCount(377, $moved); // 52 more (F6: the bundle, its DI and the Symfony controllers), 142 to omnibridge/doctrine (F3), 78 to omnibridge/symfony (F5b), 5 more (F5c), 4 more (F5c item 3: 3 to omnibridge/symfony, 1 to omnibridge/doctrine), 33 more (F5c item 3, Console), 38 more (F5c item 3: subscribers, routing, warmers, collectors, responses), 13 more (F5c item 3: Security), 12 more (F5c item 3: Bridge\Symfony, the Symfony-wired adapters)
+        self::assertCount(377, $moved); // 52 (F6: the bundle, its DI and the Symfony controllers), 142 to omnibridge/doctrine (F3), 78 to omnibridge/symfony (F5b), 5 (F5c), 4 (F5c item 3), 33 (F5c item 3, Console), 38 (F5c item 3: subscribers, routing, warmers, collectors, responses), 13 (F5c item 3: Security), 12 (F5c item 3: Bridge\Symfony)
 
-        // A class that only loads with a package the core suggests: checked where that package is installed.
-        $needs = ['Base\\Security\\OAuthUserProvider' => 'HWI\\Bundle\\OAuthBundle\\Security\\Core\\User\\OAuthAwareUserProviderInterface'];
-
-        // Back in the core (plan "omnibase agnostic", step E3): omnibridge/doctrine's ClassMetadataCompletor is the core's
-        // Completor under its former name, so the former name is the core's class.
-        $back = ['Base\\Database\\Mapping\\ClassMetadataCompletor' => 'Base\\Database\\Mapping\\Completor'];
-
-        $wrong = [];
-        foreach ($moved as $former => $new) {
-            $new = isset($back[$former]) && class_exists($back[$former]) ? $back[$former] : $new;
-            if (isset($needs[$former]) && !interface_exists($needs[$former])) {
-                continue;
-            }
-            if (!class_exists($former) && !interface_exists($former) && !trait_exists($former) || (new \ReflectionClass($former))->getName() !== $new) {
-                $wrong[] = $former;
-            }
-        }
-
-        self::assertSame([], $wrong);
-    }
-
-    public function testNoFileOfTheCoreDeclaresAMovedClass(): void
-    {
         $src = \dirname(__DIR__, 2).'/src/';
         $left = [];
-        foreach (FormerNames::moved() as $former => $new) {
+        foreach ($moved as $former => $new) {
+            self::assertStringStartsWith('Base\\', $former);
+            self::assertMatchesRegularExpression('/^Omnibridge\\\\(Doctrine|Symfony)\\\\Omnibase\\\\/', $new);
             if (is_file($src.str_replace('\\', '/', substr($former, \strlen('Base\\'))).'.php')) {
                 $left[] = $former;
             }
-            self::assertMatchesRegularExpression('/^Omnibridge\\\\(Doctrine|Symfony)\\\\Omnibase\\\\/', $new);
         }
+        self::assertSame([], $left, 'no file of the core declares a moved class');
 
-        self::assertSame([], $left);
         self::assertSame('Base\\Repository\\UserRepository', FormerNames::former('Omnibridge\\Doctrine\\Omnibase\\Repository\\UserRepository'));
+        self::assertSame('Base\\Repository\\UserRepository', FormerNames::name('\\Omnibridge\\Doctrine\\Omnibase\\Repository\\UserRepository'));
         self::assertSame('Base\\Entity\\User', FormerNames::name('Base\\Entity\\User'));
+        self::assertFalse(is_file($src.'Resources/former-names.php'), 'the aliasing autoloader is gone');
     }
 
     /**
-     * In a process of its own, so that neither name is loaded yet: the moved class loaded by its new
-     * name (as Symfony's container loads it), its former name is declared at once - PHP checks an
-     * instanceof or a type written with it without autoloading it -; and the other way round.
+     * In a process of its own, on the application's autoloader: a former name loads nothing, before or after its
+     * moved class is loaded by its new name; the new name answers.
      */
-    public function testWhicheverNameIsLoadedFirstTheOtherIsDeclared(): void
+    public function testNoClassAnswersToAFormerName(): void
     {
         $script = <<<'PHP'
             require $argv[1];
+            $exists = static fn (string $class): bool => class_exists($class) || interface_exists($class) || trait_exists($class);
             $answer = [];
-            $answer['new first'] = class_exists('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataCompletor') && class_exists('Base\Database\Mapping\ClassMetadataCompletor', false);
-            $answer['former first'] = class_exists('Base\Bridge\Doctrine\Registry') && class_exists('Omnibridge\Doctrine\Omnibase\Registry', false);
-            $answer['as a parent'] = class_exists('Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository') && class_exists('Base\Database\Repository\ServiceEntityRepository', false);
-            $answer['typed'] = (static fn (\Base\Database\Mapping\NamingStrategy $s) => true)(new \Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy());
+            $answer['former, first'] = $exists('Base\Bridge\Doctrine\Registry');
+            $answer['new'] = $exists('Omnibridge\Doctrine\Omnibase\Registry');
+            $answer['former, after the new'] = $exists('Base\Bridge\Doctrine\Registry');
+            $answer['a repository, former'] = $exists('Base\Repository\Thread\TagRepository');
+            $answer['a repository, new'] = $exists('Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository');
+            $answer['a form type, former'] = $exists('Base\Field\Type\SelectType');
             echo json_encode($answer);
             PHP;
 
@@ -81,15 +64,25 @@ final class FormerNamesTest extends TestCase
             }
         }
         self::assertNotNull($autoload);
+        if (!class_exists(\Omnibridge\Doctrine\Omnibase\Registry::class)) {
+            self::markTestSkipped('omnibridge/doctrine is not installed.');
+        }
         $output = shell_exec(escapeshellarg(\PHP_BINARY).' -r '.escapeshellarg($script).' '.escapeshellarg($autoload).' 2>&1');
 
-        self::assertSame(['new first' => true, 'former first' => true, 'as a parent' => true, 'typed' => true], json_decode((string) $output, true), (string) $output);
+        self::assertSame([
+            'former, first' => false,
+            'new' => true,
+            'former, after the new' => false,
+            'a repository, former' => false,
+            'a repository, new' => true,
+            'a form type, former' => false,
+        ], json_decode((string) $output, true), (string) $output);
     }
 
     public function testTheEntityOfAMovedRepositoryIsTheCoresEntity(): void
     {
         self::assertSame('Base\\Entity\\Thread\\Tag', \Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository::getFqcnEntityName());
-        self::assertSame('Base\\Entity\\User', \Base\Repository\UserRepository::getFqcnEntityName());
+        self::assertSame('Base\\Entity\\User', \Omnibridge\Doctrine\Omnibase\Repository\UserRepository::getFqcnEntityName());
     }
 
     /** An entity's repositoryClass may name a repository interface of the core: the repository bound to it answers. */
@@ -97,8 +90,8 @@ final class FormerNamesTest extends TestCase
     {
         $factory = \Omnibridge\Doctrine\Omnibase\RepositoryFactory::class;
 
-        self::assertSame(\Base\Repository\Thread\TagRepository::class, $factory::implementation(\Base\Repository\Thread\Tags::class));
-        self::assertSame(\Base\Repository\Thread\TagRepository::class, $factory::implementation(\Base\Repository\Thread\TagRepository::class));
-        self::assertContains($factory::implementation(\Base\Repository\Users::class), ['App\\Repository\\UserRepository', 'Base\\Repository\\UserRepository']);
+        self::assertSame(\Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository::class, $factory::implementation(\Base\Repository\Thread\Tags::class));
+        self::assertSame(\Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository::class, $factory::implementation(\Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository::class));
+        self::assertContains($factory::implementation(\Base\Repository\Users::class), ['App\\Repository\\UserRepository', 'Omnibridge\\Doctrine\\Omnibase\\Repository\\UserRepository']);
     }
 }

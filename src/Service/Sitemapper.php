@@ -4,16 +4,14 @@ namespace Base\Service;
 
 use Base\Attributes\Attribute\Sitemap;
 use Base\Attributes\AttributeReader;
-use Base\Routing\AdvancedRouterInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SitemapEntry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
-use Base\View\ViewsAdapter;
 use Omnibridge\Contract\Views;
-use Twig\Environment;
 
 class Sitemapper implements SitemapperInterface
 {
@@ -49,10 +47,9 @@ class Sitemapper implements SitemapperInterface
 
     protected ?LoggerInterface $logger;
 
-    /** @param Views|Environment $views Twig's environment is deprecated (until 6.0) */
-    public function __construct(Views|Environment $views, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer, ?LoggerInterface $logger = null)
+    public function __construct(Views $views, AttributeReader $attributeReader, AdvancedRouterInterface $router, LocalizerInterface $localizer, ?LoggerInterface $logger = null)
     {
-        $this->views = ViewsAdapter::of($views);
+        $this->views = $views;
         $this->router = $router;
         $this->localizer = $localizer;
         $this->attributeReader = $attributeReader;

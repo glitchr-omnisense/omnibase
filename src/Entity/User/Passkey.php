@@ -4,7 +4,7 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Database\Attribute\Timestamp;
-use Base\Repository\User\PasskeyRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository;
 
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,7 +27,7 @@ use Doctrine\ORM\Mapping as ORM;
  * the credential id and the public key as bytes, the AAGUID as its text, the
  * trust path as the array webauthn-lib normalizes it to. The objects of the
  * library are made from it where the library is used:
- * Base\Repository\User\PasskeyRepository gives WebauthnBundle the
+ * Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository gives WebauthnBundle the
  * CredentialRecord it asks for and saves what it hands back.
  */
 #[ORM\Entity(repositoryClass: PasskeyRepository::class)]

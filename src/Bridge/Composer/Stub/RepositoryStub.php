@@ -7,9 +7,9 @@ use Omnibridge\Composer\Stub\StubContext;
 /**
  * The stubs of App\Repository\ (see AbstractBaseStub). The core's repositories are
  * omnibridge/doctrine's since the plan "omnibase agnostic"'s step F3
- * (Omnibridge\Doctrine\Omnibase\Repository\X): their stubs extend them by their former
- * names, Base\Repository\X, which the core aliases (src/Resources/former-names.php) and
- * the application's App\Repository\X stands for at run time, as before.
+ * (Omnibridge\Doctrine\Omnibase\Repository\X): their stubs extend them by that name, which
+ * the application's App\Repository\X stands for at run time (5.x named them Base\Repository\X,
+ * a former name the core aliased until 6.0).
  */
 final class RepositoryStub extends AbstractBaseStub
 {
@@ -29,10 +29,5 @@ final class RepositoryStub extends AbstractBaseStub
         }
 
         return $context->vendorDir.'/omnibridge/doctrine/src/Omnibase/Repository';
-    }
-
-    protected function render(string $namespace, string $name, string $class): string
-    {
-        return parent::render($namespace, $name, 'Base\\Repository'.substr($class, \strlen(self::SOURCE)));
     }
 }

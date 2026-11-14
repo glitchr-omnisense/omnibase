@@ -59,7 +59,7 @@ types"). The block prefix is the name of its block in the form theme
 | `QuadrantType` | `FormType` | `quadrant` | `class` (`Quadrant8` by default: a compass direction) |
 | `BooleanType` | `CheckboxType` | `boolean` | `confirmation[onCheck]`, `confirmation[onUncheck]`, `toogle_url`, `switch`, `inline` |
 | `ButtonType` | `ButtonType` (Symfony's) | `button2` | `confirmation`, `confirmation-bubbleup`, `type` |
-| `SubmitType` | `Base\Field\Type\ButtonType` | `submit2` | none |
+| `SubmitType` | `Omnibridge\Symfony\Omnibase\Field\Type\ButtonType` | `submit2` | none |
 | `CodeType` | `TextType` | `code` | `length`, `alphabet`, `uppercase`, `submit_on_complete` (a code of known length typed one character per box, carried by one hidden input) |
 | `SlugType` | `TextType` | `slug` | `separator`, `keep`, `upper`, `lock`, `strict`, `target` |
 | `ColorType` | `TextType` | `jscolor` | `jscolor`, `is_nullable` |

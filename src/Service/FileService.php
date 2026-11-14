@@ -5,9 +5,7 @@ namespace Base\Service;
 use Base\Contract\MediaRouter;
 use finfo;
 use Symfony\Component\Uid\Uuid;
-use Base\View\ViewsAdapter;
 use Omnibridge\Contract\Views;
-use Twig\Environment;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
@@ -53,10 +51,9 @@ class FileService implements FileServiceInterface
     /** @var string     */
     protected string $localCache;
 
-    /** @param Views|Environment|null $views Twig's environment is deprecated (until 6.0) */
-    public function __construct(Views|Environment|null $views, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
+    public function __construct(?Views $views, MediaRouter $router, ObfuscatorInterface $obfuscator, Storages $flysystem, ParameterBagInterface $parameterBag)
     {
-        $this->views = ViewsAdapter::ofNullable($views);
+        $this->views = $views;
         $this->router = $router;
         $this->obfuscator = $obfuscator;
         $this->flysystem = $flysystem;

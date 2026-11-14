@@ -1,5 +1,5 @@
 /*
- * Notification service worker (served by Base\Controller\Client\NotificationController
+ * Notification service worker (served by Omnibridge\Symfony\Omnibase\Controller\Client\NotificationController
  * at /sw.js so its scope is the whole origin).
  *
  * Deliberately minimal: no caching, no offline - it exists to receive Web

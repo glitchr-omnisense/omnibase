@@ -128,7 +128,7 @@ passkey:
     serverError: "The server refused the operation: {reason}"
     generic: "The passkey could not be used ({reason})."
 
-# Base\Form\Type\CommentType and Base\Service\CommentGuard.
+# Omnibridge\Symfony\Omnibase\Form\Type\CommentType and Base\Service\CommentGuard.
 comment:
     fields:
         name: "Your name or nickname"
@@ -141,7 +141,7 @@ comment:
         reply_signed_in: "Answering a message takes an account."
 
 # The data-protection notice under a form that collects personal data, and
-# the box to tick when consent is asked (Base\Form\Type\PrivacyType).
+# the box to tick when consent is asked (Omnibridge\Symfony\Omnibase\Form\Type\PrivacyType).
 privacy:
     notice: "The information you send is used only to answer you, and is passed on to no one. You may ask at any time for it to be corrected or deleted."
     consent: "I agree that this information is used to answer me."

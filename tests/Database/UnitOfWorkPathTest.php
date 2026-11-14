@@ -11,16 +11,16 @@ use PHPUnit\Framework\TestCase;
  * Base\Database\UnitOfWorks::repositories() or an interface, an entity's
  * fields through its shape, and what only a persistence does (a row locked,
  * a field compared and set, the second-level cache) through
- * Base\Database\Backend\*. Doctrine's entity manager is named only as the
- * deprecated other half of a constructor's union type
- * (UnitOfWork|EntityManagerInterface, until 6.0).
+ * Base\Database\Backend\*. Doctrine's entity manager is not named (5.x
+ * still accepted it as the other half of a constructor's union type,
+ * UnitOfWork|EntityManagerInterface, removed at 6.0).
  *
  * What stays on the entity manager, on purpose (Doctrine's own side, for step
  * F3, or host code for F5): the mapping (ClassMetadataManipulator,
  * ClassMetadataFactory, EntityHydrator), ServiceEntityRepository, the Doctrine
  * listeners (src/DatabaseSubscriber, src/EntitySubscriber), the commands of
  * Doctrine's own (DoctrineDatabaseImportCommand, DoctrineArrayUpgradeCommand,
- * DoctrineSchemaCharsetCommand), Base\Bridge\Symfony\FrameworkLocator (BaseTrait's
+ * DoctrineSchemaCharsetCommand), Omnibridge\Symfony\Omnibase\FrameworkLocator (BaseTrait's
  * framework services since step F2f), the validators and
  * CropperType (the form layer, F5b), AbstractEventDispatcher and BaseNotifier
  * (F5a), DemoAccountFactory (Doctrine's fixtures).
@@ -89,7 +89,7 @@ final class UnitOfWorkPathTest extends TestCase
     }
 
     /**
-     * Their parent, Base\Console\Command, takes the entity manager still (the applications' commands read its
+     * Their parent, Omnibridge\Symfony\Omnibase\Console\Command, takes the entity manager still (the applications' commands read its
      * deprecated $entityManager; it moves to omnibridge/symfony at step F5c): they pass it on, and ask $unitOfWork.
      */
     private const PASS_THE_ENTITY_MANAGER_ON = ['Console/Command/AutocompleteEntitiesCommand.php', 'Console/Command/IconEntitiesCommand.php'];
@@ -102,11 +102,7 @@ final class UnitOfWorkPathTest extends TestCase
                 if (!\is_array($token) || !\in_array($token[0], [\T_STRING, \T_NAME_QUALIFIED, \T_NAME_FULLY_QUALIFIED], true) || !str_ends_with($token[1], 'EntityManagerInterface')) {
                     continue;
                 }
-                $previous = $tokens[$i - 1] ?? null;
-                $inUse = \is_array($tokens[$i - 1] ?? null) && \T_USE === $tokens[$i - 1][0];
-                if (!$inUse && '|' !== $previous) {
-                    self::fail("$file:{$token[2]} names EntityManagerInterface outside a UnitOfWork|EntityManagerInterface union");
-                }
+                self::fail("$file:{$token[2]} names EntityManagerInterface");
             }
         }
         $this->addToAssertionCount(1);

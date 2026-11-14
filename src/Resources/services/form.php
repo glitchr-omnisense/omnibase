@@ -131,7 +131,7 @@ return [
     ],
     [
         'class' => 'Base\Security\UserTracker',
-        'requires' => ['Symfony\Component\HttpFoundation\RequestStack', 'Base\Routing\AdvancedRouterInterface'],
+        'requires' => ['Symfony\Component\HttpFoundation\RequestStack', 'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface'],
         'public' => true,
         'arguments' => ['@Omnibridge\Persistence\UnitOfWork'],
         'symfony' => [
@@ -148,7 +148,7 @@ return [
         'requires' => [
             'Symfony\Component\EventDispatcher\EventSubscriberInterface',
             'Symfony\Component\HttpFoundation\RequestStack',
-            'Base\Routing\AdvancedRouterInterface',
+            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
         ],
         'public' => true,
         'arguments' => ['@Base\Security\UserTracker', '@Omnibridge\Persistence\UnitOfWork'],

@@ -5,7 +5,7 @@ namespace Base\Database\Type;
 /**
  * An enumeration whose field holds a set of its values (UserRole: an account's roles), kept as
  * those values joined by commas (a MySQL SET). A plain PHP class (plan "omnibase agnostic", step
- * F2a): Base\Bridge\Doctrine\EnumTypeAdapter maps it on Doctrine.
+ * F2a): Omnibridge\Doctrine\Omnibase\EnumTypeAdapter maps it on Doctrine.
  */
 abstract class SetType extends EnumType
 {

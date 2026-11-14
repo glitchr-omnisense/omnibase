@@ -11,7 +11,7 @@ use Omnibridge\Persistence\Scope;
  * "omnibase agnostic", step F2e): an entity whose class is #[Vault] is read
  * when its vault field is null or names the environment the scope was enabled
  * with ("environment"). Doctrine compiles it as its SQL filter "vault_filter"
- * (Base\Database\Filter\VaultFilter).
+ * (Omnibridge\Doctrine\Omnibase\Database\Filter\VaultFilter).
  */
 final class VaultScope implements Scope
 {

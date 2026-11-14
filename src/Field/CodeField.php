@@ -5,7 +5,7 @@ namespace Base\Field;
 use Symfony\Contracts\Translation\TranslatableInterface;
 
 /**
- * A code of known length, one box per character (Base\Field\Type\CodeType).
+ * A code of known length, one box per character (Omnibridge\Symfony\Omnibase\Field\Type\CodeType).
  * Reads as plain text on index/detail.
  */
 class CodeField implements FieldInterface

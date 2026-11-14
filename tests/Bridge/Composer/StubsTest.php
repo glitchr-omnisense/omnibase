@@ -58,16 +58,16 @@ final class StubsTest extends TestCase
             foreach ($files as $file => $content) {
                 self::assertMatchesRegularExpression('/^namespace (App\\\\[\\\\\w]+);$/m', $content);
                 preg_match('/^namespace (App\\\\[\\\\\w]+);$/m', $content, $namespace);
-                preg_match('/^    class (\w+) extends \\\\(Base\\\\[\\\\\w]+) \{\}$/m', $content, $class);
+                preg_match('/^    class (\w+) extends \\\\((?:Base|Omnibridge)\\\\[\\\\\w]+) \{\}$/m', $content, $class);
                 self::assertCount(3, $class, $file);
 
                 $app = $namespace[1].'\\'.$class[1];
                 self::assertSame($class[2], ClassAliases::base($app), $file);
-                // The core's repositories are omnibridge/doctrine's since step F3, by their former names here.
+                // The core's repositories are omnibridge/doctrine's since step F3, by their own names since 6.0.
                 // The form types, extensions and services are omnibridge/symfony's since step F5b, the same way.
                 self::assertTrue('Repository' === $name || is_file(self::root().'/src/'.$name.'/'.$file) || 'Form' === $name && class_exists($class[2]), $file);
                 if ('Repository' === $name) {
-                    self::assertFileExists(\dirname((string) (new \ReflectionClass(\Base\Repository\UserRepository::class))->getFileName()).'/'.$file);
+                    self::assertFileExists(\dirname((string) (new \ReflectionClass(\Omnibridge\Doctrine\Omnibase\Repository\UserRepository::class))->getFileName()).'/'.$file);
                 }
                 self::assertStringContainsString("if (!class_exists('\\".$app."'))", $content);
             }

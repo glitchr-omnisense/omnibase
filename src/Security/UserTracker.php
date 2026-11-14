@@ -4,8 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use Base\Repository\User\Connections;
-use Base\Routing\AdvancedRouterInterface;
-use Doctrine\ORM\EntityManagerInterface;
+use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -26,8 +25,7 @@ class UserTracker extends ConnectionTracker
      */
     protected $router;
 
-    /** @param UnitOfWork|EntityManagerInterface $unitOfWork the entity manager is deprecated (until 6.0): adapted by UnitOfWorks */
-    public function __construct(UnitOfWork|EntityManagerInterface $unitOfWork, RequestStack $requestStack, AdvancedRouterInterface $router, Connections $connectionRepository)
+    public function __construct(UnitOfWork $unitOfWork, RequestStack $requestStack, AdvancedRouterInterface $router, Connections $connectionRepository)
     {
         parent::__construct($unitOfWork, $connectionRepository);
 

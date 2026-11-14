@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
  * count. Counted in a PSR-6 pool: one both hosts reach (lesringostars' Redis)
  * makes a captcha one host asks for asked by the other as well.
  *
- * Base\Security\SignInGuard is it under Symfony (its security events, the
+ * Omnibridge\Symfony\Omnibase\Security\SignInGuard is it under Symfony (its security events, the
  * sign-in page's form); Base\Auth\Listener\GuardSignIn is it on omniauth's
  * events, under any host. Nothing where glitchr/ux-google's reCAPTCHA
  * already guards the sign-in ($google), nor without omnisense/omnishield and a

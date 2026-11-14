@@ -77,7 +77,7 @@ standalone Symfony components (`string`, `uid`, `intl`, `translation`,
 `event-dispatcher`, `http-client`, the contracts...), Doctrine (storage) and
 Twig (the view) are allowed. A failure names the framework's class or file, the
 class of the list that loaded it and the class that asked for it. A second case
-loads `Base\BaseBundle` and `Base\Repository\UserRepository` the same way and
+loads `Omnibridge\Symfony\Omnibase\BaseBundle` and `Omnibridge\Doctrine\Omnibase\Repository\UserRepository` the same way and
 checks the report names the framework (`HttpKernel\Bundle\Bundle`, asked by
 `AbstractBaseBundle`; Security's `UserProviderInterface`, implemented by the
 users' repository): the check is not blind. A third loads a repository

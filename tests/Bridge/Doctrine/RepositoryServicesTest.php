@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Bridge\Doctrine;
 
-use Base\Bridge\Doctrine\Mapping;
-use Base\Bridge\Doctrine\RepositoryFactory;
+use Omnibridge\Doctrine\Omnibase\Mapping;
+use Omnibridge\Doctrine\Omnibase\RepositoryFactory;
 use Base\Service\Storages;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;

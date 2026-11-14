@@ -2,12 +2,12 @@
 
 namespace Tests\Base;
 
-use Base\BaseBundle;
-use Base\Database\Repository\ServiceEntityRepository;
+use Omnibridge\Symfony\Omnibase\BaseBundle;
+use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 use Base\Enum\UserRole;
 use Base\Twig\Extension\FunctionTwigExtension;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
-use Base\Repository\UserRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\UserRepository;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -487,7 +487,7 @@ final class BareTest extends TestCase
     }
 
     /**
-     * Base\Repository\UserRepository where the framework is not installed (audit "lesringostars face au
+     * Omnibridge\Doctrine\Omnibase\Repository\UserRepository where the framework is not installed (audit "lesringostars face au
      * master plan", R2): its Base\Contract\SecurityUserProvider and SecurityUserLoader are empty interfaces, and loading it
      * loads nothing of the framework - the last hard seam between the core and Security on the way of
      * a Laravel application reading a site's App\Repository.
@@ -511,7 +511,7 @@ final class BareTest extends TestCase
      */
     public function testThePasskeysLoadWhereTheFrameworkIsNotInstalled(): void
     {
-        $classes = [\Base\Entity\User\Passkey::class, \Base\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class];
+        $classes = [\Base\Entity\User\Passkey::class, \Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class];
         [$status, $report] = self::bare($classes);
         self::assertSame(0, $status);
         foreach ($classes as $class) {
@@ -545,12 +545,12 @@ final class BareTest extends TestCase
      */
     public function testThePasskeysRepositoriesDeclareTheBundlesInterfacesWhereItIsInstalled(): void
     {
-        [, $report] = self::bare([\Base\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class], self::withTheFramework());
+        [, $report] = self::bare([\Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class], self::withTheFramework());
 
         self::assertSame([
             'Webauthn\\Bundle\\Repository\\CanSaveCredentialRecord' => 'Base\\Contract\\PasskeyRecords',
             'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface' => 'Base\\Contract\\PasskeyRecords',
-        ], array_intersect_key($report['classes'][\Base\Repository\User\PasskeyRepository::class]['framework'], array_flip([
+        ], array_intersect_key($report['classes'][\Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class]['framework'], array_flip([
             'Webauthn\\Bundle\\Repository\\CanSaveCredentialRecord',
             'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface',
         ])));
@@ -558,21 +558,21 @@ final class BareTest extends TestCase
             'Base\\Contract\\PasskeyUsers',
             $report['classes'][\Base\Security\WebauthnUserEntityRepository::class]['framework']['Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface'] ?? null,
         );
-        self::assertContains('Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface', class_implements(\Base\Repository\User\PasskeyRepository::class));
+        self::assertContains('Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface', class_implements(\Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class));
         self::assertContains('Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface', class_implements(\Base\Security\WebauthnUserEntityRepository::class));
     }
 
     /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
     public function testARepositoryLoadsWithoutTheFramework(): void
     {
-        [$status, $report] = self::bare([\Base\Repository\ThreadRepository::class]);
+        [$status, $report] = self::bare([\Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository::class]);
 
         self::assertSame(0, $status);
-        $repository = $report['classes'][\Base\Repository\ThreadRepository::class];
+        $repository = $report['classes'][\Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository::class];
         self::assertNull($repository['error']);
         self::assertSame([], $repository['framework']);
         self::assertSame([], $repository['framework_files']);
-        self::assertContains(\Doctrine\ORM\EntityRepository::class, class_parents(\Base\Repository\ThreadRepository::class));
+        self::assertContains(\Doctrine\ORM\EntityRepository::class, class_parents(\Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository::class));
     }
 
     /**
@@ -923,8 +923,8 @@ final class BareTest extends TestCase
      * AbstractEventDispatcher::lifecycle() with omnisense/omnibridge's Lifecycle events: user.register after the account's
      * insert, user.verified after the update that verifies it (the original entity read from the PreUpdate), thread.published
      * after a published thread's insert, each dispatched once through a plain PSR-14 dispatcher and carrying the entity and
-     * the unit of work, the listeners' changes flushed after; a dispatcher still overriding onPersist() (typed on
-     * doctrine/persistence) refused aloud. Outside the kept list only the property accessor's extraction (property-info,
+     * the unit of work, the listeners' changes flushed after; the former hooks typed on doctrine/persistence gone (6.0).
+     * Outside the kept list only the property accessor's extraction (property-info,
      * type-info), as for the services' list.
      */
     public function testTheEntityDispatchersRunWithoutDoctrinePersistence(): void
@@ -942,12 +942,11 @@ final class BareTest extends TestCase
         self::assertSame([], array_values(preg_grep('~^Symfony\\\\Component\\\\(?:PropertyInfo|TypeInfo)\\\\~', array_keys($run['framework']), PREG_GREP_INVERT)), 'nothing of Doctrine, Twig nor the framework');
         self::assertSame([
             'doctrine/persistence' => false,
-            'former hooks' => [[], [], ['onPersist']],
+            'former hooks gone' => true,
             'user' => [[], ['user.register'], ['user.verified']],
             'user.register carries' => [true, true, true],
             'flushed after the events' => 1,
             'thread' => ['thread.published'],
-            'former refused' => true,
         ], $run['result']);
     }
 

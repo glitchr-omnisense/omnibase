@@ -76,7 +76,7 @@ class Translator implements TranslatorInterface, Translations
     public const MAX_NESTED_TRANSLATION_DEPTH = 10;
 
     /**
-     * @var ParameterBag
+     * @var ParameterBagInterface
      */
     protected $parameterBag;
 
@@ -686,7 +686,7 @@ class Translator implements TranslatorInterface, Translations
             return $this->entityNouns;
         }
         // Outside Symfony's kernel (omnibridge/laravel, plain PHP): the host's namespaces, as its Nouns contract has them.
-        $bundle = class_exists(\Base\BaseBundle::class) ? \Base\BaseBundle::getInstance(false) : null;
+        $bundle = class_exists(\Omnibridge\Symfony\Omnibase\BaseBundle::class) ? \Omnibridge\Symfony\Omnibase\BaseBundle::getInstance(false) : null;
         if (null === $bundle) {
             $nouns = \Omnibridge\Runtime::find(\Base\Contract\Nouns::class);
 

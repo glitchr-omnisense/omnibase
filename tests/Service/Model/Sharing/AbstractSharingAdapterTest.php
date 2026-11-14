@@ -18,11 +18,11 @@ class AbstractSharingAdapterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->adapter = new FakeSharingAdapter(new Environment(new ArrayLoader([
+        $this->adapter = new FakeSharingAdapter(new \Omnibridge\Twig\TwigViews(new Environment(new ArrayLoader([
             '@Base/sharing/default.html.twig' => '{{ sharing|raw }}',
             'custom.html.twig' => 'CUSTOM:{{ sharing|raw }}',
             'context.html.twig' => '{{ a }}|{{ b }}|{{ adapter.identifier }}',
-        ])));
+        ]))));
     }
 
     public function testGenerateSubstitutesAndUrlEncodesOptions(): void

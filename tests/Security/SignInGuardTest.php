@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Security;
 
-use Base\Security\LoginFormAuthenticator;
-use Base\Security\SignInGuard;
+use Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator;
+use Omnibridge\Symfony\Omnibase\Security\SignInGuard;
 use Base\Service\FormGuard;
 use Omnishield\Registry;
 use Omnishield\Testing\FixedGateway;

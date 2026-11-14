@@ -8,7 +8,7 @@ use Base\Entity\Thread;
 use App\Entity\User;
 use Base\Enum\CommentState;
 use Base\Enum\SpamScore;
-use Base\Repository\Thread\CommentRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Thread\CommentRepository;
 use Base\Service\Model\SpamProtectionInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

@@ -1473,7 +1473,7 @@
                    is_inherited/is_descending, superadmin-only) always came out
                    empty for every password-type field: form2_label reads
                    form.vars.is_dbcolumn, but form.plain here is PasswordType's
-                   own internal sub-field (Base\Field\Type\PasswordType::
+                   own internal sub-field (Omnibridge\Symfony\Omnibase\Field\Type\PasswordType::
                    buildForm()'s $builder->add('plain', SymfonyPasswordType::
                    class, ...)), which never itself gets walked by
                    FormTypeExtension's markAsDbColumns()/markDbProperties() -
@@ -1640,7 +1640,7 @@
 {{ form_widget(form, {attr: attr}) }}
 {% endblock %}
 
-{# One box per character (Base\Field\Type\CodeType). The boxes are
+{# One box per character (Omnibridge\Symfony\Omnibase\Field\Type\CodeType). The boxes are
    presentation; the hidden input rendered by form_widget_simple is the
    field. See form/_code_boxes.html.twig and forms/form-type-code.js. #}
 {% block code_widget -%}
@@ -1654,7 +1654,7 @@
 {%- endblock code_widget %}
 
 {# The data-protection notice under a form, and the box to tick when consent
-   is asked (Base\Form\Type\PrivacyType, ContactType's `privacy` options).
+   is asked (Omnibridge\Symfony\Omnibase\Form\Type\PrivacyType, ContactType's `privacy` options).
    The notice is a translation, trusted: printed as HTML so that it may link
    to the privacy page through its parameters. #}
 {%- block base_privacy_row -%}

@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Controller\Action;
 
-use Base\Bridge\Symfony\ActionArguments;
+use Omnibridge\Symfony\Omnibase\ActionArguments;
 use Base\Controller\Action\Notification\Delete;
 use Base\Controller\Action\Notification\Read;
 use App\Entity\User;

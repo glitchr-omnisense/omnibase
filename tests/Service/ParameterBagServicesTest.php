@@ -4,7 +4,7 @@ namespace Tests\Base\Service;
 
 use Base\Contract\Runtime;
 use Base\Service\BaseService;
-use Base\Service\HotParameterBag;
+use Omnibridge\Symfony\Omnibase\Service\HotParameterBag;
 use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;

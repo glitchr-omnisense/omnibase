@@ -9,7 +9,7 @@ use Omnibridge\Schema\Builder\Rule;
 use Omnibridge\Schema\Declaration\ClassDeclaration;
 
 /**
- * The extensions' index, as Base\EntitySubscriber\ExtensionSubscriber gives
+ * The extensions' index, as Omnibridge\Doctrine\Omnibase\EntitySubscriber\ExtensionSubscriber gives
  * it to Doctrine: on AbstractExtension's table, <table>_entity over
  * entityClass and entityId (an index, not a unique constraint: a Revision is
  * one row per flush).

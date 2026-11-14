@@ -7,7 +7,7 @@ order: 25
 
 ## Repositories
 
-`Base\Database\Repository\ServiceEntityRepository` is doctrine/orm's
+`Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository` is doctrine/orm's
 `EntityRepository` built from the `ManagerRegistry` (doctrine/persistence), as
 DoctrineBundle's service repository is - `__construct(ManagerRegistry $registry,
 ?string $entityName = null)`, the entity guessed from the repository's name -
@@ -282,7 +282,7 @@ rewrites the database behind the ORM's back leaves that cache wrong:
 new rows are numbered from 1 again, and the cache answered yesterday's entity
 for today's id until it expired.
 
-`Base\Subscriber\SecondLevelCacheConsoleSubscriber` empties every region
+`Omnibridge\Symfony\Omnibase\Subscriber\SecondLevelCacheConsoleSubscriber` empties every region
 (entities, collections, queries) of every entity manager when one of these
 commands ends: `doctrine:fixtures:load`, `doctrine:schema:{drop,create,update}`,
 `doctrine:database:{drop,import}`, `doctrine:migrations:{migrate,execute}`,

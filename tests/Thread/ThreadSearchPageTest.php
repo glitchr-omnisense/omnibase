@@ -54,7 +54,7 @@ class ThreadSearchPageTest extends KernelTestCase
 
     public function testThePageWithNothingSearched(): void
     {
-        $form = static::getContainer()->get('form.factory')->create('Base\Form\Type\ThreadSearchType');
+        $form = static::getContainer()->get('form.factory')->create('Omnibridge\Symfony\Omnibase\Form\Type\ThreadSearchType');
         self::assertNull($form->getData());
 
         $html = $this->page($form, null, []);
@@ -72,7 +72,7 @@ class ThreadSearchPageTest extends KernelTestCase
         $em->flush();
         $this->threads[] = $thread;
 
-        $form = static::getContainer()->get('form.factory')->create('Base\Form\Type\ThreadSearchType');
+        $form = static::getContainer()->get('form.factory')->create('Omnibridge\Symfony\Omnibase\Form\Type\ThreadSearchType');
         $form->submit(['generic' => strtolower($title)]);
         [$model, $threads] = static::getContainer()->get(ThreadSearch::class)->find($form->getData());
         self::assertSame([$thread->getId()], array_map(static fn ($found) => $found->getId(), $threads));

@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Analytics;
 
-use Base\Repository\Analytics\PageViewRepository;
+use Omnibridge\Doctrine\Omnibase\Repository\Analytics\PageViewRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

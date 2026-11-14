@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
  * another name is never loaded for its own and, loaded for the class it
  * names, declares one already declared elsewhere.
  * src/EntitySubscriber/HookExtensionSubscriber.php declared a second
- * Base\EntitySubscriber\ExtensionSubscriber, an older copy nothing loaded.
+ * Omnibridge\Doctrine\Omnibase\EntitySubscriber\ExtensionSubscriber, an older copy nothing loaded.
  */
 class SourceFilesTest extends TestCase
 {
@@ -38,7 +38,7 @@ class SourceFilesTest extends TestCase
     {
         $this->assertFileDoesNotExist(\dirname(__DIR__).'/src/EntitySubscriber/HookExtensionSubscriber.php');
         // In omnibridge/doctrine since the plan "omnibase agnostic"'s step F3, its former name aliased by the core.
-        $file = (string) (new \ReflectionClass(\Base\EntitySubscriber\ExtensionSubscriber::class))->getFileName();
+        $file = (string) (new \ReflectionClass(\Omnibridge\Doctrine\Omnibase\EntitySubscriber\ExtensionSubscriber::class))->getFileName();
         $this->assertSame(['ExtensionSubscriber'], self::declaredNames((string) file_get_contents($file)));
     }
 
