@@ -83,11 +83,13 @@ ARG TWIG_EXTRAS="twig/cache-extra twig/intl-extra twig/inky-extra twig/cssinline
 ARG OMNI_REFRESH=0
 # --mount: the same token, when given.
 RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families as of ${OMNI_REFRESH}" \
-    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omnisense/omnibase": "5.x-dev"}}}' \
+    && composer config repositories.omnibase '{"type": "path", "url": "/srv/omnibase", "options": {"symlink": false, "versions": {"omnisense/omnibase": "6.x-dev"}}}' \
     # Since 4.0 the core requires its Foundation alone (Doctrine, Twig, standalone components):
     # a Symfony application adds omnibridge/symfony (the framework) and the bundles its
     # config/bundles.php registers - here every one the core suggests (app/config/bundles.php).
-    && composer require "omnisense/omnibase:5.x-dev as 5.0.x-dev" "omnibridge/symfony:1.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
+    # 6.x: omnibridge/symfony and omnibridge/doctrine 2.x (the core conflicts with their 1.x); the plugins resolve once
+    # their constraints allow omnisense/omnibase ^6.0 and omnibridge/symfony ^2.0.
+    && composer require "omnisense/omnibase:6.x-dev" "omnibridge/symfony:2.x-dev" "omnibridge/doctrine:2.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
         $BUNDLES $TWIG_EXTRAS \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
         "omnisense/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \

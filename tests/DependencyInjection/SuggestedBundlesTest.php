@@ -6,11 +6,11 @@ use Base\Contract\Framework;
 use Base\Contract\SecurityUserLoader;
 use Base\Contract\SecurityUserProvider;
 use Base\Entity\User;
-use Base\Repository\UserRepository;
-use Base\Security\OAuthUserProvider;
+use Omnibridge\Doctrine\Omnibase\Repository\UserRepository;
+use Omnibridge\Symfony\Omnibase\Security\OAuthUserProvider;
 use Base\Service\Flysystem;
 use Base\Service\FlysystemInterface;
-use Base\Security\UserProvider;
+use Omnibridge\Symfony\Omnibase\Security\UserProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ServiceLocator;
@@ -75,7 +75,7 @@ class SuggestedBundlesTest extends KernelTestCase
             $this->assertArrayHasKey($package, $composer['suggest'], $package.' is suggested');
             $this->assertArrayHasKey($package, $composer['require-dev'], $package.' is there for the core\'s own suite');
         }
-        $this->assertSame('5.1.x-dev', $composer['extra']['branch-alias']['dev-5.x']);
+        $this->assertSame('6.0.x-dev', $composer['extra']['branch-alias']['dev-6.x']);
         // Since 5.1 the core installs with the default minimum-stability: every requirement is a stable version.
         $this->assertArrayNotHasKey('minimum-stability', $composer);
         foreach ($composer['require'] as $package => $constraint) {
@@ -126,7 +126,7 @@ class SuggestedBundlesTest extends KernelTestCase
     }
 
     /**
-     * Base\Repository\UserRepository under Symfony implements every interface it did up to 4.0
+     * Omnibridge\Doctrine\Omnibase\Repository\UserRepository under Symfony implements every interface it did up to 4.0
      * (audit "lesringostars face au master plan", R2): doctrine-bridge's user loader, Security's
      * user provider and password upgrader, through Base\Contract\SecurityUserLoader and SecurityUserProvider - the
      * packages being installed here, installed means declared, as for the user (C7b, C7c).
@@ -232,11 +232,11 @@ class SuggestedBundlesTest extends KernelTestCase
 
         // The provider of the firewalls, without hwi/oauth-bundle registered: the class follows the
         // package, which is installed here; the service compiles either way.
-        $this->assertInstanceOf(UserProvider::class, $container->get('Base\\Security\\UserProvider'));
+        $this->assertInstanceOf(UserProvider::class, $container->get('Omnibridge\\Symfony\\Omnibase\\Security\\UserProvider'));
         // API Platform's decoration dropped with its bundle.
         $this->assertFalse($container->has('Base\\ApiPlatform\\Metadata\\Resource\\Factory\\OverriddenResourceNameCollectionFactory'));
         // ga.service (glitchr/ux-google) and Encore's lookup given as null.
-        $this->assertNull((fn () => $this->gaService)->call($container->get('Base\\Subscriber\\AnalyticsSubscriber')));
+        $this->assertNull((fn () => $this->gaService)->call($container->get('Omnibridge\\Symfony\\Omnibase\\Subscriber\\AnalyticsSubscriber')));
 
         // league/flysystem-bundle left out: the `flysystem` service on omnibase's local storages.
         $flysystem = $container->get('flysystem');

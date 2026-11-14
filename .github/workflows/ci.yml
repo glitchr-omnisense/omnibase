@@ -19,9 +19,9 @@ name: ci
 
 on:
   push:
-    # 5.x since the sites moved to it (omnibase's plan "omnibase agnostic", step S). 4.x's own ci.yml runs by
+    # 6.x (omnisense/omnibase 6.0; 5.x has its own ci.yml on its branch). 5.x since the sites moved to it (omnibase's plan "omnibase agnostic", step S). 4.x's own ci.yml runs by
     # hand only since 2026-11-09: no site runs 4.x any more.
-    branches: ['5.x']
+    branches: ['6.x']
   pull_request:
   workflow_dispatch:
   # release.yml runs this CI on a tag before the release.
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-react, path: omnibridge/react}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with: {repository: glitchr-omnisense/omnibridge-doctrine, path: omnibridge/doctrine}
+        with: {repository: glitchr-omnisense/omnibridge-doctrine, ref: 2.x, path: omnibridge/doctrine}
       # omnisense/omnibridge, which compose.checkouts.yml mounts over the image's since R14 (Omnibridge\Schema,
       # Omnibridge\Runtime): without it the mount is an empty folder and the suite stops at the first class.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -92,10 +92,10 @@ jobs:
       # it the mount is an empty folder, and the autoloader's files (src/Contract/Urls.php) are not there.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-twig, path: omnibridge/twig}
-      # omnibridge/symfony, the Symfony host of 5.x (BaseBundle, the controllers, the service configuration): mounted
-      # over the image's, as the other bridges.
+      # omnibridge/symfony, the Symfony host (BaseBundle, the controllers, the service configuration): mounted
+      # over the image's, as the other bridges; 2.x and omnibridge/doctrine 2.x for omnisense/omnibase 6.x.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with: {repository: glitchr-omnisense/omnibridge-symfony, path: omnibridge/symfony}
+        with: {repository: glitchr-omnisense/omnibridge-symfony, ref: 2.x, path: omnibridge/symfony}
 
       - name: Build the harness
         run: DOCKER_BUILDKIT=1 docker build -f core/docker/Dockerfile -t omnisense/omnibase-harness --secret id=composer_auth,env=COMPOSER_AUTH core

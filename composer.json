@@ -73,14 +73,20 @@
         "symfony/uid": "^6.0|^7.0|^8.0",
         "symfony/yaml": "^6.0|^7.0|^8.0"
     },
+    "conflict": {
+        "omnibridge/doctrine": "<2.0",
+        "omnibridge/eloquent": "<1.1",
+        "omnibridge/laravel": "<1.2",
+        "omnibridge/symfony": "<2.0"
+    },
     "replace": {
         "omniscient/omnibase": "self.version",
         "glitchr/omnibase": "self.version"
     },
     "suggest": {
-        "omnibridge/symfony": "The core under Symfony: since 5.0 the bundle itself (Omnibridge\\Symfony\\Omnibase\\BaseBundle, registered in config/bundles.php), its configuration (base:), its container extension and compiler passes, the Symfony controllers (their routes imported with `type: omnibase`), the adapters of the host's contracts and the framework packages (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, Form, Routing, HttpKernel, Validator, Cache, Process, Workflow...) (^1.1)",
-        "omnibridge/doctrine": "The persistence on Doctrine: since 5.0 the core requires no Doctrine package but doctrine/collections; omnibridge/doctrine brings doctrine/orm and dbal, the DQL functions (beberlei/doctrineextensions, scienta/doctrine-json-functions), the repositories, the mapping and the types of the core's entities (^1.0)",
-        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (^1.0)",
+        "omnibridge/symfony": "The core under Symfony: since 5.0 the bundle itself (Omnibridge\\Symfony\\Omnibase\\BaseBundle, registered in config/bundles.php), its configuration (base:), its container extension and compiler passes, the Symfony controllers (their routes imported with `type: omnibase`), the adapters of the host's contracts and the framework packages (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, Form, Routing, HttpKernel, Validator, Cache, Process, Workflow...) (^2.0)",
+        "omnibridge/doctrine": "The persistence on Doctrine: since 5.0 the core requires no Doctrine package but doctrine/collections; omnibridge/doctrine brings doctrine/orm and dbal, the DQL functions (beberlei/doctrineextensions, scienta/doctrine-json-functions), the repositories, the mapping and the types of the core's entities (^2.0)",
+        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (^1.2)",
         "symfony/validator": "The validation of the entities' #[Assert\\...] attributes under Symfony (omnibridge/symfony requires it), and its `validators` catalogue (^6.0|^7.0|^8.0)",
         "symfony/http-client": "An HTTP client behind the core's HTTP contract (symfony/http-client-contracts): the currency rates (Trading), the remote classifiers, embeds (^6.0|^7.0|^8.0)",
         "florianv/swap": "The currency rates of Base\\Service\\Trading (^4.0)",
@@ -137,8 +143,8 @@
         "league/flysystem-ftp": "^3.0",
         "omniauth/otp": "1.x-dev",
         "omniauth/webauthn": "1.x-dev",
-        "omnibridge/doctrine": "1.x-dev",
-        "omnibridge/symfony": "^1.1",
+        "omnibridge/doctrine": "2.x-dev",
+        "omnibridge/symfony": "^2.0",
         "omnibridge/twig": "1.x-dev",
         "omnisense/omniauth": "1.x-dev",
         "omnisense/omnishield": "1.x-dev",
@@ -222,11 +228,11 @@
                 "omnisense/omniauth": "1.x-dev",
                 "omniauth/webauthn": "1.x-dev",
                 "omniauth/otp": "1.x-dev",
-                "omnibridge/doctrine": "1.x-dev"
+                "omnibridge/doctrine": "2.x-dev"
             }
         },
         "branch-alias": {
-            "dev-5.x": "5.1.x-dev"
+            "dev-6.x": "6.0.x-dev"
         }
     }
 }

@@ -6,6 +6,65 @@ Versions follow the branch-per-major scheme: branch `3.x` → tags `3.0.0`,
 
 ## [Unreleased]
 
+## [6.0.0] — 2026-11-14
+
+The former names and the deprecated entry points of 5.x removed (plan "omnibase agnostic": "former names and old
+Doctrine-typed hooks removed at 6.0, after step S"). What a site or a bundle changes: **UPGRADE-6.0.md** (every former
+name with its replacement, generated from the record of the renames; each removed entry point with what replaces it).
+The entities, the schema, the routes, the templates and the configuration tree are 5.1's: no migration.
+
+### Removed
+
+- **The 377 former names.** `src/Resources/former-names.php`, the autoloader that aliased each class moved to
+  omnibridge/doctrine and omnibridge/symfony under its former `Base\` name, and its `require` in `Functions.php`. No
+  class answers to a former name any more. `former-names.{doctrine,symfony}.php` and `Base\Database\FormerNames` stay
+  as data, the record of the renames (UPGRADE-6.0.md, omnibridge/doctrine's MetadataSnapshot).
+- **The core's own code on the new names**: the entities' `repositoryClass`, `Base\Repository\Aliases::INTERFACES`, the
+  services' declarations (`src/Resources/services/*.php`: requirements, arguments), the stubs (`App\Repository\X` and
+  `App\Form\X` extend `Omnibridge\Doctrine\Omnibase\Repository\X`, `Omnibridge\Symfony\Omnibase\Form\X`), and
+  `Base\Service\Model\ClassAliases::base()`, which answers the bridge's class for an `App\Repository\X` or `App\Form\X`
+  the core does not hold itself (`MOVED`).
+- **The constructors' union types** (deprecated until 6.0): `UnitOfWork|EntityManagerInterface` (19 services, see
+  UPGRADE-6.0.md), `Views|Environment` (11), `Requests|RequestStack` (4), `Roles|RoleHierarchyInterface`
+  (SecurityPolicy), `Access|AuthorizationCheckerInterface|TokenStorageInterface` (Launcher, MaintenanceProvider,
+  UserSubscriber), `UnitOfWork|ManagerRegistry` (DemoAccountFactory), `EntityShapes|ClassMetadataManipulator`
+  (EntityHydrator). With them `Base\View\ViewsAdapter`, `Base\Http\RequestsOf` and `EmailComposer::views()`.
+  `Base\Database\UnitOfWorks::of()` stays: what makes a unit of work of an entity manager.
+- **The entity dispatchers' former hooks**: `onPersist()`, `onUpdate()`, `onRemove()`, `dispatchEvents()` (and on
+  `EventDispatcherInterface`), `FORMER_HOOKS`, `formerHooks()`, `getEntityManager()` and `$entityManager`;
+  `AbstractEvent::getObjectManager()`, replaced on `EventInterface` by `getUnitOfWork()`. Doctrine's entries
+  (`prePersist()`... `postRemove()`) call the neutral hooks (`persisting()`, `updating()`, `removing()`).
+- **BaseNotifier**: `$twig`, `$entityManager`, `getEnvironment()` (`getViews()`, `$unitOfWork`).
+- **BaseTrait's framework accessors** (`Base\Traits\FrameworkAccessorsTrait`: getRouter, getTwig, getEntityManager,
+  getDoctrine, getObjectManager, getRepository, getClassMetadataManipulator, getTokenStorage, getRequestStack,
+  getFirewallMap, getSlugger, getService).
+- `Base\Traits\CacheClearTrait` (`Base\Console\Task\CacheClear`); `Launcher::redirectOnDeny()`,
+  `MaintenanceProvider::redirectOnDeny()` and `Base\Request\EventDecisions` (the rules `LaunchPage`, `MaintenancePage`).
+
+### Changed
+
+- The thread search page (`@Base/client/thread/search.html.twig`) titles a group of results with `sections`,
+  `Base\Thread\ThreadSearch::sections()` (omnibridge/symfony 2.0's controller passes it), where it asked each thread
+  for its repository through BaseTrait (`thread.getRepository()`, gone).
+- `Base\Database\Mapping\EntityShapes` declares `classes()` (both implementations had it since step B1d).
+- composer.json: branch alias `dev-6.x` → `6.0.x-dev`; `conflict` with omnibridge/symfony < 2.0, omnibridge/doctrine
+  < 2.0, omnibridge/laravel < 1.2, omnibridge/eloquent < 1.1; require-dev omnibridge/symfony ^2.0, omnibridge/doctrine
+  2.x-dev (also `extra.omnibase.bare`); the suggestions name those versions.
+- The harness application (docker/app) names the new classes (bundles.php, doctrine.yaml, security.yaml, its
+  UserRepository and DemoController).
+- CI on the 6.x branch; the harness job checks out omnibridge/symfony and omnibridge/doctrine at 2.x, and
+  docker/Dockerfile installs omnisense/omnibase 6.x-dev with omnibridge/symfony and omnibridge/doctrine 2.x-dev: the
+  image builds once the omnibase/* bundles allow `^5.1 || ^6.0` and omnibridge/symfony `^1.1 || ^2.0`.
+- tests/Bridge/Doctrine/fixtures/doctrine-metadata.json recorded again: the core's classes, filters and types are
+  byte-identical (the repositories are recorded by their former names, omnibridge/doctrine 2.0's MetadataSnapshot);
+  the six lines that differ are the bundles' since the last record (omnibase/forge 1.2's PaymentSetup,
+  omnibase/marketplace 1.1's Order\Consent, and the `withdrawal` column of their products).
+
+### Not in 6.0
+
+- The vocabulary step (E3: the entities' `#[ORM\...]` attributes on omnisense/omnibridge's own), optional in the plan,
+  and with it AbstractAttribute's and EntityValues' Doctrine-metadata fallback.
+
 ## [5.1.1] — 2026-11-13
 
 ### Changed
