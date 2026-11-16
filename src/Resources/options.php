@@ -90,6 +90,8 @@ return [
 
         'router' => $section([
             'use_custom' => $bool(null, 'Use custom router'),
+            'fallback' => $scalar(null, 'A service (Base\\Contract\\Routes and Base\\Contract\\Urls) answering the route names this host lacks: another site\'s routes (a twin\'s), read by both hosts\' routers'),
+            'fallback_locale' => $scalar(null, 'The language a route name declared per language is read in when the page\'s has none (app_timeline: app_timeline.fr); null, names as given'),
             'ip_access' => ['deprecated' => ['message' => 'The "%node%" option at "%path%" has no effect (RouterSubscriber reads it only once isGranted(\'VALIDATE_IP\') holds, which no voter of the core decides); remove it from the configuration.'] + $unread] + $bool(false, 'Allow accessing by'),
             'use_fallbacks' => $bool(false, 'Restrict to permitted hosts'),
             'fallback_warning' => $bool(true, 'Fallback warning disable in case there is no fallback'),
@@ -237,6 +239,14 @@ return [
 
         // Account security decided by the application (the administrator's own switches are settings: Base\Service\SecurityPolicy).
         'security' => $section([
+            // What a host wires its security from (omnibridge/symfony prepends security.yaml, omnibridge/laravel its guards): one source.
+            'firewall' => $scalar('main', 'The visitors\' firewall, which omnibase gives its user checker, sign-in and entry point (null: none).'),
+            'rescue' => $scalar('rescue', 'The rescue sign-in\'s firewall (null: none).'),
+            'sign_in' => ['type' => 'enum', 'values' => [null, 'form', 'omniauth'], 'default' => null, 'info' => 'How visitors sign in: form (omnibase\'s sign-in form) or omniauth; null: omniauth where it is configured, else form.'],
+            'access_token' => $bool(true, 'Bearer tokens accepted on the visitors\' firewall.'),
+            'provider' => $scalar('users', 'The name of the user provider omnibase declares: the application\'s accounts.'),
+            'role_hierarchy' => ['type' => 'array', 'key' => 'role', 'prototype' => ['type' => 'array', 'prototype' => ['type' => 'scalar'], 'deep_merging' => false], 'default' => [], 'info' => 'The roles each role holds, read by every host (ROLE_ADMIN: [ROLE_USER]).'],
+            'access_control' => ['type' => 'array', 'prototype' => ['type' => 'array', 'children' => ['path' => ['type' => 'scalar'], 'roles' => ['type' => 'mixed']]], 'default' => [], 'info' => 'The pages kept for some accounts, by their path, read by every host ({ path: ^/admin, roles: ROLE_ADMIN }).'],
             'two_factor' => $section([
                 // A list is merged by appending: when@test's [] left the base list as it was, and when@dev's [ROLE_ADMIN]
                 // gave [ROLE_STAFF, ROLE_ADMIN]. The last definition is the list.
@@ -299,6 +309,7 @@ return [
             'classifier' => $scalar(null, 'The classifier of what is written (SpamChecker): a gateway of omnishield.gateways. Null: Akismet with the key api.spam.akismet (base.spam.akismet) when omnishield/akismet is installed.'),
             'unreachable' => ['type' => 'enum', 'values' => ['accept', 'reject'], 'default' => 'accept', 'info' => 'A list or a classifier that does not answer: the form goes on (accept) or is refused (reject). The captcha\'s is omnishield.challenge.unreachable.'],
             'min_delay' => ['min' => 0] + $int(3, 'Seconds between a guarded form being shown and sent: faster is a robot. 0: not checked.'),
+            'sign_in_pool' => $scalar(null, 'The cache pool (a service) the sign-in captcha counts the failed sign-ins in (null: cache.app).'),
             'sign_in_after' => ['min' => 0] + $int(3, 'Failed sign-ins from an address before the sign-in form asks the captcha too. 0: never.'),
             'captcha_after' => ['min' => 0] + $int(3, 'Refused tries of a guarded form from a visitor (address, else session; 15 minutes) before its captcha is shown and asked. 0: always shown. A form sets its own with the option guard.captcha_after.'),
         ]),

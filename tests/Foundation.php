@@ -923,6 +923,7 @@ return [
     Base\Screen\Negotiation::class,
     Base\Screen\Redirect::class,
     Base\Screen\Reply::class,
+    Base\Screen\Responder::class,
     Base\Screen\Screen::class,
     Base\Screen\Shape::class,
     Base\Screen\Shell::class,

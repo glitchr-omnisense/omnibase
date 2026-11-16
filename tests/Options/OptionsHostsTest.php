@@ -4,8 +4,7 @@ namespace Tests\Base\Options;
 
 use Base\Options;
 use Omnibridge\Options\InvalidOption;
-use Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration;
-use Omnibridge\Symfony\Omnibase\Legacy\DependencyInjection\BaseConfiguration as FormerConfiguration;
+use Base\DependencyInjection\BaseConfiguration;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Dumper\YamlReferenceDumper;
@@ -57,29 +56,6 @@ final class OptionsHostsTest extends TestCase
             $refused += (int) $past;
         }
         self::assertGreaterThan(20, $refused);
-    }
-
-    /**
-     * The tree compiled from the declaration is the one omnibridge/symfony wrote by hand until slice 4b (the 4.x
-     * tree, which stays as it was), but for the two storages' defaults given since: the ones the core declares,
-     * where the former tree had none (a host without them stopped on a TypeError).
-     */
-    public function testTheDeclarationIsTheFormerTree(): void
-    {
-        if (!class_exists(FormerConfiguration::class)) {
-            self::markTestSkipped('Requires omnibridge/symfony.');
-        }
-        $dumper = new YamlReferenceDumper();
-        $since = [
-            "        # Upload storage location\n        storage:              null\n" => "        # Upload storage location\n        storage:              local.uploads\n",
-            "        editor:\n            storage:              null\n" => "        editor:\n\n            # The editor's files' storage\n            storage:              local.wysiwyg\n",
-        ];
-        $former = $dumper->dump(new FormerConfiguration());
-        foreach ($since as $was => $is) {
-            self::assertSame(1, substr_count($former, $was), $was);
-        }
-
-        self::assertSame(strtr($former, $since), $dumper->dump(new BaseConfiguration()));
     }
 
     /**

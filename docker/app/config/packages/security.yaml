@@ -7,9 +7,9 @@ security:
         ROLE_ADMIN: [ROLE_USER]
 
     providers:
-        # The demo's own member (src/Entity/User.php): base-bundle's User
-        # plus a username.
-        users: { entity: { class: App\Entity\User } }
+        # The demo's own member (src/Entity/User.php), read by omnibase's users'
+        # provider (Base\Security\UserProvider, as base.security prepends it).
+        users: { id: Base\Security\UserProvider }
 
     firewalls:
         dev:

@@ -68,8 +68,9 @@ class ConnectionTracker
     }
 
     /**
-     * On every authenticated request (UserProvider::refreshUser under
-     * Symfony, the guard's Authenticated event under Laravel): flushed only
+     * When an account signs in (NewDeviceSubscriber under Symfony,
+     * TrackConnections for omniauth's; the guard's Authenticated event under
+     * Laravel): flushed only
      * when the connection is new or something about it changed - it flushed
      * the whole unit of work on every request, before the controller had
      * even run.
