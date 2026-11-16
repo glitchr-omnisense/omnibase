@@ -265,9 +265,6 @@ trait BaseCommonTrait
         self::$iconProvider = $iconProvider;
     }
 
-    /**
-     * @var ClassMetadataManipulator|null
-     */
     protected static null|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
 
     public static function setClassMetadataManipulator(null|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator)

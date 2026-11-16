@@ -8,6 +8,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Layout\ImageCrops;
 
 /**
+ * @extends ServiceEntityRepository<ImageCrop>
+ *
  * @method ImageCrop|null find($id)
  * @method ImageCrop|null findOneBy(array $criteria, array $orderBy = null)
  * @method ImageCrop[]    findAll()

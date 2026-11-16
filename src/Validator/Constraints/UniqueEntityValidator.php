@@ -30,6 +30,9 @@ class UniqueEntityValidator extends ConstraintEntityValidator
      */
     public function validate($value, Constraint $constraint): void
     {
+        if (!$constraint instanceof UniqueEntity) {
+            throw new \Symfony\Component\Validator\Exception\UnexpectedTypeException($constraint, UniqueEntity::class);
+        }
         $entity = $value;
         parent::validate($entity, $constraint);
 
@@ -156,9 +159,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             return;
         }
 
-        if ($constraint instanceof ConstraintEntity) {
-            $constraint->entity = $entity;
-        }
+        $constraint->entity = $entity;
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
         $invalidValue = $criteria[$errorPath] ?? $criteria[$fields[0]];

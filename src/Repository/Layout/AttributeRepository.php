@@ -7,6 +7,8 @@ use Base\Entity\Layout\Attribute;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<Attribute>
+ *
  * @method Attribute|null find($id)
  * @method Attribute|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Attribute[]    findAll()

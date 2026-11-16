@@ -11,9 +11,15 @@ namespace Base\Mapping;
  */
 final class AssociationOverride implements MappingAttribute
 {
+    /** @var array<JoinColumn>|null */
     public readonly array|null $joinColumns;
+    /** @var array<JoinColumn>|null */
     public readonly array|null $inverseJoinColumns;
 
+    /**
+     * @param array<JoinColumn>|JoinColumn|null $joinColumns
+     * @param array<JoinColumn>|JoinColumn|null $inverseJoinColumns
+     */
     public function __construct(
         public readonly string $name,
         array|JoinColumn|null $joinColumns = null,

@@ -7,6 +7,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Extension\Revisions;
 
 /**
+ * @extends ServiceEntityRepository<Revision>
+ *
  * @method Revision|null find($id)
  * @method Revision|null findOneBy(array $criteria, array $orderBy = null)
  * @method Revision[]    findAll()

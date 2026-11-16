@@ -7,6 +7,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\User\Tokens;
 
 /**
+ * @extends ServiceEntityRepository<Token>
+ *
  * @method Token|null find($id)
  * @method Token|null findOneBy(array $criteria, array $orderBy = null)
  * @method Token[]    findAll()

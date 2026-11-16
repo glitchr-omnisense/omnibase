@@ -143,7 +143,7 @@ abstract class AbstractAttribute implements AttributeInterface
 
     /**
      * @param $className
-     * @return EntityRepository|ObjectRepository
+     * @return \Base\Database\Repository\Entities<object>
      */
     public static function getRepository($className): \Base\Database\Repository\Entities
     {
@@ -291,8 +291,8 @@ abstract class AbstractAttribute implements AttributeInterface
     /**
      * @param $entity
      * @param string $property
-     * @return EntityRepository the repository of the class declaring $property (an omnibase
-     *                          repository, Base\Database\Repository\ServiceEntityRepository, or any other)
+     * @return EntityRepository<object>|\Base\Database\Repository\Entities<object> the repository of the class declaring
+     *                          $property (an omnibase repository, Base\Database\Repository\ServiceEntityRepository, or any other)
      * @throws NotSupported
      */
     public function getPropertyOwnerRepository($entity, string $property, ?NeutralUnitOfWork $unitOfWork = null): EntityRepository|\Base\Database\Repository\Entities

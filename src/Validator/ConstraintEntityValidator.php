@@ -47,6 +47,8 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
     /**
      * The entity as it was read (its changed fields set back to their former values, on a copy); null for an entity
      * the persistence holds no row of yet.
+     *
+     * @return object|null
      */
     public function getOriginalEntity($entity)
     {

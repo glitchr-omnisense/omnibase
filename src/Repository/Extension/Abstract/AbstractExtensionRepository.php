@@ -6,6 +6,8 @@ use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<AbstractExtension>
+ *
  * @method AbstractExtension|null find($id)
  * @method AbstractExtension|null findOneBy(array $criteria, array $orderBy = null)
  * @method AbstractExtension[]    findAll()

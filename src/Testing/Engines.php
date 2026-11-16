@@ -97,10 +97,13 @@ final class Engines
         \Omnibridge\Doctrine\Omnibase\Mapping::register($entityManager, ['parameters' => ($options['parameters'] ?? []) + ['base.uploader.storage' => 'local.uploads']] + $options);
         $store = new \Omnibridge\Eloquent\EntityStore(\Omnibridge\Eloquent\Connections::pdo($pdo), new \Omnibridge\Eloquent\Mapping($description), \Omnibridge\Eloquent\Casts::utc($types));
 
-        return new self($pdo, $description, $entityManager, $store, [
+        /** @var array<string, \Base\Database\Repository\Finders> $finders */
+        $finders = [
             'doctrine' => \Omnibridge\Doctrine\Omnibase\DoctrineFinders::over($entityManager),
             'eloquent' => new \Omnibridge\Eloquent\Omnibase\EloquentFinders($store, new \Omnibridge\Eloquent\EloquentUnitOfWork($store)),
-        ]);
+        ];
+
+        return new self($pdo, $description, $entityManager, $store, $finders);
     }
 
     /**
@@ -169,7 +172,7 @@ final class Engines
     /** The value a row of that class holds in its discriminator column (the same on both engines). */
     public function discriminator(string $class): string
     {
-        return (string) ($this->description->entity($class)?->inheritance?->value ?? throw new \InvalidArgumentException(sprintf('%s has no discriminator.', $class)));
+        return (string) ($this->description->entity($class)?->inheritance->value ?? throw new \InvalidArgumentException(sprintf('%s has no discriminator.', $class)));
     }
 
     /** The database, to read what a statement wrote. */

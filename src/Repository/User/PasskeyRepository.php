@@ -35,6 +35,8 @@ use Base\Repository\User\Passkeys;
  * @method Passkey|null findOneBy(array $criteria, array $orderBy = null)
  * @method Passkey[]    findAll()
  * @method Passkey[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * @extends ServiceEntityRepository<Passkey>
  */
 class PasskeyRepository extends ServiceEntityRepository implements PasskeyRecords, Passkeys
 {

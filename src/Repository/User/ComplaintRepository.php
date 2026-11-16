@@ -7,6 +7,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\User\Complaints;
 
 /**
+ * @extends ServiceEntityRepository<Complaint>
+ *
  * @method Complaint|null find($id)
  * @method Complaint|null findOneBy(array $criteria, array $orderBy = null)
  * @method Complaint[]    findAll()

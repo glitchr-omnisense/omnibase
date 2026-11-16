@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\Action\GrantRoleAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<GrantRoleAdapter>
+ *
  * @method GrantRoleAdapter|null find($id)
  * @method GrantRoleAdapter|null findOneBy(array $criteria, array $orderBy = null)
  * @method GrantRoleAdapter[]    findAll()

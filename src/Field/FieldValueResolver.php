@@ -32,7 +32,7 @@ class FieldValueResolver
      * @param string[]|null                 $identifierFields         null = DEFAULT_IDENTIFIER_FIELDS
      * @param array<class-string, string[]> $identifierFieldsByEntity per-class overrides
      * @param bool                          $lowercaseIdentifiers     see $this->lowercaseIdentifiers
-     * @param ManagerRegistry|null          $doctrine                 says which identifier fields are columns, see isStoredField()
+     * @param EntityShapes|null             $shapes                   says which identifier fields are columns, see isStoredField()
      */
     public function __construct(
         ?PropertyAccessorInterface $accessor = null,

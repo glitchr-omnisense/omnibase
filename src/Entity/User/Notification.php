@@ -330,7 +330,7 @@ class Notification extends SymfonyNotification implements BaseNotificationInterf
         }
     }
 
-    #[ORM\Column(type:"datetime", nullable:"true")]
+    #[ORM\Column(type:"datetime", nullable:true)]
     protected $sentAt = null;
 
     public function getSentAt(): ?DateTimeInterface

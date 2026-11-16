@@ -129,7 +129,7 @@ final class Contracts
         }
         self::$declared = true;
         foreach (self::NAMES as $name => $class) {
-            if ((class_exists($class) || interface_exists($class) || trait_exists($class) || enum_exists($class)) && !class_exists($name, false) && !interface_exists($name, false) && !trait_exists($name, false)) {
+            if ((class_exists($class) || interface_exists($class) || trait_exists($class)) && !class_exists($name, false) && !interface_exists($name, false) && !trait_exists($name, false)) {
                 class_alias($class, $name);
             }
         }

@@ -113,7 +113,7 @@ class AttributeReader extends AbstractLocalCache
 
     /**
      * @param $entity
-     * @return EntityRepository|ObjectRepository
+     * @return \Base\Database\Repository\Entities<object>
      * @throws NotSupported
      */
     public function getRepository($entity)

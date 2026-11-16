@@ -6,6 +6,8 @@ use Base\Entity\Layout\Attribute\Adapter\ScoreAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<ScoreAdapter>
+ *
  * @method ScoreAdapter|null find($id)
  * @method ScoreAdapter|null findOneBy(array $criteria, array $orderBy = null)
  * @method ScoreAdapter[]    findAll()

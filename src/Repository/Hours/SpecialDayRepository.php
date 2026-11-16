@@ -7,6 +7,8 @@ use Base\Entity\Hours\SpecialDay;
 use Base\Repository\Hours\SpecialDays;
 
 /**
+ * @extends ServiceEntityRepository<SpecialDay>
+ *
  * @method SpecialDay|null find($id)
  * @method SpecialDay[]    findAll()
  */

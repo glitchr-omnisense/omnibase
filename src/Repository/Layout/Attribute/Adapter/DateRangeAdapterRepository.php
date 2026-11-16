@@ -6,6 +6,8 @@ use Base\Entity\Layout\Attribute\Adapter\DateRangeAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<DateRangeAdapter>
+ *
  * @method DateRangeAdapter|null find($id)
  * @method DateRangeAdapter|null findOneBy(array $criteria, array $orderBy = null)
  * @method DateRangeAdapter[]    findAll()

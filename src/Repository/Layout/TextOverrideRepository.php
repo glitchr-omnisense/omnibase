@@ -6,6 +6,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\TextOverride;
 
 /**
+ * @extends ServiceEntityRepository<TextOverride>
+ *
  * @method TextOverride|null find($id)
  * @method TextOverride[]    findAll()
  */

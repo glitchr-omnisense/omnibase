@@ -10,6 +10,8 @@ use Base\Repository\Thread\Comments;
 use Base\Database\Repository\Finder\Key;
 
 /**
+ * @extends ServiceEntityRepository<Comment>
+ *
  * @method Comment|null find($id)
  * @method Comment|null findOneBy(array $criteria, array $orderBy = null)
  * @method Comment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)

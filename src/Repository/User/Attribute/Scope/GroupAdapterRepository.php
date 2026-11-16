@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\Scope\GroupAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<GroupAdapter>
+ *
  * @method GroupAdapter|null find($id)
  * @method GroupAdapter|null findOneBy(array $criteria, array $orderBy = null)
  * @method GroupAdapter[]    findAll()

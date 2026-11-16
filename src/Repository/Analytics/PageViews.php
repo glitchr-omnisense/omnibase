@@ -10,7 +10,7 @@ use Base\Entity\Analytics\PageView;
  * Base\Database\Repository\Entities): PageViewRepository answers it with the queries
  * its callers ran by name before.
  *
- * @extends Entities<object> of PageView (its repository declares ServiceEntityRepository<PageView>)
+ * @extends Entities<PageView> (its repository declares ServiceEntityRepository<PageView>)
  */
 interface PageViews extends Entities
 {

@@ -8,6 +8,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Thread\Likes;
 
 /**
+ * @extends ServiceEntityRepository<\Base\Entity\Thread\Like> (App\Entity\Thread\Like at run time, the same class)
+ *
  * @method Like|null find($id)
  * @method Like|null findOneBy(array $criteria, array $orderBy = null)
  * @method Like[]    findAll()

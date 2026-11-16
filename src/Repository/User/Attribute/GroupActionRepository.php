@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\GroupAction;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<GroupAction>
+ *
  * @method GroupAction|null find($id)
  * @method GroupAction|null findOneBy(array $criteria, array $orderBy = null)
  * @method GroupAction[]    findAll()

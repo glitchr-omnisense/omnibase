@@ -9,6 +9,8 @@ use Base\Repository\User\Notifications;
 use Base\Database\Repository\Finder\Group;
 
 /**
+ * @extends ServiceEntityRepository<Notification>
+ *
  * @method Notification|null find($id)
  * @method Notification|null findOneBy(array $criteria, array $orderBy = null)
  * @method Notification[]    findAll()

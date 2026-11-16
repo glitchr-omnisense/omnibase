@@ -9,6 +9,8 @@ use DateTimeInterface;
 use Base\Repository\Extension\TrashBalls;
 
 /**
+ * @extends ServiceEntityRepository<TrashBall>
+ *
  * @method TrashBall|null find($id)
  * @method TrashBall|null findOneBy(array $criteria, array $orderBy = null)
  * @method TrashBall[]    findAll()

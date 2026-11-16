@@ -65,7 +65,11 @@ final class Criterion
         return new self(self::EXISTS, null, [$class, $pointingTo, $criteria], [self::EXISTS]);
     }
 
-    /** The rows no record of $class points to through $pointingTo (matching $criteria): NOT EXISTS. */
+    /**
+     * The rows no record of $class points to through $pointingTo (matching $criteria): NOT EXISTS.
+     *
+     * @param array<int|string, mixed> $criteria
+     */
     public static function notExists(string $class, string $pointingTo, array $criteria = []): self
     {
         return new self(self::NOT_EXISTS, null, [$class, $pointingTo, $criteria], [self::NOT_EXISTS]);
@@ -87,7 +91,7 @@ final class Criterion
      */
     public static function hasAll(string $path, array $values): self
     {
-        return new self(self::HAS_ALL, null, [$path, array_values($values)], [self::HAS_ALL]);
+        return new self(self::HAS_ALL, null, [$path, $values], [self::HAS_ALL]);
     }
 
     /** Whether it is one of the conditions above, read by the repository before the persistence compiles the rest. */
@@ -108,7 +112,7 @@ final class Criterion
             throw new \InvalidArgumentException(sprintf('%s needs a class.', $word));
         }
 
-        return new self(lcfirst($word), null, 1 === \count($classes) ? $classes[0] : array_values($classes), [$word]);
+        return new self(lcfirst($word), null, 1 === \count($classes) ? $classes[0] : $classes, [$word]);
     }
 
     public function is(string $option): bool

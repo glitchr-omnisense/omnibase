@@ -9,6 +9,8 @@ use Base\Entity\Layout\Redirection;
 use Base\Repository\Layout\Redirections;
 
 /**
+ * @extends ServiceEntityRepository<Redirection>
+ *
  * @method Redirection|null find($id)
  * @method Redirection[]    findAll()
  */

@@ -7,6 +7,8 @@ use Base\Entity\Hours\ScopedWeek;
 use Base\Repository\Hours\ScopedWeeks;
 
 /**
+ * @extends ServiceEntityRepository<ScopedWeek>
+ *
  * @method ScopedWeek|null find($id)
  * @method ScopedWeek[]    findAll()
  */

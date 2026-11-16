@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\GroupRule;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<GroupRule>
+ *
  * @method GroupRule|null find($id)
  * @method GroupRule|null findOneBy(array $criteria, array $orderBy = null)
  * @method GroupRule[]    findAll()

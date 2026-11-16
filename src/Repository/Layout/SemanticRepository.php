@@ -8,6 +8,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Layout\Semantics;
 
 /**
+ * @extends ServiceEntityRepository<Semantic>
+ *
  * @method Semantic|null find($id)
  * @method Semantic|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Semantic[]    findAll()

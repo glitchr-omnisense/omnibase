@@ -10,6 +10,8 @@ use Base\Enum\WorkflowState;
 use Base\Repository\Threads;
 
 /**
+ * @extends ServiceEntityRepository<Thread>
+ *
  * @method Thread|null find($id)
  * @method Thread|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Thread[]    findAll()

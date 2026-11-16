@@ -17,6 +17,9 @@ class StringCaseEntityValidator extends ConstraintEntityValidator
      */
     public function validate($value, Constraint $constraint): void
     {
+        if (!$constraint instanceof StringCaseEntity) {
+            throw new \Symfony\Component\Validator\Exception\UnexpectedTypeException($constraint, StringCaseEntity::class);
+        }
         parent::validate($value, $constraint);
 
         $entity = $value;

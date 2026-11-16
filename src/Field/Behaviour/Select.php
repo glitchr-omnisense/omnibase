@@ -269,7 +269,6 @@ class Select extends AbstractBehaviour
         $orderBy = \is_array($options['order_by'] ?? null) ? $options['order_by'] : [];
         $direct = array_filter($orderBy, static fn (string $field): bool => !str_contains($field, '.'), \ARRAY_FILTER_USE_KEY);
         $records = $repositories->of($class)->findBy(\is_array($options['criteria'] ?? null) ? $options['criteria'] : [], [] !== $direct ? $direct : null);
-        $records = \is_array($records) ? $records : iterator_to_array($records, false);
         if (\count($direct) !== \count($orderBy)) {
             usort($records, static function (object $a, object $b) use ($orderBy): int {
                 foreach ($orderBy as $path => $direction) {

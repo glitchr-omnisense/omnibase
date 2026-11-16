@@ -11,6 +11,9 @@ namespace Base\Mapping;
  */
 final class JoinColumns implements MappingAttribute
 {
+    /**
+     * @param array<JoinColumn> $value
+     */
     public function __construct(
         public readonly array $value,
     ) {

@@ -10,7 +10,7 @@ use Base\Entity\Analytics\PageVisit;
  * Base\Database\Repository\Entities): PageVisitRepository answers it with the queries
  * its callers ran by name before.
  *
- * @extends Entities<object> of PageVisit (its repository declares ServiceEntityRepository<PageVisit>)
+ * @extends Entities<PageVisit> (its repository declares ServiceEntityRepository<PageVisit>)
  */
 interface PageVisits extends Entities
 {

@@ -18,8 +18,12 @@ use function sprintf;
 #[Attribute(Attribute::TARGET_CLASS)]
 final class AssociationOverrides implements MappingAttribute
 {
+    /** @var list<AssociationOverride> */
     public readonly array $overrides;
 
+    /**
+     * @param array<mixed>|AssociationOverride $overrides each an AssociationOverride
+     */
     public function __construct(array|AssociationOverride $overrides)
     {
         if (!is_array($overrides)) {

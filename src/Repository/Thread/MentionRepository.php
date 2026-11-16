@@ -7,6 +7,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Thread\Mentions;
 
 /**
+ * @extends ServiceEntityRepository<Mention>
+ *
  * @method Mention|null find($id)
  * @method Mention|null findOneBy(array $criteria, array $orderBy = null)
  * @method Mention[]    findAll()

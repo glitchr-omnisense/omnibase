@@ -7,6 +7,8 @@ use Base\Entity\Layout\Attribute\Common\AbstractAction;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<AbstractAction>
+ *
  * @method AbstractAction|null find($id)
  * @method AbstractAction|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method AbstractAction[]    findAll()

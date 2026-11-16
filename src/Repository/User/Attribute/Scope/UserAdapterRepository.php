@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\Scope\UserAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<UserAdapter>
+ *
  * @method UserAdapter|null find($id)
  * @method UserAdapter|null findOneBy(array $criteria, array $orderBy = null)
  * @method UserAdapter[]    findAll()

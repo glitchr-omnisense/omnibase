@@ -14,6 +14,9 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final class OrderBy implements MappingAttribute
 {
+    /**
+     * @param array<string, string> $value
+     */
     public function __construct(
         public readonly array $value,
     ) {

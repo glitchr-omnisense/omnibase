@@ -288,7 +288,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     public function prePersist(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
-        if ($object == null || !$this->supports($object)) {
+        if (!$this->supports($object)) {
             return;
         }
 
@@ -299,7 +299,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     public function preUpdate(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
-        if ($object == null || !$this->supports($object)) {
+        if (!$this->supports($object)) {
             return;
         }
 
@@ -310,7 +310,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface, Rese
     public function preRemove(LifecycleEventArgs $event)
     {
         $object = $event->getObject();
-        if ($object == null || !$this->supports($object)) {
+        if (!$this->supports($object)) {
             return;
         }
 

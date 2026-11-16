@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\Action\GrantPermissionAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<GrantPermissionAdapter>
+ *
  * @method GrantPermissionAdapter|null find($id)
  * @method GrantPermissionAdapter|null findOneBy(array $criteria, array $orderBy = null)
  * @method GrantPermissionAdapter[]    findAll()

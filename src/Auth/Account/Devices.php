@@ -36,7 +36,7 @@ final class Devices
     {
         $user = $this->access->getUser();
 
-        return array_values($this->connections->findBy(['user' => $user], ['updatedAt' => 'DESC'], self::SESSIONS_SHOWN));
+        return $this->connections->findBy(['user' => $user], ['updatedAt' => 'DESC'], self::SESSIONS_SHOWN);
     }
 
     public static function passkeyToken(string $action, int $id): string

@@ -57,7 +57,7 @@ class Flysystem implements FlysystemInterface, Storages
         if (null !== self::$projectDir) {
             return self::$projectDir;
         }
-        $root = class_exists(\Composer\InstalledVersions::class) ? (\Composer\InstalledVersions::getRootPackage()['install_path'] ?? null) : null;
+        $root = class_exists(\Composer\InstalledVersions::class) ? \Composer\InstalledVersions::getRootPackage()['install_path'] : null;
 
         return \is_string($root) && false !== ($path = realpath($root)) ? $path : \Base\Contract\Runtime::projectDir();
     }

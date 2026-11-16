@@ -7,6 +7,8 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<AbstractAdapter>
+ *
  * @method AbstractAdapter|null find($id)
  * @method AbstractAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method AbstractAdapter[]    findAll()

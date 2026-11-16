@@ -4,11 +4,13 @@
 # extension.neon: what PHPStan must know of omnibase, as an application includes it (the finder language).
 # tests/phpstan-bootstrap.php: the App\ classes the core names are the Base\ ones, aliased as at run time.
 #
-# The bridges' src/Omnibase (omnibridge/symfony's: the core's Symfony host; omnibridge/doctrine's: its Doctrine
-# persistence) are analysed here, from vendor/, where the core's require-dev installs both (with DoctrineBundle
+# The bridges' src/Omnibase and src/Base (omnibridge/symfony's: the core's Symfony host; omnibridge/doctrine's: its
+# Doctrine persistence; src/Base: their classes under the core's Base\ names, moved out of src/Omnibase in their 3.0)
+# are analysed here, from vendor/, where the core's require-dev installs both (with DoctrineBundle
 # and HWI): they extend and implement the core's classes, which the bridges' own installs do not have, so their
 # own phpstan.neon leaves those folders out. Same level as the core's. phpstan-bridges-baseline.neon lists their
-# violations as of 2026-11-09 (1,472 entries, 1,630 errors), and the CI fails on any other. To write both
+# violations as of 2026-11-16 (988 entries, 1,054 errors; phpstan-baseline.neon 4,234 entries, 4,513 errors), and the CI
+# fails on any other. To write both
 # baselines again: generate one with neither included (--generate-baseline), then put its entries whose path is
 # under vendor/ in phpstan-bridges-baseline.neon and the others in phpstan-baseline.neon (a core trait used by a
 # bridge's class is reported under the trait's own path: the core's file). The job installs the bridges as a
@@ -24,9 +26,18 @@ parameters:
     - src
     - tests
     - vendor/omnibridge/symfony/src/Omnibase
+    - vendor/omnibridge/symfony/src/Base
     - vendor/omnibridge/doctrine/src/Omnibase
+    - vendor/omnibridge/doctrine/src/Base
   # Classes that cannot load on purpose (Tests\Base\Fixtures\Absent\* is never defined): the
   # warm-up's fixtures of an optional extension whose parent package is absent.
+  ignoreErrors:
+    # Base\Testing\Engines builds both engines for the parity tests of the core, a bundle or a site: omnibridge/eloquent
+    # is the caller's to install (it requires the core), not the core's.
+    -
+      identifier: class.notFound
+      path: src/Testing/Engines.php
+      message: '#Omnibridge\\Eloquent\\#'
   excludePaths:
     - tests/Fixtures/Warmup/OptionalExtension.php
     - tests/Fixtures/Warmup/OptionalImplementation.php

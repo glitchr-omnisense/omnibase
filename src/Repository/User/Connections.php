@@ -11,7 +11,7 @@ use Base\Entity\User;
  * Base\Database\Repository\Entities): ConnectionRepository answers it with the queries
  * its callers ran by name before.
  *
- * @extends Entities<object> of Connection (its repository declares ServiceEntityRepository<Connection>)
+ * @extends Entities<Connection> (its repository declares ServiceEntityRepository<Connection>)
  */
 interface Connections extends Entities
 {

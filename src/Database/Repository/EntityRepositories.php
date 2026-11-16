@@ -20,10 +20,10 @@ final class EntityRepositories implements Repositories
     /** The mapping attributes that name a repository, read by name: no ORM is loaded. */
     private const ATTRIBUTES = ['Base\Mapping\Entity', 'Base\Mapping\MappedSuperclass', 'Doctrine\ORM\Mapping\Entity', 'Doctrine\ORM\Mapping\MappedSuperclass'];
 
-    /** @var array<string, ServiceEntityRepository> */
+    /** @var array<string, ServiceEntityRepository<object>> */
     private array $repositories = [];
 
-    /** @var array<string, class-string<ServiceEntityRepository>> */
+    /** @var array<string, class-string<ServiceEntityRepository<object>>> */
     private array $classes = [];
 
     public function __construct(private readonly Finders $finders, private readonly ?ContainerInterface $services = null)
@@ -32,19 +32,29 @@ final class EntityRepositories implements Repositories
 
     public function of(string $class): Entities
     {
-        $class = (new \ReflectionClass($class))->getName();
-
-        return $this->repositories[$class] ??= $this->make($class);
+        return $this->repository($class);
     }
 
     public function byIds(string $class, array $ids): array
     {
-        return [] === $ids ? [] : $this->of($class)->cacheById(array_values($ids))->getResult();
+        return [] === $ids ? [] : $this->repository($class)->cacheById($ids)->getResult();
     }
 
     public function oneById(string $class, mixed $id): ?object
     {
-        return null === $id ? null : $this->of($class)->cacheOneById($id);
+        return null === $id ? null : $this->repository($class)->cacheOneById($id);
+    }
+
+    /**
+     * of()'s repository as what it is here: a ServiceEntityRepository, which speaks the finder language.
+     *
+     * @return ServiceEntityRepository<object>
+     */
+    private function repository(string $class): ServiceEntityRepository
+    {
+        $class = (new \ReflectionClass($class))->getName();
+
+        return $this->repositories[$class] ??= $this->make($class);
     }
 
     /**
@@ -65,6 +75,7 @@ final class EntityRepositories implements Repositories
         if (!class_exists($bound) && str_starts_with($bound, 'App\\')) {
             $bound = 'Base\\'.substr($bound, 4);
         }
+        // @phpstan-ignore function.alreadyNarrowedType (Aliases binds repositories; an application's App\ class is checked at run time)
         if (!class_exists($bound) || !is_a($bound, ServiceEntityRepository::class, true)) {
             throw new \LogicException(sprintf('%s, bound to %s, is no repository of omnibase.', $bound, $interface));
         }
@@ -83,10 +94,11 @@ final class EntityRepositories implements Repositories
      * found: a host that knows better than the mapping (a test, a persistence switched per class).
      *
      * @param class-string                           $entity
-     * @param class-string<ServiceEntityRepository> $repository
+     * @param class-string<ServiceEntityRepository<object>> $repository
      */
     public function register(string $entity, string $repository): void
     {
+        // @phpstan-ignore function.alreadyNarrowedType (a caller's class-string is checked at run time all the same)
         if (!is_a($repository, ServiceEntityRepository::class, true)) {
             throw new \InvalidArgumentException(sprintf('%s is no repository of omnibase (%s).', $repository, ServiceEntityRepository::class));
         }
@@ -94,7 +106,7 @@ final class EntityRepositories implements Repositories
         $this->repositories = [];
     }
 
-    /** @return class-string<ServiceEntityRepository> the repository class of an entity class */
+    /** @return class-string<ServiceEntityRepository<object>> the repository class of an entity class */
     public function repositoryClass(string $class): string
     {
         $class = (new \ReflectionClass($class))->getName();
@@ -142,6 +154,7 @@ final class EntityRepositories implements Repositories
         return class_exists($named) && is_a($named, ServiceEntityRepository::class, true) && !(new \ReflectionClass($named))->isAbstract() ? $named : null;
     }
 
+    /** @return ServiceEntityRepository<object> */
     private function make(string $class): ServiceEntityRepository
     {
         $repository = $this->repositoryClass($class);
@@ -158,6 +171,7 @@ final class EntityRepositories implements Repositories
         return $this->build($repository, $class);
     }
 
+    /** @return ServiceEntityRepository<object> */
     private function build(string $repository, string $class): ServiceEntityRepository
     {
         $arguments = [];

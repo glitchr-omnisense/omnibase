@@ -7,6 +7,8 @@ use Base\Entity\User\PushSubscription;
 use Base\Repository\User\PushSubscriptions;
 
 /**
+ * @extends ServiceEntityRepository<PushSubscription>
+ *
  * @method PushSubscription|null find($id)
  * @method PushSubscription|null findOneBy(array $criteria, array $orderBy = null)
  * @method PushSubscription[]    findAll()

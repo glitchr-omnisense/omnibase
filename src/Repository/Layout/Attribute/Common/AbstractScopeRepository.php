@@ -7,6 +7,8 @@ use Base\Entity\Layout\Attribute\Common\AbstractScope;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<AbstractScope>
+ *
  * @method AbstractScope|null find($id)
  * @method AbstractScope|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method AbstractScope[]    findAll()

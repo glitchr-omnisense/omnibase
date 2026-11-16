@@ -8,6 +8,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Layout\Widgets;
 
 /**
+ * @extends ServiceEntityRepository<Widget>
+ *
  * @method Widget|null find($id)
  * @method Widget|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Widget[]    findAll()

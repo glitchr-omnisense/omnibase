@@ -8,6 +8,9 @@ namespace Base\Mapping;
  */
 trait JoinColumnProperties
 {
+    /**
+     * @param array<string, mixed> $options
+     */
     public function __construct(
         public readonly string|null $name = null,
         public readonly string|null $referencedColumnName = null,

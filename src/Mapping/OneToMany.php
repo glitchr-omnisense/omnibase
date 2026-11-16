@@ -14,6 +14,9 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final class OneToMany implements MappingAttribute
 {
+    /**
+     * @param array<string>|null $cascade
+     */
     public function __construct(
         public readonly string|null $targetEntity = null,
         public readonly string|null $mappedBy = null,

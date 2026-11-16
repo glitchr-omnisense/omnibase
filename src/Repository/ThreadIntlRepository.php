@@ -10,6 +10,8 @@ use Base\Repository\ThreadTranslations;
 use Base\Database\Repository\Finder\Group;
 
 /**
+ * @extends ServiceEntityRepository<ThreadIntl>
+ *
  * @method ThreadIntl|null find($id)
  * @method ThreadIntl|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method ThreadIntl[]    findAll()

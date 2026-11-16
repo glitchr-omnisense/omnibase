@@ -119,10 +119,11 @@ trait BaseTrait
         if (self::class !== Locator::class) {
             return Locator::getProjectDir();
         }
+        // @phpstan-ignore deadCode.unreachable (the trait's other classes ask the Locator above; this is the Locator's own answer)
         if (null !== Locator::$projectDir && '' !== Locator::$projectDir) {
             return Locator::$projectDir;
         }
-        $root = class_exists(\Composer\InstalledVersions::class) ? (\Composer\InstalledVersions::getRootPackage()['install_path'] ?? null) : null;
+        $root = class_exists(\Composer\InstalledVersions::class) ? \Composer\InstalledVersions::getRootPackage()['install_path'] : null;
 
         return \is_string($root) && false !== ($path = realpath($root)) ? $path : (string) getcwd();
     }

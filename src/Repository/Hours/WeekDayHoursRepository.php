@@ -7,6 +7,8 @@ use Base\Entity\Hours\WeekDayHours;
 use Base\Repository\Hours\WeekDays;
 
 /**
+ * @extends ServiceEntityRepository<WeekDayHours>
+ *
  * @method WeekDayHours|null find($id)
  * @method WeekDayHours[]    findAll()
  */

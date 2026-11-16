@@ -7,6 +7,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 
 /**
+ * @extends ServiceEntityRepository<Image>
+ *
  * @method Image|null find($id)
  * @method Image|null findOneBy(array $criteria, array $orderBy = null)
  * @method Image[]    findAll()

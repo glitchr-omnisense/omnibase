@@ -6,6 +6,8 @@ use Base\Entity\User\Penalty;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<Penalty>
+ *
  * @method Penalty|null find($id)
  * @method Penalty|null findOneBy(array $criteria, array $orderBy = null)
  * @method Penalty[]    findAll()

@@ -58,10 +58,10 @@ interface Entities
     /** @param array<int|string, mixed> $criteria as findBy()'s, counted by the database */
     public function count(array $criteria = []): int;
 
-    /** @param T $entity kept at the next flush, at once with $flush */
+    /** @param object $entity one of T, kept at the next flush, at once with $flush (object: T is covariant) */
     public function persist($entity, bool $flush = false): void;
 
-    /** @param T $entity */
+    /** @param object $entity one of T (object: T is covariant) */
     public function remove($entity, bool $flush = false): void;
 
     /**

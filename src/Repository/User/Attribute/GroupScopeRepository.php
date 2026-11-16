@@ -6,6 +6,8 @@ use Base\Entity\User\Attribute\GroupScope;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<GroupScope>
+ *
  * @method GroupScope|null find($id)
  * @method GroupScope|null findOneBy(array $criteria, array $orderBy = null)
  * @method GroupScope[]    findAll()

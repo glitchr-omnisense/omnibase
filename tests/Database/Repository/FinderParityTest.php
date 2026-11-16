@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Database\Repository;
 
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityParser;
+use Omnibridge\Doctrine\Omnibase\Finder\DqlCompiler as ServiceEntityParser;
 use Base\Database\Repository\ServiceEntityRepository;
 use Base\Database\Repository\Finder\Key;
 use Base\Entity\Layout\ImageCrop;

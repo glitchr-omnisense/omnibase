@@ -104,6 +104,7 @@ class ServiceEntityRepository implements Entities
         return $this->finder()->run((string) $method, $arguments);
     }
 
+    /** @param int|string|null $id null finds nothing */
     public function find($id): ?object
     {
         return null === $id ? null : $this->finder()->find($id);
@@ -200,6 +201,9 @@ class ServiceEntityRepository implements Entities
      * @param array<string, string>|null         $orderBy
      * @param array<int|string, mixed>           $having
      *
+     * @param int|null                           $limit
+     * @param int|null                           $offset
+     *
      * @return list<array<string, mixed>>
      */
     public function findValuesBy(array $values, array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, array $having = [], bool $distinct = false): array
@@ -245,7 +249,7 @@ class ServiceEntityRepository implements Entities
             }
 
             return $row;
-        }, array_values($rows));
+        }, $rows);
     }
 
     /**
@@ -276,6 +280,7 @@ class ServiceEntityRepository implements Entities
                 $byTable[$table]['set'][] = match ($value->operation) {
                     Change::ADD => $column.' = '.$column.' + ?',
                     Change::REPLACE_PREFIX => $column.' = '.('mysql' === $this->finders->platform() ? 'CONCAT(?, SUBSTRING('.$column.', ?))' : '? || SUBSTR('.$column.', ?)'),
+                    default => throw new \LogicException(sprintf('No SQL for the change "%s".', $value->operation)),
                 };
                 array_push($byTable[$table]['parameters'], ...(Change::ADD === $value->operation ? [$value->arguments[0]] : [$value->arguments[1], mb_strlen((string) $value->arguments[0]) + 1]));
             } else {
@@ -378,12 +383,12 @@ class ServiceEntityRepository implements Entities
             $class = $this->entityNamed($match[1]);
             $tables = new Tables($this->finders->shapes(), $class, $this->finders->platform());
 
-            return isset($match[2]) && '' !== $match[2]
+            return isset($match[2])
                 ? ($match[2] === $tables->identifierProperty($class) ? $tables->quote($tables->identifierColumn($class)) : (new Tables($this->finders->shapes(), $class, $this->finders->platform()))->columnName($match[2]))
                 : $tables->readable($class);
         }, $sql) ?? $sql;
 
-        return $this->finders->sql($sql, array_map($this->bind(...), array_values($parameters)));
+        return $this->finders->sql($sql, array_map($this->bind(...), $parameters));
     }
 
     /**
@@ -523,7 +528,7 @@ class ServiceEntityRepository implements Entities
      */
     private function member(Criterion $criterion): Criterion
     {
-        $words = array_values($criterion->options);
+        $words = $criterion->options;
         if ($criterion->value instanceof Field) {
             $tables = $this->tables();
             $operator = match (true) {
@@ -547,7 +552,7 @@ class ServiceEntityRepository implements Entities
             $target = $this->shape()->targetClass($path[0]) ?? throw new UnsupportedQueryException(sprintf('"%s": %s::$%s names no target class.', $criterion->field, $this->getClassName(), $path[0]));
             $related = (new self($this->finders, $target))->findBy([Group::of(Parser::SEPARATOR_AND, Criterion::of(implode('.', \array_slice($path, 1)), $criterion->value, ...$words))]);
 
-            return [] === $related ? $this->nothing() : Criterion::of($path[0], array_values($related));
+            return [] === $related ? $this->nothing() : Criterion::of($path[0], $related);
         }
 
         return $criterion;
@@ -562,7 +567,11 @@ class ServiceEntityRepository implements Entities
         return Criterion::of($this->tables()->identifierProperty($this->getClassName()), null, Parser::OPTION_NULL);
     }
 
-    /** Whether an order goes through two associations or more (or into a JSON field): the common SQL orders it. */
+    /**
+     * Whether an order goes through two associations or more (or into a JSON field): the common SQL orders it.
+     *
+     * @param array<string, mixed>|null $orderBy
+     */
     private function ordersThroughAssociations(?array $orderBy): bool
     {
         foreach (array_keys($orderBy ?? []) as $name) {
@@ -578,6 +587,9 @@ class ServiceEntityRepository implements Entities
     /**
      * @param array<int|string, mixed> $criteria already read
      * @param array<string, mixed>     $orderBy
+     *
+     * @param int|null                 $limit
+     * @param int|null                 $offset
      *
      * @return list<T>
      */
@@ -622,6 +634,7 @@ class ServiceEntityRepository implements Entities
                 'pgsql' => "TO_CHAR(DATE_TRUNC('hour', ".$column."), 'YYYY-MM-DD HH24:00:00')",
                 default => "STRFTIME('%Y-%m-%d %H:00:00', ".$column.')',
             },
+            default => throw new \LogicException(sprintf('No SQL for the aggregate "%s".', $aggregate->function)),
         };
     }
 
@@ -730,8 +743,7 @@ class ServiceEntityRepository implements Entities
             $value instanceof \BackedEnum => $value->value,
             \is_bool($value) => (int) $value,
             // An entity by its identifier, even one that prints as a string (__toString()), as the finders bind it.
-            \is_object($value) && ($this->finders->shapes()->has($value) || !$value instanceof \Stringable) => $this->identify($value),
-            $value instanceof \Stringable => (string) $value,
+            \is_object($value) => $this->finders->shapes()->has($value) || !$value instanceof \Stringable ? $this->identify($value) : (string) $value,
             default => $value,
         };
     }
@@ -804,7 +816,7 @@ class ServiceEntityRepository implements Entities
         $target = $this->shape()->targetClass($path[0]) ?? throw new UnsupportedQueryException(sprintf('"%s": %s::$%s names no target class.', $field, $this->getClassName(), $path[0]));
         $related = (new self($this->finders, $target))->findBy([implode('.', \array_slice($path, 1)) => $value]);
 
-        return [$path[0], array_values($related)];
+        return [$path[0], $related];
     }
 
     /**

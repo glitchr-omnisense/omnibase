@@ -5462,7 +5462,7 @@ namespace {
     if (!function_exists('cast_datetime')) {
         /**
          * @param string|int|DateTime|null $datetime
-         * @return DateTime
+         * @return DateTime|null null for null
          */
         function cast_datetime(null|string|int|DateTime $datetime)
         {

@@ -1009,9 +1009,7 @@ final class Parser
                 if ($farestTo) {
                     $this->addCustomOption($id, self::OPTION_FARESTTO);
                 }
-                if ($operator) {
-                    $this->addCustomOption($id, $operator);
-                }
+                $this->addCustomOption($id, $operator); // always one: OPTION_EQUAL by default
             }
         }
 

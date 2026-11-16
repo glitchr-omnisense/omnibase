@@ -8,6 +8,8 @@ use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Layout\Settings;
 
 /**
+ * @extends ServiceEntityRepository<Setting>
+ *
  * @method Setting|null find($id)
  * @method Setting|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Setting[]    findAll()

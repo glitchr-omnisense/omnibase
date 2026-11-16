@@ -6,6 +6,8 @@ use Base\Entity\Thread\Tag;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<Tag>
+ *
  * @method Tag|null find($id)
  * @method Tag|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method Tag[]    findAll()

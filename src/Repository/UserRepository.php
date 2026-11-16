@@ -14,6 +14,8 @@ use Base\Repository\Users;
 use Base\Database\Repository\Finder\Group;
 
 /**
+ * @extends ServiceEntityRepository<\Base\Entity\User> (App\Entity\User at run time, the same class)
+ *
  * @method User|null find($id)
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()

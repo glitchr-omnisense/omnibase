@@ -8,7 +8,7 @@ use Base\Mapping as ORM;
 
 trait TrasheableTrait
 {
-    #[ORM\Column(type:"datetime", nullable:"true")]
+    #[ORM\Column(type:"datetime", nullable:true)]
     #[Timestamp(on:"remove")]
     protected $deletedAt;
 

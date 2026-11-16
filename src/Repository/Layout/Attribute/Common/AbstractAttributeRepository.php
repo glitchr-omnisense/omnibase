@@ -7,6 +7,8 @@ use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
+ * @extends ServiceEntityRepository<AbstractAttribute>
+ *
  * @method AbstractAttribute|null find($id)
  * @method AbstractAttribute|null findOneBy(array $criteria, ?array $orderBy = null)
  * @method AbstractAttribute[]    findAll()

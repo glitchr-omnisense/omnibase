@@ -9,14 +9,14 @@ use Base\Database\Entity\EntityExtension;
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_PROPERTY)]
 class Cascade extends AbstractAttribute implements ExtensionOptionInterface
 {
-    /** @Required */
-    private string $column;
-    private array $value;
-
+    /**
+     * @param string       $column the association a class-level #[Cascade] names
+     * @param list<string> $value  its cascade (persist, remove...)
+     *
+     * Both are read from the attribute's arguments by resolve(), the attribute never instantiated for them.
+     */
     public function __construct(string $column = "", array $value = [])
     {
-        $this->column = $column;
-        $this->value = $value;
     }
 
     /**
@@ -85,6 +85,8 @@ class Cascade extends AbstractAttribute implements ExtensionOptionInterface
 
     /**
      * The properties a class declares as another's #[Alias] (its `column`).
+     *
+     * @param \ReflectionClass<object> $reflection
      *
      * @return list<string>
      */

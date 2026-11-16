@@ -14,6 +14,9 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 final class DiscriminatorColumn implements MappingAttribute
 {
+    /**
+     * @param array<string, mixed> $options
+     */
     public function __construct(
         public readonly string|null $name = null,
         public readonly string|null $type = null,

@@ -122,8 +122,8 @@ class Associate extends AbstractAttribute implements ExtensionOptionInterface
 
         $root = $this->rootOf($event, $className);
         $repository = $root ? $this->getRepository($root) : null;
-        if (!$repository) {
-            return;
+        if (!$repository instanceof \Base\Database\Repository\ServiceEntityRepository) {
+            return; // none, or one without the finder language (cacheBy(), cacheOneBy())
         }
 
         $value = $propertyAccessor->getValue($entity, $property);

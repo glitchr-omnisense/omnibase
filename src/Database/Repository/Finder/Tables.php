@@ -168,7 +168,11 @@ final class Tables
         return $this->entity($class)->identifier[0] ?? throw new \LogicException(sprintf('%s has no identifier.', $class));
     }
 
-    /** The class's tables, the root's first (a joined hierarchy), or its one table. @return list<string> */
+    /**
+     * The class's tables, the root's first (a joined hierarchy), or its one table.
+     *
+     * @return list<string>
+     */
     public function tables(string $class): array
     {
         $entity = $this->entity($class);
