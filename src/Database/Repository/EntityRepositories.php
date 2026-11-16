@@ -20,10 +20,10 @@ final class EntityRepositories implements Repositories
     /** The mapping attributes that name a repository, read by name: no ORM is loaded. */
     private const ATTRIBUTES = ['Base\Mapping\Entity', 'Base\Mapping\MappedSuperclass', 'Doctrine\ORM\Mapping\Entity', 'Doctrine\ORM\Mapping\MappedSuperclass'];
 
-    /** @var array<string, ServiceEntityRepository<object>> */
+    /** @var array<string, ServiceEntityRepository<covariant object>> */
     private array $repositories = [];
 
-    /** @var array<string, class-string<ServiceEntityRepository<object>>> */
+    /** @var array<string, class-string<ServiceEntityRepository<covariant object>>> */
     private array $classes = [];
 
     public function __construct(private readonly Finders $finders, private readonly ?ContainerInterface $services = null)
@@ -48,7 +48,7 @@ final class EntityRepositories implements Repositories
     /**
      * of()'s repository as what it is here: a ServiceEntityRepository, which speaks the finder language.
      *
-     * @return ServiceEntityRepository<object>
+     * @return ServiceEntityRepository<covariant object>
      */
     private function repository(string $class): ServiceEntityRepository
     {
@@ -94,7 +94,7 @@ final class EntityRepositories implements Repositories
      * found: a host that knows better than the mapping (a test, a persistence switched per class).
      *
      * @param class-string                           $entity
-     * @param class-string<ServiceEntityRepository<object>> $repository
+     * @param class-string<ServiceEntityRepository<covariant object>> $repository
      */
     public function register(string $entity, string $repository): void
     {
@@ -106,7 +106,7 @@ final class EntityRepositories implements Repositories
         $this->repositories = [];
     }
 
-    /** @return class-string<ServiceEntityRepository<object>> the repository class of an entity class */
+    /** @return class-string<ServiceEntityRepository<covariant object>> the repository class of an entity class */
     public function repositoryClass(string $class): string
     {
         $class = (new \ReflectionClass($class))->getName();
@@ -154,7 +154,7 @@ final class EntityRepositories implements Repositories
         return class_exists($named) && is_a($named, ServiceEntityRepository::class, true) && !(new \ReflectionClass($named))->isAbstract() ? $named : null;
     }
 
-    /** @return ServiceEntityRepository<object> */
+    /** @return ServiceEntityRepository<covariant object> */
     private function make(string $class): ServiceEntityRepository
     {
         $repository = $this->repositoryClass($class);
@@ -171,7 +171,7 @@ final class EntityRepositories implements Repositories
         return $this->build($repository, $class);
     }
 
-    /** @return ServiceEntityRepository<object> */
+    /** @return ServiceEntityRepository<covariant object> */
     private function build(string $repository, string $class): ServiceEntityRepository
     {
         $arguments = [];

@@ -1,5 +1,14 @@
 # Changelog
 
+## 7.0.2
+
+- `Base\Database\Repository\EntityRepositories`: its PHPDoc takes any repository, `ServiceEntityRepository<covariant
+  object>` (`register()`, `repositoryClass()`, the registry): 7.0.1's `ServiceEntityRepository<object>` refused a
+  repository of a given entity (`Base\Repository\ThreadRepository`, `ServiceEntityRepository<Thread>`), as
+  omnibridge/eloquent's PHPStan reported.
+- The harness image (docker/Dockerfile) no longer requires `omnibridge/doctrine:1.x-dev` among its bundles, which
+  conflicted with the 3.x it requires and with the 2.0 bundles: the release's harness job built no image.
+
 ## 7.0.1
 
 `Base\Mapping\OrderBy`'s value is documented as `array<string, string|\UnitEnum>`: a direction may be an enumeration
