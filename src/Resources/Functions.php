@@ -1527,7 +1527,9 @@ namespace {
     if (!function_exists('project_dir')) {
         function project_dir()
         {
-            return dirname(__DIR__,5);
+            // The application installing the core (Flysystem's: Composer's root package), never guessed from the core's own
+            // location (a path or symlinked core lives outside the application).
+            return \Base\Service\Flysystem::getProjectDir();
         }
     }
 

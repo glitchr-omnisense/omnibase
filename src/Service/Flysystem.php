@@ -43,32 +43,38 @@ class Flysystem implements FlysystemInterface, Storages
     /** The default storage: its name, or an operator given as it (deprecated). */
     protected FilesystemOperator|string $default = "local.cache";
 
-    protected static string $projectDir;
+    protected static ?string $projectDir = null;
 
     /**
      * @return string
      */
     public static function getProjectDir()
     {
-        return self::$projectDir;
+        // The application that serves the files: the one Composer installs the core in (its root package), whose
+        // public/ the web server serves - not the core's own folder (dirname(__FILE__, 6) gave "/" for a path or
+        // symlinked core, every public address null), nor the code's folder Runtime::projectDir() names (a twin's
+        // omnibase.project_dir is the Symfony site's code, its files served from its own public/).
+        if (null !== self::$projectDir) {
+            return self::$projectDir;
+        }
+        $root = class_exists(\Composer\InstalledVersions::class) ? (\Composer\InstalledVersions::getRootPackage()['install_path'] ?? null) : null;
+
+        return \is_string($root) && false !== ($path = realpath($root)) ? $path : \Base\Contract\Runtime::projectDir();
     }
 
-    protected static string $publicDir;
+    protected static ?string $publicDir = null;
 
     /**
      * @return string
      */
     public static function getPublicDir()
     {
-        return self::$publicDir;
+        return self::$publicDir ?? self::getProjectDir() . "/public";
     }
 
     public function __construct(Drives|ContainerInterface $storages)
     {
         $this->drives = $storages instanceof Drives ? $storages : new OperatorDrives($storages);
-
-        self::$projectDir = dirname(__FILE__, 6);
-        self::$publicDir = self::$projectDir . "/public";
 
         if (!$this->hasStorage("local.cache")) {
             throw new InvalidArgumentException("\"local.cache\" storage not found in your Flysystem configuration.");

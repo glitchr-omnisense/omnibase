@@ -109,9 +109,22 @@ trait BaseTrait
         }
     }
 
+    /**
+     * The application's folder: the one the host gave at boot (kernel.project_dir under Symfony, base_path() under
+     * Laravel), else Composer's root package. Never guessed from where the core's files are: a core installed as a
+     * path or symlinked package lives outside the application.
+     */
     public static function getProjectDir(): string
     {
-        return (self::class === Locator::class) ? Locator::$projectDir : Locator::getProjectDir();
+        if (self::class !== Locator::class) {
+            return Locator::getProjectDir();
+        }
+        if (null !== Locator::$projectDir && '' !== Locator::$projectDir) {
+            return Locator::$projectDir;
+        }
+        $root = class_exists(\Composer\InstalledVersions::class) ? (\Composer\InstalledVersions::getRootPackage()['install_path'] ?? null) : null;
+
+        return \is_string($root) && false !== ($path = realpath($root)) ? $path : (string) getcwd();
     }
 
     /** The Environment contract's name when the registry has it (C9), else the kernel's, seeded at boot. */
