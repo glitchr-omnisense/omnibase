@@ -2,6 +2,7 @@
 
 namespace Base\Request\Rule;
 
+use Base\Database\Type\Utc;
 use Base\Entity\User;
 use Omnibridge\Persistence\UnitOfWork;
 
@@ -28,7 +29,7 @@ final class Presence
         if (!$user instanceof User || $user->isActive()) {
             return false;
         }
-        $user->poke(new \DateTime('now'));
+        $user->poke(\DateTime::createFromImmutable(Utc::now()));
         $this->unitOfWork?->flush();
 
         return true;

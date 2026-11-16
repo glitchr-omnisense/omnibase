@@ -140,6 +140,11 @@ Runtime::set(Locales::class, new class implements Locales {
     {
         return ['fr-FR', 'en-GB'];
     }
+
+    public function getTimezone(): string
+    {
+        return 'UTC';
+    }
 });
 
 // Nouns: before anything is set, said aloud.

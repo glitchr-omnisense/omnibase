@@ -334,6 +334,6 @@ class OpeningHours implements ResetInterface
 
     protected function local(?\DateTimeInterface $at): \DateTimeImmutable
     {
-        return ($at ? \DateTimeImmutable::createFromInterface($at) : new \DateTimeImmutable())->setTimezone($this->zone);
+        return ($at ? \DateTimeImmutable::createFromInterface($at) : \Base\Database\Type\Utc::now())->setTimezone($this->zone);
     }
 }

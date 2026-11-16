@@ -62,6 +62,7 @@ $locales = new class implements Locales {
     public function getLocale(): string { return 'fr-FR'; }
     public function getDefaultLocale(): string { return 'en-GB'; }
     public function getAvailableLocales(): array { return ['en-GB', 'fr-FR']; }
+    public function getTimezone(): string { return 'UTC'; }
 };
 
 $dates = new Dates($translator, 'Europe/Paris');

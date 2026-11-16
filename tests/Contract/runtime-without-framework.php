@@ -93,6 +93,11 @@ $locale = new class implements Locales {
     {
         return ['fr-FR', 'en-GB'];
     }
+
+    public function getTimezone(): string
+    {
+        return 'UTC';
+    }
 };
 $listened = new ArrayObject();
 $services = [

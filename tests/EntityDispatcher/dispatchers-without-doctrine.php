@@ -43,6 +43,11 @@ namespace {
         {
             return ['fr-FR'];
         }
+
+        public function getTimezone(): string
+        {
+            return 'UTC';
+        }
     });
 
     $heard = new \ArrayObject();

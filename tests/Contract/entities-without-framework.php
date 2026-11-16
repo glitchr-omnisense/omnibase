@@ -133,6 +133,11 @@ $locales = new class implements Locales {
     {
         return ['fr-FR', 'en-GB'];
     }
+
+    public function getTimezone(): string
+    {
+        return 'UTC';
+    }
 };
 Runtime::set(Locales::class, $locales);
 $answers['normalized'] = array_map(LocaleNormalizer::here(...), ['fr' => 'fr', 'en' => 'en', 'en_US' => 'en_US', 'ja' => 'ja', 'xx' => 'xx']);

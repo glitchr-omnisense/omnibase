@@ -1278,8 +1278,10 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
             return null;
         }
 
-        $today = new DateTime('now');
-        $age = $today->diff($this->birthdate);
+        // The visitor's day (a birthdate is a date, no time), on the application's clock.
+        $today = Runtime::clock()->now()->setTimezone(new \DateTimeZone(Runtime::find(\Base\Contract\Locales::class)?->getTimezone() ?? date_default_timezone_get()))->setTime(0, 0);
+        // The birthdate's calendar day in the same zone: a day against a day, whatever zone it was read in.
+        $age = $today->diff(new \DateTimeImmutable($this->birthdate->format('Y-m-d'), $today->getTimezone()));
 
         return $age->y;
     }

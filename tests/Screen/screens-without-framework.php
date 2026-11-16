@@ -46,6 +46,11 @@ Runtime::set(Locales::class, new class implements Locales {
     {
         return ['fr-FR'];
     }
+
+    public function getTimezone(): string
+    {
+        return 'UTC';
+    }
 });
 Runtime::set(ClockInterface::class, new class implements ClockInterface {
     public function now(): DateTimeImmutable

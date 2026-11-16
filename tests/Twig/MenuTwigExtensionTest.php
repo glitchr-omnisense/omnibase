@@ -41,6 +41,7 @@ class MenuTwigExtensionTest extends KernelTestCase
             public function getLocale(): string { return 'en-GB'; }
             public function getDefaultLocale(): string { return 'fr-FR'; }
             public function getAvailableLocales(): array { return ['fr-FR', 'en-GB']; }
+            public function getTimezone(): string { return 'UTC'; }
         };
         // Each choice, the visitor's in brackets: "{{ class }}:a [b] ".
         $choices = static fn (string $available, string $current) => strtr('{{ class }}:{% for each in AVAILABLE %}{% set id = each.id ?? each %}{{ id == (CURRENT.id ?? CURRENT) ? "[" ~ id ~ "]" : id }} {% endfor %}', ['AVAILABLE' => $available, 'CURRENT' => $current]);

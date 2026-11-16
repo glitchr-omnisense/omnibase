@@ -7,6 +7,7 @@ use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use DateTime;
 use DateTimeImmutable;
+use Base\Database\Type\Utc;
 
 
 /**
@@ -53,7 +54,7 @@ class Timestamp extends AbstractAttribute implements ExtensionOptionInterface
     public function getValue(): DateTime
     {
         if (!$this->value) {
-            $this->value = $this->isImmutable() ? new DateTimeImmutable("now") : new DateTime("now");
+            $this->value = $this->isImmutable() ? Utc::now() : DateTime::createFromImmutable(Utc::now()); // the application's clock, in UTC
         }
 
         return $this->value;

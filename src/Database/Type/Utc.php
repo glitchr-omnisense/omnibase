@@ -2,6 +2,8 @@
 
 namespace Base\Database\Type;
 
+use Base\Contract\Runtime;
+
 /**
  * Moments in UTC, for the code around a `utc_datetime_immutable` column: the
  * present, and any date as the same moment in UTC - what a query parameter
@@ -12,15 +14,18 @@ namespace Base\Database\Type;
  */
 final class Utc
 {
-    /** The zone moments are kept in: omnibridge/doctrine's, the one its types (and these) write with. */
+    /** The zone moments are kept in: UTC, the one every persistence's date types write with. */
     public static function zone(): \DateTimeZone
     {
-        return \Omnibridge\Doctrine\Type\Utc::zone();
+        return self::$zone ??= new \DateTimeZone('UTC');
     }
 
+    private static ?\DateTimeZone $zone = null;
+
+    /** The present on the application's clock (Runtime::clock(): the host's, a test's frozen one), in UTC. */
     public static function now(): \DateTimeImmutable
     {
-        return new \DateTimeImmutable('now', self::zone());
+        return \DateTimeImmutable::createFromInterface(Runtime::clock()->now())->setTimezone(self::zone());
     }
 
     /** Any date, as the same moment in UTC. */

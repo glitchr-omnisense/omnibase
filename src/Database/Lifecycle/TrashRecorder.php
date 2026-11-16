@@ -6,6 +6,7 @@ use Base\Database\Attribute\Trasheable;
 use Base\Entity\Extension\TrashBall;
 use Base\Enum\EntityAction;
 use DateTime;
+use Base\Database\Type\Utc;
 use DateTimeInterface;
 use Throwable;
 
@@ -67,7 +68,7 @@ final class TrashRecorder
         $trashBall->setEntityClass($class);
         $trashBall->setEntityId($entity);
         $trashBall->setAction(EntityAction::DELETE);
-        $trashBall->setPermanentAfter(new DateTime(null !== $trasheable->expiry ? self::expiry($trasheable->expiry) : $this->emptyTrash));
+        $trashBall->setPermanentAfter(DateTime::createFromImmutable(Utc::now())->modify(null !== $trasheable->expiry ? self::expiry($trasheable->expiry) : $this->emptyTrash));
 
         $label = null;
         try {

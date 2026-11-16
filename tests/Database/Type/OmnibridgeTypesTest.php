@@ -86,7 +86,7 @@ final class OmnibridgeTypesTest extends TestCase
 
     public function testTheSameZoneAndTheNamesKept(): void
     {
-        self::assertSame(Bridge\Utc::zone(), Utc::zone());
+        self::assertSame(Bridge\Utc::zone()->getName(), Utc::zone()->getName());
         self::assertSame('utc_datetime', UtcDateTimeType::NAME);
         self::assertSame('utc_datetime_immutable', UtcDateTimeImmutableType::NAME);
         self::assertInstanceOf(Bridge\DateTimeType::class, new DateTimeTypeUTC());
