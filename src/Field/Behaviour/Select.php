@@ -248,6 +248,55 @@ class Select extends AbstractBehaviour
         return \is_array($submitted) && \array_key_exists('choice', $submitted) ? $submitted['choice'] : $submitted;
     }
 
+    /**
+     * The records of `class` listed at once, where the options ask them - `criteria` (findBy's), `order_by` (field =>
+     * ASC|DESC; a path through an association, 'book.name', ordered here once read), `group_by` (a property path, or
+     * a callable given the record) -: label => record, under a group's label where group_by says one; null where
+     * none of them is given (the records are then searched remotely). What Symfony's EntityType did with
+     * query_builder and group_by; each host's select reads it (omnibridge/symfony's SelectType gives the ids).
+     *
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function records(\Base\Database\Repository\Repositories $repositories, array $options): ?array
+    {
+        $class = $options['class'] ?? null;
+        if (!\is_string($class) || !class_exists($class) || enum_exists($class)
+            || (null === ($options['criteria'] ?? null) && null === ($options['order_by'] ?? null) && null === ($options['group_by'] ?? null))) {
+            return null;
+        }
+        $orderBy = \is_array($options['order_by'] ?? null) ? $options['order_by'] : [];
+        $direct = array_filter($orderBy, static fn (string $field): bool => !str_contains($field, '.'), \ARRAY_FILTER_USE_KEY);
+        $records = $repositories->of($class)->findBy(\is_array($options['criteria'] ?? null) ? $options['criteria'] : [], [] !== $direct ? $direct : null);
+        $records = \is_array($records) ? $records : iterator_to_array($records, false);
+        if (\count($direct) !== \count($orderBy)) {
+            usort($records, static function (object $a, object $b) use ($orderBy): int {
+                foreach ($orderBy as $path => $direction) {
+                    $order = \Base\Form\Definition\Properties::get($a, $path) <=> \Base\Form\Definition\Properties::get($b, $path);
+                    if (0 !== $order) {
+                        return 'DESC' === strtoupper((string) $direction) ? -$order : $order;
+                    }
+                }
+
+                return 0;
+            });
+        }
+        $groupBy = $options['group_by'] ?? null;
+        $choices = [];
+        foreach ($records as $record) {
+            $text = (string) $record;
+            if (null === $groupBy) {
+                $choices[$text] = $record;
+                continue;
+            }
+            $group = (string) (\is_callable($groupBy) ? $groupBy($record) : \Base\Form\Definition\Properties::get($record, (string) $groupBy));
+            $choices[$group][$text] = $record;
+        }
+
+        return $choices;
+    }
+
     /** The remote search, where the field is autocompleted: the host's ux_autocomplete (or the field's own route). */
     public function endpoints(array $options): array
     {

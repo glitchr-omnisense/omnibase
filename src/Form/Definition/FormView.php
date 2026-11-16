@@ -93,6 +93,10 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
                 $root->children[$name] = self::association($root, $name, $field, $data, $errors[$name] ?? [], $form->getDataClass());
                 continue;
             }
+            if (Kind::FORM === $field->getKind() && $field->getOption('form') instanceof FormDefinition) {
+                $root->children[$name] = self::nested($root, $name, $field, (array) ($values[$name] ?? []), $errors[$name] ?? []);
+                continue;
+            }
             if (Kind::ATTRIBUTE === $field->getKind() && !$field->hasExplicitFormType()) {
                 $root->children[$name] = self::attribute($root, $name, $field, $data, $errors[$name] ?? [], $form->getDataClass());
                 continue;
@@ -214,6 +218,32 @@ final class FormView implements \ArrayAccess, \IteratorAggregate, \Countable, \J
             'explicit' => false,
             'translation_domain' => $field->getOption('translation_domain') ?? $root->vars['translation_domain'],
         ];
+    }
+
+    /**
+     * A field that is a whole form (Kind::FORM): a compound named name[child] (widget `form`), one child per field of
+     * its nested definition, what its type gave its view (option `view`: PrivacyType's notice, its consent) among its
+     * vars, its block_prefix; its errors its own (a nested refusal is said under the nested form).
+     *
+     * @param array<string, mixed> $values the nested form's values (FormBinder::read() or Binding::$values)
+     * @param list<string>         $errors
+     */
+    private static function nested(self $parent, string $name, FieldDescriptor $field, array $values, array $errors): self
+    {
+        /** @var FormDefinition $form */
+        $form = $field->getOption('form');
+        $view = new self($name, self::compound($parent, $field, Kind::FORM, $errors) + (array) $field->getOption('view', []) + [
+            'required' => (bool) ($field->isRequired() ?? true),
+            'block_prefix' => $field->getOption('block_prefix'),
+        ], $parent);
+        $view->vars['widget'] = Kind::FORM;
+        foreach ($form->getFields() as $child => $descriptor) {
+            $view->children[$child] = Kind::FORM === $descriptor->getKind() && $descriptor->getOption('form') instanceof FormDefinition
+                ? self::nested($view, $child, $descriptor, (array) ($values[$child] ?? []), [])
+                : self::field($view, $child, $descriptor, $values[$child] ?? null, []);
+        }
+
+        return $view;
     }
 
     /**

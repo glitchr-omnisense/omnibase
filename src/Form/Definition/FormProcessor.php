@@ -163,6 +163,16 @@ final class FormProcessor
         }
 
         foreach ($form->getFields() as $name => $field) {
+            if (Kind::FORM === $field->getKind() && ($nested = $field->getOption('form')) instanceof FormDefinition && true !== $field->isDisabled()) {
+                // A nested form (Kind::FORM): its own fields' rules, on what was bound into it, said under its name.
+                $held = \is_array($binding->data) || true === $field->isVirtual() || false === $field->getOption('mapped')
+                    ? (\is_array($binding->data) && \array_key_exists($name, $binding->data) ? $binding->data[$name] : $field->getValue())
+                    : $this->read($binding->data, $field->getOption('property_path') ?? $name);
+                foreach ($this->validate($nested, new Binding($held ?? [], [], []), $groups) as $violation) {
+                    $violations[] = new Violation('' === $violation->path ? $name : $name.'.'.$violation->path, $violation->message, $violation->code, $violation->parameters);
+                }
+                continue;
+            }
             $constraints = $field->getConstraints();
             if ([] === $constraints || isset($unread[$name]) || true === $field->isDisabled()) {
                 continue;

@@ -77,6 +77,12 @@ final class Kind
     public const REPEATED = 'repeated';
     public const TRANSLATION = 'translation';
     public const DISCRIMINATOR = 'discriminator';
+    /**
+     * A field that is itself a whole form (a form type that builds fields of its own: ContactType's `privacy`,
+     * PrivacyType): its option `form` is the nested FormDefinition, its option `view` what its type gives its view;
+     * sent as name[child], bound and validated child by child.
+     */
+    public const FORM = 'form';
 
     // Actions and markup
     public const SUBMIT = 'submit';

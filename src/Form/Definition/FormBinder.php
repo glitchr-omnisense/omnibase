@@ -110,6 +110,11 @@ final class FormBinder
                 // The record's translations read by its translation entity's fields.
                 $field = $this->translatable($field, $data::class);
             }
+            if (Kind::FORM === $field->getKind() && ($nested = $field->getOption('form')) instanceof FormDefinition) {
+                // A nested form: its own fields' values, read from what it edits.
+                $values[$name] = $this->read($nested, $this->isMapped($field) && null !== $data ? $this->getValue($data, $this->path($name, $field)) : $field->getValue());
+                continue;
+            }
             if (\array_key_exists('data', $field->getOptions())) {
                 $value = $field->getOption('data');
             } else {
@@ -144,6 +149,28 @@ final class FormBinder
 
             $path = $this->path($name, $field);
             $mapped = $this->isMapped($field);
+            if (Kind::FORM === $kind && ($nested = $field->getOption('form')) instanceof FormDefinition) {
+                // A nested form (Kind::FORM): its part of what was sent (name[child]) bound as a form, into what it edits.
+                $held = $mapped ? $this->getValue($data, $path) : $field->getValue();
+                if (true === $field->isDisabled()) {
+                    $values[$name] = $this->read($nested, $held);
+                    continue;
+                }
+                $raw = $submitted[$name] ?? null;
+                $binding = $this->bind($nested, \is_array($raw) ? $raw : [], \is_object($held) || \is_array($held) ? $held : null);
+                foreach ($binding->violations as $violation) {
+                    $violations[] = new Violation('' === $violation->path ? $name : $name.'.'.$violation->path, $violation->message, $violation->code, $violation->parameters);
+                }
+                $values[$name] = $binding->values;
+                if (!$mapped) {
+                    $field->setValue($binding->data);
+                } elseif (\is_array($data)) {
+                    $data[$path] = $binding->data;
+                } elseif ($held !== $binding->data) {
+                    Properties::set($data, $path, $binding->data);
+                }
+                continue;
+            }
             if (true === $field->isDisabled()) {
                 $values[$name] = $this->transform($mapped ? $this->getValue($data, $path) : $field->getValue(), $field);
                 continue;

@@ -35,7 +35,8 @@ final class Samples
             throw new \LogicException(sprintf('No conformance sample for the kinds %s: a kind the core names has one.', implode(', ', $missing)));
         }
 
-        return $samples;
+        // In Kind::all()'s order (the kinds' list a host reads), whatever order the samples are declared in.
+        return array_replace(array_intersect_key(array_fill_keys(Kind::all(), null), $samples), $samples);
     }
 
     /** @param array<string, mixed> $options */
@@ -117,6 +118,8 @@ final class Samples
             // A list of texts, a list of hidden values: each entry shown, the list sent kept in its order.
             new Sample(Kind::ARRAY, self::field(Kind::ARRAY), ['un', 'deux'], ['un', 'deux'], ['trois', 'quatre'], ['trois', 'quatre']),
             new Sample(Kind::COLLECTION, self::field(Kind::COLLECTION, ['allow_add' => true]), ['un', 'deux'], ['un', 'deux'], ['trois', 'quatre', 'cinq'], ['trois', 'quatre', 'cinq']),
+            // A field that is a whole form: its nested definition's fields, sent as value[title], bound as its array.
+            new Sample(Kind::FORM, self::field(Kind::FORM, ['form' => FormDefinition::new(Suite::FIELD)->setCsrf(false)->add(FormDefinition::field('title', Kind::TEXT))]), ['title' => 'Ringo'], 'Ringo', ['title' => ' Paul '], ['title' => 'Paul']),
             new Sample(Kind::REPEATED, self::field(Kind::REPEATED, ['type' => Kind::TEXT]), null, Sample::NONE, ['first' => 'yeah', 'second' => 'yeah'], 'yeah', ['first' => 'yeah', 'second' => 'no']),
             new Sample(Kind::TRANSLATION, self::field(Kind::TRANSLATION), dataClass: \Base\Entity\Thread::class, name: 'translations'),
             new Sample(Kind::DISCRIMINATOR, self::field(Kind::DISCRIMINATOR)),

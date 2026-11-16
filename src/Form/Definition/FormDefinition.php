@@ -17,7 +17,7 @@ use Base\Field\Kind;
  *         ->add(TextareaField::new('content', 'comment.content')->setRequired(true))
  *         ->addAction('submit', 'comment.submit');
  *
- * The admin builds one from a CRUD controller's fields (fromFields()).
+ * The admin builds one from a CRUD controller's fields (fromFields()); a form type is read by of().
  */
 final class FormDefinition
 {
@@ -74,6 +74,20 @@ final class FormDefinition
     public static function new(string $name): self
     {
         return new self($name);
+    }
+
+    /**
+     * The form a form type describes - an App\Form\XType written for Symfony (buildForm(), configureOptions(),
+     * omnibase's Base\Field\Type\* and Symfony's core types) -, read on any host: one way to write a form.
+     *
+     *     $submission = $processor->handle(FormDefinition::of(ContactType::class), $request->input('contact'), $message);
+     *
+     * @param class-string         $type    the form type
+     * @param array<string, mixed> $options the form's options, as Symfony's createForm() takes them
+     */
+    public static function of(string $type, array $options = []): self
+    {
+        return TypeReader::reader()->definition($type, $options);
     }
 
     /**
