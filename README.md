@@ -39,7 +39,7 @@ The suites run there in the test environment on a fresh SQLite database: see
 
 The package is resolved from Packagist (repository: https://github.com/glitchr-omnisense/omnibase).
 
-The core alone, under any PHP host (5.x: no framework, no persistence, no view engine imposed):
+The core alone, under any PHP host (7.x: no framework, no persistence, no view engine imposed):
 
 ```bash
 composer require omnisense/omnibase

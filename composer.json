@@ -45,7 +45,7 @@
         "jaybizzle/crawler-detect": "^1.2",
         "league/flysystem": "^3.0",
         "omnibridge/composer": "^1.0",
-        "omnisense/omnibridge": "^1.0",
+        "omnisense/omnibridge": "^2.0",
         "omnisense/omnidrive": "^1.0",
         "psr/cache": "^1.0|^2.0|^3.0",
         "psr/clock": "^1.0",
@@ -139,9 +139,9 @@
         "league/flysystem-ftp": "^3.0",
         "omniauth/otp": "1.x-dev",
         "omniauth/webauthn": "1.x-dev",
-        "omnibridge/doctrine": "^1.0",
-        "omnibridge/symfony": "^1.0",
-        "omnibridge/twig": "^1.0",
+        "omnibridge/doctrine": "^3.0",
+        "omnibridge/symfony": "^3.0",
+        "omnibridge/twig": "^2.0",
         "omnisense/omniauth": "1.x-dev",
         "omnisense/omnishield": "1.x-dev",
         "omnisense/omnisign": "1.x-dev",
@@ -224,8 +224,11 @@
                 "omnisense/omniauth": "1.x-dev",
                 "omniauth/webauthn": "1.x-dev",
                 "omniauth/otp": "1.x-dev",
-                "omnibridge/doctrine": "^1.0"
+                "omnibridge/doctrine": "^3.0"
             }
+        },
+        "branch-alias": {
+            "dev-7.x": "7.x-dev"
         }
     }
 }

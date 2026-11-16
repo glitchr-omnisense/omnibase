@@ -15,7 +15,8 @@ What `composer.json` requires:
 | Doctrine | ORM 3.4+, DBAL 4.2+, Persistence 4 |
 | Twig | 3 |
 | Symfony's standalone components | 6, 7 or 8 (cache, mailer, notifier, serializer, translation, validator, workflow...) |
-| omnisense/omnibridge, omnisense/omnidrive, omnibridge/composer, omnibridge/doctrine, omnibridge/twig | 1.x |
+| omnisense/omnibridge | 2.x |
+| omnisense/omnidrive, omnibridge/composer | 1.x |
 
 glitchr/backup-manager (the TimeMachine, the backups) is suggested, not required:
 see below.
@@ -32,7 +33,7 @@ the core's harness runs on SQLite. The commands `doctrine:schema:charset` and
 
 ```bash
 composer config allow-plugins.omnibridge/composer true
-composer require omnisense/omnibase:5.x-dev omnibridge/symfony:1.x-dev omnibridge/doctrine:1.x-dev omnibridge/twig:1.x-dev
+composer require omnisense/omnibase:^7.0 omnibridge/symfony:^3.0 omnibridge/doctrine:^3.0 omnibridge/twig:^2.0
 ```
 
 Since 5.0 the core is a library that requires neither Symfony's framework nor Doctrine nor Twig

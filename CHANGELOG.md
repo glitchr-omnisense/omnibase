@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (1.0.0)
+## 7.0.0
 
 omnisense/omnibase: the core of omnibase sites under the agnostic `Base\` namespace (an application overrides
 `Base\X` by `App\X`, the same path), on any framework and persistence: the entities (written in `Base\Mapping`), the
