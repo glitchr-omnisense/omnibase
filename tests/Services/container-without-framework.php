@@ -147,6 +147,15 @@ final class PlainUnitOfWork implements Omnibridge\Persistence\UnitOfWork, Omnibr
     /** @var array<int, array<string, mixed>> */
     public array $snapshots = [];
 
+    public function clear(): void
+    {
+    }
+
+    public function isOpen(): bool
+    {
+        return true;
+    }
+
     public function persist(object $entity): void {}
     public function remove(object $entity): void {}
     public function flush(): void {}
@@ -249,7 +258,7 @@ $container = Container::fromDefinitions(Services::definitions(), $values, $hostS
 
 $obfuscator = $container->get(ObfuscatorInterface::class);
 $media = $container->get(MediaServiceInterface::class);
-$pagination = $container->get(PaginatorInterface::class)->paginate(range(1, 25), 2, 10);
+$pagination = $container->get(PaginatorInterface::class)->paginate(range(1, 25), page: 2, pageSize: 10);
 $translator = $container->get(TranslatorInterface::class);
 $email = $container->get(EmailComposer::class)->compose('Anne <anne@example.org>', '@App/mail/welcome.html.twig', ['name' => 'Anne'], 'Hello Anne.');
 

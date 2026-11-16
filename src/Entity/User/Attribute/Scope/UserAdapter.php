@@ -8,7 +8,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 use Base\Entity\User;
 use Base\Field\Type\SelectType;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Scope\UserAdapterRepository;
+use Base\Repository\User\Attribute\Scope\UserAdapterRepository;
 
 /**
  * Narrows something to named people.

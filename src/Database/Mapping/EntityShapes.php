@@ -4,7 +4,7 @@ namespace Base\Database\Mapping;
 
 /**
  * The entities' shapes (plan "omnibase agnostic", step F2c): from a Description (DescriptionShapes), or
- * from the installed persistence (Omnibridge\Doctrine\Omnibase\DoctrineShapes on Doctrine).
+ * from the installed persistence (Finders::shapes()).
  *
  * Both list the mapped entities' classes as well, classes() (step B1d; declared here since 6.0).
  */

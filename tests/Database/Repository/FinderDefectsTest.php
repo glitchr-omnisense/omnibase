@@ -4,10 +4,10 @@ namespace Tests\Base\Database\Repository;
 
 use Base\Database\Repository\Finder\Parser;
 use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityParser;
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Thread;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository;
+use Base\Repository\Layout\ImageCropRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -27,7 +27,7 @@ final class FinderDefectsTest extends KernelTestCase
 
     private function threads(): ServiceEntityRepository
     {
-        $repository = $this->entityManager()->getRepository(Thread::class);
+        $repository = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Thread::class);
         self::assertInstanceOf(ServiceEntityRepository::class, $repository);
 
         return $repository;
@@ -40,7 +40,7 @@ final class FinderDefectsTest extends KernelTestCase
 
         foreach (['findByIdLowerEqualTo' => [5, '<='], 'findByIdGreaterEqualTo' => [5, '>='], 'findByPublishedAtYoungerEqualTo' => ['-1 day', '>='], 'findByPublishedAtOlderEqualTo' => ['-1 day', '<=']] as $method => [$value, $comparison]) {
             $query = $threads->{$method}($value);
-            self::assertInstanceOf(Query::class, $query, $method);
+            self::assertInstanceOf(\Omnibridge\Doctrine\Omnibase\Finder\DoctrineResult::class, $query, $method);
             self::assertStringContainsString(' '.$comparison.' :', $query->getDQL(), $method);
             self::assertIsArray($query->getResult(), $method);
         }
@@ -51,7 +51,7 @@ final class FinderDefectsTest extends KernelTestCase
     {
         $threads = $this->threads();
         /** @var ServiceEntityParser $parser */
-        $parser = (new \ReflectionProperty(ServiceEntityRepository::class, 'serviceParser'))->getValue($threads);
+        $parser = (new \ReflectionMethod(ServiceEntityRepository::class, 'finder'))->invoke($threads)->compiler();
 
         foreach (['findBySlugNotStartingWith' => ['a-', 'slug', Parser::OPTION_NOT_STARTING_WITH], 'findBySlugNotEndingWith' => ['-z', 'slug', Parser::OPTION_NOT_ENDING_WITH], 'findByNotInstanceOf' => [Thread::class, 'notInstanceOf', Parser::OPTION_NOT_INSTANCEOF], 'findByNotClassOf' => [Thread::class, 'notClassOf', Parser::OPTION_NOT_CLASSOF], 'findByNotMemberOf' => [Thread::class, 'notMemberOf', Parser::OPTION_NOT_MEMBEROF]] as $method => [$value, $field, $option]) {
             $criterion = $parser->read($method, [$value])->criterions()[0];
@@ -93,7 +93,7 @@ final class FinderDefectsTest extends KernelTestCase
         $threads = $this->threads();
 
         foreach ([$threads->findByParentNull(), $threads->findByParentNotNull(), $threads->findByStateAndParentNull('publish', [], ['id' => 'ASC']), $threads->findBySlugNull()] as $query) {
-            self::assertInstanceOf(Query::class, $query);
+            self::assertInstanceOf(\Omnibridge\Doctrine\Omnibase\Finder\DoctrineResult::class, $query);
             self::assertIsArray($query->getResult(), $query->getDQL());
         }
         self::assertStringContainsString('e_parent IS NULL', $threads->findByParentNull()->getDQL());
@@ -102,7 +102,7 @@ final class FinderDefectsTest extends KernelTestCase
     /** ImageCropRepository's two finders give the ratio as the selected expression, no longer as the offset (a TypeError). */
     public function testTheImageCropsClosestToARatioAreFound(): void
     {
-        $crops = $this->entityManager()->getRepository(ImageCrop::class);
+        $crops = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(ImageCrop::class);
         self::assertInstanceOf(ImageCropRepository::class, $crops);
 
         self::assertNull($crops->oneClosestToRatio(1.5, 'no-such-image.jpg'));

@@ -118,7 +118,7 @@ class AttributeReader extends AbstractLocalCache
      */
     public function getRepository($entity)
     {
-        return ($this->entityManager ?? throw new \LogicException('The attribute reader has no entity manager: Doctrine is not the persistence here. Ask Base\Database\UnitOfWorks::repositories() instead.'))->getRepository($entity);
+        return \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager ?? throw new \LogicException('The attribute reader has no entity manager: ask Base\Database\UnitOfWorks::repositories() with the unit of work at hand.')))->of(\is_object($entity) ? $entity::class : $entity);
     }
 
     public function isEntity(mixed $entity): bool

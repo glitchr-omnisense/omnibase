@@ -3,7 +3,7 @@
 namespace Tests\Base\Security;
 
 use Base\Entity\User\Passkey;
-use Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository;
+use Base\Repository\User\PasskeyRepository;
 use Base\Security\WebauthnUserEntityRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Uid\Uuid;
@@ -46,7 +46,7 @@ final class PasskeyRepositoryTest extends KernelTestCase
 
     private function repository(): PasskeyRepository
     {
-        return $this->entityManager()->getRepository(Passkey::class);
+        return \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Passkey::class);
     }
 
     private static function record(string $userHandle, int $counter = 0, ?CredentialRecord $like = null): CredentialRecord
@@ -155,8 +155,8 @@ final class PasskeyRepositoryTest extends KernelTestCase
     public function testTheAccountsAreThePasskeysUsers(): void
     {
         $user = $this->createUser();
-        $accounts = $this->entityManager()->getRepository($user::class);
-        self::assertInstanceOf(\Omnibridge\Doctrine\Omnibase\Repository\UserRepository::class, $accounts);
+        $accounts = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of($user::class);
+        self::assertInstanceOf(\Base\Repository\UserRepository::class, $accounts);
         $users = static::getContainer()->has(WebauthnUserEntityRepository::class)
             ? static::getContainer()->get(WebauthnUserEntityRepository::class)
             : new WebauthnUserEntityRepository($accounts);

@@ -165,7 +165,7 @@ class RemoteSearch
 
             do {
                 $bookIsFull = false;
-                $book = $this->paginator->paginate($entries, $page);
+                $book = $this->paginator->paginate($entries, page: $page);
                 if ($page > $book->getTotalPages() + 1) {
                     break;
                 }
@@ -251,7 +251,7 @@ class RemoteSearch
         $index0 = -1;
         do {
             $bookIsFull = false;
-            $book = $this->paginator->paginate($entries, $page, $pageSize);
+            $book = $this->paginator->paginate($entries, page: $page, pageSize: $pageSize);
             if ($page > $book->getTotalPages() + 1) {
                 break;
             }

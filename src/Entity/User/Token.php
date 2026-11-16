@@ -15,7 +15,7 @@ use Hashids\Hashids;
 
 use Base\Traits\BaseTrait;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository;
+use Base\Repository\User\TokenRepository;
 
 #[ORM\Entity(repositoryClass:TokenRepository::class)]
 class Token implements IconizeInterface

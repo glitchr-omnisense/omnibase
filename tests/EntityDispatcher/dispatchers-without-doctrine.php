@@ -61,7 +61,16 @@ namespace {
     $unitOfWork = new class implements UnitOfWork {
         public int $flushes = 0;
 
-        public function persist(object $entity): void
+        public function clear(): void
+    {
+    }
+
+    public function isOpen(): bool
+    {
+        return true;
+    }
+
+    public function persist(object $entity): void
         {
         }
 

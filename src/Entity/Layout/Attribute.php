@@ -9,7 +9,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\AttributeRepository;
+use Base\Repository\Layout\AttributeRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AttributeRepository::class)]

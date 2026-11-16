@@ -37,6 +37,7 @@ class StringCaseEntityValidator extends ConstraintEntityValidator
             $fieldValue = $entityChanges[$fieldName][1] ?? "";
 
             if (mb_strtolower($fieldValue) != mb_strtolower($originalFieldValue)) {
+                $constraint->entity ??= $entity;
                 $this->buildViolation($constraint, $fieldValue)->addViolation();
             }
         }

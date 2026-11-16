@@ -143,6 +143,8 @@ final class Group
         Parser::OPTION_TRUE, Parser::OPTION_NOT_TRUE, Parser::OPTION_FALSE, Parser::OPTION_NOT_FALSE,
         Parser::OPTION_WITHIN, Parser::OPTION_OLDER, Parser::OPTION_OLDER_EQUAL, Parser::OPTION_YOUNGER, Parser::OPTION_YOUNGER_EQUAL,
         Parser::OPTION_OVER, Parser::OPTION_NOT_OVER,
+        // The row's class (Criterion::instanceOf()...): the member's field is the word itself.
+        Parser::OPTION_INSTANCEOF, Parser::OPTION_NOT_INSTANCEOF, Parser::OPTION_CLASSOF, Parser::OPTION_NOT_CLASSOF,
     ];
 
     /** Whether the group was read (by the Parser, or built from its members). */

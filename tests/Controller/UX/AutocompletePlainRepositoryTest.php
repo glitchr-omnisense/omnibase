@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Controller\UX;
 
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Thread\Taxon;
 use Base\Entity\Thread\TaxonIntl;
 use Base\Field\Type\SelectType;

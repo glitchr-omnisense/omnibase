@@ -11,7 +11,7 @@ use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\Attribute\Uploader;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\TooltipRepository;
+use Base\Repository\Layout\TooltipRepository;
 use Base\Database\Attribute\Cache;
 use DateTimeInterface;
 

@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Hours;
 
-use Omnibridge\Doctrine\Omnibase\Repository\Hours\ScopedWeekRepository;
+use Base\Repository\Hours\ScopedWeekRepository;
 use Base\Mapping as ORM;
 
 /**

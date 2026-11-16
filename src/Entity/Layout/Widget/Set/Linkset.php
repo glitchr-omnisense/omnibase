@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\Set\LinksetRepository;
+use Base\Repository\Layout\Widget\Set\LinksetRepository;
 
 use Base\Database\Attribute\Cache;
 

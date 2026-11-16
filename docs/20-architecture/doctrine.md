@@ -31,7 +31,7 @@ any other keeps its path below `Omnibridge\Doctrine\Omnibase\`.
 | `Base\Database\Type\{ArrayType, DateTimeTypeUTC, MySQLSetType, UtcDateTimeType, UtcDateTimeImmutableType, Passkey\*}` | `Base\Database\Type\*` |
 | `Base\Database\{Walker, Function, Filter, Middleware, Event}\*`, `Omnibridge\Doctrine\Omnibase\Database\Schema\Describer` | `Omnibridge\Doctrine\Omnibase\Database\...` |
 | `Base\Database\Repository\{ServiceEntityRepository, ServiceEntityParser}` (the finder's Doctrine compiler) | `Omnibridge\Doctrine\Omnibase\Database\Repository\*` |
-| the 81 repositories `Base\Repository\**\*Repository` | `Omnibridge\Doctrine\Omnibase\Repository\**\*Repository` |
+| the 81 repositories `Base\Repository\**\*Repository` | `Base\Repository\**\*Repository` |
 | `Base\DatabaseSubscriber\{Attribute, Intl, InverseCollectionCache, TrackingPolicy}Subscriber`, `Base\EntitySubscriber\{Extension, Trasheable, Versionable, Setting}Subscriber` | `Omnibridge\Doctrine\Omnibase\{DatabaseSubscriber, EntitySubscriber}\*` |
 
 What stays in the core: the neutral parts - the finder language (`Base\Database\Repository\Finder\*`),
@@ -51,9 +51,9 @@ required by `Functions.php`); 6.0 declares no class under a former name. `src/Re
 lists it, and `MetadataSnapshot` compares a mapping across the move with it.
 
 - The entities name their repositories by their own names since 6.0 (`repositoryClass:
-  ThreadRepository::class`, `Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository`); `MetadataSnapshot`
+  ThreadRepository::class`, `Base\Repository\ThreadRepository`); `MetadataSnapshot`
   records a repository, a filter or a type by its former name, so that the mapping compares with one recorded on 5.x.
-  BaseBundle maps the moved repositories `Omnibridge\Doctrine\Omnibase\Repository\X` => `App\Repository\X` from
+  BaseBundle maps the moved repositories `Base\Repository\X` => `App\Repository\X` from
   omnibridge/doctrine's folder, and registers them under their names.
 - An entity's `repositoryClass` may name a repository **interface** of the core
   (`Base\Repository\Thread\Tags`): `Omnibridge\Doctrine\Omnibase\RepositoryFactory::implementation()`

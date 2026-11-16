@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use Omnibridge\Doctrine\Omnibase\Repository\User\PushSubscriptionRepository;
+use Base\Repository\User\PushSubscriptionRepository;
 use DateTime;
 use DateTimeInterface;
 use Base\Mapping as ORM;

@@ -1,0 +1,18 @@
+<?php
+
+namespace Base\Repository\Layout\Widget\Set;
+
+use Base\Entity\Layout\Widget\Set\Menu;
+
+use Base\Repository\Layout\WidgetRepository;
+
+/**
+ * @method Menu|null find($id)
+ * @method Menu|null findOneBy(array $criteria, ?array $orderBy = null)
+ * @method Menu[]    findAll()
+ * @method Menu[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
+ */
+
+class MenuRepository extends WidgetRepository
+{
+}

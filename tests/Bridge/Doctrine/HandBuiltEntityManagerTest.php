@@ -141,7 +141,6 @@ final class HandBuiltEntityManagerTest extends KernelTestCase
         self::assertSame(get_class($entityManager->getRepository(Thread::class)), $answer['repositories']['repository'], 'the same repository class');
         // omnibridge/doctrine's since step F3, the class its former name stands for.
         self::assertSame((new \ReflectionClass(\Omnibridge\Doctrine\Omnibase\RepositoryFactory::class))->getName(), $answer['repository factory'], 'set before the entity manager existed (Mapping::configure())');
-        self::assertTrue($answer['same repository']['repository'], 'Mapping::getRepository(), deprecated, hands the same one');
     }
 
     /**

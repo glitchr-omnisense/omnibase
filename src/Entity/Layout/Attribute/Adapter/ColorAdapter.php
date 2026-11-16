@@ -8,7 +8,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Field\Type\ColorType;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ColorAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\ColorAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:ColorAdapterRepository::class)]

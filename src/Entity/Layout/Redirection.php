@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\RedirectionRepository;
+use Base\Repository\Layout\RedirectionRepository;
 use Base\Mapping as ORM;
 use Base\Validator\Constraints\Unique;
 use Symfony\Component\Validator\Constraints as Assert;

@@ -3,7 +3,7 @@
 namespace Base\EntitySubscriber;
 
 use Base\Entity\Thread;
-use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
+use Base\Database\UnitOfWorks;
 use Base\Database\Lifecycle\ThreadParticipants;
 use Base\Entity\Thread\Mention;
 use Base\Entity\ThreadIntl;
@@ -116,7 +116,7 @@ class ThreadSubscriber implements EventSubscriberInterface
     /** A new reply followed by its parent's owners. */
     public function prePersist(PrePersistEventArgs $event): void
     {
-        $this->participants()->onPrePersist(new Lifecycle\PrePersist($event->getObject(), new DoctrineUnitOfWork($event->getObjectManager())));
+        $this->participants()->onPrePersist(new Lifecycle\PrePersist($event->getObject(), UnitOfWorks::of($event->getObjectManager())));
     }
 
     /**
@@ -160,7 +160,7 @@ class ThreadSubscriber implements EventSubscriberInterface
 
         $threads = array_filter($threads, fn (Thread $thread) => !$unitOfWork->isScheduledForDelete($thread));
         if ($threads) {
-            $this->participants()->onFlush(new Lifecycle\OnFlush(new DoctrineUnitOfWork($entityManager)), $threads);
+            $this->participants()->onFlush(new Lifecycle\OnFlush(UnitOfWorks::of($entityManager)), $threads);
         }
     }
 }

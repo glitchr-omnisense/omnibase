@@ -9,7 +9,7 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\LinkRepository;
+use Base\Repository\Layout\Widget\LinkRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:LinkRepository::class)]

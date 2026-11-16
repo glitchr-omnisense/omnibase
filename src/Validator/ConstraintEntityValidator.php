@@ -2,9 +2,11 @@
 
 namespace Base\Validator;
 
-use Omnibridge\Doctrine\Omnibase\DoctrineLocator;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Base\Contract\Runtime;
+use Base\Database\Mapping\EntityShape;
+use Base\Database\UnitOfWorks;
+use Omnibridge\Persistence\UnitOfWork;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 
@@ -15,72 +17,63 @@ use function get_class;
 use function is_array;
 use function is_string;
 
+/**
+ * The validators of an entity's state (UniqueEntity, StringCaseEntity...), on any persistence: the host's unit of work
+ * (its changes, what it holds) and the entities' shapes - nothing of an ORM.
+ */
 abstract class ConstraintEntityValidator extends ConstraintValidator
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected EntityManagerInterface $em;
+    /** The persistence chosen's unit of work, else the runtime's. */
+    protected ?UnitOfWork $unitOfWork = null;
+
+    public function setUnitOfWork(?UnitOfWork $unitOfWork): void
+    {
+        $this->unitOfWork = $unitOfWork;
+    }
+
+    protected function unitOfWork(): UnitOfWork
+    {
+        $unitOfWork = $this->unitOfWork ?? Runtime::find(UnitOfWork::class);
+
+        return $unitOfWork instanceof UnitOfWork ? $unitOfWork : throw new ConstraintDefinitionException(sprintf('%s validates an entity through the host\'s unit of work: none is set.', static::class));
+    }
+
+    /** The shape (fields, associations) of an entity or a class. */
+    protected function shape(object|string $entityOrClass): EntityShape
+    {
+        return UnitOfWorks::shapes($this->unitOfWork())->shape(is_object($entityOrClass) ? $this->unitOfWork()->className($entityOrClass) : $entityOrClass);
+    }
 
     /**
-     * @param $entity
-     * @return mixed
+     * The entity as it was read (its changed fields set back to their former values, on a copy); null for an entity
+     * the persistence holds no row of yet.
      */
     public function getOriginalEntity($entity)
     {
-        $class = get_class($entity);
-        $originalEntity = new $class();
-
-        // Hydrate class
-        $attributes = $this->em->getUnitOfWork()->getOriginalEntityData($entity);
-        foreach ($attributes as $key => $value) {
-            // One gets the setter's name matching the attribute.
-            $method = 'set' . mb_ucfirst($key);
-
-            // If the matching setter exists
-            if (method_exists($originalEntity, $method)) {
-                // One calls the setter.
-                $originalEntity->$method($value);
+        $unitOfWork = $this->unitOfWork();
+        if (!$unitOfWork->contains($entity) || $unitOfWork->isNew($entity)) {
+            return null;
+        }
+        $original = clone $entity;
+        $accessor = PropertyAccess::createPropertyAccessor();
+        foreach ($this->getEntityChangeSet($entity) as $field => [$before]) {
+            if ($accessor->isWritable($original, $field)) {
+                $accessor->setValue($original, $field, $before);
             }
         }
 
-        return $originalEntity;
+        return $original;
     }
 
-    /**
-     * @param $entity
-     * @return array|null
-     */
+    /** What changed in the entity since it was read: field => [before, after]. */
     public function getEntityChangeSet($entity): ?array
     {
-        $classMetadata = $this->getClassMetadata($entity);
+        $unitOfWork = $this->unitOfWork();
+        $unitOfWork->recompute($entity);
 
-        $uow = $this->em->getUnitOfWork();
-        $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
-
-        return $uow->getEntityChangeSet($entity);
+        return $unitOfWork->changes($entity);
     }
 
-    /**
-     * @param $entityName
-     * @return ClassMetadata
-     */
-    public function getClassMetadata($entityName): ClassMetadata
-    {
-        if (is_object($entityName)) {
-            $class = get_class($entityName);
-        } else {
-            $class = $entityName;
-        }
-
-        return $this->em->getClassMetadata($class);
-    }
-
-    /**
-     * @param Constraint $constraint
-     * @param $value
-     * @return ConstraintViolationBuilderInterface
-     */
     public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
     {
         $buildViolation = parent::buildViolation($constraint, $value);
@@ -88,19 +81,6 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $entity = $constraint->entity;
         if (!$entity) {
             return $buildViolation;
-        }
-
-        if ($constraint->em) {
-            $em = DoctrineLocator::doctrine()->getManager($constraint->em);
-
-            if (!$em) {
-                throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em));
-            }
-        } else {
-            $em = DoctrineLocator::doctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
-            if (!$em) {
-                throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
-            }
         }
 
         $this->setParameter("entity", $this->translator->transEntity($entity));
@@ -132,11 +112,6 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         if (!is_array($constraint->fields) && !is_string($constraint->fields)) {
             throw new UnexpectedTypeException($constraint->fields, 'array');
         }
-
-        // if (null !== $constraint->errorPath && !\is_string($constraint->errorPath))
-        //     throw new UnexpectedTypeException($constraint->errorPath, 'string or null');
-
-        $this->em = DoctrineLocator::doctrine()->getManagerForClass($constraint->entityClass ?? get_class($entity));
     }
 
     /**

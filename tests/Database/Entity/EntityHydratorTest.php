@@ -240,6 +240,15 @@ class PlainUnitOfWork implements UnitOfWork, Snapshots
     /** @var array<int, array<string, mixed>> */
     public array $snapshots = [];
 
+    public function clear(): void
+    {
+    }
+
+    public function isOpen(): bool
+    {
+        return true;
+    }
+
     public function persist(object $entity): void {}
     public function remove(object $entity): void {}
     public function flush(): void {}
@@ -300,5 +309,9 @@ final class PlainEntities implements Entities
     public function count(array $criteria = []): int { return 0; }
     public function persist($entity, bool $flush = false): void {}
     public function remove($entity, bool $flush = false): void {}
+    public function clear(): void
+    {
+    }
+
     public function flush(bool $autoclear = false) {}
 }

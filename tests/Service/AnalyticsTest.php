@@ -3,7 +3,7 @@
 namespace Tests\Base\Service;
 
 use Base\Entity\Analytics\PageView;
-use Omnibridge\Doctrine\Omnibase\Repository\Analytics\VisitRepository;
+use Base\Repository\Analytics\VisitRepository;
 use Base\Service\Analytics;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -510,10 +510,9 @@ class AnalyticsTest extends KernelTestCase
         // this test is about is that THIS visitor adds exactly one.
         $before = $this->analytics->uniqueVisitors("today");
 
-        $connection->executeStatement(
-            VisitRepository::insertIgnore($connection, "analytics_visit (date, subject_type, subject_id) VALUES (:date, 'visitor', :id)"),
-            ["date" => (new \DateTimeImmutable("today", $utc))->modify("+{$seedHour} hours")->format("Y-m-d H:i:s"), "id" => $visitor],
-        );
+        // The visitor's presence of another hour, written through the repository (the language, both persistences).
+        \Base\Database\UnitOfWorks::repositories(static::getContainer()->get(\Base\Contract\UnitOfWork::class))->implementing(\Base\Repository\Analytics\Visits::class)
+            ->recordPresence('visitor', $visitor, (new \DateTimeImmutable("today", $utc))->modify("+{$seedHour} hours"));
         $this->analytics->track($this->path("-two-hours"), $visitor);
 
         $this->assertSame($before + 1, $this->analytics->uniqueVisitors("today"), "one distinct visitor across the whole day, regardless of how many hourly rows back it");

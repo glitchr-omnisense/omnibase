@@ -375,7 +375,7 @@ class EditorJs
         }
 
         $items = [];
-        $records = $this->paginator->paginate(UnitOfWorks::repositories($this->unitOfWork)->of($class)->cacheByInsensitiveIdentifier($query, $fields), $page, 5);
+        $records = $this->paginator->paginate(UnitOfWorks::repositories($this->unitOfWork)->of($class)->cacheByInsensitiveIdentifier($query, $fields), page: $page, pageSize: 5);
         foreach ($records as $record) {
             $items[] = ['id' => $record->getId(), 'label' => $record->__toString()] + $entry($record) + [
                 'data' => [$this->obfuscator->encode(['id' => $record->getId(), 'className' => \get_class($record)])],

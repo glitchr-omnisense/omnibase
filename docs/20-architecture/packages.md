@@ -166,7 +166,7 @@ class and the storages load without either:
   interfaces are still declared: only the two-factor sign-in itself is the bundle's. Where
   the framework is not installed is measured on such a vendor: `bare` loads the Foundation
   with the core installed alone (`composer install --no-dev`, see the harness). The users'
-  repository follows the same rule (step R2): `Omnibridge\Doctrine\Omnibase\Repository\UserRepository` implements
+  repository follows the same rule (step R2): `Base\Repository\UserRepository` implements
   `Base\Contract\SecurityUserLoader` and `SecurityUserProvider`, aliases of
   `Base\Bridge\Symfony\SecurityUserLoader` (doctrine-bridge's `UserLoaderInterface`) and
   `SecurityUserProvider` (Security's `UserProviderInterface` and `PasswordUpgraderInterface`)

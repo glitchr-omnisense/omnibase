@@ -30,7 +30,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\NotificationRepository;
+use Base\Repository\User\NotificationRepository;
 
 /**
  * A notification: its subject, content, importance, channels, recipients,

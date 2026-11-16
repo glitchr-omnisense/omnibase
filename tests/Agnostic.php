@@ -99,7 +99,7 @@
  * TestRecipient}, Base\Request\{TimezoneSwitch, ErrorPage, ShortLinkRedirect, AttachmentDownload, SitemapPage},
  * Base\Screen\Welcome, Base\Field\Validation\Autovalidate, Base\Field\Search\ExchangeRate (the controllers' rules).
  * 860 after step E2 (2026-11-06, +3): the finder language's groups, Base\Database\Repository\Finder\Group, and the
- * methods only one persistence runs, Base\Database\Repository\{BackendOnly, UnsupportedQueryException}.
+ * what a persistence refuses aloud, Base\Database\Repository\UnsupportedQueryException.
  * 862 after steps E2b and E2' (2026-11-06, +2): a to-one association compared by its key without a join,
  * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
  * 863 after step F7a (2026-11-07, +1): the entities described with no persistence installed, Base\Database\Schema\EntitySchema.
@@ -311,7 +311,6 @@ return [
     Base\Database\Mapping\EntityFields::class,
     Base\Database\Mapping\EntityShape::class,
     Base\Database\Mapping\EntityShapes::class,
-    Base\Database\Repository\BackendOnly::class,
     Base\Database\Repository\Entities::class,
     Base\Database\Repository\Finder\Criterion::class,
     Base\Database\Repository\Finder\Group::class,

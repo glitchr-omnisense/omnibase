@@ -90,6 +90,8 @@ foreach (array_unique($asked) as $id) {
         $given[$id] = omnibase_stand_in($id);
     }
 }
+// The repositories' engines, which a repository the graph autowires asks (Base\Repository\User\GroupRepository...).
+$given[Base\Database\Repository\Finders::class] ??= omnibase_stand_in(Base\Database\Repository\Finders::class);
 $given['Symfony\Component\String\Slugger\SluggerInterface'] = new Symfony\Component\String\Slugger\AsciiSlugger();
 // The parameters' bag with the defaults too.
 $given[Base\Service\ParameterBagInterface::class] = new Base\Service\ArrayParameterBag($values);

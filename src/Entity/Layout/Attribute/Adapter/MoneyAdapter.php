@@ -7,7 +7,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Field\Type\MoneyType;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\MoneyAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\MoneyAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: MoneyAdapterRepository::class)]

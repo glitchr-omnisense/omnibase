@@ -4,7 +4,6 @@ namespace Base\Demo;
 
 use Base\Database\UnitOfWorks;
 use Base\Entity\User\Group;
-use Doctrine\Persistence\ObjectManager;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -22,7 +21,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  *
  * Read and written through omnisense/omnibridge's unit of work, the persistence chosen's (plan "omnibase agnostic",
  * step F7d-3: on Eloquent, the account a one-click sign-in gives is the one its connections are written for); a
- * fixture's ObjectManager given to a call is used as it is.
+ * fixture's unit of work given to a call is used as it is (a Doctrine ObjectManager is adapted: UnitOfWorks::of()).
  */
 class DemoAccountFactory
 {
@@ -41,7 +40,7 @@ class DemoAccountFactory
     }
 
     /** The row of a declared account, null when the database has none. */
-    public function find(string $identifier, ?ObjectManager $manager = null): ?object
+    public function find(string $identifier, ?object $manager = null): ?object
     {
         $manager = $this->manager($manager);
         $pending = $this->users[$identifier] ?? null;
@@ -57,7 +56,7 @@ class DemoAccountFactory
      * its declaration (verified, approved, in its group - created with its
      * roles when missing).
      */
-    public function account(string $identifier, ?ObjectManager $manager = null): object
+    public function account(string $identifier, ?object $manager = null): object
     {
         $account = $this->registry->get($identifier);
         if (null === $account) {
@@ -65,7 +64,7 @@ class DemoAccountFactory
         }
 
         $manager = $this->manager($manager);
-        $user = $this->find($identifier, $manager instanceof ObjectManager ? $manager : null);
+        $user = $this->find($identifier, $manager);
         if (null === $user) {
             $user = new ($this->userClass)();
             $field = $this->identifierField();
@@ -101,7 +100,7 @@ class DemoAccountFactory
      *
      * @return array<string, object> by identifier
      */
-    public function load(?ObjectManager $manager = null): array
+    public function load(?object $manager = null): array
     {
         $users = [];
         foreach ($this->registry->all() as $identifier => $account) {
@@ -116,13 +115,13 @@ class DemoAccountFactory
      *
      * @return string[]
      */
-    public function missing(?ObjectManager $manager = null): array
+    public function missing(?object $manager = null): array
     {
         return array_values(array_filter(array_keys($this->registry->all()), fn (string $identifier): bool => null === $this->find($identifier, $manager)));
     }
 
     /** @param string[] $roles */
-    private function group(ObjectManager|UnitOfWork $manager, string $name, array $roles): object
+    private function group(UnitOfWork $manager, string $name, array $roles): object
     {
         $group = $this->groups[$name] ?? null;
         if (!$group || !$manager->contains($group)) {
@@ -138,15 +137,15 @@ class DemoAccountFactory
         return $this->groups[$name] = $group;
     }
 
-    /** The fixture's manager when one is given, else the unit of work. */
-    private function manager(?ObjectManager $manager): ObjectManager|UnitOfWork
+    /** The fixture's unit of work when one is given (a persistence's manager adapted), else the service's. */
+    private function manager(?object $manager): UnitOfWork
     {
-        return $manager ?? $this->doctrine;
+        return null === $manager ? $this->doctrine : ($manager instanceof UnitOfWork ? $manager : UnitOfWorks::of($manager));
     }
 
-    private function repository(ObjectManager|UnitOfWork $manager, string $class): object
+    private function repository(UnitOfWork $manager, string $class): object
     {
-        return $manager instanceof UnitOfWork ? UnitOfWorks::repositories($manager)->of($class) : $manager->getRepository($class);
+        return UnitOfWorks::repositories($manager)->of($class);
     }
 
     private function identifierField(): string

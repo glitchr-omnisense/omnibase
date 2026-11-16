@@ -55,8 +55,8 @@ final class LikeEscapeTest extends KernelTestCase
         $tag = bin2hex(random_bytes(3));
         $underscore = $this->thread('esc_'.$tag.'_50%');
         $letter = $this->thread('escx'.$tag.'x50x');
-        $repository = $this->entityManager()->getRepository(ThreadIntl::class);
-        $ids = static fn (Query $query): array => array_map(static fn (ThreadIntl $text) => $text->getTranslatable()?->getId(), $query->getResult());
+        $repository = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(ThreadIntl::class);
+        $ids = static fn (\Base\Database\Repository\Finder\Result $query): array => array_map(static fn (ThreadIntl $text) => $text->getTranslatable()?->getId(), $query->getResult());
 
         self::assertSame([$underscore], $ids($repository->findByTitleStartingWith('esc_'.$tag)), '"_" is an underscore, not any character');
         self::assertSame([$underscore], $ids($repository->findByTitleEndingWith($tag.'_50%')), '"%" is a percent sign');
@@ -73,7 +73,7 @@ final class LikeEscapeTest extends KernelTestCase
 
     public function testTheSqlForMySqlSaysTheEscape(): void
     {
-        $dql = $this->entityManager()->getRepository(ThreadIntl::class)->findByTitleStartingWith('esc_')->getDQL();
+        $dql = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(ThreadIntl::class)->findByTitleStartingWith('esc_')->getDQL();
 
         // An entity manager of the same configuration on MySQL's platform (the walker quotes the escape through a
         // connection: SQLite's in memory, which quotes "!" as MySQL does).

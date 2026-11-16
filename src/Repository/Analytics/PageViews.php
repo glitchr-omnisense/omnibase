@@ -2,7 +2,6 @@
 
 namespace Base\Repository\Analytics;
 
-use Base\Database\Repository\BackendOnly;
 use Base\Database\Repository\Entities;
 use Base\Entity\Analytics\PageView;
 
@@ -15,7 +14,6 @@ use Base\Entity\Analytics\PageView;
  */
 interface PageViews extends Entities
 {
-    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: an upsert, ON DUPLICATE KEY UPDATE on MySQL, ON CONFLICT elsewhere')]
     public function incrementView(string $path, \DateTimeImmutable $date, string $source = PageView::SOURCE_HUMAN): void;
 
     public function countViews(?string $path = null, ?\DateTimeImmutable $since = null, ?string $source = null): int;
@@ -27,7 +25,6 @@ interface PageViews extends Entities
      *
      * @return array<mixed>
      */
-    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: SUM() grouped by DATE(), which DQL has no function for')]
     public function dailyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array;
 
     /**
@@ -35,7 +32,6 @@ interface PageViews extends Entities
      *
      * @return array<mixed>
      */
-    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: SUM() grouped by DATE() and source')]
     public function dailyBreakdownBySource(\DateTimeImmutable $since, string|array|null $path = null): array;
 
     /**
@@ -43,7 +39,6 @@ interface PageViews extends Entities
      *
      * @return array<mixed>
      */
-    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: SUM() grouped by the hour bucket, rows as arrays')]
     public function hourlyBreakdown(\DateTimeImmutable $since, string|array|null $path = null): array;
 
     /**
@@ -51,6 +46,5 @@ interface PageViews extends Entities
      *
      * @return array<mixed>
      */
-    #[BackendOnly(['doctrine', 'eloquent'], 'native SQL: SUM() grouped by the hour bucket and source')]
     public function hourlyBreakdownBySource(\DateTimeImmutable $since, string|array|null $path = null): array;
 }

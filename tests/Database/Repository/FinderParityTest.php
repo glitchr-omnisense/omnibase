@@ -3,7 +3,7 @@
 namespace Tests\Base\Database\Repository;
 
 use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityParser;
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Database\Repository\Finder\Key;
 use Base\Entity\Layout\ImageCrop;
 use Base\Entity\Thread;
@@ -117,7 +117,7 @@ final class FinderParityTest extends KernelTestCase
 
         $observed = [];
         foreach (self::scenarios() as [$entity, $method, $arguments]) {
-            $repository = $entityManager->getRepository($entity);
+            $repository = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($entityManager))->of($entity);
             self::assertInstanceOf(ServiceEntityRepository::class, $repository, $entity);
             $key = $entity.'::'.$method.'#'.md5(serialize(self::normalise($arguments)));
             $observed[$key] = ['parse' => self::parse($repository, $method, $arguments), 'query' => self::call($repository, $method, $arguments)];
@@ -215,8 +215,8 @@ final class FinderParityTest extends KernelTestCase
             [$bookId, $onLiveId, $onTrashedId] = [$book->getId(), $written[3][0]->getId(), $written[4][0]->getId()];
             [$liveId, $trashedId] = [$live->getId(), $trashed->getId()];
 
-            $views = $entityManager->getRepository(\Base\Entity\Analytics\PageView::class);
-            $visits = $entityManager->getRepository(\Base\Entity\Analytics\Visit::class);
+            $views = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($entityManager))->of(\Base\Entity\Analytics\PageView::class);
+            $visits = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($entityManager))->of(\Base\Entity\Analytics\Visit::class);
             foreach ([['/', 0], ['/', 0], ['/', 40 * 86400], ['/about', 3600]] as [$path, $ago]) {
                 $views->incrementView($path, $now->modify('-'.$ago.' seconds'));
                 $visits->recordPresence(\Base\Entity\Analytics\Visit::TYPE_VISITOR, md5($path.$ago), $now->modify('-'.$ago.' seconds'));
@@ -225,7 +225,7 @@ final class FinderParityTest extends KernelTestCase
             $visits->recordPresence(\Base\Entity\Analytics\Visit::TYPE_USER, '1', $now);
             $entityManager->clear();
 
-            $repository = static fn (string $class) => $entityManager->getRepository($class);
+            $repository = static fn (string $class) => \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($entityManager))->of($class);
             $latest = static function (string $class) use ($entityManager): ?object {
                 $id = $entityManager->getClassMetadata($class)->getSingleIdentifierFieldName();
 
@@ -291,7 +291,7 @@ final class FinderParityTest extends KernelTestCase
     private static function parse(ServiceEntityRepository $repository, string $method, array $arguments): array
     {
         /** @var ServiceEntityParser $parser */
-        $parser = (new \ReflectionProperty(ServiceEntityRepository::class, 'serviceParser'))->getValue($repository);
+        $parser = (new \ReflectionMethod(ServiceEntityRepository::class, 'finder'))->invoke($repository)->compiler();
 
         try {
             if (method_exists($parser, 'read')) {
@@ -337,7 +337,7 @@ final class FinderParityTest extends KernelTestCase
             return ['exception' => $e::class, 'message' => self::message($e)];
         }
 
-        if ($result instanceof Query) {
+        if ($result instanceof Query || $result instanceof \Omnibridge\Doctrine\Omnibase\Finder\DoctrineResult) {
             $parameters = [];
             foreach ($result->getParameters() as $parameter) {
                 $value = $parameter->getValue();

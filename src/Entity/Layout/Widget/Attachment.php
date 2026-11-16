@@ -15,7 +15,7 @@ use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\AttachmentRepository;
+use Base\Repository\Layout\Widget\AttachmentRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:AttachmentRepository::class)]

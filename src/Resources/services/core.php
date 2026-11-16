@@ -71,7 +71,7 @@ return [
     ],
     [
         'class' => 'Base\Service\GroupManager',
-        'requires' => ['Omnibridge\Doctrine\Omnibase\Repository\User\GroupRepository', 'Omnibridge\Doctrine\Omnibase\Repository\User\PermissionRepository'],
+        'requires' => ['Base\Repository\User\GroupRepository', 'Base\Repository\User\PermissionRepository'],
         'public' => true,
         'autowire' => true,
         'autoconfigure' => true,
@@ -224,10 +224,10 @@ return [
     ],
     [
         'class' => 'Base\Controller\Action\Widget\Page',
-        'requires' => ['Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\PageRepository'],
+        'requires' => ['Base\Repository\Layout\Widget\PageRepository'],
         'public' => true,
         'tags' => ['controller.service_arguments'],
-        'symfony' => ['arguments' => ['@Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\PageRepository']],
+        'symfony' => ['arguments' => ['@Base\Repository\Layout\Widget\PageRepository']],
     ],
     [
         'class' => 'Base\Screen\Builder\Accounts',

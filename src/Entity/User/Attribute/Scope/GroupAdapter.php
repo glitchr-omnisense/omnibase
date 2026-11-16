@@ -9,7 +9,7 @@ use Base\Entity\User;
 use Base\Entity\User\Group;
 use Base\Field\Type\SelectType;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Scope\GroupAdapterRepository;
+use Base\Repository\User\Attribute\Scope\GroupAdapterRepository;
 
 /**
  * Narrows something to the members of another group.

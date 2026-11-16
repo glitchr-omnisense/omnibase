@@ -8,7 +8,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractActionAdapter;
 use Base\Entity\User;
 use Base\Field\Type\SelectType;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Action\GrantPermissionAdapterRepository;
+use Base\Repository\User\Attribute\Action\GrantPermissionAdapterRepository;
 
 /**
  * Awards one or more fine-grained permission tags.

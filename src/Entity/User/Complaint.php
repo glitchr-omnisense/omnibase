@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use Base\Entity\User;
-use Omnibridge\Doctrine\Omnibase\Repository\User\ComplaintRepository;
+use Base\Repository\User\ComplaintRepository;
 use Base\Service\Model\IconizeInterface;
 use DateTime;
 use Base\Mapping as ORM;

@@ -2743,12 +2743,6 @@ parameters:
 			path: src/Database/Mapping/MetadataManipulator.php
 
 		-
-			message: '#^Parameter \#1 \$array \(list\<string\>\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: src/Database/Repository/BackendOnly.php
-
-		-
 			message: '#^Method Base\\Database\\Repository\\Finder\\Group\:\:words\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -23281,7 +23275,7 @@ parameters:
 			path: tests/Security/PasskeyRepositoryTest.php
 
 		-
-			message: '#^Method Tests\\Base\\Security\\PasskeyRepositoryTest\:\:repository\(\) should return Omnibridge\\Doctrine\\Omnibase\\Repository\\User\\PasskeyRepository but returns Doctrine\\ORM\\EntityRepository\<Base\\Entity\\User\\Passkey\>\.$#'
+			message: '#^Method Tests\\Base\\Security\\PasskeyRepositoryTest\:\:repository\(\) should return Base\\Repository\\User\\PasskeyRepository but returns Doctrine\\ORM\\EntityRepository\<Base\\Entity\\User\\Passkey\>\.$#'
 			identifier: return.type
 			count: 1
 			path: tests/Security/PasskeyRepositoryTest.php

@@ -2,44 +2,41 @@
 
 namespace Base\Service;
 
-use Omnibridge\Contract\Urls;
-use Symfony\Component\Routing\RouterInterface;
+use Base\Database\Repository\CriteriaPages;
+use Base\Database\Repository\Entities;
 use Base\Service\Model\Pages;
 use Base\Service\Model\Pagination;
-use Doctrine\ORM\Query;
+use Omnibridge\Contract\Urls;
+use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * omnibase's Paginator (PaginatorInterface): a repository with criteria and an order, a finder's Result, or an array,
+ * paged by the persistence; the pages' addresses by the host's Urls (Symfony's router where the host is Symfony).
+ */
 class Paginator implements PaginatorInterface
 {
-    /**
-     * @var RouterInterface
-     */
-    /** The addresses of the pages: omnibridge's Urls (plan "omnibase agnostic", F5a: where the host has no router of Symfony's), or Symfony's router (its advanced_router under Symfony, its links as they were). */
-    protected Urls|RouterInterface $router;
-
-    /**
-     * @var ParameterBagInterface
-     */
-    protected ParameterBagInterface $parameterBag;
-
-    public function __construct(Urls|RouterInterface $router, ParameterBagInterface $parameterBag)
-    {
-        $this->router = $router;
-        $this->parameterBag = $parameterBag;
+    public function __construct(
+        protected Urls|RouterInterface $router,
+        protected ParameterBagInterface $parameterBag,
+    ) {
     }
 
-    /** @param array|Pages|Query $query the rows: an array, a query's Pages, a Doctrine Query (adapted, step F2e) */
-    public function paginate(array|Pages|Query $query, int $page = 1, int $pageSize = 0, int $pageRange = 0): ?Pagination
+    public function paginate(Entities|Pages|array $source, array $criteria = [], ?array $orderBy = null, int $page = 1, int $pageSize = 0, int $pageRange = 0): Pagination
     {
-        $pageSize = ($pageSize < 1 ? $this->parameterBag->get("base.paginator.page_size") : $pageSize);
-        $pageRange = ($pageRange < 1 ? $this->parameterBag->get("base.paginator.page_range") : $pageRange);
-        $parameterName = $this->parameterBag->get("base.paginator.page_parameter");
-        $pageTemplate = $this->parameterBag->get("base.paginator.default_template");
+        if ($source instanceof Entities) {
+            $source = new CriteriaPages($source, $criteria, $orderBy);
+        } elseif ([] !== $criteria || null !== $orderBy) {
+            throw new \InvalidArgumentException(sprintf('Criteria and an order page a repository (Entities): a %s is paged as it is - give the repository, or none of them.', get_debug_type($source)));
+        }
 
-        $pagination = new Pagination($query, $this->router, $parameterName);
+        $pageSize = $pageSize < 1 ? (int) $this->parameterBag->get('base.paginator.page_size') : $pageSize;
+        $pageRange = $pageRange < 1 ? (int) $this->parameterBag->get('base.paginator.page_range') : $pageRange;
+
+        $pagination = new Pagination($source, $this->router, $this->parameterBag->get('base.paginator.page_parameter'));
         $pagination->setPageSize($pageSize);
         $pagination->setPageRange($pageRange);
-        $pagination->setTemplate($pageTemplate);
-        $pagination->setPage($page);
+        $pagination->setTemplate($this->parameterBag->get('base.paginator.default_template'));
+        $pagination->setPage(max(1, $page));
 
         return $pagination;
     }

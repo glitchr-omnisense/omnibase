@@ -5,7 +5,7 @@ namespace Base\Entity\Extension;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Extension\Abstract\AbstractExtension;
 
-use Omnibridge\Doctrine\Omnibase\Repository\Extension\TrashBallRepository;
+use Base\Repository\Extension\TrashBallRepository;
 use DateTimeInterface;
 use Base\Mapping as ORM;
 use Base\Database\Attribute\Cache;

@@ -5,7 +5,7 @@ namespace Base\Entity\Thread;
 use App\Entity\User;
 use App\Entity\Thread;
 
-use Omnibridge\Doctrine\Omnibase\Repository\Thread\LikeRepository;
+use Base\Repository\Thread\LikeRepository;
 
 use Base\Mapping as ORM;
 use Base\Database\Attribute\DiscriminatorEntry;

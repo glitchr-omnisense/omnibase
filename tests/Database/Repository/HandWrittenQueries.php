@@ -36,8 +36,8 @@ use Doctrine\ORM\Query;
  * (Finder\Key): the thread of the newest comment - in the core's harness, one in the trash - and the
  * visitors' book.
  *
- * Not here: the methods declared #[BackendOnly] (native SQL, a bulk UPDATE), which each
- * persistence writes in its own terms, so they keep their query (see the plan's inventory, ~/Sites/.agent-briefs/e2/inventory.md).
+ * Not here: the analytics and Redirections::hit(), once native SQL per persistence, now written once with
+ * findValuesBy()/updateBy() (tests/Repository/AnalyticsParityTest).
  */
 final class HandWrittenQueries
 {
@@ -53,7 +53,8 @@ final class HandWrittenQueries
     public static function scenarios(\Closure $repository, \Closure $latest, string $userClass, ?\DateTimeInterface $now = null, ?Thread $commented = null): array
     {
         $now ??= new \DateTime();
-        $qb = static fn (string $class, string $alias) => $repository($class)->createQueryBuilder($alias);
+        // The queries of before, on Doctrine's own repository of the class (omnibase's has no createQueryBuilder()).
+        $qb = static fn (string $class, string $alias) => (method_exists($r = $repository($class), 'createQueryBuilder') ? $r : \Omnibridge\Doctrine\Omnibase\DoctrineLocator::objectManager($class)->getRepository($class))->createQueryBuilder($alias);
         $user = $latest($userClass);
         $thread = $latest(Thread::class);
         $trashBall = $latest(TrashBall::class);

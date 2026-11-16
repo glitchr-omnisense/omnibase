@@ -2,8 +2,7 @@
 
 namespace Tests\Base\Database\Repository;
 
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use Base\Database\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -32,9 +31,7 @@ class ServiceEntityParserTest extends KernelTestCase
         }
 
         self::bootKernel();
-        /** @var EntityManagerInterface $em */
-        $em = static::getContainer()->get('doctrine')->getManager();
-        $repo = $em->getRepository(self::ENTITY);
+        $repo = static::getContainer()->get(\Base\Database\Repository\Repositories::class)->of(self::ENTITY);
 
         if (!$repo instanceof ServiceEntityRepository) {
             self::markTestSkipped(self::ENTITY . ' is not backed by a base ServiceEntityRepository.');

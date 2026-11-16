@@ -9,7 +9,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\DateRangeAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\DateRangeAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 /**

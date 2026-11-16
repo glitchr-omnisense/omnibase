@@ -5,7 +5,7 @@ namespace Base\Entity\Layout\Attribute\Adapter\Common;
 use Base\Database\Attribute\DiscriminatorEntry;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\Common\AbstractRuleAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\Common\AbstractRuleAdapterRepository;
 use Base\Database\Attribute\Cache;
 use InvalidArgumentException;
 

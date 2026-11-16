@@ -6,7 +6,7 @@ use Base\Database\Attribute\Blameable;
 use Base\Database\Attribute\Timestamp;
 use Base\Entity\User;
 use Base\Enum\ConnectionState;
-use Omnibridge\Doctrine\Omnibase\Repository\User\ConnectionRepository;
+use Base\Repository\User\ConnectionRepository;
 use Base\Database\Attribute\Cache;
 use Base\Service\Model\IconizeInterface;
 use Base\Mapping as ORM;

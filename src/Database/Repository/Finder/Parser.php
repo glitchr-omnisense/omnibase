@@ -541,33 +541,36 @@ final class Parser
         $eagerly = self::LOAD_EAGERLY;
         $by = self::SEPARATOR_BY;
         $for = self::SEPARATOR_FOR;
+        // A column in camel case, as short as the By that follows lets it be: a By counts only before a capital or the
+        // end (sumOfSizeBytesBy: the column sizeBytes, not size + "tes"; a column may hold a B or a y).
+        $column = '[A-Z][A-Za-z0-9_]*?';
 
         $special = null;
         $magicExtra = [];
 
         $requestType = self::REQUEST_FIND;
-        if (preg_match('/^(?P<fn>' . $countRequest . ')(?:' . $for . '(?P<column>[^' . $by . ']*))?' . $by . '(?P<names>.*)/', $method, $magicExtra)) {
+        if (preg_match('/^(?P<fn>' . $countRequest . ')(?:' . $for . '(?P<column>' . $column . '))?' . $by . '(?=[A-Z]|$)(?P<names>.*)/', $method, $magicExtra)) {
             $requestType = self::REQUEST_COUNT;
             $byNames = array_pop_key("names", $magicExtra);
             $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
             $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-        } elseif (preg_match('/^(?P<fn>' . $countRequest . ')(?:' . $for . '(?P<column>[^' . $by . ']*))?(?P<names>.*)/', $method, $magicExtra)) {
+        } elseif (preg_match('/^(?P<fn>' . $countRequest . ')(?:' . $for . '(?P<column>[A-Z][A-Za-z0-9_]*))?(?P<names>.*)/', $method, $magicExtra)) {
             $requestType = self::REQUEST_COUNT;
             $byNames = array_pop_key("names", $magicExtra);
             $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
             $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-        } elseif (preg_match('/^(?P<fn>' . $lengthRequest . ')(?P<column>[^' . $by . ']+)' . $by . '(?P<names>.*)/', $method, $magicExtra)) {
+        } elseif (preg_match('/^(?P<fn>' . $lengthRequest . ')(?P<column>' . $column . ')' . $by . '(?=[A-Z]|$)(?P<names>.*)/', $method, $magicExtra)) {
             $requestType = self::REQUEST_LENGTH;
             $byNames = array_pop_key("names", $magicExtra);
             $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
             $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-        } elseif (preg_match('/^(?P<fn>' . $lengthRequest . ')(?P<column>[^' . $by . ']+)(?P<names>.*)/', $method, $magicExtra)) {
+        } elseif (preg_match('/^(?P<fn>' . $lengthRequest . ')(?P<column>[A-Z][A-Za-z0-9_]*)(?P<names>.*)/', $method, $magicExtra)) {
             $requestType = self::REQUEST_LENGTH;
             $byNames = array_pop_key("names", $magicExtra);
 
@@ -575,7 +578,7 @@ final class Parser
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
             $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
-        } elseif (preg_match('/^(?P<fn>' . $aggregateRequest . ')(?P<column>[A-Z][A-Za-z0-9_]*?)(?:' . $by . '(?P<names>.*))?$/', $method, $magicExtra)) {
+        } elseif (preg_match('/^(?P<fn>' . $aggregateRequest . ')(?P<column>' . $column . ')(?:' . $by . '(?P<names>(?=[A-Z]|$).*))?$/', $method, $magicExtra)) {
             // sumOfViewsBy..., minOfDate (step E2): the column, then the criteria as for find...By.
             $requestType = array_pop_key("fn", $magicExtra);
             $byNames = array_pop_key("names", $magicExtra) ?? "";

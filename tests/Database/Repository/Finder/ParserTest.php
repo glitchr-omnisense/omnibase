@@ -303,4 +303,19 @@ final class ParserTest extends TestCase
         $this->expectExceptionMessage('Undefined method "fetchBySlug"');
         self::parser()->parse('fetchBySlug', ['a']);
     }
+
+    /** A column in camel case whose words hold a B or a y (sizeBytes): read whole, the By only before a capital or the end. */
+    public function testAMultiWordColumn(): void
+    {
+        $parser = new Parser(new Fields(Article::class, ['id', 'state', 'sizeBytes', 'byteCount']));
+
+        $query = $parser->parse('sumOfSizeBytesBy', [['state' => 'publish']]);
+        self::assertSame('sizeBytes', $query->column);
+        $query = $parser->parse('sumOfSizeBytesByState', ['publish']);
+        self::assertSame('sizeBytes', $query->column);
+        self::assertSame('state', $query->criterions()[0]->field);
+        self::assertSame('byteCount', $parser->parse('maxOfByteCount', [])->column);
+        self::assertSame('sizeBytes', $parser->parse('countForSizeBytesByState', ['publish'])->column);
+        self::assertSame('sizeBytes', $parser->parse('lengthOfSizeBytesByState', ['publish'])->column);
+    }
 }

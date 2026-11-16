@@ -7,7 +7,7 @@ use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\SemanticRepository;
+use Base\Repository\Layout\SemanticRepository;
 use Base\Traits\BaseTrait;
 use DomDocument;
 use DOMXPath;

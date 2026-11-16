@@ -30,9 +30,9 @@ return [
         ['instanceof' => 'Symfony\Component\Workflow\WorkflowInterface', 'tags' => ['workflow']],
         // The demonstration accounts a bundle or the application declares (docs/20-architecture/demo.md).
         ['instanceof' => 'Base\Demo\DemoAccountProviderInterface', 'tags' => ['base.demo_account_provider']],
-        // An application's repository extending omnibridge/doctrine's (App\Repository\*): DoctrineBundle's repository
-        // factory finds it in the container.
-        ['instanceof' => 'Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository', 'tags' => ['doctrine.repository_service']],
+        // The repositories of the application and of the bundles (every class over the agnostic parent): tagged, so that
+        // Repositories::of() hands out the service the container built (EntityRepositories' locator: tagged_locator base.repository).
+        ['instanceof' => 'Base\Database\Repository\ServiceEntityRepository', 'tags' => ['base.repository']],
         // The entity dispatchers: Doctrine listeners of these events, flushed after the flush that raised their events
         // (EntityDispatcherFlushSubscriber), reset between requests.
         ['instanceof' => 'Base\EntityDispatcher\EventDispatcherInterface', 'tags' => [

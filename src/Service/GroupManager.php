@@ -4,8 +4,8 @@ namespace Base\Service;
 
 use Base\Entity\User;
 use Base\Entity\User\Group;
-use Omnibridge\Doctrine\Omnibase\Repository\User\GroupRepository;
-use Omnibridge\Doctrine\Omnibase\Repository\User\PermissionRepository;
+use Base\Repository\User\GroupRepository;
+use Base\Repository\User\PermissionRepository;
 use Omnibridge\Persistence\UnitOfWork;
 
 /**

@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\TextOverrideRepository;
+use Base\Repository\Layout\TextOverrideRepository;
 use Base\Mapping as ORM;
 use Base\Validator\Constraints\Unique;
 use Symfony\Component\Validator\Constraints as Assert;

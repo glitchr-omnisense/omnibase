@@ -37,7 +37,7 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\GraphInterface;
 use Base\Enum\WorkflowState;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository;
+use Base\Repository\ThreadRepository;
 use DateTime;
 
 use Base\Traits\CacheableTrait;

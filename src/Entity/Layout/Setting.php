@@ -9,7 +9,7 @@ use Base\Validator\Constraints as AssertBase;
 use Base\Database\Attribute\Slugify;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository;
+use Base\Repository\Layout\SettingRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:SettingRepository::class)]

@@ -3,7 +3,6 @@
 namespace Tests\Base\Field;
 
 use Base\Field\FieldValueResolver;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use PHPUnit\Framework\TestCase;
@@ -270,20 +269,34 @@ class FieldValueResolverIdentifierTest extends TestCase
      *
      * @param string[] $columns
      */
-    private function doctrine(array $columns): ManagerRegistry
+    private function doctrine(array $columns): \Base\Database\Mapping\EntityShapes
     {
-        $metadata = $this->createMock(ClassMetadata::class);
-        $metadata->method('hasField')->willReturnCallback(fn (string $field) => in_array($field, $columns, true));
+        // The entities' shapes (no ORM): IdentifierParentFixture and its child are entities with these columns.
+        $entity = new \Omnibridge\Schema\Entity(IdentifierParentFixture::class, 'fixture', fields: array_combine($columns, array_map(
+            static fn (string $column): \Omnibridge\Schema\Field => new \Omnibridge\Schema\Field($column, $column, 'string'),
+            $columns,
+        )));
 
-        $manager = $this->createMock(ObjectManager::class);
-        $manager->method('getClassMetadata')->willReturn($metadata);
+        return new class($entity) implements \Base\Database\Mapping\EntityShapes {
+            public function __construct(private readonly \Omnibridge\Schema\Entity $entity)
+            {
+            }
 
-        $doctrine = $this->createMock(ManagerRegistry::class);
-        $doctrine->method('getManagerForClass')->willReturnCallback(
-            fn (string $class) => is_a($class, IdentifierParentFixture::class, true) ? $manager : null
-        );
+            public function has(string|object $class): bool
+            {
+                return is_a($class, IdentifierParentFixture::class, true);
+            }
 
-        return $doctrine;
+            public function shape(string|object $class): \Base\Database\Mapping\EntityShape
+            {
+                return new \Base\Database\Mapping\EntityShape($this->entity);
+            }
+
+            public function classes(): array
+            {
+                return [IdentifierParentFixture::class];
+            }
+        };
     }
 
     /**

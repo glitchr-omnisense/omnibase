@@ -3,7 +3,6 @@
 namespace Base\Service\Model;
 
 use Base\Exception\InvalidPageException;
-use Doctrine\ORM\Query;
 use Omnibridge\Contract\Urls;
 use Symfony\Component\Routing\RouterInterface;
 use Countable;
@@ -30,16 +29,8 @@ class Pagination implements PaginationInterface, Iterator, Countable
     protected string $template = "@Base/paginator/sliding.html.twig";
     protected ?string $parameterName;
 
-    /**
-     * A query is paged by what runs it (step F2e): Pages, which a Doctrine Query is adapted to
-     * (Omnibridge\Doctrine\Omnibase\QueryPages, by name: nothing of Doctrine is loaded here).
-     */
-    public const ADAPTERS = [
-        'Doctrine\ORM\Query' => 'Omnibridge\Doctrine\Omnibase\QueryPages',
-    ];
-
-    /** @param array|Pages|Query $arrayOrQuery the rows: an array, or a query's Pages (a Doctrine Query is adapted) */
-    public function __construct(array|Pages|Query $arrayOrQuery, Urls|RouterInterface $router, ?string $parameterName = "page")
+    /** @param array|Pages $arrayOrQuery the rows: an array, or Pages (a finder's Result, CriteriaPages...) */
+    public function __construct(array|Pages $arrayOrQuery, Urls|RouterInterface $router, ?string $parameterName = "page")
     {
         if (!is_array($arrayOrQuery)) {
             $this->paginator = self::pages($arrayOrQuery);
@@ -54,27 +45,10 @@ class Pagination implements PaginationInterface, Iterator, Countable
         $this->router = $router;
     }
 
-    /** The rows of a query as Pages: Pages as they are, a backend's query through its adapter. */
+    /** The rows of a query as Pages: a finder's Result, CriteriaPages, any Pages. */
     public static function pages(object $query): Pages
     {
-        if ($query instanceof Pages) {
-            return $query;
-        }
-        foreach (self::ADAPTERS as $class => $adapter) {
-            if ($query instanceof $class) {
-                return new $adapter($query);
-            }
-        }
-
-        throw new UnexpectedValueException(sprintf('No pages for a %s (%s).', get_debug_type($query), implode(', ', array_keys(self::ADAPTERS))));
-    }
-
-    /**
-     * @deprecated since step F2e of the plan "omnibase agnostic": Omnibridge\Doctrine\Omnibase\QueryPages::countQuery()
-     */
-    public function getCountQuery(Query $query, bool $bHint = true): Query
-    {
-        return self::ADAPTERS[Query::class]::countQuery($query, $bHint);
+        return $query instanceof Pages ? $query : throw new UnexpectedValueException(sprintf('No pages for a %s: give Pages (a finder\'s Result, Base\Database\Repository\CriteriaPages).', get_debug_type($query)));
     }
 
     public function rewind(): void
@@ -134,12 +108,6 @@ class Pagination implements PaginationInterface, Iterator, Countable
     public function get()
     {
         return $this->paginator;
-    }
-
-    /** The page's query, when the Pages are a query's that gives it (Doctrine's QueryPages). */
-    public function getQuery(): ?Query
-    {
-        return $this->isQuery() && method_exists($this->paginator, 'query') ? $this->paginator->query($this->pageSize * ($this->page - 1), $this->pageSize) : null;
     }
 
     /**

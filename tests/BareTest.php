@@ -3,11 +3,11 @@
 namespace Tests\Base;
 
 use Base\BaseBundle;
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Enum\UserRole;
 use Base\Twig\Extension\FunctionTwigExtension;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
-use Omnibridge\Doctrine\Omnibase\Repository\UserRepository;
+use Base\Repository\UserRepository;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -120,10 +120,8 @@ final class BareTest extends TestCase
     }
 
     /**
-     * --strict is not blind, and is stricter than the Foundation's guard: omnibase's repository is
-     * doctrine/orm's EntityRepository - Doctrine is allowed by the guard (D2), refused by --strict,
-     * which names the class and the class that asked for it (omnibridge/doctrine's since step F3,
-     * which moved the Doctrine repositories there, the core aliasing their former names); a Twig extension of the core is refused for Twig's
+     * --strict is not blind, and is stricter than the Foundation's guard: omnibase's repository, agnostic since the
+     * finder language (no doctrine/orm parent), passes it; a Twig extension of the core is refused for Twig's
      * AbstractExtension where Twig is installed (this run's vendor: since step F4 the vendor without the
      * framework has no Twig, see testTwigIsOptional()). An enumeration was the first example until
      * step F2a made it a plain class.
@@ -133,14 +131,13 @@ final class BareTest extends TestCase
         [$status, $report] = self::bare([ServiceEntityRepository::class]);
         self::assertSame(0, $status, 'the Foundation\'s guard allows Doctrine');
 
+        // The agnostic repository (over Base\Database\Repository\Finders) loads nothing of Doctrine: --strict lets it by.
         [$status, $report] = self::bare(['--strict', ServiceEntityRepository::class, UserRole::class]);
-        self::assertSame(1, $status);
+        self::assertSame(0, $status, 'the repository is agnostic');
         $repository = $report['classes'][ServiceEntityRepository::class];
         self::assertNull($repository['error']);
-        // omnibridge/doctrine's since step F3, under its former name: the moved class extends Doctrine's.
-        self::assertSame(\Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository::class, $repository['framework']['Doctrine\\ORM\\EntityRepository'] ?? null);
-        self::assertNotEmpty(preg_grep('~/doctrine/orm/~', $repository['framework_files']));
-        self::assertNotEmpty(preg_grep('~/omnibridge/doctrine/~', $repository['framework_files']), 'the bridge refused by --strict');
+        self::assertSame([], $repository['framework']);
+        self::assertSame([], $repository['framework_files']);
         // Since step F2a an enumeration loads nothing of Doctrine.
         self::assertSame([], $report['classes'][UserRole::class]['framework']);
         self::assertSame([], $report['classes'][UserRole::class]['framework_files']);
@@ -487,7 +484,7 @@ final class BareTest extends TestCase
     }
 
     /**
-     * Omnibridge\Doctrine\Omnibase\Repository\UserRepository where the framework is not installed (audit "lesringostars face au
+     * Base\Repository\UserRepository where the framework is not installed (audit "lesringostars face au
      * master plan", R2): its Base\Contract\SecurityUserProvider and SecurityUserLoader are empty interfaces, and loading it
      * loads nothing of the framework - the last hard seam between the core and Security on the way of
      * a Laravel application reading a site's App\Repository.
@@ -511,7 +508,7 @@ final class BareTest extends TestCase
      */
     public function testThePasskeysLoadWhereTheFrameworkIsNotInstalled(): void
     {
-        $classes = [\Base\Entity\User\Passkey::class, \Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class];
+        $classes = [\Base\Entity\User\Passkey::class, \Base\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class];
         [$status, $report] = self::bare($classes);
         self::assertSame(0, $status);
         foreach ($classes as $class) {
@@ -545,12 +542,12 @@ final class BareTest extends TestCase
      */
     public function testThePasskeysRepositoriesDeclareTheBundlesInterfacesWhereItIsInstalled(): void
     {
-        [, $report] = self::bare([\Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class], self::withTheFramework());
+        [, $report] = self::bare([\Base\Repository\User\PasskeyRepository::class, \Base\Security\WebauthnUserEntityRepository::class], self::withTheFramework());
 
         self::assertSame([
             'Webauthn\\Bundle\\Repository\\CanSaveCredentialRecord' => 'Base\\Contract\\PasskeyRecords',
             'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface' => 'Base\\Contract\\PasskeyRecords',
-        ], array_intersect_key($report['classes'][\Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class]['framework'], array_flip([
+        ], array_intersect_key($report['classes'][\Base\Repository\User\PasskeyRepository::class]['framework'], array_flip([
             'Webauthn\\Bundle\\Repository\\CanSaveCredentialRecord',
             'Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface',
         ])));
@@ -558,21 +555,22 @@ final class BareTest extends TestCase
             'Base\\Contract\\PasskeyUsers',
             $report['classes'][\Base\Security\WebauthnUserEntityRepository::class]['framework']['Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface'] ?? null,
         );
-        self::assertContains('Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface', class_implements(\Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository::class));
+        self::assertContains('Webauthn\\Bundle\\Repository\\CredentialRecordRepositoryInterface', class_implements(\Base\Repository\User\PasskeyRepository::class));
         self::assertContains('Webauthn\\Bundle\\Repository\\PublicKeyCredentialUserEntityRepositoryInterface', class_implements(\Base\Security\WebauthnUserEntityRepository::class));
     }
 
-    /** A repository of omnibase loads doctrine/orm's EntityRepository and nothing of the framework (step C3b). */
+    /** A repository of omnibase loads nothing of Doctrine nor of the framework (step C3b, agnostic since the finder language). */
     public function testARepositoryLoadsWithoutTheFramework(): void
     {
-        [$status, $report] = self::bare([\Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository::class]);
+        [$status, $report] = self::bare([\Base\Repository\ThreadRepository::class]);
 
         self::assertSame(0, $status);
-        $repository = $report['classes'][\Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository::class];
+        $repository = $report['classes'][\Base\Repository\ThreadRepository::class];
         self::assertNull($repository['error']);
         self::assertSame([], $repository['framework']);
         self::assertSame([], $repository['framework_files']);
-        self::assertContains(\Doctrine\ORM\EntityRepository::class, class_parents(\Omnibridge\Doctrine\Omnibase\Repository\ThreadRepository::class));
+        // The agnostic ServiceEntityRepository: no Doctrine parent.
+        self::assertNotContains(\Doctrine\ORM\EntityRepository::class, class_parents(\Base\Repository\ThreadRepository::class));
     }
 
     /**

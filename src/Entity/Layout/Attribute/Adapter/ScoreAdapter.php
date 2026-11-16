@@ -8,7 +8,7 @@ use Base\Enum\Operation;
 use Base\Field\Type\NumberType;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ScoreAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\ScoreAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 /**

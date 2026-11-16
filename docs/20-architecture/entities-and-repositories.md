@@ -7,7 +7,7 @@ order: 25
 
 ## Repositories
 
-`Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository` is doctrine/orm's
+`Base\Database\Repository\ServiceEntityRepository` is doctrine/orm's
 `EntityRepository` built from the `ManagerRegistry` (doctrine/persistence), as
 DoctrineBundle's service repository is - `__construct(ManagerRegistry $registry,
 ?string $entityName = null)`, the entity guessed from the repository's name -
@@ -161,19 +161,23 @@ omnibridge/doctrine's compiler also binds an equality on one value with the fiel
 that type converts it (`ConvertedInCriteria`: the passkeys' base64 and AAGUID columns), as
 Doctrine's own `findBy()` does: `findOneBy(['publicKeyCredentialId' => $bytes])` finds the row.
 
-What the language does not say stays the backends', declared so:
-`#[Base\Database\Repository\BackendOnly(['doctrine', 'eloquent'], reason)]` on the core's interface
-method - the analytics' native SQL (upserts, `INSERT IGNORE`, `DATE()` groupings, correlated
-subqueries) and `Redirections::hit()`'s bulk `UPDATE`. No finder compiles them: each persistence
-writes them in its own terms, omnibridge/doctrine through DBAL (its implementation declares
-`BackendOnly('doctrine', ...)` too), omnibridge/eloquent the same statements through Illuminate's
-connection (step F7f; `Redirections::hit()` as one `UPDATE ... SET hits = hits + 1`).
-`BackendOnly::declared()` lists them (14, kept in `tests/Database/Repository/BackendOnlyTest`),
-`BackendOnly::runs()` tells whether a persistence runs one, and a persistence not named answers
-`BackendOnly::refuse()` - an `UnsupportedQueryException` that names the method, the backends it is
-written for and why - until it writes the query in its own terms, never a silent wrong answer.
-None of the 14 is tied to Doctrine itself: plain SQL a connection runs, and an `UPDATE` whose
-`hits + 1` the database computes (no DQL-only construct, no Doctrine locking).
+Every query is written ONCE, in the repository, on both persistences. What the finder names do not say is said by
+the repository's own methods, all on the same criteria array:
+
+- `findValuesBy($values, $criteria, $orderBy, $limit, $offset, $having, $distinct)`: values of the rows (fields,
+  paths through any number of associations, `json->key`), aggregates grouped by the plain values listed
+  (`Finder\Aggregate::count/sum/avg/min/max/countDistinct`, the UTC buckets `day`/`hour`);
+- `updateBy($criteria, $values)` with `Finder\Change::add()` / `replacePrefix()`, and `deleteBy($criteria)`: rows
+  changed or deleted in the database (no entity read, no lifecycle; the class's second-level cache evicted);
+- `Criterion::exists()`, `notExists()`, `greatestPer()`, `hasAll()` as entries of a criteria array, and
+  `Finder\Field::of()` to compare a field with another;
+- `lockOneBy($criteria, $orderBy, $skipLocked)` inside `UnitOfWork::transactional()`;
+- `sql($sql, $parameters)` (protected): ONE SQL body for what no word says (an order on an expression), its tables
+  and columns written `{Entity}` / `{Entity.field}`.
+
+The analytics (upserts, presences, breakdowns by day and hour) and `Redirections::hit()` are written so
+(`tests/Repository/AnalyticsParityTest` runs them on both persistences). A word a persistence cannot compile is
+refused aloud (`UnsupportedQueryException`), never answered wrong.
 
 Each rewritten method gives the rows of its former query, in the same order:
 `FinderParityTest::testTheRewrittenQueriesGiveTheRowsOfBefore` runs both (the former queries

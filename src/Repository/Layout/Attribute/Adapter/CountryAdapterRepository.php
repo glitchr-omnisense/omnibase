@@ -1,0 +1,18 @@
+<?php
+
+namespace Base\Repository\Layout\Attribute\Adapter;
+
+use Base\Entity\Layout\Attribute\Adapter\CountryAdapter;
+
+use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
+
+/**
+ * @method CountryAdapter|null find($id)
+ * @method CountryAdapter|null findOneBy(array $criteria, ?array $orderBy = null)
+ * @method CountryAdapter[]    findAll()
+ * @method CountryAdapter[]    findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null)
+ */
+
+class CountryAdapterRepository extends AbstractAdapterRepository
+{
+}

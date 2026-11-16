@@ -13,7 +13,7 @@ use Omniauth\Exception\AccountRefused;
  * omniauth's accounts: omnibase's users (the `user` table, and the
  * application's own beside it - lesringostars' userProfile, joined).
  *
- * - byIdentifier(): the address, as Omnibridge\Doctrine\Omnibase\Repository\UserRepository's
+ * - byIdentifier(): the address, as Base\Repository\UserRepository's
  *   loadUserByIdentifier() finds it, then the application's identifier field
  *   when it is another (User::$userIdentifier: lesringostars' username), as
  *   its own repository does (findOneByEmailOrUsername()).

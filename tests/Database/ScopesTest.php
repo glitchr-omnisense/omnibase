@@ -3,7 +3,6 @@
 namespace Tests\Base\Database;
 
 use Omnibridge\Doctrine\Omnibase\DoctrineBackend;
-use Omnibridge\Doctrine\Omnibase\QueryPages;
 use Base\Database\Scope\TrashScope;
 use Base\Database\Scope\VaultScope;
 use Base\Database\UnitOfWorks;
@@ -112,17 +111,14 @@ final class ScopesTest extends KernelTestCase
         self::assertSame(5, $pagination->getTotalCount());
         self::assertEquals(3, $pagination->getTotalPages(), "ceil()ed, a float as before");
         self::assertSame(['e'], $pagination->getResult());
-        self::assertNull($pagination->getQuery(), 'no query behind these pages');
+        self::assertSame($pages, $pagination->get(), 'the pages themselves, no query behind them');
     }
 
-    public function testADoctrineQueryIsPagedAsBefore(): void
+    public function testARepositoryIsPagedWithItsCriteria(): void
     {
         self::bootKernel();
-        if (!static::getContainer()->has('doctrine')) {
-            self::markTestSkipped('Doctrine is not installed: no Doctrine query to page.');
-        }
-        // Doctrine's entity manager, whichever persistence the host chose: the query is its own.
-        $unitOfWork = UnitOfWorks::of(static::getContainer()->get('doctrine')->getManager());
+        // The host's unit of work, whichever persistence it chose: the Paginator pages the repository in the database.
+        $unitOfWork = static::getContainer()->get(\Base\Contract\UnitOfWork::class);
         $prefix = 'f2e.pages.'.bin2hex(random_bytes(3)).'.';
         $settings = [];
         foreach (['a', 'b', 'c'] as $name) {
@@ -131,13 +127,12 @@ final class ScopesTest extends KernelTestCase
         $unitOfWork->flush();
 
         try {
-            $query = $unitOfWork->entityManager()->createQuery('SELECT s FROM '.Setting::class.' s WHERE s.path LIKE :prefix ORDER BY s.path ASC')->setParameter('prefix', $prefix.'%');
-            $pagination = static::getContainer()->get('Base\Service\Paginator')->paginate($query, 1, 2);
+            $repository = UnitOfWorks::repositories($unitOfWork)->of(Setting::class);
+            $criteria = [\Base\Database\Repository\Finder\Group::of(\Base\Database\Repository\Finder\Parser::SEPARATOR_AND, \Base\Database\Repository\Finder\Criterion::of('path', $prefix.'%', \Base\Database\Repository\Finder\Parser::OPTION_PARTIAL))];
+            $pagination = static::getContainer()->get('Base\Service\PaginatorInterface')->paginate($repository, $criteria, ['path' => 'ASC'], page: 1, pageSize: 2);
 
-            self::assertInstanceOf(QueryPages::class, $pagination->get());
             self::assertSame(3, $pagination->getTotalCount());
             self::assertSame([$prefix.'a', $prefix.'b'], array_map(static fn (Setting $s) => $s->getPath(), $pagination->getResult()));
-            self::assertSame(2, $pagination->getQuery()?->getMaxResults());
         } finally {
             foreach ($settings as $setting) {
                 $unitOfWork->remove($setting);

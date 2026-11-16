@@ -13,7 +13,7 @@ use Base\Notifier\Mail\EmailComposer;
 use Base\Notifier\Mail\SignInMails;
 use Base\Notifier\Notifier;
 use Base\Notifier\Recipient\Recipient;
-use Omnibridge\Doctrine\Omnibase\Repository\User\ConnectionRepository;
+use Base\Repository\User\ConnectionRepository;
 use Base\Security\ConnectionTracker;
 use Base\Security\SignInCaptcha;
 use Base\Service\FormGuard;
@@ -90,7 +90,7 @@ final class HostlessEffectsTest extends KernelTestCase
         $user = $this->createUser();
         $_SERVER['REMOTE_ADDR'] = '203.0.113.21';
         $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (X11; Linux x86_64) Firefox/131.0';
-        $connections = $this->entityManager()->getRepository(Connection::class);
+        $connections = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Connection::class);
         \assert($connections instanceof ConnectionRepository);
         $browser = 'browser-of-another-host';
         $tracker = new ConnectionTracker(\Base\Database\UnitOfWorks::of($this->entityManager()), $connections, static fn (): string => $browser, static fn (): string => 'twin.example.org');
@@ -201,7 +201,7 @@ final class HostlessEffectsTest extends KernelTestCase
     {
         $user = $this->createUser();
         $_SERVER['REMOTE_ADDR'] = '203.0.113.50';
-        $connections = $this->entityManager()->getRepository(Connection::class);
+        $connections = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Connection::class);
         \assert($connections instanceof ConnectionRepository);
         $browser = 'first-browser';
         $tracker = new ConnectionTracker(\Base\Database\UnitOfWorks::of($this->entityManager()), $connections, static function () use (&$browser): string {

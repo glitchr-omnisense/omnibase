@@ -145,7 +145,7 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $className
      * @return EntityRepository|ObjectRepository
      */
-    public static function getRepository($className): EntityRepository|ObjectRepository
+    public static function getRepository($className): \Base\Database\Repository\Entities
     {
         return AttributeReader::getInstance()->getRepository($className);
     }
@@ -292,7 +292,7 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $entity
      * @param string $property
      * @return EntityRepository the repository of the class declaring $property (an omnibase
-     *                          repository, Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository, or any other)
+     *                          repository, Base\Database\Repository\ServiceEntityRepository, or any other)
      * @throws NotSupported
      */
     public function getPropertyOwnerRepository($entity, string $property, ?NeutralUnitOfWork $unitOfWork = null): EntityRepository|\Base\Database\Repository\Entities
@@ -312,11 +312,11 @@ abstract class AbstractAttribute implements AttributeInterface
         }
 
         $className = get_class($entity);
-        $repository = $this->getEntityManager()->getRepository($className);
+        $repository = AttributeReader::getInstance()->getRepository($className);
 
         while ($className = get_parent_class($className)) {
             if (property_exists($className, $property)) {
-                $repository = $this->getEntityManager()->getRepository($className);
+                $repository = AttributeReader::getInstance()->getRepository($className);
             }
         }
 

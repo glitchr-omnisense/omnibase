@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Analytics;
 
-use Omnibridge\Doctrine\Omnibase\Repository\Analytics\VisitRepository;
+use Base\Repository\Analytics\VisitRepository;
 use Base\Mapping as ORM;
 
 /**

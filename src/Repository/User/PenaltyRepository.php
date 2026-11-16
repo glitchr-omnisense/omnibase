@@ -1,0 +1,16 @@
+<?php
+
+namespace Base\Repository\User;
+
+use Base\Entity\User\Penalty;
+use Base\Database\Repository\ServiceEntityRepository;
+
+/**
+ * @method Penalty|null find($id)
+ * @method Penalty|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Penalty[]    findAll()
+ * @method Penalty[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class PenaltyRepository extends ServiceEntityRepository
+{
+}

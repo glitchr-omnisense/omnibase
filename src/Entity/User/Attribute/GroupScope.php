@@ -7,7 +7,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Common\AbstractScope;
 use Base\Entity\User\Group;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\GroupScopeRepository;
+use Base\Repository\User\Attribute\GroupScopeRepository;
 
 /**
  * Who a group's rules are about in the first place.

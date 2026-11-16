@@ -18,7 +18,7 @@ a name, an e-mail (never shown), a site, a text, a reply to another comment
   form was opened (`opened`); `Base\Service\CommentGuard::check($form,
   $request)` answers `trapped` (thank it, save nothing), `too_fast`, `flood`
   or null (`base.comments.min_delay`, `base.comments.flood_interval`).
-- Reading: `Omnibridge\Doctrine\Omnibase\Repository\Thread\CommentRepository::findVisible($thread)`,
+- Reading: `Base\Repository\Thread\CommentRepository::findVisible($thread)`,
   `countVisible()`, `findPending()`, `countPending()`.
 
 ```php

@@ -7,7 +7,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Common\AbstractAction;
 use Base\Entity\User\Group;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\GroupActionRepository;
+use Base\Repository\User\Attribute\GroupActionRepository;
 
 /**
  * What a group DOES for somebody who qualifies for it.

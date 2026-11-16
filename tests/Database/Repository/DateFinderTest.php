@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Database\Repository;
 
-use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
+use Base\Database\Repository\ServiceEntityRepository;
 use Base\Entity\Layout\TextOverride;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -60,7 +60,7 @@ class DateFinderTest extends KernelTestCase
 
     private function repository(): ServiceEntityRepository
     {
-        $repository = $this->em->getRepository(TextOverride::class);
+        $repository = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->em))->of(TextOverride::class);
         $this->assertInstanceOf(ServiceEntityRepository::class, $repository);
 
         return $repository;

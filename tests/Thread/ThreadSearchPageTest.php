@@ -88,7 +88,7 @@ class ThreadSearchPageTest extends KernelTestCase
         self::assertSame(['articles'], (new Hierarchify('articles'))->hierarchy);
         self::assertSame([], (new Hierarchify(null))->hierarchy);
 
-        $repository = $this->entityManager()->getRepository(Thread::class);
+        $repository = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Thread::class);
         self::assertSame([], $repository->getHierarchyTree());
         self::assertSame(0, $repository->getHierarchyDepth());
         self::assertNull($repository->getHierarchy());

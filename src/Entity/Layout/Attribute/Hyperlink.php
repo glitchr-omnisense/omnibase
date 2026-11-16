@@ -12,7 +12,7 @@ use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Base\Service\Model\IconizeInterface;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\HyperlinkRepository;
+use Base\Repository\Layout\Attribute\HyperlinkRepository;
 
 use Base\Database\Attribute\Cache;
 

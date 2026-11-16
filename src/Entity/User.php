@@ -641,7 +641,7 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
         return $this->setRoles($roles);
     }
 
-    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy:"members", orphanRemoval:true, cascade:["persist", "remove"])]
+    #[ORM\ManyToMany(targetEntity: Group::class, inversedBy:"members", cascade:["persist"])]
     protected $groups;
 
     public function getGroups(): Collection
@@ -667,7 +667,7 @@ class User implements SecurityUser, TwoFactorUser, IconizeInterface, Autocomplet
         return $this;
     }
 
-    #[ORM\ManyToMany(targetEntity: Permission::class, inversedBy:"uid", orphanRemoval:true, cascade:["persist", "remove"])]
+    #[ORM\ManyToMany(targetEntity: Permission::class, inversedBy:"uid", cascade:["persist"])]
     protected $permissions;
 
     public function getPermissions(): Collection

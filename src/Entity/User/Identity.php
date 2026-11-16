@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use Omnibridge\Doctrine\Omnibase\Repository\User\IdentityRepository;
+use Base\Repository\User\IdentityRepository;
 use DateTime;
 use DateTimeInterface;
 use Base\Mapping as ORM;

@@ -6,7 +6,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
 use Base\Database\Attribute\Cache;
 use Base\Field\Type\CountryType;
 

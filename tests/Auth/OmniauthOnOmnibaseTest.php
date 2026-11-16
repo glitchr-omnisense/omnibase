@@ -248,7 +248,7 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
         self::assertTrue($result->isAuthenticated(), 'QA1: no second factor after a passkey, TOTP or not');
         self::assertSame($user->getId(), $result->account->getId());
         $this->entityManager()->clear();
-        $passkey = $this->entityManager()->getRepository(Passkey::class)->findOneByCredential($authenticator->credentialId);
+        $passkey = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Passkey::class)->findOneByCredential($authenticator->credentialId);
         self::assertSame($authenticator->counter, $passkey->counter, 'the counter the assertion gave');
         self::assertNotNull($passkey->getLastUsedAt());
     }
@@ -260,7 +260,7 @@ final class OmniauthOnOmnibaseTest extends KernelTestCase
 
         $result = $this->kit->google($person);
         self::assertTrue($result->isAuthenticated());
-        $identity = $this->entityManager()->getRepository(Identity::class)->findOneBySubject('google', $person['sub']);
+        $identity = \Base\Database\UnitOfWorks::repositories(\Base\Database\UnitOfWorks::of($this->entityManager()))->of(Identity::class)->findOneBySubject('google', $person['sub']);
         self::assertSame([$user->getId(), $user->getEmail(), true], [$identity->getUser()->getId(), $identity->getEmail(), $identity->isEmailVerified()]);
         self::assertSame($this->kit->clock->now()->getTimestamp(), $identity->getLastUsedAt()?->getTimestamp());
         self::assertSame(['google'], $this->kit->identities->providers($user));

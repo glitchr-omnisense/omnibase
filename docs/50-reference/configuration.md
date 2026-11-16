@@ -890,5 +890,5 @@ Besides the parameters, `BaseExtension`:
 | `Base\Twig\Renderer\TagRendererInterface` | `twig.tag_renderer` |
 | `Symfony\Component\Workflow\WorkflowInterface` | `workflow` |
 | `Base\Demo\DemoAccountProviderInterface` | `base.demo_account_provider` |
-| `Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository` | `doctrine.repository_service` |
+| `Base\Database\Repository\ServiceEntityRepository` | `doctrine.repository_service` |
 | `Base\EntityDispatcher\EventDispatcherInterface` | `doctrine.event_listener` on `prePersist`, `postPersist`, `preUpdate`, `postUpdate`, `preRemove`, `postRemove`, `postFlush`; `base.entity_dispatcher`; `kernel.reset` (method `reset`) |

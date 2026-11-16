@@ -18,7 +18,7 @@ use Base\Entity\User\Attribute\GroupAction;
 use Base\Entity\User\Attribute\GroupRule;
 use Base\Entity\User\Attribute\GroupScope;
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\GroupRepository;
+use Base\Repository\User\GroupRepository;
 use Base\Database\Attribute\DiscriminatorEntry;
 
 /**

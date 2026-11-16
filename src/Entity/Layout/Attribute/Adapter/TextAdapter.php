@@ -7,7 +7,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\TextAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\TextAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass :TextAdapterRepository::class)]

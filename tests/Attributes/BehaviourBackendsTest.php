@@ -94,7 +94,16 @@ final class BehaviourBackendsTest extends KernelTestCase
     public function testOneBackendPerUnitOfWorkBuiltFromIt(): void
     {
         $persistence = new class() implements UnitOfWork {
-            public function persist(object $entity): void {}
+                public function clear(): void
+        {
+        }
+
+        public function isOpen(): bool
+        {
+            return true;
+        }
+
+    public function persist(object $entity): void {}
             public function remove(object $entity): void {}
             public function flush(): void {}
             public function refresh(object $entity): void {}

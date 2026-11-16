@@ -3,7 +3,6 @@
 namespace Tests\Base\Bridge\Doctrine;
 
 use Omnibridge\Doctrine\Omnibase\Mapping;
-use Omnibridge\Doctrine\Omnibase\RepositoryFactory;
 use Base\Service\Storages;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
@@ -19,9 +18,9 @@ require_once __DIR__.'/fixtures/services/CountedRepository.php';
 
 /**
  * An entity manager built by hand gives a repository the services it takes
- * beside the registry (audit "lesringostars face au master plan", R7: the
+ * beside the finders (audit "lesringostars face au master plan", R7: the
  * site's CommentRepository, its cache pool first), each by its type from the
- * host (Mapping::register()'s `services`, RepositoryFactory::services()); a
+ * host (Mapping::register()'s `services`, read by its Repositories); a
  * service the host has not is null where the parameter allows it, else the
  * repository is refused naming it. Mapping::register()'s `flysystem` is the
  * attribute reader's (#[Uploader]: an upload's public path, an article's audio).
@@ -44,7 +43,7 @@ final class RepositoryServicesTest extends TestCase
         $entityManager = $this->entityManager();
         $mapping = Mapping::register($entityManager, ['filters' => false, 'flysystem' => $flysystem, 'services' => static fn (string $type) => CacheItemPoolInterface::class === $type ? $pool : null]);
 
-        $repository = $entityManager->getRepository(Counted::class);
+        $repository = $mapping->repositories->of(Counted::class);
         self::assertInstanceOf(CountedRepository::class, $repository);
         self::assertSame($pool, $repository->cache, 'the host\'s pool, by its type');
         self::assertNull($repository->nothing, 'a service the host has not: null, the parameter allowing it');
@@ -54,15 +53,10 @@ final class RepositoryServicesTest extends TestCase
 
     public function testARepositoryWhoseServiceTheHostHasNotIsRefused(): void
     {
-        $factory = new RepositoryFactory();
-        $factory->services(static fn (string $type) => null);
-        $configuration = ORMSetup::createAttributeMetadataConfig([__DIR__.'/fixtures/services'], true);
-        $configuration->enableNativeLazyObjects(true);
-        $configuration->setRepositoryFactory($factory);
-        $entityManager = new EntityManager(DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true], $configuration), $configuration);
+        $mapping = Mapping::register($this->entityManager(), ['filters' => false, 'services' => static fn (string $type) => null]);
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('asks Psr\Cache\CacheItemPoolInterface $cache');
-        $entityManager->getRepository(Counted::class);
+        $mapping->repositories->of(Counted::class);
     }
 }

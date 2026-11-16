@@ -96,14 +96,14 @@
  * which the Foundation does not install; their former names (Base\Bridge\Symfony\*) are aliases declared only where
  * omnibridge/symfony is (src/Resources/Aliases.php). The moved classes load nothing of the framework either.
  * omnibase's own adapters (LocalizerLocales, FlysystemFiles, RouterRoutes, MediaPictures...) stay listed.
- * 777 after step R2 of the audit "lesringostars face au master plan" (+3: Omnibridge\Doctrine\Omnibase\Repository\UserRepository, which
+ * 777 after step R2 of the audit "lesringostars face au master plan" (+3: Base\Repository\UserRepository, which
  * declares Security's user provider and doctrine-bridge's user loader through Base\Contract\SecurityUserProvider
  * and SecurityUserLoader - those interfaces when they are installed, empty ones otherwise, as
  * Base\Contract\SecurityUser for the user -, and those two contracts).
  * 779 after step R6 of the same audit (+2: Base\Contract\MediaRouter, the five questions omnibase's media rule asks a
  * router, which AdvancedRouterInterface extends and FileService and MediaService now take; Base\Service\ImageRoute,
  * the image route's answers moved out of MediaController for any host, with the routes' list).
- * 786 after step AU1 of the plan "omniauth" (+7: the passkeys described by the core - Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository
+ * 786 after step AU1 of the plan "omniauth" (+7: the passkeys described by the core - Base\Repository\User\PasskeyRepository
  * and Base\Security\WebauthnUserEntityRepository, which declare WebauthnBundle's repositories through
  * Base\Contract\PasskeyRecords and PasskeyUsers, those interfaces when the bundle is installed, empty ones otherwise -,
  * those two contracts, and Base\Database\Type\Passkey\{Base64, Aaguid, TrustPath}, the columns of
@@ -115,7 +115,7 @@
  * 807 after step AU4 of the plan "omniauth" (+19: Base\Auth\, omniauth's stores on omnibase's tables - UserStore,
  * UserAccounts, UserPasswords, UserLinkTokens, UserTotpSecrets, UserEmailCodes, UserBackupCodes, UserTrustedVersion,
  * UserPasskeys, UserIdentities -, Policy and PolicyLinking, the listeners Listener\{GuardSignIn, TrackConnections,
- * WarnNewDevice, UpdateAccount, WelcomeBack}; Base\Entity\User\Identity and Omnibridge\Doctrine\Omnibase\Repository\User\IdentityRepository,
+ * WarnNewDevice, UpdateAccount, WelcomeBack}; Base\Entity\User\Identity and Base\Repository\User\IdentityRepository,
  * the userIdentity table). They load with omniauth and its methods, which var/bare installs beside the core
  * (composer.json, extra.omnibase.bare: suggested, not required), and without the framework.
  * 816 after step R10 of the audit "lesringostars face au master plan" (+9: Base\Screen\Negotiation, how an action's
@@ -185,6 +185,9 @@
  * 799 after step F5c's first part (2026-11-02, -3 +1 on F5b group 5's 801): Base\Subscriber\{AnalyticsSubscriber, TemplatedEmailSubjectSubscriber,
  * TwigSubscriber} moved to omnibridge/symfony (with FrameworkLocator and WebpackCacheWarmer, listed nowhere); Base\Http\RequestsOf.
  * 771 after step F5c, item 3 (2026-11-03, +2 on 769): Base\Database\Mapping\EntityFields and Base\Database\Backend\ColumnTypes.
+ * 973 in the base-agnostic ensemble (2026-11-15): FormerNames gone; + the 43 mapping attributes Base\Mapping\* (E3), the
+ * repository contracts (Finders, Finder, Finder\Result, EntityRepositories, CriteriaPages,
+ * the agnostic ServiceEntityRepository), Database\Exception\*, Contract\Contracts, Screen\Responder.
  * 791 after step F5d (2026-11-03, +20): Base\Field\Behaviour\* and Base\Field\Conformance\* (see tests/Agnostic.php).
  * 793 after step F5d, slice 2 (2026-11-03, +2): Base\Field\Search\{RemoteSearch, Answer} (see tests/Agnostic.php).
  * 795 after step F5d, slice 3 (2026-11-03, +2): Base\Field\Behaviour\{Translation, RecordFields} (see tests/Agnostic.php).
@@ -209,7 +212,7 @@
  * TestRecipient}, Base\Request\{TimezoneSwitch, ErrorPage, ShortLinkRedirect, AttachmentDownload, SitemapPage},
  * Base\Screen\Welcome, Base\Field\Validation\Autovalidate, Base\Field\Search\ExchangeRate (the controllers' rules).
  * 923 after step E2 (2026-11-06, +3): the finder language's groups, Base\Database\Repository\Finder\Group, and the
- * methods only one persistence runs, Base\Database\Repository\{BackendOnly, UnsupportedQueryException}.
+ * what a persistence refuses aloud, Base\Database\Repository\UnsupportedQueryException.
  * 925 after steps E2b and E2' (2026-11-06, +2): a to-one association compared by its key without a join,
  * Base\Database\Repository\Finder\Key, and the complaints' interface, Base\Repository\User\Complaints.
  * 926 after step F7a (2026-11-07, +1): the entities described with no persistence installed, Base\Database\Schema\EntitySchema.
@@ -416,6 +419,7 @@ return [
     Base\Database\Entity\Extension\VaultInterface::class,
     Base\Database\Entity\Extension\VaultTrait::class,
     Base\Database\Events::class,
+    Base\Database\Exception\UniqueConstraintViolation::class,
     Base\Database\Lifecycle\RevisionRecorder::class,
     Base\Database\Lifecycle\SettingsInvalidation::class,
     Base\Database\Lifecycle\ThreadParticipants::class,
@@ -424,15 +428,20 @@ return [
     Base\Database\Mapping\EntityFields::class,
     Base\Database\Mapping\EntityShape::class,
     Base\Database\Mapping\EntityShapes::class,
-    Base\Database\Repository\BackendOnly::class,
+    Base\Database\Repository\CriteriaPages::class,
     Base\Database\Repository\Entities::class,
+    Base\Database\Repository\EntityRepositories::class,
+    Base\Database\Repository\Finder::class,
     Base\Database\Repository\Finder\Criterion::class,
     Base\Database\Repository\Finder\Group::class,
     Base\Database\Repository\Finder\Key::class,
     Base\Database\Repository\Finder\Parser::class,
     Base\Database\Repository\Finder\Query::class,
+    Base\Database\Repository\Finder\Result::class,
     Base\Database\Repository\Finder\Subject::class,
+    Base\Database\Repository\Finders::class,
     Base\Database\Repository\Repositories::class,
+    Base\Database\Repository\ServiceEntityRepository::class,
     Base\Database\Repository\UnsupportedQueryException::class,
     Base\Database\Schema\Attributes::class,
     Base\Database\Schema\DiscriminatorRule::class,

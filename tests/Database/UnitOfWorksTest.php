@@ -91,11 +91,12 @@ final class UnitOfWorksTest extends KernelTestCase
     /** Laravel's container resolves no union type: the repositories' constructor takes the entity manager alone. */
     public function testTheRepositoriesAreAutowiredByAnyContainer(): void
     {
-        $parameters = (new \ReflectionMethod(\Omnibridge\Doctrine\Omnibase\DoctrineRepositories::class, '__construct'))->getParameters();
+        // The core's Repositories (the same class on every persistence) is built from the backend's Finders: a type
+        // any container autowires, nothing of an ORM.
+        $parameters = (new \ReflectionMethod(\Base\Database\Repository\EntityRepositories::class, '__construct'))->getParameters();
 
-        self::assertCount(1, $parameters);
         self::assertInstanceOf(\ReflectionNamedType::class, $parameters[0]->getType());
-        self::assertSame(EntityManagerInterface::class, $parameters[0]->getType()->getName());
+        self::assertSame(\Base\Database\Repository\Finders::class, $parameters[0]->getType()->getName());
     }
 
     public function testARowLockedThenAFieldComparedAndSet(): void

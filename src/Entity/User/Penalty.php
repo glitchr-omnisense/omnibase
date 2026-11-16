@@ -11,7 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\User\PenaltyRepository;
+use Base\Repository\User\PenaltyRepository;
 
 /**
  * A penalty an administrator has defined, NOT one somebody has received.

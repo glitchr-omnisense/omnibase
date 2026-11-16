@@ -4,7 +4,7 @@ namespace Base\Field;
 
 use Base\Entity\Layout\ImageInterface;
 
-use Doctrine\Persistence\ManagerRegistry;
+use Base\Database\Mapping\EntityShapes;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -39,7 +39,7 @@ class FieldValueResolver
         ?array $identifierFields = null,
         array $identifierFieldsByEntity = [],
         bool $lowercaseIdentifiers = false,
-        protected ?ManagerRegistry $doctrine = null,
+        protected ?EntityShapes $shapes = null,
     ) {
         $this->lowercaseIdentifiers = $lowercaseIdentifiers;
         $this->accessor = $accessor ?? PropertyAccess::createPropertyAccessorBuilder()
@@ -294,22 +294,16 @@ class FieldValueResolver
      * by it (AbstractCrudController::findEntity()). An accessor without a
      * column - computed, or read from a translation - is not.
      *
-     * Without Doctrine at hand, or for an object it does not manage, the
+     * Without the shapes at hand, or for an object it does not manage, the
      * accessor is trusted as before: nothing here can tell.
      */
     protected function isStoredField(object $entity, string $field): bool
     {
-        if (null === $this->doctrine) {
+        if (null === $this->shapes || !$this->shapes->has($entity)) {
             return true;
         }
 
-        try {
-            $manager = $this->doctrine->getManagerForClass($entity::class);
-        } catch (\Throwable) {
-            return true;
-        }
-
-        return null === $manager || $manager->getClassMetadata($entity::class)->hasField($field);
+        return $this->shapes->shape($entity)->hasField($field);
     }
 
     /**

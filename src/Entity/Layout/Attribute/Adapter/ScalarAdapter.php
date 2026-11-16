@@ -7,7 +7,7 @@ use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Field\Type\NumberType;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ScalarAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\ScalarAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: ScalarAdapterRepository::class)]

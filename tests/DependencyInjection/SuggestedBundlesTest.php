@@ -6,7 +6,7 @@ use Base\Contract\Framework;
 use Base\Contract\SecurityUserLoader;
 use Base\Contract\SecurityUserProvider;
 use Base\Entity\User;
-use Omnibridge\Doctrine\Omnibase\Repository\UserRepository;
+use Base\Repository\UserRepository;
 use Base\Security\OAuthUserProvider;
 use Base\Service\Flysystem;
 use Base\Service\FlysystemInterface;
@@ -127,7 +127,7 @@ class SuggestedBundlesTest extends KernelTestCase
     }
 
     /**
-     * Omnibridge\Doctrine\Omnibase\Repository\UserRepository under Symfony implements every interface it did up to 4.0
+     * Base\Repository\UserRepository under Symfony implements every interface it did up to 4.0
      * (audit "lesringostars face au master plan", R2): doctrine-bridge's user loader, Security's
      * user provider and password upgrader, through Base\Contract\SecurityUserLoader and SecurityUserProvider - the
      * packages being installed here, installed means declared, as for the user (C7b, C7c).

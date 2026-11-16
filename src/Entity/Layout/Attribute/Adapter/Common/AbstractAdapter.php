@@ -16,7 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Base\Entity\Layout\Attribute\Common\AttributeInterface;
 
 use Base\Mapping as ORM;
-use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
+use Base\Repository\Layout\Attribute\Adapter\Common\AbstractAdapterRepository;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass:AbstractAdapterRepository::class)]
