@@ -419,6 +419,7 @@ return [
     Base\Database\Entity\Extension\VaultInterface::class,
     Base\Database\Entity\Extension\VaultTrait::class,
     Base\Database\Events::class,
+    Base\Database\Exception\TableNotFound::class,
     Base\Database\Exception\UniqueConstraintViolation::class,
     Base\Database\Lifecycle\RevisionRecorder::class,
     Base\Database\Lifecycle\SettingsInvalidation::class,

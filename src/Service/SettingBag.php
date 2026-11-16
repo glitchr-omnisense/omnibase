@@ -84,8 +84,8 @@ class SettingBag implements SettingBagInterface
             $this->invalidate();
             $this->loadSnapshot(true);
             $this->allRaw();
-        } catch (\Doctrine\DBAL\Exception | \PDOException $e) {
-            // degrade: warm nothing, compile on first request instead
+        } catch (\Base\Database\Exception\TableNotFound | \Doctrine\DBAL\Exception | \PDOException $e) {
+            // degrade: warm nothing, compile on first request instead (a schema not created yet: TableNotFound)
         }
 
         return [get_class($this)];
