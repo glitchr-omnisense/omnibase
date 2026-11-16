@@ -238,7 +238,7 @@ class SettingBag implements SettingBagInterface
             return null;
         }
 
-        return (new SettingIntl())->setValue($raw)->getValue();
+        return (new \App\Entity\Layout\SettingIntl())->setValue($raw)->getValue();
     }
 
     /**
@@ -462,7 +462,7 @@ class SettingBag implements SettingBagInterface
         $setting = $this->getRawScalar($path, $useCache);
 
         if (!$setting instanceof Setting) {
-            $setting = new Setting($path, null, $locale);
+            $setting = new \App\Entity\Layout\Setting($path, null, $locale);
             $this->unitOfWork->persist($setting);
         }
 

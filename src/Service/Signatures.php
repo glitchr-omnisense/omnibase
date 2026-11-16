@@ -82,7 +82,7 @@ class Signatures
     {
         $name = $this->gateway($gateway) ?? throw new \LogicException(sprintf('No omnisign gateway "%s" (omnisign.gateways, base.signatures.gateway).', $gateway ?? $this->gateway ?? ''));
         [$class, $id] = $this->identify($subject);
-        $envelope = new Envelope($class, $id, $request->title, $name);
+        $envelope = new \App\Entity\Signature\Envelope($class, $id, $request->title, $name);
         $sent = $this->provider($envelope)->send($this->provider($envelope)->create($request));
         $this->apply($envelope, $sent, $request);
         $this->unitOfWork->persist($envelope);

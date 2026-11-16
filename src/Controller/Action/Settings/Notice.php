@@ -20,6 +20,6 @@ final class Notice
 
             return;
         }
-        (new Notification($message))->send($label);
+        (new \App\Entity\User\Notification($message))->send($label);
     }
 }

@@ -32,7 +32,7 @@ class UserLinkTokens extends UserStore implements LinkTokens, PlainLinkTokens
         $user->removeExpiredTokens();
 
         // No throttle of the token's own: omniauth limits the requests ("link.begin").
-        $token = new Token(self::NAME, max(1, $until->getTimestamp() - time()), 0);
+        $token = new \App\Entity\User\Token(self::NAME, max(1, $until->getTimestamp() - time()), 0);
         $token->setValue($hash);
         $token->setExpiry(\DateTime::createFromImmutable($until));
         $token->markAsLogginable();

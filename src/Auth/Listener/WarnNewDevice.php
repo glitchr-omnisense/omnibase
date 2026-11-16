@@ -62,7 +62,7 @@ class WarnNewDevice
         if ($email && null !== $this->mails) {
             $this->mails->newDevice($user, $connection);
         } elseif ($email) {
-            $notification = new Notification('newDevice.subject', [$user]);
+            $notification = new \App\Entity\User\Notification('newDevice.subject', [$user]);
             $notification->setUser($user);
             $notification->setHtmlTemplate(SignInMails::NEW_DEVICE_TEMPLATE, SignInMails::newDeviceParameters($user, $connection));
             $notification->send('email');

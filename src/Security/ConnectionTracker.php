@@ -58,7 +58,7 @@ class ConnectionTracker
 
     public function createNewConnection(User $user): Connection
     {
-        $connection = new Connection($this->getUniqid(), $user);
+        $connection = new \App\Entity\User\Connection($this->getUniqid(), $user);
         $this->describe($connection, $user);
 
         $this->unitOfWork->persist($connection);

@@ -60,7 +60,7 @@ final class SecondFactor
         if (!$this->policy->isDemoAccount($user ?? $this->access->getUser())) {
             return null;
         }
-        (new Notification('@notifications.demo.locked'))->send('warning');
+        (new \App\Entity\User\Notification('@notifications.demo.locked'))->send('warning');
 
         return Outcome::route(self::SETTINGS);
     }
@@ -78,7 +78,7 @@ final class SecondFactor
         // The administrator can switch the whole feature off: refused here as well as the button hidden, so a
         // bookmarked address is refused too.
         if (!$this->policy->canEnableTwoFactor()) {
-            (new Notification('@notifications.settings.twoFactorUnavailable'))->send('warning');
+            (new \App\Entity\User\Notification('@notifications.settings.twoFactorUnavailable'))->send('warning');
 
             return Outcome::route(self::SETTINGS);
         }
@@ -129,7 +129,7 @@ final class SecondFactor
         $user->setBackupCodes($codes);
         $this->unitOfWork->flush();
         $this->requests?->forget(self::PENDING);
-        (new Notification('@notifications.settings.twoFactorEnabled'))->send('success');
+        (new \App\Entity\User\Notification('@notifications.settings.twoFactorEnabled'))->send('success');
 
         return Outcome::page(new Template(self::CODES_TEMPLATE, ['backupCodes' => $codes]));
     }
@@ -155,12 +155,12 @@ final class SecondFactor
             return Outcome::denied();
         }
         if (!$this->policy->canDisableTwoFactor($user)) {
-            (new Notification('@notifications.settings.twoFactorMandatory'))->send('warning');
+            (new \App\Entity\User\Notification('@notifications.settings.twoFactorMandatory'))->send('warning');
 
             return Outcome::route(self::SETTINGS);
         }
         if (!$this->passwords?->isPasswordValid($user, (string) $password)) {
-            (new Notification('@notifications.settings.wrongPassword'))->send('danger');
+            (new \App\Entity\User\Notification('@notifications.settings.wrongPassword'))->send('danger');
 
             return Outcome::route(self::SETTINGS);
         }
@@ -168,7 +168,7 @@ final class SecondFactor
         $user->setBackupCodes([]);
         $user->invalidateTrustedDevices();
         $this->unitOfWork->flush();
-        (new Notification('@notifications.settings.twoFactorDisabled'))->send('success');
+        (new \App\Entity\User\Notification('@notifications.settings.twoFactorDisabled'))->send('success');
 
         return Outcome::route(self::SETTINGS);
     }

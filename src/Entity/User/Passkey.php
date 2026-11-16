@@ -160,7 +160,7 @@ class Passkey
      */
     public static function createFromCredentialRecord(\Webauthn\CredentialRecord $record, User $user, ?string $label = null): self
     {
-        $passkey = PasskeyRepository::fill(new self(), $record);
+        $passkey = PasskeyRepository::fill(new \App\Entity\User\Passkey(), $record);
         $passkey->setUser($user);
         $passkey->setLabel($label);
 

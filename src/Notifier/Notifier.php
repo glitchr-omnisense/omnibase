@@ -34,7 +34,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
 
     public function testEmail(User $user): Notification
     {
-        $notification = new Notification("email.html.twig");
+        $notification = new \App\Entity\User\Notification("email.html.twig");
         $notification->setUser($user);
 
         $route = $this->currentRoute();
@@ -86,7 +86,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function contactEmail(ContactModel $contactModel)
     {
-        $notification = new Notification("contact.adminNotification");
+        $notification = new \App\Entity\User\Notification("contact.adminNotification");
         $notification->setHtmlTemplate("email.html.twig");
 
         $adminRecipient = $this->getContactRecipient();
@@ -110,7 +110,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function contactEmailConfirmation(ContactModel $contactModel)
     {
-        $notification = new Notification("contact.userConfirmation");
+        $notification = new \App\Entity\User\Notification("contact.userConfirmation");
         $notification->setHtmlTemplate("email.html.twig");
         $notification->addRecipient($contactModel->getRecipient());
 
@@ -130,7 +130,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function userAccountGoodbye(User $user)
     {
-        $notification = new Notification("accountGoodbye.success");
+        $notification = new \App\Entity\User\Notification("accountGoodbye.success");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
@@ -150,7 +150,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function userApprovalRequest(User $user)
     {
-        $notification = new Notification("adminApproval.required");
+        $notification = new \App\Entity\User\Notification("adminApproval.required");
 
         $notification->addRecipient($this->getContactRecipient());
 
@@ -171,7 +171,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function userApprovalConfirmation(User $user)
     {
-        $notification = new Notification("adminApproval.approval");
+        $notification = new \App\Entity\User\Notification("adminApproval.approval");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
@@ -195,7 +195,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function accountCreated(User $user, string $password)
     {
-        $notification = new Notification("accountCreated.sent");
+        $notification = new \App\Entity\User\Notification("accountCreated.sent");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
@@ -223,7 +223,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         // What the browser would be told with it is what the page says to everyone who asks ("an
         // e-mail is sent if the address is found") - it read "your password has been changed",
         // which it has not. SecurityController sends it by e-mail alone.
-        $notification = new Notification("resetPassword.confirmation");
+        $notification = new \App\Entity\User\Notification("resetPassword.confirmation");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
@@ -253,7 +253,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function verificationEmail(User $user, Token $token)
     {
-        $notification = new Notification("verifyEmail.check");
+        $notification = new \App\Entity\User\Notification("verifyEmail.check");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
@@ -286,7 +286,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
         // What the browser would be told with it is what the page says to everyone who asks ("a link is
         // sent if an account goes with the address") - not "a link has been sent to your address", which
         // only an account was told. SecurityController sends it by e-mail alone.
-        $notification = new Notification("loginToken.confirmation");
+        $notification = new \App\Entity\User\Notification("loginToken.confirmation");
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");
@@ -317,7 +317,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function loginLink(User $user, string $token, \DateTimeInterface $until): Notification
     {
-        $notification = new Notification("loginToken.confirmation");
+        $notification = new \App\Entity\User\Notification("loginToken.confirmation");
         $notification->setUser($user);
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters(SignInMails::loginLinkParameters($this->words(), $this->duration(), $this->urlOf(SignInMails::LINK_ROUTE, ["token" => $token]), $until));
@@ -331,7 +331,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
      */
     public function emailCode(User $user, string $code, \DateTimeInterface $until): Notification
     {
-        $notification = new Notification("emailCode.subject");
+        $notification = new \App\Entity\User\Notification("emailCode.subject");
         $notification->setUser($user);
         $notification->setHtmlTemplate("email.html.twig");
         $notification->setHtmlParameters(SignInMails::emailCodeParameters($this->words(), $this->duration(), $code, $until));
@@ -347,7 +347,7 @@ class Notifier extends BaseNotifier implements NotifierInterface
     public function userWelcomeBack(User $user, Token $token)
     {
         // Both texts name the account ("Bon retour, {0} !", "Bienvenue {0} !"): given their parameter.
-        $notification = new Notification("accountWelcomeBack.success", [$user]);
+        $notification = new \App\Entity\User\Notification("accountWelcomeBack.success", [$user]);
         $notification->setUser($user);
 
         $notification->setHtmlTemplate("email.html.twig");

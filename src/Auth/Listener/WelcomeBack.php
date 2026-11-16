@@ -43,7 +43,7 @@ class WelcomeBack
         }
         $user->removeExpiredTokens();
 
-        $token = new Token(UserAccounts::WELCOME_BACK, self::LIFETIME);
+        $token = new \App\Entity\User\Token(UserAccounts::WELCOME_BACK, self::LIFETIME);
         $token->setUser($user);
 
         // The e-mail of Notifier::userWelcomeBack() (no template of its own: @Base/security/email/account_welcomeBack.html.twig never existed).
@@ -59,7 +59,7 @@ class WelcomeBack
 
     private static function bare(User $user, Token $token): Notification
     {
-        $notification = new Notification('accountWelcomeBack.success', [$user]);
+        $notification = new \App\Entity\User\Notification('accountWelcomeBack.success', [$user]);
         $notification->setUser($user);
         $notification->setHtmlTemplate('email.html.twig', ['token' => $token]);
 

@@ -39,7 +39,7 @@ class UserPasskeys extends UserStore implements Passkeys
         if ($record->userHandle !== (string) $user->getId()) {
             throw new \InvalidArgumentException('A passkey belongs to the account its user handle names.');
         }
-        $passkey = new Passkey();
+        $passkey = new \App\Entity\User\Passkey();
         self::fill($passkey, $record);
         $passkey->setUser($user);
         $passkey->setLabel(null === $label ? null : mb_substr($label, 0, 100));

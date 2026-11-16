@@ -64,7 +64,7 @@ final class Devices
             return $passkey;
         }
         $this->passkeys->remove($passkey, true);
-        (new Notification('@notifications.settings.passkeyDeleted'))->send('success');
+        (new \App\Entity\User\Notification('@notifications.settings.passkeyDeleted'))->send('success');
 
         return Outcome::route(self::SETTINGS);
     }

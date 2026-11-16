@@ -82,7 +82,7 @@ class WebPushService
             throw new \InvalidArgumentException("Incomplete push subscription.");
         }
 
-        $row = $this->repository->findOneBy(["endpointHash" => sha1($endpoint)]) ?? new PushSubscription();
+        $row = $this->repository->findOneBy(["endpointHash" => sha1($endpoint)]) ?? new \App\Entity\User\PushSubscription();
         $row->setUser($user)
             ->setEndpoint($endpoint)
             ->setP256dh((string) $keys["p256dh"])

@@ -33,7 +33,7 @@ class UserIdentities extends UserStore implements Identities
 
             return;
         }
-        $this->unitOfWork->persist(new Identity($user, $provider, $subject, $email, $emailVerified));
+        $this->unitOfWork->persist(new \App\Entity\User\Identity($user, $provider, $subject, $email, $emailVerified));
         $this->save();
     }
 

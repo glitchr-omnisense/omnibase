@@ -128,7 +128,7 @@ class DemoAccountFactory
             $group = $this->repository($manager, Group::class)->findOneBy(['name' => $name]);
         }
         if (!$group) {
-            $group = (new Group())->setName($name)->setRoles($roles);
+            $group = (new \App\Entity\User\Group())->setName($name)->setRoles($roles);
             // The column is NOT NULL and has no default.
             $group->setIcon('fa-solid fa-users');
             $manager->persist($group);

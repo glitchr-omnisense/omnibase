@@ -93,7 +93,7 @@ final class RevisionRecorder
         }
         $this->lastDiff[$key] = $fingerprint;
 
-        $revision = new Revision();
+        $revision = new \App\Entity\Extension\Revision();
         $revision->setEntityClass($class);
         $revision->setEntityId($target);
         $revision->setAction(EntityAction::UPDATE);

@@ -59,7 +59,7 @@ class CommentModel implements SpamProtectionInterface
      *
      * @param class-string<Comment> $class a subclass of Comment, for a bundle that extends it
      */
-    public function toComment(?Thread $thread, bool $autoApprove, string $class = Comment::class): Comment
+    public function toComment(?Thread $thread, bool $autoApprove, string $class = \App\Entity\Thread\Comment::class): Comment
     {
         /** @var Comment $comment */
         $comment = new $class($thread, $this->author);

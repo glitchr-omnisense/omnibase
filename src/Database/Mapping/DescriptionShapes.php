@@ -54,10 +54,14 @@ final class DescriptionShapes implements EntityShapes
         return $this->shapes[$name] ??= new EntityShape($this->description->entity($name));
     }
 
-    /** The class's name, a proxy's or a lazy object's parent where the description has no such class. */
+    /** The class's name: an alias's class, a proxy's or a lazy object's parent where the description has no such class. */
     private function name(string|object $class): string
     {
         $name = \is_object($class) ? $class::class : ltrim($class, '\\');
+        // An alias (App\Entity\X for Base\Entity\X, Base\ and App\ by the same path): the class it names.
+        if (!isset($this->description->entities[$name]) && class_exists($name) && isset($this->description->entities[$real = (new \ReflectionClass($name))->getName()])) {
+            return $real;
+        }
         while (!isset($this->description->entities[$name]) && class_exists($name) && false !== ($parent = get_parent_class($name))) {
             if (!$this->isProxy($name)) {
                 break;

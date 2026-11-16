@@ -95,7 +95,7 @@ class UserSubscriber implements EventSubscriberInterface, ResetInterface
             return; // made by someone else (user:create mails its own), or nothing to verify (a social account)
         }
 
-        $token = new Token('verify-email', self::VERIFY_EMAIL_EXPIRY, self::VERIFY_EMAIL_THROTTLE);
+        $token = new \App\Entity\User\Token('verify-email', self::VERIFY_EMAIL_EXPIRY, self::VERIFY_EMAIL_THROTTLE);
         $user->addToken($token);
 
         $this->notifier->verificationEmail($user, $token)->send('success');
@@ -124,7 +124,7 @@ class UserSubscriber implements EventSubscriberInterface, ResetInterface
 
         // The e-mail with the link came first (UserChecker, on a sign-in to a closed account):
         // the account reopened, its owner is told so.
-        $notification = new Notification('accountWelcomeBack.success', [$user]);
+        $notification = new \App\Entity\User\Notification('accountWelcomeBack.success', [$user]);
         $notification->setUser($user);
         $notification->send('success');
     }

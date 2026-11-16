@@ -70,7 +70,7 @@ class ThreadSubscriber implements EventSubscriberInterface
         $authors = $this->authors($thread);
         foreach ($authors as $author) {
 
-            $notification = new Notification('thread.published');
+            $notification = new \App\Entity\User\Notification('thread.published');
             $notification->setHtmlTemplate("@Base/client/thread/email/publish.html.twig", ["thread" => $thread]);
             $notification->setUser($author);
             $notification->send("email");
@@ -83,7 +83,7 @@ class ThreadSubscriber implements EventSubscriberInterface
             /**
              * @var Mention $mention
              */
-            $notification = new Notification('thread.mentioned');
+            $notification = new \App\Entity\User\Notification('thread.mentioned');
             $notification->setHtmlTemplate("@Base/client/thread/email/mention.html.twig", ["mentionee" => $mention->getMentionee(), "thread" => $thread]);
             $notification->setUser($mention->getMentionee());
             $notification->send("email");

@@ -100,8 +100,9 @@ final class EntitySchema
     }
 
     /**
-     * The column types by name that are classes of omnibase's: those given, then the enumerations of the core, of the
-     * project (src/Enum) and of the folders given, each under its name (the first of a name kept).
+     * The column types by name that are classes of omnibase's: those given, then the enumerations of the core (each by
+     * its App\ class: the application's own where it declares one), of the project (src/Enum) and of the folders given,
+     * each under its name (the first of a name kept).
      *
      * @param array<string, mixed> $options
      *
@@ -111,11 +112,16 @@ final class EntitySchema
     {
         $projectDir = rtrim((string) ($options['project_dir'] ?? getcwd()), '/');
         $types = $options['types'] ?? [];
+        // App\Enum\X is the application's own where it declares one (extending Base\Enum\X with its cases), the core's otherwise.
+        ClassAliases::register();
         foreach (array_merge([self::coreDirectory('Enum'), $projectDir.'/src/Enum'], $options['enumerations'] ?? []) as $directory) {
             if (!is_dir($directory)) {
                 continue;
             }
             foreach (ClassFinder::classes($directory) as $className) {
+                if (str_starts_with($className, 'Base\\Enum\\')) {
+                    $className = (new \ReflectionClass('App\\'.substr($className, \strlen('Base\\'))))->getName();
+                }
                 // A plain PHP enum (Base\Enum\Allergen) is no column type.
                 if (class_exists($className) && is_subclass_of($className, EnumType::class) && !(new \ReflectionClass($className))->isAbstract()) {
                     $types[$className::getStaticName()] ??= $className;

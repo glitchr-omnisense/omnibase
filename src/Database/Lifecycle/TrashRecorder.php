@@ -63,7 +63,7 @@ final class TrashRecorder
      */
     public function entry(object $entity, string $class, Trasheable $trasheable, DateTime $deletedAt): TrashBall
     {
-        $trashBall = new TrashBall();
+        $trashBall = new \App\Entity\Extension\TrashBall();
         $trashBall->setEntityClass($class);
         $trashBall->setEntityId($entity);
         $trashBall->setAction(EntityAction::DELETE);

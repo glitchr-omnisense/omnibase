@@ -2,6 +2,7 @@
 
 namespace Base;
 
+use Base\Service\Model\ClassAliases;
 use Base\Service\Model\ClassFinder;
 
 /**
@@ -63,6 +64,11 @@ final class Discovery
         foreach ($registry['directories'] as $directory) {
             $directory = strtr($directory, ['%package%' => rtrim($packageDir, '/'), '%kernel.project_dir%' => rtrim($projectDir, '/')]);
             foreach (ClassFinder::listed($directory) as $className) {
+                // App\Enum\X is the application's own where it declares one, the core's otherwise.
+                if (str_starts_with($className, 'Base\\Enum\\')) {
+                    ClassAliases::register();
+                    $className = (new \ReflectionClass('App\\'.substr($className, \strlen('Base\\'))))->getName();
+                }
                 if (!is_subclass_of($className, $registry['extends']) || (new \ReflectionClass($className))->isAbstract()) {
                     continue;
                 }

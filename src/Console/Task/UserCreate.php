@@ -68,7 +68,7 @@ final class UserCreate
         $user->verify();
         $user->approve();
         if (!$input->keepPassword) {
-            (new Token(self::PASSWORD_CHANGE))->setUser($user);
+            (new \App\Entity\User\Token(self::PASSWORD_CHANGE))->setUser($user);
         }
 
         $this->unitOfWork->persist($user);

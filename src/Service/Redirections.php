@@ -35,7 +35,7 @@ class Redirections
     public function add(string $source, string $target, int $status = Redirection::PERMANENT, bool $flush = true): Redirection
     {
         $source = Redirection::normalize($source);
-        $redirection = $this->repository->findOneBy(['source' => $source]) ?? new Redirection($source, $target, $status);
+        $redirection = $this->repository->findOneBy(['source' => $source]) ?? new \App\Entity\Layout\Redirection($source, $target, $status);
         $redirection->setTarget($target)->setStatus($status);
 
         $this->repository->persist($redirection, $flush);
