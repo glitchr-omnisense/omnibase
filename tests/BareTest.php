@@ -444,7 +444,11 @@ final class BareTest extends TestCase
         self::assertSame([], array_values(preg_grep('~^(?:omnibridge/symfony|symfony/(?:framework-bundle|dependency-injection|config|http-kernel|http-foundation|routing|security-[a-z-]+|form|ux-[a-z-]+|[a-z-]+-bundle|[a-z-]+-bridge)|(?!composer/ca-bundle$)[a-z0-9_.-]+/[a-z0-9_.-]*-bundle|api-platform/.+|hwi/.+|scheb/.+|nelmio/.+|web-auth/webauthn-symfony-bundle)$~', $names)), 'no package of the framework is installed');
         // The map read, not the autoloader required: it is not to be registered in this process.
         $psr4 = require \dirname($autoload).'/composer/autoload_psr4.php';
-        self::assertSame([realpath(__DIR__.'/../src')], array_map('realpath', $psr4['Base\\'] ?? []), 'the classes measured are this checkout\'s');
+        // Base\ is this checkout's src/, and the src/Base of the persistence bridge installed with it (omnibridge/doctrine
+        // declares its host classes under the core's Base\ names since 3.0): bare measures src/ alone.
+        $dirs = array_map('realpath', $psr4['Base\\'] ?? []);
+        self::assertContains(realpath(__DIR__.'/../src'), $dirs, 'the classes measured are this checkout\'s');
+        self::assertSame([], array_values(array_filter($dirs, static fn (string|false $dir): bool => $dir !== realpath(__DIR__.'/../src') && 1 !== preg_match('~/omnibridge/[a-z]+/src/Base$~', (string) $dir))), 'no other Base\\ than a bridge\'s src/Base');
     }
 
     /**

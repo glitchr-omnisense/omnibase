@@ -227,9 +227,6 @@
                 "omniauth/otp": "1.x-dev",
                 "omnibridge/doctrine": "^3.0"
             }
-        },
-        "branch-alias": {
-            "dev-7.x": "7.x-dev"
         }
     }
 }

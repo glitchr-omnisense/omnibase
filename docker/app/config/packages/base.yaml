@@ -4,6 +4,9 @@
 # use_setting_bag reads the settings from the database at all: off, the
 # setting bag is empty.
 base:
+    # The harness runs on Doctrine: omnibridge/eloquent is installed beside it (Base\Testing\Engines, the parity
+    # tests), and with both persistences installed the application names its own (omnisense/omnibridge's Persistences).
+    persistence: doctrine
     parameter_bag:
         use_hot_bag: true
         use_setting_bag: true

@@ -1,5 +1,16 @@
 # Changelog
 
+## 7.0.3
+
+- No `extra.branch-alias` any more (the ensemble has none, foundation Q4): the release workflow no longer checks the
+  tag against one (`branch-alias: false`); the branch 7.x is Composer's 7.x-dev as it is.
+- The harness image installs omnibridge/eloquent beside omnibridge/doctrine (`Base\Testing\Engines`, the parity tests
+  of the core and the plugins) and its application names its persistence (`base.persistence: doctrine`).
+- Tests: BareTest accepts the src/Base a persistence bridge declares under `Base\` (omnibridge/doctrine 3.0); the
+  recorded Doctrine metadata and finder parse follow the 7.0 ensemble (forge's seat listener is a neutral lifecycle
+  listener, TimeEntry and Wishlist\Reservation name their repositories, the filters are omnibridge/doctrine's,
+  a finder asked of `Base\Entity\User` queries that class, `ServiceEntityParser` is `DqlCompiler`).
+
 ## 7.0.2
 
 - `Base\Database\Repository\EntityRepositories`: its PHPDoc takes any repository, `ServiceEntityRepository<covariant

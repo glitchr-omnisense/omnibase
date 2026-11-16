@@ -27,3 +27,7 @@ jobs:
       attestations: write
     uses: glitchr-studio/ci/.github/workflows/php-release.yml@133c7eda3cd536a2e3478474ead380257375589e # main, 2026-11-09
     secrets: inherit
+    with:
+      # No extra.branch-alias in the ensemble (foundation, Q4 and Decision 5; SuggestedBundlesTest checks it):
+      # the branch 7.x is what Composer already calls 7.x-dev. Tag v7.x.y on 7.x.
+      branch-alias: false

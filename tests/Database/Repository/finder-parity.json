@@ -1513,7 +1513,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.id <> :id_0 AND e.activeAt > :activeAt_0",
+            "dql": "SELECT e FROM Base\\Entity\\User e WHERE e.id <> :id_0 AND e.activeAt > :activeAt_0",
             "parameters": {
                 "activeAt_0": {
                     "@from_now": -300
@@ -1546,7 +1546,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.activeAt > :activeAt_0",
+            "dql": "SELECT e FROM Base\\Entity\\User e WHERE e.activeAt > :activeAt_0",
             "parameters": {
                 "activeAt_0": {
                     "@from_now": -300
@@ -1582,7 +1582,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.roles IN(:roles_0)",
+            "dql": "SELECT e FROM Base\\Entity\\User e WHERE e.roles IN(:roles_0)",
             "parameters": {
                 "roles_0": [
                     "ROLE_ADMIN"
@@ -1669,7 +1669,7 @@
             "eagerly": false
         },
         "query": {
-            "dql": "SELECT e FROM App\\Entity\\User e WHERE e.id = :id_0 OR e.email = :email_0",
+            "dql": "SELECT e FROM Base\\Entity\\User e WHERE e.id = :id_0 OR e.email = :email_0",
             "parameters": {
                 "email_0": "someone@example.org",
                 "id_0": 5
@@ -1786,7 +1786,7 @@
         },
         "query": {
             "exception": "TypeError",
-            "message": "Base\\Database\\Repository\\ServiceEntityParser::__findOneBy(): Argument #3 ($offset) must be of type ?int, array given"
+            "message": "Omnibridge\\Doctrine\\Omnibase\\Finder\\DqlCompiler::__findOneBy(): Argument #3 ($offset) must be of type ?int, array given"
         }
     },
     "Base\\Entity\\Layout\\ImageCrop::findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo#b641c2c974e7ae1b479ea2bb27759e4b": {
@@ -1835,7 +1835,7 @@
         },
         "query": {
             "exception": "TypeError",
-            "message": "Base\\Database\\Repository\\ServiceEntityParser::__findOneBy(): Argument #3 ($offset) must be of type ?int, array given"
+            "message": "Omnibridge\\Doctrine\\Omnibase\\Finder\\DqlCompiler::__findOneBy(): Argument #3 ($offset) must be of type ?int, array given"
         }
     }
 }
