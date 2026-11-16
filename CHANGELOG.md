@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.1
+
+`Base\Mapping\OrderBy`'s value is documented as `array<string, string|\UnitEnum>`: a direction may be an enumeration
+(`SortDirection::Ascending`), as omnibase/mailbox writes it; 7.0.0's PHPDoc took strings only, and an application's
+PHPStan reported the enumeration.
+
 ## 7.0.0
 
 omnisense/omnibase: the core of omnibase sites under the agnostic `Base\` namespace (an application overrides

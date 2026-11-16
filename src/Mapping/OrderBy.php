@@ -15,7 +15,7 @@ use Attribute;
 final class OrderBy implements MappingAttribute
 {
     /**
-     * @param array<string, string> $value
+     * @param array<string, string|\UnitEnum> $value field => ASC|DESC, or an enumeration of the direction (SortDirection)
      */
     public function __construct(
         public readonly array $value,
