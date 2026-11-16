@@ -6,7 +6,6 @@ use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Mapping\Completor;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 
 /**
@@ -45,13 +44,6 @@ class Hierarchify extends AbstractAttribute implements ExtensionOptionInterface
         return AttributeReader::TARGET_CLASS == $target;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
-    {
-        if (!method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree') && !$this->parent_method_exists($classMetadata->customRepositoryClassName, 'getHierarchyTree')) {
-            throw new \Exception("Did you forgot to use \"Base\Metadata\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
-        }
-    }
-
     /** The hierarchy and its separator, on the class (plan "omnibase agnostic", step E3). */
     public function complete(Completor $completor, string $target, ?string $targetValue = null): void
     {
@@ -59,23 +51,30 @@ class Hierarchify extends AbstractAttribute implements ExtensionOptionInterface
             return;
         }
 
+        // The class's repository answers the hierarchy (HierarchifyTrait): checked on the declaration, on any persistence.
+        $repository = self::declaredRepository($completor->getName());
+        if (null !== $repository && !method_exists($repository, 'getHierarchyTree')) {
+            throw new \LogicException("Did you forget to use \"Base\\Attributes\\Traits\\HierarchifyTrait\" in $repository?");
+        }
+
         $completor->entityHierarchy ??= $this->hierarchy;
         $completor->entityHierarchySeparator ??= $this->separator;
     }
 
-    /**
-     * @param $object
-     * @param $method
-     * @return bool
-     */
-    public function parent_method_exists($object, $method)
+    /** The repositoryClass its #[Entity] declares (Base\Mapping's or Doctrine's), null when none. */
+    private static function declaredRepository(?string $className): ?string
     {
-        foreach (class_parents($object) as $parent) {
-            if (method_exists($parent, $method)) {
-                return true;
+        if (null === $className || !class_exists($className)) {
+            return null;
+        }
+        foreach ((new \ReflectionClass($className))->getAttributes() as $attribute) {
+            if (str_ends_with($attribute->getName(), '\\Mapping\\Entity')) {
+                $repository = $attribute->getArguments()['repositoryClass'] ?? null;
+
+                return \is_string($repository) && class_exists($repository) ? $repository : null;
             }
         }
 
-        return false;
+        return null;
     }
 }

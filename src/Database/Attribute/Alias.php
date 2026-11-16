@@ -9,7 +9,6 @@ use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
 use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 use Omnibridge\Persistence\Lifecycle;
@@ -39,29 +38,10 @@ class Alias extends AbstractAttribute implements ExtensionOptionInterface
         return ($target == EntityExtension::TARGET_CLASS || $target == EntityExtension::TARGET_PROPERTY);
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
-    {
-        if ($target == "property") {
-            $alias = $targetValue;
-        } else {
-            $alias = $this->alias;
-        }
-
-        if (!property_exists($classMetadata->getName(), $alias)) {
-            throw new Exception("Invalid alias property \"$alias\" provided in metadata of class " . $classMetadata->getName());
-        } elseif (!property_exists($classMetadata->getName(), $this->column)) {
-            throw new Exception("Invalid column property \"$this->column\" provided in metadata of class " . $classMetadata->getName());
-        } elseif ($classMetadata->hasAssociation($alias)) {
-            throw new Exception("Alias variable \"$alias\" cannot be used, association mapping already found.");
-        } elseif ($classMetadata->hasField($alias)) {
-            throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
-        }
-    }
-
     /**
      * The alias's name, bound to its column (plan "omnibase agnostic", step E3): the property it is on, or the class's
-     * #[Alias(column:, alias:)]. Doctrine checked here, as it loaded the class, that neither is mapped already; that
-     * check stays in loadClassMetadata().
+     * #[Alias(column:, alias:)]; the alias must not be mapped itself (a field or an association), read on its
+     * declaration - on every persistence.
      */
     public function complete(Completor $completor, string $target, ?string $targetValue = null): void
     {
@@ -71,6 +51,11 @@ class Alias extends AbstractAttribute implements ExtensionOptionInterface
             throw new Exception("Invalid alias property \"$alias\" provided in metadata of class " . $class);
         } elseif (!property_exists($class, $this->column)) {
             throw new Exception("Invalid column property \"$this->column\" provided in metadata of class " . $class);
+        }
+        foreach ((new \ReflectionProperty($class, $alias))->getAttributes() as $attribute) {
+            if (1 === preg_match('/\\\\Mapping\\\\(Column|Id|Embedded|ManyToOne|OneToMany|ManyToMany|OneToOne)$/', $attribute->getName())) {
+                throw new Exception("Alias variable \"$alias\" cannot be used, it is mapped already (".$attribute->getName().").");
+            }
         }
 
         $completor->aliasNames ??= [];

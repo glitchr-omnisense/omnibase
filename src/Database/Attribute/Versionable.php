@@ -6,7 +6,6 @@ use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Entity\Extension\TranslationInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Marks a property as worth remembering: every flush that changes it appends
@@ -90,9 +89,7 @@ class Versionable extends AbstractAttribute implements EntityExtensionInterface
      */
     public static function resolve(object|string $entityOrClass): array
     {
-        if ($entityOrClass instanceof ClassMetadata) {
-            $className = $entityOrClass->getName();
-        } elseif (is_object($entityOrClass)) {
+        if (is_object($entityOrClass)) {
             $className = get_class($entityOrClass);
         } else {
             $className = $entityOrClass;

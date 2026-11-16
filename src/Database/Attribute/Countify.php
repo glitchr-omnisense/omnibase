@@ -8,8 +8,6 @@ use Omnibridge\Runtime;
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
  #[\Attribute(\Attribute::TARGET_PROPERTY)]

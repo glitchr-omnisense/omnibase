@@ -43,13 +43,27 @@ trait HierarchifyTrait
         // A class without #[Hierarchify], or with no level (Base\Entity\Thread's #[Hierarchify(null)]), has no hierarchy:
         // an empty tree, a depth of 0 and no level - the search page lists its threads under no section, where it
         // answered 500 ("Missing @Hierarchify").
-        $entityHierarchy = $this->getClassMetadataCompletor()->entityHierarchy;
+        $entityHierarchy = $this->hierarchify()->entityHierarchy;
         if (empty($entityHierarchy)) {
             return [];
         }
 
-        $entityHierarchySeparator = $this->getClassMetadataCompletor()->entityHierarchySeparator;
+        $entityHierarchySeparator = $this->hierarchify()->entityHierarchySeparator;
         $separator = $separator ?? $entityHierarchySeparator ?? "/";
         return (is_array($entityHierarchy) ? $entityHierarchy : explode($separator, $entityHierarchy));
+    }
+
+    /** The entity's #[Hierarchify], read from the class itself: its own, else its nearest parent's. */
+    private function hierarchify(): object
+    {
+        for ($class = $this->getClassName(); false !== $class; $class = get_parent_class($class)) {
+            foreach ((new \ReflectionClass($class))->getAttributes(\Base\Database\Attribute\Hierarchify::class) as $attribute) {
+                $hierarchify = $attribute->newInstance();
+
+                return (object) ['entityHierarchy' => $hierarchify->hierarchy, 'entityHierarchySeparator' => $hierarchify->separator];
+            }
+        }
+
+        return (object) ['entityHierarchy' => null, 'entityHierarchySeparator' => null];
     }
 }

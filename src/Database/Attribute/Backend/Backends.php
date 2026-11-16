@@ -37,7 +37,7 @@ final class Backends
      */
     public static function register(string $unitOfWork, string $behaviour, string|\Closure $backend): void
     {
-        self::$factories[$unitOfWork][$behaviour] = $backend;
+        self::$factories[$unitOfWork][self::name($behaviour)] = $backend;
         self::$instances = null;
     }
 
@@ -57,6 +57,7 @@ final class Backends
      */
     public static function of(UnitOfWork $unitOfWork, string $behaviour): object
     {
+        $behaviour = self::name($behaviour);
         self::$instances ??= new \WeakMap();
         if (isset(self::$instances[$unitOfWork][$behaviour])) {
             return self::$instances[$unitOfWork][$behaviour];
@@ -76,8 +77,21 @@ final class Backends
     }
 
     /** @return class-string|\Closure|null */
+    /**
+     * A behaviour's one name: an alias (Base\Contract\Backend for Omnibridge\Persistence\Backend) is the type it names.
+     *
+     * @param class-string $behaviour
+     *
+     * @return class-string
+     */
+    private static function name(string $behaviour): string
+    {
+        return interface_exists($behaviour) || class_exists($behaviour) ? (new \ReflectionClass($behaviour))->getName() : $behaviour;
+    }
+
     private static function factory(UnitOfWork $unitOfWork, string $behaviour): string|\Closure|null
     {
+        $behaviour = self::name($behaviour);
         foreach (self::$factories as $class => $backends) {
             if ($unitOfWork instanceof $class && isset($backends[$behaviour])) {
                 return $backends[$behaviour];

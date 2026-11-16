@@ -6,14 +6,11 @@ use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Attribute\Extension\ExtensionInlineInterface;
 use Base\Database\Attribute\Backend\OrderColumnBackend;
-use Base\Database\Mapping\EntityFields;
 use Base\Database\Mapping\EntityShape;
 use Base\Database\Type\Enumerations;
 use Base\Database\Type\SetType;
 
 use Base\Database\Entity\EntityValues;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\OrderBy;
 use Omnibridge\Persistence\Lifecycle;
 use Exception;
 use ReflectionProperty;
@@ -46,30 +43,6 @@ class OrderColumn extends AbstractAttribute implements ExtensionInlineInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        if ($object instanceof ClassMetadata) {
-
-            // field/type checks, on the metadata Doctrine is building (the reader's manipulator reads the shapes,
-            // plan "omnibase agnostic", step E3): a set's column, or a to-many association.
-            $field = EntityFields::aliases($object->getName())[$targetValue] ?? $targetValue;
-            $type = $object->hasField($field) ? $object->getTypeOfField($field) : null;
-
-            $isSet    = is_subclass_of((string) Enumerations::classOf($type), SetType::class);
-            $isToMany = $object->hasAssociation($field) && $object->isCollectionValuedAssociation($field);
-
-            if (!$isSet && !$isToMany) {
-                return false;
-            }
-
-            // Disallow using both @OrderColumn and @OrderBy?
-            $siblingAttributes = $this->getAttributeReader()->getPropertyAttributes($object->getName(), OrderBy::class);
-            if (array_key_exists($targetValue, $siblingAttributes)) {
-                throw new Exception(
-                    "@OrderBy metadata conflicts with @OrderColumn for \"" 
-                    . $object->getName() . "::$targetValue\""
-                );
-            }
-        }
-
         return ($target === AttributeReader::TARGET_PROPERTY);
     }
 

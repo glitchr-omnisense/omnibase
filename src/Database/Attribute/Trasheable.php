@@ -4,9 +4,9 @@ namespace Base\Database\Attribute;
 
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
+use Base\Database\Mapping\Completor;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Entity\Extension\TrasheableTrait;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 /**
@@ -66,29 +66,31 @@ class Trasheable extends AbstractAttribute implements EntityExtensionInterface
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        if ($object instanceof ClassMetadata) {
-            if (!$this->deletedAt) {
-                throw new Exception("Timing field for deletion missing, please provide a valid field \"" . $this->deletedAt . "\"");
-            }
-
-            if (!$object->hasField($this->deletedAt)) {
-                throw new Exception("Field \"" . $this->deletedAt . "\" is missing in \"" . $object->getName() . "\", did you forget to import \"" . TrasheableTrait::class . "\" ?");
-            }
-        }
-
         return ($target == AttributeReader::TARGET_CLASS);
+    }
+
+    /** Its deletion field checked on the class's declaration, on every persistence (Doctrine checked its metadata). */
+    public function complete(Completor $completor, string $target, ?string $targetValue = null): void
+    {
+        if (AttributeReader::TARGET_CLASS !== $target) {
+            return;
+        }
+        if (!$this->deletedAt) {
+            throw new Exception("Timing field for deletion missing, please provide a valid field \"" . $this->deletedAt . "\"");
+        }
+        if (!property_exists((string) $completor->getName(), $this->deletedAt)) {
+            throw new Exception("Field \"" . $this->deletedAt . "\" is missing in \"" . $completor->getName() . "\", did you forget to import \"" . TrasheableTrait::class . "\" ?");
+        }
     }
 
     /**
      * Find the attribute on $entityOrClass or on any of its ancestors, nearest
-     * declaration first. Doctrine proxies are normalised by the caller passing
-     * a ClassMetadata (or its name) rather than get_class($proxy).
+     * declaration first. A proxy is normalised by the caller passing the
+     * class's name rather than get_class($proxy).
      */
     public static function resolve(object|string $entityOrClass): ?self
     {
-        if ($entityOrClass instanceof ClassMetadata) {
-            $className = $entityOrClass->getName();
-        } elseif (is_object($entityOrClass)) {
+        if (is_object($entityOrClass)) {
             $className = get_class($entityOrClass);
         } else {
             $className = $entityOrClass;

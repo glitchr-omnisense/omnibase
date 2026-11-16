@@ -5,8 +5,6 @@ namespace Base\Database\Attribute;
 use Omnibridge\Persistence\Lifecycle;
 use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class Blameable

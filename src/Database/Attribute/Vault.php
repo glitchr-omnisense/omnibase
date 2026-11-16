@@ -6,7 +6,7 @@ use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
 use Base\Database\Traits\VaultTrait;
 use Base\Database\Attribute\Backend\VaultBackend;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Base\Database\Mapping\Completor;
 use Omnibridge\Persistence\Lifecycle;
 use Base\Exception\VaultKeyNotFoundException;
 use Exception;
@@ -54,17 +54,21 @@ class Vault extends AbstractAttribute
      */
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
-        if ($object instanceof ClassMetadata) {
-            if (!$this->vault) {
-                throw new Exception("Vault field for environment context missing, please provide a valid field \"" . $this->vault . "\"");
-            }
-
-            if (!$object->getFieldName($this->vault)) {
-                throw new Exception("Field \"" . $this->vault . "\" is missing, did you forget to import \"" . VaultTrait::class . "\" ?");
-            }
-        }
-
         return ($target == AttributeReader::TARGET_CLASS);
+    }
+
+    /** Its vault field checked on the class's declaration, on every persistence (Doctrine checked its metadata). */
+    public function complete(Completor $completor, string $target, ?string $targetValue = null): void
+    {
+        if (AttributeReader::TARGET_CLASS !== $target) {
+            return;
+        }
+        if (!$this->vault) {
+            throw new Exception("Vault field for environment context missing, please provide a valid field \"" . $this->vault . "\"");
+        }
+        if (!property_exists((string) $completor->getName(), $this->vault)) {
+            throw new Exception("Field \"" . $this->vault . "\" is missing, did you forget to import \"" . VaultTrait::class . "\" ?");
+        }
     }
 
     /**

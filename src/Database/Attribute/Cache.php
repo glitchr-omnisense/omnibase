@@ -5,7 +5,6 @@ namespace Base\Database\Attribute;
 use Base\Attributes\AbstractAttribute;
 use Base\Database\Attribute\Extension\ExtensionOptionInterface;
 use Base\Database\Entity\EntityExtension;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Base\Database\Attribute\Backend\CacheBackend;
 use Omnibridge\Persistence\Lifecycle;
 
@@ -102,22 +101,17 @@ class Cache extends AbstractAttribute implements ExtensionOptionInterface
     }
 
     /**
-     * @param ClassMetadata $classMetadata
-     * @return string
+     * The second-level cache region of a class: the one given, else its root's table (what the persistence names it).
      */
-    public function getRegion(ClassMetadata $classMetadata)
+    public function getRegion(string $rootTable): string
     {
-        return $this->region ?? $this->getEntityManager()->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->rootEntityName);
+        return $this->region ?? $rootTable;
     }
 
-    /**
-     * @param ClassMetadata $classMetadata
-     * @param string $property
-     * @return string
-     */
-    public function getRegionProperty(ClassMetadata $classMetadata, string $property)
+    /** The region of one of its associations. */
+    public function getRegionProperty(string $rootTable, string $property): string
     {
-        return $this->getRegion($classMetadata) . "__" . $property;
+        return $this->getRegion($rootTable) . "__" . $property;
     }
 
     /**
