@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Bundle;
 
-use Omnibridge\Symfony\Omnibase\Cache\Warmer\DoctrineMetadataCacheWarmer;
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
+use Base\Cache\Warmer\DoctrineMetadataCacheWarmer;
+use Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Adapter\PhpArrayAdapter;

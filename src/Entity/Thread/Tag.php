@@ -18,7 +18,7 @@ use Base\Database\Attribute\Cache;
 use Base\Database\Entity\Extension\AliasInterface;
 use Base\Database\Entity\Extension\AliasTrait;
 use Base\Database\Entity\Extension\TranslatableAliasTrait;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Thread\TagRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;

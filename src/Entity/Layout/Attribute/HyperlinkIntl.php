@@ -4,7 +4,7 @@ namespace Base\Entity\Layout\Attribute;
 
 use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Database\Entity\Extension\TranslationInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 #[ORM\Entity]
 class HyperlinkIntl implements TranslationInterface

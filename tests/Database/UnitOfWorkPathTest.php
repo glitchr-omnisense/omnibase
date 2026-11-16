@@ -89,7 +89,7 @@ final class UnitOfWorkPathTest extends TestCase
     }
 
     /**
-     * Their parent, Omnibridge\Symfony\Omnibase\Console\Command, takes the entity manager still (the applications' commands read its
+     * Their parent, Base\Console\Command, takes the entity manager still (the applications' commands read its
      * deprecated $entityManager; it moves to omnibridge/symfony at step F5c): they pass it on, and ask $unitOfWork.
      */
     private const PASS_THE_ENTITY_MANAGER_ON = ['Console/Command/AutocompleteEntitiesCommand.php', 'Console/Command/IconEntitiesCommand.php'];
@@ -112,10 +112,10 @@ final class UnitOfWorkPathTest extends TestCase
     private static function tokens(string $file): array
     {
         $path = \dirname(__DIR__, 2).'/src/'.$file;
-        // A file the core moved to a bridge (omnibridge/symfony's console, step F5c) is read where its class is now.
-        $moved = \Base\Database\FormerNames::moved()['Base\\'.str_replace('/', '\\', substr($file, 0, -4))] ?? null;
-        if (!is_file($path) && null !== $moved && class_exists($moved)) {
-            $path = (string) (new \ReflectionClass($moved))->getFileName();
+        // A class a bridge declares under Base\ (omnibridge/symfony's console) is read where that bridge has it.
+        $class = 'Base\\'.str_replace('/', '\\', substr($file, 0, -4));
+        if (!is_file($path) && class_exists($class)) {
+            $path = (string) (new \ReflectionClass($class))->getFileName();
         }
         self::assertFileExists($path);
 

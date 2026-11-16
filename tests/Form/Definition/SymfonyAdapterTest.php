@@ -7,7 +7,7 @@ use Base\Field\EmailField;
 use Base\Field\IntegerField;
 use Base\Field\TextareaField;
 use Base\Form\Definition\FormDefinition;
-use Omnibridge\Symfony\Omnibase\Form\DefinitionForms;
+use Base\Form\DefinitionForms;
 use Omnibridge\Validation\Constraint\Length;
 use Omnibridge\Validation\Constraint\NotBlank;
 use PHPUnit\Framework\TestCase;
@@ -69,8 +69,8 @@ class SymfonyAdapterTest extends TestCase
     {
         $definition = FormDefinition::new('x')->add(BooleanField::new('notify'))->setCsrf(false);
 
-        self::assertSame('Omnibridge\Symfony\Omnibase\Field\Type\BooleanType', $definition->get('notify')->getFormType());
-        self::assertSame('Omnibridge\Symfony\Omnibase\Field\Type\BooleanType', (new \ReflectionClass($definition->get('notify')->getFormType()))->getName());
+        self::assertSame('Base\Field\Type\BooleanType', $definition->get('notify')->getFormType());
+        self::assertSame('Base\Field\Type\BooleanType', (new \ReflectionClass($definition->get('notify')->getFormType()))->getName());
     }
 
     public function testARepeatedFieldChoicesAskedLateAndARewriteAreSymfonys(): void

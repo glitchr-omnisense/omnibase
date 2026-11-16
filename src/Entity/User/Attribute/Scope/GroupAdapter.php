@@ -7,8 +7,8 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractScopeAdapter;
 use Base\Entity\User;
 use Base\Entity\User\Group;
-use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Field\Type\SelectType;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Scope\GroupAdapterRepository;
 
 /**

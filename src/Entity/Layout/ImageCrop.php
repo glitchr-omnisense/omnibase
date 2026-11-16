@@ -8,7 +8,7 @@ use Base\Contract\Link;
 use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageCropRepository;
 use Base\Service\Model\SaltInterface;
 use Base\Database\Attribute\Cache;

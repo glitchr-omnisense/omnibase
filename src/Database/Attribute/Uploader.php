@@ -517,7 +517,7 @@ class Uploader extends AbstractAttribute implements ExtensionOptionInterface
      * object's bytes under another's key.
      *
      * Called at the start of every main request and on kernel.reset, by
-     * Omnibridge\Symfony\Omnibase\Subscriber\RequestScopedStateSubscriber.
+     * Base\Subscriber\RequestScopedStateSubscriber.
      */
     public static function forgetTemporaryFiles(): void
     {

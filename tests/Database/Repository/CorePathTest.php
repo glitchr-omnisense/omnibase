@@ -141,10 +141,14 @@ final class CorePathTest extends TestCase
     private static function tokens(string $file): array
     {
         $path = \dirname(__DIR__, 3).'/src/'.$file;
-        // A file the core moved to a bridge (omnibridge/symfony's console, step F5c) is read where its class is now.
-        $moved = \Base\Database\FormerNames::moved()['Base\\'.str_replace('/', '\\', substr($file, 0, -4))] ?? null;
-        if (!is_file($path) && null !== $moved && class_exists($moved)) {
-            $path = (string) (new \ReflectionClass($moved))->getFileName();
+        // A file a bridge declares under Base\ (omnibridge/symfony's console, omnibridge/doctrine's mapping) is read where its class is.
+        $class = 'Base\\'.str_replace('/', '\\', substr($file, 0, -4));
+        if (!is_file($path) && class_exists($class)) {
+            $path = (string) (new \ReflectionClass($class))->getFileName();
+        }
+        // omnibridge/symfony's internal adapters (the former Base\Bridge\Symfony\*): read where the bridge keeps them.
+        if (!is_file($path) && str_starts_with($file, 'Bridge/Symfony/') && class_exists($bridge = 'Omnibridge\\Symfony\\Omnibase\\'.substr($file, 15, -4))) {
+            $path = (string) (new \ReflectionClass($bridge))->getFileName();
         }
         self::assertFileExists($path);
 

@@ -3,7 +3,7 @@
 namespace Tests\Base\Routing;
 
 use Base\Discovery;
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\DiscoveryPass;
+use Base\DependencyInjection\Compiler\DiscoveryPass;
 use Base\Routing\AdminUrlGeneratorInterface;
 use Base\Routing\NullAdminUrlGenerator;
 use PHPUnit\Framework\TestCase;

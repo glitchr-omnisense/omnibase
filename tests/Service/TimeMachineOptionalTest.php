@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Service;
 
-use Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration;
+use Base\DependencyInjection\BaseConfiguration;
 use Base\Service\TimeMachineInterface;
 use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\TestCase;
@@ -24,10 +24,10 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
  */
 final class TimeMachineOptionalTest extends TestCase
 {
-    private const SERVICES = ['Base\\Service\\TimeMachine', 'time_machine', TimeMachineInterface::class, 'Backup\\Manager\\Manager', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineSnapshotCommand', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineSnapshotBackupCommand', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineSnapshotRestoreCommand', 'Omnibridge\\Symfony\\Omnibase\\Console\\Command\\TimeMachineStorageCommand'];
+    private const SERVICES = ['Base\\Service\\TimeMachine', 'time_machine', TimeMachineInterface::class, 'Backup\\Manager\\Manager', 'Base\\Console\\Command\\TimeMachineSnapshotCommand', 'Base\\Console\\Command\\TimeMachineSnapshotBackupCommand', 'Base\\Console\\Command\\TimeMachineSnapshotRestoreCommand', 'Base\\Console\\Command\\TimeMachineStorageCommand'];
 
     private const CHECKS = <<<'PHP'
-        $tree = (new Omnibridge\Symfony\Omnibase\DependencyInjection\BaseConfiguration())->getConfigTreeBuilder()->buildTree();
+        $tree = (new Base\DependencyInjection\BaseConfiguration())->getConfigTreeBuilder()->buildTree();
         $config = (new Symfony\Component\Config\Definition\Processor())->process($tree, []);
         $container = new Symfony\Component\DependencyInjection\ContainerBuilder();
         $loader = new Symfony\Component\DependencyInjection\Loader\PhpFileLoader($container, new Symfony\Component\Config\FileLocator(CONFIG));
@@ -54,7 +54,7 @@ final class TimeMachineOptionalTest extends TestCase
         $vendors = array_keys(array_filter(ClassLoader::getRegisteredLoaders(), static fn (ClassLoader $loader) => false !== $loader->findFile(BaseConfiguration::class)));
         self::assertNotEmpty($vendors, 'No registered Composer autoloader loads the core.');
         $autoload = $vendors[0].'/autoload.php';
-        $code = 'const CONFIG = '.var_export(\dirname((new \ReflectionClass(\Omnibridge\Symfony\Omnibase\BaseBundle::class))->getFileName(), 3).'/config/omnibase', true).'; const SERVICES = '.var_export(self::SERVICES, true).';'
+        $code = 'const CONFIG = '.var_export(\dirname((new \ReflectionClass(\Base\BaseBundle::class))->getFileName(), 3).'/config/omnibase', true).'; const SERVICES = '.var_export(self::SERVICES, true).';'
             .'$composer = require '.var_export($autoload, true).'; $composer->unregister();'
             .'spl_autoload_register(static function (string $class) use ($composer): void { if (!str_starts_with($class, "Backup\\\\")) { $composer->loadClass($class); } }, true, true);'
             .self::CHECKS;
@@ -86,7 +86,7 @@ final class TimeMachineOptionalTest extends TestCase
             self::markTestSkipped('glitchr/backup-manager is not installed.');
         }
         $container = new ContainerBuilder();
-        $loader = new PhpFileLoader($container, new FileLocator(\dirname((new \ReflectionClass(\Omnibridge\Symfony\Omnibase\BaseBundle::class))->getFileName(), 3).'/config/omnibase'));
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname((new \ReflectionClass(\Base\BaseBundle::class))->getFileName(), 3).'/config/omnibase'));
         foreach (['services-list.php', 'services.php', 'services-public.php', 'services-fix.php', 'services-decoration.php'] as $file) {
             $loader->load($file);
         }

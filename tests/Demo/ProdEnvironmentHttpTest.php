@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Demo;
 
-use Omnibridge\Symfony\Omnibase\Console\Command\DemoResetCommand;
+use Base\Console\Command\DemoResetCommand;
 use Base\Service\SecurityPolicy;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -41,10 +41,10 @@ class ProdEnvironmentHttpTest extends DemoKernelTestCase
         $response = $this->browse('/login/demo', 'POST', ['account' => TestDemoAccounts::MEMBER, '_token' => 'whatever']);
         $this->assertContains($response->getStatusCode(), [404, 405], 'the route does not exist');
 
-        $this->assertFalse(static::getContainer()->has('Omnibridge\\Symfony\\Omnibase\\Controller\\DemoController'));
-        $this->assertFalse(static::getContainer()->has('Omnibridge\\Symfony\\Omnibase\\Subscriber\\DemoSubscriber'));
-        $this->assertFalse(static::getContainer()->has('Omnibridge\\Symfony\\Omnibase\\Subscriber\\DemoBackOfficeSubscriber'));
-        $this->assertFalse(static::getContainer()->has('Omnibridge\\Doctrine\\Omnibase\\DatabaseSubscriber\\DemoAccountLockSubscriber'));
+        $this->assertFalse(static::getContainer()->has('Base\\Controller\\DemoController'));
+        $this->assertFalse(static::getContainer()->has('Base\\Subscriber\\DemoSubscriber'));
+        $this->assertFalse(static::getContainer()->has('Base\\Subscriber\\DemoBackOfficeSubscriber'));
+        $this->assertFalse(static::getContainer()->has('Base\\DatabaseSubscriber\\DemoAccountLockSubscriber'));
 
         $this->browse('/settings');
         $this->assertNull(static::getContainer()->get('security.token_storage')->getToken()?->getUser());

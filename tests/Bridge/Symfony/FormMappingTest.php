@@ -8,9 +8,9 @@ use Base\Database\Mapping\MetadataManipulator;
 use Base\Database\Schema\EntitySchema;
 use Base\Database\UnitOfWorks;
 use Doctrine\ORM\EntityManagerInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Omnibridge\Persistence\UnitOfWork;
-use Omnibridge\Symfony\Omnibase\Form\FormMapping;
+use Base\Form\FormMapping;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -142,7 +142,7 @@ final class FormMappingTest extends KernelTestCase
         if ($shapes instanceof DescriptionShapes) {
             return $shapes;
         }
-        $options = \Omnibridge\Symfony\Omnibase\Console\InstalledEntities::options($entityManager, (string) $container->getParameter('kernel.project_dir'));
+        $options = \Base\Console\InstalledEntities::options($entityManager, (string) $container->getParameter('kernel.project_dir'));
 
         return new DescriptionShapes(EntitySchema::describe($options['paths'], $options));
     }

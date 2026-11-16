@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Bundle;
 
-use Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle;
+use Base\Bundle\AbstractBaseBundle;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Tests\Base\Fixtures\Warmup\Loadable;

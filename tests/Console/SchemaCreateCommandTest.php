@@ -4,7 +4,7 @@ namespace Tests\Base\Console;
 
 use Base\Database\Schema\EntitySchema;
 use Omnibridge\Schema\Database\SchemaCreator;
-use Omnibridge\Symfony\Omnibase\Console\InstalledEntities;
+use Base\Console\InstalledEntities;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;

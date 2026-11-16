@@ -3,7 +3,7 @@
 namespace Tests\Base\Attributes;
 
 use Base\Attributes\AttributeReader;
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\AttributesPass;
+use Base\DependencyInjection\Compiler\Pass\AttributesPass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;

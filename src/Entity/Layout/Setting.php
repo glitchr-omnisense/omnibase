@@ -8,7 +8,7 @@ use Base\Service\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Base\Database\Attribute\Slugify;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\SettingRepository;
 use Base\Database\Attribute\Cache;
 

@@ -29,7 +29,7 @@ use Exception;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\User\NotificationRepository;
 
 /**

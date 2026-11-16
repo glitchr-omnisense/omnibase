@@ -4,7 +4,7 @@ namespace Base\Database\Entity\Extension;
 
 use Base\Database\Attribute\Timestamp;
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 trait TrasheableTrait
 {

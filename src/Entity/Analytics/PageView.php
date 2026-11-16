@@ -3,7 +3,7 @@
 namespace Base\Entity\Analytics;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Analytics\PageViewRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * One row per (path, HOUR, source) - an hourly rolling aggregate, not a

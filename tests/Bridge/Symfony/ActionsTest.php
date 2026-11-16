@@ -6,7 +6,7 @@ use Base\Controller\Action\Notification\Latest;
 use Base\Controller\Action\Widget\Page;
 use Omnibridge\Symfony\Omnibase\ActionArguments;
 use Omnibridge\Symfony\Omnibase\ActionResults;
-use Omnibridge\Symfony\Omnibase\Controller\Client\NotificationController;
+use Base\Controller\Client\NotificationController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;

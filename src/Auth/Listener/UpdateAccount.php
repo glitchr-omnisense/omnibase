@@ -9,7 +9,7 @@ use Omnibridge\Persistence\UnitOfWork;
 
 /**
  * The account brought up to date at its sign-in, what
- * Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator::onAuthenticationSuccess() does under
+ * Base\Security\LoginFormAuthenticator::onAuthenticationSuccess() does under
  * Symfony: a role the application's UserRole enum no longer knows dropped
  * from the account's own roles (never those of its groups), its time zone and
  * its language kept (the visitor's when it had none), its kick lifted.

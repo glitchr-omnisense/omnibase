@@ -6,7 +6,7 @@ use Omnibridge\Doctrine\Omnibase\Behaviour\DoctrineBehaviours;
 use Omnibridge\Doctrine\Omnibase\DoctrineShapes;
 use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Base\Database\Attribute\Backend\Backends;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\DescriptionShapes;
 use Base\Database\Mapping\EntityShapes;
 use Doctrine\ORM\EntityManagerInterface;

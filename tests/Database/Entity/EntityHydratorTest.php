@@ -16,7 +16,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\EntityManagerInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Omnibridge\Doctrine\Omnibase\DoctrineUnitOfWork;
 use Omnibridge\Persistence\Lifecycle\PreUpdate;
 use Omnibridge\Persistence\Snapshots;

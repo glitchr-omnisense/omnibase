@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Database\Entity\Extension\TranslationInterface;

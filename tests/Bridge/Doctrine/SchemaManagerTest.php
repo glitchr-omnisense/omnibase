@@ -4,11 +4,11 @@ namespace Tests\Base\Bridge\Doctrine;
 
 use Omnibridge\Doctrine\Omnibase\MySQLSchemaManager;
 use Omnibridge\Doctrine\Omnibase\SchemaManagerFactory;
-use Omnibridge\Doctrine\Omnibase\Database\Type\ArrayType;
+use Base\Database\Type\ArrayType;
 use Base\Database\Type\EnumType;
-use Omnibridge\Doctrine\Omnibase\Database\Type\MySQLSetType;
+use Base\Database\Type\MySQLSetType;
 use Base\Database\Type\SetType;
-use Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeImmutableType;
+use Base\Database\Type\UtcDateTimeImmutableType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQL84Platform;

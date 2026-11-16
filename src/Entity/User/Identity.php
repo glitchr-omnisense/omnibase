@@ -6,7 +6,7 @@ use App\Entity\User;
 use Omnibridge\Doctrine\Omnibase\Repository\User\IdentityRepository;
 use DateTime;
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * An account's identity at a provider (Google...): the provider's own

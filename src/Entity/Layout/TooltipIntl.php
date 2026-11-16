@@ -5,7 +5,7 @@ namespace Base\Entity\Layout;
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Entity\Extension\TranslationTrait;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 #[ORM\Entity]
 class TooltipIntl implements TranslationInterface

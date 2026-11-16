@@ -14,7 +14,7 @@ use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Service\Model\IconizeInterface;
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\WidgetRepository;
 use Base\Contract\Runtime;

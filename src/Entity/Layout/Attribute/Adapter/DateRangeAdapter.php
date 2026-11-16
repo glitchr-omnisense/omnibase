@@ -4,11 +4,11 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
-use Omnibridge\Symfony\Omnibase\Field\Type\DateTimePickerType;
+use Base\Field\Type\DateTimePickerType;
 use DateTimeImmutable;
 use DateTimeInterface;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\DateRangeAdapterRepository;
 use Base\Database\Attribute\Cache;
 

@@ -3,7 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapterIntl;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 #[ORM\Entity]
 class HyperpatternAdapterIntl extends AbstractAdapterIntl

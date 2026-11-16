@@ -4,7 +4,7 @@ namespace Tests\Base\Attributes;
 
 use Base\Attributes\AbstractAttribute;
 use Base\Attributes\AttributeReader;
-use Omnibridge\Symfony\Omnibase\Service\ParameterBag;
+use Base\Service\ParameterBag;
 use Base\Service\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface as SymfonyParameterBagInterface;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface as 
  * The attributes read the parameters through omnibase's contract,
  * Base\Service\ParameterBagInterface, no longer DependencyInjection's (plan
  * "omnibase agnostique", step C3c). The contract extends nothing of the
- * framework; Omnibridge\Symfony\Omnibase\Service\ParameterBag is its Symfony adapter, and still
+ * framework; Base\Service\ParameterBag is its Symfony adapter, and still
  * DependencyInjection's bag for the code typing it; the reader is given
  * `parameter_bag` (HotParameterBag over it, C9).
  */

@@ -7,7 +7,7 @@ use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Extension\TrashBallRepository;
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: TrashBallRepository::class)]

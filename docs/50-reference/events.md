@@ -206,7 +206,7 @@ sign the user out when its checks fail.
 
 | Event | Listener | Priority |
 |---|---|---|
-| `CheckPassportEvent` | `Omnibridge\Symfony\Omnibase\Security\SignInGuard::onCheckPassport` (the captcha after failed sign-ins, see [The forms' guard](../20-architecture/guard.md#the-sign-in)) | 300 |
+| `CheckPassportEvent` | `Base\Security\SignInGuard::onCheckPassport` (the captcha after failed sign-ins, see [The forms' guard](../20-architecture/guard.md#the-sign-in)) | 300 |
 | | `Base\EntitySubscriber\ConnectionSubscriber::onCheckPassport` | 10 |
 | `LoginSuccessEvent` | `SignInGuard::onLoginSuccess` | 0 |
 | | `NewDeviceSubscriber::onLoginSuccess` | 0 |

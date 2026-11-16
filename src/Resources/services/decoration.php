@@ -14,7 +14,7 @@ return [
         'class' => 'Base\Twig\AppVariable',
         'requires' => [
             'Twig\Environment',
-            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
+            'Base\Routing\AdvancedRouterInterface',
             'Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface',
         ],
         'public' => true,

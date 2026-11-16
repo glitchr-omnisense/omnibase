@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Omnibridge\Symfony\Omnibase\Form\FormProxyInterface;
+use Base\Form\FormProxyInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Twig\Extension\AbstractExtension;

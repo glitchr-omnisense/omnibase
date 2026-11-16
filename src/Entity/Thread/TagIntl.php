@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Thread;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Base\Database\Attribute\OrderColumn;
 
 use Base\Database\Entity\Extension\TranslationInterface;

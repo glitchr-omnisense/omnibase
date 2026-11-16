@@ -282,7 +282,7 @@ rewrites the database behind the ORM's back leaves that cache wrong:
 new rows are numbered from 1 again, and the cache answered yesterday's entity
 for today's id until it expired.
 
-`Omnibridge\Symfony\Omnibase\Subscriber\SecondLevelCacheConsoleSubscriber` empties every region
+`Base\Subscriber\SecondLevelCacheConsoleSubscriber` empties every region
 (entities, collections, queries) of every entity manager when one of these
 commands ends: `doctrine:fixtures:load`, `doctrine:schema:{drop,create,update}`,
 `doctrine:database:{drop,import}`, `doctrine:migrations:{migrate,execute}`,

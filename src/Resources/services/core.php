@@ -12,7 +12,7 @@
 return [
     [
         'class' => 'Base\Service\Referrer',
-        'requires' => ['Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface'],
+        'requires' => ['Base\Routing\AdvancedRouterInterface'],
         'public' => true,
         'arguments' => ['@Omnibridge\Contract\Requests'],
         'contracts' => [
@@ -21,7 +21,7 @@ return [
         ],
         'symfony' => ['arguments' => ['@Omnibridge\Contract\Requests', '@advanced_router']],
     ],
-    ['class' => 'Base\Auth\Account\RescuePage', 'requires' => ['Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface'], 'public' => true, 'autowire' => true],
+    ['class' => 'Base\Auth\Account\RescuePage', 'requires' => ['Base\Routing\AdvancedRouterInterface'], 'public' => true, 'autowire' => true],
     ['class' => 'Base\Service\Analytics\UserAgentClassifier', 'public' => true],
     [
         'class' => 'Base\Service\Analytics',
@@ -267,7 +267,7 @@ return [
     ],
     [
         'class' => 'Base\Service\MaintenanceProvider',
-        'requires' => ['Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface'],
+        'requires' => ['Base\Routing\AdvancedRouterInterface'],
         'public' => true,
         'arguments' => [
             1 => '@setting_bag',
@@ -292,7 +292,7 @@ return [
     ],
     [
         'class' => 'Base\Service\Launcher',
-        'requires' => ['Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface'],
+        'requires' => ['Base\Routing\AdvancedRouterInterface'],
         'public' => true,
         'arguments' => [2 => '@setting_bag', 3 => '@Omnibridge\Contract\Access', 4 => '@Omnibridge\Contract\Access'],
         'contracts' => [

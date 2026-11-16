@@ -9,7 +9,7 @@ use Base\Enum\ConnectionState;
 use Omnibridge\Doctrine\Omnibase\Repository\User\ConnectionRepository;
 use Base\Database\Attribute\Cache;
 use Base\Service\Model\IconizeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass:ConnectionRepository::class)]
 #[Cache(usage:"NONSTRICT_READ_WRITE", associations:"ALL")]

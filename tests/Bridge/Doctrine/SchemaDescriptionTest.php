@@ -262,7 +262,8 @@ final class SchemaDescriptionTest extends KernelTestCase
         }
         // The enumerations DBAL has, a bundle's among them (omnibase/marketplace's order_state), as omnibridge/symfony's
         // omnibridge:schema:create reads them.
-        foreach (Type::getTypeRegistry()->getMap() as $name => $type) {
+        // DBAL 4's registry has no getMap(): it is iterated, name => type.
+        foreach (Type::getTypeRegistry() as $name => $type) {
             if (method_exists($type, 'enumeration')) {
                 $types[$name] ??= $type->enumeration();
             }

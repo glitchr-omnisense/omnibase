@@ -303,7 +303,6 @@ return [
     Base\Database\Entity\Extension\VaultInterface::class,
     Base\Database\Entity\Extension\VaultTrait::class,
     Base\Database\Events::class,
-    Base\Database\FormerNames::class,
     Base\Database\Lifecycle\RevisionRecorder::class,
     Base\Database\Lifecycle\SettingsInvalidation::class,
     Base\Database\Lifecycle\ThreadParticipants::class,

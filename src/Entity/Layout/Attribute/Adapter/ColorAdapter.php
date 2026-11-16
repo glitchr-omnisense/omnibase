@@ -5,9 +5,9 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Service\Model\Color\Intl\Colors;
 use Base\Database\Attribute\DiscriminatorEntry;
-use Omnibridge\Symfony\Omnibase\Field\Type\ColorType;
+use Base\Field\Type\ColorType;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ColorAdapterRepository;
 use Base\Database\Attribute\Cache;
 

@@ -8,7 +8,7 @@ use Base\Database\Entity\Extension\TranslatableTrait;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\AttributeRepository;
 use Base\Database\Attribute\Cache;
 

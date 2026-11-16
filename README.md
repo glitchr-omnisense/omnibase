@@ -77,7 +77,7 @@ composer require omnisense/omnibase omnibridge/laravel
 Under Symfony, enable in `config/bundles.php` (Flex usually does it):
 
 ```php
-Omnibridge\Symfony\Omnibase\BaseBundle::class => ['all' => true],
+Base\BaseBundle::class => ['all' => true],
 ```
 
 Bundle configuration lives under the `base:` key; the tree is defined in
@@ -121,7 +121,7 @@ applied automatically (see omnibridge/symfony's `src/Omnibase/DependencyInjectio
 ## Service wiring
 
 Since 5.0 the Symfony service definitions are omnibridge/symfony's (`config/omnibase/`, loaded by
-its `Omnibridge\Symfony\Omnibase\DependencyInjection\BaseExtension`); the core keeps the list of
+its `Base\DependencyInjection\BaseExtension`); the core keeps the list of
 its services as data (`Base\Services::definitions()`), which Symfony, Laravel and a plain-PHP
 container read alike. The files there:
 

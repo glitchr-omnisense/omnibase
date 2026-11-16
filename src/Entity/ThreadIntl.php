@@ -8,7 +8,7 @@ use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Entity\Extension\TranslationTrait;
 use Base\Traits\BaseTrait;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\ThreadIntlRepository;
 
 #[ORM\Entity(repositoryClass: ThreadIntlRepository::class)]

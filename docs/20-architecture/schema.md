@@ -17,8 +17,9 @@ is described once, outside any ORM, and Doctrine reads it.
 - **omnisense/omnibridge, `Omnibridge\Schema`** (framework-free, ORM-free): the
   generic part. `Schema\Declaration` reads what the entity classes declare from
   their attributes by reflection, without instantiating them - the attributes
-  are `Doctrine\ORM\Mapping`'s, the vocabulary every omnibase entity is written
-  in, but their classes need not exist (`Vocabulary` holds their parameters and
+  are `Base\Mapping`'s (the core's `src/Mapping`, Doctrine's attributes under
+  omnibase's own name: decision Q8), the vocabulary every omnibase entity is
+  written in, read by name (`Vocabulary` holds their parameters and
   defaults as data). `Schema\Description` is the neutral description: each
   `Entity` (table, kind, parent and root, `Inheritance` with its column, map and
   value, identifier, `Field`s with their portable types, `Relation`s with their

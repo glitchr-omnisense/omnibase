@@ -5,7 +5,7 @@ namespace Base\Database\Entity\Extension;
 use Omnibridge\Schema\CamelCaseNaming as NamingStrategy;
 use Base\Database\Entity\Extension\TranslatableInterface;
 use Base\Service\Model\LocaleNormalizer;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 trait TranslationTrait

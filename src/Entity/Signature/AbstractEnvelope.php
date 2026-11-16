@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Signature;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * What an envelope keeps (Base\Entity\Signature\Envelope): what it is

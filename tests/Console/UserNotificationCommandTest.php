@@ -14,7 +14,7 @@ use Tests\Base\Http\HttpTestTrait;
  * user:notifications counts an account's notifications (or everyone's), lists them with
  * --show, erases with --clear the read ones older than base.user.notifications.expiry (or
  * --expiry), with --clear-all every read one. Its default, "+30d", read "d" as a time zone. Every run stopped on "Undefined property
- * $baseService" (Omnibridge\Symfony\Omnibase\Console\Command has none).
+ * $baseService" (Base\Console\Command has none).
  */
 final class UserNotificationCommandTest extends KernelTestCase
 {
@@ -34,7 +34,7 @@ final class UserNotificationCommandTest extends KernelTestCase
     private function command(array $arguments): CommandTester
     {
         $tester = new CommandTester((new Application(static::$kernel))->find('user:notifications'));
-        $tester->execute($arguments, ["capture_stderr_separately" => true]); // a ConsoleOutput, as Omnibridge\Symfony\Omnibase\Console\Command asks
+        $tester->execute($arguments, ["capture_stderr_separately" => true]); // a ConsoleOutput, as Base\Console\Command asks
 
         return $tester;
     }
@@ -64,7 +64,7 @@ final class UserNotificationCommandTest extends KernelTestCase
             if ($command instanceof \Symfony\Component\Console\Command\LazyCommand) {
                 $command = $command->getCommand();
             }
-            $unitOfWork = (new \ReflectionProperty(\Omnibridge\Symfony\Omnibase\Console\Command::class, 'unitOfWork'))->getValue($command);
+            $unitOfWork = (new \ReflectionProperty(\Base\Console\Command::class, 'unitOfWork'))->getValue($command);
             $this->assertSame($chosen, $unitOfWork, $name);
         }
     }

@@ -361,7 +361,7 @@ final class FinderParityTest extends KernelTestCase
      */
     private static function message(\Throwable $e): string
     {
-        return strtr((string) preg_replace('~, called in \S+ on line \d+~', '', $e->getMessage()), array_flip(\Base\Database\FormerNames::moved()));
+        return strtr((string) preg_replace('~, called in \S+ on line \d+~', '', $e->getMessage()), []);
     }
 
     /**

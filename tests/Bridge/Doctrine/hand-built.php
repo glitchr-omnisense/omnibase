@@ -17,7 +17,7 @@
  * and the fields asked (a getter's name each, or "getTranslations.getTitle":
  * a getter's collection, then a getter on each item, by its key).
  *
- * The answer: the metadata (Omnibridge\Doctrine\Omnibase\MetadataSnapshot), the rows
+ * The answer: the metadata (Base\Testing\MetadataSnapshot), the rows
  * read, and the classes of the framework PHP loaded on the way (informative).
  */
 
@@ -48,7 +48,7 @@ $mapping = Omnibridge\Doctrine\Omnibase\Mapping::register($entityManager, [
 ]);
 
 $answer = ['factory' => $entityManager->getMetadataFactory()::class, 'repository factory' => $entityManager->getConfiguration()->getRepositoryFactory()::class];
-$answer += Omnibridge\Doctrine\Omnibase\MetadataSnapshot::of($entityManager, $options['classes'] ?? null);
+$answer += Base\Testing\MetadataSnapshot::of($entityManager, $options['classes'] ?? null);
 
 $answer['reads'] = [];
 foreach ($options['reads'] ?? [] as $name => $read) {

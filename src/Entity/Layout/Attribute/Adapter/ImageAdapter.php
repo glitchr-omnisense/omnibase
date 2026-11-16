@@ -4,9 +4,9 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
-use Omnibridge\Symfony\Omnibase\Field\Type\ImageType;
+use Base\Field\Type\ImageType;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ImageAdapterRepository;
 use Base\Database\Attribute\Cache;
 

@@ -47,7 +47,7 @@ use Base\Contract\TwoFactorUser;
 use Exception;
 use Base\Database\Attribute\Cache;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\Enum\UserRole;
 use App\Enum\UserState;

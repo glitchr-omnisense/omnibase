@@ -4,7 +4,7 @@ namespace Tests\Base\Subscriber;
 
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\EntityDispatcher\AbstractEventDispatcher;
-use Omnibridge\Symfony\Omnibase\Subscriber\EntityDispatcherFlushSubscriber;
+use Base\Subscriber\EntityDispatcherFlushSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

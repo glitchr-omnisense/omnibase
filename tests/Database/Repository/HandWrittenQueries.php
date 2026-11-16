@@ -209,7 +209,7 @@ final class HandWrittenQueries
                 fn () => $repository(Visit::class)->countUnique(Visit::TYPE_VISITOR, $since),
             ],
             'Passkeys::findOneByCredential' => [
-                fn () => $qb(Passkey::class, 'passkey')->where('passkey.publicKeyCredentialId = :id')->setParameter('id', $passkey?->publicKeyCredentialId ?? 'none', \Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Base64::NAME)->getQuery()->getOneOrNullResult(),
+                fn () => $qb(Passkey::class, 'passkey')->where('passkey.publicKeyCredentialId = :id')->setParameter('id', $passkey?->publicKeyCredentialId ?? 'none', \Base\Database\Type\Passkey\Base64::NAME)->getQuery()->getOneOrNullResult(),
                 fn () => $repository(Passkey::class)->findOneByCredential($passkey?->publicKeyCredentialId ?? 'none'),
             ],
             'Identities::findOneBySubject' => [

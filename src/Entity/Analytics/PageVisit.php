@@ -3,7 +3,7 @@
 namespace Base\Entity\Analytics;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Analytics\PageVisitRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * An HOURLY PRESENCE record per page: at most one row per (hour, path,

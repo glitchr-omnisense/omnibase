@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\Thread;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Thread\MentionRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Service\Model\IconizeInterface;
 use Base\Database\Attribute\Cache;

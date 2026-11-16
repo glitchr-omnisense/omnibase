@@ -150,6 +150,6 @@ final class TwigIsOptionalTest extends TestCase
     /** The core's service files, omnibridge/symfony's since 5.0 (plan "omnibase agnostic", step F6). */
     private static function config(): string
     {
-        return \dirname((new \ReflectionClass(\Omnibridge\Symfony\Omnibase\BaseBundle::class))->getFileName(), 3).'/config/omnibase';
+        return \dirname((new \ReflectionClass(\Base\BaseBundle::class))->getFileName(), 3).'/config/omnibase';
     }
 }

@@ -4,7 +4,7 @@ namespace Base\Database\Entity\Extension;
 
 use Base\Contract\Runtime;
 use Base\Traits\BaseTrait;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 trait VaultTrait
 {

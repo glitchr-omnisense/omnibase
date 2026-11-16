@@ -7,7 +7,7 @@ use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\BaseService;
 use Base\Service\Obfuscator;
 use Base\Service\TradingInterface;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\MediaServiceInterface;
@@ -268,9 +268,9 @@ trait BaseCommonTrait
     /**
      * @var ClassMetadataManipulator|null
      */
-    protected static null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
+    protected static null|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
 
-    public static function setClassMetadataManipulator(null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator)
+    public static function setClassMetadataManipulator(null|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator)
     {
         self::$classMetadataManipulator = $classMetadataManipulator;
     }

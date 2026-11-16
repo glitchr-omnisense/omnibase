@@ -2,10 +2,10 @@
 
 namespace Tests\Base\Routing;
 
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\AdvancedRouterPass;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter;
-use Omnibridge\Symfony\Omnibase\Routing\Generator\AdvancedUrlGenerator;
-use Omnibridge\Symfony\Omnibase\Routing\Matcher\AdvancedUrlMatcher;
+use Base\DependencyInjection\Compiler\Pass\AdvancedRouterPass;
+use Base\Routing\AdvancedRouter;
+use Base\Routing\Generator\AdvancedUrlGenerator;
+use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -34,8 +34,8 @@ final class RouterMadeOnDemandTest extends KernelTestCase
             self::assertFalse($container->hasParameter(AdvancedRouterPass::PARAMETER));
         }
 
-        $container->register('Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter');
-        $container->setAlias('advanced_router', 'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter');
+        $container->register('Base\Routing\AdvancedRouter');
+        $container->setAlias('advanced_router', 'Base\Routing\AdvancedRouter');
         (new AdvancedRouterPass())->process($container);
         $options = $container->getDefinition('router.default')->getArgument(2);
         self::assertSame(AdvancedUrlMatcher::class, $options['matcher_class']);

@@ -9,7 +9,7 @@ use Tests\Base\Http\HttpTestTrait;
 
 /**
  * The option `use_model`, which gives a form the model named beside its type: the core's form types moved to
- * omnibridge/symfony (Omnibridge\Symfony\Omnibase\Form\Type\*) and their models stayed here (Base\Form\Model\*), so
+ * omnibridge/symfony (Base\Form\Type\*) and their models stayed here (Base\Form\Model\*), so
  * a page naming ContactType by its new name - a site's contact page over the bridge's ContactController - answered
  * 500 ("Form model Omnibridge\Symfony\Omnibase\Form\Model\ContactModel not found"). The bridge finds the core's
  * model; the contact page (Fixtures\PagesController::contact()) is shown, then sent, as a visitor does.
@@ -18,7 +18,7 @@ class ContactFormModelHttpTest extends KernelTestCase
 {
     use HttpTestTrait;
 
-    private const CONTACT_TYPE = 'Omnibridge\Symfony\Omnibase\Form\Type\ContactType';
+    private const CONTACT_TYPE = 'Base\Form\Type\ContactType';
 
     protected static function getKernelClass(): string
     {
@@ -45,7 +45,7 @@ class ContactFormModelHttpTest extends KernelTestCase
             if (!class_exists($model) || !is_subclass_of($model, FormModelInterface::class)) {
                 continue;
             }
-            foreach (['Omnibridge\\Symfony\\Omnibase\\Form\\Type\\'.$short.'Type'] as $type) {
+            foreach (['Base\\Form\\Type\\'.$short.'Type'] as $type) {
                 $form = $forms->create($type, null, ['use_model' => true, 'csrf_protection' => false]);
                 self::assertInstanceOf($model, $form->getData(), $type);
             }

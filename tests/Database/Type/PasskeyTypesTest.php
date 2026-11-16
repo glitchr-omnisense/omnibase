@@ -3,9 +3,9 @@
 namespace Tests\Base\Database\Type;
 
 use Omnibridge\Doctrine\Omnibase\Types;
-use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Aaguid;
-use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\Base64;
-use Omnibridge\Doctrine\Omnibase\Database\Type\Passkey\TrustPath;
+use Base\Database\Type\Passkey\Aaguid;
+use Base\Database\Type\Passkey\Base64;
+use Base\Database\Type\Passkey\TrustPath;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;

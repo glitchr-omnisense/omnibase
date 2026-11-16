@@ -5,7 +5,7 @@ namespace Base\Entity\Layout\Attribute\Common;
 use Base\Database\Attribute\Associate;
 use Base\Database\Attribute\DiscriminatorEntry;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Common\AbstractRuleRepository;
 use Base\Database\Attribute\Cache;
 

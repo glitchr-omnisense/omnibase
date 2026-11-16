@@ -3,7 +3,7 @@
 namespace Base\Entity\Hours;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Hours\ScopedWeekRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * The usual week of one place, when a site has several: a shop among the

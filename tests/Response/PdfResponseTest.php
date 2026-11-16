@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Response;
 
-use Omnibridge\Symfony\Omnibase\Response\PdfResponse;
+use Base\Response\PdfResponse;
 use Dompdf\Dompdf;
 use PHPUnit\Framework\TestCase;
 

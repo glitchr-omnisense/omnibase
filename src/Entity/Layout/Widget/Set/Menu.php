@@ -10,7 +10,7 @@ use Base\Service\Model\LinkableInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Widget\Set\MenuRepository;
 
 use Base\Database\Attribute\Cache;

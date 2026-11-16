@@ -16,7 +16,7 @@ use Base\Service\Model\GraphInterface;
 use Doctrine\Common\Collections\Collection;
 use Base\Database\Attribute\Cache;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Thread\TaxonRepository;
 use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\File\File;

@@ -104,7 +104,7 @@ return [
         'requires' => [
             'Omniauth\Contract\Accounts',
             'Symfony\Component\HttpFoundation\RequestStack',
-            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
+            'Base\Routing\AdvancedRouterInterface',
         ],
         'arguments' => ['@Base\Security\UserTracker', '@Omnibridge\Persistence\UnitOfWork', '@Omniauth\Contract\Accounts'],
         'tags' => [
@@ -126,7 +126,7 @@ return [
         'requires' => [
             'Omniauth\Contract\Accounts',
             'Symfony\Component\HttpFoundation\RequestStack',
-            'Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface',
+            'Base\Routing\AdvancedRouterInterface',
         ],
         'arguments' => [
             0 => '@Base\Service\SecurityPolicy',
@@ -197,7 +197,7 @@ return [
             ],
         ],
         'symfony' => [
-            'arguments' => ['@Omnibridge\Symfony\Omnibase\Security\SignInGuard', '@request_stack'],
+            'arguments' => ['@Base\Security\SignInGuard', '@request_stack'],
             'factory' => ['Omnibridge\Symfony\Omnibase\AuthListeners', 'guardSignIn'],
         ],
     ],

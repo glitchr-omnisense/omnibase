@@ -114,12 +114,12 @@ abstract class AbstractAttribute implements AttributeInterface
      * The reader's manipulator: omnisense/omnibase's MetadataManipulator on the persistence's shapes (plan "omnibase
      * agnostic", step E3), omnibridge/doctrine's ClassMetadataManipulator where a reader was made with that one.
      */
-    public static function getClassMetadataManipulator(): null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator
+    public static function getClassMetadataManipulator(): null|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator
     {
         return AttributeReader::getInstance()->getClassMetadataManipulator();
     }
 
-    public static function getClassMetadataCompletor(mixed $entityOrClassOrMetadata): null|Completor|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataCompletor
+    public static function getClassMetadataCompletor(mixed $entityOrClassOrMetadata): null|Completor|\Base\Database\Mapping\ClassMetadataCompletor
     {
         return AttributeReader::getInstance()->getClassMetadataManipulator()->getClassMetadataCompletor($entityOrClassOrMetadata);
     }
@@ -455,7 +455,7 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $value
      * @return MetadataManipulator|false
      */
-    public static function setFieldValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): false|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator|EntityValues
+    public static function setFieldValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): false|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator|EntityValues
     {
         if (self::neutral($unitOfWork)) {
             $values = EntityValues::of($unitOfWork);
@@ -500,7 +500,7 @@ abstract class AbstractAttribute implements AttributeInterface
      * @param $value
      * @return MetadataManipulator
      */
-    public static function setPropertyValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator|EntityValues
+    public static function setPropertyValue($entity, string $property, $value, ?NeutralUnitOfWork $unitOfWork = null): MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator|EntityValues
     {
         if (self::neutral($unitOfWork)) {
             $values = EntityValues::of($unitOfWork);
@@ -593,7 +593,7 @@ abstract class AbstractAttribute implements AttributeInterface
     /*
      * The neutral hooks (plan "omnibase agnostic", step F2b): the same moments as the hooks above, with
      * omnisense/omnibridge's lifecycle events - the entity and its unit of work, no ORM type - in place of
-     * Doctrine's arguments. A persistence dispatches them (Omnibridge\Doctrine\Omnibase\DatabaseSubscriber\AttributeSubscriber
+     * Doctrine's arguments. A persistence dispatches them (Base\DatabaseSubscriber\AttributeSubscriber
      * relays Doctrine's: the neutral hook first, then the Doctrine-typed one, kept for the attributes of
      * the applications and bundles that override it, deprecated). An attribute of the core answers here;
      * an entity's property hook receives its property, a class hook null.

@@ -3,7 +3,7 @@
 namespace Base\Entity\Hours;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Hours\SpecialDayRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * A day (or a run of days) off the usual week: closed (holidays, a bank

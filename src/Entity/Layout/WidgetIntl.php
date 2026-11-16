@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 use Base\Database\Entity\Extension\TranslationInterface;
 use Base\Database\Entity\Extension\TranslationTrait;

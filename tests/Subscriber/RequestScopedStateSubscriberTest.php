@@ -4,8 +4,8 @@ namespace Tests\Base\Subscriber;
 
 use Base\Database\Attribute\Uploader;
 use Base\Service\Localizer;
-use Omnibridge\Symfony\Omnibase\Subscriber\LocalizerSubscriber;
-use Omnibridge\Symfony\Omnibase\Subscriber\RequestScopedStateSubscriber;
+use Base\Subscriber\LocalizerSubscriber;
+use Base\Subscriber\RequestScopedStateSubscriber;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;

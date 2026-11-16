@@ -3,7 +3,7 @@
 namespace Base\Entity\Hours;
 
 use Omnibridge\Doctrine\Omnibase\Repository\Hours\WeekDayHoursRepository;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * The usual hours of one day of the week: [["09:00","13:00"],["16:30","19:00"]],

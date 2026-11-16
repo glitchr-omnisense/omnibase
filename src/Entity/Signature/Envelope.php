@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Signature;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /*
  * A document sent to be signed, through omnisense/omnisign (Base\Service\Signatures):

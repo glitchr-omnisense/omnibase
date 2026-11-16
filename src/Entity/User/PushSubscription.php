@@ -6,7 +6,7 @@ use App\Entity\User;
 use Omnibridge\Doctrine\Omnibase\Repository\User\PushSubscriptionRepository;
 use DateTime;
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * One browser's Web Push endpoint for one user. A person has one of these

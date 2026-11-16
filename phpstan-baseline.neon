@@ -11629,19 +11629,19 @@ parameters:
 			path: src/Resources/Functions.php
 
 		-
-			message: '#^Call to an undefined static method Omnibridge\\Symfony\\Omnibase\\BaseBundle\:\:disableDump\(\)\.$#'
+			message: '#^Call to an undefined static method Base\\BaseBundle\:\:disableDump\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
 			path: src/Resources/Functions.php
 
 		-
-			message: '#^Call to an undefined static method Omnibridge\\Symfony\\Omnibase\\BaseBundle\:\:dump\(\)\.$#'
+			message: '#^Call to an undefined static method Base\\BaseBundle\:\:dump\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
 			path: src/Resources/Functions.php
 
 		-
-			message: '#^Call to an undefined static method Omnibridge\\Symfony\\Omnibase\\BaseBundle\:\:enableDump\(\)\.$#'
+			message: '#^Call to an undefined static method Base\\BaseBundle\:\:enableDump\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 1
 			path: src/Resources/Functions.php
@@ -14443,7 +14443,7 @@ parameters:
 			path: src/Service/Breadgrinder.php
 
 		-
-			message: '#^Parameter \#1 \$router of class Base\\Service\\Model\\Breadcrumb constructor expects Omnibridge\\Symfony\\Omnibase\\Routing\\AdvancedRouterInterface, Symfony\\Component\\Routing\\RouterInterface given\.$#'
+			message: '#^Parameter \#1 \$router of class Base\\Service\\Model\\Breadcrumb constructor expects Base\\Routing\\AdvancedRouterInterface, Symfony\\Component\\Routing\\RouterInterface given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Service/Breadgrinder.php
@@ -18607,7 +18607,7 @@ parameters:
 			path: src/Service/Translator.php
 
 		-
-			message: '#^Property Base\\Service\\Translator\:\:\$parameterBag \(Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag\) does not accept Base\\Service\\ParameterBagInterface\.$#'
+			message: '#^Property Base\\Service\\Translator\:\:\$parameterBag \(Base\\Service\\ParameterBag\) does not accept Base\\Service\\ParameterBagInterface\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Service/Translator.php
@@ -19045,7 +19045,7 @@ parameters:
 			path: src/Twig/Extension/ClipboardTwigExtension.php
 
 		-
-			message: '#^Call to an undefined method Omnibridge\\Symfony\\Omnibase\\Form\\FormProxyInterface\:\:advancedForm\(\)\.$#'
+			message: '#^Call to an undefined method Base\\Form\\FormProxyInterface\:\:advancedForm\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Twig/Extension/FormTwigExtension.php
@@ -21109,7 +21109,7 @@ parameters:
 			path: tests/Bundle/RepositoryRegistrationTest.php
 
 		-
-			message: '#^Instanceof between Tests\\Base\\Bundle\\RepositoryFixtureBundle and Omnibridge\\Symfony\\Omnibase\\Bundle\\AbstractBaseBundle will always evaluate to true\.$#'
+			message: '#^Instanceof between Tests\\Base\\Bundle\\RepositoryFixtureBundle and Base\\Bundle\\AbstractBaseBundle will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
 			path: tests/Bundle/RepositoryRegistrationTest.php
@@ -21121,7 +21121,7 @@ parameters:
 			path: tests/Bundle/WarmupOptionalDependencyTest.php
 
 		-
-			message: '#^Instanceof between Tests\\Base\\Bundle\\WarmupFixtureBundle and Omnibridge\\Symfony\\Omnibase\\Bundle\\AbstractBaseBundle will always evaluate to true\.$#'
+			message: '#^Instanceof between Tests\\Base\\Bundle\\WarmupFixtureBundle and Base\\Bundle\\AbstractBaseBundle will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
 			path: tests/Bundle/WarmupOptionalDependencyTest.php
@@ -21268,13 +21268,13 @@ parameters:
 			message: '#^Call to function class_exists\(\) with ''Base\\\\Bridge\\\\Symfony…''\|''Base\\\\Contract\\\\Access''\|''Base\\\\Contract…''\|''Base\\\\Contract\\\\Files''\|''Base\\\\Contract\\\\Routes''\|''Base\\\\Contract\\\\Tokens''\|''Base\\\\Contract\\\\Urls''\|''Base\\\\Exception…'' will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
-			path: tests/Contract/FormerNamesTest.php
+			path: tests/Contract/ContractNamesTest.php
 
 		-
 			message: '#^Call to function interface_exists\(\) with ''Base\\\\Bridge\\\\Symfony…''\|''Base\\\\Contract\\\\Access''\|''Base\\\\Contract…''\|''Base\\\\Contract\\\\Files''\|''Base\\\\Contract\\\\Routes''\|''Base\\\\Contract\\\\Tokens''\|''Base\\\\Contract\\\\Urls''\|''Base\\\\Exception…'' will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
-			path: tests/Contract/FormerNamesTest.php
+			path: tests/Contract/ContractNamesTest.php
 
 		-
 			message: '#^Method Base\\Entity\\Layout\\Image@anonymous/tests/Contract/MediaTest\.php\:86\:\:getNaturalHeight\(\) never returns null so it can be removed from the return type\.$#'
@@ -23095,25 +23095,25 @@ parameters:
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$container with no type specified\.$#'
+			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$container with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$fallbacks with no value type specified in iterable type array\.$#'
+			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:__construct\(\) has parameter \$fallbacks with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) has parameter \$bag with no value type specified in iterable type array\.$#'
+			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) has parameter \$bag with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
 
 		-
-			message: '#^Method Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method Base\\Service\\ParameterBag@anonymous/tests/Routing/RouterSchemeTest\.php\:77\:\:get\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: tests/Routing/RouterSchemeTest.php
@@ -23461,13 +23461,13 @@ parameters:
 			path: tests/Service/Model/BreadcrumbTest.php
 
 		-
-			message: '#^Call to an undefined method Omnibridge\\Symfony\\Omnibase\\Routing\\AdvancedRouterInterface\:\:expects\(\)\.$#'
+			message: '#^Call to an undefined method Base\\Routing\\AdvancedRouterInterface\:\:expects\(\)\.$#'
 			identifier: method.notFound
 			count: 2
 			path: tests/Service/Model/BreadcrumbTest.php
 
 		-
-			message: '#^Call to an undefined method Omnibridge\\Symfony\\Omnibase\\Routing\\AdvancedRouterInterface\:\:method\(\)\.$#'
+			message: '#^Call to an undefined method Base\\Routing\\AdvancedRouterInterface\:\:method\(\)\.$#'
 			identifier: method.notFound
 			count: 16
 			path: tests/Service/Model/BreadcrumbTest.php
@@ -23521,7 +23521,7 @@ parameters:
 			path: tests/Service/Model/Wysiwyg/MediaEnhancerTest.php
 
 		-
-			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotInstanceOf\(\) with ''Symfony\\\\Component\\\\DependencyInjection\\\\ParameterBag\\\\FrozenParameterBag'' and Omnibridge\\Symfony\\Omnibase\\Service\\ParameterBag will always evaluate to true\.$#'
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotInstanceOf\(\) with ''Symfony\\\\Component\\\\DependencyInjection\\\\ParameterBag\\\\FrozenParameterBag'' and Base\\Service\\ParameterBag will always evaluate to true\.$#'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1
 			path: tests/Service/ParameterBagTest.php

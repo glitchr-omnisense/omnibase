@@ -3,7 +3,7 @@
 namespace Tests\Base\Demo;
 
 use Base\Demo\DemoAccountFactory;
-use Omnibridge\Symfony\Omnibase\Security\SignInGuard;
+use Base\Security\SignInGuard;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;

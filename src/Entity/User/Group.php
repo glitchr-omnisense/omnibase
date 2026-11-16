@@ -17,7 +17,7 @@ use Base\Entity\User\Attribute\Action\GrantRoleAdapter;
 use Base\Entity\User\Attribute\GroupAction;
 use Base\Entity\User\Attribute\GroupRule;
 use Base\Entity\User\Attribute\GroupScope;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\User\GroupRepository;
 use Base\Database\Attribute\DiscriminatorEntry;
 

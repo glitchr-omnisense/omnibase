@@ -27,7 +27,7 @@ use Imagine\Image\ImagineInterface;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
-use Omnibridge\Symfony\Omnibase\Controller\UX\MediaController;
+use Base\Controller\UX\MediaController;
 
 class MediaService extends FileService implements MediaServiceInterface
 {

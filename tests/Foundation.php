@@ -30,7 +30,7 @@
  * omnibase's xx-XX form, which the translatable entities apply with the Locales contract).
  * 694 after step C3f (+1: Base\Bridge\Symfony\NotificationMessages, Notification's Symfony half, which
  * names the framework and loads none of it).
- * 695 with step C6's measure (+1: Omnibridge\Doctrine\Omnibase\MetadataSnapshot, an entity manager's mapping as data).
+ * 695 with step C6's measure (+1: Base\Testing\MetadataSnapshot, an entity manager's mapping as data).
  * 712 after step C6's seams (+17: what an entity manager built by hand reads its mapping through -
  * Base\Service\ArrayParameterBag, Base\Service\Model\ClassFinder, ClassAliases -, and the fourteen services
  * of omnibase's own caches, Base\Cache\Abstract\AbstractLocalCacheInterface no longer extending HttpKernel's
@@ -73,7 +73,7 @@
  * Base\Bridge\Symfony\SecuritySessions, the token storage and the remember-me cookie).
  * 778 after step C6b (doctrine/dbal as published, without glitchr/doctrine-dc2type): +3, Base\Bridge\Doctrine\
  * SchemaManagerFactory and MySQLSchemaManager (a SET column read with its values, the "(DC2Type:...)" comments of
- * before left out) and Omnibridge\Doctrine\Omnibase\Database\Type\MySQLSetType (a SET column as the database has it); -1, Base\
+ * before left out) and Base\Database\Type\MySQLSetType (a SET column as the database has it); -1, Base\
  * DatabaseSubscriber\EnumSubscriber, removed from the core (it wrote those comments; CHANGELOG [4.0], plan C6b).
  * 777 after step P3 (glitchr/base-plugin replaced by omnibridge/composer): +1, Base\Bridge\Symfony\FileLinks (the
  * file links of the error pages mapped to the host with Symfony's own FileLinkFormatter, which it builds and does not
@@ -124,7 +124,7 @@
  * 817 after step AU7 of the plan "omniauth" (+1: Base\Auth\NotifierSender, omniauth's Sender on omnibase's Notifier:
  * the sign-in link and the e-mailed code), 818 (+1: Base\Auth\DemoPasswords, the back office's secrets where omniauth checks
  * the password in a demonstration).
- * The stub providers Base\Bridge\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
+ * The stub providers Base\Tooling\Composer\Stub\* are not listed: omnibridge/composer alone loads them, at install.
  * 826 after step R14 of the audit "lesringostars face au master plan" (+8: Base\Database\Schema\, omnibase's
  * rules on the description built without any ORM - Omnibridge\Schema of omnisense/omnibridge -: the
  * discriminators, the translations, the vaults, the order columns, the extensions, the targets resolved,
@@ -334,6 +334,7 @@ return [
     Base\Console\Task\UserCreateInput::class,
     Base\Console\Task\UserNotification::class,
     Base\Console\Task\UserNotificationInput::class,
+    Base\Contract\Contracts::class,
     Base\Contract\Framework::class,
     Base\Contract\Link::class,
     Base\Contract\Media::class,
@@ -415,7 +416,6 @@ return [
     Base\Database\Entity\Extension\VaultInterface::class,
     Base\Database\Entity\Extension\VaultTrait::class,
     Base\Database\Events::class,
-    Base\Database\FormerNames::class,
     Base\Database\Lifecycle\RevisionRecorder::class,
     Base\Database\Lifecycle\SettingsInvalidation::class,
     Base\Database\Lifecycle\ThreadParticipants::class,
@@ -762,6 +762,49 @@ return [
     Base\Imagine\Svg\Image::class,
     Base\Imagine\Svg\Imagine::class,
     Base\Mailer\MailTrap::class,
+    Base\Mapping\AssociationOverride::class,
+    Base\Mapping\AssociationOverrides::class,
+    Base\Mapping\AttributeOverride::class,
+    Base\Mapping\AttributeOverrides::class,
+    Base\Mapping\Cache::class,
+    Base\Mapping\ChangeTrackingPolicy::class,
+    Base\Mapping\Column::class,
+    Base\Mapping\CustomIdGenerator::class,
+    Base\Mapping\DiscriminatorColumn::class,
+    Base\Mapping\DiscriminatorMap::class,
+    Base\Mapping\Embeddable::class,
+    Base\Mapping\Embedded::class,
+    Base\Mapping\Entity::class,
+    Base\Mapping\EntityListeners::class,
+    Base\Mapping\GeneratedValue::class,
+    Base\Mapping\HasLifecycleCallbacks::class,
+    Base\Mapping\Id::class,
+    Base\Mapping\Index::class,
+    Base\Mapping\InheritanceType::class,
+    Base\Mapping\InverseJoinColumn::class,
+    Base\Mapping\JoinColumn::class,
+    Base\Mapping\JoinColumnProperties::class,
+    Base\Mapping\JoinColumns::class,
+    Base\Mapping\JoinTable::class,
+    Base\Mapping\ManyToMany::class,
+    Base\Mapping\ManyToOne::class,
+    Base\Mapping\MappedSuperclass::class,
+    Base\Mapping\MappingAttribute::class,
+    Base\Mapping\OneToMany::class,
+    Base\Mapping\OneToOne::class,
+    Base\Mapping\OrderBy::class,
+    Base\Mapping\PostLoad::class,
+    Base\Mapping\PostPersist::class,
+    Base\Mapping\PostRemove::class,
+    Base\Mapping\PostUpdate::class,
+    Base\Mapping\PreFlush::class,
+    Base\Mapping\PrePersist::class,
+    Base\Mapping\PreRemove::class,
+    Base\Mapping\PreUpdate::class,
+    Base\Mapping\SequenceGenerator::class,
+    Base\Mapping\Table::class,
+    Base\Mapping\UniqueConstraint::class,
+    Base\Mapping\Version::class,
     Base\Notifier\Abstract\BaseNotificationInterface::class,
     Base\Notifier\Abstract\BaseNotifier::class,
     Base\Notifier\Abstract\BaseNotifierInterface::class,

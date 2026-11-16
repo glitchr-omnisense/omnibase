@@ -71,7 +71,7 @@ final class StaleContainerKernel extends Kernel implements CompilerPassInterface
 
         if ($container->hasDefinition('router.default') && \is_array($options = $container->getDefinition('router.default')->getArgument(2))) {
             foreach (['matcher_class', 'generator_class'] as $option) {
-                if (str_starts_with((string) ($options[$option] ?? ''), 'Omnibridge\\Symfony\\Omnibase\\Routing\\')) {
+                if (str_starts_with((string) ($options[$option] ?? ''), 'Base\\Routing\\')) {
                     unset($options[$option]);
                 }
             }

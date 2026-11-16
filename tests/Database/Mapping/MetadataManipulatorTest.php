@@ -13,7 +13,7 @@ use Base\Database\Mapping\MetadataManipulator;
 use Base\Database\Schema\EntitySchema;
 use Base\Database\UnitOfWorks;
 use Doctrine\ORM\EntityManagerInterface;
-use Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Omnibridge\Persistence\Backend;
 use Omnibridge\Persistence\UnitOfWork;
 use Omnibridge\Schema\Description;
@@ -210,10 +210,10 @@ final class MetadataManipulatorTest extends KernelTestCase
         if ($shapes instanceof DescriptionShapes) {
             return $shapes;
         }
-        if (!class_exists(\Omnibridge\Symfony\Omnibase\Console\InstalledEntities::class)) {
+        if (!class_exists(\Base\Console\InstalledEntities::class)) {
             self::markTestSkipped('omnibridge/symfony is not installed: no entity folders to describe.');
         }
-        $options = \Omnibridge\Symfony\Omnibase\Console\InstalledEntities::options($entityManager, (string) $container->getParameter('kernel.project_dir'));
+        $options = \Base\Console\InstalledEntities::options($entityManager, (string) $container->getParameter('kernel.project_dir'));
 
         return new DescriptionShapes(EntitySchema::describe($options['paths'], $options));
     }

@@ -9,7 +9,7 @@ use Base\Entity\User\Notification;
 use Base\Notifier\Recipient\Recipient;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\TimezoneRecipientInterface;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\SettingBagInterface;
 use DateTime;
 use Doctrine\DBAL\Exception as DoctrineException;

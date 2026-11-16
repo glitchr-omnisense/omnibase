@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Security\Voter;
 
-use Omnibridge\Symfony\Omnibase\Security\Voter\PermissionVoter;
+use Base\Security\Voter\PermissionVoter;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 

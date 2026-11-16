@@ -67,8 +67,8 @@ return [
     Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
     // ...
-    // omnibase's bundle, omnibridge/symfony's since 5.0 (Omnibridge\Symfony\Omnibase\BaseBundle in 4.x)
-    Omnibridge\Symfony\Omnibase\BaseBundle::class => ['all' => true],
+    // omnibase's bundle, omnibridge/symfony's since 5.0 (Base\BaseBundle in 4.x)
+    Base\BaseBundle::class => ['all' => true],
 ];
 ```
 

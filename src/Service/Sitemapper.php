@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\Attributes\Attribute\Sitemap;
 use Base\Attributes\AttributeReader;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SitemapEntry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;

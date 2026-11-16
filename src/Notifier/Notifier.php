@@ -3,7 +3,7 @@
 namespace Base\Notifier;
 
 use Base\Notifier\Mail\SignInMails;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouter;
+use Base\Routing\AdvancedRouter;
 
 use Base\Entity\User;
 use Base\Entity\User\Notification;

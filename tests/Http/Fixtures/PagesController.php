@@ -2,9 +2,9 @@
 
 namespace Tests\Base\Http\Fixtures;
 
-use Omnibridge\Symfony\Omnibase\Field\Type\EmojiPickerType;
-use Omnibridge\Symfony\Omnibase\Form\FormProcessorInterface;
-use Omnibridge\Symfony\Omnibase\Form\FormProxy;
+use Base\Field\Type\EmojiPickerType;
+use Base\Form\FormProcessorInterface;
+use Base\Form\FormProxy;
 use Base\Form\Model\ContactModel;
 use Base\Notifier\ContactMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,7 +45,7 @@ final class PagesController extends AbstractController
     public function contact(Request $request, FormProxy $forms): Response
     {
         return $forms
-            ->createProcessor('contact', 'Omnibridge\\Symfony\\Omnibase\\Form\\Type\\ContactType', ['use_model' => true, 'csrf_protection' => false, 'guard' => false])
+            ->createProcessor('contact', 'Base\\Form\\Type\\ContactType', ['use_model' => true, 'csrf_protection' => false, 'guard' => false])
             ->onDefault(fn (FormProcessorInterface $processor) => $this->render(ContactMessage::TEMPLATE, ['user' => null, 'form' => $processor->getForm()->createView()]))
             ->onSubmit(function (FormProcessorInterface $processor): Response {
                 $model = $processor->getData();

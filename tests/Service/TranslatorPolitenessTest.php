@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Service;
 
-use Omnibridge\Symfony\Omnibase\BaseBundle;
-use Omnibridge\Symfony\Omnibase\Bundle\AbstractBaseBundle;
+use Base\BaseBundle;
+use Base\Bundle\AbstractBaseBundle;
 use Base\Service\Localizer;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;

@@ -8,7 +8,7 @@ use Base\Service\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\User\PermissionRepository;
 
 #[ORM\Entity(repositoryClass:PermissionRepository::class)]

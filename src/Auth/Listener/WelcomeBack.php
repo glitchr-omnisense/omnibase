@@ -14,7 +14,7 @@ use Omnibridge\Persistence\UnitOfWork;
 /**
  * A disabled account that proved who it is: the "welcome back" e-mail, with
  * a token good an hour - its next sign-in within that hour enables the
- * account again (UserAccounts::check()). Omnibridge\Symfony\Omnibase\Security\UserChecker's
+ * account again (UserAccounts::check()). Base\Security\UserChecker's
  * checkPostAuth() under Symfony, on omniauth's AccountRefused event.
  */
 class WelcomeBack

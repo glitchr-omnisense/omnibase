@@ -2,11 +2,11 @@
 
 namespace Base\Service;
 
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Omnibridge\Contract\Requests;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use  Omnibridge\Symfony\Omnibase\Security\LoginFormAuthenticator;
-use  Omnibridge\Symfony\Omnibase\Security\RescueFormAuthenticator;
+use  Base\Security\LoginFormAuthenticator;
+use  Base\Security\RescueFormAuthenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**

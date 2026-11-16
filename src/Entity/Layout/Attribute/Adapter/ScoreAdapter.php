@@ -5,9 +5,9 @@ namespace Base\Entity\Layout\Attribute\Adapter;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractRuleAdapter;
 use Base\Enum\Operation;
-use Omnibridge\Symfony\Omnibase\Field\Type\NumberType;
+use Base\Field\Type\NumberType;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\ScoreAdapterRepository;
 use Base\Database\Attribute\Cache;
 

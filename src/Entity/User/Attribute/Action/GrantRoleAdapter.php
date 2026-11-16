@@ -6,8 +6,8 @@ use Base\Database\Attribute\Cache;
 use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractActionAdapter;
 use Base\Entity\User;
-use Omnibridge\Symfony\Omnibase\Field\Type\SelectType;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Field\Type\SelectType;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\User\Attribute\Action\GrantRoleAdapterRepository;
 
 /**

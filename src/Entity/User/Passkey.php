@@ -7,7 +7,7 @@ use Base\Database\Attribute\Timestamp;
 use Omnibridge\Doctrine\Omnibase\Repository\User\PasskeyRepository;
 
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * A passkey of an account (WebAuthn's credential record), described by the

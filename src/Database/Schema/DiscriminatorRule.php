@@ -9,7 +9,7 @@ use Omnibridge\Schema\Builder\Rule;
 use Omnibridge\Schema\Declaration\ClassDeclaration;
 
 /**
- * omnibase's discriminators, as Omnibridge\Doctrine\Omnibase\MappingDriver and
+ * omnibase's discriminators, as the Doctrine persistence's mapping driver and
  * #[DiscriminatorEntry] give them to Doctrine (plan "omnibase agnostique",
  * C6), on the description built without it:
  *

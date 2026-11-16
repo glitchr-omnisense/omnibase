@@ -15,7 +15,7 @@ Texts are translated by `Base\Service\Translator`. A key may name its domain
 (`@mailbox.form.subject`), or be looked up in the field's `translation_domain`.
 
 Every field has the domain **`fields`** by default
-(`Omnibridge\Symfony\Omnibase\Form\Extension\FormTypeExtension`), where omnibase's own field types
+(`Base\Form\Extension\FormTypeExtension`), where omnibase's own field types
 keep their words. A form type that declares its own domain is followed by its
 fields:
 
@@ -49,7 +49,7 @@ in every key to go around it; they no longer need to.)
 
 ## A PHP enum in a select
 
-`Omnibridge\Symfony\Omnibase\Field\Type\SelectType` bound to a property that holds a PHP enum finds
+`Base\Field\Type\SelectType` bound to a property that holds a PHP enum finds
 its choices by itself - the cases - and hands the case back to the record:
 
 ```php

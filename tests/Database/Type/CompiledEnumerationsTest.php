@@ -7,7 +7,7 @@ use Base\Enum\ConnectionState;
 use Doctrine\DBAL\Types\Type;
 use Omnibridge\Doctrine\Omnibase\EnumTypeAdapter;
 use Omnibridge\Doctrine\Omnibase\Types;
-use Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\EnumerationsPass;
+use Base\DependencyInjection\Compiler\Pass\EnumerationsPass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

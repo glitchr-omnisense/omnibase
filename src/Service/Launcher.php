@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use DateTime;
 use Omnibridge\Contract\Access;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

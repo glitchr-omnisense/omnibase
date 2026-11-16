@@ -1,13 +1,13 @@
 # PHPStan's knowledge of omnibase: an application includes it from its phpstan.neon
 # (includes: [vendor/omnisense/omnibase/extension.neon]), the core's own phpstan.neon does.
 # - the finder language of the repositories (findOneBySlug(), cacheByParentAndState()...):
-#   Base\Bridge\PHPStan\FinderMethodsExtension;
+#   Base\Tooling\PHPStan\FinderMethodsExtension;
 # - the entities' accessors answered by __call(): an #[Alias] (getDestination() as getParent())
-#   and a translation's methods (getLabel() of TagIntl on a Tag): Base\Bridge\PHPStan\EntityAccessorsExtension.
+#   and a translation's methods (getLabel() of TagIntl on a Tag): Base\Tooling\PHPStan\EntityAccessorsExtension.
 services:
     -
-        class: Base\Bridge\PHPStan\FinderMethodsExtension
+        class: Base\Tooling\PHPStan\FinderMethodsExtension
         tags: [phpstan.broker.methodsClassReflectionExtension]
     -
-        class: Base\Bridge\PHPStan\EntityAccessorsExtension
+        class: Base\Tooling\PHPStan\EntityAccessorsExtension
         tags: [phpstan.broker.methodsClassReflectionExtension]

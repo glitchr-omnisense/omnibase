@@ -2,7 +2,7 @@
 
 namespace Tests\Base\Subscriber;
 
-use Omnibridge\Symfony\Omnibase\Subscriber\LocalizerSubscriber;
+use Base\Subscriber\LocalizerSubscriber;
 use PHPUnit\Framework\TestCase;
 
 /**

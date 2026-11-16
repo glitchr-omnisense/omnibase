@@ -6,7 +6,7 @@ use Base\Entity\User;
 use Omnibridge\Doctrine\Omnibase\Repository\User\ComplaintRepository;
 use Base\Service\Model\IconizeInterface;
 use DateTime;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * A user's complaint about another one (or about something), for the staff to answer.
@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
  * by name as well as by account: an account may go, the complaint stays readable. `targetStatus` is the rank the
  * one complained about held when it was made.
  *
- * Who may read one is Omnibridge\Symfony\Omnibase\Security\Voter\ComplaintVoter's call (COMPLAINT_READ / COMPLAINT_HANDLE on the
+ * Who may read one is Base\Security\Voter\ComplaintVoter's call (COMPLAINT_READ / COMPLAINT_HANDLE on the
  * complaint): the staff whose roles outrank the one it is about - a complaint about a moderator goes to the ranks
  * above them, never to the moderator - and never the one it is about.
  *

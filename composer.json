@@ -1,7 +1,7 @@
 {
     "name": "omnisense/omnibase",
     "type": "library",
-    "description": "omnibase: entities, view models, contracts, forms and helpers for any PHP host; under Symfony with omnibridge/symfony, under Laravel with omnibridge/laravel, persisted through omnibridge/doctrine",
+    "description": "omnibase: entities, repositories, view models, contracts, forms and helpers for any PHP host - Base\\ is what is provided, App\\ the application that overrides it by the same path; under Symfony with omnibridge/symfony, under Laravel with omnibridge/laravel, persisted through omnibridge/doctrine or omnibridge/eloquent",
     "keywords": [
         "omnibase",
         "entities",
@@ -73,20 +73,14 @@
         "symfony/uid": "^6.0|^7.0|^8.0",
         "symfony/yaml": "^6.0|^7.0|^8.0"
     },
-    "conflict": {
-        "omnibridge/doctrine": "<2.0",
-        "omnibridge/eloquent": "<1.1",
-        "omnibridge/laravel": "<1.2",
-        "omnibridge/symfony": "<2.0"
-    },
     "replace": {
         "omniscient/omnibase": "self.version",
         "glitchr/omnibase": "self.version"
     },
     "suggest": {
-        "omnibridge/symfony": "The core under Symfony: since 5.0 the bundle itself (Omnibridge\\Symfony\\Omnibase\\BaseBundle, registered in config/bundles.php), its configuration (base:), its container extension and compiler passes, the Symfony controllers (their routes imported with `type: omnibase`), the adapters of the host's contracts and the framework packages (FrameworkBundle, DoctrineBundle, SecurityBundle, TwigBundle, Form, Routing, HttpKernel, Validator, Cache, Process, Workflow...) (^2.0)",
-        "omnibridge/doctrine": "The persistence on Doctrine: since 5.0 the core requires no Doctrine package but doctrine/collections; omnibridge/doctrine brings doctrine/orm and dbal, the DQL functions (beberlei/doctrineextensions, scienta/doctrine-json-functions), the repositories, the mapping and the types of the core's entities (^2.0)",
-        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (^1.2)",
+        "omnibridge/symfony": "The core under Symfony: the bundle (Base\\BaseBundle, registered in config/bundles.php), its configuration (base:), the Symfony form types, controllers, commands and security classes under their Base\\ names, the adapters of the host's contracts (^1.0)",
+        "omnibridge/doctrine": "The persistence on Doctrine behind the core's contracts: the DQL compiler of the finder language, the statements of the backend-only queries, the mapping and the types (^1.0)",
+        "omnibridge/laravel": "The core under Laravel: the contracts, the services' list bound, the forms drawn in Blade (^1.0)",
         "symfony/validator": "The validation of the entities' #[Assert\\...] attributes under Symfony (omnibridge/symfony requires it), and its `validators` catalogue (^6.0|^7.0|^8.0)",
         "symfony/http-client": "An HTTP client behind the core's HTTP contract (symfony/http-client-contracts): the currency rates (Trading), the remote classifiers, embeds (^6.0|^7.0|^8.0)",
         "florianv/swap": "The currency rates of Base\\Service\\Trading (^4.0)",
@@ -126,7 +120,9 @@
         "twig/intl-extra": "Twig's format_date(), format_number()... in a Twig application's templates; omnibase's |datetime and |format_currency no longer need it (Base\\View\\Dates, Money) (^3.0)",
         "twig/inky-extra": "inky_to_html in the core's e-mail frame (@Base/notifier/email.html.twig) (^3.0)",
         "twig/cssinliner-extra": "inline_css in the core's e-mail frame, and |inline_css_email (MailTwigExtension) (^3.0)",
-        "twig/cache-extra": "{% cache %} in the core's breakpoints and widget templates (@Base/breakpoints.css.twig, @Base/widget/*) (^3.0)"
+        "twig/cache-extra": "{% cache %} in the core's breakpoints and widget templates (@Base/breakpoints.css.twig, @Base/widget/*) (^3.0)",
+        "omnibridge/eloquent": "The persistence on Eloquent's database layer behind the same contracts (^1.0)",
+        "symfony/form": "Base\\Form\\Type\\* (the contact, comment, privacy, search and password forms) and FormDefinition::of(): the forms written as Symfony form types, read on every host (omnibridge/symfony and omnibridge/laravel install it)"
     },
     "require-dev": {
         "api-platform/symfony": "^4.0",
@@ -143,9 +139,9 @@
         "league/flysystem-ftp": "^3.0",
         "omniauth/otp": "1.x-dev",
         "omniauth/webauthn": "1.x-dev",
-        "omnibridge/doctrine": "2.x-dev",
-        "omnibridge/symfony": "^2.0",
-        "omnibridge/twig": "1.x-dev",
+        "omnibridge/doctrine": "^1.0",
+        "omnibridge/symfony": "^1.0",
+        "omnibridge/twig": "^1.0",
         "omnisense/omniauth": "1.x-dev",
         "omnisense/omnishield": "1.x-dev",
         "omnisense/omnisign": "1.x-dev",
@@ -192,11 +188,11 @@
     "extra": {
         "omnibridge": {
             "stubs": [
-                "Base\\Bridge\\Composer\\Stub\\EntityStub",
-                "Base\\Bridge\\Composer\\Stub\\EnumStub",
-                "Base\\Bridge\\Composer\\Stub\\FormStub",
-                "Base\\Bridge\\Composer\\Stub\\NotifierStub",
-                "Base\\Bridge\\Composer\\Stub\\RepositoryStub"
+                "Base\\Tooling\\Composer\\Stub\\EntityStub",
+                "Base\\Tooling\\Composer\\Stub\\EnumStub",
+                "Base\\Tooling\\Composer\\Stub\\FormStub",
+                "Base\\Tooling\\Composer\\Stub\\NotifierStub",
+                "Base\\Tooling\\Composer\\Stub\\RepositoryStub"
             ],
             "patches": [
                 {
@@ -228,11 +224,8 @@
                 "omnisense/omniauth": "1.x-dev",
                 "omniauth/webauthn": "1.x-dev",
                 "omniauth/otp": "1.x-dev",
-                "omnibridge/doctrine": "2.x-dev"
+                "omnibridge/doctrine": "^1.0"
             }
-        },
-        "branch-alias": {
-            "dev-6.x": "6.0.x-dev"
         }
     }
 }

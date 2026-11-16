@@ -2,8 +2,8 @@
 
 namespace Tests\Base\Field;
 
-use Omnibridge\Symfony\Omnibase\Field\Type\EditorType;
-use Omnibridge\Symfony\Omnibase\Field\Type\WysiwygType;
+use Base\Field\Type\EditorType;
+use Base\Field\Type\WysiwygType;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**

@@ -3,7 +3,7 @@
 namespace Base\Entity\Layout;
 
 use Base\Database\Attribute\Associate;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 use Base\Database\Attribute\Vault;
 use Base\Database\Attribute\Uploader;

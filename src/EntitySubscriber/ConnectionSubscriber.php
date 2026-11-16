@@ -4,7 +4,7 @@ namespace Base\EntitySubscriber;
 
 use App\Entity\User;
 use Base\Enum\ConnectionState;
-use Omnibridge\Symfony\Omnibase\Security\SignInGuard;
+use Base\Security\SignInGuard;
 use Base\Security\UserTracker;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

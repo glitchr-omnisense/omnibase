@@ -4,7 +4,7 @@ namespace Tests\Base\Bridge\Doctrine;
 
 use Base\Attributes\AttributeReader;
 use Omnibridge\Doctrine\Omnibase\MappingDriver;
-use Omnibridge\Doctrine\Omnibase\MetadataSnapshot;
+use Base\Testing\MetadataSnapshot;
 use Base\Entity\Thread;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;

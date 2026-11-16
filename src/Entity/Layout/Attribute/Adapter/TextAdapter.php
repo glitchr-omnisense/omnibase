@@ -6,7 +6,7 @@ use Base\Database\Attribute\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\Common\AbstractAdapter;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\Adapter\TextAdapterRepository;
 use Base\Database\Attribute\Cache;
 

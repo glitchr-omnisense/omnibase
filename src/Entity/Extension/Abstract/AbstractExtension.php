@@ -11,7 +11,7 @@ use Base\Service\Model\IconizeInterface;
 use Base\Service\Locator;
 use Base\Traits\BaseTrait;
 use DateTimeInterface;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Base\Database\Attribute\Cache;
 
 #[ORM\Entity(repositoryClass: AbstractExtensionRepository::class)]

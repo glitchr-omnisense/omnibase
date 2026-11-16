@@ -28,7 +28,7 @@ use Omnibridge\Persistence\UnitOfWork;
  * What only a framework has - its kernel and container, its console, its form
  * factory, its profiler, its request, route and response objects - is the
  * host's facade, a subclass of this one: under Symfony omnibridge/symfony's
- * Omnibridge\Symfony\Omnibase\Service\SymfonyBaseService, which the container
+ * Base\Service\SymfonyBaseService, which the container
  * hands out as `base.service` and Base\Service\BaseService, so the
  * applications' code and templates calling those methods keep them, with
  * Symfony's services as the fallback of the methods below.

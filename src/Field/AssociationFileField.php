@@ -2,8 +2,8 @@
 
 namespace Base\Field;
 
-use Omnibridge\Symfony\Omnibase\Field\Type\AvatarType;
-use Omnibridge\Symfony\Omnibase\Field\Type\ImageType;
+use Base\Field\Type\AvatarType;
+use Base\Field\Type\ImageType;
 use Base\Field\Option\TextAlign;
 
 use Symfony\Contracts\Translation\TranslatableInterface;

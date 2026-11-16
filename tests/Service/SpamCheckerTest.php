@@ -6,7 +6,7 @@ use Base\Entity\Thread\Comment;
 use Base\Enum\CommentState;
 use Base\Enum\SpamScore;
 use Base\Form\Model\CommentModel;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\FormGuard;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;

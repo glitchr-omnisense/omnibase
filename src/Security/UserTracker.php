@@ -4,7 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use Base\Repository\User\Connections;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Omnibridge\Persistence\UnitOfWork;
 use Symfony\Component\HttpFoundation\RequestStack;
 

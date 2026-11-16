@@ -27,8 +27,8 @@ any other keeps its path below `Omnibridge\Doctrine\Omnibase\`.
 | Former name | Now |
 |---|---|
 | `Base\Bridge\Doctrine\*` (the unit of work, backend, shapes, repositories, mapping, types, configuration, snapshot, `Behaviour\*`) | `Omnibridge\Doctrine\Omnibase\*` |
-| `Base\Database\Mapping\{ClassMetadataManipulator, ClassMetadataCompletor, ClassMetadataFactory, NamingStrategy}` | `Omnibridge\Doctrine\Omnibase\Database\Mapping\*` |
-| `Base\Database\Type\{ArrayType, DateTimeTypeUTC, MySQLSetType, UtcDateTimeType, UtcDateTimeImmutableType, Passkey\*}` | `Omnibridge\Doctrine\Omnibase\Database\Type\*` |
+| `Base\Database\Mapping\{ClassMetadataManipulator, ClassMetadataCompletor, ClassMetadataFactory, NamingStrategy}` | `Base\Database\Mapping\*` |
+| `Base\Database\Type\{ArrayType, DateTimeTypeUTC, MySQLSetType, UtcDateTimeType, UtcDateTimeImmutableType, Passkey\*}` | `Base\Database\Type\*` |
 | `Base\Database\{Walker, Function, Filter, Middleware, Event}\*`, `Omnibridge\Doctrine\Omnibase\Database\Schema\Describer` | `Omnibridge\Doctrine\Omnibase\Database\...` |
 | `Base\Database\Repository\{ServiceEntityRepository, ServiceEntityParser}` (the finder's Doctrine compiler) | `Omnibridge\Doctrine\Omnibase\Database\Repository\*` |
 | the 81 repositories `Base\Repository\**\*Repository` | `Omnibridge\Doctrine\Omnibase\Repository\**\*Repository` |
@@ -97,8 +97,8 @@ own `ClassMetadataFactory` is used; the class names are the core's (D6).
 | Column types: `datetime`/`datetimetz` in UTC, `array`, `utc_datetime(_immutable)`, the enumerations | `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()` → `Omnibridge\Doctrine\Omnibase\Types::register()`, then `registerEnumerations()` of the list omnibridge/symfony's `EnumerationsPass` compiles (parameter `omnibridge.doctrine.enumerations`) | `Types::register()` |
 | Filters (`trash_filter`, `vault_filter`), DQL functions (RAND, FIELD, JSON_*), the default hint | `DoctrineConfigurationPass` → `Omnibridge\Doctrine\Omnibase\Configuration`'s lists; filters enabled at boot (`Configuration::enableFilters()`) | `Configuration::apply()`, `enableFilters()` |
 | The driver: discriminator maps generated, the `resolveDiscriminator` event, the table names checked | `DoctrineConfigurationPass` wraps every entity manager's driver in `Omnibridge\Doctrine\Omnibase\MappingDriver` | the same wrapper |
-| Naming | `naming_strategy: Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy` | set on the configuration |
-| The factory | `class_metadata_factory_name: Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataFactory` (kept: the naming strategy of a cached ClassMetadata, `isEntity()`, `getAllClassNames()`) | Doctrine's own |
+| Naming | `naming_strategy: Base\Database\Mapping\NamingStrategy` | set on the configuration |
+| The factory | `class_metadata_factory_name: Base\Database\Mapping\ClassMetadataFactory` (kept: the naming strategy of a cached ClassMetadata, `isEntity()`, `getAllClassNames()`) | Doctrine's own |
 | Listeners: `AttributeSubscriber`, `IntlSubscriber`, the targets resolved, the entity listeners attached, `TrackingPolicySubscriber`, `ExtensionSubscriber`; on flush `TrasheableSubscriber`, `VersionableSubscriber`, `InverseCollectionCacheSubscriber` | tags `doctrine.event_listener` (config/services/media.php), in their priorities' order | added in that order |
 | Repositories | DoctrineBundle's `ContainerRepositoryFactory` (the services) | `Omnibridge\Doctrine\Omnibase\RepositoryFactory`, set by `Mapping::configure()` as omnibridge/doctrine's `configure:` (from 4d2436d), before the entity manager exists: its own `getRepository()` builds a repository taking a `ManagerRegistry` from `Omnibridge\Doctrine\Omnibase\Registry`. `$mapping->getRepository()` (deprecated) hands the same one, and is the way for an entity manager built without `configure:` (Doctrine's default factory) |
 | `App\Entity\X` = `Base\Entity\X` | `BaseBundle::warmUp()`'s aliases, `AbstractBaseBundle`'s fallback autoloader | `Base\Service\Model\ClassAliases::register()` (the same convention) |
@@ -251,7 +251,7 @@ What keeps the entity manager, on purpose: the mapping (`ClassMetadataManipulato
 `ClassMetadataFactory`, `EntityHydrator`), `ServiceEntityRepository`, the Doctrine listeners, the
 Doctrine commands (`doctrine:database:import`, `doctrine:array:upgrade`, the schema's charset), the
 validators and `CropperType` (the form layer, F5b), `AbstractEventDispatcher` and `BaseNotifier` (F5a),
-`DemoAccountFactory` (Doctrine's fixtures), `Omnibridge\Symfony\Omnibase\Console\Command` (omnibridge/symfony's `Omnibase\Console\Command` since F5c; its deprecated `$entityManager`, read
+`DemoAccountFactory` (Doctrine's fixtures), `Base\Console\Command` (omnibridge/symfony's `Omnibase\Console\Command` since F5c; its deprecated `$entityManager`, read
 by the applications' commands, beside its `$unitOfWork`), `Omnibridge\Symfony\Omnibase\FrameworkLocator` (since F2f: the entity
 manager and the registry BaseTrait handed out, now deprecated there). `tests/Database/UnitOfWorkPathTest`
 keeps the converted files off the entity manager.
@@ -317,7 +317,7 @@ application's vendor suite):
 - an entity manager built by hand in a PHP process of its own
   (`tests/Bridge/Doctrine/hand-built.php`: Composer's autoloader, a DBAL
   connection, `EntityManagers::create()`, `Mapping::register()`) gives the
-  metadata Symfony's gives, class by class - `Omnibridge\Doctrine\Omnibase\MetadataSnapshot`:
+  metadata Symfony's gives, class by class - `Base\Testing\MetadataSnapshot`:
   every public property of each ClassMetadata (table, inheritance,
   discriminator map and value, fields and their types, associations, cache,
   callbacks, entity listeners, repository), what each filter adds to a query of

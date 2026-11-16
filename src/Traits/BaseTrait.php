@@ -92,7 +92,7 @@ trait BaseTrait
         }
         $unitOfWork = \Omnibridge\Runtime::find(\Omnibridge\Persistence\UnitOfWork::class);
         if (!$unitOfWork instanceof \Omnibridge\Persistence\UnitOfWork) {
-            throw MissingContractException::for('Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator');
+            throw MissingContractException::for('Base\Database\Mapping\ClassMetadataManipulator');
         }
         $class = match (true) {
             \is_string($entityOrClassOrMetadata) => $entityOrClassOrMetadata,

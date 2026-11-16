@@ -13,7 +13,13 @@
 
 namespace {
 
-    use Omnibridge\Symfony\Omnibase\BaseBundle;
+    // The generic contracts under their Base\ names (Base\Contract\Contracts): declared before any type is checked,
+    // where an autoloader gives the class (this file loaded on its own declares the functions only).
+    if (class_exists(\Base\Contract\Contracts::class)) {
+        \Base\Contract\Contracts::declare();
+    }
+
+    use Base\BaseBundle;
     use Omnibridge\Symfony\Omnibase\FrameworkLocator;
     use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
     use Symfony\Component\HttpFoundation\Request;

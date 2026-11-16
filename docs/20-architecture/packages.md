@@ -22,7 +22,7 @@ http-client). `docker/bin/bare --install --alone` installs exactly that (var/bar
 | symfony/validator, cache, event-dispatcher, process, workflow, var-dumper, error-handler, asset, expression-language | **omnibridge/symfony** |
 | symfony/http-client, discord-notifier, league/flysystem-ftp, phpoffice/phpspreadsheet, web-auth/webauthn-lib, florianv/swap | `suggest`: the application that uses the feature requires it |
 
-The bundle itself is omnibridge/symfony's since 5.0: `Omnibridge\Symfony\Omnibase\BaseBundle`, its
+The bundle itself is omnibridge/symfony's since 5.0: `Base\BaseBundle`, its
 `Bundle\*`, `DependencyInjection\*`, the Symfony controllers and the service configuration
 (`config/omnibase/`); their former names (`Base\BaseBundle`...) were aliases until 5.x. The bundle's
 path is still the core's `src/` (`@BaseBundle/...`, the templates, the translations), and its
@@ -59,11 +59,11 @@ a Laravel application does not.
 | **The bundles the core works with** | scheb/2fa, league/flysystem-bundle, hwi/oauth-bundle, web-auth/webauthn-symfony-bundle, api-platform/symfony and doctrine-orm, symfony/webpack-encore-bundle, symfony/ux-twig-component, glitchr/ux-google, glitchr/well-known, nelmio/cors-bundle, nelmio/security-bundle | `suggest` of the core; the application requires the ones its `config/bundles.php` registers |
 
 **omnibridge/doctrine stays required**: the core does not load without it.
-`Omnibridge\Doctrine\Omnibase\Database\Type\UtcDateTimeType`, `UtcDateTimeImmutableType` and `DateTimeTypeUTC` extend
+`Base\Database\Type\UtcDateTimeType`, `UtcDateTimeImmutableType` and `DateTimeTypeUTC` extend
 omnibridge/doctrine's types and `Base\Database\Type\Utc` reads its zone (the types registered at
 every boot, `BaseExtension::prependDoctrineTypes()`, `BaseBundle::boot()`);
-`Omnibridge\Doctrine\Omnibase\Database\Mapping\NamingStrategy` extends its `NamingStrategy`;
-`Omnibridge\Symfony\Omnibase\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass` and `Omnibridge\Doctrine\Omnibase\Mapping`
+`Base\Database\Mapping\NamingStrategy` extends its `NamingStrategy`;
+`Base\DependencyInjection\Compiler\Pass\DoctrineConfigurationPass` and `Omnibridge\Doctrine\Omnibase\Mapping`
 wrap every entity manager's driver in its `DeclarationDriver`. Since the agnostic core's step F3
 the core's Doctrine classes themselves are omnibridge/doctrine's (`Omnibridge\Doctrine\Omnibase\`, their
 former names aliased by the core until 5.x: [the Doctrine mapping](doctrine.md)); leaving the package to the
@@ -125,7 +125,7 @@ glitchr/base-plugin until 4.0), and declares what it asks of it in its own
 - **the stubs** of `App\Entity`, `App\Enum`, `App\Form`, `App\Notifier` and
   `App\Repository` - one per plain class `Base\<Name>\X` the application does not
   define in `src/<Name>/`, the alias `AbstractBaseBundle` declares at run time - by
-  the providers `Base\Bridge\Composer\Stub\*`, written after every
+  the providers `Base\Tooling\Composer\Stub\*`, written after every
   `dump-autoload` into `vendor/composer/omnibridge/stubs/`, which no autoloader
   reads (for an IDE; never a definition at run time; `StubsTest`). The providers
   are loaded by the engine alone, outside the Foundation;
@@ -143,9 +143,9 @@ and checks vendor/ in its CI with `composer omnibridge:patches --check` (and
 the patch.
 
 Nothing else is changed in an application: its `bin/console` keeps its own line,
-`use Omnibridge\Symfony\Omnibase\Console\Application;` in place of FrameworkBundle's (glitchr/base-plugin
+`use Base\Console\Application;` in place of FrameworkBundle's (glitchr/base-plugin
 used to rewrite it at each install; a site made from the skeleton writes it once). The class is
-omnibridge/symfony's `Omnibridge\Symfony\Omnibase\Console\Application` since step F5c (its former name,
+omnibridge/symfony's `Base\Console\Application` since step F5c (its former name,
 `Base\Console\Application`, was aliased until 5.x).
 
 ### None required de facto
@@ -188,7 +188,7 @@ The others have a fallback:
 |---|---|
 | scheb/2fa | the user still declares its interfaces when the package is installed; no two-factor sign-in |
 | league/flysystem-bundle | the `flysystem` service on omnibase's local storages (above) |
-| hwi/oauth-bundle | the service `Omnibridge\Symfony\Omnibase\Security\UserProvider` is a `UserProvider` (with it, an `OAuthUserProvider`: the same, declared OAuth-aware); `oauth_available()` false |
+| hwi/oauth-bundle | the service `Base\Security\UserProvider` is a `UserProvider` (with it, an `OAuthUserProvider`: the same, declared OAuth-aware); `oauth_available()` false |
 | web-auth/webauthn-symfony-bundle | `PasskeyRepository` and `WebauthnUserEntityRepository` declare nothing of it (`Base\Contract\PasskeyRecords` and `PasskeyUsers` are empty interfaces) and nobody asks them; the passkeys' table is the core's (`Passkey` and its three column types); no passkey ceremony |
 | api-platform/symfony | the decoration of its resource name collection is dropped; `#[ApiResource]` is an attribute nothing reads |
 | symfony/webpack-encore-bundle | `encore_entry_*_tags` (the core's own functions) print the core's build alone; the warmer reads no application build |

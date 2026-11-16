@@ -293,7 +293,7 @@ final class HostlessEffectsTest extends KernelTestCase
 
         // The addresses as the Notifier's router writes them in this kernel (no request: a path); a host's Urls
         // gives them whole, as the router does on a request.
-        $router = $container->get(\Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface::class);
+        $router = $container->get(\Base\Routing\AdvancedRouterInterface::class);
         $urls = new class($router, $container->get(Urls::class)) implements Urls {
             public function __construct(private readonly object $router, private readonly Urls $urls)
             {

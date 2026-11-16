@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout\Widget;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 use Base\Entity\Layout\WidgetIntl;
 

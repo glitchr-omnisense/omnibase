@@ -2,7 +2,7 @@
 
 namespace Tests\Base;
 
-use Omnibridge\Symfony\Omnibase\BaseBundle;
+use Base\BaseBundle;
 use Omnibridge\Doctrine\Omnibase\Database\Repository\ServiceEntityRepository;
 use Base\Enum\UserRole;
 use Base\Twig\Extension\FunctionTwigExtension;
@@ -410,7 +410,7 @@ final class BareTest extends TestCase
         self::assertSame(1, $status);
         $bundle = $report['classes'][BaseBundle::class];
         self::assertNull($bundle['error']);
-        self::assertSame('Omnibridge\\Symfony\\Omnibase\\Bundle\\AbstractBaseBundle', $bundle['framework']['Symfony\\Component\\HttpKernel\\Bundle\\Bundle'] ?? null);
+        self::assertSame('Base\\Bundle\\AbstractBaseBundle', $bundle['framework']['Symfony\\Component\\HttpKernel\\Bundle\\Bundle'] ?? null);
         self::assertNotEmpty(preg_grep('~/symfony/http-kernel/~', $bundle['framework_files']));
 
         $repository = $report['classes'][UserRepository::class];

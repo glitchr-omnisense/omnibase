@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\Enum\SpamApi;
 use Base\Enum\SpamScore;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Model\SpamProtectionInterface;
 use Omnishield\Akismet\AkismetGatewayFactory;
 use Omnishield\ClassifierInterface;

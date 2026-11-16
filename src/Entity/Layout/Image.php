@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\File\File;
 
 use Base\Database\Attribute\Cache;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\ImageRepository;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Service\Model\SaltInterface;

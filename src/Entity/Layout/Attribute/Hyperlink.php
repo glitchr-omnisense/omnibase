@@ -11,7 +11,7 @@ use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Base\Service\Model\IconizeInterface;
 
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\Layout\Attribute\HyperlinkRepository;
 
 use Base\Database\Attribute\Cache;

@@ -16,7 +16,7 @@ use Base\Cache\Abstract\AbstractLocalCache;
 use Base\Contract\Runtime;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\MetadataManipulator;
-use Omnibridge\Symfony\Omnibase\Routing\AdvancedRouterInterface;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\Storages;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\SingletonTrait;
@@ -143,9 +143,9 @@ class AttributeReader extends AbstractLocalCache
      *
      * @var MetadataManipulator|null
      */
-    protected null|MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
+    protected null|MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator = null;
 
-    public function getClassMetadataManipulator(): MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator
+    public function getClassMetadataManipulator(): MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator
     {
         return $this->classMetadataManipulator;
     }
@@ -162,7 +162,7 @@ class AttributeReader extends AbstractLocalCache
 
     /**
      * omnibase's contract (Base\Service\ParameterBagInterface), the container's
-     * `parameter_bag` under Symfony, which Omnibridge\Symfony\Omnibase\Service\ParameterBag decorates.
+     * `parameter_bag` under Symfony, which Base\Service\ParameterBag decorates.
      *
      * @var ParameterBagInterface
      */
@@ -230,7 +230,7 @@ class AttributeReader extends AbstractLocalCache
         ?RequestStack             $requestStack,
         ?TokenStorageInterface    $tokenStorage,
         EntityHydrator           $entityHydrator,
-        MetadataManipulator|\Omnibridge\Doctrine\Omnibase\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator,
+        MetadataManipulator|\Base\Database\Mapping\ClassMetadataManipulator $classMetadataManipulator,
         string                   $projectDir,
         string                   $environment,
         string                   $cacheDir

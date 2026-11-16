@@ -18,7 +18,7 @@ use Omniauth\Exception\AccountRefused;
  *   when it is another (User::$userIdentifier: lesringostars' username), as
  *   its own repository does (findOneByEmailOrUsername()).
  * - the handle: the id, as text - the passkeys' userHandle since AU1.
- * - check(): Omnibridge\Symfony\Omnibase\Security\UserChecker's rule - an account class that
+ * - check(): Base\Security\UserChecker's rule - an account class that
  *   implements LoginRestrictionInterface, a banned, a locked, a disabled
  *   account may not sign in; the reason is the key of its message,
  *   "@notifications.login.<reason>". A disabled account with a valid

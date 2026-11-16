@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use Base\Entity\User;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 
 /**
  * An e-mail that opens something: whoever follows its link before it runs

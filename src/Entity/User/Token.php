@@ -14,7 +14,7 @@ use DateTimeInterface;
 use Hashids\Hashids;
 
 use Base\Traits\BaseTrait;
-use Doctrine\ORM\Mapping as ORM;
+use Base\Mapping as ORM;
 use Omnibridge\Doctrine\Omnibase\Repository\User\TokenRepository;
 
 #[ORM\Entity(repositoryClass:TokenRepository::class)]

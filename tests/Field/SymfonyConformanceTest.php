@@ -5,7 +5,7 @@ namespace Tests\Base\Field;
 use Base\Field\Conformance\Samples;
 use Base\Field\Conformance\Suite;
 use Omnibridge\Symfony\Omnibase\Form\Conformance\SymfonyHost;
-use Omnibridge\Symfony\Omnibase\Form\DefinitionForms;
+use Base\Form\DefinitionForms;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
