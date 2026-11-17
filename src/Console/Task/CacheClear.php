@@ -85,6 +85,9 @@ final class CacheClear
             if ($input->checks) {
                 if ($clears->isFirst() && $this->parameterBag->get('base.autoclear') && null !== $again) {
                     $report->warning('Automatic double `cache:clear` is now running to account for base bundle features.');
+                    // The second clear is another process: it takes the lock this one would still hold (it skipped,
+                    // its links to the public folder never made, the counter left at one).
+                    $this->release(rtrim($input->cacheDir, '/').'/.lock');
                     $again();
                 }
                 if (extension_loaded('Zend OPcache')) {

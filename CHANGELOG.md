@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.0.4
+
+- `cache:clear`'s automatic second clear ran while the first still held the cache folder's lock: the second process
+  skipped ("Another cache:clear is already running"), so on a fresh tree one `cache:clear` left the clear counter at
+  one and made none of the public folder's links (`public/uploads`, `images`, `wysiwyg`); a local upload then had no
+  public address until a second manual `cache:clear`. The lock is released before the second clear starts.
+
 ## 7.0.3
 
 - No `extra.branch-alias` any more (the ensemble has none, foundation Q4): the release workflow no longer checks the
