@@ -13,9 +13,8 @@
 use Omnibridge\Doctrine\Omnibase\Types;
 use Base\Entity\User\Passkey;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
-use Doctrine\DBAL\Types\Type;
 
-Types::register();
+$types = Types::provider();
 $platform = new MySQL80Platform();
 
 $passkey = new Passkey();
@@ -26,9 +25,9 @@ $passkey->trustPath = ['x5c' => ['MIIB/w==']];
 
 $row = [];
 foreach (['publicKeyCredentialId' => 'passkey_base64', 'credentialPublicKey' => 'passkey_base64', 'aaguid' => 'passkey_aaguid', 'trustPath' => 'passkey_trust_path'] as $field => $type) {
-    $row[$field] = Type::getType($type)->convertToDatabaseValue($passkey->{$field}, $platform);
+    $row[$field] = $types->get($type)->convertToDatabaseValue($passkey->{$field}, $platform);
 }
-$read = Type::getType('passkey_base64')->convertToPHPValue($row['publicKeyCredentialId'], $platform);
+$read = $types->get('passkey_base64')->convertToPHPValue($row['publicKeyCredentialId'], $platform);
 
 $webauthn = array_values(array_filter(
     array_merge(get_declared_classes(), get_declared_interfaces()),

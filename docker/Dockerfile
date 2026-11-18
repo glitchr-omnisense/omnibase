@@ -88,9 +88,9 @@ RUN --mount=type=secret,id=composer_auth,env=COMPOSER_AUTH echo "omni families a
     # a Symfony application adds omnibridge/symfony (the framework) and the bundles its
     # config/bundles.php registers - here every one the core suggests (app/config/bundles.php).
     # omnibridge/eloquent 2.x: Base\Testing\Engines (the parity tests of the core and the plugins) runs both persistences.
-    # 7.x: omnibridge/symfony and omnibridge/doctrine 3.x; the plugins resolve once
+    # 7.1: omnibridge/symfony 3.x and omnibridge/doctrine 4.x; the plugins resolve once
     # their constraints allow omnisense/omnibase ^7.0 and omnibridge/symfony ^3.0.
-    && composer require "omnisense/omnibase:7.x-dev" "omnibridge/symfony:3.x-dev" "omnibridge/doctrine:3.x-dev" "omnibridge/eloquent:2.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
+    && composer require "omnisense/omnibase:7.x-dev" "omnibridge/symfony:3.x-dev" "omnibridge/doctrine:4.x-dev" "omnibridge/eloquent:2.x-dev" $(for p in $PLUGINS; do printf '%s:*@dev ' "$p"; done) \
         $BUNDLES $TWIG_EXTRAS \
         "glitchr/omnitrade:1.x-dev" "omnitrade/stripe:1.x-dev" "glitchr/omnibus:2.x-dev" "omnibus/offline:2.x-dev" "omnibus/mondial-relay:2.x-dev" \
         "omnisense/omniauth:1.x-dev" "omniauth/webauthn:1.x-dev" "omniauth/otp:1.x-dev" \

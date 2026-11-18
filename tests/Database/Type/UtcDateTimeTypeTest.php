@@ -66,6 +66,7 @@ class UtcDateTimeTypeTest extends TestCase
         $this->assertNotSame($paris->getTimestamp(), $plain->getTimestamp());
     }
 
+    /** utc_datetime, the mutable twin up to omnibridge/doctrine 3.x, is read as a \DateTimeImmutable since 4.0; a \DateTime is still written. */
     public function testTheMutableTwinLeavesTheGivenObjectAlone(): void
     {
         $type = new UtcDateTimeType();
@@ -76,7 +77,8 @@ class UtcDateTimeTypeTest extends TestCase
 
         date_default_timezone_set('America/New_York');
         $read = $type->convertToPHPValue('2026-10-07 00:00:00', $this->platform());
-        $this->assertInstanceOf(\DateTime::class, $read);
+        $this->assertInstanceOf(\DateTimeImmutable::class, $read);
+        $this->assertSame('UTC', $read->getTimezone()->getName());
         $this->assertSame($tokyo->getTimestamp(), $read->getTimestamp());
     }
 

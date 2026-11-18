@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-react, path: omnibridge/react}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with: {repository: glitchr-omnisense/omnibridge-doctrine, ref: 3.x, path: omnibridge/doctrine}
+        with: {repository: glitchr-omnisense/omnibridge-doctrine, ref: 4.x, path: omnibridge/doctrine}
       # omnisense/omnibridge, which compose.checkouts.yml mounts over the image's since R14 (Omnibridge\Schema,
       # Omnibridge\Runtime): without it the mount is an empty folder and the suite stops at the first class.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -93,7 +93,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-twig, path: omnibridge/twig}
       # omnibridge/symfony, the Symfony host (BaseBundle, the controllers, the service configuration): mounted
-      # over the image's, as the other bridges; 3.x and omnibridge/doctrine 3.x for omnisense/omnibase 7.x.
+      # over the image's, as the other bridges; 3.x (3.1) and omnibridge/doctrine 4.x for omnisense/omnibase 7.1.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {repository: glitchr-omnisense/omnibridge-symfony, ref: 3.x, path: omnibridge/symfony}
 

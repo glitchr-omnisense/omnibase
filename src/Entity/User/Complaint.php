@@ -5,7 +5,6 @@ namespace Base\Entity\User;
 use Base\Entity\User;
 use Base\Repository\User\ComplaintRepository;
 use Base\Service\Model\IconizeInterface;
-use DateTime;
 use Base\Mapping as ORM;
 
 /**
@@ -35,7 +34,7 @@ class Complaint implements IconizeInterface
 
     public function __construct(?User $complainant = null, ?string $text = null, ?string $source = null)
     {
-        $this->createdAt = new DateTime("now");
+        $this->createdAt = new \DateTimeImmutable("now");
         $this->complainant = $complainant;
         $this->complainantName = $complainant ? (string) $complainant : "";
         $this->text = (string) $text;
@@ -59,12 +58,11 @@ class Complaint implements IconizeInterface
 
     public function getId(): ?int { return $this->id; }
 
-    /** Mutable: base-bundle's |datetime filter takes a \DateTime only. */
     #[ORM\Column(type: "datetime")]
-    protected DateTime $createdAt;
+    protected \DateTimeInterface $createdAt;
 
-    public function getCreatedAt(): DateTime { return $this->createdAt; }
-    public function setCreatedAt(DateTime $at): self { $this->createdAt = $at; return $this; }
+    public function getCreatedAt(): \DateTimeInterface { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeInterface $at): self { $this->createdAt = $at; return $this; }
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
@@ -146,9 +144,9 @@ class Complaint implements IconizeInterface
     public function getHandledBy(): ?User { return $this->handledBy; }
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    protected ?DateTime $handledAt = null;
+    protected ?\DateTimeInterface $handledAt = null;
 
-    public function getHandledAt(): ?DateTime { return $this->handledAt; }
+    public function getHandledAt(): ?\DateTimeInterface { return $this->handledAt; }
 
     /** What the staff answered. */
     #[ORM\Column(type: "text", nullable: true)]
@@ -173,7 +171,7 @@ class Complaint implements IconizeInterface
         $this->status = $status;
         $this->answer = null !== $answer && "" !== trim($answer) ? trim($answer) : null;
         $this->handledBy = self::OPEN === $status ? null : $by;
-        $this->handledAt = self::OPEN === $status ? null : new DateTime("now");
+        $this->handledAt = self::OPEN === $status ? null : new \DateTimeImmutable("now");
 
         return $this;
     }

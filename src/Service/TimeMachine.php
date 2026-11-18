@@ -320,7 +320,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
      * @param int|null $timeLimit
      * @return $this
      */
-    public function setTimeLimit(null|string|DateTime|int $timeLimit)
+    public function setTimeLimit(null|string|\DateTimeInterface|int $timeLimit)
     {
         $this->timeLimit = $timeLimit;
         return $this;

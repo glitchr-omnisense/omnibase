@@ -9,13 +9,15 @@ use Base\Database\Type\EnumType;
 use Base\Database\Type\MySQLSetType;
 use Base\Database\Type\SetType;
 use Base\Database\Type\UtcDateTimeImmutableType;
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Platforms\MySQL84Platform;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\EnumType as DbalEnumType;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\TypeRegistry;
 use Doctrine\DBAL\Types\Types;
 use PHPUnit\Framework\TestCase;
 
@@ -63,24 +65,54 @@ final class SchemaManagerTestReader extends MySQLSchemaManager
  */
 final class SchemaManagerTest extends TestCase
 {
-    private static function type(string $class): Type
+    private static ?TypeRegistry $types = null;
+
+    /** The connections' type provider (omnibridge/doctrine 4.0: not DBAL's static registry): the core's types and the test's array. */
+    private static function types(): TypeRegistry
+    {
+        return self::$types ??= \Omnibridge\Doctrine\Omnibase\Types::provider(['omnibase_test_array' => ArrayType::class]);
+    }
+
+    /** The name of an enumeration's type, registered in the connections' types. */
+    private static function type(string $class): string
     {
         $name = strtolower(substr($class, strrpos($class, '\\') + 1));
         // An enumeration is registered as an EnumTypeAdapter of it (plan "omnibase agnostic", step F2a).
-        \Omnibridge\Doctrine\Omnibase\Types::registerEnumerations([$name => $class]);
+        \Omnibridge\Doctrine\Omnibase\Types::registerEnumerations(self::types(), [$name => $class]);
 
-        return Type::getType($name);
+        return $name;
+    }
+
+    /** A column of a type named (DBAL 4.6: by its name, the type read from the platform's provider). */
+    private static function column(string $name, string $type): Column
+    {
+        return Column::editor()->setUnquotedName($name)->setTypeName($type)->create();
+    }
+
+    /** MySQL's platform, given the connection's types. */
+    private static function platform(): AbstractPlatform
+    {
+        return self::mysql()->getDatabasePlatform();
+    }
+
+    private static function configuration(): Configuration
+    {
+        return (new Configuration())->setTypeProvider(self::types());
     }
 
     private static function mysql(): Connection
     {
         // Never connected: the server's version given, the platform is known without asking it.
-        return DriverManager::getConnection(['driver' => 'pdo_mysql', 'host' => 'nowhere.invalid', 'serverVersion' => '8.4.0']);
+        return DriverManager::getConnection(['driver' => 'pdo_mysql', 'host' => 'nowhere.invalid', 'serverVersion' => '8.4.0'], self::configuration());
     }
 
     private static function reader(): SchemaManagerTestReader
     {
-        return new SchemaManagerTestReader(self::mysql(), new MySQL84Platform());
+        $connection = self::mysql();
+        $platform = $connection->getDatabasePlatform();
+        \assert($platform instanceof AbstractMySQLPlatform);
+
+        return new SchemaManagerTestReader($connection, $platform);
     }
 
     public function testOnMySQLTheFactoryGivesTheCoresSchemaManager(): void
@@ -90,45 +122,45 @@ final class SchemaManagerTest extends TestCase
 
     public function testASetColumnIsReadWithItsValuesAndComparesWithItsMapping(): void
     {
-        $platform = new MySQL84Platform();
+        $platform = self::platform();
         $read = self::reader()->column([
             'field' => 'roles', 'type' => 'set', 'column_type' => "set('ROLE_ADMIN','ROLE_USER')",
             'comment' => '(DC2Type:schema_manager_test_roles) ROLE_ADMIN,ROLE_USER',
         ]);
 
-        self::assertInstanceOf(MySQLSetType::class, $read->getType());
+        self::assertInstanceOf(MySQLSetType::class, self::types()->get($read->getTypeName()));
         self::assertSame(['ROLE_ADMIN', 'ROLE_USER'], $read->getValues());
         self::assertSame('', $read->getComment(), 'the comment of before is left out, values and all');
 
-        $mapped = new Column('roles', self::type(SchemaManagerTestRoles::class));
+        $mapped = self::column('roles', self::type(SchemaManagerTestRoles::class));
         self::assertTrue($platform->columnsEqual($read, $mapped), 'nothing changed: no migration');
 
-        $added = new Column('roles', self::type(SchemaManagerTestAppRoles::class));
+        $added = self::column('roles', self::type(SchemaManagerTestAppRoles::class));
         self::assertFalse($platform->columnsEqual($read, $added), 'a value added: the column is altered');
-        self::assertStringContainsString("'ROLE_PRO'", $platform->getColumnDeclarationSQL('roles', $added->toArray()));
+        self::assertStringContainsString("'ROLE_PRO'", $platform->getColumnDeclarationSQL('roles', $added->toArray(true)));
     }
 
     public function testAnEnumColumnIsDbalsEnumWithItsValuesAndComparesWithItsMapping(): void
     {
-        $platform = new MySQL84Platform();
+        $platform = self::platform();
         $read = self::reader()->column([
             'field' => 'state', 'type' => 'enum', 'column_type' => "enum('STATE_DRAFT','STATE_PUBLISH')",
             'comment' => '(DC2Type:schema_manager_test_state) STATE_DRAFT,STATE_PUBLISH',
         ]);
 
-        self::assertInstanceOf(DbalEnumType::class, $read->getType());
+        self::assertInstanceOf(DbalEnumType::class, self::types()->get($read->getTypeName()));
         self::assertSame('', $read->getComment());
-        self::assertTrue($platform->columnsEqual($read, new Column('state', self::type(SchemaManagerTestState::class))));
+        self::assertTrue($platform->columnsEqual($read, self::column('state', self::type(SchemaManagerTestState::class))));
 
         $old = self::reader()->column(['field' => 'state', 'type' => 'enum', 'column_type' => "enum('STATE_DRAFT')"]);
-        self::assertFalse($platform->columnsEqual($old, new Column('state', self::type(SchemaManagerTestState::class))));
+        self::assertFalse($platform->columnsEqual($old, self::column('state', self::type(SchemaManagerTestState::class))));
     }
 
     public function testOnlyTheTypeCommentIsLeftOut(): void
     {
         $read = self::reader()->column(['field' => 'data', 'type' => 'longtext', 'column_type' => 'longtext', 'comment' => '(DC2Type:array)']);
         self::assertSame('', $read->getComment());
-        self::assertSame(Types::TEXT, Type::lookupName($read->getType()));
+        self::assertSame(Types::TEXT, $read->getTypeName());
 
         $read = self::reader()->column(['field' => 'bio', 'type' => 'longtext', 'column_type' => 'longtext', 'comment' => 'The author, in a few lines']);
         self::assertSame('The author, in a few lines', $read->getComment());
@@ -139,20 +171,13 @@ final class SchemaManagerTest extends TestCase
 
     public function testOnSQLiteTheCoresColumnsReadBackUnchanged(): void
     {
-        if (!Type::hasType(UtcDateTimeImmutableType::NAME)) {
-            Type::addType(UtcDateTimeImmutableType::NAME, UtcDateTimeImmutableType::class);
-        }
-        if (!Type::hasType('omnibase_test_array')) {
-            Type::addType('omnibase_test_array', ArrayType::class);
-        }
-
-        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
+        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true], self::configuration());
         $table = new Table('schema_manager_test', [
-            new Column('id', Type::getType(Types::INTEGER), ['autoincrement' => true]),
-            new Column('state', self::type(SchemaManagerTestState::class)),
-            new Column('roles', self::type(SchemaManagerTestRoles::class)),
-            new Column('attributes', Type::getType('omnibase_test_array')),
-            new Column('created_at', Type::getType(UtcDateTimeImmutableType::NAME)),
+            Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->create(),
+            self::column('state', self::type(SchemaManagerTestState::class)),
+            self::column('roles', self::type(SchemaManagerTestRoles::class)),
+            self::column('attributes', 'omnibase_test_array'),
+            self::column('created_at', UtcDateTimeImmutableType::NAME),
         ]);
         $table->setPrimaryKey(['id']);
 
@@ -161,7 +186,7 @@ final class SchemaManagerTest extends TestCase
 
         $diff = $schemaManager->createComparator()->compareTables($schemaManager->introspectTable('schema_manager_test'), $table);
         $platform = $connection->getDatabasePlatform();
-        $changed = array_map(static fn ($change): string => $change->getOldColumn()->getName().': '.$platform->getColumnDeclarationSQL('', $change->getOldColumn()->toArray()).' / '.$platform->getColumnDeclarationSQL('', $change->getNewColumn()->toArray()), $diff->getChangedColumns());
+        $changed = array_map(static fn ($change): string => $change->getOldColumn()->getName().': '.$platform->getColumnDeclarationSQL('', $change->getOldColumn()->toArray(true)).' / '.$platform->getColumnDeclarationSQL('', $change->getNewColumn()->toArray(true)), $diff->getChangedColumns());
         self::assertTrue($diff->isEmpty(), 'the table read back is the table created: '.implode('; ', $changed));
     }
 }

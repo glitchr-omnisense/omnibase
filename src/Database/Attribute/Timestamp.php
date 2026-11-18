@@ -24,7 +24,7 @@ class Timestamp extends AbstractAttribute implements ExtensionOptionInterface
     private bool $immutable;
 
     /**
-     * @var DateTime
+     * @var DateTime|DateTimeImmutable|string the moment, memoised; "" until it is asked
      */
     private $value;
 
@@ -51,9 +51,9 @@ class Timestamp extends AbstractAttribute implements ExtensionOptionInterface
         return $this->immutable;
     }
 
-    public function getValue(): DateTime
+    public function getValue(): DateTime|DateTimeImmutable
     {
-        if (!$this->value) {
+        if (!$this->value instanceof \DateTimeInterface) {
             $this->value = $this->isImmutable() ? Utc::now() : DateTime::createFromImmutable(Utc::now()); // the application's clock, in UTC
         }
 

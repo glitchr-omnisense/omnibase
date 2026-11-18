@@ -292,10 +292,10 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface,
         return str_starts_with($this->state, ThreadState::SECRET);
     }
 
-    public function isPublished(null|DateTime|string $within = null): bool
+    public function isPublished(null|\DateTimeInterface|string $within = null): bool
     {
         if ($within) {
-            $within = $within instanceof DateTime ? $within : new DateTime($within);
+            $within = $within instanceof \DateTimeInterface ? $within : new DateTime($within);
             return $this->isScheduled() && $this->publishedAt < $within;
         }
 

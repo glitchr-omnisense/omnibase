@@ -414,11 +414,11 @@ final class FunctionTwigExtension extends AbstractExtension
      * A moment as a pattern says it, lowered (Base\View\Dates, in Twig's time zone).
      *
      * @param Environment $env
-     * @param \DateTime|\DateInterval|int|string|null $datetime
+     * @param \DateTimeInterface|\DateInterval|int|string|null $datetime
      * @param array|string $pattern
      * @return array|string
      */
-    public function datetime(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array|string $pattern = 'YYYY-MM-dd HH:mm:ss', ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', ?string $locale = null): array|string
+    public function datetime(Environment $env, \DateTimeInterface|\DateInterval|int|string|null $datetime, array|string $pattern = 'YYYY-MM-dd HH:mm:ss', ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', ?string $locale = null): array|string
     {
         return $this->dates->datetime($datetime, $pattern, $dateFormat, $timeFormat, $timezone, $calendar, $locale, $env->getExtension(CoreExtension::class)->getTimezone());
     }
@@ -439,10 +439,10 @@ final class FunctionTwigExtension extends AbstractExtension
         return Formats::pickup($array, $i);
     }
 
-    public function countdown(Environment $env, \DateTime|\DateInterval|int|string|null $datetime, array $parameters = []): string
+    public function countdown(Environment $env, \DateTimeInterface|\DateInterval|int|string|null $datetime, array $parameters = []): string
     {
         $now = time();
-        if ($datetime instanceof \DateTime) {
+        if ($datetime instanceof \DateTimeInterface) {
             $timestamp = $datetime->getTimestamp();
         } elseif ($datetime instanceof \DateInterval) {
             $timestamp = $now + (int)$datetime->format('s');
@@ -458,7 +458,7 @@ final class FunctionTwigExtension extends AbstractExtension
         ]));
     }
 
-    public function progress(Environment $env, \DateTime $start, \DateTime $end, array $parameters = []): string
+    public function progress(Environment $env, \DateTimeInterface $start, \DateTimeInterface $end, array $parameters = []): string
     {
         return $env->render('@Base/progress/progressbar.html.twig', array_merge($parameters, [
             'id' => rand(),

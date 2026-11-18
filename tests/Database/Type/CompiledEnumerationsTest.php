@@ -4,7 +4,6 @@ namespace Tests\Base\Database\Type;
 
 use Base\Database\Type\Enumerations;
 use Base\Enum\ConnectionState;
-use Doctrine\DBAL\Types\Type;
 use Omnibridge\Doctrine\Omnibase\EnumTypeAdapter;
 use Omnibridge\Doctrine\Omnibase\Types;
 use Base\DependencyInjection\Compiler\Pass\EnumerationsPass;
@@ -128,9 +127,11 @@ final class CompiledEnumerationsTest extends KernelTestCase
         $names = $container->getParameter(EnumerationsPass::PARAMETER);
         self::assertSame(Types::enumerations(EnumerationsPass::directories($container->getParameter('kernel.project_dir'))), $names);
         self::assertNotEmpty($names);
+        // In the connection's type provider (omnibridge/doctrine 4.0, omnibridge/symfony 3.1), not DBAL's static registry.
+        $types = $container->get('doctrine.orm.entity_manager')->getConnection()->getConfiguration()->getTypeProvider();
         foreach ($names as $name => $class) {
-            self::assertTrue(Type::hasType($name), $name.' registered');
-            $type = Type::getType($name);
+            self::assertTrue($types->has($name), $name.' registered');
+            $type = $types->get($name);
             if ($type instanceof EnumTypeAdapter && $type->enumeration() === $class) {
                 self::assertSame($class, Enumerations::classOf($name));
             }

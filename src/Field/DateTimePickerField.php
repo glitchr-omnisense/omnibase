@@ -163,10 +163,10 @@ final class DateTimePickerField implements FieldInterface
     }
 
     /**
-     * @param DateTime|null $datetime
+     * @param \DateTimeInterface|null $datetime
      * @return $this
      */
-    public function setDefault(?\DateTime $datetime = null)
+    public function setDefault(?\DateTimeInterface $datetime = null)
     {
         $this->setCustomOption(self::OPTION_DEFAULT, $datetime);
 

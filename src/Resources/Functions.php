@@ -5461,21 +5461,21 @@ namespace {
 
     if (!function_exists('cast_datetime')) {
         /**
-         * @param string|int|DateTime|null $datetime
+         * @param string|int|DateTimeInterface|null $datetime
          * @return DateTime|null null for null
          */
-        function cast_datetime(null|string|int|DateTime $datetime)
+        function cast_datetime(null|string|int|DateTimeInterface $datetime)
         {
             if ($datetime === null) {
                 return null;
             }
             return is_int($datetime) ? (new DateTime())->setTimestamp($datetime) :
-                (is_string($datetime) ? (new DateTime())->modify($datetime) : (clone $datetime));
+                (is_string($datetime) ? (new DateTime())->modify($datetime) : DateTime::createFromInterface($datetime));
         }
     }
 
     if (!function_exists('daydiff')) {
-        function daydiff(null|string|int|DateTime $datetime): ?int
+        function daydiff(null|string|int|DateTimeInterface $datetime): ?int
         {
             if ($datetime == null) {
                 return null;
@@ -5489,7 +5489,7 @@ namespace {
     }
 
     if (!function_exists('ceil_datetime')) {
-        function ceil_datetime(null|string|int|DateTime $datetime, null|string|int $precision): DateTime
+        function ceil_datetime(null|string|int|DateTimeInterface $datetime, null|string|int $precision): DateTime
         {
             $datetime = cast_datetime($datetime);
             $precision = cast_datetime($precision);
@@ -5503,7 +5503,7 @@ namespace {
     }
 
     if (!function_exists('floor_datetime')) {
-        function floor_datetime(null|string|int|DateTime $datetime, null|string|int $precision): DateTime
+        function floor_datetime(null|string|int|DateTimeInterface $datetime, null|string|int $precision): DateTime
         {
             $datetime = cast_datetime($datetime);
             $precision = cast_datetime($precision);
@@ -5571,7 +5571,7 @@ namespace {
     }
 
     if (!function_exists('round_datetime')) {
-        function round_datetime(null|string|int|DateTime $datetime, null|string|int $precision): DateTime
+        function round_datetime(null|string|int|DateTimeInterface $datetime, null|string|int $precision): DateTime
         {
             $datetime = cast_datetime($datetime);
             $precision = cast_datetime($precision);
@@ -5586,12 +5586,12 @@ namespace {
 
     if (!function_exists('datetime_is_between')) {
         /**
-         * @param string|int|DateTime|null $datetime
-         * @param string|int|DateTime|null $dt1
-         * @param string|int|DateTime|null $dt2
+         * @param string|int|DateTimeInterface|null $datetime
+         * @param string|int|DateTimeInterface|null $dt1
+         * @param string|int|DateTimeInterface|null $dt2
          * @return bool
          */
-        function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null)
+        function datetime_is_between(null|string|int|DateTimeInterface $datetime, null|string|int|DateTimeInterface $dt1 = null, null|string|int|DateTimeInterface $dt2 = null)
         {
             $datetime = cast_datetime($datetime);
             if ($datetime === null) {
@@ -5614,12 +5614,12 @@ namespace {
 
     if (!function_exists('date_is_between')) {
         /**
-         * @param string|DateTime|null $datetime
-         * @param string|int|DateTime|null $d1
-         * @param string|int|DateTime|null $d2
+         * @param string|DateTimeInterface|null $datetime
+         * @param string|int|DateTimeInterface|null $d1
+         * @param string|int|DateTimeInterface|null $d2
          * @return bool
          */
-        function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null)
+        function date_is_between(null|string|DateTimeInterface $datetime, null|string|int|DateTimeInterface $d1 = null, null|string|int|DateTimeInterface $d2 = null)
         {
             $datetime = cast_datetime($datetime);
             if ($datetime === null) {
@@ -5672,12 +5672,12 @@ namespace {
 
     if (!function_exists('time_is_between')) {
         /**
-         * @param string|DateTime|null $datetime
-         * @param string|int|DateTime|null $t1
-         * @param string|int|DateTime|null $t2
+         * @param string|DateTimeInterface|null $datetime
+         * @param string|int|DateTimeInterface|null $t1
+         * @param string|int|DateTimeInterface|null $t2
          * @return bool
          */
-        function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
+        function time_is_between(null|string|DateTimeInterface $datetime, null|string|int|DateTimeInterface $t1 = null, null|string|int|DateTimeInterface $t2 = null)
         {
             $datetime = cast_datetime($datetime);
             if ($datetime === null) {

@@ -62,7 +62,7 @@ final class TrashRecorder
      * The persistence sets its creation date to $deletedAt AFTER persisting it: #[Timestamp(on: "create")]'s
      * own prePersist would overwrite it, with a DateTime it memoised on a cached attribute instance.
      */
-    public function entry(object $entity, string $class, Trasheable $trasheable, DateTime $deletedAt): TrashBall
+    public function entry(object $entity, string $class, Trasheable $trasheable, \DateTimeInterface $deletedAt): TrashBall
     {
         $trashBall = new \App\Entity\Extension\TrashBall();
         $trashBall->setEntityClass($class);

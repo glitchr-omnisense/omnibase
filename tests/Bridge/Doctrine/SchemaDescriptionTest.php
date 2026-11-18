@@ -10,7 +10,7 @@ use Base\Database\Schema\TranslationRule;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\TypeRegistry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
@@ -142,8 +142,8 @@ final class SchemaDescriptionTest extends KernelTestCase
         foreach (EntitySchema::ALIASES as $name => $portable) {
             foreach ([null, 36, 255, 70000] as $length) {
                 $column = $types->resolve(new Column('c', $name, length: $length));
-                self::assertSame(strtolower(Type::getType($name)->getSQLDeclaration(['length' => $length], $mysql)), (new MySqlStatements($types))->sqlType($column), $name.'('.$length.') on MySQL');
-                self::assertSame(Type::getType($name)->getSQLDeclaration(['length' => $length], $sqlite), (new SqliteStatements($types))->sqlType($column), $name.'('.$length.') on SQLite');
+                self::assertSame(strtolower($this->types()->get($name)->getSQLDeclaration(['length' => $length], $mysql)), (new MySqlStatements($types))->sqlType($column), $name.'('.$length.') on MySQL');
+                self::assertSame($this->types()->get($name)->getSQLDeclaration(['length' => $length], $sqlite), (new SqliteStatements($types))->sqlType($column), $name.'('.$length.') on SQLite');
             }
         }
 
@@ -152,7 +152,7 @@ final class SchemaDescriptionTest extends KernelTestCase
         $checked = 0;
         foreach (array_keys($types->enumerations + $types->sets) as $name) {
             self::assertSame($doctrine[$name](new Column('c', $name)), $ours[$name](new Column('c', $name)), $name);
-            self::assertSame('CLOB', Type::getType($name)->getSQLDeclaration([], $sqlite), $name.' on SQLite');
+            self::assertSame('CLOB', $this->types()->get($name)->getSQLDeclaration([], $sqlite), $name.' on SQLite');
             ++$checked;
         }
         self::assertGreaterThan(10, $checked);
@@ -226,6 +226,15 @@ final class SchemaDescriptionTest extends KernelTestCase
         return Describer::describe($options['paths'], $options);
     }
 
+    /** The connection's types (omnibridge/doctrine 4.0: a type provider, not DBAL's static registry). */
+    private function types(): TypeRegistry
+    {
+        $types = $this->entityManager()->getConnection()->getConfiguration()->getTypeProvider();
+        self::assertInstanceOf(TypeRegistry::class, $types);
+
+        return $types;
+    }
+
     /**
      * The entity folders Symfony's attribute drivers map, the project, the targets DoctrineBundle resolves: as HandBuiltEntityManagerTest reads them.
      *
@@ -262,8 +271,8 @@ final class SchemaDescriptionTest extends KernelTestCase
         }
         // The enumerations DBAL has, a bundle's among them (omnibase/marketplace's order_state), as omnibridge/symfony's
         // omnibridge:schema:create reads them.
-        // DBAL 4's registry has no getMap(): it is iterated, name => type.
-        foreach (Type::getTypeRegistry() as $name => $type) {
+        // DBAL 4's registry has no getMap(): it is iterated, name => type. The connection's (omnibridge/doctrine 4.0).
+        foreach ($this->types() as $name => $type) {
             if (method_exists($type, 'enumeration')) {
                 $types[$name] ??= $type->enumeration();
             }

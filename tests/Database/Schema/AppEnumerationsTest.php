@@ -57,8 +57,11 @@ final class AppEnumerationsTest extends TestCase
         self::assertSame($schema::getPermittedValues(), $roles, 'the set the tables and Eloquent\'s casts are made from');
 
         if (class_exists(\Omnibridge\Doctrine\EntityManagers::class) && class_exists(\Omnibridge\Eloquent\EntityStore::class)) {
-            Engines::of([Thread::class], $options);
-            $doctrine = \Doctrine\DBAL\Types\Type::getType('user_role');
+            $engines = Engines::of([Thread::class], $options);
+            // The connection's type provider (omnibridge/doctrine 4.0: DBAL's static registry holds none of omnibase's types).
+            $entityManager = (new \ReflectionProperty(Engines::class, 'entityManager'))->getValue($engines);
+            \assert($entityManager instanceof \Doctrine\ORM\EntityManagerInterface);
+            $doctrine = $entityManager->getConnection()->getConfiguration()->getTypeProvider()->get('user_role');
             self::assertInstanceOf(\Omnibridge\Doctrine\Omnibase\EnumTypeAdapter::class, $doctrine);
             self::assertSame($schema, $doctrine->enumeration(), 'Doctrine\'s type');
         }

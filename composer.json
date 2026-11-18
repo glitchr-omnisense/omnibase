@@ -127,10 +127,10 @@
     "require-dev": {
         "api-platform/symfony": "^4.0",
         "beberlei/doctrineextensions": "^1.0",
-        "doctrine/dbal": "^4.2",
+        "doctrine/dbal": "^4.6",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "doctrine/doctrine-migrations-bundle": "^3.0",
-        "doctrine/orm": "^3.4",
+        "doctrine/orm": "^3.8",
         "florianv/swap": "^4.0",
         "glitchr/backup-manager": "4.0.*-dev",
         "glitchr/ux-google": "1.0.*-dev",
@@ -139,8 +139,8 @@
         "league/flysystem-ftp": "^3.0",
         "omniauth/otp": "1.x-dev",
         "omniauth/webauthn": "1.x-dev",
-        "omnibridge/doctrine": "^3.0",
-        "omnibridge/symfony": "^3.0",
+        "omnibridge/doctrine": "^4.0",
+        "omnibridge/symfony": "^3.1",
         "omnibridge/twig": "^2.0",
         "omnisense/omniauth": "1.x-dev",
         "omnisense/omnishield": "1.x-dev",
@@ -225,7 +225,7 @@
                 "omnisense/omniauth": "1.x-dev",
                 "omniauth/webauthn": "1.x-dev",
                 "omniauth/otp": "1.x-dev",
-                "omnibridge/doctrine": "^3.0"
+                "omnibridge/doctrine": "^4.0"
             }
         }
     }

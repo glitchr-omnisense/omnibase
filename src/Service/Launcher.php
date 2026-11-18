@@ -49,13 +49,14 @@ class Launcher implements LauncherInterface
             return null;
         }
         if ($launchdate instanceof DateTime) return $launchdate;
+        if ($launchdate instanceof \DateTimeInterface) return DateTime::createFromInterface($launchdate);
         if (is_string($launchdate)) return new DateTime($launchdate);
         if (is_array($launchdate) && is_string($launchdate["date"] ?? null)) return new DateTime($launchdate["date"]);
         return null;
     }
 
     /** The site's years ("2019-2026", "2026"), since a launch date (since()). */
-    public static function yearsSince(?DateTime $launchdate): string
+    public static function yearsSince(?\DateTimeInterface $launchdate): string
     {
         $currentYear = date("Y");
         if (!$launchdate) {

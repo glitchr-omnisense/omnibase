@@ -16,7 +16,7 @@ class IntlDateTime extends DateTime
     protected IntlDateFormatter $intlDateFormatter;
 
     public function __construct(
-        DateTime|string                       $datetime = "now",
+        \DateTimeInterface|string             $datetime = "now",
         ?string                               $locale = null,
         int                                   $dateType = IntlDateFormatter::FULL,
         int                                   $timeType = IntlDateFormatter::FULL,
@@ -42,7 +42,7 @@ class IntlDateTime extends DateTime
     }
 
     /**
-     * @param DateTime $datetime
+     * @param \DateTimeInterface $datetime
      * @param string|null $locale
      * @param int $dateType
      * @param int $timeType
@@ -52,7 +52,7 @@ class IntlDateTime extends DateTime
      * @throws \Exception
      */
     public static function createFromDateTime(
-        DateTime                 $datetime,
+        \DateTimeInterface       $datetime,
         ?string                  $locale = null,
         int                      $dateType = IntlDateFormatter::FULL,
         int                      $timeType = IntlDateFormatter::FULL,

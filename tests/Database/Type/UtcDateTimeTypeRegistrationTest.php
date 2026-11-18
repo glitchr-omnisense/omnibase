@@ -4,7 +4,6 @@ namespace Tests\Base\Database\Type;
 
 use Base\Database\Type\UtcDateTimeImmutableType;
 use Base\Database\Type\UtcDateTimeType;
-use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /** The bundle registers both types: an entity names them without any configuration. */
@@ -17,9 +16,10 @@ class UtcDateTimeTypeRegistrationTest extends KernelTestCase
         }
 
         self::bootKernel();
-        static::getContainer()->get('doctrine')->getConnection(); // DoctrineBundle registers its types with the connection
+        // The connection's type provider (omnibridge/doctrine 4.0: not DBAL's static registry).
+        $types = static::getContainer()->get('doctrine')->getConnection()->getConfiguration()->getTypeProvider();
 
-        $this->assertInstanceOf(UtcDateTimeImmutableType::class, Type::getType(UtcDateTimeImmutableType::NAME));
-        $this->assertInstanceOf(UtcDateTimeType::class, Type::getType(UtcDateTimeType::NAME));
+        $this->assertInstanceOf(UtcDateTimeImmutableType::class, $types->get(UtcDateTimeImmutableType::NAME));
+        $this->assertInstanceOf(UtcDateTimeType::class, $types->get(UtcDateTimeType::NAME));
     }
 }

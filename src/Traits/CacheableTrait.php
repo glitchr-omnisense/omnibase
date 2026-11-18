@@ -14,7 +14,7 @@ trait CacheableTrait
                 return $v;
             }
 
-            if($v instanceof \DateTime) {
+            if($v instanceof \DateTimeInterface) {
                 return $v->getTimestamp();
             }
 

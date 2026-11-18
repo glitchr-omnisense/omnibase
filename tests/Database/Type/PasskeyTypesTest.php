@@ -118,9 +118,9 @@ final class PasskeyTypesTest extends TestCase
         ]), Types::passkey());
         self::assertSame(Types::passkey(), array_intersect_key(Types::core(), Types::passkey()));
 
-        Types::register();
+        $types = Types::provider();
         foreach (Types::passkey() as $name => $class) {
-            self::assertInstanceOf($class, Type::getType($name));
+            self::assertInstanceOf($class, $types->get($name));
         }
     }
 }

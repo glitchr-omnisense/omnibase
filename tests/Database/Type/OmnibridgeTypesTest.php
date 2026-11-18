@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
  * extend its UtcDateTimeType and UtcDateTimeImmutableType), the same zone. Each pair writes the same
  * text and reads back the same moment, from Tokyo, Paris and UTC, so a site
  * mapped by omnibase and an application mapped by omnibridge/doctrine
- * (Omnibridge\Doctrine\Types::register()) read each other's rows.
+ * (Omnibridge\Doctrine\Types::provider()) read each other's rows.
  */
 final class OmnibridgeTypesTest extends TestCase
 {
