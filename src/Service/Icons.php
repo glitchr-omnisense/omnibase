@@ -84,7 +84,12 @@ final class Icons
             }
         }
 
-        if($icon == "fa-solid fa-question-circle") return [];
+        // Not even the question mark is known (no adapter, or its metadata not installed): nothing to draw,
+        // in the shape the caller asked for - a list when wrapped, a string inside an associative map
+        // (a template reading one state with |first or |second got an array and failed).
+        if ("fa-solid fa-question-circle" === $icon) {
+            return $wrap ? [] : '';
+        }
         return $this->iconify("fa-solid fa-question-circle", $attributes, $wrap) ?? null;
     }
 }

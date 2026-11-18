@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.1.1
+
+- `Icons::iconify()` with no adapter knowing a name, not even its question mark (no adapter, or its metadata not
+  installed): nothing to draw in the shape the caller asked for, an empty list when wrapped and an empty string
+  inside an associative map. It returned an empty list in both cases, so a template reading one icon of a map of
+  states (`|first`, `|second`) got an array and failed with "Array to string conversion".
+
 ## 7.1.0
 
 omnibridge/doctrine 4.0 (and omnibridge/eloquent 2.1) read the `datetime`, `datetimetz` and `utc_datetime` columns as
