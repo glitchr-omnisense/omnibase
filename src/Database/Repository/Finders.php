@@ -34,8 +34,8 @@ interface Finders
      * lockOneBy(), sql()): the rows of a SELECT (column => value), the rows changed otherwise. Positional `?`
      * parameters; `{selection:N}` stands for the identifiers of the rows of `$selections[N] = [class, criteria]`, as
      * the persistence's own finder selects them (its compiled criteria, scopes and discriminator included).
-     *
-     * @internal what ServiceEntityRepository builds on; an application calls its repository
+     * What ServiceEntityRepository builds on; an application calls its repository. Not tagged internal: each
+     * persistence's bridge implements it, which Symfony's DebugClassLoader reports for an internal method.
      *
      * @param list<mixed>                                     $parameters
      * @param list<array{0: class-string, 1: array<int|string, mixed>}> $selections
