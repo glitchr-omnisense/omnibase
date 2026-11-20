@@ -30,6 +30,9 @@ class DemoAccountRegistry
     /** @var array<string, DemoAccount>|null */
     private ?array $accounts = null;
 
+    /** @var array<string, DemoAccount> the declared accounts base.demo.exclude left out, by identifier */
+    private array $excluded = [];
+
     /**
      * @param iterable<DemoAccountProviderInterface> $providers
      * @param string[]                               $exclude    identifiers left out (base.demo.exclude)
@@ -61,6 +64,7 @@ class DemoAccountRegistry
                     throw new \LogicException(sprintf('"%s" (declared by %s) cannot be a demonstration account: its roles reach %s. The super-administrator signs in with its own password, never through the demonstration.', $account->identifier, $provider::class, self::SUPER_ADMIN));
                 }
                 if (\in_array($account->identifier, $this->exclude, true)) {
+                    $this->excluded[$account->identifier] = $account;
                     continue;
                 }
                 // Replaced in place: the application's version keeps the bundle's rank unless it gives its own.
@@ -88,8 +92,11 @@ class DemoAccountRegistry
     /**
      * The roles of the application's `user_role` type (or of $roles) that no
      * account offered holds - leaving out those that open the back office.
-     * ROLE_USER is everyone's: any account offered holds it. Empty when the
-     * demonstration has one account for each role it should.
+     * ROLE_USER is everyone's: any account offered holds it. An account the
+     * site left out (base.demo.exclude) is a choice, not a gap: its roles are
+     * not asked for - a real business whose every account is approved by hand
+     * offers none. Empty when the demonstration has one account for each role
+     * it should.
      *
      * @param string[]|null $roles null: the constants of the `user_role` type
      *
@@ -106,6 +113,8 @@ class DemoAccountRegistry
         }
 
         $offered = $this->offered();
+        $this->all(); // fills $this->excluded
+        $offered = [...$offered, ...$this->excluded];
         $held = $offered ? ['ROLE_USER'] : [];
         foreach ($offered as $account) {
             $held = [...$held, ...$account->getAllRoles()];

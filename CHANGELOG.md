@@ -1,5 +1,22 @@
 # Changelog
 
+## 7.1.2
+
+- `base-async` built on @glitchr/flowjs 1.6.4 (it was 1.3.1, no longer on npm, so the bundle could not be built again):
+  the scroll position is read as the scroll event comes, not in the frame, where it made the browser lay the page out
+  again after the page's own frame work - a scroll that lagged on a busy machine. The package's build dependency is
+  the tagged flowjs on GitHub until 1.6.4 is on npm.
+- The demonstration's sign-in panel (`@Base/demo/_accounts.html.twig`) prints, under each account's button, the
+  identifier and the password it types in the ordinary form (`data-demo-credentials`; `@demo.accounts.identifier`
+  and `@demo.accounts.password` in English and French). A visitor shown a site - in a frame, in a presentation - can
+  type them as well as click.
+- `Finders::sql()` is no longer `@internal`: `DoctrineFinders` implements it (a DebugClassLoader deprecation).
+- `DemoAccountRegistry::missingRoles()` takes an account the site left out (`base.demo.exclude`) as a choice, not a gap:
+  its roles are no longer asked for, and `demo:reset` no longer warns about them. A real business whose every
+  account is approved by hand can offer none.
+- `docs/20-architecture/demo.md` and `base.demo.admin_roles`' description: a real business keeps its own management
+  roles (a shop's `ROLE_STAFF`) out of its demonstration by listing them there.
+
 ## 7.1.1
 
 - `Icons::iconify()` with no adapter knowing a name, not even its question mark (no adapter, or its metadata not

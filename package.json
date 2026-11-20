@@ -30,7 +30,7 @@
     "@glitchr/breakpoints": "^1.0",
     "@glitchr/clipboardjs": "^1.0",
     "@glitchr/dockjs": "^1.0",
-    "@glitchr/flowjs": "^1.3.1",
+    "@glitchr/flowjs": "github:glitchr-studio/flowjs#v1.6.4",
     "@glitchr/imaginejs": "^1.0",
     "@glitchr/lightbox2": "^1.0",
     "@glitchr/media-query-plugin": "^1.5",

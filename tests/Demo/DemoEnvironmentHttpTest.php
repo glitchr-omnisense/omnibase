@@ -46,6 +46,10 @@ class DemoEnvironmentHttpTest extends DemoKernelTestCase
         $this->assertMatchesRegularExpression('/\.base-demo-accounts form \{[^}]*flex-wrap: wrap/', $html);
         $this->assertMatchesRegularExpression('/\.base-demo-accounts form span \{[^}]*flex: 1 1 14rem/', $html);
         $this->assertStringNotContainsString('demo-root', $html, 'the super-administrator is nobody\'s demonstration account');
+        // What each account types in the form: its identifier and its password, beside its button.
+        $this->assertMatchesRegularExpression('/data-demo-credentials="'.preg_quote(TestDemoAccounts::MEMBER, '/').'">Identifier <code>'.preg_quote(TestDemoAccounts::MEMBER, '/').'<\/code> · password <code>'.preg_quote(TestDemoAccounts::MEMBER, '/').'<\/code>/', $html);
+        $this->assertStringNotContainsString('data-demo-credentials="demo-staff"', $html, 'nor the back office\'s');
+        $this->assertStringContainsString('password <code>pro-password-example</code>', $html, 'a password of its own, not its identifier');
         $this->assertSame('noindex, nofollow', $response->headers->get('X-Robots-Tag'));
 
         $form = $this->demoForm($html, TestDemoAccounts::MEMBER);

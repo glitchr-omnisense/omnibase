@@ -131,5 +131,14 @@ class DemoAccountRegistryTest extends TestCase
         $this->assertSame([], $registry->missingRoles($roles), 'a group\'s role counts');
 
         $this->assertSame(['ROLE_USER'], (new DemoAccountRegistry([], [], $hierarchy))->missingRoles(['ROLE_ADMIN', 'ROLE_USER']), 'no account at all: not even the public\'s');
+
+        // A real business whose every account is approved by hand: the site leaves its members out on purpose.
+        $registry = new DemoAccountRegistry([$this->provider([
+            new DemoAccount('gestion', 'Gestion', roles: ['ROLE_ADMIN']),
+            new DemoAccount('locataire', 'Locataire'),
+            new DemoAccount('artiste', 'Artiste', group: 'Artistes', groupRoles: ['ROLE_ARTIST']),
+        ])], ['locataire', 'artiste'], $hierarchy, ['ROLE_ADMIN', 'ROLE_STAFF']);
+        $this->assertSame([], $registry->offered(), 'nobody offered');
+        $this->assertSame([], $registry->missingRoles($roles), 'an account left out is a choice, not a missing one');
     }
 }

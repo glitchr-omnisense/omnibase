@@ -110,7 +110,11 @@ otherwise.
 ## On the sign-in page
 
 `@Base/demo/_accounts.html.twig` prints "Comptes de démonstration": one button
-for each account offered that exists. omnibase's own sign-in page includes
+for each account offered that exists, and under it the identifier and the
+password that account types in the ordinary form ("Identifier `client` ·
+password `client`") - a demonstration's accounts are public, and a visitor
+shown the site (in a frame of Glitch Art's Forge, in a presentation) can type
+them as well as click. omnibase's own sign-in page includes
 it; an application with its own `templates/security/login.html.twig` adds the
 line under its form:
 
@@ -304,7 +308,21 @@ when@demo:
 
 A role below these - the kitchen's `ROLE_STAFF`, a practitioner's group -
 stays public, with whatever pages of the back office the application opens
-to it: name it in `admin_roles` when those pages are not for everyone.
+to it: name it in `admin_roles` when those pages are not for everyone. That
+is how a real business keeps its own management out of its demonstration -
+a shop whose kitchen reads the day's orders:
+
+```yaml
+when@demo:
+    base:
+        demo:
+            admin_roles: [ROLE_ADMIN, ROLE_STAFF]     # the shop and its kitchen: offered to nobody
+```
+
+The kitchen's account is then created like the others, offered to nobody,
+and signed in with the secret alone; `missingRoles()` no longer asks for an
+account of `ROLE_STAFF`, so the rule "one account per role" still holds for
+every role left public.
 
 ### The super-administrator
 

@@ -1,6 +1,8 @@
 {#
     "Comptes de démonstration": one button for each declared account (Base\Demo\DemoAccountProviderInterface),
-    signed in at a click. Printed in the `demo` environment only; a sign-in page includes it under its form:
+    signed in at a click, with the identifier and the password it signs in with in the form above - a
+    demonstration's accounts are public. Printed in the `demo` environment only; a sign-in page includes it
+    under its form:
 
         {{ include('@Base/demo/_accounts.html.twig') }}
 
@@ -20,6 +22,9 @@
                 <input type="hidden" name="account" value="{{ account.identifier }}">
                 <button type="submit" data-demo-account="{{ account.identifier }}">{{ account.label|trans }}</button>
                 {% if account.description %}<span>{{ account.description|trans }}</span>{% endif %}
+                <small class="base-demo-accounts-credentials" data-demo-credentials="{{ account.identifier }}">
+                    {{- '@demo.accounts.identifier'|trans }} <code>{{ account.identifier }}</code> · {{ '@demo.accounts.password'|trans }} <code>{{ account.getPassword() }}</code>
+                </small>
             </form>
         </li>
         {% endfor %}
@@ -36,6 +41,9 @@
     .base-demo-accounts button { flex: 0 0 auto; min-width: 9.5rem; padding: .4rem .8rem; border: 1px solid currentColor; border-radius: 4px; background: transparent; color: inherit; font: inherit; font-weight: 600; cursor: pointer; text-align: left; }
     .base-demo-accounts button:hover, .base-demo-accounts button:focus-visible { box-shadow: inset 0 0 0 1px currentColor; text-decoration: underline; text-underline-offset: 3px; }
     .base-demo-accounts form span { flex: 1 1 14rem; opacity: .8; line-height: 1.35; }
+    /* What the account types in the form above: on a line of its own, under its button and its sentence. */
+    .base-demo-accounts-credentials { flex: 1 0 100%; font-size: .88em; opacity: .75; }
+    .base-demo-accounts-credentials code { font: inherit; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 600; user-select: all; }
     @media (max-width: 30rem) { .base-demo-accounts button { width: 100%; } }
 </style>
 {% endif %}
