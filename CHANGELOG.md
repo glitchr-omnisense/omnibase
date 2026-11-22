@@ -2,6 +2,10 @@
 
 ## 7.2.1 (unreleased)
 
+- `LocaleSwitch::remember()`: the notice is written in the language chosen, with that language's own name ("Il sito è
+  ora in italiano"); it was written in the language being left, so a visitor moving to Italian read "The website is
+  now displayed in italiano". German and Italian versions of the message (`controllers.locale_changeto.action`).
+
 - `Embeds::known()` reads a player's own address: `https://www.youtube-nocookie.com/embed/<id>` and
   `https://player.vimeo.com/video/<id>` are YouTube's and Vimeo's frames, as their page addresses are. A film stored
   once resolved (omnipack/video's sources, as the musicians' sites keep them) went unrecognised, so omnipack/music

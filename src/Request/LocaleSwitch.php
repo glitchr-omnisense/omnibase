@@ -8,6 +8,8 @@ use Base\Service\LocalizerInterface;
 use Base\Service\TranslatorInterface;
 use Omnibridge\Contract\Access;
 use Omnibridge\Persistence\UnitOfWork;
+use Symfony\Component\Intl\Exception\MissingResourceException;
+use Symfony\Component\Intl\Languages;
 
 /**
  * The language menu's choice (/locale/{_locale}), written once for every host (plan "omnibase agnostic", step
@@ -38,7 +40,10 @@ final class LocaleSwitch
         return \in_array($requested, $available, true) ? $this->localizer->getLocale($requested) : null;
     }
 
-    /** The choice kept as a member's own (not while impersonating); what the visitor is told. */
+    /**
+     * The choice kept as a member's own (not while impersonating); what the visitor is told, in the language chosen
+     * and with that language's own name ("Il sito è ora in italiano"), the page that shows it being in that language.
+     */
     public function remember(string $requested, string $locale): string
     {
         $user = $this->access?->getUser();
@@ -47,7 +52,14 @@ final class LocaleSwitch
             $this->unitOfWork?->flush();
         }
 
-        return (string) $this->translator?->trans(self::MESSAGE, [$this->localizer->getLocaleLangName($requested)]);
+        $lang = $this->localizer->getLocaleLang($requested);
+        try {
+            $name = Languages::getName($lang, $lang);
+        } catch (MissingResourceException) {
+            $name = $this->localizer->getLocaleLangName($requested);
+        }
+
+        return (string) $this->translator?->trans(self::MESSAGE, [$name], null, $locale);
     }
 
     /** The path the visitor came from, when it is one of this site's (no host, or the request's). */
