@@ -2,6 +2,7 @@
 
 namespace Base\Database\Schema;
 
+use Base\Discovery;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Service\Model\ClassAliases;
@@ -37,7 +38,19 @@ use Omnibridge\Schema\Description;
  * by name, a bundle's enumerations among them), resolve_target_entities
  * (interface => class), declarations (a Declarations source in place of the
  * attributes), rules (more rules, after omnibase's), column_types (more
- * ColumnTypes, over omnibase's: an application's own column types).
+ * ColumnTypes, over omnibase's: an application's own column types); since
+ * 7.2, packages (the packages discovered, folder => namespace:
+ * Base\Discovery::packages() or a host's bundles - their src/Enum's
+ * enumerations are column types, their interfaces' #[ResolveTargetEntity]
+ * resolve the associations the options do not) and exclude (files and
+ * folders of mapped classes left out of the folders described: a feature of
+ * a package that is off).
+ *
+ * The folders of a site with packages, as every host gives them since 7.2:
+ *
+ *     $packages = Base\Discovery::packages();             // or a host's bundles
+ *     $options = ['project_dir' => $projectDir, 'packages' => $packages, 'exclude' => $exclude];
+ *     $description = EntitySchema::describe(array_keys(Base\Discovery::entities($projectDir, $packages, $include)), $options);
  *
  * The description is omnibridge/doctrine's Describer's (the same classes, the
  * same rules: SchemaDescriptionTest compares them), which feeds Doctrine; the
@@ -73,6 +86,10 @@ final class EntitySchema
         foreach ($directories as $directory) {
             $classes = array_merge($classes, ClassFinder::classes($directory));
         }
+        // The files and folders left out (a package's feature that is off): their classes are never loaded.
+        foreach ($options['exclude'] ?? [] as $excluded) {
+            $classes = array_values(array_diff($classes, ClassFinder::classes((string) $excluded)));
+        }
 
         $declarations = $options['declarations'] ?? null;
 
@@ -93,7 +110,7 @@ final class EntitySchema
             new VaultRule(),
             new OrderColumnRule(self::types($options)),
             new TranslationRule(),
-            new TargetRule($options['resolve_target_entities'] ?? []),
+            new TargetRule(($options['resolve_target_entities'] ?? []) + Discovery::targets($options['packages'] ?? [])),
             new ExtensionRule(),
             ...($options['rules'] ?? []),
         ];
@@ -101,8 +118,8 @@ final class EntitySchema
 
     /**
      * The column types by name that are classes of omnibase's: those given, then the enumerations of the core (each by
-     * its App\ class: the application's own where it declares one), of the project (src/Enum) and of the folders given,
-     * each under its name (the first of a name kept).
+     * its App\ class: the application's own where it declares one), of the project (src/Enum), of the packages' src/Enum
+     * and of the folders given, each under its name (the first of a name kept).
      *
      * @param array<string, mixed> $options
      *
@@ -114,7 +131,12 @@ final class EntitySchema
         $types = $options['types'] ?? [];
         // App\Enum\X is the application's own where it declares one (extending Base\Enum\X with its cases), the core's otherwise.
         ClassAliases::register();
-        foreach (array_merge([self::coreDirectory('Enum'), $projectDir.'/src/Enum'], $options['enumerations'] ?? []) as $directory) {
+        // A package's src/Enum (7.2) before the application's: the application's own of a name prevails (the first kept).
+        $packages = [];
+        foreach (array_keys($options['packages'] ?? []) as $package) {
+            $packages[] = rtrim((string) $package, '/').'/src/Enum';
+        }
+        foreach (array_merge([self::coreDirectory('Enum'), $projectDir.'/src/Enum'], $packages, $options['enumerations'] ?? []) as $directory) {
             if (!is_dir($directory)) {
                 continue;
             }

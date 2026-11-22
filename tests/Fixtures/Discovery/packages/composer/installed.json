@@ -1,0 +1,22 @@
+{
+    "packages": [
+        {
+            "name": "acme/shop",
+            "version": "1.0.0",
+            "type": "symfony-bundle",
+            "require": {"php": ">=8.2", "omnisense/omnibase": "^7.2"},
+            "autoload": {"psr-4": {"Acme\\Shop\\": "./src"}},
+            "install-path": "../acme/shop"
+        },
+        {
+            "name": "acme/tool",
+            "version": "1.0.0",
+            "type": "library",
+            "require": {"php": ">=8.2"},
+            "autoload": {"psr-4": {"Acme\\Tool\\": "src/"}},
+            "install-path": "../acme/tool"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

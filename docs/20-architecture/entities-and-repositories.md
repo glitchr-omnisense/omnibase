@@ -5,6 +5,33 @@ order: 25
 
 # Entities and repositories
 
+## Where the entities are (7.2)
+
+A package's entities are found by where they are, on every host and whichever persistence (`Base\Discovery`'s
+`entities` kind): the core's `src/Entity`, each package's `src/Entity` - a registered omnibase bundle under Symfony,
+a Composer package that requires `omnisense/omnibase` elsewhere (`Discovery::packages()`) - and the application's.
+A package's `src/Enum` holds column types, and an interface an association targets says its default class:
+
+```php
+#[Base\Database\Attribute\ResolveTargetEntity('App\Entity\User')]
+interface MerchantInterface {}
+```
+
+What depends on a package's configuration is written by the package under `base.entity_folders` (Symfony: prepended
+by its extension; Laravel: `config/base.php`):
+
+```php
+$container->prependExtensionConfig('base', ['entity_folders' => [
+    'include' => [\dirname(__DIR__).'/Practice/Entity' => 'Base\Legal\Practice\Entity'],
+    'exclude' => [\dirname(__DIR__).'/Entity/Quote'],     // a feature that is off: never loaded
+]]);
+```
+
+With DoctrineBundle, omnibridge/symfony gives the same folders, exclusions and targets to Doctrine's mapping; without
+it, omnibridge/eloquent describes them, `omnibridge:schema:create` makes their tables and `omnibridge:schema:update`
+(`--dump-sql`, `--force`) evolves them. A package's test runs without Doctrine with `Base\Testing\WithoutPackages`
+and `Base\Testing\PackageKernel`.
+
 ## Repositories
 
 `Base\Database\Repository\ServiceEntityRepository` is doctrine/orm's

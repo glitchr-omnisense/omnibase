@@ -37,6 +37,15 @@ return [
         // refused aloud otherwise; null runs on the only one installed.
         'persistence' => $scalar(null, 'The persistence: doctrine or eloquent (null: the only one installed; required when both are)'),
 
+        // 7.2: the folders of mapped classes beside those discovered (Base\Discovery's `entities`: the core's, each
+        // package's src/Entity, the application's), read by every persistence and fed to Doctrine's mapping where it is
+        // installed. A package prepends the folders that depend on its configuration (a profession's entities, a
+        // feature's that is off); an application may name its own.
+        'entity_folders' => $section([
+            'include' => ['type' => 'array', 'key' => 'path', 'prototype' => ['type' => 'scalar'], 'default' => [], 'info' => 'More folders of mapped classes: folder => the namespace of its classes (null: read from its files).'],
+            'exclude' => $strings([], 'Files and folders of mapped classes left out of the folders described (a package\'s feature that is off).'),
+        ]),
+
         'database' => $section([
             'fallback_warning' => $bool(true, 'Fallback warning disable in case there is no fallback'),
             'use_custom' => $bool(null, 'Use custom database settings'),

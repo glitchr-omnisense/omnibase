@@ -1,5 +1,35 @@
 # Changelog
 
+## 7.2.0
+
+Doctrine dispensable for a package's entities (additive; Phase A of the plan "Doctrine optional in every omnipack"):
+
+- **Entities discovered.** A new `Base\Discovery` kind, `entities` (`'directories' => ['%package%/src/Entity',
+  '%kernel.project_dir%/src/Entity']`, `'requires' => 'omnisense/omnibase'`): the mapped classes of the core, of every
+  package and of the application, whichever persistence and host. `Discovery::packages()` reads Composer's
+  `vendor/composer/installed.json` for the packages that require the core (folder => the PSR-4 namespace of its
+  `src/`), what a host without bundles gives; omnibridge/symfony gives its registered omnibase bundles.
+  `Discovery::entities()` gives the folders with their namespaces (Doctrine's prefixes), `Discovery::targets()` the
+  packages' interfaces carrying `#[ResolveTargetEntity]`, and `Discovery::enumerations()` takes the packages too: a
+  package's `src/Enum` is a column type wherever it is installed. omnibridge/symfony 3.2 feeds the same discovery to
+  DoctrineBundle, so a package needs no `prependExtensionConfig('doctrine', ...)` for its `src/Entity` or its
+  enumerations.
+- **`#[Base\Database\Attribute\ResolveTargetEntity(class)]`** on an interface an association targets: the package's
+  default target, read by `TargetRule` (every description) and given to Doctrine's `resolve_target_entities` by
+  omnibridge/symfony; the application's `resolve_target_entities` prevails.
+- **`base.entity_folders`** (`include`: folder => namespace, `exclude`: files and folders), the folders a package adds
+  or leaves out by configuration (a profession's entities, a feature that is off) or an application names - *a name
+  proposed, to be approved before release*. `EntitySchema`'s options `packages` and `exclude` read them: an excluded
+  class is never loaded.
+- **`Base\Testing\WithoutPackages`** (omnipack/forge's helper, promoted): namespaces made absent from a test's process
+  (`DOCTRINE` by default: doctrine/orm, dbal, persistence, the bundles, symfony/doctrine-bridge, omnibridge/doctrine;
+  not doctrine/collections). **`Base\Testing\PackageKernel`**: a package's bundles on the core alone - framework,
+  security, Twig, `BaseBundle`, omnibridge/eloquent on SQLite, `createSchema()` through `omnibridge:schema:create`
+  (tests/Testing/PackageKernelTest: a fixture package without Doctrine, discovered, a feature left out unloaded).
+- `src/Resources/schema.php` (the plain-PHP `omnibridge-schema-create`) describes the Composer packages' entities too.
+- `Base\Service\TimeMachine` is declared where DoctrineBundle's registry is installed as well as backup-manager: its
+  dumps go through it, and a container without Doctrine did not compile with backup-manager installed.
+
 ## 7.1.2
 
 - `base-async` built on @glitchr/flowjs 1.6.4 (it was 1.3.1, no longer on npm, so the bundle could not be built again):

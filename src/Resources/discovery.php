@@ -165,7 +165,8 @@ return [
     ],
 
     // The enumerations (no Doctrine type since step F2a): the non-abstract classes extending `extends` in these folders
-    // (%package%: the core's, %kernel.project_dir%: the application's), by their names (Base\Discovery::enumerations()).
+    // (%package%: the core's and, since 7.2, each package's; %kernel.project_dir%: the application's), by their names
+    // (Base\Discovery::enumerations()).
     'enumerations' => [
         'extends' => 'Base\Database\Type\EnumType',
         'directories' => ['%package%/src/Enum', '%kernel.project_dir%/src/Enum'],
@@ -174,4 +175,13 @@ return [
     // The core's repository interfaces and the repository each is bound to (an entity's repositoryClass may name an
     // interface, step F3): Base\Repository\Aliases.
     'repositories' => Aliases::INTERFACES,
+
+    // The entities (omnibase 7.2): the mapped classes of these folders, for every persistence - %package%: the core's
+    // and each package's (a host's bundles under Symfony, the Composer packages that `requires` the core elsewhere:
+    // Base\Discovery::packages()), %kernel.project_dir%: the application's (Base\Discovery::entities()). The folders a
+    // package or the application adds or leaves out by configuration are the `entity_folders` option's.
+    'entities' => [
+        'directories' => ['%package%/src/Entity', '%kernel.project_dir%/src/Entity'],
+        'requires' => 'omnisense/omnibase',
+    ],
 ];

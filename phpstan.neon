@@ -41,6 +41,8 @@ parameters:
   excludePaths:
     - tests/Fixtures/Warmup/OptionalExtension.php
     - tests/Fixtures/Warmup/OptionalImplementation.php
+    # A package's feature whose parent package is absent, left out of the discovery (tests/Discovery, tests/Testing).
+    - tests/Fixtures/Discovery/packages/acme/shop/src/Entity/Feature
   bootstrapFiles:
     - tests/phpstan-bootstrap.php
   tmpDir: .tmp

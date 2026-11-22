@@ -2,6 +2,7 @@
 
 namespace Base\Database\Schema;
 
+use Base\Database\Attribute\ResolveTargetEntity;
 use Omnibridge\Schema\Builder;
 use Omnibridge\Schema\Builder\Draft;
 use Omnibridge\Schema\Builder\Rule;
@@ -11,7 +12,9 @@ use Omnibridge\Schema\Declaration\ClassDeclaration;
  * The targets resolved, as Doctrine's ResolveTargetEntityListener resolves
  * them (DoctrineBundle's resolve_target_entities, Mapping::register()'s
  * option): a relation toward an interface points to the class the
- * application gave for it, the rest of the relation as it was.
+ * application gave for it, the rest of the relation as it was. An interface
+ * the application does not resolve is resolved to the class it declares with
+ * #[ResolveTargetEntity] (a package's default, omnibase 7.2).
  */
 final class TargetRule implements Rule
 {
@@ -31,10 +34,11 @@ final class TargetRule implements Rule
     public function loaded(Draft $class, ClassDeclaration $declaration, Builder $builder): void
     {
         foreach ($class->associationMappings as $property => $mapping) {
-            if (isset($this->targets[$mapping['targetEntity']])) {
+            $target = $this->targets[$mapping['targetEntity']] ?? ResolveTargetEntity::of((string) $mapping['targetEntity']);
+            if (null !== $target) {
                 // Doctrine's listener maps the relation again: it moves to the end of the relations.
                 unset($class->associationMappings[$property]);
-                $mapping['targetEntity'] = ltrim($this->targets[$mapping['targetEntity']], '\\');
+                $mapping['targetEntity'] = ltrim($target, '\\');
                 $class->associationMappings[$property] = $mapping;
             }
         }

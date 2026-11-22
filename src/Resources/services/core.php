@@ -336,7 +336,9 @@ return [
     ],
     [
         'id' => 'Base\Service\TimeMachine',
-        'requires' => ['Backup\Manager\Manager'],
+        // Its database dumps go through DoctrineBundle's registry (7.2: declared only where it is installed, so that
+        // a site on omnibridge/eloquent with backup-manager installed compiles).
+        'requires' => ['Backup\Manager\Manager', 'Doctrine\Bundle\DoctrineBundle\Registry'],
         'public' => true,
         'arguments' => ['@flysystem'],
         'contracts' => [
