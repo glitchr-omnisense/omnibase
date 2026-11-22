@@ -72,7 +72,10 @@ class Embeds
             'padlet.com' === $host && (bool) preg_match('#/(?:embed/)?(?:[^/]+/)?(?:[^/]*-)?([a-z0-9]{8,})/?$#i', $path, $m) => ['padlet', 'https://padlet.com/embed/'.$m[1], '4 / 3'],
             \in_array($host, ['youtube.com', 'm.youtube.com', 'music.youtube.com'], true) && isset($query['v']) => ['youtube', 'https://www.youtube-nocookie.com/embed/'.rawurlencode((string) $query['v']), '16 / 9'],
             \in_array($host, ['youtube.com', 'm.youtube.com'], true) && (bool) preg_match('#^/(?:shorts|embed|live)/([A-Za-z0-9_-]+)#', $path, $m) => ['youtube', 'https://www.youtube-nocookie.com/embed/'.$m[1], '16 / 9'],
+            // A player's own address, as a site stores it once resolved: https://www.youtube-nocookie.com/embed/<id>.
+            'youtube-nocookie.com' === $host && (bool) preg_match('#^/embed/([A-Za-z0-9_-]+)#', $path, $m) => ['youtube', 'https://www.youtube-nocookie.com/embed/'.$m[1], '16 / 9'],
             'youtu.be' === $host && '' !== trim($path, '/') => ['youtube', 'https://www.youtube-nocookie.com/embed/'.rawurlencode(trim($path, '/')), '16 / 9'],
+            'player.vimeo.com' === $host && (bool) preg_match('#^/video/(\d+)#', $path, $m) => ['vimeo', 'https://player.vimeo.com/video/'.$m[1], '16 / 9'],
             'vimeo.com' === $host && (bool) preg_match('#^/(\d+)#', $path, $m) => ['vimeo', 'https://player.vimeo.com/video/'.$m[1], '16 / 9'],
             'learningapps.org' === $host && (isset($query['v']) || (bool) preg_match('#^/(?:view|watch)?/?(\d+)#', $path, $m)) => ['learningapps', 'https://learningapps.org/watch?app='.rawurlencode((string) ($query['v'] ?? $m[1] ?? '')), '4 / 3'],
             \in_array($host, ['genial.ly', 'view.genial.ly', 'view.genially.com', 'genially.com'], true) && (bool) preg_match('#([a-f0-9]{24})#', $path, $m) => ['genially', 'https://view.genially.com/'.$m[1], '16 / 9'],

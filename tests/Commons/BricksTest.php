@@ -40,6 +40,9 @@ class BricksTest extends TestCase
     {
         $embeds = new Embeds(remote: false);
         $this->assertSame('https://www.youtube-nocookie.com/embed/abc123', $embeds->resolve('https://www.youtube.com/watch?v=abc123')['src']);
+        // A player's own address resolves to itself: a film stored once resolved still plays in its frame.
+        $this->assertSame(['youtube', 'https://www.youtube-nocookie.com/embed/abc123'], [$embeds->resolve('https://www.youtube-nocookie.com/embed/abc123')['provider'] ?? null, $embeds->resolve('https://www.youtube-nocookie.com/embed/abc123')['src']]);
+        $this->assertSame('https://player.vimeo.com/video/42', $embeds->resolve('https://player.vimeo.com/video/42?h=x')['src']);
         $this->assertSame('https://player.vimeo.com/video/42', $embeds->resolve('https://vimeo.com/42')['src']);
         $this->assertSame('padlet', $embeds->resolve('https://padlet.com/maitresse/mur-abcdef1234')['provider']);
         $this->assertTrue($embeds->resolve('https://youtu.be/xyz')['known']);

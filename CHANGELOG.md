@@ -1,5 +1,12 @@
 # Changelog
 
+## 7.2.1 (unreleased)
+
+- `Embeds::known()` reads a player's own address: `https://www.youtube-nocookie.com/embed/<id>` and
+  `https://player.vimeo.com/video/<id>` are YouTube's and Vimeo's frames, as their page addresses are. A film stored
+  once resolved (omnipack/video's sources, as the musicians' sites keep them) went unrecognised, so omnipack/music
+  played the player's page in a `<video>` element, which played nothing.
+
 ## 7.2.0
 
 Doctrine dispensable for a package's entities (additive; Phase A of the plan "Doctrine optional in every omnipack"):
